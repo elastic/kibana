@@ -1,0 +1,88 @@
+{
+  "package": "sysdig",
+  "dataStreams": [
+    {
+      "dataset": "sysdig.alerts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.original",
+        "host.name",
+        "log.syslog.severity.name",
+        "orchestrator.resource.name",
+        "rule.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sysdig.cspm",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "rule.benchmark.name",
+        "rule.id",
+        "sysdig.cspm.control.accepted_count",
+        "sysdig.cspm.control.pass",
+        "sysdig.cspm.control.passing_count",
+        "sysdig.cspm.control.severity",
+        "sysdig.cspm.name",
+        "sysdig.cspm.pass",
+        "sysdig.cspm.requirement_id",
+        "sysdig.cspm.severity",
+        "sysdig.cspm.zone.name"
+      ],
+      "filterValues": {
+        "sysdig.cspm.pass": [
+          "false",
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "sysdig.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.provider",
+        "container.name",
+        "event.provider",
+        "host.hostname",
+        "orchestrator.cluster.name",
+        "orchestrator.resource.name",
+        "rule.name",
+        "rule.ruleset",
+        "sysdig.event.category",
+        "sysdig.event.labels.kubernetes.node.name",
+        "sysdig.event.severity_value",
+        "threat.tactic.name",
+        "threat.technique.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sysdig.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "orchestrator.cluster.name",
+        "orchestrator.namespace",
+        "package.fixed_version",
+        "sysdig.vulnerability.package.vulnerability.exploitable",
+        "sysdig.vulnerability.scope.registry.vendor",
+        "vulnerability.cve",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "vulnerability.severity": [
+          "Critical",
+          "High"
+        ],
+        "sysdig.vulnerability.package.vulnerability.exploitable": [
+          "false",
+          "true"
+        ]
+      }
+    }
+  ]
+}

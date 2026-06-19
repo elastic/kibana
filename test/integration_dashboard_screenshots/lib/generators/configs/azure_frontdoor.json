@@ -1,0 +1,39 @@
+{
+  "package": "azure_frontdoor",
+  "dataStreams": [
+    {
+      "dataset": "azure_frontdoor.access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.frontdoor.waf.details.msg",
+        "client.ip",
+        "event.action",
+        "rule.name",
+        "source.geo.country_name",
+        "url.domain",
+        "url.original",
+        "user_agent.name",
+        "user_agent.os.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure_frontdoor.waf",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.frontdoor.waf.details.msg",
+        "client.ip",
+        "event.action",
+        "rule.name",
+        "source.geo.country_name",
+        "url.domain",
+        "url.original",
+        "user_agent.name",
+        "user_agent.os.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

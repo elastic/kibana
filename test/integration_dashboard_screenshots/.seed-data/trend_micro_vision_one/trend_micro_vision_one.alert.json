@@ -1,0 +1,135 @@
+[
+  {
+    "@timestamp": "2023-04-30T00:01:16.000Z",
+    "agent": {
+      "ephemeral_id": "5aabf71c-5a0f-4bed-8230-5412d514b9fb",
+      "id": "e3429a7f-e0a3-4bed-bd94-6bb0fc414da9",
+      "name": "elastic-agent-86702",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trend_micro_vision_one.alert",
+      "namespace": "98375",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e3429a7f-e0a3-4bed-bd94-6bb0fc414da9",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "created": "2026-03-10T02:18:39.162Z",
+      "dataset": "trend_micro_vision_one.alert",
+      "id": "WB-9002-20200427-0002",
+      "ingested": "2026-03-10T02:18:42Z",
+      "kind": "alert",
+      "original": "{\"alertProvider\":\"SAE\",\"createdDateTime\":\"2020-04-30T00:01:15Z\",\"description\":\"A backdoor was possibly implanted after a user received a possible spear phishing email message.\",\"id\":\"WB-9002-20200427-0002\",\"impactScope\":{\"accountCount\":0,\"desktopCount\":0,\"emailAddressCount\":0,\"entities\":[{\"entityId\":\"5257b401-2fd7-469c-94fa-39a4f11eb925\",\"entityType\":\"host\",\"entityValue\":\"user@email.com\",\"provenance\":[\"Alert\"],\"relatedEntities\":[\"CODERED\\\\\\\\user\"],\"relatedIndicatorIds\":[1]}],\"serverCount\":0},\"indicators\":[{\"field\":\"request url\",\"filterIds\":[\"f862df72-7f5e-4b2b-9f7f-9148e875f908\"],\"id\":1,\"provenance\":[\"Alert\"],\"relatedEntities\":[\"user@example.com\"],\"type\":\"url\",\"value\":\"http://www.example.com/ab001.zip\"}],\"investigationStatus\":\"New\",\"matchedRules\":[{\"id\":\"5f52d1f1-53e7-411a-b74f-745ee81fa30b\",\"matchedFilters\":[{\"id\":\"ccf86fc1-688f-4131-a46f-1d7a6ee2f88e\",\"matchedDateTime\":\"2019-08-02T04:00:01Z\",\"matchedEvents\":[{\"matchedDateTime\":\"2019-08-02T04:00:01Z\",\"type\":\"TELEMETRY_REGISTRY\",\"uuid\":\"fa9ff47c-e1b8-459e-a3d0-a5b104b854a5\"}],\"mitreTechniqueIds\":[\"T1192\"],\"name\":\"(T1192) Spearphishing Link\"}],\"name\":\"Possible SpearPhishing Email\"}],\"model\":\"Possible APT Attack\",\"schemaVersion\":\"1.0\",\"score\":63,\"severity\":\"critical\",\"updatedDateTime\":\"2023-04-30T00:01:16Z\",\"workbenchLink\":\"https://THE_WORKBENCH_URL\"}",
+      "severity": 63,
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "log": {
+      "level": "critical"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trend_micro_vision_one-alert"
+    ],
+    "trend_micro_vision_one": {
+      "alert": {
+        "alert_provider": "SAE",
+        "created_date": "2020-04-30T00:01:15.000Z",
+        "description": "A backdoor was possibly implanted after a user received a possible spear phishing email message.",
+        "id": "WB-9002-20200427-0002",
+        "impact_scope": {
+          "account_count": 0,
+          "desktop_count": 0,
+          "email_address_count": 0,
+          "entities": [
+            {
+              "provenance": [
+                "Alert"
+              ],
+              "related_entities": [
+                "CODERED\\\\user"
+              ],
+              "related_indicator_id": [
+                1
+              ],
+              "id": "5257b401-2fd7-469c-94fa-39a4f11eb925",
+              "type": "host",
+              "value": {
+                "account_value": "user@email.com"
+              }
+            }
+          ],
+          "server_count": 0
+        },
+        "indicators": [
+          {
+            "provenance": [
+              "Alert"
+            ],
+            "field": "request url",
+            "filter_id": [
+              "f862df72-7f5e-4b2b-9f7f-9148e875f908"
+            ],
+            "related_entities": [
+              "user@example.com"
+            ],
+            "id": 1,
+            "type": "url",
+            "value": "http://www.example.com/ab001.zip"
+          }
+        ],
+        "investigation_status": "New",
+        "matched_rule": [
+          {
+            "filter": [
+              {
+                "date": "2019-08-02T04:00:01.000Z",
+                "name": "(T1192) Spearphishing Link",
+                "mitre_technique_id": [
+                  "T1192"
+                ],
+                "id": "ccf86fc1-688f-4131-a46f-1d7a6ee2f88e",
+                "events": [
+                  {
+                    "date": "2019-08-02T04:00:01.000Z",
+                    "type": "TELEMETRY_REGISTRY",
+                    "uuid": "fa9ff47c-e1b8-459e-a3d0-a5b104b854a5"
+                  }
+                ]
+              }
+            ],
+            "name": "Possible SpearPhishing Email",
+            "id": "5f52d1f1-53e7-411a-b74f-745ee81fa30b"
+          }
+        ],
+        "model": "Possible APT Attack",
+        "schema_version": "1.0",
+        "score": 63,
+        "severity": "critical",
+        "workbench_link": "https://THE_WORKBENCH_URL"
+      }
+    },
+    "url": {
+      "original": "https://THE_WORKBENCH_URL",
+      "scheme": "https"
+    }
+  }
+]

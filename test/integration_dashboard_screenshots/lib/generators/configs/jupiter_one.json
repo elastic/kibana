@@ -1,0 +1,44 @@
+{
+  "package": "jupiter_one",
+  "dataStreams": [
+    {
+      "dataset": "jupiter_one.risks_and_alerts",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "jupiter_one.asset.entity._class",
+        "jupiter_one.asset.entity._source",
+        "jupiter_one.asset.entity._type",
+        "jupiter_one.asset.properties.category",
+        "jupiter_one.asset.properties.classification",
+        "jupiter_one.asset.properties.device_external_ip",
+        "jupiter_one.asset.properties.device_status",
+        "jupiter_one.asset.properties.level",
+        "jupiter_one.asset.properties.numeric_severity",
+        "jupiter_one.asset.properties.open",
+        "jupiter_one.asset.properties.product",
+        "jupiter_one.asset.properties.product_name_version",
+        "jupiter_one.asset.properties.severity",
+        "jupiter_one.asset.properties.status",
+        "jupiter_one.asset.properties.total_number_of_affected_entities",
+        "labels.is_transform_source",
+        "threat.tactic.name",
+        "threat.technique.name"
+      ],
+      "filterValues": {
+        "jupiter_one.asset.entity._class": [
+          "Finding",
+          "Alert",
+          "Vulnerability"
+        ],
+        "jupiter_one.asset.properties.open": [
+          "true",
+          "false"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

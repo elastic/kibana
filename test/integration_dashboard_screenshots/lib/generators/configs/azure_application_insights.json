@@ -1,0 +1,36 @@
+{
+  "package": "azure_application_insights",
+  "dataStreams": [
+    {
+      "dataset": "azure.app_state",
+      "indexPattern": "metrics-*",
+      "docTarget": 690,
+      "fields": [
+        "azure.app_state.browser_timings_network_duration.avg",
+        "azure.app_state.browser_timings_processing_duration.avg",
+        "azure.app_state.browser_timings_receive_duration.avg",
+        "azure.app_state.browser_timings_send_duration.avg",
+        "azure.app_state.browser_timings_total_duration.avg",
+        "azure.app_state.exceptions_browser.sum",
+        "azure.app_state.exceptions_count.sum",
+        "azure.app_state.exceptions_server.sum",
+        "azure.app_state.performance_counters_memory_available_bytes.avg",
+        "azure.app_state.performance_counters_process_cpu_percentage.avg",
+        "azure.app_state.performance_counters_process_cpu_percentage_total.avg",
+        "azure.app_state.performance_counters_process_private_bytes.avg",
+        "azure.app_state.requests_count.sum",
+        "azure.app_state.requests_failed.sum",
+        "azure.app_state.sessions_count.unique",
+        "azure.app_state.users_authenticated.unique",
+        "azure.app_state.users_count.unique",
+        "azure.application_id",
+        "azure.dimensions.browser_timing_url_path",
+        "azure.dimensions.cloud_role_instance",
+        "azure.dimensions.cloud_role_name",
+        "azure.dimensions.exception_type",
+        "azure.dimensions.request_url_host"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

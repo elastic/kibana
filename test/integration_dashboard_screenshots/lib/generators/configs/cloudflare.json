@@ -1,0 +1,54 @@
+{
+  "package": "cloudflare",
+  "dataStreams": [
+    {
+      "dataset": "cloudflare.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.bytes",
+        "client.ip",
+        "cloudflare.edge.rate_limit.action",
+        "cloudflare.origin.response.time",
+        "cloudflare.waf.action",
+        "cloudflare.waf.rule.id",
+        "cloudflare.waf.rule.message",
+        "destination.bytes",
+        "source.geo.country_iso_code",
+        "source.geo.country_name",
+        "source.geo.location",
+        "url.domain",
+        "url.full",
+        "user_agent.original"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare.logpull",
+      "indexPattern": "logs-*",
+      "docTarget": 570,
+      "fields": [
+        "client.ip",
+        "cloudflare.cache.status",
+        "cloudflare.client.ip_class",
+        "cloudflare.client.ssl.protocol",
+        "cloudflare.device_type",
+        "cloudflare.edge.response.content_type",
+        "cloudflare.origin.response.status_code",
+        "cloudflare.waf.action",
+        "destination.bytes",
+        "http.request.bytes",
+        "http.request.method",
+        "http.request.referrer",
+        "http.response.status_code",
+        "http.version",
+        "source.as.number",
+        "source.geo.country_name",
+        "url.domain",
+        "url.full",
+        "user_agent.original"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

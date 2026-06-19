@@ -1,0 +1,2546 @@
+[
+  {
+    "@timestamp": "2026-03-10T04:19:53.756Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:19:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 16,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 11,
+        "total": 69,
+        "unenrolled": 53,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:18:53.726Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:18:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 16,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 11,
+        "total": 69,
+        "unenrolled": 53,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:17:53.672Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:17:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 15,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 11,
+        "total": 68,
+        "unenrolled": 53,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:16:53.760Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:16:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 15,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 9,
+        "total": 67,
+        "unenrolled": 52,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:15:53.617Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:15:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 15,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 9,
+        "total": 67,
+        "unenrolled": 52,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:14:53.589Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:14:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 14,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 9,
+        "total": 66,
+        "unenrolled": 52,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:13:53.616Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:13:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 14,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 8,
+        "total": 65,
+        "unenrolled": 51,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 2,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:12:53.538Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:12:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 14,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 7,
+        "total": 65,
+        "unenrolled": 51,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 2,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:11:53.523Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:11:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 13,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 7,
+        "total": 64,
+        "unenrolled": 51,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:10:53.477Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:10:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 13,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 8,
+        "total": 62,
+        "unenrolled": 49,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:09:53.429Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:09:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 13,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 7,
+        "total": 62,
+        "unenrolled": 49,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:08:53.447Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:08:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 13,
+        "healthy": 6,
+        "inactive": 0,
+        "offline": 7,
+        "total": 61,
+        "unenrolled": 48,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:07:53.360Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:07:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 13,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 8,
+        "total": 59,
+        "unenrolled": 46,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:06:53.415Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:06:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 13,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 7,
+        "total": 59,
+        "unenrolled": 46,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:05:53.295Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:05:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 12,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 7,
+        "total": 57,
+        "unenrolled": 45,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:04:53.363Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:04:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 12,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 7,
+        "total": 56,
+        "unenrolled": 44,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:03:53.245Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:03:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 12,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 6,
+        "total": 55,
+        "unenrolled": 43,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:02:53.214Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:02:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 11,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 6,
+        "total": 54,
+        "unenrolled": 43,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:01:53.220Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:01:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 11,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 6,
+        "total": 54,
+        "unenrolled": 43,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:00:53.177Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:00:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 11,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 4,
+        "total": 54,
+        "unenrolled": 43,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 2,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:59:53.147Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:59:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 11,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 4,
+        "total": 54,
+        "unenrolled": 43,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 3,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:58:53.193Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:58:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 10,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 5,
+        "total": 52,
+        "unenrolled": 42,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:57:53.076Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:57:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 10,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 5,
+        "total": 52,
+        "unenrolled": 42,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:56:53.084Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:56:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 10,
+        "healthy": 3,
+        "inactive": 0,
+        "offline": 4,
+        "total": 52,
+        "unenrolled": 42,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 3,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:55:53.049Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:55:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 3,
+        "inactive": 0,
+        "offline": 4,
+        "total": 50,
+        "unenrolled": 41,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 2,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:54:53.014Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:54:53Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 3,
+        "total": 49,
+        "unenrolled": 40,
+        "unhealthy": 1,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:53:52.972Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:53:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 3,
+        "inactive": 0,
+        "offline": 3,
+        "total": 48,
+        "unenrolled": 40,
+        "unhealthy": 1,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:52:52.918Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:52:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 3,
+        "total": 47,
+        "unenrolled": 38,
+        "unhealthy": 1,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:51:52.918Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:51:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 1,
+        "total": 46,
+        "unenrolled": 38,
+        "unhealthy": 1,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:50:52.880Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:50:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 1,
+        "total": 44,
+        "unenrolled": 36,
+        "unhealthy": 1,
+        "unhealthy_reason": {
+          "input": 1,
+          "other": 0,
+          "output": 2
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:49:52.899Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:49:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 6,
+        "inactive": 0,
+        "offline": 1,
+        "total": 44,
+        "unenrolled": 36,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:48:52.913Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:48:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 6,
+        "inactive": 0,
+        "offline": 1,
+        "total": 42,
+        "unenrolled": 34,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:47:52.792Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:47:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 7,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 1,
+        "total": 41,
+        "unenrolled": 34,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:46:52.821Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:46:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 6,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 1,
+        "total": 37,
+        "unenrolled": 31,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:45:52.771Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:45:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 7,
+        "healthy": 6,
+        "inactive": 0,
+        "offline": 1,
+        "total": 37,
+        "unenrolled": 30,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:44:52.726Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:44:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 4,
+        "healthy": 2,
+        "inactive": 0,
+        "offline": 1,
+        "total": 34,
+        "unenrolled": 30,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:43:52.616Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:43:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 7,
+        "healthy": 6,
+        "inactive": 0,
+        "offline": 1,
+        "total": 33,
+        "unenrolled": 26,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:42:52.577Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:42:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 7,
+        "healthy": 6,
+        "inactive": 0,
+        "offline": 1,
+        "total": 33,
+        "unenrolled": 26,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:41:52.437Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:41:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 4,
+        "total": 30,
+        "unenrolled": 21,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:40:52.404Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:40:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 4,
+        "total": 29,
+        "unenrolled": 20,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:39:52.321Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:39:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 4,
+        "total": 27,
+        "unenrolled": 19,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:38:52.237Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:38:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 4,
+        "total": 26,
+        "unenrolled": 18,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:37:52.561Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:37:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 4,
+        "total": 26,
+        "unenrolled": 17,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:36:52.101Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:36:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 4,
+        "total": 24,
+        "unenrolled": 15,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.033Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 4,
+        "inactive": 0,
+        "offline": 4,
+        "total": 23,
+        "unenrolled": 15,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:52.028Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:34:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 8,
+        "inactive": 0,
+        "offline": 0,
+        "total": 21,
+        "unenrolled": 13,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:51.998Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:33:51Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 9,
+        "healthy": 9,
+        "inactive": 0,
+        "offline": 0,
+        "total": 21,
+        "unenrolled": 12,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:51.933Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:32:51Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 8,
+        "inactive": 0,
+        "offline": 0,
+        "total": 19,
+        "unenrolled": 11,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:52.379Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:31:52Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 10,
+        "healthy": 10,
+        "inactive": 0,
+        "offline": 0,
+        "total": 19,
+        "unenrolled": 9,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.714Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 10,
+        "healthy": 9,
+        "inactive": 0,
+        "offline": 0,
+        "total": 18,
+        "unenrolled": 8,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 1,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.712Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 5,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 0,
+        "total": 11,
+        "unenrolled": 6,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:51.668Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:28:51Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 10,
+        "healthy": 10,
+        "inactive": 0,
+        "offline": 0,
+        "total": 10,
+        "unenrolled": 0,
+        "unhealthy": 0,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 0,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.610Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_status",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "fleet": {
+      "agents": {
+        "enrolled": 8,
+        "healthy": 5,
+        "inactive": 0,
+        "offline": 0,
+        "total": 8,
+        "unenrolled": 0,
+        "unhealthy": 1,
+        "unhealthy_reason": {
+          "input": 0,
+          "other": 0,
+          "output": 1
+        },
+        "updating": 2,
+        "upgrading_step": {
+          "downloading": 0,
+          "extracting": 0,
+          "failed": 0,
+          "replacing": 0,
+          "requested": 0,
+          "restarting": 0,
+          "rollback": 0,
+          "scheduled": 0,
+          "watching": 0
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,1202 @@
+[
+  {
+    "@timestamp": "2024-07-31T00:00:59.483Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "216.160.83.59"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.59",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059483524068,\"sampler_address\":\"67.43.156.1\",\"sequence_num\":1022,\"in_if\":0,\"out_if\":561,\"src_addr\":\"216.160.83.60\",\"dst_addr\":\"216.160.83.59\",\"etype\":\"IPv4\",\"proto\":\"TCP\",\"src_port\":19156,\"dst_port\":443,\"src_vlan\":0,\"dst_vlan\":1500,\"sampling_rate\":2000,\"bytes\":1518}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 940
+    },
+    "network": {
+      "bytes": 3036000,
+      "packets": 2000,
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "561"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "0"
+        },
+        "vlan": {
+          "id": "0"
+        }
+      },
+      "ip": [
+        "67.43.156.1"
+      ]
+    },
+    "related": {
+      "ip": [
+        "216.160.83.60",
+        "216.160.83.59"
+      ]
+    },
+    "sflow": {
+      "bytes": 1518,
+      "sample_rate": 2000,
+      "sequence_num": 1022
+    },
+    "source": {
+      "address": [
+        "216.160.83.60"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.60",
+      "port": 19156
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.483Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "216.160.83.58"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.58",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059483524068,\"sampler_address\":\"67.43.156.1\",\"sequence_num\":1022,\"in_if\":0,\"out_if\":561,\"src_addr\":\"216.160.83.59\",\"dst_addr\":\"216.160.83.58\",\"etype\":\"IPv4\",\"proto\":\"TCP\",\"src_port\":19156,\"dst_port\":443,\"src_vlan\":0,\"dst_vlan\":1500,\"sampling_rate\":2000,\"bytes\":1518}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 1253
+    },
+    "network": {
+      "bytes": 3036000,
+      "packets": 2000,
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "561"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "0"
+        },
+        "vlan": {
+          "id": "0"
+        }
+      },
+      "ip": [
+        "67.43.156.1"
+      ]
+    },
+    "related": {
+      "ip": [
+        "216.160.83.59",
+        "216.160.83.58"
+      ]
+    },
+    "sflow": {
+      "bytes": 1518,
+      "sample_rate": 2000,
+      "sequence_num": 1022
+    },
+    "source": {
+      "address": [
+        "216.160.83.59"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.59",
+      "port": 19156
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.483Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "216.160.83.58"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.58",
+      "port": 6097
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059483524068,\"sampler_address\":\"67.43.156.1\",\"sequence_num\":1022,\"in_if\":531,\"out_if\":561,\"src_addr\":\"216.160.83.59\",\"dst_addr\":\"216.160.83.58\",\"etype\":\"IPv4\",\"proto\":\"UDP\",\"src_port\":1122,\"dst_port\":6097,\"src_vlan\":1500,\"dst_vlan\":1500,\"sampling_rate\":2000,\"bytes\":1518}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 1566
+    },
+    "network": {
+      "bytes": 3036000,
+      "packets": 2000,
+      "transport": "udp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "561"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "531"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ip": [
+        "67.43.156.1"
+      ]
+    },
+    "related": {
+      "ip": [
+        "216.160.83.59",
+        "216.160.83.58"
+      ]
+    },
+    "sflow": {
+      "bytes": 1518,
+      "sample_rate": 2000,
+      "sequence_num": 1022
+    },
+    "source": {
+      "address": [
+        "216.160.83.59"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.59",
+      "port": 1122
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.483Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "81.2.69.194"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.194",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059483524068,\"sampler_address\":\"89.160.20.129\",\"sequence_num\":1022,\"in_if\":0,\"out_if\":561,\"src_addr\":\"81.2.69.193\",\"dst_addr\":\"81.2.69.194\",\"etype\":\"IPv4\",\"proto\":\"TCP\",\"src_port\":49031,\"dst_port\":443,\"src_vlan\":0,\"dst_vlan\":1500,\"sampling_rate\":2000,\"bytes\":1518}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 1884
+    },
+    "network": {
+      "bytes": 3036000,
+      "packets": 2000,
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "561"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "0"
+        },
+        "vlan": {
+          "id": "0"
+        }
+      },
+      "ip": [
+        "89.160.20.129"
+      ]
+    },
+    "related": {
+      "ip": [
+        "81.2.69.193",
+        "81.2.69.194"
+      ]
+    },
+    "sflow": {
+      "bytes": 1518,
+      "sample_rate": 2000,
+      "sequence_num": 1022
+    },
+    "source": {
+      "address": [
+        "81.2.69.193"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.193",
+      "port": 49031
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.483Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "81.2.69.194"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.194",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059483524068,\"sampler_address\":\"89.160.20.129\",\"sequence_num\":1022,\"in_if\":0,\"out_if\":561,\"src_addr\":\"81.2.69.193\",\"dst_addr\":\"81.2.69.194\",\"etype\":\"IPv4\",\"proto\":\"TCP\",\"src_port\":31385,\"dst_port\":443,\"src_vlan\":0,\"dst_vlan\":1500,\"sampling_rate\":2000,\"bytes\":1518}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 2195
+    },
+    "network": {
+      "bytes": 3036000,
+      "packets": 2000,
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "561"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "0"
+        },
+        "vlan": {
+          "id": "0"
+        }
+      },
+      "ip": [
+        "89.160.20.129"
+      ]
+    },
+    "related": {
+      "ip": [
+        "81.2.69.193",
+        "81.2.69.194"
+      ]
+    },
+    "sflow": {
+      "bytes": 1518,
+      "sample_rate": 2000,
+      "sequence_num": 1022
+    },
+    "source": {
+      "address": [
+        "81.2.69.193"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.193",
+      "port": 31385
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.483Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "81.2.69.194"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.194",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059483524068,\"sampler_address\":\"89.160.20.129\",\"sequence_num\":1022,\"in_if\":561,\"out_if\":531,\"src_addr\":\"81.2.69.193\",\"dst_addr\":\"81.2.69.194\",\"etype\":\"IPv4\",\"proto\":\"TCP\",\"src_port\":6097,\"dst_port\":443,\"src_vlan\":1500,\"dst_vlan\":1500,\"sampling_rate\":2000,\"bytes\":70}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 2506
+    },
+    "network": {
+      "bytes": 140000,
+      "packets": 2000,
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "531"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "561"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ip": [
+        "89.160.20.129"
+      ]
+    },
+    "related": {
+      "ip": [
+        "81.2.69.193",
+        "81.2.69.194"
+      ]
+    },
+    "sflow": {
+      "bytes": 70,
+      "sample_rate": 2000,
+      "sequence_num": 1022
+    },
+    "source": {
+      "address": [
+        "81.2.69.193"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.193",
+      "port": 6097
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.333Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "81.2.69.194"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.194",
+      "port": 55319
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059333197201,\"sampler_address\":\"89.160.20.129\",\"sequence_num\":27481,\"in_if\":637,\"out_if\":742,\"src_addr\":\"81.2.69.193\",\"dst_addr\":\"81.2.69.194\",\"etype\":\"IPv4\",\"proto\":\"TCP\",\"src_port\":80,\"dst_port\":55319,\"src_vlan\":500,\"dst_vlan\":500,\"sampling_rate\":2000,\"bytes\":1518}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 317
+    },
+    "network": {
+      "bytes": 3036000,
+      "packets": 2000,
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "742"
+        },
+        "vlan": {
+          "id": "500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "637"
+        },
+        "vlan": {
+          "id": "500"
+        }
+      },
+      "ip": [
+        "89.160.20.129"
+      ]
+    },
+    "related": {
+      "ip": [
+        "81.2.69.193",
+        "81.2.69.194"
+      ]
+    },
+    "sflow": {
+      "bytes": 1518,
+      "sample_rate": 2000,
+      "sequence_num": 27481
+    },
+    "source": {
+      "address": [
+        "81.2.69.193"
+      ],
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.193",
+      "port": 80
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.333Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "216.160.83.60"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.60",
+      "port": 0
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059333197201,\"sampler_address\":\"67.43.156.1\",\"sequence_num\":27481,\"in_if\":637,\"out_if\":609,\"src_addr\":\"216.160.83.59\",\"dst_addr\":\"216.160.83.60\",\"etype\":\"IPv4\",\"proto\":\"ESP\",\"src_port\":0,\"dst_port\":0,\"src_vlan\":500,\"dst_vlan\":500,\"sampling_rate\":500,\"bytes\":142}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 631
+    },
+    "network": {
+      "bytes": 71000,
+      "packets": 500,
+      "transport": "esp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "609"
+        },
+        "vlan": {
+          "id": "500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "637"
+        },
+        "vlan": {
+          "id": "500"
+        }
+      },
+      "ip": [
+        "67.43.156.1"
+      ]
+    },
+    "related": {
+      "ip": [
+        "216.160.83.59",
+        "216.160.83.60"
+      ]
+    },
+    "sflow": {
+      "bytes": 142,
+      "sample_rate": 500,
+      "sequence_num": 27481
+    },
+    "source": {
+      "address": [
+        "216.160.83.59"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.59",
+      "port": 0
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-31T00:00:59.314Z",
+    "agent": {
+      "ephemeral_id": "f93b5291-4c09-4dbc-8549-e0097092479a",
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "name": "elastic-agent-84842",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "goflow2.sflow",
+      "namespace": "10573",
+      "type": "logs"
+    },
+    "destination": {
+      "address": [
+        "216.160.83.58"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.58",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "669c0cfe-01e3-4827-a6ec-474cbf1ddc4e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SFLOW_5",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "goflow2.sflow",
+      "ingested": "2026-03-10T04:42:54Z",
+      "kind": "event",
+      "original": "{\"type\":\"SFLOW_5\",\"time_flow_start_ns\":1722384059314899647,\"sampler_address\":\"67.43.156.1\",\"sequence_num\":44555,\"in_if\":563,\"out_if\":573,\"src_addr\":\"216.160.83.57\",\"dst_addr\":\"216.160.83.58\",\"etype\":\"IPv4\",\"proto\":\"TCP\",\"src_port\":10876,\"dst_port\":443,\"src_vlan\":1500,\"dst_vlan\":1500,\"sampling_rate\":1000,\"bytes\":70}",
+      "timezone": "+00:00",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "3509",
+        "path": "/tmp/service_logs/test-goflow2-sflow-sample.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "bytes": 70000,
+      "packets": 1000,
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "id": "573"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "id": "563"
+        },
+        "vlan": {
+          "id": "1500"
+        }
+      },
+      "ip": [
+        "67.43.156.1"
+      ]
+    },
+    "related": {
+      "ip": [
+        "216.160.83.57",
+        "216.160.83.58"
+      ]
+    },
+    "sflow": {
+      "bytes": 70,
+      "sample_rate": 1000,
+      "sequence_num": 44555
+    },
+    "source": {
+      "address": [
+        "216.160.83.57"
+      ],
+      "as": {
+        "number": 209
+      },
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "ip": "216.160.83.57",
+      "port": 10876
+    },
+    "tags": [
+      "sflow",
+      "forwarded",
+      "preserve_original_event"
+    ]
+  }
+]

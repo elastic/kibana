@@ -1,0 +1,98 @@
+{
+  "package": "cybereason",
+  "dataStreams": [
+    {
+      "dataset": "cybereason.logon_session",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cybereason.logon_session.element_values.owner_machine.element_values.guid",
+        "cybereason.logon_session.element_values.owner_machine.element_values.has_malops",
+        "cybereason.logon_session.element_values.owner_machine.element_values.has_suspicions",
+        "cybereason.logon_session.element_values.owner_machine.element_values.name",
+        "cybereason.logon_session.element_values.remote_machine.element_values.guid",
+        "cybereason.logon_session.element_values.remote_machine.element_values.has_malops",
+        "cybereason.logon_session.element_values.remote_machine.element_values.has_suspicions",
+        "cybereason.logon_session.element_values.remote_machine.element_values.name",
+        "cybereason.logon_session.element_values.user.element_values.has_malops",
+        "cybereason.logon_session.element_values.user.element_values.has_suspicions",
+        "cybereason.logon_session.simple_values.logon_type.values",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cybereason.malop_connection",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cybereason.malop_connection.simple_values.aggregated_received_bytes_count.values",
+        "cybereason.malop_connection.simple_values.aggregated_transmitted_bytes_count.values",
+        "cybereason.malop_connection.simple_values.direction.values",
+        "cybereason.malop_connection.simple_values.port_type.values",
+        "event.id",
+        "network.transport",
+        "server.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cybereason.malop_process",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cybereason.malop_process.is_malicious",
+        "cybereason.malop_process.simple_values.detection_type.values",
+        "cybereason.malop_process.simple_values.is_blocked.values",
+        "cybereason.malop_process.simple_values.root_cause_element.types.values"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cybereason.malware",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cybereason.malware.detection.engine",
+        "cybereason.malware.element_type",
+        "cybereason.malware.needs_attention",
+        "cybereason.malware.status",
+        "cybereason.malware.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cybereason.poll_malop",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cybereason.poll_malop.data.detection_type",
+        "cybereason.poll_malop.decision_statuses",
+        "cybereason.poll_malop.detection.engines",
+        "cybereason.poll_malop.priority",
+        "cybereason.poll_malop.root_cause_element.names_count",
+        "cybereason.poll_malop.root_cause_element.type",
+        "cybereason.poll_malop.severity",
+        "cybereason.poll_malop.status"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cybereason.suspicions_process",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cybereason.suspicions_process.element_values.parent_process.element_values.has_malops",
+        "cybereason.suspicions_process.element_values.parent_process.element_values.has_suspicions",
+        "cybereason.suspicions_process.is_malicious",
+        "cybereason.suspicions_process.simple_values.product_type.values",
+        "cybereason.suspicions_process.suspect",
+        "event.created",
+        "process.parent.entity_id",
+        "process.parent.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

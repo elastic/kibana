@@ -1,0 +1,19 @@
+{
+  "package": "nginx_otel",
+  "dataStreams": [
+    {
+      "dataset": "nginxreceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "nginx.connections_accepted",
+        "nginx.connections_current",
+        "nginx.connections_handled",
+        "nginx.requests",
+        "state"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

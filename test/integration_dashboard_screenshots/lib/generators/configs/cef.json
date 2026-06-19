@@ -1,0 +1,36 @@
+{
+  "package": "cef",
+  "dataStreams": [
+    {
+      "dataset": "cef.log",
+      "indexPattern": "logs-*",
+      "docTarget": 690,
+      "fields": [
+        "cef.extensions.agentHostName",
+        "cef.extensions.agentType",
+        "cef.extensions.categoryDeviceGroup",
+        "cef.extensions.categoryDeviceType",
+        "cef.extensions.categoryObject",
+        "cef.extensions.categoryOutcome",
+        "cef.extensions.deviceAction",
+        "cef.extensions.deviceEventCategory",
+        "cef.extensions.deviceHostName",
+        "cef.severity",
+        "destination.bytes",
+        "destination.geo.country_name",
+        "destination.ip",
+        "destination.port",
+        "event.action",
+        "event.outcome",
+        "network.application",
+        "observer.hostname",
+        "observer.ip",
+        "process.name",
+        "source.bytes",
+        "source.geo.country_name",
+        "source.ip"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

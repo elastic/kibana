@@ -1,0 +1,49 @@
+{
+  "package": "extrahop",
+  "dataStreams": [
+    {
+      "dataset": "extrahop.detection",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.risk_score",
+        "extrahop.detection.categories",
+        "extrahop.detection.recommended",
+        "extrahop.detection.resolution",
+        "extrahop.detection.status",
+        "extrahop.detection.type",
+        "labels.is_transform_source",
+        "threat.tactic.id",
+        "threat.tactic.name",
+        "threat.technique.id",
+        "threat.technique.name",
+        "user.name"
+      ],
+      "filterValues": {
+        "extrahop.detection.recommended": [
+          "true"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "extrahop.investigation",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "extrahop.investigation.assessment",
+        "extrahop.investigation.assignee",
+        "extrahop.investigation.status",
+        "extrahop.investigation.update_time",
+        "labels.is_transform_source"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

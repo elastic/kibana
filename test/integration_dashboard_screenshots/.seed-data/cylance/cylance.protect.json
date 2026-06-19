@@ -1,0 +1,8614 @@
+[
+  {
+    "@timestamp": "2018-04-08T04:33:58.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "fullaccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "Finibus1411.www5.corp"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "Finibus1411.www5.corp"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "nibus",
+        "lastname": "vitaed"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "fullaccess",
+        "mail_id": "ser",
+        "node": "dquiaco",
+        "policy_name": "rroqu"
+      },
+      "network": {
+        "alias_host": [
+          "Finibus1411.www5.corp"
+        ]
+      },
+      "time": {
+        "event_time": "2018-04-08T04:33:58.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-04-30T03:32:16.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "Sedutp7428.internal.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "Sedutp7428.internal.home"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "iquipe"
+      },
+      "identity": {
+        "firstname": "upida",
+        "lastname": "tvolupt"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "PolicyAdd",
+        "mail_id": "eufugi",
+        "policy_name": "itempor"
+      },
+      "network": {
+        "alias_host": [
+          "Sedutp7428.internal.home"
+        ]
+      },
+      "time": {
+        "event_time": "2017-04-30T03:32:16.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-08-02T01:43:25.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "admi3749.api.lan"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "admi3749.api.lan"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "nimadmin"
+      },
+      "identity": {
+        "firstname": "iqui",
+        "lastname": "etc"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals"
+      },
+      "misc": {
+        "device_name": "tinvol",
+        "event_type": "DeviceRemove",
+        "mail_id": "etM"
+      },
+      "network": {
+        "alias_host": [
+          "admi3749.api.lan"
+        ]
+      },
+      "time": {
+        "event_time": "2025-08-02T01:43:25.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-23T12:09:07.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAddDevice",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "amre146.mail.host"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "amre146.mail.host"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "temqu",
+        "lastname": "oru"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "category": "sectetur",
+        "checksum": "abi",
+        "event_type": "ZoneAddDevice",
+        "mail_id": "uioffi",
+        "policy_name": "nti"
+      },
+      "network": {
+        "alias_host": [
+          "amre146.mail.host"
+        ]
+      },
+      "time": {
+        "event_time": "2016-12-23T12:09:07.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-03-11T02:28:49.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceEdit",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "aparia1179.www.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "aparia1179.www.localdomain"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "acom",
+        "lastname": "ceroinB"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "DeviceEdit",
+        "mail_id": "nim",
+        "node": "metco"
+      },
+      "network": {
+        "alias_host": [
+          "aparia1179.www.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2018-03-11T02:28:49.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-06-04T08:44:15.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ThreatUpdated",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "asperna7623.www.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "asperna7623.www.home"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "onproide"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default"
+      },
+      "misc": {
+        "event_type": "ThreatUpdated",
+        "node": "dexe"
+      },
+      "network": {
+        "alias_host": [
+          "asperna7623.www.home"
+        ],
+        "zone": "tat"
+      },
+      "time": {
+        "event_time": "2025-06-04T08:44:15.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-05-14T10:34:50.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "ati4639.www5.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ati4639.www5.home"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "con",
+        "lastname": "nisist"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "Alert",
+        "mail_id": "usmodte",
+        "node": "ven"
+      },
+      "network": {
+        "alias_host": [
+          "ati4639.www5.home"
+        ]
+      },
+      "time": {
+        "event_time": "2017-05-14T10:34:50.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-02-10T12:23:41.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Registration",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "ation6657.www.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ation6657.www.home"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "sitamet"
+      },
+      "identity": {
+        "firstname": "utlabo",
+        "lastname": "tetur"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "Registration",
+        "mail_id": "tionula"
+      },
+      "network": {
+        "alias_host": [
+          "ation6657.www.home"
+        ]
+      },
+      "time": {
+        "event_time": "2018-02-10T12:23:41.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-08-30T03:48:33.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "civeli370.www5.local"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "civeli370.www5.local"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "The Device: picia was auto assigned to the Zone: IP Address: Fake Devices"
+      },
+      "identity": {
+        "firstname": "mUtenima",
+        "lastname": "emaperi"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "Alert"
+      },
+      "network": {
+        "alias_host": [
+          "civeli370.www5.local"
+        ]
+      },
+      "time": {
+        "event_time": "2016-08-30T03:48:33.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-05-13T09:45:57.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "pechange",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "consequa1486.internal.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "consequa1486.internal.localdomain"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "quaeratv"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "ptatemse"
+      },
+      "misc": {
+        "checksum": "tobeata",
+        "event_type": "pechange"
+      },
+      "network": {
+        "alias_host": [
+          "consequa1486.internal.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2019-05-13T09:45:57.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-06-12T12:39:58.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-45-8B-97"
+      ],
+      "name": "cusant1701.api.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "cusant1701.api.localdomain"
+      ],
+      "ip": [
+        "10.190.175.158"
+      ],
+      "user": [
+        "ditemp"
+      ]
+    },
+    "rsa": {
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals",
+        "event_vcat": "taevita"
+      },
+      "misc": {
+        "OS": "edqui",
+        "event_type": "DeviceRemove",
+        "node": "siut"
+      },
+      "network": {
+        "alias_host": [
+          "cusant1701.api.localdomain"
+        ],
+        "eth_host": "01:00:5e:45:8b:97"
+      },
+      "time": {
+        "event_time": "2017-06-12T12:39:58.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.190.175.158"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "ditemp"
+    }
+  },
+  {
+    "@timestamp": "2019-06-25T06:53:40.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SyslogSettingsSave",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "dentsunt6061.www5.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "dentsunt6061.www5.home"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "nvol",
+        "lastname": "dtemp"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "quioff"
+      },
+      "misc": {
+        "event_type": "SyslogSettingsSave",
+        "mail_id": "mquis",
+        "node": "upt",
+        "policy_name": "atatnonp"
+      },
+      "network": {
+        "alias_host": [
+          "dentsunt6061.www5.home"
+        ]
+      },
+      "time": {
+        "event_time": "2019-06-25T06:53:40.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-06-26T07:42:33.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "fullaccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "eacommod1930.internal.lan"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "eacommod1930.internal.lan"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "tasnulap",
+        "lastname": "psum"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "category": "llamco",
+        "checksum": "tot",
+        "event_type": "fullaccess",
+        "mail_id": "nea",
+        "node": "uradi"
+      },
+      "network": {
+        "alias_host": [
+          "eacommod1930.internal.lan"
+        ]
+      },
+      "time": {
+        "event_time": "2017-06-26T07:42:33.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-08T05:06:33.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAddDevice",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "eaq908.api.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "eaq908.api.home"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "equat"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "tNequepo"
+      },
+      "misc": {
+        "event_type": "ZoneAddDevice",
+        "node": "luptasn"
+      },
+      "network": {
+        "alias_host": [
+          "eaq908.api.home"
+        ]
+      },
+      "time": {
+        "event_time": "2016-12-08T05:06:33.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-05-28T04:48:31.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_changed",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "eavolup6981.www5.example"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "eavolup6981.www5.example"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "tateveli"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "threat_changed",
+        "node": "lum",
+        "serial_number": "enimadmi"
+      },
+      "network": {
+        "alias_host": [
+          "eavolup6981.www5.example"
+        ]
+      },
+      "time": {
+        "event_time": "2019-05-28T04:48:31.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-11-15T05:19:22.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LoginSuccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "edutpers6452.api.host"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "edutpers6452.api.host"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "com"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1401060000,
+        "event_cat_name": "User.Activity.Successful Logins",
+        "event_vcat": "sitv"
+      },
+      "misc": {
+        "checksum": "mveni",
+        "event_type": "LoginSuccess"
+      },
+      "network": {
+        "alias_host": [
+          "edutpers6452.api.host"
+        ]
+      },
+      "time": {
+        "event_time": "2019-11-15T05:19:22.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-02-26T08:15:08.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "eius6159.www5.localhost"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "eius6159.www5.localhost"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "temvel"
+      },
+      "identity": {
+        "firstname": "oloremqu",
+        "lastname": "tia"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts"
+      },
+      "misc": {
+        "device_name": "aer",
+        "event_type": "Alert",
+        "mail_id": "lupt"
+      },
+      "network": {
+        "alias_host": [
+          "eius6159.www5.localhost"
+        ]
+      },
+      "time": {
+        "event_time": "2026-02-26T08:15:08.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-12-29T03:15:58.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAddDevice",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "eiusmod3517.internal.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "eiusmod3517.internal.invalid"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "metcons",
+        "lastname": "sciun"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "checksum": "labor",
+        "event_type": "ZoneAddDevice",
+        "mail_id": "dol",
+        "node": "olup"
+      },
+      "network": {
+        "alias_host": [
+          "eiusmod3517.internal.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2017-12-29T03:15:58.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-07-11T02:45:07.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "emeumfug4387.internal.lan"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "emeumfug4387.internal.lan"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "lapariat",
+        "lastname": "niamq"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "checksum": "iduntu",
+        "event_type": "Alert",
+        "mail_id": "ccaeca",
+        "node": "untincul"
+      },
+      "network": {
+        "alias_host": [
+          "emeumfug4387.internal.lan"
+        ]
+      },
+      "time": {
+        "event_time": "2017-07-11T02:45:07.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-03-25T09:31:24.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LoginSuccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "erspi5757.local"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "erspi5757.local"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "undeomni"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1401060000,
+        "event_cat_name": "User.Activity.Successful Logins",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "LoginSuccess",
+        "node": "uov",
+        "serial_number": "quaU"
+      },
+      "network": {
+        "alias_host": [
+          "erspi5757.local"
+        ]
+      },
+      "time": {
+        "event_time": "2018-03-25T09:31:24.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-09-28T05:53:42.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LoginSuccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "giatquov",
+      "name": "ici",
+      "type": "tati"
+    },
+    "host": {
+      "name": "estqu1709.internal.example"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "estqu1709.internal.example"
+      ],
+      "ip": [
+        "10.64.70.5"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "eprehend"
+      },
+      "db": {
+        "index": "iadese"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1401060000,
+        "event_cat_name": "User.Activity.Successful Logins",
+        "event_vcat": " Threat"
+      },
+      "misc": {
+        "checksum": "dexeac",
+        "event_state": "atvol",
+        "event_type": "LoginSuccess",
+        "node": "uasia"
+      },
+      "network": {
+        "alias_host": [
+          "estqu1709.internal.example"
+        ]
+      },
+      "time": {
+        "event_time": "2016-09-28T05:53:42.000Z"
+      },
+      "web": {
+        "reputation_num": 145.898
+      }
+    },
+    "source": {
+      "ip": "10.64.70.5"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-08-21T11:03:57.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_found",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "name": "uredol"
+    },
+    "host": {
+      "name": "etMa3452.www5.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "maliqua"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.4613"
+    },
+    "related": {
+      "hosts": [
+        "etMa3452.www5.test"
+      ],
+      "user": [
+        "omnisi"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "mquia"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default"
+      },
+      "misc": {
+        "event_type": "threat_found",
+        "node": "nturmag",
+        "policy_name": "mco",
+        "version": "1.4613"
+      },
+      "network": {
+        "alias_host": [
+          "etMa3452.www5.test"
+        ]
+      },
+      "time": {
+        "event_time": "2025-08-21T11:03:57.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "omnisi"
+    }
+  },
+  {
+    "@timestamp": "2025-04-16T08:29:41.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "etconsec6708.internal.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "etconsec6708.internal.invalid"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "mquame"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added"
+      },
+      "misc": {
+        "device_name": "tquov",
+        "event_type": "PolicyAdd",
+        "node": "ersp",
+        "serial_number": "tes"
+      },
+      "network": {
+        "alias_host": [
+          "etconsec6708.internal.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2025-04-16T08:29:41.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-09-19T01:09:05.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "pechange",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "gnaaliq5240.api.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "gnaaliq5240.api.test"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "ratvo"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "esciun"
+      },
+      "misc": {
+        "checksum": "volupt",
+        "event_type": "pechange"
+      },
+      "network": {
+        "alias_host": [
+          "gnaaliq5240.api.test"
+        ]
+      },
+      "time": {
+        "event_time": "2019-09-19T01:09:05.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-10-03T08:11:40.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LoginSuccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "illum2625.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "illum2625.test"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "iaeconse"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1401060000,
+        "event_cat_name": "User.Activity.Successful Logins"
+      },
+      "misc": {
+        "checksum": "nimadmin",
+        "event_type": "LoginSuccess"
+      },
+      "network": {
+        "alias_host": [
+          "illum2625.test"
+        ]
+      },
+      "time": {
+        "event_time": "2025-10-03T08:11:40.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-11-16T06:08:15.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_changed",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-DE-32-2C"
+      ],
+      "name": "itlab6956.mail.local"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "itlab6956.mail.local"
+      ],
+      "ip": [
+        "10.105.46.101"
+      ],
+      "user": [
+        "tconsect"
+      ]
+    },
+    "rsa": {
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "siuta"
+      },
+      "misc": {
+        "OS": "rum",
+        "event_type": "threat_changed",
+        "node": "ommodo"
+      },
+      "network": {
+        "alias_host": [
+          "itlab6956.mail.local"
+        ],
+        "eth_host": "01:00:5e:de:32:2c"
+      },
+      "time": {
+        "event_time": "2017-11-16T06:08:15.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.105.46.101"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "tconsect"
+    }
+  },
+  {
+    "@timestamp": "2019-06-11T11:51:06.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "fullaccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-BC-C1-21"
+      ],
+      "name": "its6443.mail.example"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "its6443.mail.example"
+      ],
+      "ip": [
+        "10.139.80.71"
+      ],
+      "user": [
+        "orem"
+      ]
+    },
+    "rsa": {
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "miurere"
+      },
+      "misc": {
+        "OS": "eniamqui",
+        "event_type": "fullaccess",
+        "node": "tlabo"
+      },
+      "network": {
+        "alias_host": [
+          "its6443.mail.example"
+        ],
+        "eth_host": "01:00:5e:bc:c1:21"
+      },
+      "time": {
+        "event_time": "2019-06-11T11:51:06.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.139.80.71"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "orem"
+    }
+  },
+  {
+    "@timestamp": "2025-11-10T03:01:24.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceEdit",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "llu4718.localhost"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "llu4718.localhost"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "psaquae"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default"
+      },
+      "misc": {
+        "device_name": "oidentsu",
+        "event_type": "DeviceEdit",
+        "node": "conseq",
+        "serial_number": "ern"
+      },
+      "network": {
+        "alias_host": [
+          "llu4718.localhost"
+        ]
+      },
+      "time": {
+        "event_time": "2025-11-10T03:01:24.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-10-26T07:58:50.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "maccusa5126.api.domain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "process": {
+      "name": "aliqu.exe",
+      "pid": 2289
+    },
+    "related": {
+      "hosts": [
+        "maccusa5126.api.domain"
+      ],
+      "ip": [
+        "10.32.143.134"
+      ],
+      "user": [
+        "olupta"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "eFinib"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": " ExploitAttempt"
+      },
+      "misc": {
+        "action": [
+          "accept"
+        ],
+        "event_type": "Alert",
+        "node": "olorema",
+        "policy_name": "mipsumd"
+      },
+      "network": {
+        "alias_host": [
+          "maccusa5126.api.domain"
+        ]
+      },
+      "time": {
+        "event_time": "2016-10-26T07:58:50.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.32.143.134"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "olupta"
+    }
+  },
+  {
+    "@timestamp": "2018-05-21T01:41:41.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_found",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "magnid3343.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "magnid3343.home"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "obea"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "threat_found",
+        "node": "gitse",
+        "serial_number": "col"
+      },
+      "network": {
+        "alias_host": [
+          "magnid3343.home"
+        ]
+      },
+      "time": {
+        "event_time": "2018-05-21T01:41:41.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-10-19T04:03:07.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "maliquam2147.internal.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "maliquam2147.internal.home"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "untincul"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "PolicyAdd",
+        "node": "estl",
+        "serial_number": "atu"
+      },
+      "network": {
+        "alias_host": [
+          "maliquam2147.internal.home"
+        ]
+      },
+      "time": {
+        "event_time": "2017-10-19T04:03:07.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-02-18T04:19:24.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "cancel",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "maven3758.www.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "process": {
+      "name": "mveleu.exe",
+      "pid": 7410
+    },
+    "related": {
+      "hosts": [
+        "maven3758.www.invalid"
+      ],
+      "ip": [
+        "10.74.104.215"
+      ],
+      "user": [
+        "nofdeFin"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "temvel"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " ExploitAttempt"
+      },
+      "misc": {
+        "action": [
+          "cancel"
+        ],
+        "event_type": "DeviceEdit",
+        "node": "udan",
+        "policy_name": "sequam"
+      },
+      "network": {
+        "alias_host": [
+          "maven3758.www.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2017-02-18T04:19:24.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.74.104.215"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "nofdeFin"
+    }
+  },
+  {
+    "@timestamp": "2016-04-09T05:22:51.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SystemSecurity",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-DC-BB-8B"
+      ],
+      "name": "maveniam1399.mail.lan"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "maveniam1399.mail.lan"
+      ],
+      "ip": [
+        "10.124.61.119"
+      ],
+      "user": [
+        "occ"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "reetdolo"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1600000000,
+        "event_cat_name": "System",
+        "event_vcat": "omnis"
+      },
+      "misc": {
+        "OS": "ect",
+        "event_type": "SystemSecurity",
+        "node": "eip"
+      },
+      "network": {
+        "alias_host": [
+          "maveniam1399.mail.lan"
+        ],
+        "eth_host": "01:00:5e:dc:bb:8b"
+      },
+      "time": {
+        "event_time": "2016-04-09T05:22:51.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.124.61.119"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "occ"
+    }
+  },
+  {
+    "@timestamp": "2017-01-06T07:11:41.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "olor"
+    },
+    "host": {
+      "name": "mcolab379.internal.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "Neque"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.4129"
+    },
+    "related": {
+      "hosts": [
+        "mcolab379.internal.home"
+      ],
+      "user": [
+        "fdeFi"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "iutali"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals",
+        "event_vcat": " ScriptControl"
+      },
+      "misc": {
+        "event_type": "DeviceRemove",
+        "node": "tper",
+        "version": "1.4129"
+      },
+      "network": {
+        "alias_host": [
+          "mcolab379.internal.home"
+        ]
+      },
+      "time": {
+        "event_time": "2017-01-06T07:11:41.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "fdeFi"
+    }
+  },
+  {
+    "@timestamp": "2017-12-01T01:10:49.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Device Policy Assigned",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-F9-78-C2"
+      ],
+      "name": "midestl1919.host"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "midestl1919.host"
+      ],
+      "ip": [
+        "10.124.88.222"
+      ],
+      "user": [
+        "onu"
+      ]
+    },
+    "rsa": {
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502000000,
+        "event_cat_name": "Policies.Rules",
+        "event_vcat": "ntNeq"
+      },
+      "misc": {
+        "OS": "liquaUte",
+        "event_type": "Device Policy Assigned",
+        "node": "aUt"
+      },
+      "network": {
+        "alias_host": [
+          "midestl1919.host"
+        ],
+        "eth_host": "01:00:5e:f9:78:c2"
+      },
+      "time": {
+        "event_time": "2017-12-01T01:10:49.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.124.88.222"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "onu"
+    }
+  },
+  {
+    "@timestamp": "2026-03-04T11:21:59.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "pechange",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "mni7200.mail.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "mni7200.mail.localdomain"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "uisau"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default"
+      },
+      "misc": {
+        "event_type": "pechange",
+        "node": "idolor"
+      },
+      "network": {
+        "alias_host": [
+          "mni7200.mail.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2026-03-04T11:21:59.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-04-24T12:25:25.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Device Policy Assigned",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "nimadmin6499.local"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "nimadmin6499.local"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "lorem"
+      },
+      "identity": {
+        "firstname": "liqu",
+        "lastname": "aquaeab"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502000000,
+        "event_cat_name": "Policies.Rules"
+      },
+      "misc": {
+        "device_name": "dexe",
+        "event_type": "Device Policy Assigned",
+        "mail_id": "urerep"
+      },
+      "network": {
+        "alias_host": [
+          "nimadmin6499.local"
+        ]
+      },
+      "time": {
+        "event_time": "2025-04-24T12:25:25.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-01-29T06:09:59.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "nostrud4819.mail.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "nostrud4819.mail.test"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "uii",
+        "lastname": "umexe"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "ZoneAdd",
+        "mail_id": "estlabo",
+        "node": "pisciv",
+        "policy_name": "orev"
+      },
+      "network": {
+        "alias_host": [
+          "nostrud4819.mail.test"
+        ]
+      },
+      "time": {
+        "event_time": "2016-01-29T06:09:59.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-12-15T08:13:24.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "deny",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "nsec923.internal.local"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "process": {
+      "name": "tinvolup.exe",
+      "pid": 3916
+    },
+    "related": {
+      "hosts": [
+        "nsec923.internal.local"
+      ],
+      "ip": [
+        "10.28.120.149"
+      ],
+      "user": [
+        "tsed"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "rroq"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " ExploitAttempt"
+      },
+      "misc": {
+        "action": [
+          "deny"
+        ],
+        "event_type": "DeviceEdit",
+        "node": "mod",
+        "policy_name": "inv"
+      },
+      "network": {
+        "alias_host": [
+          "nsec923.internal.local"
+        ]
+      },
+      "time": {
+        "event_time": "2017-12-15T08:13:24.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.28.120.149"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "tsed"
+    }
+  },
+  {
+    "@timestamp": "2018-01-27T05:21:06.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-54-AB-3F"
+      ],
+      "name": "ntexpl3889.www.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ntexpl3889.www.home"
+      ],
+      "ip": [
+        "10.156.34.19"
+      ],
+      "user": [
+        "imveni"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "stquid"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals",
+        "event_vcat": "Cic"
+      },
+      "misc": {
+        "OS": "ariaturE",
+        "event_type": "DeviceRemove",
+        "node": "saqu"
+      },
+      "network": {
+        "alias_host": [
+          "ntexpl3889.www.home"
+        ],
+        "eth_host": "01:00:5e:54:ab:3f"
+      },
+      "time": {
+        "event_time": "2018-01-27T05:21:06.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.156.34.19"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "imveni"
+    }
+  },
+  {
+    "@timestamp": "2026-02-24T07:26:15.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-EE-E8-77"
+      ],
+      "name": "ntium4450.www5.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ntium4450.www5.localdomain"
+      ],
+      "ip": [
+        "10.22.94.10"
+      ],
+      "user": [
+        "ssusci"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "mpo"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals"
+      },
+      "misc": {
+        "OS": "animid",
+        "event_type": "DeviceRemove",
+        "node": "vol"
+      },
+      "network": {
+        "alias_host": [
+          "ntium4450.www5.localdomain"
+        ],
+        "eth_host": "01:00:5e:ee:e8:77"
+      },
+      "time": {
+        "event_time": "2026-02-24T07:26:15.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.22.94.10"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "ssusci"
+    }
+  },
+  {
+    "@timestamp": "2017-04-02T01:27:07.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "orro"
+    },
+    "host": {
+      "name": "ntoccae1705.internal.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "tae"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.3212"
+    },
+    "related": {
+      "hosts": [
+        "ntoccae1705.internal.invalid"
+      ],
+      "user": [
+        "aperiame"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "tlab"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts"
+      },
+      "misc": {
+        "event_type": "Alert",
+        "node": "sBon",
+        "version": "1.3212"
+      },
+      "network": {
+        "alias_host": [
+          "ntoccae1705.internal.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2017-04-02T01:27:07.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "aperiame"
+    }
+  },
+  {
+    "@timestamp": "2019-11-30T00:21:57.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "deny",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "emporin"
+    },
+    "host": {
+      "name": "nulamc5617.mail.host"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "nulamc5617.mail.host"
+      ],
+      "ip": [
+        "10.134.137.205"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "etquasia"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1600000000,
+        "event_cat_name": "System",
+        "event_vcat": " AppControl"
+      },
+      "misc": {
+        "action": [
+          "deny"
+        ],
+        "checksum": "oreseosq",
+        "event_type": "SystemSecurity",
+        "node": "ntu"
+      },
+      "network": {
+        "alias_host": [
+          "nulamc5617.mail.host"
+        ]
+      },
+      "time": {
+        "event_time": "2019-11-30T00:21:57.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.134.137.205"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-04-29T02:43:23.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "officiad4982.www5.domain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "officiad4982.www5.domain"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "etdolore",
+        "lastname": "magnaa"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "ZoneAdd",
+        "mail_id": "sumquiad",
+        "node": "umtota"
+      },
+      "network": {
+        "alias_host": [
+          "officiad4982.www5.domain"
+        ]
+      },
+      "time": {
+        "event_time": "2019-04-29T02:43:23.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-07-10T01:56:14.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SyslogSettingsSave",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "oid218.api.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "oid218.api.invalid"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "mcorpori"
+      },
+      "identity": {
+        "firstname": "mqu",
+        "lastname": "pteursi"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "SyslogSettingsSave",
+        "mail_id": "orsitam"
+      },
+      "network": {
+        "alias_host": [
+          "oid218.api.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2019-07-10T01:56:14.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-09-27T05:04:49.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-E8-41-AE"
+      ],
+      "name": "oloreeu7597.mail.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "oloreeu7597.mail.home"
+      ],
+      "ip": [
+        "10.7.99.47"
+      ],
+      "user": [
+        "evolupta"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "ditau"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added"
+      },
+      "misc": {
+        "OS": "teturadi",
+        "event_type": "PolicyAdd",
+        "node": "nula"
+      },
+      "network": {
+        "alias_host": [
+          "oloreeu7597.mail.home"
+        ],
+        "eth_host": "01:00:5e:e8:41:ae"
+      },
+      "time": {
+        "event_time": "2025-09-27T05:04:49.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.7.99.47"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "evolupta"
+    }
+  },
+  {
+    "@timestamp": "2017-09-20T01:57:58.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "cancel",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "olori416.api.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "process": {
+      "name": "accusant.exe",
+      "pid": 5530
+    },
+    "related": {
+      "hosts": [
+        "olori416.api.test"
+      ],
+      "ip": [
+        "10.31.190.145"
+      ],
+      "user": [
+        "onse"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "stenatu"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": " ExploitAttempt"
+      },
+      "misc": {
+        "action": [
+          "cancel"
+        ],
+        "event_type": "Alert",
+        "node": "exeaco",
+        "policy_name": "admin"
+      },
+      "network": {
+        "alias_host": [
+          "olori416.api.test"
+        ]
+      },
+      "time": {
+        "event_time": "2017-09-20T01:57:58.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.31.190.145"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "onse"
+    }
+  },
+  {
+    "@timestamp": "2018-09-12T10:02:15.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ThreatUpdated",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "olori4584.mail.domain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "olori4584.mail.domain"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "nturmag"
+      },
+      "identity": {
+        "firstname": "equat",
+        "lastname": "aliquid"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "ThreatUpdated",
+        "mail_id": "usantiu",
+        "policy_name": "tura"
+      },
+      "network": {
+        "alias_host": [
+          "olori4584.mail.domain"
+        ]
+      },
+      "time": {
+        "event_time": "2018-09-12T10:02:15.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-08-29T02:59:40.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_quarantined",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "nculpaq",
+      "name": "psa",
+      "type": "iame"
+    },
+    "host": {
+      "name": "ons5050.mail.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ons5050.mail.test"
+      ],
+      "ip": [
+        "10.48.209.115"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "adm"
+      },
+      "db": {
+        "index": "cta"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " Threat"
+      },
+      "misc": {
+        "checksum": "sequat",
+        "event_state": "ccaec",
+        "event_type": "threat_quarantined",
+        "node": "mquiad"
+      },
+      "network": {
+        "alias_host": [
+          "ons5050.mail.test"
+        ]
+      },
+      "time": {
+        "event_time": "2018-08-29T02:59:40.000Z"
+      },
+      "web": {
+        "reputation_num": 75.498
+      }
+    },
+    "source": {
+      "ip": "10.48.209.115"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-10-18T03:14:14.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "oreeu6419.www.corp"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "oreeu6419.www.corp"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "uames",
+        "lastname": "tium"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "PolicyAdd",
+        "mail_id": "ianonn",
+        "node": "moenimip"
+      },
+      "network": {
+        "alias_host": [
+          "oreeu6419.www.corp"
+        ]
+      },
+      "time": {
+        "event_time": "2019-10-18T03:14:14.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-09-06T06:55:24.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_quarantined",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "oremi1485.api.localhost"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "oremi1485.api.localhost"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "atisund",
+        "lastname": "xea"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "checksum": "amvolupt",
+        "event_type": "threat_quarantined",
+        "mail_id": "ites",
+        "result": "success"
+      },
+      "network": {
+        "alias_host": [
+          "oremi1485.api.localhost"
+        ]
+      },
+      "time": {
+        "event_time": "2017-09-06T06:55:24.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-10-04T09:00:32.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_found",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "periam126.api.host"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "periam126.api.host"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "rExc"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default"
+      },
+      "misc": {
+        "checksum": "tame",
+        "event_type": "threat_found"
+      },
+      "network": {
+        "alias_host": [
+          "periam126.api.host"
+        ]
+      },
+      "time": {
+        "event_time": "2025-10-04T09:00:32.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-06-19T03:46:49.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "allow",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "pisc3553.internal.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "process": {
+      "name": "nim.exe",
+      "pid": 1359
+    },
+    "related": {
+      "hosts": [
+        "pisc3553.internal.home"
+      ],
+      "ip": [
+        "10.43.110.203"
+      ],
+      "user": [
+        "ame"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "mip"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " ExploitAttempt"
+      },
+      "misc": {
+        "action": [
+          "allow"
+        ],
+        "event_type": "DeviceEdit",
+        "node": "ritati",
+        "policy_name": "amvolu"
+      },
+      "network": {
+        "alias_host": [
+          "pisc3553.internal.home"
+        ]
+      },
+      "time": {
+        "event_time": "2018-06-19T03:46:49.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.43.110.203"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "ame"
+    }
+  },
+  {
+    "@timestamp": "2019-02-02T08:27:57.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SystemSecurity",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "prehen4807.mail.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "prehen4807.mail.invalid"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "meum"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1600000000,
+        "event_cat_name": "System",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "SystemSecurity",
+        "node": "remq",
+        "serial_number": "ugia"
+      },
+      "network": {
+        "alias_host": [
+          "prehen4807.mail.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2019-02-02T08:27:57.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-01-12T22:18:32.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "iuntNequ"
+    },
+    "host": {
+      "name": "queips4947.mail.example"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "queips4947.mail.example"
+      ],
+      "ip": [
+        "10.165.16.231"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "aincidun"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AppControl"
+      },
+      "misc": {
+        "action": [
+          "accept"
+        ],
+        "checksum": "esseq",
+        "event_type": "Registration",
+        "node": "labore"
+      },
+      "network": {
+        "alias_host": [
+          "queips4947.mail.example"
+        ]
+      },
+      "time": {
+        "event_time": "2018-01-12T22:18:32.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.165.16.231"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-03-12T03:17:42.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SystemSecurity",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "ratvolup497.www.corp"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ratvolup497.www.corp"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "ommodic"
+      },
+      "identity": {
+        "firstname": "mipsu",
+        "lastname": "consec"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1600000000,
+        "event_cat_name": "System",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "SystemSecurity",
+        "mail_id": "taliquip"
+      },
+      "network": {
+        "alias_host": [
+          "ratvolup497.www.corp"
+        ]
+      },
+      "time": {
+        "event_time": "2016-03-12T03:17:42.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-06-05T09:33:08.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SystemSecurity",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "aspern"
+    },
+    "host": {
+      "name": "reetdolo2451.www.example"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "itlabori"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.2344"
+    },
+    "related": {
+      "hosts": [
+        "reetdolo2451.www.example"
+      ],
+      "user": [
+        "usan"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "ollit"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1600000000,
+        "event_cat_name": "System"
+      },
+      "misc": {
+        "event_type": "SystemSecurity",
+        "node": "llam",
+        "version": "1.2344"
+      },
+      "network": {
+        "alias_host": [
+          "reetdolo2451.www.example"
+        ]
+      },
+      "time": {
+        "event_time": "2016-06-05T09:33:08.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "usan"
+    }
+  },
+  {
+    "@timestamp": "2016-08-16T08:45:59.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "fullaccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "Nemoen"
+    },
+    "host": {
+      "name": "rudexerc703.internal.host"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "tfug"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.5383"
+    },
+    "related": {
+      "hosts": [
+        "rudexerc703.internal.host"
+      ],
+      "user": [
+        "isaute"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "urE"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " ScriptControl"
+      },
+      "misc": {
+        "event_type": "fullaccess",
+        "node": "onproide",
+        "version": "1.5383"
+      },
+      "network": {
+        "alias_host": [
+          "rudexerc703.internal.host"
+        ]
+      },
+      "time": {
+        "event_time": "2016-08-16T08:45:59.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "isaute"
+    }
+  },
+  {
+    "@timestamp": "2017-07-25T09:47:41.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "rumwrit764.www5.local"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "rumwrit764.www5.local"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "miu"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "DeviceRemove",
+        "node": "etMal",
+        "serial_number": "onula"
+      },
+      "network": {
+        "alias_host": [
+          "rumwrit764.www5.local"
+        ]
+      },
+      "time": {
+        "event_time": "2017-07-25T09:47:41.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-11-01T10:16:48.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "sci333.mail.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "sci333.mail.home"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "uasi",
+        "lastname": "maveniam"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added",
+        "event_vcat": "docons"
+      },
+      "misc": {
+        "event_type": "PolicyAdd",
+        "mail_id": "uis",
+        "node": "eumf",
+        "policy_name": "roquisq"
+      },
+      "network": {
+        "alias_host": [
+          "sci333.mail.home"
+        ]
+      },
+      "time": {
+        "event_time": "2019-11-01T10:16:48.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-02-03T09:16:50.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LoginSuccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "sciun4694.api.lan"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "sciun4694.api.lan"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "enderit"
+      },
+      "identity": {
+        "firstname": "magnid",
+        "lastname": "rumwritt"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1401060000,
+        "event_cat_name": "User.Activity.Successful Logins"
+      },
+      "misc": {
+        "device_name": "nsect",
+        "event_type": "LoginSuccess",
+        "mail_id": "idata"
+      },
+      "network": {
+        "alias_host": [
+          "sciun4694.api.lan"
+        ]
+      },
+      "time": {
+        "event_time": "2026-02-03T09:16:50.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-04-15T07:40:49.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Device Updated",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "sectetu7182.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "sectetu7182.localdomain"
+      ]
+    },
+    "rsa": {
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804010000,
+        "event_cat_name": "Network.Devices.Additions",
+        "event_vcat": "orissus"
+      },
+      "misc": {
+        "event_type": "Device Updated"
+      },
+      "network": {
+        "alias_host": [
+          "sectetu7182.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2019-04-15T07:40:49.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-01-19T01:25:23.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAddDevice",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "serrorsi1096.www5.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "serrorsi1096.www5.localdomain"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "The Device: reetdo was auto assigned to the Zone: IP Address: Fake Devices"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "ZoneAddDevice",
+        "mail_id": "ever",
+        "node": "reetdo"
+      },
+      "network": {
+        "alias_host": [
+          "serrorsi1096.www5.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2019-01-19T01:25:23.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-04-01T12:38:14.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Device Policy Assigned",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-E6-A6-A2"
+      ],
+      "name": "sis3986.internal.lan"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "sis3986.internal.lan"
+      ],
+      "ip": [
+        "10.232.90.3"
+      ],
+      "user": [
+        "midestl"
+      ]
+    },
+    "rsa": {
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502000000,
+        "event_cat_name": "Policies.Rules",
+        "event_vcat": "isiu"
+      },
+      "misc": {
+        "OS": "nci",
+        "event_type": "Device Policy Assigned",
+        "node": "mmodi"
+      },
+      "network": {
+        "alias_host": [
+          "sis3986.internal.lan"
+        ],
+        "eth_host": "01:00:5e:e6:a6:a2"
+      },
+      "time": {
+        "event_time": "2019-04-01T12:38:14.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.232.90.3"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "midestl"
+    }
+  },
+  {
+    "@timestamp": "2019-03-17T05:35:40.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "sit1400.www.lan"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "sit1400.www.lan"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "ntsunti"
+      },
+      "identity": {
+        "firstname": "uid",
+        "lastname": "idatat"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "ZoneAdd",
+        "mail_id": "onev",
+        "policy_name": "borios"
+      },
+      "network": {
+        "alias_host": [
+          "sit1400.www.lan"
+        ]
+      },
+      "time": {
+        "event_time": "2019-03-17T05:35:40.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-06-20T04:35:42.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ZoneAddDevice",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "sitas4259.mail.corp"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "sitas4259.mail.corp"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "dun"
+      },
+      "identity": {
+        "firstname": "vel",
+        "lastname": "quu"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "ZoneAddDevice",
+        "mail_id": "undeo",
+        "policy_name": "enim"
+      },
+      "network": {
+        "alias_host": [
+          "sitas4259.mail.corp"
+        ]
+      },
+      "time": {
+        "event_time": "2016-06-20T04:35:42.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-05-08T07:27:59.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ThreatUpdated",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "suntinc4934.www5.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "suntinc4934.www5.test"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "mquisnos",
+        "lastname": "olab"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "checksum": "uovol",
+        "event_type": "ThreatUpdated",
+        "mail_id": "dmi",
+        "policy_name": "uptatev"
+      },
+      "network": {
+        "alias_host": [
+          "suntinc4934.www5.test"
+        ]
+      },
+      "time": {
+        "event_time": "2016-05-08T07:27:59.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-05-22T02:30:33.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_quarantined",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "tae1382.mail.localhost"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "tae1382.mail.localhost"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "lit"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "orsitame"
+      },
+      "misc": {
+        "checksum": "qua",
+        "event_type": "threat_quarantined"
+      },
+      "network": {
+        "alias_host": [
+          "tae1382.mail.localhost"
+        ]
+      },
+      "time": {
+        "event_time": "2016-05-22T02:30:33.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-11-02T11:05:41.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "sit",
+      "name": "iquamqua",
+      "type": "olorsit"
+    },
+    "host": {
+      "name": "tate6578.api.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "tate6578.api.localdomain"
+      ],
+      "ip": [
+        "10.252.165.146"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "undeom"
+      },
+      "db": {
+        "index": "turadip"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added",
+        "event_vcat": " Threat"
+      },
+      "misc": {
+        "checksum": "ita",
+        "event_state": "exeaco",
+        "event_type": "PolicyAdd",
+        "node": "yCiceroi"
+      },
+      "network": {
+        "alias_host": [
+          "tate6578.api.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2017-11-02T11:05:41.000Z"
+      },
+      "web": {
+        "reputation_num": 51.523
+      }
+    },
+    "source": {
+      "ip": "10.252.165.146"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-12-14T07:24:31.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_found",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "tatem4713.internal.host"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "tatem4713.internal.host"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "usci"
+      },
+      "identity": {
+        "firstname": "lupta",
+        "lastname": "ura"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "threat_found",
+        "mail_id": "oreeufug",
+        "policy_name": "unturmag"
+      },
+      "network": {
+        "alias_host": [
+          "tatem4713.internal.host"
+        ]
+      },
+      "time": {
+        "event_time": "2019-12-14T07:24:31.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-03-26T10:20:16.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "tatno5625.api.local"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "taliqu",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "tatno5625.api.local"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "tur",
+        "lastname": "aperi"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "checksum": "ommod",
+        "event_type": "Alert",
+        "mail_id": "iveli",
+        "result": "failure"
+      },
+      "network": {
+        "alias_host": [
+          "tatno5625.api.local"
+        ]
+      },
+      "time": {
+        "event_time": "2016-03-26T10:20:16.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-08-07T04:01:23.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "ttenb",
+      "name": "itl",
+      "type": "oluptat"
+    },
+    "host": {
+      "name": "tconsec7604.corp"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "tconsec7604.corp"
+      ],
+      "ip": [
+        "10.223.246.244"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "ercitati"
+      },
+      "db": {
+        "index": "con"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": " Threat"
+      },
+      "misc": {
+        "checksum": "quiav",
+        "event_state": "Nem",
+        "event_type": "Alert",
+        "node": "stiaecon"
+      },
+      "network": {
+        "alias_host": [
+          "tconsec7604.corp"
+        ]
+      },
+      "time": {
+        "event_time": "2019-08-07T04:01:23.000Z"
+      },
+      "web": {
+        "reputation_num": 105.845
+      }
+    },
+    "source": {
+      "ip": "10.223.246.244"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-12-07T04:17:40.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SystemSecurity",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "teir7585.www5.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "teir7585.www5.localdomain"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "scip",
+        "lastname": "Finibus"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1600000000,
+        "event_cat_name": "System",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "SystemSecurity",
+        "mail_id": "Utenimad",
+        "node": "oreverit"
+      },
+      "network": {
+        "alias_host": [
+          "teir7585.www5.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2018-12-07T04:17:40.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-05-29T05:37:24.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "PolicyAdd",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "torever662.www5.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "torever662.www5.home"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "The Device: pexe was auto assigned to the Zone: IP Address: 10.70.168.240"
+      },
+      "identity": {
+        "firstname": "amcol",
+        "lastname": "adeser"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "PolicyAdd"
+      },
+      "network": {
+        "alias_host": [
+          "torever662.www5.home"
+        ]
+      },
+      "time": {
+        "event_time": "2017-05-29T05:37:24.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-09-05T06:06:31.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_found",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "tuser2694.internal.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "tuser2694.internal.invalid"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "natus",
+        "lastname": "boreet"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "ugiatqu"
+      },
+      "misc": {
+        "event_type": "threat_found",
+        "mail_id": "luptasnu",
+        "node": "turveli",
+        "policy_name": "isciv"
+      },
+      "network": {
+        "alias_host": [
+          "tuser2694.internal.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2019-09-05T06:06:31.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-10-11T12:07:23.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Device Updated",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "ueip5847.api.test"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ueip5847.api.test"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "Nemoenim"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804010000,
+        "event_cat_name": "Network.Devices.Additions",
+        "event_vcat": "sed"
+      },
+      "misc": {
+        "checksum": "labori",
+        "event_type": "Device Updated"
+      },
+      "network": {
+        "alias_host": [
+          "ueip5847.api.test"
+        ]
+      },
+      "time": {
+        "event_time": "2018-10-11T12:07:23.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-10-25T07:09:57.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SystemSecurity",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "eufug"
+    },
+    "host": {
+      "name": "uid3520.www.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "roquisq"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.989"
+    },
+    "related": {
+      "hosts": [
+        "uid3520.www.home"
+      ],
+      "user": [
+        "ici"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "civelits"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1600000000,
+        "event_cat_name": "System",
+        "event_vcat": " ScriptControl"
+      },
+      "misc": {
+        "event_type": "SystemSecurity",
+        "node": "prehend",
+        "version": "1.989"
+      },
+      "network": {
+        "alias_host": [
+          "uid3520.www.home"
+        ]
+      },
+      "time": {
+        "event_time": "2018-10-25T07:09:57.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "ici"
+    }
+  },
+  {
+    "@timestamp": "2016-07-18T06:40:50.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SyslogSettingsSave",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "uid7309.api.domain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "uid7309.api.domain"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "strude",
+        "lastname": "ctetura"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "SyslogSettingsSave",
+        "mail_id": "usmod",
+        "policy_name": "antiumto"
+      },
+      "network": {
+        "alias_host": [
+          "uid7309.api.domain"
+        ]
+      },
+      "time": {
+        "event_time": "2016-07-18T06:40:50.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-07-03T10:49:23.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "block",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "ema"
+    },
+    "host": {
+      "name": "uipexe7153.api.corp"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "uipexe7153.api.corp"
+      ],
+      "ip": [
+        "10.127.20.244"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "ptatems"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AppControl"
+      },
+      "misc": {
+        "action": [
+          "block"
+        ],
+        "checksum": "odi",
+        "event_type": "ZoneAdd",
+        "node": "abori"
+      },
+      "network": {
+        "alias_host": [
+          "uipexe7153.api.corp"
+        ]
+      },
+      "time": {
+        "event_time": "2018-07-03T10:49:23.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.127.20.244"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-07-04T11:38:16.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Registration",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "uis7612.www5.domain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "uis7612.www5.domain"
+      ]
+    },
+    "rsa": {
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "emeumfug"
+      },
+      "misc": {
+        "event_type": "Registration"
+      },
+      "network": {
+        "alias_host": [
+          "uis7612.www5.domain"
+        ]
+      },
+      "time": {
+        "event_time": "2016-07-04T11:38:16.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-07-17T05:51:58.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LoginSuccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "seddoeiu"
+    },
+    "host": {
+      "name": "undeom845.www5.example"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "nse"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.3421"
+    },
+    "related": {
+      "hosts": [
+        "undeom845.www5.example"
+      ],
+      "user": [
+        "tassita"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "quira"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1401060000,
+        "event_cat_name": "User.Activity.Successful Logins"
+      },
+      "misc": {
+        "event_type": "LoginSuccess",
+        "node": "liq",
+        "version": "1.3421"
+      },
+      "network": {
+        "alias_host": [
+          "undeom845.www5.example"
+        ]
+      },
+      "time": {
+        "event_time": "2018-07-17T05:51:58.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "tassita"
+    }
+  },
+  {
+    "@timestamp": "2018-08-15T07:57:06.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "ura675.mail.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "ura675.mail.localdomain"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "sumquiad"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "DeviceRemove",
+        "node": "seddo",
+        "serial_number": "dol"
+      },
+      "network": {
+        "alias_host": [
+          "ura675.mail.localdomain"
+        ]
+      },
+      "time": {
+        "event_time": "2018-08-15T07:57:06.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-07-24T08:58:48.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "velites4233.internal.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "velites4233.internal.home"
+      ]
+    },
+    "rsa": {
+      "crypto": {
+        "sig_type": "asp"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": "odocons"
+      },
+      "misc": {
+        "checksum": "amn",
+        "event_type": "Alert"
+      },
+      "network": {
+        "alias_host": [
+          "velites4233.internal.home"
+        ]
+      },
+      "time": {
+        "event_time": "2019-07-24T08:58:48.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-08-22T11:52:50.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceEdit",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "veniamqu7284.mail.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "veniamqu7284.mail.invalid"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "The Device: tetur was auto assigned to the Zone: IP Address: Fake Devices"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "DeviceEdit",
+        "mail_id": "xce",
+        "node": "tetur"
+      },
+      "network": {
+        "alias_host": [
+          "veniamqu7284.mail.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2017-08-22T11:52:50.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-02-12T01:12:33.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LoginSuccess",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "volup208.invalid"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "volup208.invalid"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "luptat",
+        "lastname": "isiutal"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1401060000,
+        "event_cat_name": "User.Activity.Successful Logins",
+        "event_vcat": " AuditLog"
+      },
+      "misc": {
+        "event_type": "LoginSuccess",
+        "mail_id": "moenimi",
+        "node": "vol"
+      },
+      "network": {
+        "alias_host": [
+          "volup208.invalid"
+        ]
+      },
+      "time": {
+        "event_time": "2016-02-12T01:12:33.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-10-12T12:56:16.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-93-1C-9F"
+      ],
+      "name": "xeac7155.www.localdomain"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "xeac7155.www.localdomain"
+      ],
+      "ip": [
+        "10.143.239.210"
+      ],
+      "user": [
+        "oinBCSe"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "sedd"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": "pida"
+      },
+      "misc": {
+        "OS": "mnisist",
+        "event_type": "Alert",
+        "node": "idolor"
+      },
+      "network": {
+        "alias_host": [
+          "xeac7155.www.localdomain"
+        ],
+        "eth_host": "01:00:5e:93:1c:9f"
+      },
+      "time": {
+        "event_time": "2016-10-12T12:56:16.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.143.239.210"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "oinBCSe"
+    }
+  },
+  {
+    "@timestamp": "2019-03-03T10:33:06.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "name": "yCiceroi5998.mail.home"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "hosts": [
+        "yCiceroi5998.mail.home"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "umdolore"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals",
+        "event_vcat": " DeviceControl"
+      },
+      "misc": {
+        "event_type": "DeviceRemove",
+        "node": "roinBCSe",
+        "serial_number": "uidolo"
+      },
+      "network": {
+        "alias_host": [
+          "yCiceroi5998.mail.home"
+        ]
+      },
+      "time": {
+        "event_time": "2019-03-03T10:33:06.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-02-17T03:30:32.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_found",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "name": "ender"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "network": {
+      "application": "dico"
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance",
+      "version": "1.5848"
+    },
+    "related": {
+      "user": [
+        "olore"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "Utenima"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "quas"
+      },
+      "misc": {
+        "event_type": "threat_found",
+        "node": "orp",
+        "version": "1.5848"
+      },
+      "time": {
+        "event_time": "2026-02-17T03:30:32.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "olore"
+    }
+  },
+  {
+    "@timestamp": "2026-01-20T02:14:16.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_quarantined",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "host": {
+      "mac": [
+        "01-00-5E-3F-C4-6C"
+      ]
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "ip": [
+        "10.237.205.140"
+      ],
+      "user": [
+        "uames"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "veniam"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "boN"
+      },
+      "misc": {
+        "OS": "iduntu",
+        "event_type": "threat_quarantined",
+        "node": "ectio"
+      },
+      "network": {
+        "eth_host": "01:00:5e:3f:c4:6c"
+      },
+      "time": {
+        "event_time": "2026-01-20T02:14:16.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.237.205.140"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ],
+    "user": {
+      "name": "uames"
+    }
+  },
+  {
+    "@timestamp": "2026-01-05T06:22:49.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Alert",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "db": {
+        "index": "colabori"
+      },
+      "identity": {
+        "firstname": "tassita",
+        "lastname": "iamqui"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1609000000,
+        "event_cat_name": "System.Alerts",
+        "event_vcat": "atura"
+      },
+      "misc": {
+        "device_name": "oreeu",
+        "event_type": "Alert",
+        "mail_id": "nvo"
+      },
+      "time": {
+        "event_time": "2026-01-05T06:22:49.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-12-21T11:20:14.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SyslogSettingsSave",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "db": {
+        "index": "ptate"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "ali"
+      },
+      "misc": {
+        "device_name": "itasp",
+        "event_type": "SyslogSettingsSave",
+        "node": "quunt",
+        "policy_name": "conse",
+        "serial_number": "volup"
+      },
+      "time": {
+        "event_time": "2025-12-21T11:20:14.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-11-24T10:03:59.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DeviceRemove",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "db": {
+        "index": "ari"
+      },
+      "identity": {
+        "firstname": "rinrepre",
+        "lastname": "etconse"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1804020000,
+        "event_cat_name": "Network.Devices.Removals",
+        "event_vcat": "stquidol"
+      },
+      "misc": {
+        "device_name": "leumiu",
+        "event_type": "DeviceRemove",
+        "mail_id": "tincu",
+        "policy_name": "taevit"
+      },
+      "time": {
+        "event_time": "2025-11-24T10:03:59.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-11-23T09:15:06.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SyslogSettingsSave",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "ugiat"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "pariatur"
+      },
+      "misc": {
+        "event_type": "SyslogSettingsSave",
+        "node": "imavenia"
+      },
+      "network": {
+        "zone": "expli"
+      },
+      "time": {
+        "event_time": "2025-11-23T09:15:06.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-11-09T02:12:32.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SyslogSettingsSave",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "db": {
+        "index": "nostrud"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "iduntu"
+      },
+      "misc": {
+        "event_type": "SyslogSettingsSave",
+        "node": "inibusB"
+      },
+      "time": {
+        "event_time": "2025-11-09T02:12:32.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-08-08T04:50:15.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SyslogSettingsSave",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "ip": [
+        "10.13.66.97"
+      ]
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "dicta",
+        "lastname": "taedicta"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "luptat"
+      },
+      "misc": {
+        "event_type": "SyslogSettingsSave",
+        "mail_id": "ritt"
+      },
+      "time": {
+        "event_time": "2025-08-08T04:50:15.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.13.66.97"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-08-01T12:54:32.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_changed",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "tatema"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "nisiut"
+      },
+      "misc": {
+        "event_type": "threat_changed",
+        "node": "quira"
+      },
+      "network": {
+        "zone": "rror"
+      },
+      "time": {
+        "event_time": "2025-08-01T12:54:32.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-04-22T11:36:32.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "threat_found",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "db": {
+        "index": "lmolesti"
+      },
+      "identity": {
+        "firstname": "uptate",
+        "lastname": "lloinven"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": "idolo"
+      },
+      "misc": {
+        "device_name": "edolo",
+        "event_type": "threat_found",
+        "mail_id": "econs"
+      },
+      "time": {
+        "event_time": "2025-04-22T11:36:32.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-03-18T06:24:33.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Device Policy Assigned",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "rsa": {
+      "identity": {
+        "firstname": "tur"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502000000,
+        "event_cat_name": "Policies.Rules",
+        "event_vcat": "officiad"
+      },
+      "misc": {
+        "event_type": "Device Policy Assigned",
+        "node": "quinesc"
+      },
+      "network": {
+        "zone": "madmi"
+      },
+      "time": {
+        "event_time": "2025-03-18T06:24:33.000Z"
+      }
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-05-07T06:39:00.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "allow",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "isi"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "ip": [
+        "10.153.34.43"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "saute"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1502030000,
+        "event_cat_name": "Policies.Rules.Added",
+        "event_vcat": " AppControl"
+      },
+      "misc": {
+        "action": [
+          "allow"
+        ],
+        "checksum": "culpaq",
+        "event_type": "PolicyAdd",
+        "node": "fugits"
+      },
+      "time": {
+        "event_time": "2018-05-07T06:39:00.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.153.34.43"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2016-09-13T22:51:00.000Z",
+    "agent": {
+      "ephemeral_id": "1677b951-b0dc-4e02-b89c-fa08ee7e18a6",
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "name": "elastic-agent-49780",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cylance.protect",
+      "namespace": "27562",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "36ea627e-921a-4096-b411-740ae37b5928",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "cancel",
+      "agent_id_status": "verified",
+      "code": "CylancePROTECT",
+      "dataset": "cylance.protect",
+      "ingested": "2026-03-10T03:23:05Z",
+      "timezone": "+00:00"
+    },
+    "file": {
+      "directory": "Lor"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.25.0.3:38208"
+      }
+    },
+    "observer": {
+      "product": "Protect",
+      "type": "Anti-Virus",
+      "vendor": "Cylance"
+    },
+    "related": {
+      "ip": [
+        "10.199.98.186"
+      ]
+    },
+    "rsa": {
+      "db": {
+        "index": "erc"
+      },
+      "internal": {
+        "messageid": "CylancePROTECT"
+      },
+      "investigations": {
+        "event_cat": 1901000000,
+        "event_cat_name": "Other.Default",
+        "event_vcat": " AppControl"
+      },
+      "misc": {
+        "action": [
+          "cancel"
+        ],
+        "checksum": "itecto",
+        "event_type": "threat_found",
+        "node": "sequatur"
+      },
+      "time": {
+        "event_time": "2016-09-13T22:51:00.000Z"
+      }
+    },
+    "source": {
+      "ip": "10.199.98.186"
+    },
+    "tags": [
+      "cylance-protect",
+      "forwarded"
+    ]
+  }
+]

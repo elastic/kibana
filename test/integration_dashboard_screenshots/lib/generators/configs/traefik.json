@@ -1,0 +1,21 @@
+{
+  "package": "traefik",
+  "dataStreams": [
+    {
+      "dataset": "traefik.access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "http.response.body.bytes",
+        "http.response.status_code",
+        "source.geo.location",
+        "url.original",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

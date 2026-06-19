@@ -1,0 +1,17 @@
+{
+  "package": "okta",
+  "dataStreams": [
+    {
+      "dataset": "okta.system",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "event.outcome",
+        "okta.actor.type",
+        "okta.transaction.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

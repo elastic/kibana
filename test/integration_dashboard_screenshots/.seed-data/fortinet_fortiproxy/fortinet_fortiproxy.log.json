@@ -1,0 +1,3245 @@
+[
+  {
+    "@timestamp": "2024-06-07T15:33:38.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 250,
+      "ip": "10.10.0.2",
+      "port": 57783,
+      "user": {
+        "group": {
+          "name": "TEST-GROUP"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 40,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.183",
+      "nat": {
+        "ip": "172.16.0.173",
+        "port": 5360
+      },
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0010000099",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 50000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-06-07 time=09:33:38 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1717770818783036000 tz=\"-0600\" logid=\"0010000099\" type=\"traffic\" subtype=\"http-transaction\" level=\"notice\" vd=\"root\" srcip=10.10.0.2 dstip=67.43.156.183 tranip=172.16.0.173 clientip=10.10.0.2 scheme=\"https\" srcport=57783 dstport=443 tranport=5360 hostname=\"google.com\" url=\"https://google.com/\" prefetch=0 policyid=1 sessionid=370197373 transid=139874926 reqlength=250 resplength=0 rcvdbyte=40 sentbyte=250 resptype=\"normal\" user=\"TEST-USER\" group=\"TEST-GROUP\" httpmethod=\"CONNECT\" agent=\"Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Mobile Safari/537.36\" statuscode=\"200\" rawdata=\"Time=50ms|Header-Host=google.com:443\" reqtime=1717770818 resptime=1717770818 respfinishtime=1717770818 duration=50 appcat=\"APP-CAT\"",
+      "start": "2024-06-07T14:33:38.783Z",
+      "timezone": "-0600"
+    },
+    "fortinet": {
+      "proxy": {
+        "prefetch": 0,
+        "rawdata": "Time=50ms|Header-Host=google.com:443",
+        "reqtime": 1717770818,
+        "respfinishtime": 1717770818,
+        "resptime": 1717770818,
+        "resptype": "normal",
+        "sessionid": "370197373",
+        "subtype": "http-transaction",
+        "transid": "139874926",
+        "type": "traffic",
+        "url": "https://google.com/",
+        "user": "TEST-USER",
+        "vd": "root"
+      }
+    },
+    "http": {
+      "request": {
+        "bytes": 250,
+        "method": "CONNECT"
+      },
+      "response": {
+        "bytes": 0,
+        "status_code": 200
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 290
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "APP-CAT",
+      "id": "1"
+    },
+    "server": {
+      "bytes": 40,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.183",
+      "nat": {
+        "ip": "172.16.0.173",
+        "port": 5360
+      },
+      "port": 443
+    },
+    "source": {
+      "bytes": 250,
+      "ip": "10.10.0.2",
+      "port": 57783,
+      "user": {
+        "group": {
+          "name": "TEST-GROUP"
+        }
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "google.com",
+      "original": "https://google.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Generic Smartphone"
+      },
+      "name": "Chrome Mobile",
+      "original": "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Mobile Safari/537.36",
+      "os": {
+        "full": "Android 10",
+        "name": "Android",
+        "version": "10"
+      },
+      "version": "99.0.4844.88"
+    }
+  },
+  {
+    "@timestamp": "2024-06-07T15:16:30.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 3200,
+      "ip": "10.10.0.2",
+      "nat": {
+        "ip": "172.16.1.6",
+        "port": 7680
+      },
+      "port": 64924,
+      "user": {
+        "group": {
+          "name": "TEST-GROUP"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 5500,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.173",
+      "nat": {
+        "ip": "172.16.0.67",
+        "port": 5505
+      },
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000010",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 3203000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-06-07 time=09:16:30 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1717769790749853000 tz=\"-0600\" logid=\"0000000010\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.10.0.2 srcport=64924 srcintf=\"internal\" srcintfrole=\"lan\" dstcountry=\"Canada\" srccountry=\"Reserved\" dstip=67.43.156.173 dstport=443 dstintf=\"external\" dstintfrole=\"wan\" sessionid=682182743 service=\"HTTPS\" proxyapptype=\"web-proxy\" proto=6 action=\"accept\" policyid=1 policytype=\"proxy-policy\" poluuid=\"19c3b994-9324-4bae-819d-01d068f09b5e\" policyname=\"TEST-POLICY\" trandisp=\"snat+dnat\" tranip=172.16.0.67 tranport=5505 transip=172.16.1.6 transport=7680 clientip=10.10.0.2 duration=3203 user=\"TEST-USER\" group=\"TEST-GROUP\" wanin=5500 rcvdbyte=5500 wanout=3200 lanin=3200 sentbyte=3200 lanout=5500 appid=34365 app=\"TEST-APP\" appcat=\"APP-CAT\" apprisk=\"medium\"",
+      "start": "2024-06-07T14:16:30.749Z",
+      "timezone": "-0600"
+    },
+    "fortinet": {
+      "proxy": {
+        "app": "TEST-APP",
+        "appid": "34365",
+        "apprisk": "medium",
+        "dstintfrole": "wan",
+        "lanin": 3200,
+        "lanout": 5500,
+        "proxyapptype": "web-proxy",
+        "sessionid": "682182743",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "snat+dnat",
+        "type": "traffic",
+        "user": "TEST-USER",
+        "vd": "root",
+        "wanin": 5500,
+        "wanout": 3200
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 8700,
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "external"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "internal"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "APP-CAT",
+      "id": "1",
+      "name": "TEST-POLICY",
+      "ruleset": "proxy-policy",
+      "uuid": "19c3b994-9324-4bae-819d-01d068f09b5e"
+    },
+    "server": {
+      "bytes": 5500,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.173",
+      "nat": {
+        "ip": "172.16.0.67",
+        "port": 5505
+      },
+      "port": 443
+    },
+    "source": {
+      "bytes": 3200,
+      "ip": "10.10.0.2",
+      "nat": {
+        "ip": "172.16.1.6",
+        "port": 7680
+      },
+      "port": 64924,
+      "user": {
+        "group": {
+          "name": "TEST-GROUP"
+        }
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-09T13:25:02.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 0,
+      "ip": "10.0.0.3",
+      "packets": 0,
+      "port": 57748
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.126",
+      "packets": 0,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "deny",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000013",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 0,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-09 time=06:25:02 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715261101829329792 tz=\"-0700\" logid=\"0000000013\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 srcport=57748 srcintf=\"port2\" srcintfrole=\"lan\" dstip=67.43.156.126 dstport=443 dstintf=\"port1\" dstintfrole=\"undefined\" srccountry=\"Reserved\" dstcountry=\"United States\" sessionid=1781818022 proto=6 action=\"deny\" policyid=2 policytype=\"policy\" poluuid=\"7f573f0c-0e07-51ef-9204-df7d834bf3cd\" policyname=\"url-filter-test\" service=\"HTTPS\" trandisp=\"noop\" url=\"https://steampowered.com/\" agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\" duration=0 sentbyte=0 rcvdbyte=0 sentpkt=0 rcvdpkt=0 appcat=\"unscanned\" crscore=30 craction=131072 crlevel=\"high\" msg=\"Traffic denied because of explicit proxy policy\"",
+      "start": "2024-05-09T13:25:01.829Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "craction": 131072,
+        "crlevel": "high",
+        "crscore": 30,
+        "dstintfrole": "undefined",
+        "sessionid": "1781818022",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "noop",
+        "type": "traffic",
+        "url": "https://steampowered.com/",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Traffic denied because of explicit proxy policy",
+    "network": {
+      "bytes": 0,
+      "iana_number": "6",
+      "packets": 0,
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "2",
+      "name": "url-filter-test",
+      "ruleset": "policy",
+      "uuid": "7f573f0c-0e07-51ef-9204-df7d834bf3cd"
+    },
+    "server": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.126",
+      "packets": 0,
+      "port": 443
+    },
+    "source": {
+      "bytes": 0,
+      "ip": "10.0.0.3",
+      "packets": 0,
+      "port": 57748
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "steampowered.com",
+      "original": "https://steampowered.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "115.0"
+    }
+  },
+  {
+    "@timestamp": "2024-05-09T13:20:04.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 755,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 7242
+      },
+      "port": 41460
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 3665,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.171",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000010",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 12536000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-09 time=06:20:04 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715260803895122957 tz=\"-0700\" logid=\"0000000010\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 srcport=41460 srcintf=\"port2\" srcintfrole=\"lan\" dstcountry=\"United States\" srccountry=\"Reserved\" dstip=67.43.156.171 dstport=443 dstintf=\"port1\" dstintfrole=\"undefined\" sessionid=1781818021 service=\"HTTPS\" proxyapptype=\"web-proxy\" proto=6 action=\"accept\" policyid=1 policytype=\"proxy-policy\" poluuid=\"27b09930-033d-51ef-0c72-6c1221a8d893\" policyname=\"test-proxy\" trandisp=\"snat\" transip=10.0.128.2 transport=7242 clientip=10.0.0.3 duration=12536 wanin=3665 rcvdbyte=3665 wanout=667 lanin=755 sentbyte=755 lanout=3737 appcat=\"unscanned\" utmaction=\"allow\" countssl=1",
+      "start": "2024-05-09T13:20:03.895Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "countssl": 1,
+        "dstintfrole": "undefined",
+        "lanin": 755,
+        "lanout": 3737,
+        "proxyapptype": "web-proxy",
+        "sessionid": "1781818021",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "snat",
+        "type": "traffic",
+        "utmaction": "allow",
+        "vd": "root",
+        "wanin": 3665,
+        "wanout": 667
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 4420,
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "1",
+      "name": "test-proxy",
+      "ruleset": "proxy-policy",
+      "uuid": "27b09930-033d-51ef-0c72-6c1221a8d893"
+    },
+    "server": {
+      "bytes": 3665,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.171",
+      "port": 443
+    },
+    "source": {
+      "bytes": 755,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 7242
+      },
+      "port": 41460
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-09T13:19:51.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 80,
+      "ip": "10.0.0.3",
+      "port": 41458
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.50",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0010000099",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 56000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-09 time=06:19:51 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715260791218098006 tz=\"-0700\" logid=\"0010000099\" type=\"traffic\" subtype=\"http-transaction\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 dstip=67.43.156.50 clientip=10.0.0.3 scheme=\"https\" srcport=41458 dstport=443 hostname=\"adobe.com\" url=\"https://adobe.com/\" prefetch=0 policyid=1 sessionid=1781818020 transid=16777245 reqlength=80 resplength=0 rcvdbyte=0 sentbyte=80 resptype=\"generated\" httpmethod=\"CONNECT\" agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\" statuscode=\"200\" rawdata=\"Time=56ms|Header-Host=adobe.com:443\" reqtime=1715260791 resptime=0 respfinishtime=1715260791 duration=56 appcat=\"unscanned\"",
+      "start": "2024-05-09T13:19:51.218Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "prefetch": 0,
+        "rawdata": "Time=56ms|Header-Host=adobe.com:443",
+        "reqtime": 1715260791,
+        "respfinishtime": 1715260791,
+        "resptime": 0,
+        "resptype": "generated",
+        "sessionid": "1781818020",
+        "subtype": "http-transaction",
+        "transid": "16777245",
+        "type": "traffic",
+        "url": "https://adobe.com/",
+        "vd": "root"
+      }
+    },
+    "http": {
+      "request": {
+        "bytes": 80,
+        "method": "CONNECT"
+      },
+      "response": {
+        "bytes": 0,
+        "status_code": 200
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 80
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "1"
+    },
+    "server": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.50",
+      "port": 443
+    },
+    "source": {
+      "bytes": 80,
+      "ip": "10.0.0.3",
+      "port": 41458
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "adobe.com",
+      "original": "https://adobe.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "115.0"
+    }
+  },
+  {
+    "@timestamp": "2024-05-09T13:19:51.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 88,
+      "ip": "10.0.0.3",
+      "port": 41460
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.171",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0010000099",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 55000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-09 time=06:19:51 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715260791413817018 tz=\"-0700\" logid=\"0010000099\" type=\"traffic\" subtype=\"http-transaction\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 dstip=67.43.156.171 clientip=10.0.0.3 scheme=\"https\" srcport=41460 dstport=443 hostname=\"www.adobe.com\" url=\"https://www.adobe.com/\" prefetch=0 policyid=1 sessionid=1781818021 transid=16777246 reqlength=88 resplength=0 rcvdbyte=0 sentbyte=88 resptype=\"generated\" httpmethod=\"CONNECT\" agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\" statuscode=\"200\" rawdata=\"Time=55ms|Header-Host=www.adobe.com:443\" reqtime=1715260791 resptime=0 respfinishtime=1715260791 duration=55 appcat=\"unscanned\"",
+      "start": "2024-05-09T13:19:51.413Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "prefetch": 0,
+        "rawdata": "Time=55ms|Header-Host=www.adobe.com:443",
+        "reqtime": 1715260791,
+        "respfinishtime": 1715260791,
+        "resptime": 0,
+        "resptype": "generated",
+        "sessionid": "1781818021",
+        "subtype": "http-transaction",
+        "transid": "16777246",
+        "type": "traffic",
+        "url": "https://www.adobe.com/",
+        "vd": "root"
+      }
+    },
+    "http": {
+      "request": {
+        "bytes": 88,
+        "method": "CONNECT"
+      },
+      "response": {
+        "bytes": 0,
+        "status_code": 200
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 88
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "1"
+    },
+    "server": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.171",
+      "port": 443
+    },
+    "source": {
+      "bytes": 88,
+      "ip": "10.0.0.3",
+      "port": 41460
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "www.adobe.com",
+      "original": "https://www.adobe.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "115.0"
+    }
+  },
+  {
+    "@timestamp": "2024-05-09T13:19:51.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.0.0.3",
+      "port": 41460
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.0.0.2",
+      "port": 8080
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "exempt",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1701062004",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-09 time=06:19:51 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715260791388347818 tz=\"-0700\" logid=\"1701062004\" type=\"utm\" subtype=\"ssl\" eventtype=\"ssl-exempt\" level=\"notice\" vd=\"root\" action=\"exempt\" policyid=1 poluuid=\"27b09930-033d-51ef-0c72-6c1221a8d893\" policytype=\"policy\" sessionid=1781818021 service=\"HTTPS\" profile=\"Clone of deep-inspection\" srcip=10.0.0.3 srcport=41460 srccountry=\"Reserved\" dstip=10.0.0.2 dstport=8080 dstcountry=\"Reserved\" srcintf=\"port2\" srcintfrole=\"lan\" dstintf=\"port1\" dstintfrole=\"undefined\" proto=6 eventsubtype=\"address\" hostname=\"www.adobe.com\" msg=\"SSL connection is exempted based on address.\"",
+      "start": "2024-05-09T13:19:51.388Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "dstintfrole": "undefined",
+        "eventsubtype": "address",
+        "eventtype": "ssl-exempt",
+        "profile": "Clone of deep-inspection",
+        "sessionid": "1781818021",
+        "srcintfrole": "lan",
+        "subtype": "ssl",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "SSL connection is exempted based on address.",
+    "network": {
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "id": "1",
+      "ruleset": "policy",
+      "uuid": "27b09930-033d-51ef-0c72-6c1221a8d893"
+    },
+    "server": {
+      "ip": "10.0.0.2",
+      "port": 8080
+    },
+    "source": {
+      "ip": "10.0.0.3",
+      "port": 41460
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "www.adobe.com"
+    }
+  },
+  {
+    "@timestamp": "2024-05-07T16:19:34.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 0,
+      "ip": "10.0.0.3",
+      "packets": 0,
+      "port": 36834
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.3",
+      "packets": 0,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "start",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000015",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 0,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-07 time=09:19:34 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715098773638113952 tz=\"-0700\" logid=\"0000000015\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 srcport=36834 srcintf=\"port2\" srcintfrole=\"lan\" dstip=67.43.156.3 dstport=443 dstintf=\"port1\" dstintfrole=\"undefined\" srccountry=\"Reserved\" dstcountry=\"United States\" sessionid=1781818015 proto=6 action=\"start\" policyid=1 policytype=\"policy\" poluuid=\"27b09930-033d-51ef-0c72-6c1221a8d893\" policyname=\"test-proxy\" service=\"HTTPS\" trandisp=\"noop\" url=\"https://github.com/\" agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\" duration=0 sentbyte=0 rcvdbyte=0 sentpkt=0 rcvdpkt=0 appcat=\"unscanned\"",
+      "start": "2024-05-07T16:19:33.638Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "dstintfrole": "undefined",
+        "sessionid": "1781818015",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "noop",
+        "type": "traffic",
+        "url": "https://github.com/",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 0,
+      "iana_number": "6",
+      "packets": 0,
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "1",
+      "name": "test-proxy",
+      "ruleset": "policy",
+      "uuid": "27b09930-033d-51ef-0c72-6c1221a8d893"
+    },
+    "server": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.3",
+      "packets": 0,
+      "port": 443
+    },
+    "source": {
+      "bytes": 0,
+      "ip": "10.0.0.3",
+      "packets": 0,
+      "port": 36834
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "github.com",
+      "original": "https://github.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "115.0"
+    }
+  },
+  {
+    "@timestamp": "2024-05-07T16:11:20.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100026004",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<190>date=2024-05-07 time=09:11:20 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715098280109454696 tz=\"-0700\" logid=\"0100026004\" type=\"event\" subtype=\"system\" level=\"information\" vd=\"root\" logdesc=\"DHCP client lease granted\" msg=\"interface port1 gets a DHCP lease, ip:10.0.128.2, mask:255.255.255.255, gateway:10.0.128.1, lease expires:Tue May  7 10:11:16 2024\"",
+      "start": "2024-05-07T16:11:20.109Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "subtype": "system",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "interface port1 gets a DHCP lease, ip:10.0.128.2, mask:255.255.255.255, gateway:10.0.128.1, lease expires:Tue May  7 10:11:16 2024",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "DHCP client lease granted"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T16:10:46.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Delete",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100044547",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<190>date=2024-05-07 time=09:10:46 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715098246709559342 tz=\"-0700\" logid=\"0100044547\" type=\"event\" subtype=\"system\" level=\"information\" vd=\"root\" logdesc=\"Object attribute configured\" user=\"admin\" ui=\"GUI(216.160.83.59)\" action=\"Delete\" cfgtid=56623112 uuid=\"cac8b018-0c88-51ef-6b30-8897fae43bd8\" cfgpath=\"firewall.policy\" cfgobj=\"3\" msg=\"Delete firewall.policy 3\"",
+      "start": "2024-05-07T16:10:46.709Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "cfgobj": "3",
+        "cfgpath": "firewall.policy",
+        "cfgtid": "56623112",
+        "subtype": "system",
+        "type": "event",
+        "ui": "GUI(216.160.83.59)",
+        "user": "admin",
+        "uuid": "cac8b018-0c88-51ef-6b30-8897fae43bd8",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Delete firewall.policy 3",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Object attribute configured"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T16:10:36.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 843,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 31298
+      },
+      "port": 60466
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 5386,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.130",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000010",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 330000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-07 time=09:10:36 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715098236741352145 tz=\"-0700\" logid=\"0000000010\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 srcport=60466 srcintf=\"port2\" srcintfrole=\"lan\" dstcountry=\"United States\" srccountry=\"Reserved\" dstip=67.43.156.130 dstport=443 dstintf=\"port1\" dstintfrole=\"undefined\" sessionid=1781818009 service=\"HTTPS\" proxyapptype=\"web-proxy\" proto=6 action=\"accept\" policyid=1 policytype=\"proxy-policy\" poluuid=\"27b09930-033d-51ef-0c72-6c1221a8d893\" policyname=\"test-proxy\" trandisp=\"snat\" transip=10.0.128.2 transport=31298 clientip=10.0.0.3 duration=330 wanin=5386 rcvdbyte=5386 wanout=675 lanin=843 sentbyte=843 lanout=5839 appcat=\"unscanned\" utmaction=\"allow\"",
+      "start": "2024-05-07T16:10:36.741Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "dstintfrole": "undefined",
+        "lanin": 843,
+        "lanout": 5839,
+        "proxyapptype": "web-proxy",
+        "sessionid": "1781818009",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "snat",
+        "type": "traffic",
+        "utmaction": "allow",
+        "vd": "root",
+        "wanin": 5386,
+        "wanout": 675
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 6229,
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "1",
+      "name": "test-proxy",
+      "ruleset": "proxy-policy",
+      "uuid": "27b09930-033d-51ef-0c72-6c1221a8d893"
+    },
+    "server": {
+      "bytes": 5386,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.130",
+      "port": 443
+    },
+    "source": {
+      "bytes": 843,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 31298
+      },
+      "port": 60466
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T16:08:38.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 843,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 13846
+      },
+      "port": 34750
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 4566,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.130",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000010",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 122000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-07 time=09:08:38 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715098118357817763 tz=\"-0700\" logid=\"0000000010\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 srcport=34750 srcintf=\"port2\" srcintfrole=\"lan\" dstcountry=\"United States\" srccountry=\"Reserved\" dstip=67.43.156.130 dstport=443 dstintf=\"port1\" dstintfrole=\"undefined\" sessionid=1781818008 service=\"HTTPS\" proxyapptype=\"web-proxy\" proto=6 action=\"accept\" policyid=1 policytype=\"proxy-policy\" poluuid=\"27b09930-033d-51ef-0c72-6c1221a8d893\" policyname=\"test-proxy\" trandisp=\"snat\" transip=10.0.128.2 transport=13846 clientip=10.0.0.3 duration=122 wanin=4566 rcvdbyte=4566 wanout=452 lanin=843 sentbyte=843 lanout=34487 appcat=\"unscanned\" utmaction=\"block\"",
+      "start": "2024-05-07T16:08:38.357Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "dstintfrole": "undefined",
+        "lanin": 843,
+        "lanout": 34487,
+        "proxyapptype": "web-proxy",
+        "sessionid": "1781818008",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "snat",
+        "type": "traffic",
+        "utmaction": "block",
+        "vd": "root",
+        "wanin": 4566,
+        "wanout": 452
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 5409,
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "1",
+      "name": "test-proxy",
+      "ruleset": "proxy-policy",
+      "uuid": "27b09930-033d-51ef-0c72-6c1221a8d893"
+    },
+    "server": {
+      "bytes": 4566,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.130",
+      "port": 443
+    },
+    "source": {
+      "bytes": 843,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 13846
+      },
+      "port": 34750
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T16:08:38.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100022010",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<187>date=2024-05-07 time=09:08:38 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715098118300824285 tz=\"-0700\" logid=\"0100022010\" type=\"event\" subtype=\"system\" level=\"error\" vd=\"root\" logdesc=\"URL filter packet send failure\" reason=\"No such file or directory\" msg=\"failed to send urlfilter packet\"",
+      "reason": "No such file or directory",
+      "start": "2024-05-07T16:08:38.300Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "subtype": "system",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "error",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 187,
+        "severity": {
+          "code": 3
+        }
+      }
+    },
+    "message": "failed to send urlfilter packet",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "URL filter packet send failure"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T16:08:31.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Edit",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100044547",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<190>date=2024-05-07 time=09:08:31 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715098111066601201 tz=\"-0700\" logid=\"0100044547\" type=\"event\" subtype=\"system\" level=\"information\" vd=\"root\" logdesc=\"Object attribute configured\" user=\"admin\" ui=\"GUI(216.160.83.59)\" action=\"Edit\" cfgtid=56623110 uuid=\"27b09930-033d-51ef-0c72-6c1221a8d893\" cfgpath=\"firewall.policy\" cfgobj=\"1\" cfgattr=\"ssl-ssh-profile[certificate-inspection->deep-inspection]\" msg=\"Edit firewall.policy 1\"",
+      "start": "2024-05-07T16:08:31.066Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "cfgattr": "ssl-ssh-profile[certificate-inspection->deep-inspection]",
+        "cfgobj": "1",
+        "cfgpath": "firewall.policy",
+        "cfgtid": "56623110",
+        "subtype": "system",
+        "type": "event",
+        "ui": "GUI(216.160.83.59)",
+        "user": "admin",
+        "uuid": "27b09930-033d-51ef-0c72-6c1221a8d893",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Edit firewall.policy 1",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Object attribute configured"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T16:01:32.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100041000",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-07 time=09:01:32 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715097691561506009 tz=\"-0700\" logid=\"0100041000\" type=\"event\" subtype=\"system\" level=\"notice\" vd=\"root\" logdesc=\"FortiProxy update succeeded\" status=\"update\" msg=\"Fortiproxyupdate now  fsci=yes from 175.16.199:443\"",
+      "start": "2024-05-07T16:01:31.561Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "status": "update",
+        "subtype": "system",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Fortiproxyupdate now  fsci=yes from 175.16.199:443",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "FortiProxy update succeeded"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T16:01:25.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0112053202",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<187>date=2024-05-07 time=09:01:25 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715097684331635956 tz=\"-0700\" logid=\"0112053202\" type=\"event\" subtype=\"connector\" level=\"error\" vd=\"root\" logdesc=\"SDN Connector API failed\" addr=\"FCTEMS_ALL_FORTICLOUD_SERVERS\" msg=\"Attempt to add tag FCTEMS_ALL_FORTICLOUD_SERVERS failed. Code (-2147483646)\"",
+      "start": "2024-05-07T16:01:24.331Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "addr": "FCTEMS_ALL_FORTICLOUD_SERVERS",
+        "subtype": "connector",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "error",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 187,
+        "severity": {
+          "code": 3
+        }
+      }
+    },
+    "message": "Attempt to add tag FCTEMS_ALL_FORTICLOUD_SERVERS failed. Code (-2147483646)",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "SDN Connector API failed"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-07T15:53:21.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 0,
+      "ip": "10.0.0.3",
+      "packets": 0,
+      "port": 40946
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.142",
+      "packets": 0,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "deny",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000013",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 0,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-07 time=08:53:21 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715097201578825283 tz=\"-0700\" logid=\"0000000013\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 srcport=40946 srcintf=\"port2\" srcintfrole=\"lan\" dstip=67.43.156.142 dstport=443 dstintf=\"port1\" dstintfrole=\"undefined\" srccountry=\"Reserved\" dstcountry=\"United States\" sessionid=1781818007 proto=6 action=\"deny\" policyid=2 policytype=\"policy\" poluuid=\"595c071a-0bc3-51ef-1966-4c130f19e4e5\" policyname=\"no-google\" service=\"HTTPS\" trandisp=\"noop\" url=\"https://google.com/\" agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\" duration=0 sentbyte=0 rcvdbyte=0 sentpkt=0 rcvdpkt=0 appcat=\"unscanned\" crscore=30 craction=131072 crlevel=\"high\" msg=\"Traffic denied because of explicit proxy policy\"",
+      "start": "2024-05-07T15:53:21.578Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "craction": 131072,
+        "crlevel": "high",
+        "crscore": 30,
+        "dstintfrole": "undefined",
+        "sessionid": "1781818007",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "noop",
+        "type": "traffic",
+        "url": "https://google.com/",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Traffic denied because of explicit proxy policy",
+    "network": {
+      "bytes": 0,
+      "iana_number": "6",
+      "packets": 0,
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "2",
+      "name": "no-google",
+      "ruleset": "policy",
+      "uuid": "595c071a-0bc3-51ef-1966-4c130f19e4e5"
+    },
+    "server": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.142",
+      "packets": 0,
+      "port": 443
+    },
+    "source": {
+      "bytes": 0,
+      "ip": "10.0.0.3",
+      "packets": 0,
+      "port": 40946
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "google.com",
+      "original": "https://google.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "115.0"
+    }
+  },
+  {
+    "@timestamp": "2024-05-07T15:53:21.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 82,
+      "ip": "10.0.0.3",
+      "port": 40946
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.142",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0010000099",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 120000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-07 time=08:53:21 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715097201578875219 tz=\"-0700\" logid=\"0010000099\" type=\"traffic\" subtype=\"http-transaction\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 dstip=67.43.156.142 clientip=10.0.0.3 scheme=\"https\" srcport=40946 dstport=443 hostname=\"google.com\" url=\"https://google.com/\" prefetch=0 policyid=2 sessionid=1781818007 transid=1 reqlength=82 resplength=0 rcvdbyte=0 sentbyte=82 resptype=\"generated\" httpmethod=\"CONNECT\" agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\" statuscode=\"200\" rawdata=\"Time=120ms|Header-Host=google.com:443\" reqtime=1715097201 resptime=0 respfinishtime=1715097201 duration=120 appcat=\"unscanned\"",
+      "start": "2024-05-07T15:53:21.578Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "prefetch": 0,
+        "rawdata": "Time=120ms|Header-Host=google.com:443",
+        "reqtime": 1715097201,
+        "respfinishtime": 1715097201,
+        "resptime": 0,
+        "resptype": "generated",
+        "sessionid": "1781818007",
+        "subtype": "http-transaction",
+        "transid": "1",
+        "type": "traffic",
+        "url": "https://google.com/",
+        "vd": "root"
+      }
+    },
+    "http": {
+      "request": {
+        "bytes": 82,
+        "method": "CONNECT"
+      },
+      "response": {
+        "bytes": 0,
+        "status_code": 200
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 82
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "2"
+    },
+    "server": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.142",
+      "port": 443
+    },
+    "source": {
+      "bytes": 82,
+      "ip": "10.0.0.3",
+      "port": 40946
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "google.com",
+      "original": "https://google.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "115.0"
+    }
+  },
+  {
+    "@timestamp": "2024-05-07T15:53:21.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 743,
+      "ip": "10.0.0.3",
+      "port": 40946
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.142",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0010000099",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 0,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-07 time=08:53:21 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715097201627718958 tz=\"-0700\" logid=\"0010000099\" type=\"traffic\" subtype=\"http-transaction\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 dstip=67.43.156.142 clientip=10.0.0.3 scheme=\"https\" srcport=40946 dstport=443 hostname=\"google.com\" url=\"https://google.com/\" prefetch=0 policyid=2 sessionid=1781818007 transid=1 reqlength=155 resplength=0 rcvdbyte=0 sentbyte=743 resptype=\"generated\" httpmethod=\"GET\" agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\" statuscode=\"403\" rawdata=\"Time=0ms|Header-Host=google.com\" reqtime=1715097201 resptime=0 respfinishtime=1715097201 duration=0 appcat=\"unscanned\"",
+      "start": "2024-05-07T15:53:21.627Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "prefetch": 0,
+        "rawdata": "Time=0ms|Header-Host=google.com",
+        "reqtime": 1715097201,
+        "respfinishtime": 1715097201,
+        "resptime": 0,
+        "resptype": "generated",
+        "sessionid": "1781818007",
+        "subtype": "http-transaction",
+        "transid": "1",
+        "type": "traffic",
+        "url": "https://google.com/",
+        "vd": "root"
+      }
+    },
+    "http": {
+      "request": {
+        "bytes": 155,
+        "method": "GET"
+      },
+      "response": {
+        "bytes": 0,
+        "status_code": 403
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 743
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "2"
+    },
+    "server": {
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.142",
+      "port": 443
+    },
+    "source": {
+      "bytes": 743,
+      "ip": "10.0.0.3",
+      "port": 40946
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "google.com",
+      "original": "https://google.com/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "115.0"
+    }
+  },
+  {
+    "@timestamp": "2024-05-06T16:11:58.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Move",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100044547",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<190>date=2024-05-06 time=09:11:58 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715011917842918042 tz=\"-0700\" logid=\"0100044547\" type=\"event\" subtype=\"system\" level=\"information\" vd=\"root\" logdesc=\"Object attribute configured\" user=\"admin\" ui=\"GUI(216.160.83.59)\" action=\"Move\" cfgtid=56688758 uuid=\"595c071a-0bc3-51ef-1966-4c130f19e4e5\" cfgpath=\"firewall.policy\" cfgobj=\"2\" msg=\"Move firewall.policy 2 to 1\"",
+      "start": "2024-05-06T16:11:57.842Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "cfgobj": "2",
+        "cfgpath": "firewall.policy",
+        "cfgtid": "56688758",
+        "subtype": "system",
+        "type": "event",
+        "ui": "GUI(216.160.83.59)",
+        "user": "admin",
+        "uuid": "595c071a-0bc3-51ef-1966-4c130f19e4e5",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Move firewall.policy 2 to 1",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Object attribute configured"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-06T16:11:54.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Add",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100044547",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<190>date=2024-05-06 time=09:11:54 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715011913961265256 tz=\"-0700\" logid=\"0100044547\" type=\"event\" subtype=\"system\" level=\"information\" vd=\"root\" logdesc=\"Object attribute configured\" user=\"admin\" ui=\"GUI(216.160.83.59)\" action=\"Add\" cfgtid=56688757 uuid=\"595c071a-0bc3-51ef-1966-4c130f19e4e5\" cfgpath=\"firewall.policy\" cfgobj=\"2\" cfgattr=\"type[explicit-web]name[no-google]dstintf[port1]srcaddr[all]dstaddr[wildcard.google.com]srcaddr6[]dstaddr6[]schedule[always]service[webproxy]explicit-web-proxy[web-proxy]url-category[]logtraffic[disable]logtraffic-start[enable]log-http-transaction[all]extended-log[enable]poolname[]groups[]users[]custom-log-fields[]application[]app-category[]app-group[]ssl-ssh-profile[certificate-inspection]\" msg=\"Add firewall.policy 2\"",
+      "start": "2024-05-06T16:11:53.961Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "cfgattr": "type[explicit-web]name[no-google]dstintf[port1]srcaddr[all]dstaddr[wildcard.google.com]srcaddr6[]dstaddr6[]schedule[always]service[webproxy]explicit-web-proxy[web-proxy]url-category[]logtraffic[disable]logtraffic-start[enable]log-http-transaction[all]extended-log[enable]poolname[]groups[]users[]custom-log-fields[]application[]app-category[]app-group[]ssl-ssh-profile[certificate-inspection]",
+        "cfgobj": "2",
+        "cfgpath": "firewall.policy",
+        "cfgtid": "56688757",
+        "subtype": "system",
+        "type": "event",
+        "ui": "GUI(216.160.83.59)",
+        "user": "admin",
+        "uuid": "595c071a-0bc3-51ef-1966-4c130f19e4e5",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Add firewall.policy 2",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Object attribute configured"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-06T16:09:19.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0110052000",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-06 time=09:09:19 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715011758637051812 tz=\"-0700\" logid=\"0110052000\" type=\"event\" subtype=\"security-rating\" level=\"notice\" vd=\"root\" logdesc=\"Security Rating summary\" auditid=1715011747944 audittime=1715011758 auditscore=\"-20.0\" auditreporttype=\"CoverageReport\" criticalcount=3 highcount=1 mediumcount=0 lowcount=0 passedcount=12",
+      "start": "2024-05-06T16:09:18.637Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "auditid": "1715011747944",
+        "auditreporttype": "CoverageReport",
+        "auditscore": "-20.0",
+        "audittime": 1715011758,
+        "criticalcount": 3,
+        "highcount": 1,
+        "lowcount": 0,
+        "mediumcount": 0,
+        "passedcount": 12,
+        "subtype": "security-rating",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Security Rating summary"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-06T16:09:10.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0110052000",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-06 time=09:09:10 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715011750013344193 tz=\"-0700\" logid=\"0110052000\" type=\"event\" subtype=\"security-rating\" level=\"notice\" vd=\"root\" logdesc=\"Security Rating summary\" auditid=1715011747944 audittime=1715011750 auditscore=\"-160.0\" auditreporttype=\"PostureReport\" criticalcount=3 highcount=7 mediumcount=2 lowcount=0 passedcount=9",
+      "start": "2024-05-06T16:09:10.013Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "auditid": "1715011747944",
+        "auditreporttype": "PostureReport",
+        "auditscore": "-160.0",
+        "audittime": 1715011750,
+        "criticalcount": 3,
+        "highcount": 7,
+        "lowcount": 0,
+        "mediumcount": 2,
+        "passedcount": 9,
+        "subtype": "security-rating",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Security Rating summary"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-06T16:09:09.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0110052000",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-05-06 time=09:09:09 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715011748478368427 tz=\"-0700\" logid=\"0110052000\" type=\"event\" subtype=\"security-rating\" level=\"notice\" vd=\"root\" logdesc=\"Security Rating summary\" auditid=1715011747944 audittime=1715011748 auditscore=\"65.0\" auditreporttype=\"OptimizationReport\" criticalcount=0 highcount=0 mediumcount=0 lowcount=0 passedcount=4",
+      "start": "2024-05-06T16:09:08.478Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "auditid": "1715011747944",
+        "auditreporttype": "OptimizationReport",
+        "auditscore": "65.0",
+        "audittime": 1715011748,
+        "criticalcount": 0,
+        "highcount": 0,
+        "lowcount": 0,
+        "mediumcount": 0,
+        "passedcount": 4,
+        "subtype": "security-rating",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Security Rating summary"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-06T13:20:18.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.42"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.0.128.2"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "login",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0100032002",
+      "dataset": "fortinet_fortiproxy.log",
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<185>date=2024-05-06 time=06:20:18 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1715001618718129170 tz=\"-0700\" logid=\"0100032002\" type=\"event\" subtype=\"system\" level=\"alert\" vd=\"root\" logdesc=\"Admin login failed\" sn=\"0\" user=\"Admin\" ui=\"https(175.16.199.42)\" method=\"https\" srcip=175.16.199.42 dstip=10.0.128.2 action=\"login\" status=\"failed\" reason=\"name_invalid\" msg=\"Administrator Admin login failed from https(175.16.199.42) because of invalid user name\"",
+      "reason": "name_invalid",
+      "start": "2024-05-06T13:20:18.718Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "method": "https",
+        "sn": "0",
+        "status": "failed",
+        "subtype": "system",
+        "type": "event",
+        "ui": "https(175.16.199.42)",
+        "user": "Admin",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "alert",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 185,
+        "severity": {
+          "code": 1
+        }
+      }
+    },
+    "message": "Administrator Admin login failed from https(175.16.199.42) because of invalid user name",
+    "observer": {
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "Admin login failed"
+    },
+    "server": {
+      "ip": "10.0.128.2"
+    },
+    "source": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.42"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2024-04-11T02:56:17.000Z",
+    "agent": {
+      "ephemeral_id": "b565079a-22ad-4243-8d74-8e6f6f903463",
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "name": "elastic-agent-14189",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "bytes": 798,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 53184
+      },
+      "port": 47886
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiproxy.log",
+      "namespace": "94311",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 125800732,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.10",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d1d77e7f-2791-44b4-a013-98c262a41ed7",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000010",
+      "dataset": "fortinet_fortiproxy.log",
+      "duration": 8089000000000,
+      "ingested": "2026-03-10T03:23:07Z",
+      "kind": "event",
+      "original": "<189>date=2024-04-10 time=19:56:17 devname=\"TEST-PXY01\" devid=\"FPXTESTPXY01\" eventtime=1712771778239212440 tz=\"-0700\" logid=\"0000000010\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" srcip=10.0.0.3 srcport=47886 srcintf=\"port2\" srcintfrole=\"lan\" dstcountry=\"United States\" srccountry=\"Reserved\" dstip=67.43.156.10 dstport=443 dstintf=\"port1\" dstintfrole=\"undefined\" sessionid=1781818019 service=\"HTTPS\" proxyapptype=\"web-proxy\" proto=6 action=\"accept\" policyid=1 policytype=\"proxy-policy\" poluuid=\"27b09930-033d-51ef-0c72-6c1221a8d893\" policyname=\"test-proxy\" trandisp=\"snat\" transip=10.0.128.2 transport=53184 clientip=10.0.0.3 duration=8089 wanin=125800732 rcvdbyte=125800732 wanout=632 lanin=798 sentbyte=798 lanout=125824455 appcat=\"unscanned\" utmaction=\"allow\"",
+      "start": "2024-04-10T17:56:18.239Z",
+      "timezone": "-0700"
+    },
+    "fortinet": {
+      "proxy": {
+        "dstintfrole": "undefined",
+        "lanin": 798,
+        "lanout": 125824455,
+        "proxyapptype": "web-proxy",
+        "sessionid": "1781818019",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "snat",
+        "type": "traffic",
+        "utmaction": "allow",
+        "vd": "root",
+        "wanin": 125800732,
+        "wanout": 632
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.26.0.3:44839"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 125801530,
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port2"
+        }
+      },
+      "name": "TEST-PXY01",
+      "product": "FortiProxy",
+      "serial_number": "FPXTESTPXY01",
+      "type": "proxy",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "1",
+      "name": "test-proxy",
+      "ruleset": "proxy-policy",
+      "uuid": "27b09930-033d-51ef-0c72-6c1221a8d893"
+    },
+    "server": {
+      "bytes": 125800732,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.10",
+      "port": 443
+    },
+    "source": {
+      "bytes": 798,
+      "ip": "10.0.0.3",
+      "nat": {
+        "ip": "10.0.128.2",
+        "port": 53184
+      },
+      "port": 47886
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiproxy",
+      "forwarded"
+    ]
+  }
+]

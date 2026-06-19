@@ -1,0 +1,80 @@
+{
+  "package": "salesforce",
+  "dataStreams": [
+    {
+      "dataset": "salesforce.apex",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.outcome",
+        "salesforce.apex.entity_name",
+        "salesforce.apex.entry_point",
+        "salesforce.apex.run_time",
+        "salesforce.apex.trigger_name",
+        "salesforce.apex.trigger_type",
+        "salesforce.instance_url"
+      ],
+      "filterValues": {
+        "event.action": [
+          "apex-execution"
+        ]
+      }
+    },
+    {
+      "dataset": "salesforce.login",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.outcome",
+        "salesforce.instance_url",
+        "salesforce.login.application",
+        "salesforce.login.db_total_time",
+        "salesforce.login.request.status",
+        "salesforce.login.run_time",
+        "source.geo.location",
+        "source.geo.postal_code",
+        "source.ip",
+        "user.email",
+        "user.roles",
+        "user_agent.name"
+      ],
+      "filterValues": {
+        "event.action": [
+          "login-attempt"
+        ],
+        "event.outcome": [
+          "failure"
+        ]
+      }
+    },
+    {
+      "dataset": "salesforce.logout",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "salesforce.instance_url",
+        "salesforce.logout.session.level",
+        "salesforce.logout.session.type",
+        "salesforce.logout.user_initiated_logout",
+        "source.geo.location",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "salesforce.setupaudittrail",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "salesforce.instance_url",
+        "salesforce.setup_audit_trail.delegate_user",
+        "salesforce.setup_audit_trail.display",
+        "salesforce.setup_audit_trail.section"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

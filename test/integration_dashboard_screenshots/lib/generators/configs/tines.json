@@ -1,0 +1,28 @@
+{
+  "package": "tines",
+  "dataStreams": [
+    {
+      "dataset": "tines.audit_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "user_agent.device.name",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tines.time_saved",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "tines.time_saved.value"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

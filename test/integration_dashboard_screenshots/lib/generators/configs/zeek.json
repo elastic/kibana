@@ -1,0 +1,397 @@
+{
+  "package": "zeek",
+  "dataStreams": [
+    {
+      "dataset": "zeek.capture_loss",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "network.direction",
+        "network.protocol",
+        "network.transport",
+        "url.domain",
+        "zeek.dns.query",
+        "zeek.ssl.server.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.connection",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.dce_rpc",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.dhcp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.dnp3",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.dns",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.dpd",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.files",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.ftp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.http",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.intel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.irc",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.kerberos",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.known_certs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.known_hosts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.known_services",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.modbus",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.mysql",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.notice",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.ntlm",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.ntp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.ocsp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.pe",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.radius",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.rdp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.rfb",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.signature",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.sip",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.smb_cmd",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.smb_files",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.smb_mapping",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.smtp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.snmp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.socks",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.software",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.ssh",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.ssl",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.stats",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.syslog",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.traceroute",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.tunnel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.weird",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zeek.x509",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

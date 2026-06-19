@@ -1,0 +1,25 @@
+{
+  "package": "cribl",
+  "dataStreams": [
+    {
+      "dataset": "cribl.logs",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "_dataId",
+        "tags"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cribl.metrics",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "_dataId",
+        "tags"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

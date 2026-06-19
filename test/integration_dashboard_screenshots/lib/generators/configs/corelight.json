@@ -1,0 +1,46 @@
+{
+  "package": "corelight",
+  "dataStreams": [
+    {
+      "dataset": "corelight.conn",
+      "indexPattern": "logs-*",
+      "docTarget": 570,
+      "fields": [
+        "capture_metadata.vpc.vpc_id",
+        "capture_source",
+        "destination.bytes",
+        "destination.geo.country_iso_code",
+        "destination.ip",
+        "destination.ip_bytes",
+        "destination.port",
+        "event.duration",
+        "event.id",
+        "log.id.uid",
+        "network.direction",
+        "network.ip_bytes",
+        "network.transport",
+        "observer.hostname",
+        "orig_inst.org_id",
+        "source.bytes",
+        "source.geo.country_iso_code",
+        "source.ip",
+        "source.ip_bytes"
+      ],
+      "filterValues": {
+        "_index": [
+          "logs-corelight.conn*"
+        ],
+        "capture_source": [
+          "vpcflow"
+        ],
+        "network.transport": [
+          "icmp"
+        ],
+        "network.direction": [
+          "outbound",
+          "inbound"
+        ]
+      }
+    }
+  ]
+}

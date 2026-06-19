@@ -1,0 +1,23 @@
+{
+  "package": "beyondtrust_pra",
+  "dataStreams": [
+    {
+      "dataset": "beyondtrust_pra.access_session",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "beyondtrust_pra.access_session.destination.type",
+        "beyondtrust_pra.access_session.performed_by.type",
+        "beyondtrust_pra.access_session.session.jump_group.type",
+        "destination.domain",
+        "destination.ip",
+        "destination.user.name",
+        "event.action",
+        "source.domain",
+        "source.ip",
+        "source.user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

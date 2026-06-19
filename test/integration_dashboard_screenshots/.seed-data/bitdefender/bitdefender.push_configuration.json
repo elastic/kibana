@@ -1,0 +1,81 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:13:42.480Z",
+    "agent": {
+      "ephemeral_id": "dcb6dde6-d2ef-4b8b-9cb5-fa5912ec5be9",
+      "id": "0a9d0ccd-62a8-4ff3-8b01-0287d3ab62e6",
+      "name": "elastic-agent-45531",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitdefender": {
+      "id": "1",
+      "push": {
+        "configuration": {
+          "serviceSettings": {
+            "requireValidSslCertificate": true,
+            "url": "https://your.elastic.agent/bitdefender/push/notification"
+          },
+          "serviceType": "qradar",
+          "status": 1,
+          "subscribeToEventTypes": {
+            "adcloud": true,
+            "antiexploit": true,
+            "aph": true,
+            "av": true,
+            "avc": true,
+            "dp": true,
+            "endpoint-moved-in": true,
+            "endpoint-moved-out": true,
+            "exchange-malware": true,
+            "exchange-user-credentials": true,
+            "fw": true,
+            "hd": true,
+            "hwid-change": true,
+            "install": true,
+            "modules": true,
+            "network-monitor": true,
+            "network-sandboxing": true,
+            "new-incident": true,
+            "ransomware-mitigation": true,
+            "registration": true,
+            "security-container-update-available": true,
+            "supa-update-status": true,
+            "sva": true,
+            "sva-load": true,
+            "task-status": true,
+            "troubleshooting-activity": true,
+            "uc": true,
+            "uninstall": true
+          }
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "bitdefender.push_configuration",
+      "namespace": "45627",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0a9d0ccd-62a8-4ff3-8b01-0287d3ab62e6",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "bitdefender.push_configuration",
+      "ingested": "2026-03-10T02:13:45Z",
+      "original": "{\"id\":\"1\",\"jsonrpc\":\"2.0\",\"result\":{\"serviceSettings\":{\"requireValidSslCertificate\":true,\"url\":\"https://your.elastic.agent/bitdefender/push/notification\"},\"serviceType\":\"qradar\",\"status\":1,\"subscribeToEventTypes\":{\"adcloud\":true,\"antiexploit\":true,\"aph\":true,\"av\":true,\"avc\":true,\"dp\":true,\"endpoint-moved-in\":true,\"endpoint-moved-out\":true,\"exchange-malware\":true,\"exchange-user-credentials\":true,\"fw\":true,\"hd\":true,\"hwid-change\":true,\"install\":true,\"modules\":true,\"network-monitor\":true,\"network-sandboxing\":true,\"new-incident\":true,\"ransomware-mitigation\":true,\"registration\":true,\"security-container-update-available\":true,\"supa-update-status\":true,\"sva\":true,\"sva-load\":true,\"task-status\":true,\"troubleshooting-activity\":true,\"uc\":true,\"uninstall\":true}}}"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ]
+  }
+]

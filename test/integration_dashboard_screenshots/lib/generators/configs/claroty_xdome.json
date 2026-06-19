@@ -1,0 +1,93 @@
+{
+  "package": "claroty_xdome",
+  "dataStreams": [
+    {
+      "dataset": "claroty_xdome.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 570,
+      "fields": [
+        "claroty_xdome.alert.category",
+        "claroty_xdome.alert.device.impact_subscore.value",
+        "claroty_xdome.alert.device.insecure_protocols.value",
+        "claroty_xdome.alert.device.ip.list",
+        "claroty_xdome.alert.device.ip.value",
+        "claroty_xdome.alert.device.is_resolved",
+        "claroty_xdome.alert.device.likelihood_subscore.value",
+        "claroty_xdome.alert.device.name",
+        "claroty_xdome.alert.device.network_list",
+        "claroty_xdome.alert.device.purdue_level.value",
+        "claroty_xdome.alert.device.risk_score.value",
+        "claroty_xdome.alert.device.site.name",
+        "claroty_xdome.alert.id",
+        "claroty_xdome.alert.name",
+        "claroty_xdome.alert.status",
+        "claroty_xdome.alert.type_name",
+        "device.manufacturer",
+        "host.id",
+        "host.type"
+      ],
+      "filterValues": {
+        "claroty_xdome.alert.device.is_resolved": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "claroty_xdome.event",
+      "indexPattern": "logs-*",
+      "docTarget": 630,
+      "fields": [
+        "claroty_xdome.event.destination.asset_id",
+        "claroty_xdome.event.destination.device.ip",
+        "claroty_xdome.event.destination.device.name",
+        "claroty_xdome.event.destination.device.type",
+        "claroty_xdome.event.destination.network",
+        "claroty_xdome.event.destination.site_name",
+        "claroty_xdome.event.mode",
+        "claroty_xdome.event.source.device.type",
+        "claroty_xdome.event.source.network",
+        "claroty_xdome.event.source.site_name",
+        "claroty_xdome.event.type",
+        "destination.ip",
+        "destination.port",
+        "host.id",
+        "host.ip",
+        "host.name",
+        "network.protocol",
+        "network.transport",
+        "source.ip",
+        "source.port",
+        "source.user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "claroty_xdome.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "claroty_xdome.vulnerability.device.ip.value",
+        "claroty_xdome.vulnerability.device.name",
+        "claroty_xdome.vulnerability.device.relevance",
+        "claroty_xdome.vulnerability.device.risk_score.value",
+        "claroty_xdome.vulnerability.device.source",
+        "claroty_xdome.vulnerability.type",
+        "device.manufacturer",
+        "device.model.identifier",
+        "host.mac",
+        "host.name",
+        "host.os.family",
+        "host.os.name",
+        "host.type",
+        "observer.ingress.vlan.id",
+        "vulnerability.id"
+      ],
+      "filterValues": {
+        "claroty_xdome.vulnerability.device.risk_score.value": [
+          "Critical",
+          "High"
+        ]
+      }
+    }
+  ]
+}

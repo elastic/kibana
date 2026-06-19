@@ -1,0 +1,29 @@
+{
+  "package": "stan",
+  "dataStreams": [
+    {
+      "dataset": "stan.channels",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "stan.channels.depth",
+        "stan.channels.messages",
+        "stan.channels.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "stan.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "log.level",
+        "network.direction",
+        "stan.log.msg.bytes",
+        "stan.log.msg.subject",
+        "stan.log.msg.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

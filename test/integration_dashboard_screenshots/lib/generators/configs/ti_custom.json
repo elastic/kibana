@@ -1,0 +1,24 @@
+{
+  "package": "ti_custom",
+  "dataStreams": [
+    {
+      "dataset": "ti_custom.indicator",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "labels.is_ioc_transform_source",
+        "related.hash",
+        "related.ip",
+        "stix.id",
+        "threat.indicator.confidence",
+        "threat.indicator.type",
+        "threat.indicator.url.original"
+      ],
+      "filterValues": {
+        "labels.is_ioc_transform_source": [
+          "true"
+        ]
+      }
+    }
+  ]
+}

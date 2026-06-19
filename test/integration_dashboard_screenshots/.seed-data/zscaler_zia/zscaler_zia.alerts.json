@@ -1,0 +1,121 @@
+[
+  {
+    "@timestamp": "2026-12-10T14:04:28.000Z",
+    "agent": {
+      "ephemeral_id": "ace2fc92-79f7-4666-a03c-020689e52b44",
+      "id": "b5d7b96a-ecf2-45a7-bbdf-86157f913dd0",
+      "name": "elastic-agent-59564",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.alerts",
+      "namespace": "18704",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "175.16.199.1",
+      "ip": "175.16.199.1",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "b5d7b96a-ecf2-45a7-bbdf-86157f913dd0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "zscaler_zia.alerts",
+      "ingested": "2026-03-10T03:28:38Z"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "192.168.16.3:37036"
+      },
+      "syslog": {
+        "priority": 114
+      }
+    },
+    "message": "ZscalerNSS: Zscaler cloud configuration connection to  175.16.199.1:443 lost and unavailable for the past 2325.00 minutes",
+    "related": {
+      "ip": [
+        "175.16.199.1"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-alerts"
+    ],
+    "zscaler_zia": {
+      "alerts": {
+        "connection_lost_minutes": 2325.0
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-12-10T13:40:32.000Z",
+    "agent": {
+      "ephemeral_id": "ace2fc92-79f7-4666-a03c-020689e52b44",
+      "id": "b5d7b96a-ecf2-45a7-bbdf-86157f913dd0",
+      "name": "elastic-agent-59564",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.alerts",
+      "namespace": "18704",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "81.2.69.193",
+      "ip": "81.2.69.193",
+      "port": 9012
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "b5d7b96a-ecf2-45a7-bbdf-86157f913dd0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "zscaler_zia.alerts",
+      "ingested": "2026-03-10T03:28:38Z"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "192.168.16.3:37036"
+      },
+      "syslog": {
+        "priority": 114
+      }
+    },
+    "message": "ZscalerNSS: SIEM Feed connection \"DNS Logs Feed\" to 81.2.69.193:9012 lost and unavailable for the past 2440.00 minutes",
+    "related": {
+      "ip": [
+        "81.2.69.193"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-alerts"
+    ],
+    "zscaler_zia": {
+      "alerts": {
+        "connection_lost_minutes": 2440.0,
+        "log_feed_name": "DNS Logs Feed"
+      }
+    }
+  }
+]

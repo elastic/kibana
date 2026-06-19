@@ -1,0 +1,37 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:42:26.493Z",
+    "agent": {
+      "ephemeral_id": "8c0d7bc4-0d40-4a5e-8e13-9c1c85902d60",
+      "id": "2c22b6e7-74ae-4706-bcdb-b64d9040e1db",
+      "name": "elastic-agent-56242",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cel.cel",
+      "namespace": "38046",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "2c22b6e7-74ae-4706-bcdb-b64d9040e1db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cel.cel",
+      "ingested": "2026-03-10T02:42:29Z"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "success",
+    "tags": [
+      "forwarded"
+    ]
+  }
+]

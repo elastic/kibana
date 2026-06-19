@@ -1,0 +1,139 @@
+[
+  {
+    "@timestamp": "2019-07-03T05:17:22.000Z",
+    "agent": {
+      "ephemeral_id": "8702aec0-c26c-4293-af88-16eb70583f9d",
+      "id": "658fb298-31b8-402b-87a9-40c9b6f8f817",
+      "name": "elastic-agent-35494",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "nat": {
+        "ip": "10.0.0.1"
+      }
+    },
+    "data_stream": {
+      "dataset": "zscaler_zpa.app_connector_status",
+      "namespace": "74248",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "658fb298-31b8-402b-87a9-40c9b6f8f817",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "package"
+      ],
+      "dataset": "zscaler_zpa.app_connector_status",
+      "ingested": "2026-03-10T04:43:19Z",
+      "kind": "event",
+      "original": "{\"LogTimestamp\":\"Wed Jul 3 05:17:22 2019\",\"Customer\":\"Customer Name\",\"SessionID\":\"8A64Qwj9zCkfYDGJVoUZ\",\"SessionType\":\"ZPN_ASSISTANT_BROKER_CONTROL\",\"SessionStatus\":\"ZPN_STATUS_AUTHENTICATED\",\"Version\":\"19.20.3\",\"Platform\":\"el7\",\"ZEN\":\"US-NY-8179\",\"Connector\":\"Some App Connector\",\"ConnectorGroup\":\"Some App Connector Group\",\"PrivateIP\":\"10.0.0.4\",\"PublicIP\":\"0.0.0.0\",\"Latitude\":47,\"Longitude\":-122,\"CountryCode\":\"\",\"TimestampAuthentication\":\"2019-06-27T05:05:23.348Z\",\"TimestampUnAuthentication\":\"\",\"CPUUtilization\":1,\"MemUtilization\":20,\"ServiceCount\":2,\"InterfaceDefRoute\":\"eth0\",\"DefRouteGW\":\"10.0.0.1\",\"PrimaryDNSResolver\":\"168.63.129.16\",\"HostStartTime\":\"1513229995\",\"ConnectorStartTime\":\"1555920005\",\"NumOfInterfaces\":2,\"BytesRxInterface\":319831966346,\"PacketsRxInterface\":1617569938,\"ErrorsRxInterface\":0,\"DiscardsRxInterface\":0,\"BytesTxInterface\":192958782635,\"PacketsTxInterface\":1797471190,\"ErrorsTxInterface\":0,\"DiscardsTxInterface\":0,\"TotalBytesRx\":10902554,\"TotalBytesTx\":48931771}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "cpu": {
+        "usage": 1.0
+      },
+      "network": {
+        "egress": {
+          "bytes": 48931771
+        },
+        "ingress": {
+          "bytes": 10902554
+        }
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.24.0.3:35576"
+      }
+    },
+    "observer": {
+      "geo": {
+        "location": {
+          "lat": 46.99999996460974,
+          "lon": -122.0000000204891
+        }
+      },
+      "ip": [
+        "0.0.0.0"
+      ],
+      "os": {
+        "platform": "el7"
+      },
+      "type": "forwarder",
+      "version": "19.20.3"
+    },
+    "organization": {
+      "name": "Customer Name"
+    },
+    "related": {
+      "ip": [
+        "10.0.0.1",
+        "0.0.0.0",
+        "10.0.0.4",
+        "168.63.129.16"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "zscaler_zpa-app_connectors_status"
+    ],
+    "zscaler_zpa": {
+      "app_connector_status": {
+        "connector": {
+          "group": "Some App Connector Group",
+          "name": "Some App Connector"
+        },
+        "connector_start_time": "2019-04-22T08:00:05.000Z",
+        "host_start_time": "2017-12-14T05:39:55.000Z",
+        "interface": {
+          "name": "eth0",
+          "received": {
+            "bytes": 319831966346.0,
+            "discards": 0.0,
+            "errors": 0.0,
+            "packets": 1617569938.0
+          },
+          "transmitted": {
+            "bytes": 192958782635.0,
+            "discards": 0.0,
+            "errors": 0.0,
+            "packets": 1797471190.0
+          }
+        },
+        "memory": {
+          "utilization": 20.0
+        },
+        "num_of_interfaces": 2.0,
+        "primary_dns_resolver": "168.63.129.16",
+        "private_ip": "10.0.0.4",
+        "service": {
+          "count": 2.0
+        },
+        "session": {
+          "id": "8A64Qwj9zCkfYDGJVoUZ",
+          "status": "ZPN_STATUS_AUTHENTICATED",
+          "type": "ZPN_ASSISTANT_BROKER_CONTROL"
+        },
+        "timestamp": {
+          "authentication": "2019-06-27T05:05:23.348Z"
+        },
+        "zen": "US-NY-8179"
+      }
+    }
+  }
+]

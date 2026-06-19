@@ -1,0 +1,874 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:28:23.314Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "d22804cc5987bbb1728ff7a18a4d4342f0d058c84fbb0a051b55ebfcc96ae85f",
+      "image": {
+        "name": "docker.elastic.co/kibana/kibana:7.11.0-SNAPSHOT"
+      },
+      "name": "elastic-package-stack_kibana_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "/bin/tini -- /usr/local/bin/kibana-docker",
+        "created": "2021-02-03T18:02:38.000Z",
+        "ip_addresses": "172.28.0.5",
+        "labels": {
+          "com_docker_compose_config-hash": "8df048b7bdfcc2a947b3d1822f933a67f3f5ddb885e1faf58da07755e6014278",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "kibana",
+          "com_docker_compose_version": "1.25.4",
+          "org_label-schema_build-date": "2021-02-02T18:21:13.108Z",
+          "org_label-schema_license": "Elastic License",
+          "org_label-schema_name": "Kibana",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_url": "https://www.elastic.co/products/kibana",
+          "org_label-schema_usage": "https://www.elastic.co/guide/en/kibana/reference/index.html",
+          "org_label-schema_vcs-ref": "61f4c54124e2ca8b3dfbcfad3ff74942f519dad9",
+          "org_label-schema_vcs-url": "https://github.com/elastic/kibana",
+          "org_label-schema_vendor": "Elastic",
+          "org_label-schema_version": "7.11.0-SNAPSHOT",
+          "org_opencontainers_image_created": "2021-02-02T18:21:13.108Z",
+          "org_opencontainers_image_documentation": "https://www.elastic.co/guide/en/kibana/reference/index.html",
+          "org_opencontainers_image_licenses": "Elastic License",
+          "org_opencontainers_image_revision": "61f4c54124e2ca8b3dfbcfad3ff74942f519dad9",
+          "org_opencontainers_image_source": "https://github.com/elastic/kibana",
+          "org_opencontainers_image_title": "Kibana",
+          "org_opencontainers_image_url": "https://www.elastic.co/products/kibana",
+          "org_opencontainers_image_vendor": "Elastic",
+          "org_opencontainers_image_version": "7.11.0-SNAPSHOT"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 1504000,
+      "ingested": "2026-03-10T03:28:24Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:23.314Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "86a4d10d07bf0b1ded54c7156b4362e8b0dba9d450201a9695b4714c1492829c",
+      "image": {
+        "name": "docker.elastic.co/beats/elastic-agent:7.11.0-SNAPSHOT"
+      },
+      "name": "elastic-package-stack_elastic-agent_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "/usr/bin/tini -- /usr/local/bin/docker-entrypoint",
+        "created": "2021-02-03T18:03:04.000Z",
+        "ip_addresses": "172.28.0.4",
+        "labels": {
+          "com_docker_compose_config-hash": "e0db3f7a06dffa57624a791a0c995582e76b750a1d296a06b853cbeb2f47ffb8",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "elastic-agent",
+          "com_docker_compose_version": "1.25.4",
+          "description": "Agent manages other beats based on configuration provided.",
+          "io_k8s_description": "Agent manages other beats based on configuration provided.",
+          "io_k8s_display-name": "Elastic-Agent image",
+          "license": "Elastic License",
+          "maintainer": "infra@elastic.co",
+          "name": "elastic-agent",
+          "org_label-schema_build-date": "2021-02-02T20:18:24Z",
+          "org_label-schema_license": "Elastic License",
+          "org_label-schema_name": "elastic-agent",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_url": "https://www.elastic.co/products/beats/elastic-agent",
+          "org_label-schema_vcs-ref": "52133c1123a5f40f00dcaca121413321f2f1f00c",
+          "org_label-schema_vcs-url": "github.com/elastic/beats/v7",
+          "org_label-schema_vendor": "Elastic",
+          "org_label-schema_version": "7.11.0-SNAPSHOT",
+          "org_opencontainers_image_created": "2021-02-02T20:18:24Z",
+          "org_opencontainers_image_licenses": "Elastic License",
+          "org_opencontainers_image_title": "Elastic-Agent",
+          "org_opencontainers_image_vendor": "Elastic",
+          "release": "1",
+          "summary": "elastic-agent",
+          "url": "https://www.elastic.co/products/beats/elastic-agent",
+          "vendor": "Elastic",
+          "version": "7.11.0-SNAPSHOT"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 1481875,
+      "ingested": "2026-03-10T03:28:24Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:23.314Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "dcbf5457bb8c873bce7caf22be793d1c8975429bff2fc4762f0d5fd524c1a863",
+      "image": {
+        "name": "elastic-package-stack_package-registry"
+      },
+      "name": "elastic-package-stack_package-registry_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "./package-registry --address=0.0.0.0:8080 -disable-package-validation",
+        "created": "2021-02-03T18:01:51.000Z",
+        "ip_addresses": "172.28.0.3",
+        "labels": {
+          "BRANCH_NAME": "snapshot",
+          "GIT_SHA": "4b5420241e50b7e5b7285d26031523f30116dc2c",
+          "GO_VERSION": "1.13.12",
+          "TIMESTAMP": "2021-02-03_16:56",
+          "com_docker_compose_config-hash": "0568d5c622d0665329a0479c66c4072f0bf49f3521d17d991aada3bd4c298305",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "package-registry",
+          "com_docker_compose_version": "1.25.4",
+          "org_label-schema_build-date": "20201113",
+          "org_label-schema_license": "GPLv2",
+          "org_label-schema_name": "CentOS Base Image",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_vendor": "CentOS",
+          "org_opencontainers_image_created": "2020-11-13 00:00:00+00:00",
+          "org_opencontainers_image_licenses": "GPL-2.0-only",
+          "org_opencontainers_image_title": "CentOS Base Image",
+          "org_opencontainers_image_vendor": "CentOS",
+          "package-registry": "v0.17.0"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 1949584,
+      "ingested": "2026-03-10T03:28:24Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:23.314Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "09d25e45f767d8a6024dde44b9af8032ffedc3f52e2cfac2bbceb9136087fa23",
+      "image": {
+        "name": "docker.elastic.co/elasticsearch/elasticsearch:7.11.0-SNAPSHOT"
+      },
+      "name": "elastic-package-stack_elasticsearch_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "/bin/tini -- /usr/local/bin/docker-entrypoint.sh eswrapper",
+        "created": "2021-02-03T18:01:51.000Z",
+        "ip_addresses": "172.28.0.2",
+        "labels": {
+          "com_docker_compose_config-hash": "3aa1564517662f2e6ef7228bf70c03b3c206f0e58c7d3ad770f42617f9dceec4",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "elasticsearch",
+          "com_docker_compose_version": "1.25.4",
+          "org_label-schema_build-date": "2021-02-02T18:28:48.941251Z",
+          "org_label-schema_license": "Elastic-License",
+          "org_label-schema_name": "Elasticsearch",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_url": "https://www.elastic.co/products/elasticsearch",
+          "org_label-schema_usage": "https://www.elastic.co/guide/en/elasticsearch/reference/index.html",
+          "org_label-schema_vcs-ref": "baf15b5eeeab2a1463a8cdc18c2a9f263cecc6d5",
+          "org_label-schema_vcs-url": "https://github.com/elastic/elasticsearch",
+          "org_label-schema_vendor": "Elastic",
+          "org_label-schema_version": "7.11.0-SNAPSHOT",
+          "org_opencontainers_image_created": "2021-02-02T18:28:48.941251Z",
+          "org_opencontainers_image_documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/index.html",
+          "org_opencontainers_image_licenses": "Elastic-License",
+          "org_opencontainers_image_revision": "baf15b5eeeab2a1463a8cdc18c2a9f263cecc6d5",
+          "org_opencontainers_image_source": "https://github.com/elastic/elasticsearch",
+          "org_opencontainers_image_title": "Elasticsearch",
+          "org_opencontainers_image_url": "https://www.elastic.co/products/elasticsearch",
+          "org_opencontainers_image_vendor": "Elastic",
+          "org_opencontainers_image_version": "7.11.0-SNAPSHOT"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 1528125,
+      "ingested": "2026-03-10T03:28:24Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:18.301Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "d22804cc5987bbb1728ff7a18a4d4342f0d058c84fbb0a051b55ebfcc96ae85f",
+      "image": {
+        "name": "docker.elastic.co/kibana/kibana:7.11.0-SNAPSHOT"
+      },
+      "name": "elastic-package-stack_kibana_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "/bin/tini -- /usr/local/bin/kibana-docker",
+        "created": "2021-02-03T18:02:38.000Z",
+        "ip_addresses": "172.28.0.5",
+        "labels": {
+          "com_docker_compose_config-hash": "8df048b7bdfcc2a947b3d1822f933a67f3f5ddb885e1faf58da07755e6014278",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "kibana",
+          "com_docker_compose_version": "1.25.4",
+          "org_label-schema_build-date": "2021-02-02T18:21:13.108Z",
+          "org_label-schema_license": "Elastic License",
+          "org_label-schema_name": "Kibana",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_url": "https://www.elastic.co/products/kibana",
+          "org_label-schema_usage": "https://www.elastic.co/guide/en/kibana/reference/index.html",
+          "org_label-schema_vcs-ref": "61f4c54124e2ca8b3dfbcfad3ff74942f519dad9",
+          "org_label-schema_vcs-url": "https://github.com/elastic/kibana",
+          "org_label-schema_vendor": "Elastic",
+          "org_label-schema_version": "7.11.0-SNAPSHOT",
+          "org_opencontainers_image_created": "2021-02-02T18:21:13.108Z",
+          "org_opencontainers_image_documentation": "https://www.elastic.co/guide/en/kibana/reference/index.html",
+          "org_opencontainers_image_licenses": "Elastic License",
+          "org_opencontainers_image_revision": "61f4c54124e2ca8b3dfbcfad3ff74942f519dad9",
+          "org_opencontainers_image_source": "https://github.com/elastic/kibana",
+          "org_opencontainers_image_title": "Kibana",
+          "org_opencontainers_image_url": "https://www.elastic.co/products/kibana",
+          "org_opencontainers_image_vendor": "Elastic",
+          "org_opencontainers_image_version": "7.11.0-SNAPSHOT"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 11780834,
+      "ingested": "2026-03-10T03:28:19Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:18.301Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "86a4d10d07bf0b1ded54c7156b4362e8b0dba9d450201a9695b4714c1492829c",
+      "image": {
+        "name": "docker.elastic.co/beats/elastic-agent:7.11.0-SNAPSHOT"
+      },
+      "name": "elastic-package-stack_elastic-agent_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "/usr/bin/tini -- /usr/local/bin/docker-entrypoint",
+        "created": "2021-02-03T18:03:04.000Z",
+        "ip_addresses": "172.28.0.4",
+        "labels": {
+          "com_docker_compose_config-hash": "e0db3f7a06dffa57624a791a0c995582e76b750a1d296a06b853cbeb2f47ffb8",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "elastic-agent",
+          "com_docker_compose_version": "1.25.4",
+          "description": "Agent manages other beats based on configuration provided.",
+          "io_k8s_description": "Agent manages other beats based on configuration provided.",
+          "io_k8s_display-name": "Elastic-Agent image",
+          "license": "Elastic License",
+          "maintainer": "infra@elastic.co",
+          "name": "elastic-agent",
+          "org_label-schema_build-date": "2021-02-02T20:18:24Z",
+          "org_label-schema_license": "Elastic License",
+          "org_label-schema_name": "elastic-agent",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_url": "https://www.elastic.co/products/beats/elastic-agent",
+          "org_label-schema_vcs-ref": "52133c1123a5f40f00dcaca121413321f2f1f00c",
+          "org_label-schema_vcs-url": "github.com/elastic/beats/v7",
+          "org_label-schema_vendor": "Elastic",
+          "org_label-schema_version": "7.11.0-SNAPSHOT",
+          "org_opencontainers_image_created": "2021-02-02T20:18:24Z",
+          "org_opencontainers_image_licenses": "Elastic License",
+          "org_opencontainers_image_title": "Elastic-Agent",
+          "org_opencontainers_image_vendor": "Elastic",
+          "release": "1",
+          "summary": "elastic-agent",
+          "url": "https://www.elastic.co/products/beats/elastic-agent",
+          "vendor": "Elastic",
+          "version": "7.11.0-SNAPSHOT"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 11759500,
+      "ingested": "2026-03-10T03:28:19Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:18.301Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "dcbf5457bb8c873bce7caf22be793d1c8975429bff2fc4762f0d5fd524c1a863",
+      "image": {
+        "name": "elastic-package-stack_package-registry"
+      },
+      "name": "elastic-package-stack_package-registry_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "./package-registry --address=0.0.0.0:8080 -disable-package-validation",
+        "created": "2021-02-03T18:01:51.000Z",
+        "ip_addresses": "172.28.0.3",
+        "labels": {
+          "BRANCH_NAME": "snapshot",
+          "GIT_SHA": "4b5420241e50b7e5b7285d26031523f30116dc2c",
+          "GO_VERSION": "1.13.12",
+          "TIMESTAMP": "2021-02-03_16:56",
+          "com_docker_compose_config-hash": "0568d5c622d0665329a0479c66c4072f0bf49f3521d17d991aada3bd4c298305",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "package-registry",
+          "com_docker_compose_version": "1.25.4",
+          "org_label-schema_build-date": "20201113",
+          "org_label-schema_license": "GPLv2",
+          "org_label-schema_name": "CentOS Base Image",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_vendor": "CentOS",
+          "org_opencontainers_image_created": "2020-11-13 00:00:00+00:00",
+          "org_opencontainers_image_licenses": "GPL-2.0-only",
+          "org_opencontainers_image_title": "CentOS Base Image",
+          "org_opencontainers_image_vendor": "CentOS",
+          "package-registry": "v0.17.0"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 12193417,
+      "ingested": "2026-03-10T03:28:19Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:18.301Z",
+    "agent": {
+      "ephemeral_id": "a0eb2598-1bdd-4d51-a8c6-5b387e1c68c3",
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "name": "elastic-agent-57010",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "container": {
+      "id": "09d25e45f767d8a6024dde44b9af8032ffedc3f52e2cfac2bbceb9136087fa23",
+      "image": {
+        "name": "docker.elastic.co/elasticsearch/elasticsearch:7.11.0-SNAPSHOT"
+      },
+      "name": "elastic-package-stack_elasticsearch_1",
+      "runtime": "docker"
+    },
+    "data_stream": {
+      "dataset": "docker.container",
+      "namespace": "47246",
+      "type": "metrics"
+    },
+    "docker": {
+      "container": {
+        "command": "/bin/tini -- /usr/local/bin/docker-entrypoint.sh eswrapper",
+        "created": "2021-02-03T18:01:51.000Z",
+        "ip_addresses": "172.28.0.2",
+        "labels": {
+          "com_docker_compose_config-hash": "3aa1564517662f2e6ef7228bf70c03b3c206f0e58c7d3ad770f42617f9dceec4",
+          "com_docker_compose_container-number": "1",
+          "com_docker_compose_oneoff": "False",
+          "com_docker_compose_project": "elastic-package-stack",
+          "com_docker_compose_project_config_files": "/home/alexk/.elastic-package/stack/snapshot.yml",
+          "com_docker_compose_project_working_dir": "/home/alexk/.elastic-package/stack",
+          "com_docker_compose_service": "elasticsearch",
+          "com_docker_compose_version": "1.25.4",
+          "org_label-schema_build-date": "2021-02-02T18:28:48.941251Z",
+          "org_label-schema_license": "Elastic-License",
+          "org_label-schema_name": "Elasticsearch",
+          "org_label-schema_schema-version": "1.0",
+          "org_label-schema_url": "https://www.elastic.co/products/elasticsearch",
+          "org_label-schema_usage": "https://www.elastic.co/guide/en/elasticsearch/reference/index.html",
+          "org_label-schema_vcs-ref": "baf15b5eeeab2a1463a8cdc18c2a9f263cecc6d5",
+          "org_label-schema_vcs-url": "https://github.com/elastic/elasticsearch",
+          "org_label-schema_vendor": "Elastic",
+          "org_label-schema_version": "7.11.0-SNAPSHOT",
+          "org_opencontainers_image_created": "2021-02-02T18:28:48.941251Z",
+          "org_opencontainers_image_documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/index.html",
+          "org_opencontainers_image_licenses": "Elastic-License",
+          "org_opencontainers_image_revision": "baf15b5eeeab2a1463a8cdc18c2a9f263cecc6d5",
+          "org_opencontainers_image_source": "https://github.com/elastic/elasticsearch",
+          "org_opencontainers_image_title": "Elasticsearch",
+          "org_opencontainers_image_url": "https://www.elastic.co/products/elasticsearch",
+          "org_opencontainers_image_vendor": "Elastic",
+          "org_opencontainers_image_version": "7.11.0-SNAPSHOT"
+        },
+        "size": {
+          "root_fs": 0,
+          "rw": 0
+        },
+        "status": "Up 28 hours (healthy)"
+      }
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "docker.container",
+      "duration": 11796417,
+      "ingested": "2026-03-10T03:28:19Z",
+      "module": "docker"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-57010",
+      "ip": [
+        "172.18.0.13",
+        "172.25.0.2"
+      ],
+      "mac": [
+        "42-A7-6F-46-74-91",
+        "F2-17-26-09-A4-4E"
+      ],
+      "name": "elastic-agent-57010",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "container",
+      "period": 5000
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    }
+  }
+]

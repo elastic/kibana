@@ -1,0 +1,181 @@
+{
+  "package": "linux",
+  "dataStreams": [
+    {
+      "dataset": "linux.conntrack",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.entropy",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.iostat",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.ksm",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.memory",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.network_summary",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.pageinfo",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.raid",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.service",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.socket",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "linux.users",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "metricset.name",
+        "process.exit_code",
+        "service.type",
+        "system.service.name",
+        "system.service.resources.memory.usage.bytes",
+        "system.service.resources.tasks.count",
+        "system.service.state",
+        "system.service.sub_state"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

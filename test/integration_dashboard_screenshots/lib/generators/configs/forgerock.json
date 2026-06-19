@@ -1,0 +1,115 @@
+{
+  "package": "forgerock",
+  "dataStreams": [
+    {
+      "dataset": "forgerock.am_access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.am_activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.am_authentication",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.am_config",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.am_core",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.idm_access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.idm_activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.idm_authentication",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.idm_config",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.idm_core",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "forgerock.idm_sync",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "user.id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

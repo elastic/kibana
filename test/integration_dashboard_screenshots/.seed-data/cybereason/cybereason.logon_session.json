@@ -1,0 +1,189 @@
+[
+  {
+    "@timestamp": "2024-03-13T12:20:35.086Z",
+    "agent": {
+      "ephemeral_id": "0fabb03f-f563-455a-a666-ba1ba03d28b8",
+      "id": "5019d5b1-6f3d-4c58-b47a-38e9c8c22e02",
+      "name": "elastic-agent-22284",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cybereason": {
+      "logon_session": {
+        "element_values": {
+          "owner_machine": {
+            "element_values": [
+              {
+                "name": "desktop-f2nf4st",
+                "has_suspicions": false,
+                "guid": "_MlzCxCi55eyTiwX",
+                "has_malops": false,
+                "simple_values": {
+                  "machinesimple": "value"
+                },
+                "element_type": "Machine",
+                "object": {
+                  "ownermachine": "myd"
+                }
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 1
+          },
+          "processes": {
+            "element_values": [
+              {
+                "name": "desktop-f2nf4stgy",
+                "has_suspicions": true,
+                "guid": "_MlzCxCi55eyTiwXYX",
+                "has_malops": true,
+                "simple_values": {
+                  "processsimple": "value"
+                },
+                "element_type": "MachineProcess",
+                "object": {
+                  "process": "myd"
+                }
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 320
+          },
+          "remote_machine": {
+            "element_values": [
+              {
+                "name": "desktop-f2nf4stmjremote",
+                "has_suspicions": true,
+                "guid": "AAAAGKxw2bFBmcGUssss",
+                "has_malops": false,
+                "simple_values": {
+                  "remotesimple": "value"
+                },
+                "element_type": "Remote",
+                "object": {
+                  "remote": "myd"
+                }
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 1
+          },
+          "user": {
+            "element_values": [
+              {
+                "has_suspicions": false,
+                "has_malops": false,
+                "simple_values": {
+                  "usersimple": "value"
+                },
+                "element_type": "User",
+                "object": {
+                  "user": "myd"
+                }
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 1
+          }
+        },
+        "evidence_map": {
+          "evidence": "map"
+        },
+        "filter_data": {
+          "group_by_value": "{guid=AAAAGKxw2bFBmcGU, __typename=User, elementDisplayName=desktop-f2nf4st\\eden, group=7af5074f-ab26-43b3-b0f1-acc962920615, hasSuspicions=false, hasMalops=false}",
+          "sort_in_group_value": "hyefilter"
+        },
+        "is_malicious": false,
+        "labels_ids": "l1",
+        "malicious": false,
+        "malop_priority": "HIGH",
+        "simple_values": {
+          "creation_time": {
+            "total_values": 1
+          },
+          "element_display_name": {
+            "total_values": 1,
+            "values": [
+              "Unknown host > desktop-f2nf4st"
+            ]
+          },
+          "group": {
+            "total_values": 1,
+            "values": [
+              "00000000-0000-0000-0000-000000000000"
+            ]
+          },
+          "logon_type": {
+            "total_values": 1,
+            "values": [
+              "SLT_RemoteInteractive"
+            ]
+          }
+        },
+        "suspect": false,
+        "suspicion_count": 0,
+        "suspicions": {
+          "xyz": "dhyg"
+        },
+        "suspicions_map": {
+          "suspicions": "map"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cybereason.logon_session",
+      "namespace": "44922",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "5019d5b1-6f3d-4c58-b47a-38e9c8c22e02",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "cybereason.logon_session",
+      "id": "_MlzC6rnLebZ2aBh",
+      "ingested": "2026-03-10T03:13:22Z",
+      "kind": "alert",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "related": {
+      "user": [
+        "AAAAGKxw2bFBmcGU",
+        "desktop-f2nf4st\\eden"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cybereason-logon_session"
+    ],
+    "user": {
+      "id": [
+        "AAAAGKxw2bFBmcGU"
+      ],
+      "name": [
+        "desktop-f2nf4st\\eden"
+      ]
+    }
+  }
+]

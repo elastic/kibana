@@ -1,0 +1,73 @@
+{
+  "package": "postgresql",
+  "dataStreams": [
+    {
+      "dataset": "postgresql.database",
+      "indexPattern": "metrics-*",
+      "docTarget": 570,
+      "fields": [
+        "postgresql.database.blocks.time.read.ms",
+        "postgresql.database.blocks.time.write.ms",
+        "postgresql.database.conflicts",
+        "postgresql.database.deadlocks",
+        "postgresql.database.name",
+        "postgresql.database.rows.deleted",
+        "postgresql.database.rows.fetched",
+        "postgresql.database.rows.inserted",
+        "postgresql.database.rows.returned",
+        "postgresql.database.rows.updated",
+        "postgresql.database.transactions.commit",
+        "postgresql.database.transactions.rollback",
+        "postgresql.statement.query.calls",
+        "postgresql.statement.query.memory.local.hit",
+        "postgresql.statement.query.memory.local.read",
+        "postgresql.statement.query.memory.shared.hit",
+        "postgresql.statement.query.memory.shared.read",
+        "postgresql.statement.query.text",
+        "postgresql.statement.query.time.total.ms"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "postgresql.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.duration",
+        "log.level",
+        "message",
+        "postgresql.log.database",
+        "postgresql.log.query",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "postgresql.statement",
+      "indexPattern": "metrics-*",
+      "docTarget": 570,
+      "fields": [
+        "postgresql.database.blocks.time.read.ms",
+        "postgresql.database.blocks.time.write.ms",
+        "postgresql.database.conflicts",
+        "postgresql.database.deadlocks",
+        "postgresql.database.name",
+        "postgresql.database.rows.deleted",
+        "postgresql.database.rows.fetched",
+        "postgresql.database.rows.inserted",
+        "postgresql.database.rows.returned",
+        "postgresql.database.rows.updated",
+        "postgresql.database.transactions.commit",
+        "postgresql.database.transactions.rollback",
+        "postgresql.statement.query.calls",
+        "postgresql.statement.query.memory.local.hit",
+        "postgresql.statement.query.memory.local.read",
+        "postgresql.statement.query.memory.shared.hit",
+        "postgresql.statement.query.memory.shared.read",
+        "postgresql.statement.query.text",
+        "postgresql.statement.query.time.total.ms"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

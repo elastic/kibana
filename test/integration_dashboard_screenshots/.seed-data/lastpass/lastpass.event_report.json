@@ -1,0 +1,148 @@
+[
+  {
+    "@timestamp": "2015-07-17T09:51:56.000Z",
+    "agent": {
+      "ephemeral_id": "76d88669-5acc-46f4-93c4-82be626efd9f",
+      "id": "8e032252-c688-4a8a-a206-4c8671a19403",
+      "name": "elastic-agent-74074",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.event_report",
+      "namespace": "49972",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8e032252-c688-4a8a-a206-4c8671a19403",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "failed login attempt",
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "created": "2026-03-10T00:54:26.093Z",
+      "dataset": "lastpass.event_report",
+      "ingested": "2026-03-10T00:54:27Z",
+      "kind": "event",
+      "original": "{\"Action\":\"Failed Login Attempt\",\"Data\":\"\",\"IP_Address\":\"10.16.21.21\",\"Time\":\"2015-07-17 09:51:56\",\"Username\":\"j.user@example.com\",\"id\":\"Event2\"}",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "start"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "event_report": {
+        "action": "Failed Login Attempt",
+        "ip": "10.16.21.21",
+        "time": "2015-07-17T09:51:56.000Z",
+        "user_name": "j.user@example.com"
+      }
+    },
+    "related": {
+      "ip": [
+        "10.16.21.21"
+      ],
+      "user": [
+        "j.user@example.com"
+      ]
+    },
+    "source": {
+      "ip": "10.16.21.21"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-event_report"
+    ],
+    "user": {
+      "email": [
+        "j.user@example.com"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2015-07-17T09:51:51.000Z",
+    "agent": {
+      "ephemeral_id": "76d88669-5acc-46f4-93c4-82be626efd9f",
+      "id": "8e032252-c688-4a8a-a206-4c8671a19403",
+      "name": "elastic-agent-74074",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.event_report",
+      "namespace": "49972",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8e032252-c688-4a8a-a206-4c8671a19403",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "failed login attempt",
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "created": "2026-03-10T00:54:24.238Z",
+      "dataset": "lastpass.event_report",
+      "ingested": "2026-03-10T00:54:27Z",
+      "kind": "event",
+      "original": "{\"Action\":\"Failed Login Attempt\",\"Data\":\"\",\"IP_Address\":\"10.16.21.21\",\"Time\":\"2015-07-17 09:51:51\",\"Username\":\"j.user@example.com\",\"id\":\"Event1\"}",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "start"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "event_report": {
+        "action": "Failed Login Attempt",
+        "ip": "10.16.21.21",
+        "time": "2015-07-17T09:51:51.000Z",
+        "user_name": "j.user@example.com"
+      }
+    },
+    "related": {
+      "ip": [
+        "10.16.21.21"
+      ],
+      "user": [
+        "j.user@example.com"
+      ]
+    },
+    "source": {
+      "ip": "10.16.21.21"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-event_report"
+    ],
+    "user": {
+      "email": [
+        "j.user@example.com"
+      ]
+    }
+  }
+]

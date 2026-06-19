@@ -1,0 +1,17 @@
+{
+  "package": "hpe_aruba_cx",
+  "dataStreams": [
+    {
+      "dataset": "hpe_aruba_cx.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.kind",
+        "event.outcome",
+        "event.type",
+        "log.level"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

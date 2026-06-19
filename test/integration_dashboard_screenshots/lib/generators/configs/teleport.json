@@ -1,0 +1,31 @@
+{
+  "package": "teleport",
+  "dataStreams": [
+    {
+      "dataset": "teleport.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "client.address",
+        "client.geo.location",
+        "destination.bytes",
+        "destination.geo.location",
+        "event.action",
+        "event.category",
+        "event.outcome",
+        "event.type",
+        "network.protocol",
+        "orchestrator.cluster.name",
+        "related.hosts",
+        "related.user",
+        "server.address",
+        "server.geo.location",
+        "source.bytes",
+        "source.geo.location",
+        "teleport.audit.database.protocol",
+        "teleport.audit.session.id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

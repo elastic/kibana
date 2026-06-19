@@ -1,0 +1,5966 @@
+[
+  {
+    "package": "1password",
+    "version": "1.34.0",
+    "dashboards": [
+      {
+        "id": "1password-audit-events-full-dashboard",
+        "title": "Audit Events [1Password]"
+      },
+      {
+        "id": "1password-item-usages-full-dashboard",
+        "title": "Item Usages [1Password]"
+      },
+      {
+        "id": "1password-signin-attempts-full-dashboard",
+        "title": "Sign-in Attempts [1Password]"
+      }
+    ]
+  },
+  {
+    "package": "abnormal_security",
+    "version": "1.12.2",
+    "dashboards": [
+      {
+        "id": "abnormal_security-37ed5d19-c753-43a0-b0a2-f8e6437ddfe5",
+        "title": "[Logs Abnormal AI] Audit Overview"
+      },
+      {
+        "id": "abnormal_security-6a8e53ac-7759-4564-bcd6-03c6a9792eac",
+        "title": "[Logs Abnormal AI] Threat Overview"
+      },
+      {
+        "id": "abnormal_security-7997c0a4-da55-4090-b24f-586dbd19aff4",
+        "title": "[Logs Abnormal AI] Vendor Case Overview"
+      },
+      {
+        "id": "abnormal_security-a0e8aab9-b870-4903-a966-7195fd6cee9c",
+        "title": "[Logs Abnormal AI] AI Security Mailbox Not Analyzed Overview"
+      },
+      {
+        "id": "abnormal_security-a4364503-ada3-4fe6-a054-d152accf207c",
+        "title": "[Logs Abnormal AI] AI Security Mailbox Overview"
+      },
+      {
+        "id": "abnormal_security-f6562262-e429-470d-af45-4c80afdcf664",
+        "title": "[Logs Abnormal AI] Case Overview"
+      }
+    ]
+  },
+  {
+    "package": "activemq",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "activemq-8a0cbc90-f916-11ec-9736-016ee09668f5",
+        "title": "[Metrics ActiveMQ] Broker"
+      },
+      {
+        "id": "activemq-bbc52920-f916-11ec-9736-016ee09668f5",
+        "title": "[Metrics ActiveMQ] Queues"
+      },
+      {
+        "id": "activemq-d3639bc0-f916-11ec-9736-016ee09668f5",
+        "title": "[Metrics ActiveMQ] Topics"
+      },
+      {
+        "id": "activemq-eac72840-f916-11ec-9736-016ee09668f5",
+        "title": "[Logs ActiveMQ] Audit"
+      },
+      {
+        "id": "activemq-f98d0c50-f916-11ec-9736-016ee09668f5",
+        "title": "[Logs ActiveMQ] Log"
+      }
+    ]
+  },
+  {
+    "package": "admin_by_request_epm",
+    "version": "1.1.2",
+    "dashboards": [
+      {
+        "id": "admin_by_request_epm-186f2f70-8c25-4de7-b2b6-950045f14a49",
+        "title": "[Logs Admin By Request - EPM] Auditlog"
+      },
+      {
+        "id": "admin_by_request_epm-aef4665f-b43e-46f4-a635-1be3117ffc9e",
+        "title": "[Logs Admin By Request - EPM] Events"
+      }
+    ]
+  },
+  {
+    "package": "airflow",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "airflow-1ea4b491-e7a0-42ad-a0f3-7a4b02e1f22b",
+        "title": "[Metrics Airflow] Overview"
+      }
+    ]
+  },
+  {
+    "package": "airlock_digital",
+    "version": "0.3.0",
+    "dashboards": [
+      {
+        "id": "airlock_digital-872daa4d-55e1-456e-8998-702849cb10ae",
+        "title": "[Logs Airlock Digital] Server Activities"
+      },
+      {
+        "id": "airlock_digital-8a46108a-9cc8-437f-89ae-d862fbc21a7f",
+        "title": "[Logs Airlock Digital] Agent"
+      },
+      {
+        "id": "airlock_digital-a3bb220e-d9e7-4f7f-92f5-7eb58ecfb38a",
+        "title": "[Logs Airlock Digital] Execution Histories"
+      }
+    ]
+  },
+  {
+    "package": "akamai",
+    "version": "3.1.0",
+    "dashboards": [
+      {
+        "id": "akamai-e7568320-066a-11ed-9f6c-cb8079f147f7",
+        "title": "[Akamai SIEM] Akamai Overview"
+      }
+    ]
+  },
+  {
+    "package": "amazon_security_lake",
+    "version": "2.8.2",
+    "dashboards": [
+      {
+        "id": "amazon_security_lake-0d2d7a60-2472-11ee-8d80-89e82659e0f1",
+        "title": "[Logs Amazon Security Lake] Application Activity"
+      },
+      {
+        "id": "amazon_security_lake-15b6e140-24a3-11ee-bb84-975fc16e8386",
+        "title": "[Logs Amazon Security Lake] DNS Activity"
+      },
+      {
+        "id": "amazon_security_lake-1bbac7b0-2632-11ee-a94e-bfa24df19b15",
+        "title": "[Logs Amazon Security Lake] Network Activity"
+      },
+      {
+        "id": "amazon_security_lake-3ec9b110-7d82-11ee-8bb4-f99e39910112",
+        "title": "[Logs Amazon Security Lake] Email Activity, Email File Activity, Email URL Activity"
+      },
+      {
+        "id": "amazon_security_lake-41b73270-25fe-11ee-983a-17fb20a3b25d",
+        "title": "[Logs Amazon Security Lake] Identity and Access Management"
+      },
+      {
+        "id": "amazon_security_lake-48997710-7d65-11ee-8bb4-f99e39910112",
+        "title": "[Logs Amazon Security Lake] HTTP, RDP, SMB, DHCP, SSH, FTP, Network File Activity"
+      },
+      {
+        "id": "amazon_security_lake-9f829d40-7e1e-11ee-8bb4-f99e39910112",
+        "title": "[Logs Amazon Security Lake] System Activity"
+      },
+      {
+        "id": "amazon_security_lake-c2efb230-7d48-11ee-8bb4-f99e39910112",
+        "title": "[Logs Amazon Security Lake] Discovery"
+      },
+      {
+        "id": "amazon_security_lake-ed18e3a0-2565-11ee-be5c-17edc959116c",
+        "title": "[Logs Amazon Security Lake] Findings"
+      },
+      {
+        "id": "amazon_security_lake-f21df8e0-249d-11ee-aa05-4dd9349682f3",
+        "title": "[Logs Amazon Security Lake] Overview"
+      }
+    ]
+  },
+  {
+    "package": "apache",
+    "version": "3.0.0",
+    "dashboards": [
+      {
+        "id": "apache-Logs-Apache-Dashboard",
+        "title": "[Logs Apache] Access and error logs"
+      },
+      {
+        "id": "apache-Metrics-Apache-HTTPD-server-status",
+        "title": "[Metrics Apache] Overview"
+      }
+    ]
+  },
+  {
+    "package": "apache_otel",
+    "version": "0.2.0",
+    "dashboards": [
+      {
+        "id": "apache_otel-b536d9d2-90f0-4177-a92e-adbe6e12427d",
+        "title": "[Metrics Apache OTel] Overview"
+      }
+    ]
+  },
+  {
+    "package": "apache_spark",
+    "version": "1.5.0",
+    "dashboards": [
+      {
+        "id": "apache_spark-b22dc960-a06c-11ec-8d4f-4fe3367a4156",
+        "title": "[Metrics Apache Spark] Overview"
+      }
+    ]
+  },
+  {
+    "package": "apache_tomcat",
+    "version": "1.13.0",
+    "dashboards": [
+      {
+        "id": "apache_tomcat-2a331270-b8cd-11ed-a099-3791d000f969",
+        "title": "[Metrics Apache Tomcat] Session"
+      },
+      {
+        "id": "apache_tomcat-44a8e0d0-b8f5-11ed-ac9b-cb6bcd97d223",
+        "title": "[Logs Apache Tomcat] Access"
+      },
+      {
+        "id": "apache_tomcat-5b24a9c0-0e86-11ee-8c11-879004e1a267",
+        "title": "[Metrics Apache Tomcat] Thread Pool"
+      },
+      {
+        "id": "apache_tomcat-8fd54a20-1f0d-11ee-9d6b-bb41d08322c8",
+        "title": "[Logs Apache Tomcat] Overview"
+      },
+      {
+        "id": "apache_tomcat-9c66eb10-dd0c-11ed-9f4f-d97c9f37d195",
+        "title": "[Logs Apache Tomcat] Catalina and Localhost"
+      },
+      {
+        "id": "apache_tomcat-9f21d4e0-b837-11ed-8008-cf66df3fb6bf",
+        "title": "[Metrics Apache Tomcat] Cache"
+      },
+      {
+        "id": "apache_tomcat-af7759b0-0a75-11ee-a8d8-d15950a587f6",
+        "title": "[Metrics Apache Tomcat] Connection Pool"
+      },
+      {
+        "id": "apache_tomcat-c2e71320-bccb-11ed-8065-19219c0d55ab",
+        "title": "[Metrics Apache Tomcat] Memory"
+      },
+      {
+        "id": "apache_tomcat-c8ec7280-1a57-11ee-8c1a-099fb2bcb823",
+        "title": "[Metrics Apache Tomcat] Overview "
+      },
+      {
+        "id": "apache_tomcat-c97374d0-bb78-11ed-812e-b1288b469a47",
+        "title": "[Metrics Apache Tomcat] Request"
+      }
+    ]
+  },
+  {
+    "package": "arista_ngfw",
+    "version": "1.6.2",
+    "dashboards": [
+      {
+        "id": "arista_ngfw-090e6d40-1dc4-11ee-b346-5b9e0073e798",
+        "title": "Arista NG Firewall Session Stats"
+      },
+      {
+        "id": "arista_ngfw-0f3dafe6-c66a-4d1e-a9e9-fa3fb418bfaf",
+        "title": "Arista NG Firewall Intrusion Prevention"
+      },
+      {
+        "id": "arista_ngfw-2b026f60-1cf1-11ee-b346-5b9e0073e798",
+        "title": "Arista NG Firewall Admin Login"
+      },
+      {
+        "id": "arista_ngfw-3565dc44-1886-49aa-b8d3-523623e605dc",
+        "title": "Arista NG Firewall Session Details"
+      },
+      {
+        "id": "arista_ngfw-86b139ff-92ab-4aae-b0d8-c33e3be132f1",
+        "title": "Arista NG Firewall Overview"
+      },
+      {
+        "id": "arista_ngfw-93596b63-d808-4a2f-9cbf-d0e9c4003079",
+        "title": "Arista NG Firewall System Stats"
+      },
+      {
+        "id": "arista_ngfw-a4bb8521-b9d4-4d33-be52-b4ccefb2eee1",
+        "title": "Arista NG Firewall Interface Stats"
+      },
+      {
+        "id": "arista_ngfw-c61b1eb0-1cf7-11ee-b346-5b9e0073e798",
+        "title": "Arista NG Firewall Web Filter"
+      }
+    ]
+  },
+  {
+    "package": "armis",
+    "version": "0.4.1",
+    "dashboards": [
+      {
+        "id": "armis-68592f5a-9c7b-4398-a723-510d5e48a8b1",
+        "title": "[Logs Armis] Vulnerabilities"
+      },
+      {
+        "id": "armis-8a59c91d-69fd-4cf4-ab75-e9205ecbd095",
+        "title": "[Logs Armis] Alerts"
+      },
+      {
+        "id": "armis-f988ffbb-80b9-42c2-8009-bbcc59d33347",
+        "title": "[Logs Armis] Devices"
+      }
+    ]
+  },
+  {
+    "package": "auditd",
+    "version": "3.22.1",
+    "dashboards": [
+      {
+        "id": "auditd-dfbb49f0-0a0f-11e7-8a62-2d05eaaac5cb",
+        "title": "[Logs Auditd] Audit Events"
+      }
+    ]
+  },
+  {
+    "package": "auditd_manager",
+    "version": "1.19.1",
+    "dashboards": [
+      {
+        "id": "auditd_manager-693a5f40-c243-11e7-8692-232bd1143e8a",
+        "title": "[Auditd Manager] Sockets"
+      },
+      {
+        "id": "auditd_manager-7de391b0-c1ca-11e7-8995-936807a28b16",
+        "title": "[Auditd Manager] Executions"
+      },
+      {
+        "id": "auditd_manager-c0ac2c00-c1c0-11e7-8995-936807a28b16",
+        "title": "[Auditd Manager] Overview"
+      }
+    ]
+  },
+  {
+    "package": "auth0",
+    "version": "1.23.1",
+    "dashboards": [
+      {
+        "id": "auth0-29fb7200-4062-11ec-b18d-ef6bf98b26bf",
+        "title": "Auth0"
+      }
+    ]
+  },
+  {
+    "package": "authentik",
+    "version": "1.7.1",
+    "dashboards": [
+      {
+        "id": "authentik-490ec869-2ac1-4c30-9653-7916748d4f84",
+        "title": "[Logs authentik] User and Group Overview"
+      },
+      {
+        "id": "authentik-e3c4a5f9-e47c-4cde-b755-859122e7ef80",
+        "title": "[Logs authentik] Event Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws",
+    "version": "6.3.0",
+    "dashboards": [
+      {
+        "id": "aws-07d67a60-d872-11eb-8220-c9141cc1b15c",
+        "title": "[Metrics AWS] Kinesis Overview"
+      },
+      {
+        "id": "aws-0eb5a6a0-694f-11ea-b0ac-95d4ecb1fecd",
+        "title": "[Metrics AWS] TransitGateway Overview"
+      },
+      {
+        "id": "aws-131a1550-5a0b-11ed-a807-bd2da8f2e79b",
+        "title": "[Logs AWS] Inspector Findings Overview"
+      },
+      {
+        "id": "aws-15503340-4488-11ea-ad63-791a5dc86f10",
+        "title": "[Logs AWS] VPC Flow Log Overview"
+      },
+      {
+        "id": "aws-234aeda0-43b7-11e9-8697-530f39afc6eb",
+        "title": "[Metrics AWS] SQS Overview"
+      },
+      {
+        "id": "aws-24f3e07a-b5f5-470c-8305-47c9626db37b",
+        "title": "[Metrics AWS] ALB Overview"
+      },
+      {
+        "id": "aws-2ba11b50-4b9d-11ec-8282-5342b8988acc",
+        "title": "[Logs AWS] Firewall Overview"
+      },
+      {
+        "id": "aws-3367c170-921f-11e9-aa19-159bf182e06f",
+        "title": "[Metrics AWS] RDS Overview"
+      },
+      {
+        "id": "aws-34021716-10b1-4338-807c-1a9bcb3da222",
+        "title": "[Metrics AWS] NLB Overview"
+      },
+      {
+        "id": "aws-383d4630-63df-11ed-be08-4b4db5223139",
+        "title": "[Logs AWS] Inspector Vulnerabilities"
+      },
+      {
+        "id": "aws-3abffe60-4ba9-11ec-8282-5342b8988acc",
+        "title": "[Metrics AWS] Firewall Overview"
+      },
+      {
+        "id": "aws-3af47420-3e7b-11ea-bb0a-69c3ca1d410f",
+        "title": "[Logs AWS] ELB Access Log Overview"
+      },
+      {
+        "id": "aws-3d3dbe00-f79f-11ec-aa7f-c173c0f9e267",
+        "title": "[Logs AWS] Security Hub CSPM Findings Action"
+      },
+      {
+        "id": "aws-3dc1a3a8-ae96-43aa-9065-074bda487262",
+        "title": "[Logs AWS] WAF Log Overview"
+      },
+      {
+        "id": "aws-401261a0-6a39-11ed-b880-2f1b70138655",
+        "title": "[Logs AWS] Guardduty Findings Severity"
+      },
+      {
+        "id": "aws-44ce4680-b7ba-11e9-8349-f15f850c5cd0",
+        "title": "[Metrics AWS] EBS Overview"
+      },
+      {
+        "id": "aws-4746e000-bacd-11e9-9f70-1f7bda85a5eb",
+        "title": "[Logs AWS] S3 Server Access Log Overview"
+      },
+      {
+        "id": "aws-4c404390-2724-11ee-a3cb-33de1feb08f6",
+        "title": "[Logs AWS] EMR Overview"
+      },
+      {
+        "id": "aws-5465f0f0-26e4-11ee-9051-011d57d86fe2",
+        "title": "[Logs AWS] API Gateway Overview"
+      },
+      {
+        "id": "aws-562bdea0-4ba7-11ec-8282-5342b8988acc",
+        "title": "[Logs AWS] Firewall Flows"
+      },
+      {
+        "id": "aws-58e41f29-9b73-4ba9-b5f1-3e7b8ac1924b",
+        "title": "[Metrics AWS] AWS Load Balancer Overview"
+      },
+      {
+        "id": "aws-5bbce111-827a-423f-b7b0-64ef13c28396",
+        "title": "[Logs AWS] Config"
+      },
+      {
+        "id": "aws-60881ab0-63e0-11ed-be08-4b4db5223139",
+        "title": "[Logs AWS] Inspector Severity"
+      },
+      {
+        "id": "aws-62d43b00-d10d-11ee-b93f-db5ae1f208de",
+        "title": "[Metrics AWS] MSK Overview"
+      },
+      {
+        "id": "aws-63984b70-63e1-11ed-be08-4b4db5223139",
+        "title": "[Logs AWS] Inspector EC2 and ECR Overview"
+      },
+      {
+        "id": "aws-67c9f900-693e-11ea-b0ac-95d4ecb1fecd",
+        "title": "[Metrics AWS] VPN Overview"
+      },
+      {
+        "id": "aws-67f8c833-3224-40fd-ba9f-2e7a5a8d2d18",
+        "title": "[Logs AWS] Lambda Log Overview"
+      },
+      {
+        "id": "aws-68ba7bd0-20b6-11ea-8f72-2f8d21e50b0c",
+        "title": "[Metrics AWS] DynamoDB Overview"
+      },
+      {
+        "id": "aws-7ac8e1d0-28d2-11ea-ba6c-49a884eb104f",
+        "title": "[Metrics AWS] Lambda Overview"
+      },
+      {
+        "id": "aws-80ed1380-41a6-11ec-a605-bff67d9b7872",
+        "title": "[Metrics AWS] S3 Storage Lens Overview"
+      },
+      {
+        "id": "aws-81f2c980-e743-11ec-93f6-9b98f71110cd",
+        "title": "[Metrics AWS] Redshift metrics overview"
+      },
+      {
+        "id": "aws-8fcf4c20-f7a3-11ec-aa7f-c173c0f9e267",
+        "title": "[Logs AWS] Security Hub CSPM Findings Malware, Threat Intelligence Indicator and Network Path"
+      },
+      {
+        "id": "aws-917a07b0-178e-11ea-8650-fb606deb5be4",
+        "title": "[Metrics AWS] Usage Overview"
+      },
+      {
+        "id": "aws-93b9ad3e-2dd3-40a6-a068-1440e8654d79",
+        "title": "[Logs AWS] ALB Connection Log Overview"
+      },
+      {
+        "id": "aws-9574244b-b538-4cc1-9666-8aac4ecf433e",
+        "title": "[Metrics AWS] AWS Health Overview"
+      },
+      {
+        "id": "aws-98f85120-0ea4-11ee-9c37-e55025c0278a",
+        "title": "[Metrics AWS] EMR Overview"
+      },
+      {
+        "id": "aws-9c09cd20-7399-11ea-a345-f985c61fe654",
+        "title": "[Logs AWS] CloudTrail"
+      },
+      {
+        "id": "aws-9d21f520-6a36-11ed-b880-2f1b70138655",
+        "title": "[Logs AWS] Guardduty Findings Overview"
+      },
+      {
+        "id": "aws-a096b830-4762-11e9-8062-c98a86cb6f94",
+        "title": "[Metrics AWS] S3 Overview"
+      },
+      {
+        "id": "aws-aed17a80-56d9-11ee-893f-c96e4c6c871e",
+        "title": "[Metrics AWS] API Gateway WebSocket Overview"
+      },
+      {
+        "id": "aws-bff88770-56d6-11ee-893f-c96e4c6c871e",
+        "title": "[Metrics AWS] API Gateway REST Overview"
+      },
+      {
+        "id": "aws-c2b1cbc0-6891-11ea-b0ac-95d4ecb1fecd",
+        "title": "[Metrics AWS] NATGateway Overview"
+      },
+      {
+        "id": "aws-c5846400-f7fb-11e8-af03-c999c9dea608",
+        "title": "[Metrics AWS] EC2 Overview"
+      },
+      {
+        "id": "aws-c9f103d0-5f63-11ed-bd69-473ce047ef30",
+        "title": "[Logs AWS] Security Hub CSPM Summary Dashboard"
+      },
+      {
+        "id": "aws-cc571400-dc61-11ec-a6e3-1bc5ab0aa1b4",
+        "title": "[Logs AWS] Security Hub CSPM Findings and Insights Overview"
+      },
+      {
+        "id": "aws-d17b1000-17a4-11ea-8e91-03c7047cbb9d",
+        "title": "[Metrics AWS] SNS Overview"
+      },
+      {
+        "id": "aws-df91e7f0-56d8-11ee-893f-c96e4c6c871e",
+        "title": "[Metrics AWS] API Gateway HTTP Overview"
+      },
+      {
+        "id": "aws-dfa76470-4ba1-11ec-8282-5342b8988acc",
+        "title": "[Logs AWS] Firewall Alerts"
+      },
+      {
+        "id": "aws-e6776b10-1534-11ea-841c-01bf20a6c8ba",
+        "title": "[Metrics AWS] Billing Overview"
+      },
+      {
+        "id": "aws-e74bf320-b3ce-11e9-87a4-078dbbae220d",
+        "title": "[DEPRECATED] [Metrics AWS] ELB Overview"
+      },
+      {
+        "id": "aws-eab04366-1114-4ab0-ac49-9041e0a584b1",
+        "title": "[Metrics AWS] ELB Overview"
+      },
+      {
+        "id": "aws-f890a5b0-6a3a-11ed-b880-2f1b70138655",
+        "title": "[Logs AWS] Guardduty Findings Threat"
+      },
+      {
+        "id": "aws-fac28650-7349-11e9-816b-07687310a99a",
+        "title": "[Metrics AWS] Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws_bedrock",
+    "version": "1.5.1",
+    "dashboards": [
+      {
+        "id": "aws_bedrock-14fd745a-d3c1-4ebe-bd25-00b465336cde",
+        "title": "[Amazon Bedrock] Guardrails"
+      },
+      {
+        "id": "aws_bedrock-2a19b571-251b-487b-84b2-abd887efb8a4",
+        "title": "[Amazon Bedrock] Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws_bedrock_agentcore",
+    "version": "0.7.0",
+    "dashboards": [
+      {
+        "id": "aws_bedrock_agentcore-1f2ef1c3-afab-4b23-9e8b-b966f2fe40d2",
+        "title": "[Amazon Bedrock Agentcore] Memory"
+      },
+      {
+        "id": "aws_bedrock_agentcore-3235ab43-8fa0-47f5-9590-b8d7451a4c92",
+        "title": "[Amazon Bedrock Agentcore] Agentcore runtime"
+      },
+      {
+        "id": "aws_bedrock_agentcore-5e628ac1-5bd8-48f1-acad-5a940483b81a",
+        "title": " [Amazon Bedrock Agentcore] Code interpreter"
+      },
+      {
+        "id": "aws_bedrock_agentcore-65fae3e1-0b7f-410f-81c1-67055a71c595",
+        "title": "[Amazon Bedrock Agentcore] Browser"
+      },
+      {
+        "id": "aws_bedrock_agentcore-b113ff26-879e-4ea2-b0ac-993b98ed06c4",
+        "title": "[Amazon Bedrock Agentcore] Gateway"
+      },
+      {
+        "id": "aws_bedrock_agentcore-b2372a13-4d94-43ec-8623-6c8d226dd071",
+        "title": "[Amazon Bedrock Agentcore] Identity"
+      }
+    ]
+  },
+  {
+    "package": "aws_billing",
+    "version": "0.2.1",
+    "dashboards": [
+      {
+        "id": "aws_billing-01aace34-9219-4c6c-80a9-b903af48950f",
+        "title": "[Metrics] AWS Cost and Usage Report - Current month"
+      },
+      {
+        "id": "aws_billing-81918d21-70c6-4bc0-a03e-9e298460a525",
+        "title": "[Metrics] AWS Cost and Usage Report - All time"
+      },
+      {
+        "id": "aws_billing-a716ad8e-0f77-4592-b497-6c841447efd2",
+        "title": "[Metrics] AWS Cost and Usage Report - Last 3 months"
+      },
+      {
+        "id": "aws_billing-fa467f8d-50d9-4cb0-ae88-94ef24e9941a",
+        "title": "[Metrics] AWS Cost and Usage Report - Last month"
+      },
+      {
+        "id": "aws_billing-fb79da15-4c4c-453f-9d3d-b792ce2482ff",
+        "title": "[Metrics] AWS Cost and Usage Report - Last 6 months"
+      }
+    ]
+  },
+  {
+    "package": "aws_cloudtrail_otel",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "aws_cloudtrail_otel-9bfbe31c-e775-4ee4-9e34-a449e603d109",
+        "title": "[AWS CloudTrail OTEL] CloudTrail Logs Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws_elb_otel",
+    "version": "0.1.1",
+    "dashboards": [
+      {
+        "id": "aws_elb_otel-918bae2f-9268-46da-acac-7f4029ca0bfa",
+        "title": "[AWS ELB OTEL] Access Logs Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws_mq",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "aws_mq-58348442-dc71-4ff3-acd1-b043c350153f",
+        "title": "[Amazon MQ] RabbitMQ Overview"
+      },
+      {
+        "id": "aws_mq-787931c1-b9eb-4c6d-9993-e9014e135071",
+        "title": "[Amazon MQ] ActiveMQ Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws_securityhub",
+    "version": "0.2.1",
+    "dashboards": [
+      {
+        "id": "aws_securityhub-9379d123-3593-4bac-95b7-eeb559506e35",
+        "title": "[Logs AWS Security Hub] Findings Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws_vpcflow_otel",
+    "version": "0.1.1",
+    "dashboards": [
+      {
+        "id": "aws_vpcflow_otel-ef16a22e-304a-4afa-a8d9-edcd504f15ae",
+        "title": "[AWS VPC OTEL] VPC Flow Logs Overview"
+      }
+    ]
+  },
+  {
+    "package": "aws_waf_otel",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "aws_waf_otel-d75af8de-a979-4d7e-8037-40a1e5d893ba",
+        "title": "[AWS WAF OTEL] AWS Web Application Firewall Logs Overview"
+      }
+    ]
+  },
+  {
+    "package": "awsfargate",
+    "version": "1.3.0",
+    "dashboards": [
+      {
+        "id": "awsfargate-20dc7c50-2e89-11eb-991c-c5fd3b7f5a63",
+        "title": "[AWS Fargate] Fargate Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure",
+    "version": "1.36.1",
+    "dashboards": [
+      {
+        "id": "azure-0f559cc0-f0d5-11e9-90ec-112a988266d5",
+        "title": "[Logs Azure] Alerts Overview"
+      },
+      {
+        "id": "azure-1adf52d0-f50f-11eb-a831-732d3e9bbd43",
+        "title": "[Logs Azure] Azure Spring Apps Logs System Logs"
+      },
+      {
+        "id": "azure-1e5c9b50-f24a-11ec-a5a8-bf965bcd5646",
+        "title": "[Logs Azure] Firewall Application Rule Log"
+      },
+      {
+        "id": "azure-280493a0-f1a1-11ec-a5a8-bf965bcd5646",
+        "title": "[Logs Azure] Firewall Overview"
+      },
+      {
+        "id": "azure-2b2e94c8-aff5-401d-b9a5-aae2d051a92c",
+        "title": "[Logs Azure] Microsoft Graph Activity Logs"
+      },
+      {
+        "id": "azure-32aedb00-f524-11eb-b9f3-73fa29f35762",
+        "title": "[Logs Azure] Azure Spring Apps Logs Application Console Logs"
+      },
+      {
+        "id": "azure-3cdf69c0-32d9-11ed-a2e6-916b60bbea71",
+        "title": "[Logs Azure] Microsoft Entra ID Provisioning Logs"
+      },
+      {
+        "id": "azure-41e84340-ec20-11e9-90ec-112a988266d5",
+        "title": "[Logs Azure] Cloud Overview"
+      },
+      {
+        "id": "azure-5ad41d90-f50e-11eb-a831-732d3e9bbd43",
+        "title": "[Logs Azure] Azure Spring Apps Logs Overview"
+      },
+      {
+        "id": "azure-5ee36c30-32dc-11ed-a2e6-916b60bbea71",
+        "title": "[Logs Azure] Microsoft Entra ID Identity Protection"
+      },
+      {
+        "id": "azure-87095750-f05a-11e9-90ec-112a988266d5",
+        "title": "[Logs Azure] User Activity"
+      },
+      {
+        "id": "azure-8731b980-f1aa-11ec-a5a8-bf965bcd5646",
+        "title": "[Logs Azure] Firewall Network NAT Rule Log"
+      },
+      {
+        "id": "azure-91224490-f1a6-11ec-a5a8-bf965bcd5646",
+        "title": "[Logs Azure] Firewall Network Rule Log"
+      },
+      {
+        "id": "azure-cad82b40-f251-11ec-a5a8-bf965bcd5646",
+        "title": "[Logs Azure] Firewall DNS Proxy Log"
+      }
+    ]
+  },
+  {
+    "package": "azure_ai_foundry",
+    "version": "0.9.0",
+    "dashboards": [
+      {
+        "id": "azure_ai_foundry-09e1aa79-9d15-4bbe-a32c-85766864fa6a",
+        "title": "[Microsoft Foundry] Cognitive Services Billing"
+      },
+      {
+        "id": "azure_ai_foundry-0d923e01-2082-4ba0-a1a3-335ad53f1a00",
+        "title": "[Microsoft Foundry] Overview"
+      },
+      {
+        "id": "azure_ai_foundry-284b4e05-3349-401b-94fe-9136cdb4b2fd",
+        "title": "[Microsoft Foundry] Guardrails"
+      },
+      {
+        "id": "azure_ai_foundry-2b21bfb1-6fc2-45c5-9f0f-1e15aaab5245",
+        "title": "[Microsoft Foundry] API Management"
+      }
+    ]
+  },
+  {
+    "package": "azure_app_service",
+    "version": "1.1.0",
+    "dashboards": [
+      {
+        "id": "azure_app_service-77a7f73c-86b9-4400-89c5-52f3507f8178",
+        "title": "[Azure App Service] Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_application_insights",
+    "version": "1.9.1",
+    "dashboards": [
+      {
+        "id": "azure_application_insights-d5fbd610-03d9-11eb-8034-63f2039e9d3f",
+        "title": "[Azure Metrics] App State Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_billing",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "azure_billing-d3efeb30-c1c7-11ea-b7e7-0f48178cdb3c",
+        "title": "[Azure Billing] Billing overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_frontdoor",
+    "version": "2.3.0",
+    "dashboards": [
+      {
+        "id": "azure_frontdoor-d05e0860-6ea7-11ec-bf35-712f9048d91f",
+        "title": "[Azure Frontdoor] Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_functions",
+    "version": "0.12.0",
+    "dashboards": [
+      {
+        "id": "azure_functions-5b40c9c0-33d4-11ee-8d85-2d7adebebd1b",
+        "title": "[Azure Functions] Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_metrics",
+    "version": "1.11.0",
+    "dashboards": [
+      {
+        "id": "azure_metrics-10efa340-32f8-11ea-a83e-25b8612d00cc",
+        "title": "[Azure Metrics] Queue Storage Overview"
+      },
+      {
+        "id": "azure_metrics-1a151f80-32db-11ea-a83e-25b8612d00cc",
+        "title": "[Azure Metrics] Storage Overview"
+      },
+      {
+        "id": "azure_metrics-72fe31e7-ea7d-4796-94d1-8f0a091904e2",
+        "title": "[Azure Metrics] Container Registry Overview"
+      },
+      {
+        "id": "azure_metrics-91afcc50-eaad-11e9-90ec-112a988266d5",
+        "title": "[Azure Metrics] VM Scale Sets Overview "
+      },
+      {
+        "id": "azure_metrics-9c11ac60-6cf6-11ea-8fe8-71add5fd7c38",
+        "title": "[Azure Metrics] Container Instance Overview"
+      },
+      {
+        "id": "azure_metrics-a6f5d430-eaa6-11e9-90ec-112a988266d5",
+        "title": "[Azure Metrics] Compute VM Guest ASP.NET & Sql Server"
+      },
+      {
+        "id": "azure_metrics-b165ef60-32f7-11ea-a83e-25b8612d00cc",
+        "title": "[Azure Metrics] Blob Storage Overview"
+      },
+      {
+        "id": "azure_metrics-b232c220-8481-11ea-b181-4b1a9e0110f9",
+        "title": "[Azure Metrics] Database Account Overview"
+      },
+      {
+        "id": "azure_metrics-b6b434c0-feae-11eb-8fff-87871c582eca",
+        "title": "[Azure Metrics] Compute VM Guest Memory & Process Metrics Compute VM"
+      },
+      {
+        "id": "azure_metrics-d8e3c5f0-feaf-11eb-8fff-87871c582eca",
+        "title": "[Azure Metrics] Compute VM Guest Linux Metrics Overview"
+      },
+      {
+        "id": "azure_metrics-dae20ed0-6d0a-11ea-8fe8-71add5fd7c38",
+        "title": "[Azure Metrics] Container Service Overview"
+      },
+      {
+        "id": "azure_metrics-dff7a080-32f7-11ea-a83e-25b8612d00cc",
+        "title": "[Azure Metrics] File Storage Overview"
+      },
+      {
+        "id": "azure_metrics-eb3f05f0-ea9a-11e9-90ec-112a988266d5",
+        "title": "[Azure Metrics] Compute VMs Overview"
+      },
+      {
+        "id": "azure_metrics-ff2fe020-32f7-11ea-a83e-25b8612d00cc",
+        "title": "[Azure Metrics] Table Storage Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_network_watcher_nsg",
+    "version": "1.5.1",
+    "dashboards": [
+      {
+        "id": "azure_network_watcher_nsg-0c8f22c3-153c-4466-a97c-2f250fbda5de",
+        "title": "[Logs Azure Network Watcher NSG] Azure Network Watcher NSG Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_network_watcher_vnet",
+    "version": "1.6.0",
+    "dashboards": [
+      {
+        "id": "azure_network_watcher_vnet-5ecce30b-1eba-4bd8-b440-cd266263449a",
+        "title": "[Logs Azure Network Watcher VNet] Overview"
+      }
+    ]
+  },
+  {
+    "package": "azure_openai",
+    "version": "1.11.0",
+    "dashboards": [
+      {
+        "id": "azure_openai-21d9a0d0-e6a0-4b34-bc6d-ce6560a1dab3",
+        "title": "[Azure OpenAI] Overview"
+      },
+      {
+        "id": "azure_openai-83bbaa98-7f44-4785-8774-15e0de9f74fa",
+        "title": "[Azure OpenAI] PTU Deployments"
+      },
+      {
+        "id": "azure_openai-8b09a72a-8317-4ec5-aafe-4b7d3833dcc0",
+        "title": "[Azure OpenAI] Content Filtering Overview"
+      },
+      {
+        "id": "azure_openai-f5bbc591-5e6b-4af7-b6c5-b02065a06455",
+        "title": "[Azure OpenAI] Billing"
+      }
+    ]
+  },
+  {
+    "package": "barracuda",
+    "version": "1.18.0",
+    "dashboards": [
+      {
+        "id": "barracuda-15b04f30-ca1a-11ed-b9ee-a95854a88a6d",
+        "title": "[Logs Barracuda WAF] Access logs"
+      },
+      {
+        "id": "barracuda-4c9f17f0-cee9-11ed-8bd5-2d9c9e3c9d44",
+        "title": "[Logs Barracuda WAF] System logs"
+      },
+      {
+        "id": "barracuda-8fb98ab0-ca1c-11ed-b9ee-a95854a88a6d",
+        "title": "[Logs Barracuda WAF] Overview"
+      },
+      {
+        "id": "barracuda-aab68e70-ca18-11ed-b9ee-a95854a88a6d",
+        "title": "[Logs Barracuda WAF] Web Firewall Logs"
+      },
+      {
+        "id": "barracuda-b09843d0-ca1b-11ed-b9ee-a95854a88a6d",
+        "title": "[Logs Barracuda WAF] Network Firewall logs"
+      },
+      {
+        "id": "barracuda-d86e6a10-cee9-11ed-8bd5-2d9c9e3c9d44",
+        "title": "[Logs Barracuda WAF] Audit Logs"
+      }
+    ]
+  },
+  {
+    "package": "bbot",
+    "version": "1.4.0",
+    "dashboards": [
+      {
+        "id": "bbot-8abcb381-42b3-4d99-a177-c103255eedd9",
+        "title": "BBOT Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "beaconing",
+    "version": "1.5.2",
+    "dashboards": [
+      {
+        "id": "beaconing-5c610e50-2d67-11ee-b990-0d17f5be0d77",
+        "title": "Network Beaconing"
+      },
+      {
+        "id": "beaconing-7a2c6260-2d65-11ee-b990-0d17f5be0d77",
+        "title": "Hosts Affected Over Time By Process Name"
+      },
+      {
+        "id": "beaconing-f7265fc0-2d68-11ee-b990-0d17f5be0d77",
+        "title": "Beaconing Drilldown"
+      }
+    ]
+  },
+  {
+    "package": "beelzebub",
+    "version": "0.4.0",
+    "dashboards": [
+      {
+        "id": "beelzebub-f63f2014-ff4e-4253-b21c-411c4708e759",
+        "title": "[Beelzebub] Log Summary"
+      }
+    ]
+  },
+  {
+    "package": "beyondinsight_password_safe",
+    "version": "0.12.3",
+    "dashboards": [
+      {
+        "id": "beyondinsight_password_safe-10ef927f-cc3f-4cc5-a31a-4e197143ee60",
+        "title": "[Logs Beyondinsight and Password Safe] Session and Assets"
+      },
+      {
+        "id": "beyondinsight_password_safe-9a5cd258-b7de-47bf-b17c-a3bd1c563b4c",
+        "title": "[Logs Beyondinsight and Password Safe] Overview"
+      }
+    ]
+  },
+  {
+    "package": "beyondtrust_pra",
+    "version": "0.3.3",
+    "dashboards": [
+      {
+        "id": "beyondtrust_pra-7227e888-45cd-4e05-8ac3-f7d18c367bec",
+        "title": "[Logs BeyondTrust PRA] Access Session Overview"
+      }
+    ]
+  },
+  {
+    "package": "bitdefender",
+    "version": "2.7.0",
+    "dashboards": [
+      {
+        "id": "bitdefender-2f44ead0-9317-11ed-9924-a700c5ac9877",
+        "title": "[BitDefender GravityZone] Push Notifications"
+      },
+      {
+        "id": "bitdefender-493d5300-9317-11ed-9924-a700c5ac9877",
+        "title": "[BitDefender GravityZone] Configuration State & Statistics"
+      }
+    ]
+  },
+  {
+    "package": "bitwarden",
+    "version": "1.18.0",
+    "dashboards": [
+      {
+        "id": "bitwarden-63396370-b37e-11ed-9607-677b4c473c8b",
+        "title": "[Logs Bitwarden] Policy"
+      },
+      {
+        "id": "bitwarden-89884710-b362-11ed-9607-677b4c473c8b",
+        "title": "[Logs Bitwarden] Member"
+      },
+      {
+        "id": "bitwarden-9602fa40-b370-11ed-9607-677b4c473c8b",
+        "title": "[Logs Bitwarden] Group and Collection"
+      },
+      {
+        "id": "bitwarden-a9819650-b36e-11ed-9607-677b4c473c8b",
+        "title": "[Logs Bitwarden] Event"
+      }
+    ]
+  },
+  {
+    "package": "blacklens",
+    "version": "0.5.0",
+    "dashboards": [
+      {
+        "id": "blacklens-e718fd52-f1b3-400f-94c1-ead17da571f6",
+        "title": "blacklens.io Alerts"
+      }
+    ]
+  },
+  {
+    "package": "canva",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "canva-062b09b1-072e-4582-bc50-61cfb47f4dc1",
+        "title": "[Logs Canva] Audit"
+      }
+    ]
+  },
+  {
+    "package": "carbon_black_cloud",
+    "version": "4.2.0",
+    "dashboards": [
+      {
+        "id": "carbon_black_cloud-06a8d7f0-3b04-11ed-a8e8-41eb8778c6de",
+        "title": "[Logs Carbon Black Cloud] Endpoint Event"
+      },
+      {
+        "id": "carbon_black_cloud-0954fb80-3a6c-11ed-a8e8-41eb8778c6de",
+        "title": "[Logs Carbon Black Cloud] Alert V7"
+      },
+      {
+        "id": "carbon_black_cloud-44209d90-3a7b-11ed-a8e8-41eb8778c6de",
+        "title": "[Logs Carbon Black Cloud] Audit"
+      },
+      {
+        "id": "carbon_black_cloud-4d08ffd0-3b19-11ed-a8e8-41eb8778c6de",
+        "title": "[Logs Carbon Black Cloud] Watchlist Hit"
+      },
+      {
+        "id": "carbon_black_cloud-a1f898e0-3a72-11ed-a8e8-41eb8778c6de",
+        "title": "[Logs Carbon Black Cloud] Asset Vulnerability Summary"
+      }
+    ]
+  },
+  {
+    "package": "cassandra",
+    "version": "1.20.0",
+    "dashboards": [
+      {
+        "id": "cassandra-25b7d6d0-1c71-11ec-84f1-e1733c643874",
+        "title": "[Metrics Cassandra] Overview"
+      },
+      {
+        "id": "cassandra-49e4e6e0-cc54-11ec-8c59-ed6efced90da",
+        "title": "[Logs Cassandra] System Logs"
+      }
+    ]
+  },
+  {
+    "package": "cef",
+    "version": "2.23.1",
+    "dashboards": [
+      {
+        "id": "cef-94b61170-df6e-11ed-8526-4bc8ac136f5d",
+        "title": "[Logs CEF] Overview"
+      },
+      {
+        "id": "cef-a523d2b0-e02a-11ed-b85e-cd53778a26e7",
+        "title": "[Logs CEF] ArcSight Overview"
+      },
+      {
+        "id": "cef-cf73e280-e02a-11ed-b85e-cd53778a26e7",
+        "title": "[Logs CEF] Host Overview"
+      },
+      {
+        "id": "cef-eff8c340-df62-11ed-aa5d-27664439c875",
+        "title": "[Logs CEF] Network Overview"
+      }
+    ]
+  },
+  {
+    "package": "ceph",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "ceph-b2083fa0-9e0a-11ed-9f4a-79c03177b9dc",
+        "title": "[Metrics Ceph] Overview"
+      }
+    ]
+  },
+  {
+    "package": "checkpoint",
+    "version": "1.45.3",
+    "dashboards": [
+      {
+        "id": "checkpoint-259c5770-bd5b-11ed-b58e-dda7b2de7340",
+        "title": "[Check Point] Overview"
+      },
+      {
+        "id": "checkpoint-71094a90-bd49-11ed-b58e-dda7b2de7340",
+        "title": "[Check Point] Time and Traffic"
+      },
+      {
+        "id": "checkpoint-840b87b0-bd68-11ed-bda5-b56d80cf13c4",
+        "title": "[Check Point] Addresses and Ports"
+      },
+      {
+        "id": "checkpoint-e4daa100-bcb1-11ed-b8ec-2fbdd87e0d2f",
+        "title": "[Check Point] Time and Place"
+      }
+    ]
+  },
+  {
+    "package": "checkpoint_email",
+    "version": "1.3.2",
+    "dashboards": [
+      {
+        "id": "checkpoint_email-1404d9d9-994a-4d46-aa40-339e43179cf2",
+        "title": "[Logs Check Point Harmony Email & Collaboration] Event Overview"
+      }
+    ]
+  },
+  {
+    "package": "checkpoint_harmony_endpoint",
+    "version": "1.0.1",
+    "dashboards": [
+      {
+        "id": "checkpoint_harmony_endpoint-75b9a9f1-9671-4d51-a418-fed3fb5e274c",
+        "title": "[Logs Check Point Harmony Endpoint] Overview"
+      }
+    ]
+  },
+  {
+    "package": "cisa_kevs",
+    "version": "1.7.0",
+    "dashboards": [
+      {
+        "id": "cisa_kevs-dcb4dd40-d17a-11ee-b159-799470efb549",
+        "title": "[Vulnerability] CISA Known Exploited Vulnerabilities"
+      }
+    ]
+  },
+  {
+    "package": "cisco_asa",
+    "version": "2.45.0",
+    "dashboards": [
+      {
+        "id": "cisco_asa-a555b160-4987-11e9-b8ce-ed898b5ef295",
+        "title": "[Cisco] ASA Firewall"
+      }
+    ]
+  },
+  {
+    "package": "cisco_duo",
+    "version": "2.8.0",
+    "dashboards": [
+      {
+        "id": "cisco_duo-0607d4a3-5322-41c1-b8fa-f0d29bcc2757",
+        "title": "[Logs Cisco Duo] Trust Monitor"
+      },
+      {
+        "id": "cisco_duo-118061c3-3130-4c71-8899-157bab1ad447",
+        "title": "[Logs Cisco Duo] Activities"
+      },
+      {
+        "id": "cisco_duo-5a0b80af-49ad-42ee-89b7-c89faa927826",
+        "title": "[Logs Cisco Duo] Offline Enrollment"
+      },
+      {
+        "id": "cisco_duo-7a135061-78a3-45d9-951b-4b9b665fa729",
+        "title": "[Logs Cisco Duo] Administrator"
+      },
+      {
+        "id": "cisco_duo-b386f94c-0856-4508-ba08-a525a2f3b70f",
+        "title": "[Logs Cisco Duo] Telephony"
+      },
+      {
+        "id": "cisco_duo-c3336a66-68ff-4bcd-95ff-fb388793f721",
+        "title": "[Logs Cisco Duo] Authentication"
+      },
+      {
+        "id": "cisco_duo-e91470e5-2ded-4ff1-8bb5-24e06b949c1d",
+        "title": "[Logs Cisco Duo] Summary"
+      }
+    ]
+  },
+  {
+    "package": "cisco_ise",
+    "version": "1.32.1",
+    "dashboards": [
+      {
+        "id": "cisco_ise-44afda90-3991-11ed-bb16-3b8b6259e7b8",
+        "title": "[Logs Cisco ISE] Posture and Client Provisioning Audit"
+      },
+      {
+        "id": "cisco_ise-506e8200-39a5-11ed-a2b2-1d4b9d412e28",
+        "title": "[Logs Cisco ISE] AAA Diagnostics"
+      },
+      {
+        "id": "cisco_ise-6b611af0-39a0-11ed-a2b2-1d4b9d412e28",
+        "title": "[Logs Cisco ISE] System Statistics"
+      },
+      {
+        "id": "cisco_ise-a42bdb60-39a8-11ed-a2b2-1d4b9d412e28",
+        "title": "[Logs Cisco ISE] Accounting"
+      },
+      {
+        "id": "cisco_ise-db12cdf0-3a2f-11ed-a2b2-1d4b9d412e28",
+        "title": "[Logs Cisco ISE] Administrative and Operational Audit"
+      },
+      {
+        "id": "cisco_ise-e0ca7fa0-398e-11ed-bb16-3b8b6259e7b8",
+        "title": "[Logs Cisco ISE] System Diagnostics"
+      },
+      {
+        "id": "cisco_ise-e2146a20-39a1-11ed-a2b2-1d4b9d412e28",
+        "title": "[Logs Cisco ISE] AAA Audit"
+      },
+      {
+        "id": "cisco_ise-fcb9bc40-3a32-11ed-a2b2-1d4b9d412e28",
+        "title": "[Logs Cisco ISE] Cisco ISE Overview"
+      }
+    ]
+  },
+  {
+    "package": "cisco_meraki",
+    "version": "1.31.1",
+    "dashboards": [
+      {
+        "id": "cisco_meraki-4832a430-af22-11ec-a899-6f7e676e0fb4",
+        "title": "[Logs Cisco Meraki Syslog Events] Overview"
+      }
+    ]
+  },
+  {
+    "package": "cisco_meraki_metrics",
+    "version": "0.4.3",
+    "dashboards": [
+      {
+        "id": "cisco_meraki_metrics-d6b9863a-88e2-4e3d-a2a7-36ca1ee525b1",
+        "title": "[Metrics Cisco Meraki] Device Health Overview"
+      }
+    ]
+  },
+  {
+    "package": "cisco_nexus",
+    "version": "1.6.0",
+    "dashboards": [
+      {
+        "id": "cisco_nexus-cf3deb30-f56f-11ed-8e0a-bfd488deb0b8",
+        "title": "[Logs Cisco Nexus] Overview"
+      }
+    ]
+  },
+  {
+    "package": "cisco_secure_email_gateway",
+    "version": "1.29.0",
+    "dashboards": [
+      {
+        "id": "cisco_secure_email_gateway-3e3a4de0-b00b-11ec-8a45-8d83ac55242a",
+        "title": "[Logs Cisco Secure Email Gateway] Status"
+      },
+      {
+        "id": "cisco_secure_email_gateway-406c0f90-6da1-11ee-bfeb-7b49e926f7c6",
+        "title": "[Logs Cisco Secure Email Gateway] Antivirus"
+      },
+      {
+        "id": "cisco_secure_email_gateway-6a11cbc0-b513-11ec-aa3c-afc0e710666b",
+        "title": "[Logs Cisco Secure Email Gateway] AMP Engine"
+      },
+      {
+        "id": "cisco_secure_email_gateway-97ab0d40-b63e-11ec-b665-f79f0daaad54",
+        "title": "[Logs Cisco Secure Email Gateway] Anti-Spam and Authentication"
+      },
+      {
+        "id": "cisco_secure_email_gateway-a1060e90-b025-11ec-8a45-8d83ac55242a",
+        "title": "[Logs Cisco Secure Email Gateway] GUI"
+      },
+      {
+        "id": "cisco_secure_email_gateway-b9591cf0-b640-11ec-b665-f79f0daaad54",
+        "title": "[Logs Cisco Secure Email Gateway] Error, Content Scanner and System"
+      },
+      {
+        "id": "cisco_secure_email_gateway-be7e9c00-b055-11ec-8a45-8d83ac55242a",
+        "title": "[Logs Cisco Secure Email Gateway] Consolidated Event"
+      },
+      {
+        "id": "cisco_secure_email_gateway-c19f7c50-b05b-11ec-8a45-8d83ac55242a",
+        "title": "[Logs Cisco Secure Email Gateway] Text Mail"
+      },
+      {
+        "id": "cisco_secure_email_gateway-c94a00a0-b0a7-11ec-8a45-8d83ac55242a",
+        "title": "[Logs Cisco Secure Email Gateway] Bounce"
+      }
+    ]
+  },
+  {
+    "package": "cisco_secure_endpoint",
+    "version": "2.33.1",
+    "dashboards": [
+      {
+        "id": "cisco_secure_endpoint-bc8dfe81-c26c-44d5-aa26-029f950d0355",
+        "title": "[Logs Cisco Secure Endpoint] Overview"
+      }
+    ]
+  },
+  {
+    "package": "cisco_umbrella",
+    "version": "1.33.1",
+    "dashboards": [
+      {
+        "id": "cisco_umbrella-52778e55-96ca-49b8-b5f9-52d98926f24c",
+        "title": "[Cisco Umbrella] Intrusion Logs"
+      },
+      {
+        "id": "cisco_umbrella-6b6c7d99-a9ce-4c9e-9353-f1faa526b581",
+        "title": "[Cisco Umbrella] Firewall Logs"
+      },
+      {
+        "id": "cisco_umbrella-705d7e02-5f16-49f7-bfaa-b356db752799",
+        "title": "[Cisco Umbrella] DNS Logs"
+      },
+      {
+        "id": "cisco_umbrella-88287dc7-c649-4a11-9918-3586bf120934",
+        "title": "[Cisco Umbrella] Proxy Logs"
+      },
+      {
+        "id": "cisco_umbrella-91f35333-9f4a-48b3-a38c-daca5b114801",
+        "title": "[Cisco Umbrella] Overview"
+      },
+      {
+        "id": "cisco_umbrella-9f665f8f-4653-41f8-8cb5-7eb09af3d047",
+        "title": "[Cisco Umbrella] Audit Logs"
+      }
+    ]
+  },
+  {
+    "package": "citrix_adc",
+    "version": "1.18.4",
+    "dashboards": [
+      {
+        "id": "citrix_adc-2b30a8f0-4fa9-11ed-8fa7-7bab33159b99",
+        "title": "[Metrics Citrix ADC] Load Balancing Virtual Server"
+      },
+      {
+        "id": "citrix_adc-73ef1be0-485a-11ed-aee6-31b55c85e6df",
+        "title": "[Metrics Citrix ADC] System"
+      },
+      {
+        "id": "citrix_adc-8d0661f0-4fa4-11ed-8fa7-7bab33159b99",
+        "title": "[Metrics Citrix ADC] Service"
+      },
+      {
+        "id": "citrix_adc-95709fd0-e130-11ee-adb0-b71252739438",
+        "title": "[Logs Citrix ADC] Overview"
+      },
+      {
+        "id": "citrix_adc-abcd5660-4947-11ed-9b28-1f7d06bfd481",
+        "title": "[Metrics Citrix ADC] VPN"
+      },
+      {
+        "id": "citrix_adc-b475f280-4eb1-11ed-9db6-73aea65de09b",
+        "title": "[Metrics Citrix ADC] Interface"
+      },
+      {
+        "id": "citrix_adc-c4b9b970-3d99-11ed-9f8b-1bc5a55dfeec",
+        "title": "[Metrics Citrix ADC] Overview"
+      }
+    ]
+  },
+  {
+    "package": "citrix_waf",
+    "version": "1.20.0",
+    "dashboards": [
+      {
+        "id": "citrix_waf-4b27aee0-0893-11ed-aba8-a72ea09ca7ef",
+        "title": "[Citrix Web Application Firewall] Overview"
+      }
+    ]
+  },
+  {
+    "package": "claroty_ctd",
+    "version": "1.1.2",
+    "dashboards": [
+      {
+        "id": "claroty_ctd-0f0d9db1-dbf3-4d2f-b87c-c5d75e6ea62d",
+        "title": "[Logs Claroty CTD] Activity Log"
+      },
+      {
+        "id": "claroty_ctd-1051aba6-db32-473c-a24d-3b9200f22f17",
+        "title": "[Logs Claroty CTD] Overview"
+      },
+      {
+        "id": "claroty_ctd-3ff35f11-fb3c-40b1-bb47-a0d5345fc0c7",
+        "title": "[Logs Claroty CTD] Baseline"
+      },
+      {
+        "id": "claroty_ctd-66d8c2cc-eeb7-420e-8c83-9c0cae66a7fe",
+        "title": "[Logs Claroty CTD] Events"
+      },
+      {
+        "id": "claroty_ctd-a91b7c98-8dd4-479e-bc35-71641c85db97",
+        "title": "[Logs Claroty CTD] Alerts"
+      },
+      {
+        "id": "claroty_ctd-b7e0ad66-86c3-4b72-ae19-0576ed9fb1d6",
+        "title": "[Logs Claroty CTD] Health Check"
+      },
+      {
+        "id": "claroty_ctd-ce5edf6b-6671-4d1e-adc0-834a76ff9169",
+        "title": "[Logs Claroty CTD] Asset"
+      },
+      {
+        "id": "claroty_ctd-e2106b06-3d16-4014-9343-f63ebb90a114",
+        "title": "[Logs Claroty CTD] Insights"
+      }
+    ]
+  },
+  {
+    "package": "claroty_xdome",
+    "version": "1.0.1",
+    "dashboards": [
+      {
+        "id": "claroty_xdome-1a6db475-9ab4-4970-9684-9a427321a765",
+        "title": "[Logs Claroty xDome] Alert"
+      },
+      {
+        "id": "claroty_xdome-9d8a86b9-6253-4aa6-8f5c-06f4dce86a59",
+        "title": "[Logs Claroty xDome] Vulnerability"
+      },
+      {
+        "id": "claroty_xdome-9dc03d8d-e798-4bad-a368-c21468a5eeea",
+        "title": "[Logs Claroty xDome] Event"
+      }
+    ]
+  },
+  {
+    "package": "cloudflare",
+    "version": "2.32.1",
+    "dashboards": [
+      {
+        "id": "cloudflare-095f3a00-23d6-11e9-ba08-c19298cded24",
+        "title": "[Cloudflare] Overview"
+      },
+      {
+        "id": "cloudflare-532a64c0-293a-11e9-b959-4502c43b2e30",
+        "title": "[Cloudflare] Security (Overview)"
+      },
+      {
+        "id": "cloudflare-5a5d6b80-49b9-11e9-bd1f-75f359ac0c3f",
+        "title": "[Cloudflare] Clients"
+      },
+      {
+        "id": "cloudflare-8d730ba0-3aa6-11e9-bd1f-75f359ac0c3f",
+        "title": "[Cloudflare] Performance"
+      },
+      {
+        "id": "cloudflare-9c4c3100-39df-11e9-bd1f-75f359ac0c3f",
+        "title": "[Cloudflare] Reliability"
+      },
+      {
+        "id": "cloudflare-a35b4880-49a9-11e9-bd1f-75f359ac0c3f",
+        "title": "[Cloudflare] Content"
+      },
+      {
+        "id": "cloudflare-b221c710-2963-11e9-b959-4502c43b2e30",
+        "title": "[Cloudflare] Security (Rate Limiting)"
+      },
+      {
+        "id": "cloudflare-ded7e2c0-2955-11e9-b959-4502c43b2e30",
+        "title": "[Cloudflare] Security (WAF)"
+      }
+    ]
+  },
+  {
+    "package": "cloudflare_logpush",
+    "version": "1.43.3",
+    "dashboards": [
+      {
+        "id": "cloudflare_logpush-09ef2620-58a5-11ee-99a4-d186f5240e2e",
+        "title": "[Logs Cloudflare Logpush] Magic IDS Detections"
+      },
+      {
+        "id": "cloudflare_logpush-0f1c8080-04b2-11ee-8373-5fabaa30ca64",
+        "title": "[Logs Cloudflare Logpush] Gateway HTTP"
+      },
+      {
+        "id": "cloudflare_logpush-11e340a0-04bd-11ee-8373-5fabaa30ca64",
+        "title": "[Logs Cloudflare Logpush] Network Session Logs"
+      },
+      {
+        "id": "cloudflare_logpush-3da7bd20-dc45-11ec-b76d-adcfe05cc1fe",
+        "title": "[Logs Cloudflare Logpush] Network Analytics"
+      },
+      {
+        "id": "cloudflare_logpush-5b1248c0-044a-11ee-8373-5fabaa30ca64",
+        "title": "[Logs Cloudflare Logpush] Audit"
+      },
+      {
+        "id": "cloudflare_logpush-5de148d0-04ae-11ee-8373-5fabaa30ca64",
+        "title": "[Logs Cloudflare Logpush] Gateway DNS"
+      },
+      {
+        "id": "cloudflare_logpush-67684710-0151-11ee-a051-4174215e3eb2",
+        "title": "[Logs Cloudflare Logpush] Zero Trust overview"
+      },
+      {
+        "id": "cloudflare_logpush-6f14e840-0450-11ee-8373-5fabaa30ca64",
+        "title": "[Logs Cloudflare Logpush] CASB findings"
+      },
+      {
+        "id": "cloudflare_logpush-78731300-047b-11ee-8373-5fabaa30ca64",
+        "title": "[Logs Cloudflare Logpush] Device Posture"
+      },
+      {
+        "id": "cloudflare_logpush-87f6ad60-dc44-11ec-b76d-adcfe05cc1fe",
+        "title": "[Logs Cloudflare Logpush] DNS"
+      },
+      {
+        "id": "cloudflare_logpush-8ae621f0-04ba-11ee-8373-5fabaa30ca64",
+        "title": "[Logs Cloudflare Logpush] Gateway Network"
+      },
+      {
+        "id": "cloudflare_logpush-940b5bb0-015e-11ee-a051-4174215e3eb2",
+        "title": "[Logs Cloudflare Logpush] Access Requests"
+      },
+      {
+        "id": "cloudflare_logpush-9c472060-58c6-11ee-99a4-d186f5240e2e",
+        "title": "[Logs Cloudflare Logpush] DNS Firewall"
+      },
+      {
+        "id": "cloudflare_logpush-a32a0690-dc44-11ec-b76d-adcfe05cc1fe",
+        "title": "[Logs Cloudflare Logpush] Firewall Event"
+      },
+      {
+        "id": "cloudflare_logpush-a32dd850-2ad7-11ee-87da-672c93538971",
+        "title": "[Logs Cloudflare Logpush] Workers Trace Events"
+      },
+      {
+        "id": "cloudflare_logpush-bb426420-dc44-11ec-b76d-adcfe05cc1fe",
+        "title": "[Logs Cloudflare Logpush] HTTP Request"
+      },
+      {
+        "id": "cloudflare_logpush-cc375d30-dc44-11ec-b76d-adcfe05cc1fe",
+        "title": "[Logs Cloudflare Logpush] NEL Report"
+      },
+      {
+        "id": "cloudflare_logpush-da55ddb0-dc44-11ec-b76d-adcfe05cc1fe",
+        "title": "[Logs Cloudflare Logpush] Spectrum Event"
+      },
+      {
+        "id": "cloudflare_logpush-fe4ebba0-58bd-11ee-99a4-d186f5240e2e",
+        "title": "[Logs Cloudflare Logpush] Sinkhole HTTP"
+      }
+    ]
+  },
+  {
+    "package": "cockroachdb",
+    "version": "1.13.1",
+    "dashboards": [
+      {
+        "id": "cockroachdb-e3ba0c30-9766-11e9-9eea-6f554992ec1f",
+        "title": "[CockroachDB Metrics] Overview"
+      }
+    ]
+  },
+  {
+    "package": "containerd",
+    "version": "0.6.0",
+    "dashboards": [
+      {
+        "id": "containerd-53ba62e0-79dd-11ec-af32-5f2c93bb0f7e",
+        "title": "[Metrics Containerd] Overview"
+      }
+    ]
+  },
+  {
+    "package": "coredns",
+    "version": "0.10.0",
+    "dashboards": [
+      {
+        "id": "coredns-8a1ad3ad-2439-452f-ae43-9e10fc076b7c",
+        "title": "[Filebeat CoreDNS] Overview"
+      }
+    ]
+  },
+  {
+    "package": "couchbase",
+    "version": "1.9.1",
+    "dashboards": [
+      {
+        "id": "couchbase-46d21220-b9f1-11e9-a579-f5c0a5d81340",
+        "title": "[Metrics Couchbase] Metrics Overview"
+      },
+      {
+        "id": "couchbase-5bb3ed20-149e-11ed-96ce-858de47efb79",
+        "title": "[Metrics Couchbase] Sync Gateway Overview"
+      },
+      {
+        "id": "couchbase-7b3a1e60-2765-11ed-a32e-e542f57b60ed",
+        "title": "[Metrics Couchbase] XDCR Overview"
+      },
+      {
+        "id": "couchbase-90c39130-4605-11ed-9baf-d1d2c660068a",
+        "title": "[Metrics Couchbase] Node Overview"
+      }
+    ]
+  },
+  {
+    "package": "couchdb",
+    "version": "1.5.1",
+    "dashboards": [
+      {
+        "id": "couchdb-53dd9860-f87b-11ec-ba64-15286f858e89",
+        "title": "[Metrics CouchDB] Server"
+      }
+    ]
+  },
+  {
+    "package": "cribl",
+    "version": "1.0.1",
+    "dashboards": [
+      {
+        "id": "cribl-220597a9-3b61-4198-8f39-002cd202b178",
+        "title": "[Logs Cribl] Logs Overview"
+      },
+      {
+        "id": "cribl-3b258466-c0ad-4819-a793-003099c1bbf9",
+        "title": "[Metrics Cribl] Metrics Overview"
+      }
+    ]
+  },
+  {
+    "package": "crowdstrike",
+    "version": "3.9.0",
+    "dashboards": [
+      {
+        "id": "crowdstrike-2921b7f0-99b5-11ee-bf4d-afbc95e0486c",
+        "title": "[Logs CrowdStrike] Host"
+      },
+      {
+        "id": "crowdstrike-63da2573-4e68-4e7d-a06b-6858edb60fd5",
+        "title": "[Logs Crowdstrike] Vulnerability"
+      },
+      {
+        "id": "crowdstrike-a4972bc0-fb53-11eb-abed-07307b3f2b0f",
+        "title": "[Crowdstrike] FDR Overview"
+      },
+      {
+        "id": "crowdstrike-ad80a080-821b-11ee-bae0-937af575b750",
+        "title": "[Crowdstrike] Falcon Overview"
+      },
+      {
+        "id": "crowdstrike-d8070b00-99b3-11ee-bf4d-afbc95e0486c",
+        "title": "[Logs CrowdStrike] Alert"
+      },
+      {
+        "id": "crowdstrike-e64e8fe0-8210-11ee-bae0-937af575b750",
+        "title": "[Crowdstrike] Overview"
+      }
+    ]
+  },
+  {
+    "package": "cyberark_epm",
+    "version": "1.3.1",
+    "dashboards": [
+      {
+        "id": "cyberark_epm-235e1190-62b9-4d30-99d9-f6d640a5065f",
+        "title": "[Logs CyberArk EPM] Event Overview"
+      },
+      {
+        "id": "cyberark_epm-503ef0b0-fbbb-458c-96a1-e6a5d9f5810a",
+        "title": "[Logs CyberArk EPM] Policy Audit Overview"
+      },
+      {
+        "id": "cyberark_epm-b015df85-92b5-450a-91d4-4ff8bd9505f4",
+        "title": "[Logs CyberArk EPM] Admin Audit Overview"
+      }
+    ]
+  },
+  {
+    "package": "cyberark_pta",
+    "version": "1.15.0",
+    "dashboards": [
+      {
+        "id": "cyberark_pta-eea41650-18bd-11ed-9abd-41a4c44d6e7d",
+        "title": "[CyberArk PTA] Event overview"
+      }
+    ]
+  },
+  {
+    "package": "cyberarkpas",
+    "version": "2.28.0",
+    "dashboards": [
+      {
+        "id": "cyberarkpas-1c083996-84f6-472f-a818-4ad5060efc81",
+        "title": "[Logs CyberArk PAS] Monitoring"
+      },
+      {
+        "id": "cyberarkpas-eb12ef60-96f6-11eb-bbf8-d77aef8ad7a6",
+        "title": "[Logs CyberArk PAS] Overview"
+      }
+    ]
+  },
+  {
+    "package": "cybereason",
+    "version": "1.5.0",
+    "dashboards": [
+      {
+        "id": "cybereason-1aad66f0-9e9b-4795-90b6-79ee2f1f3fe9",
+        "title": "[Logs Malware] Cybereason"
+      },
+      {
+        "id": "cybereason-5446c6fd-4522-4fdc-a6d7-e42d46a30b7d",
+        "title": "[Logs Suspicions Process] Cybereason "
+      },
+      {
+        "id": "cybereason-8cd3601b-06e9-4c3e-a94f-e5a851a76fb9",
+        "title": "[Logs Malop Connection] Cybereason"
+      },
+      {
+        "id": "cybereason-bd4e9dde-68a3-4658-b4c5-b7b5395a05c7",
+        "title": "[Logs Malop Process] Cybereason"
+      },
+      {
+        "id": "cybereason-d5ebb256-640d-44e8-a1d2-123c8866e61d",
+        "title": "[Logs Logon Session] Cybereason"
+      },
+      {
+        "id": "cybereason-d7c34832-3555-484f-adde-43c071909eef",
+        "title": "[Logs Poll Malop] Cybereason"
+      }
+    ]
+  },
+  {
+    "package": "cyera",
+    "version": "0.5.0",
+    "dashboards": [
+      {
+        "id": "cyera-6737957a-301f-446f-81a3-78c70251f7df",
+        "title": "[Logs Cyera] Classification"
+      },
+      {
+        "id": "cyera-cf848001-ffb2-40f0-baac-edd6d5eec631",
+        "title": "[Logs Cyera] Datastore"
+      },
+      {
+        "id": "cyera-d44c2c43-2457-4c72-84ee-23639beeed1f",
+        "title": "[Logs Cyera] Event"
+      },
+      {
+        "id": "cyera-db5aefa7-05b8-4a10-9cb6-55a71c617e29",
+        "title": "[Logs Cyera] Issue"
+      }
+    ]
+  },
+  {
+    "package": "darktrace",
+    "version": "2.0.0",
+    "dashboards": [
+      {
+        "id": "darktrace-6bd3c320-13b2-11ed-bdc1-9f13147efcf8",
+        "title": "[Logs Darktrace] System Status Alerts Overview"
+      },
+      {
+        "id": "darktrace-da768d80-1399-11ed-bdc1-9f13147efcf8",
+        "title": "[Logs Darktrace] Model Breach Alerts Overview"
+      },
+      {
+        "id": "darktrace-eb643d20-13a5-11ed-bdc1-9f13147efcf8",
+        "title": "[Logs Darktrace] AI Analyst Alerts Overview"
+      }
+    ]
+  },
+  {
+    "package": "ded",
+    "version": "2.4.1",
+    "dashboards": [
+      {
+        "id": "ded-c0d7f060-7a6b-11ed-9b26-4bb95b2c57a6",
+        "title": "Data Exfiltration Detection Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "digital_guardian",
+    "version": "1.7.1",
+    "dashboards": [
+      {
+        "id": "digital_guardian-908d6e88-1972-4ec5-95de-acdbca2659ce",
+        "title": "[Logs Digital Guardian] Overview"
+      }
+    ]
+  },
+  {
+    "package": "docker",
+    "version": "2.15.0",
+    "dashboards": [
+      {
+        "id": "docker-AV4REOpp5NkDleZmzKkE",
+        "title": "[Metrics Docker] Overview"
+      }
+    ]
+  },
+  {
+    "package": "docker_otel",
+    "version": "0.2.0",
+    "dashboards": [
+      {
+        "id": "docker_otel-56a63a68-2c29-48f3-ba77-5020e5f88bba",
+        "title": "[Metrics Docker] Container Stats"
+      },
+      {
+        "id": "docker_otel-89b3721a-c290-4b7f-a89a-b2efc58a5b0c",
+        "title": "[Metrics Docker] Overview"
+      }
+    ]
+  },
+  {
+    "package": "ece",
+    "version": "0.0.2",
+    "dashboards": [
+      {
+        "id": "ece-0bbc7514-652f-4368-ad22-78b824e3c813",
+        "title": "[Elastic Cloud Enterprise] Audit Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "elastic_agent",
+    "version": "2.7.3",
+    "dashboards": [
+      {
+        "id": "elastic_agent-02117980-6082-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] Entity Analytics Input Metrics"
+      },
+      {
+        "id": "elastic_agent-0600ffa0-6b5e-11ed-98de-67bdecd21824",
+        "title": "[Elastic Agent] Concerning Agents"
+      },
+      {
+        "id": "elastic_agent-077f7390-6087-11f0-b451-cd284a6efe62",
+        "title": "[Elastic Agent] Lumberjack Input Metrics"
+      },
+      {
+        "id": "elastic_agent-0f79f070-6082-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] Azure Eventhub Input Metrics"
+      },
+      {
+        "id": "elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824",
+        "title": "[Elastic Agent] Integrations"
+      },
+      {
+        "id": "elastic_agent-1badd650-d136-11ed-b85f-4be0157fc90c",
+        "title": "[Elastic Agent] Winlog Input Metrics"
+      },
+      {
+        "id": "elastic_agent-3718c2f0-6082-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] Azure Blob Storage Input Metrics"
+      },
+      {
+        "id": "elastic_agent-77cdb1c0-cd45-11ed-869d-e7dc1b551cd2",
+        "title": "[Elastic Agent] S3 Input Metrics"
+      },
+      {
+        "id": "elastic_agent-7986a100-9817-11ee-80a4-550241a842c0",
+        "title": "[Elastic Agent] HTTP Endpoint Input Metrics"
+      },
+      {
+        "id": "elastic_agent-7d110ba0-cd45-11ed-869d-e7dc1b551cd2",
+        "title": "[Elastic Agent] TCP Input Metrics"
+      },
+      {
+        "id": "elastic_agent-86203230-6081-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] Unix Input Metrics"
+      },
+      {
+        "id": "elastic_agent-87ad4330-cd45-11ed-869d-e7dc1b551cd2",
+        "title": "[Elastic Agent] UDP Input Metrics"
+      },
+      {
+        "id": "elastic_agent-92846340-95ab-11ee-8ec1-093013efb0e3",
+        "title": "[Elastic Agent] Httpjson Input Metrics"
+      },
+      {
+        "id": "elastic_agent-9eab2fa0-5e7c-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] Unified Logs Input Metrics"
+      },
+      {
+        "id": "elastic_agent-a148dc70-6b3c-11ed-98de-67bdecd21824",
+        "title": "[Elastic Agent] Overview"
+      },
+      {
+        "id": "elastic_agent-a7b5e7a0-cd44-11ed-869d-e7dc1b551cd2",
+        "title": "[Elastic Agent] CloudWatch Input Metrics"
+      },
+      {
+        "id": "elastic_agent-a8192f90-cd3f-11ed-869d-e7dc1b551cd2",
+        "title": "[Elastic Agent] Input Metrics"
+      },
+      {
+        "id": "elastic_agent-b7719f90-6081-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] Streaming Input Metrics"
+      },
+      {
+        "id": "elastic_agent-ddcc3240-6081-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] Google Cloud Storage Input Metrics"
+      },
+      {
+        "id": "elastic_agent-ea44c820-95cb-11ee-b517-0550321b54cc",
+        "title": "[Elastic Agent] Filestream Input Metrics"
+      },
+      {
+        "id": "elastic_agent-ea7a59e0-6081-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] GCP Pub/Sub Input Metrics"
+      },
+      {
+        "id": "elastic_agent-f16b4870-9811-11ee-80a4-550241a842c0",
+        "title": "[Elastic Agent] CEL Input Metrics"
+      },
+      {
+        "id": "elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395",
+        "title": "[Elastic Agent] Agent metrics"
+      },
+      {
+        "id": "elastic_agent-f704cce0-6081-11f0-89d2-bb7ceae5af7f",
+        "title": "[Elastic Agent] ETW Input Metrics"
+      }
+    ]
+  },
+  {
+    "package": "elastic_package_registry",
+    "version": "0.3.1",
+    "dashboards": [
+      {
+        "id": "elastic_package_registry-313c2700-099b-11ed-91b6-3b1f9c2b2771",
+        "title": "[EPR Metrics] Overview"
+      }
+    ]
+  },
+  {
+    "package": "elastic_security",
+    "version": "0.4.0",
+    "dashboards": [
+      {
+        "id": "elastic_security-0244c13b-8bad-4bbb-9208-dcda507d3ff2",
+        "title": "[Logs Elastic Security] Alert"
+      }
+    ]
+  },
+  {
+    "package": "elasticsearch",
+    "version": "1.20.0",
+    "dashboards": [
+      {
+        "id": "elasticsearch-b1399af0-628c-11ee-9c63-732d7f759a7a",
+        "title": "[Elasticsearch] Cluster Ingest Per Day - Cluster & Node View (Technical Preview/Beta)"
+      },
+      {
+        "id": "elasticsearch-consumption",
+        "title": "[Elasticsearch] Indices & data streams usage (Technical Preview/Beta)"
+      },
+      {
+        "id": "elasticsearch-ea5b81a0-7fbf-11ed-8509-ddabeb9daeaf",
+        "title": "[Elasticsearch] Ingest Pipeline Detail"
+      },
+      {
+        "id": "elasticsearch-ea888f80-61e4-11ee-b5a1-0d1803efe5cf",
+        "title": "[Elasticsearch] Cluster Ingest Per Day - Index & Shard View (Technical Preview/Beta)"
+      },
+      {
+        "id": "elasticsearch-metrics-ingest-pipelines",
+        "title": "[Elasticsearch] Ingest Pipelines"
+      }
+    ]
+  },
+  {
+    "package": "endpoint",
+    "version": "9.3.0",
+    "dashboards": [
+      {
+        "id": "endpoint-43ff2ab2-cda0-4da5-b928-b412600c7a9c",
+        "title": "[Elastic Defend] Device Control"
+      },
+      {
+        "id": "endpoint-475a47e9-2cd7-4f5f-a2bf-efced65e9a85",
+        "title": "[Elastic Defend] Endpoint Detection and Response"
+      }
+    ]
+  },
+  {
+    "package": "entityanalytics_okta",
+    "version": "2.6.0",
+    "dashboards": [
+      {
+        "id": "entityanalytics_okta-e5242a60-0f35-11ee-8319-1d33c4a0c7ae",
+        "title": "[Logs Okta Entity Analytics] User"
+      }
+    ]
+  },
+  {
+    "package": "entro",
+    "version": "0.1.1",
+    "dashboards": [
+      {
+        "id": "entro-9fc7e45e-e6b9-4f07-bd52-92636ecc22e0",
+        "title": "[Entro Security] Audit Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "eset_protect",
+    "version": "1.13.0",
+    "dashboards": [
+      {
+        "id": "eset_protect-186ccfba-ed02-4f7a-a46d-a58ec636688a",
+        "title": "[Logs ESET PROTECT] Event"
+      },
+      {
+        "id": "eset_protect-99f893a6-1b3d-412f-9a03-46035f2fa9d5",
+        "title": "[Logs ESET PROTECT] Detection"
+      },
+      {
+        "id": "eset_protect-dbe9ff1e-44c4-4cd9-8475-f04309279577",
+        "title": "[Logs ESET PROTECT] Device Task"
+      }
+    ]
+  },
+  {
+    "package": "ess_billing",
+    "version": "1.7.0",
+    "dashboards": [
+      {
+        "id": "ess_billing-billingdashboard",
+        "title": "[Metrics ESS Billing] Billing dashboard"
+      },
+      {
+        "id": "ess_billing-creditsdashboard",
+        "title": "[Metrics ESS Billing] Credits dashboard"
+      }
+    ]
+  },
+  {
+    "package": "etcd",
+    "version": "1.4.1",
+    "dashboards": [
+      {
+        "id": "etcd-a2f2c8fd-f016-42c8-9dc1-4e5a36038e35",
+        "title": "[Metrics etcd] Overview"
+      }
+    ]
+  },
+  {
+    "package": "extrahop",
+    "version": "0.2.1",
+    "dashboards": [
+      {
+        "id": "extrahop-0987a5a3-15cb-4579-b298-08d170e7cb01",
+        "title": "[Logs ExtraHop] Detection"
+      },
+      {
+        "id": "extrahop-b0c614d7-64df-4edd-9b21-7069602ae219",
+        "title": "[Logs ExtraHop] Investigation"
+      }
+    ]
+  },
+  {
+    "package": "f5_bigip",
+    "version": "1.27.2",
+    "dashboards": [
+      {
+        "id": "f5_bigip-108dbde7-7604-43e0-b375-337f9229d1a2",
+        "title": "[Logs F5 BIG-IP] IHealth Information"
+      },
+      {
+        "id": "f5_bigip-3d589240-2d03-11ed-8a2f-21ef339df797",
+        "title": "[Logs F5 BIG-IP] Advanced Firewall Manager"
+      },
+      {
+        "id": "f5_bigip-68e4e1e0-2d1f-11ed-8a2f-21ef339df797",
+        "title": "[Logs F5 BIG-IP] Application Visibility and Reporting"
+      },
+      {
+        "id": "f5_bigip-b5d90026-87d6-4310-a724-fb5235063ff8",
+        "title": "[Logs F5 BIG-IP] Bot and DoS"
+      },
+      {
+        "id": "f5_bigip-bfd3f300-2cfd-11ed-8a2f-21ef339df797",
+        "title": "[Logs F5 BIG-IP] Local Traffic Manager"
+      },
+      {
+        "id": "f5_bigip-c7a76440-2d16-11ed-8a2f-21ef339df797",
+        "title": "[Logs F5 BIG-IP] Application Security Manager"
+      },
+      {
+        "id": "f5_bigip-ecfd399f-89bc-41c9-beac-c629dd2a26fa",
+        "title": "[Logs F5 BIG-IP] System Information"
+      },
+      {
+        "id": "f5_bigip-f9913450-2d06-11ed-8a2f-21ef339df797",
+        "title": "[Logs F5 BIG-IP] Access Policy Manager"
+      }
+    ]
+  },
+  {
+    "package": "falco",
+    "version": "2.0.2",
+    "dashboards": [
+      {
+        "id": "falco-872f3c48-4d4c-4bf3-a13c-1250743bf925",
+        "title": "[Logs Falco] Alerts Overview"
+      }
+    ]
+  },
+  {
+    "package": "fim",
+    "version": "1.16.0",
+    "dashboards": [
+      {
+        "id": "fim-97c782f0-4291-11ee-a0f4-51818a115e85",
+        "title": "[Logs FIM] Events overview"
+      }
+    ]
+  },
+  {
+    "package": "fireeye",
+    "version": "1.27.1",
+    "dashboards": [
+      {
+        "id": "fireeye-a369bcaf-11a5-41b7-891e-80a064831ea8",
+        "title": "[Logs FireEye] Overview"
+      }
+    ]
+  },
+  {
+    "package": "first_epss",
+    "version": "1.1.1",
+    "dashboards": [
+      {
+        "id": "first_epss-fad8ebfb-fb41-4029-bbcb-c8e05d7f6c65",
+        "title": "[Logs] First EPSS"
+      }
+    ]
+  },
+  {
+    "package": "forcepoint_web",
+    "version": "1.13.0",
+    "dashboards": [
+      {
+        "id": "forcepoint_web-05cb8903-79fb-4aa1-a20e-db1eb073a8e9",
+        "title": "[Forcepoint] Web Security Summary"
+      }
+    ]
+  },
+  {
+    "package": "forgerock",
+    "version": "1.22.0",
+    "dashboards": [
+      {
+        "id": "forgerock-263aed30-7fa9-11ed-b53a-1b59fe8c1601",
+        "title": "[ForgeRock] Audit Event Overview"
+      }
+    ]
+  },
+  {
+    "package": "fortinet_fortigate",
+    "version": "1.36.3",
+    "dashboards": [
+      {
+        "id": "fortinet_fortigate-d0cd8230-0c8b-11ed-bb95-158df2ca77e4",
+        "title": "[Fortinet Fortigate] Firewall Overview"
+      }
+    ]
+  },
+  {
+    "package": "fortinet_fortimail",
+    "version": "2.19.0",
+    "dashboards": [
+      {
+        "id": "fortinet_fortimail-8adfeca0-a942-11ed-8ba6-130117898d4a",
+        "title": "[Logs Fortinet FortiMail] Antispam, Antivirus & Encryption"
+      },
+      {
+        "id": "fortinet_fortimail-c4b7f4d0-a93e-11ed-8ba6-130117898d4a",
+        "title": "[Logs Fortinet FortiMail] Email"
+      },
+      {
+        "id": "fortinet_fortimail-d5803cc0-a937-11ed-8ba6-130117898d4a",
+        "title": "[Logs Fortinet FortiMail] System"
+      },
+      {
+        "id": "fortinet_fortimail-f352d950-a870-11ed-8ba6-130117898d4a",
+        "title": "[Logs Fortinet FortiMail] History"
+      }
+    ]
+  },
+  {
+    "package": "fortinet_fortimanager",
+    "version": "2.18.0",
+    "dashboards": [
+      {
+        "id": "fortinet_fortimanager-83b4a560-ac62-11ed-990f-852e80bd7ed9",
+        "title": " [Logs Fortinet FortiManager] Events"
+      }
+    ]
+  },
+  {
+    "package": "fortinet_fortiproxy",
+    "version": "1.4.0",
+    "dashboards": [
+      {
+        "id": "fortinet_fortiproxy-16343146-928c-4ed6-b6da-69035363fb73",
+        "title": "[Fortinet FortiProxy] Overview"
+      }
+    ]
+  },
+  {
+    "package": "gcp",
+    "version": "2.47.1",
+    "dashboards": [
+      {
+        "id": "gcp-1ae960c0-f9f8-11eb-bc38-79936db7c106",
+        "title": "[Metrics GCP] GKE Overview"
+      },
+      {
+        "id": "gcp-2b0fd7b0-feac-11ea-b032-d59f894a5072",
+        "title": "[Metrics GCP] PubSub Overview"
+      },
+      {
+        "id": "gcp-2b3773d0-3a16-11ee-8736-83dacf143f01",
+        "title": "[Metrics GCP] CloudSQL SQL Server Overview"
+      },
+      {
+        "id": "gcp-48e12760-cbe4-11ec-b519-85ccf621cbbf",
+        "title": "[Logs GCP] Audit"
+      },
+      {
+        "id": "gcp-6041d970-a6ae-11ea-950e-d57608e3aa51",
+        "title": "[Metrics GCP] Load Balancing TCP SSL Proxy Overview"
+      },
+      {
+        "id": "gcp-76c9e920-e890-11ea-bf8c-d13ebf358a78",
+        "title": "[Metrics GCP] Billing Overview"
+      },
+      {
+        "id": "gcp-8a1fb690-cbeb-11ec-b519-85ccf621cbbf",
+        "title": "[Logs GCP] Firewall"
+      },
+      {
+        "id": "gcp-8f9c6cc0-909d-11ea-8180-7b0dacd9df87",
+        "title": "[Metrics GCP] Load Balancing L3 Overview"
+      },
+      {
+        "id": "gcp-9484a4cd-685f-450e-aeaa-728fbdbea20f",
+        "title": "[Logs GCP] VPC Flow"
+      },
+      {
+        "id": "gcp-aa5b8bd0-9157-11ea-8180-7b0dacd9df87",
+        "title": "[Metrics GCP] Load Balancing HTTPS Overview"
+      },
+      {
+        "id": "gcp-c355cbb0-3a18-11ee-8736-83dacf143f01",
+        "title": "[Metrics GCP] CloudSQL MySQL Overview"
+      },
+      {
+        "id": "gcp-ca401040-8e52-11ea-9fa6-4d675d5290dc",
+        "title": "[Metrics GCP] Storage Overview"
+      },
+      {
+        "id": "gcp-ddc19780-3a0a-11ee-8736-83dacf143f01",
+        "title": "[Metrics GCP] CloudSQL PostgreSQL Overview"
+      },
+      {
+        "id": "gcp-f40ee870-5e4a-11ea-a4f6-717338406083",
+        "title": "[Metrics GCP] Compute Overview"
+      }
+    ]
+  },
+  {
+    "package": "gcp_audit_otel",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "gcp_audit_otel-fe3e0426-5814-4a58-bf19-20c5d8ec387a",
+        "title": "[GCP Audit OTEL] Audit Logs Overview"
+      }
+    ]
+  },
+  {
+    "package": "gcp_vertexai",
+    "version": "1.4.0",
+    "dashboards": [
+      {
+        "id": "gcp_vertexai-1b42c117-7971-424d-8015-c02f1317824d",
+        "title": "[GCP VertexAI] Metrics Overview"
+      },
+      {
+        "id": "gcp_vertexai-d566516f-06fd-47e0-aba1-44148598c59a",
+        "title": "[GCP VertexAI] AuditLogs"
+      }
+    ]
+  },
+  {
+    "package": "gcp_vpcflow_otel",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "gcp_vpcflow_otel-390527a2-9a9c-4c49-a362-6b38e922823f",
+        "title": "[GCP VPC OTEL] VPC Flow Logs Overview"
+      }
+    ]
+  },
+  {
+    "package": "github",
+    "version": "2.22.0",
+    "dashboards": [
+      {
+        "id": "github-4da91aa0-12fc-11ed-af77-016e1a977d80",
+        "title": "[GitHub] Code Scanning Alerts"
+      },
+      {
+        "id": "github-591d69e0-17b6-11ed-809a-7b4be950fe9c",
+        "title": "[GitHub] Secret Scanning Alerts"
+      },
+      {
+        "id": "github-6197be80-220c-11ed-88c4-e3caca48250a",
+        "title": "[GitHub] Dependabot Alerts"
+      },
+      {
+        "id": "github-6a6d7c40-17ab-11ed-809a-7b4be950fe9c",
+        "title": "[GitHub] Advanced Security Overview"
+      },
+      {
+        "id": "github-8bfd8310-205c-11ec-8b10-11a4c5e322a0",
+        "title": "[GitHub] User Change Audit"
+      },
+      {
+        "id": "github-dcee84c0-2059-11ec-8b10-11a4c5e322a0",
+        "title": "[GitHub] Audit Log Activity"
+      },
+      {
+        "id": "github-e6726e8d-0a94-4917-978a-b5a762b39ee5",
+        "title": "[GitHub] Security Advisories"
+      },
+      {
+        "id": "github-f0104680-ae18-11ed-83fa-df5d96a45724",
+        "title": "[GitHub] Issues"
+      }
+    ]
+  },
+  {
+    "package": "gitlab",
+    "version": "2.4.0",
+    "dashboards": [
+      {
+        "id": "gitlab-474c2c79-8777-4fe6-aa0a-232feb1cbee9",
+        "title": "[GitLab] Api Log Overview"
+      },
+      {
+        "id": "gitlab-6b62c186-77b6-49f2-a820-ca377575bb96",
+        "title": "[GitLab] Application Overview"
+      },
+      {
+        "id": "gitlab-8af75511-17ac-441f-a8e7-b8bd6a341629",
+        "title": "[GitLab] Auth Log Overview"
+      },
+      {
+        "id": "gitlab-e21a3664-0856-4ad9-83ce-e5e86397c21b",
+        "title": "[GitLab] Production Log Overview"
+      }
+    ]
+  },
+  {
+    "package": "golang",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "golang-a121edd0-8767-11ed-8520-df2d9ce4ab4e",
+        "title": "[Metrics Golang] Heap"
+      },
+      {
+        "id": "golang-c7732730-8b84-11ed-96d7-d70fe6fd6ac1",
+        "title": "[Metrics Golang] expvar"
+      }
+    ]
+  },
+  {
+    "package": "google_scc",
+    "version": "2.3.0",
+    "dashboards": [
+      {
+        "id": "google_scc-0d6620a0-05f4-11ee-af70-a35c241bca6a",
+        "title": "[Logs Google SCC] Source"
+      },
+      {
+        "id": "google_scc-1216f720-05f7-11ee-af70-a35c241bca6a",
+        "title": "[Logs Google SCC] Finding"
+      },
+      {
+        "id": "google_scc-279e2ae0-05e9-11ee-af70-a35c241bca6a",
+        "title": "[Logs Google SCC] Asset"
+      },
+      {
+        "id": "google_scc-47d98700-0878-11ee-8e98-37b34c549462",
+        "title": "[Logs Google SCC] Audit"
+      },
+      {
+        "id": "google_scc-62ec9780-05c6-11ee-af70-a35c241bca6a",
+        "title": "[Logs Google SCC] Overview Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "google_secops",
+    "version": "1.2.2",
+    "dashboards": [
+      {
+        "id": "google_secops-517f96c9-1d44-420a-9ff4-96cf28de00d7",
+        "title": "[Logs Google SecOps] Alert"
+      }
+    ]
+  },
+  {
+    "package": "grafana",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "grafana-logs",
+        "title": "[Grafana] Logs"
+      },
+      {
+        "id": "grafana-overview",
+        "title": "[Grafana] Overview"
+      }
+    ]
+  },
+  {
+    "package": "hadoop",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "hadoop-3e16f2c0-cd28-11ec-be30-1d9331f0b107",
+        "title": "[Metrics Hadoop] Applications"
+      },
+      {
+        "id": "hadoop-70125ec0-cf78-11ec-bc3e-6faca2b11df2",
+        "title": "[Metrics Hadoop] Node Manager"
+      },
+      {
+        "id": "hadoop-c06fb680-cf76-11ec-bc3e-6faca2b11df2",
+        "title": "[Metrics Hadoop] Data nodes"
+      },
+      {
+        "id": "hadoop-cb235590-cd24-11ec-be30-1d9331f0b107",
+        "title": "[Metrics Hadoop] Cluster overview"
+      }
+    ]
+  },
+  {
+    "package": "haproxy",
+    "version": "1.18.0",
+    "dashboards": [
+      {
+        "id": "haproxy-0836a4b0-47bd-11e8-bc13-1397384faad3",
+        "title": "[Metrics HAProxy] HTTP backend"
+      },
+      {
+        "id": "haproxy-3560d580-aa34-11e8-9c06-877f0445e3e0",
+        "title": "[Logs HAProxy] Overview"
+      },
+      {
+        "id": "haproxy-4b555c30-47dd-11e8-bc13-1397384faad3",
+        "title": "[Metrics HAProxy] Overview"
+      },
+      {
+        "id": "haproxy-8cc50a50-47e0-11e8-bc13-1397384faad3",
+        "title": "[Metrics HAProxy] HTTP server"
+      },
+      {
+        "id": "haproxy-9151c900-471d-11e8-bc13-1397384faad3",
+        "title": "[Metrics HAProxy] Backend"
+      },
+      {
+        "id": "haproxy-d5878d00-47c5-11e8-bc13-1397384faad3",
+        "title": "[Metrics HAProxy] Frontend"
+      },
+      {
+        "id": "haproxy-e9057ae0-47c5-11e8-bc13-1397384faad3",
+        "title": "[Metrics HAProxy] HTTP frontend"
+      }
+    ]
+  },
+  {
+    "package": "hashicorp_vault",
+    "version": "1.30.0",
+    "dashboards": [
+      {
+        "id": "hashicorp_vault-1f321db0-f4b8-11eb-a89a-7378b1713db5",
+        "title": "[Hashicorp Vault] Operational Logs"
+      },
+      {
+        "id": "hashicorp_vault-64b51280-f4ad-11eb-a89a-7378b1713db5",
+        "title": "[Hashicorp Vault] Audit Logs"
+      }
+    ]
+  },
+  {
+    "package": "hid_bravura_monitor",
+    "version": "1.21.0",
+    "dashboards": [
+      {
+        "id": "hid_bravura_monitor-0665f160-f956-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Log issues - Summary"
+      },
+      {
+        "id": "hid_bravura_monitor-0db75ff0-f9f4-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Administrative - Disabled Profiles"
+      },
+      {
+        "id": "hid_bravura_monitor-1a431f90-fa01-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Database - Discovery"
+      },
+      {
+        "id": "hid_bravura_monitor-23a89d20-fa07-11eb-96cd-db0fb11a40f3",
+        "title": "[Bravura Monitor] Windows Event Analysis - Problems"
+      },
+      {
+        "id": "hid_bravura_monitor-28db2060-fa02-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Discovery - Summary"
+      },
+      {
+        "id": "hid_bravura_monitor-3f403100-f9f4-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Administrative - Unlocked Profiles"
+      },
+      {
+        "id": "hid_bravura_monitor-49fa7e40-f9fc-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Users - Issues"
+      },
+      {
+        "id": "hid_bravura_monitor-4bf327b0-fa01-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Database - Search"
+      },
+      {
+        "id": "hid_bravura_monitor-4ee19fa0-fa02-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Processes - Executables"
+      },
+      {
+        "id": "hid_bravura_monitor-52cf42a0-fa04-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Workflow - Summary (Logs)"
+      },
+      {
+        "id": "hid_bravura_monitor-578cb360-f9f3-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Administrative - Summary"
+      },
+      {
+        "id": "hid_bravura_monitor-6ebde770-fa02-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Processes - Plugins"
+      },
+      {
+        "id": "hid_bravura_monitor-7c5c1ef0-fa03-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Integrations - Connector Return Code"
+      },
+      {
+        "id": "hid_bravura_monitor-8187dcb0-fa04-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Dataset - Summary"
+      },
+      {
+        "id": "hid_bravura_monitor-91029280-0520-11ec-853c-2bf1ec8ddeef",
+        "title": "[Bravura Monitor] Database - Replication (Windows Event)"
+      },
+      {
+        "id": "hid_bravura_monitor-a8739000-f9fd-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Users - Pages"
+      },
+      {
+        "id": "hid_bravura_monitor-a9ea8420-f9f3-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Administrative - Password Resets"
+      },
+      {
+        "id": "hid_bravura_monitor-b0fd1f50-06a2-11ec-a72d-e52b79e13120",
+        "title": "[Bravura Monitor] Workflow - Summary (Windows Event)"
+      },
+      {
+        "id": "hid_bravura_monitor-b66f3780-fa03-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Integrations - Connector Performance"
+      },
+      {
+        "id": "hid_bravura_monitor-b9bc5190-fa01-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Database - Replication (Logs)"
+      },
+      {
+        "id": "hid_bravura_monitor-c5417bd0-f9fc-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Users - API"
+      },
+      {
+        "id": "hid_bravura_monitor-cc6c9cf0-fa06-11eb-96cd-db0fb11a40f3",
+        "title": "[Bravura Monitor] Windows Event Analysis - Logins"
+      },
+      {
+        "id": "hid_bravura_monitor-d17be4f0-f9fa-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Users - Summary"
+      },
+      {
+        "id": "hid_bravura_monitor-d3a33820-fa02-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Integrations - Connectors"
+      },
+      {
+        "id": "hid_bravura_monitor-d59177c0-f9fb-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Users - Authentication"
+      },
+      {
+        "id": "hid_bravura_monitor-db22d850-fa00-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Database - Summary"
+      },
+      {
+        "id": "hid_bravura_monitor-e9fa5320-fa01-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] Database - Stored Procedure Performance"
+      },
+      {
+        "id": "hid_bravura_monitor-f8112090-fa03-11eb-a1ab-1964dffd1499",
+        "title": "[Bravura Monitor] API - Summary"
+      }
+    ]
+  },
+  {
+    "package": "hpe_aruba_cx",
+    "version": "0.4.1",
+    "dashboards": [
+      {
+        "id": "hpe_aruba_cx-2ec9d647-9d43-482a-beb7-5df529b86747",
+        "title": "HPE Aruba CX Switch Overview"
+      }
+    ]
+  },
+  {
+    "package": "hta",
+    "version": "1.0.1",
+    "dashboards": [
+      {
+        "id": "hta-c3773b23-471c-4168-bb02-90489161ce51",
+        "title": "Host Traffic Anomalies"
+      }
+    ]
+  },
+  {
+    "package": "ibm_qradar",
+    "version": "0.1.1",
+    "dashboards": [
+      {
+        "id": "ibm_qradar-f8f1ddd1-3d71-4833-a10e-87d4119aac56",
+        "title": "[Logs IBM QRadar] Offense"
+      }
+    ]
+  },
+  {
+    "package": "ibmmq",
+    "version": "1.8.0",
+    "dashboards": [
+      {
+        "id": "ibmmq-8f788c70-36c9-11ea-9f7a-097fe7ab3ddd",
+        "title": "[Metrics IBM MQ] Subscriptions Overview"
+      },
+      {
+        "id": "ibmmq-ba1d8830-7c7b-11e9-9645-e37efaf5baff",
+        "title": "[Logs IBM MQ] Overview of error log"
+      },
+      {
+        "id": "ibmmq-d2112e90-36ea-11ea-9f7a-097fe7ab3ddd",
+        "title": "[Metrics IBM MQ] Messages Overview"
+      },
+      {
+        "id": "ibmmq-fc5512c0-36d1-11ea-9f7a-097fe7ab3ddd",
+        "title": "[Metrics IBM MQ] Calls Overview"
+      }
+    ]
+  },
+  {
+    "package": "iis",
+    "version": "1.24.4",
+    "dashboards": [
+      {
+        "id": "iis-2c171500-858b-11ea-91bc-ab084c7ec0e7",
+        "title": "[Metrics IIS] Webserver Process Overview"
+      },
+      {
+        "id": "iis-4278ad30-fe16-11e7-a3b0-d13028918f9f",
+        "title": "[Logs IIS] Access and error logs"
+      },
+      {
+        "id": "iis-4b975820-85a1-11ea-91bc-ab084c7ec0e7",
+        "title": "[Metrics IIS] Website Overview"
+      },
+      {
+        "id": "iis-b4108810-861c-11ea-91bc-ab084c7ec0e7",
+        "title": "[Metrics IIS] Application Pool Overview"
+      },
+      {
+        "id": "iis-ebc23240-8572-11ea-91bc-ab084c7ec0e7",
+        "title": "[Metrics IIS] Webserver Overview"
+      }
+    ]
+  },
+  {
+    "package": "iis_otel",
+    "version": "0.2.0",
+    "dashboards": [
+      {
+        "id": "iis_otel-3254c2da-0a78-4053-be1a-edcdfa3477dc",
+        "title": "[Metrics IIS OTEL] Overview"
+      }
+    ]
+  },
+  {
+    "package": "imperva",
+    "version": "1.10.0",
+    "dashboards": [
+      {
+        "id": "imperva-7579f360-69a9-11ee-a2d3-91cb43f7ca23",
+        "title": "[Logs Imperva] Securesphere"
+      }
+    ]
+  },
+  {
+    "package": "imperva_cloud_waf",
+    "version": "1.13.1",
+    "dashboards": [
+      {
+        "id": "imperva_cloud_waf-6fbc3530-9a84-11ee-b689-05e9d8af2773",
+        "title": "[Logs Imperva Cloud WAF] Event"
+      }
+    ]
+  },
+  {
+    "package": "influxdb",
+    "version": "0.11.0",
+    "dashboards": [
+      {
+        "id": "influxdb-6382b060-1eb0-11ed-8cd7-b31b0e0c177f",
+        "title": "[InfluxDB Metrics] Advanced Status Metrics "
+      },
+      {
+        "id": "influxdb-ccddb0c0-276e-11ed-8cd7-b31b0e0c177f",
+        "title": "[InfluxDB Metrics] Status Metrics"
+      }
+    ]
+  },
+  {
+    "package": "infoblox_bloxone_ddi",
+    "version": "1.22.0",
+    "dashboards": [
+      {
+        "id": "infoblox_bloxone_ddi-85daef90-0ce7-11ed-8a96-d11b53f3d359",
+        "title": "[Logs Infoblox BloxOne DDI] DHCP Lease"
+      },
+      {
+        "id": "infoblox_bloxone_ddi-b8497140-0cdd-11ed-8a96-d11b53f3d359",
+        "title": "[Logs Infoblox BloxOne DDI] DNS Data"
+      },
+      {
+        "id": "infoblox_bloxone_ddi-d3f8a270-0ce3-11ed-8a96-d11b53f3d359",
+        "title": "[Logs Infoblox BloxOne DDI] DNS Config"
+      }
+    ]
+  },
+  {
+    "package": "infoblox_nios",
+    "version": "2.1.1",
+    "dashboards": [
+      {
+        "id": "infoblox_nios-27c573b0-b4d8-11ec-80e1-4bd67c5762eb",
+        "title": "[Logs Infoblox NIOS] DHCP"
+      },
+      {
+        "id": "infoblox_nios-c3abc8b0-b4dd-11ec-80e1-4bd67c5762eb",
+        "title": "[Logs Infoblox NIOS] Audit"
+      },
+      {
+        "id": "infoblox_nios-f8d86480-b4c9-11ec-80e1-4bd67c5762eb",
+        "title": "[Logs Infoblox NIOS] DNS"
+      }
+    ]
+  },
+  {
+    "package": "infoblox_threat_defense",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "infoblox_threat_defense-04db9888-c729-4316-8090-aed0117d9f43",
+        "title": "[Logs Infoblox Threat Defense] SOC Insights"
+      },
+      {
+        "id": "infoblox_threat_defense-47018494-4ab0-4a3a-b53b-fc355a012e37",
+        "title": "[Logs Infoblox Threat Defense] DNS Response"
+      },
+      {
+        "id": "infoblox_threat_defense-57ddf8b7-8a06-4691-9229-3d96fe89c548",
+        "title": "[Logs Infoblox Threat Defense] Audit"
+      },
+      {
+        "id": "infoblox_threat_defense-8d9df97b-90fd-4806-8b7d-4d38e920c6c1",
+        "title": "[Logs Infoblox Threat Defense] DHCP Lease"
+      },
+      {
+        "id": "infoblox_threat_defense-b505f56a-e97e-4c2b-ac55-7ffb90148bda",
+        "title": "[Logs Infoblox Threat Defense] RPZ Events"
+      },
+      {
+        "id": "infoblox_threat_defense-f2144dc9-2ca1-4e38-94ef-cfad0e70efb6",
+        "title": "[Logs Infoblox Threat Defense] Atlas Notifications and Service Events"
+      }
+    ]
+  },
+  {
+    "package": "iptables",
+    "version": "1.23.0",
+    "dashboards": [
+      {
+        "id": "iptables-ceefb9e0-1f51-11e9-93ed-f7e068f4aebb",
+        "title": "[Logs Iptables] Overview"
+      },
+      {
+        "id": "iptables-d39f0980-1ff3-11e9-ae2a-939083c6a64e",
+        "title": "[Logs Iptables] Ubiquiti Firewall Overview"
+      }
+    ]
+  },
+  {
+    "package": "ironscales",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "ironscales-10c370de-4a54-41b2-bab7-0b0fdce7f399",
+        "title": "[Logs IRONSCALES] Incident"
+      }
+    ]
+  },
+  {
+    "package": "island_browser",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "island_browser-1bcda810-8ace-46ea-9a41-f9179ac63f36",
+        "title": "[Logs Island Browser] User"
+      },
+      {
+        "id": "island_browser-86a8fe6b-5da7-4584-a376-ac52a9d4d7a2",
+        "title": "[Logs Island Browser] Device"
+      },
+      {
+        "id": "island_browser-8a93ddf1-8cd3-4316-bf78-eaaa15af9e8c",
+        "title": "[Logs Island Browser] Compromised Credential"
+      },
+      {
+        "id": "island_browser-c82199e5-3b95-4eb1-8e58-0a7d85f4614b",
+        "title": "[Logs Island Browser] Admin Actions"
+      },
+      {
+        "id": "island_browser-de262ab3-5ed3-4735-baef-72cfb0a50d1d",
+        "title": "[Logs Island Browser] Audit"
+      }
+    ]
+  },
+  {
+    "package": "istio",
+    "version": "0.8.0",
+    "dashboards": [
+      {
+        "id": "istio-f0f863b0-5941-11ed-bfb8-bbfe5b338339",
+        "title": "[Metrics Istio] Overview"
+      },
+      {
+        "id": "istio-fed6f500-5941-11ed-bfb8-bbfe5b338339",
+        "title": "[Metrics Istio] Traffic"
+      }
+    ]
+  },
+  {
+    "package": "jamf_compliance_reporter",
+    "version": "1.16.0",
+    "dashboards": [
+      {
+        "id": "jamf_compliance_reporter-8351fc80-b58c-11ec-a813-df29637f29df",
+        "title": "[Logs Jamf Compliance Reporter] Audit"
+      },
+      {
+        "id": "jamf_compliance_reporter-dd0ea730-b557-11ec-a813-df29637f29df",
+        "title": "[Logs Jamf Compliance Reporter] Event"
+      },
+      {
+        "id": "jamf_compliance_reporter-dd28ec80-b584-11ec-a813-df29637f29df",
+        "title": "[Logs Jamf Compliance Reporter] App Metrics"
+      }
+    ]
+  },
+  {
+    "package": "jamf_pro",
+    "version": "1.1.0",
+    "dashboards": [
+      {
+        "id": "jamf_pro-31386f22-bc6a-49da-8d55-ec33cb0ad728",
+        "title": "[Jamf Pro] Locations"
+      },
+      {
+        "id": "jamf_pro-81cc13af-7134-45d3-b43f-d50f63071759",
+        "title": "[Jamf Pro] Remote Status"
+      },
+      {
+        "id": "jamf_pro-90cf12f3-9a11-466b-8c28-5a07a85bc038",
+        "title": "[Jamf Pro] Hardware Information"
+      },
+      {
+        "id": "jamf_pro-a6cf6d1d-b2a7-4a59-9fdf-51d1c7b1706e",
+        "title": "[Jamf Pro] Real time "
+      },
+      {
+        "id": "jamf_pro-dce729cf-07cc-4e62-a3e3-bc6e233c3ad1",
+        "title": "[Jamf Pro] Jamf Pro overview"
+      }
+    ]
+  },
+  {
+    "package": "jamf_protect",
+    "version": "3.3.0",
+    "dashboards": [
+      {
+        "id": "jamf_protect-d23dda91-658e-4ab0-8e06-b42ce435e473",
+        "title": "Jamf Protect - Endpoint Telemetry"
+      },
+      {
+        "id": "jamf_protect-e9b86210-c65c-11ee-882f-57f79af43d7f",
+        "title": "Jamf Protect - Alerts"
+      }
+    ]
+  },
+  {
+    "package": "jumpcloud",
+    "version": "1.17.0",
+    "dashboards": [
+      {
+        "id": "jumpcloud-fe780080-94a7-11ed-9170-e9f90db17dfc",
+        "title": "[JumpCloud] Directory Insights Summary"
+      }
+    ]
+  },
+  {
+    "package": "jupiter_one",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "jupiter_one-b38d47b8-40d8-4aac-bde8-bf14f1ed64c2",
+        "title": "[Logs JupitorOne] Risks and Alerts"
+      },
+      {
+        "id": "jupiter_one-eb28c687-3b1c-43d4-acb3-6e1eb7b7b46e",
+        "title": "[Logs JupitorOne] Overview"
+      }
+    ]
+  },
+  {
+    "package": "kafka_connect",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "kafka_connect-1cdbeca7-bac9-4bd5-8ecb-77d06a82eab1",
+        "title": "[Kafka Connect] Overview"
+      }
+    ]
+  },
+  {
+    "package": "keeper",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "keeper-b30d7c4b-4a88-4f70-8d7f-e93f5491b4ac",
+        "title": "Keeper SIEM Integration Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "keycloak",
+    "version": "1.31.2",
+    "dashboards": [
+      {
+        "id": "keycloak-5aecc44a-16d7-47db-805a-245ef0d1bf77",
+        "title": "[Logs Keycloak] Event"
+      }
+    ]
+  },
+  {
+    "package": "kubernetes",
+    "version": "1.85.0",
+    "dashboards": [
+      {
+        "id": "kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] Cronjobs"
+      },
+      {
+        "id": "kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] StatefulSets"
+      },
+      {
+        "id": "kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] Volumes"
+      },
+      {
+        "id": "kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] Pods"
+      },
+      {
+        "id": "kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] Deployments"
+      },
+      {
+        "id": "kubernetes-5e649d60-9901-11e9-ba57-b7ab4e2d4b58",
+        "title": "[Metrics Kubernetes] Proxy"
+      },
+      {
+        "id": "kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] DaemonSets"
+      },
+      {
+        "id": "kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] Jobs"
+      },
+      {
+        "id": "kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] Nodes"
+      },
+      {
+        "id": "kubernetes-bf9389f0-0c14-11ed-b760-5d1bccb47f56",
+        "title": "[Metrics Kubernetes] Controller Manager"
+      },
+      {
+        "id": "kubernetes-d3bd9650-0c14-11ed-b760-5d1bccb47f56",
+        "title": "[Metrics Kubernetes] API server"
+      },
+      {
+        "id": "kubernetes-dd081350-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] PV/PVC"
+      },
+      {
+        "id": "kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c",
+        "title": "[Metrics Kubernetes] Cluster Overview"
+      },
+      {
+        "id": "kubernetes-f5ab5510-9c94-11e9-94fd-c91206cd5249",
+        "title": "[Metrics Kubernetes] Scheduler"
+      },
+      {
+        "id": "kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013",
+        "title": "[Metrics Kubernetes] Services"
+      }
+    ]
+  },
+  {
+    "package": "kubernetes_otel",
+    "version": "1.4.0",
+    "dashboards": [
+      {
+        "id": "kubernetes_otel-cluster-overview",
+        "title": "[OTEL][Metrics Kubernetes] Cluster Overview"
+      }
+    ]
+  },
+  {
+    "package": "lastpass",
+    "version": "1.21.0",
+    "dashboards": [
+      {
+        "id": "lastpass-45d2e670-244b-11ed-80ca-25e921dc7ac2",
+        "title": "[Logs LastPass] Event Report"
+      },
+      {
+        "id": "lastpass-975ecef0-2450-11ed-80ca-25e921dc7ac2",
+        "title": "[Logs LastPass] Detailed Shared Folder"
+      },
+      {
+        "id": "lastpass-fa6ad220-2458-11ed-80ca-25e921dc7ac2",
+        "title": "[Logs LastPass] User"
+      }
+    ]
+  },
+  {
+    "package": "linux",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "linux-system-c431f410-f9ac-11e9-90e8-1fb18e796788",
+        "title": "[Metrics Linux] Host Services Overview"
+      }
+    ]
+  },
+  {
+    "package": "lmd",
+    "version": "2.6.2",
+    "dashboards": [
+      {
+        "id": "lmd-17fea180-8c4c-11ed-bb03-41a73f349362",
+        "title": "Lateral Movement Detection Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "logstash",
+    "version": "2.9.0",
+    "dashboards": [
+      {
+        "id": "logstash-23d2c717-0fd1-4cb1-8d10-69c2fe669a63",
+        "title": "[Metrics Logstash] Elastic agent/Beats input plugin info"
+      },
+      {
+        "id": "logstash-4bbf4a50-6ece-11ee-910d-eb0006359086",
+        "title": "[Metrics Logstash] Elasticsearch output plugin info"
+      },
+      {
+        "id": "logstash-4f60a1e0-6eab-11ee-86f6-d7074508d975",
+        "title": "[Metrics Logstash] Filter plugin info"
+      },
+      {
+        "id": "logstash-79270240-48ee-11ee-8cb5-99927777c522",
+        "title": "[Metrics Logstash] Logstash Overview"
+      },
+      {
+        "id": "logstash-838aac39-8edd-48b0-95b4-289e42b1e98a",
+        "title": "[Metrics Logstash] Pipeline Health Report"
+      },
+      {
+        "id": "logstash-8f8c78a0-6e9e-11ee-86f6-d7074508d975",
+        "title": "[Metrics Logstash] Input plugin Info"
+      },
+      {
+        "id": "logstash-9a72208d-e446-48b9-8a63-c4256b9aa4e3",
+        "title": "[Metrics Logstash] Node Health Report"
+      },
+      {
+        "id": "logstash-9d450b10-4680-11ee-9ddc-919f87fe352d",
+        "title": "[Metrics Logstash] Single Node Overview"
+      },
+      {
+        "id": "logstash-Logs-Logstash-Log-Dashboard",
+        "title": "[Logs Logstash] Logstash Logs"
+      },
+      {
+        "id": "logstash-Logs-Logstash-Slowlog-Dashboard",
+        "title": "[Logs Logstash] Slowlogs"
+      },
+      {
+        "id": "logstash-a42d7060-45e6-11ee-957b-3720c0b0fbc5",
+        "title": "[Metrics Logstash] Single Node Advanced View"
+      },
+      {
+        "id": "logstash-b516a470-71ea-11ee-aadf-e577130ac888",
+        "title": "[Metrics Logstash] Dissect filter plugin info"
+      },
+      {
+        "id": "logstash-b5234e70-6f54-11ee-910d-eb0006359086",
+        "title": "[Metrics Logstash] Grok filter plugin info"
+      },
+      {
+        "id": "logstash-bc1a8050-5ee1-11ee-8e78-bf6865bc3ffc",
+        "title": "[Metrics Logstash] Logstash Single Pipeline View"
+      },
+      {
+        "id": "logstash-c0594170-526a-11ee-9ecc-31444cb79548",
+        "title": "[Metrics Logstash] Pipelines Overview"
+      },
+      {
+        "id": "logstash-ee860840-41ed-11ee-874b-fdb94cc3273a",
+        "title": "[Metrics Logstash] Nodes Overview"
+      },
+      {
+        "id": "logstash-fe17b800-6eb4-11ee-86f6-d7074508d975",
+        "title": "[Metrics Logstash] Output plugin info"
+      }
+    ]
+  },
+  {
+    "package": "lyve_cloud",
+    "version": "1.17.0",
+    "dashboards": [
+      {
+        "id": "lyve_cloud-42d12a00-5852-11ed-a702-0d7be6ba8b3f",
+        "title": "[Lyve Cloud] S3 API calls per service account"
+      }
+    ]
+  },
+  {
+    "package": "m365_defender",
+    "version": "5.11.0",
+    "dashboards": [
+      {
+        "id": "m365_defender-2690a440-7235-11ed-8657-c59f6ece834c",
+        "title": "[Logs Microsoft Defender XDR] Alert"
+      },
+      {
+        "id": "m365_defender-3caf3c00-7456-11ed-8657-c59f6ece834c",
+        "title": "[Logs Microsoft Defender XDR] Email"
+      },
+      {
+        "id": "m365_defender-ac54d310-44ab-11ed-8375-0168a9970c06",
+        "title": "[Logs Microsoft Defender XDR] Incident"
+      },
+      {
+        "id": "m365_defender-afb93ff7-9903-4d91-9028-9fe9c5a434f8",
+        "title": "[Logs Microsoft Defender XDR] Vulnerability"
+      },
+      {
+        "id": "m365_defender-c0b796d0-720a-11ed-8657-c59f6ece834c",
+        "title": "[Logs Microsoft Defender XDR] Device"
+      },
+      {
+        "id": "m365_defender-d587df00-745f-11ed-8657-c59f6ece834c",
+        "title": "[Logs Microsoft Defender XDR] App & Identity"
+      },
+      {
+        "id": "m365_defender-d80d7840-4366-11ed-b1f2-e917f608bd03",
+        "title": "[Logs Microsoft Defender XDR] Alert - 2"
+      }
+    ]
+  },
+  {
+    "package": "macos",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "macos-4b49d421-2f03-4dd2-891f-cbd7e2786e35",
+        "title": "[Logs macOS] Overview"
+      },
+      {
+        "id": "macos-4fae07f9-fff4-49d0-8ed6-54a63b4c6426",
+        "title": "[Logs macOS] Network"
+      }
+    ]
+  },
+  {
+    "package": "mattermost",
+    "version": "2.5.0",
+    "dashboards": [
+      {
+        "id": "mattermost-55a753ac-7944-4a4e-ad5b-a7418b1a1543",
+        "title": "[Logs Mattermost] Audit"
+      }
+    ]
+  },
+  {
+    "package": "memcached",
+    "version": "1.8.0",
+    "dashboards": [
+      {
+        "id": "memcached-a36fa0b0-eccf-11ec-b66b-6bfdc9ecc703",
+        "title": "[Metrics Memcached] Overview"
+      }
+    ]
+  },
+  {
+    "package": "microsoft_defender_cloud",
+    "version": "3.3.0",
+    "dashboards": [
+      {
+        "id": "microsoft_defender_cloud-97eaf040-0516-11ee-b4db-89b3a5f6df7f",
+        "title": "[Logs Microsoft Defender Cloud] Event"
+      }
+    ]
+  },
+  {
+    "package": "microsoft_defender_endpoint",
+    "version": "4.4.0",
+    "dashboards": [
+      {
+        "id": "microsoft_defender_endpoint-65402c30-ca6a-11ea-9d4d-9737a63aaa55",
+        "title": "[Microsoft Defender for Endpoint] Overview"
+      },
+      {
+        "id": "microsoft_defender_endpoint-6a043fee-1e3d-454b-96d1-159e6efce215",
+        "title": "[Logs Microsoft Defender Endpoint] Machine Action Overview"
+      },
+      {
+        "id": "microsoft_defender_endpoint-afb93ff7-9903-4d91-9028-9fe9c5a434f8",
+        "title": "[Logs Microsoft Defender Endpoint] Vulnerability Overview"
+      },
+      {
+        "id": "microsoft_defender_endpoint-c89734ca-ab7f-419d-b665-50076cceee60",
+        "title": "[Logs Microsoft Defender Endpoint] Machine Overview"
+      }
+    ]
+  },
+  {
+    "package": "microsoft_dnsserver",
+    "version": "1.5.1",
+    "dashboards": [
+      {
+        "id": "microsoft_dnsserver-355bcc10-992b-4184-86a2-4d19b74296f0",
+        "title": "[Microsoft DNS Server] Analytics"
+      },
+      {
+        "id": "microsoft_dnsserver-c5503fd5-e352-4ca1-8f45-23d36c15e0cf",
+        "title": "[Microsoft DNS Server] Audit"
+      }
+    ]
+  },
+  {
+    "package": "microsoft_exchange_online_message_trace",
+    "version": "2.0.1",
+    "dashboards": [
+      {
+        "id": "microsoft_exchange_online_message_trace-10b79960-536a-11ed-869d-9d6d140defa1",
+        "title": "[Microsoft Exchange Online Message Trace] Overview"
+      }
+    ]
+  },
+  {
+    "package": "microsoft_exchange_server",
+    "version": "1.4.1",
+    "dashboards": [
+      {
+        "id": "microsoft_exchange_server-2b868ef0-c041-11ee-a682-0f218cc418af",
+        "title": "[Logs Exchange Server] Messagetracking"
+      },
+      {
+        "id": "microsoft_exchange_server-66a4ce40-1a00-4ced-9547-7e96def93f02",
+        "title": "[Logs Exchange Server] HTTPProxy"
+      }
+    ]
+  },
+  {
+    "package": "microsoft_sentinel",
+    "version": "1.3.0",
+    "dashboards": [
+      {
+        "id": "microsoft_sentinel-a9a3f6fc-876c-4aa1-98f3-6d41bbb7f852",
+        "title": "[Logs Microsoft Sentinel] Alert"
+      },
+      {
+        "id": "microsoft_sentinel-bcfbf711-9fa2-4d98-aaec-1302e4ffd332",
+        "title": "[Logs Microsoft Sentinel] Event"
+      },
+      {
+        "id": "microsoft_sentinel-c0a331fd-c7d9-452e-b5db-0f062479c779",
+        "title": "[Logs Microsoft Sentinel] Incident"
+      }
+    ]
+  },
+  {
+    "package": "microsoft_sqlserver",
+    "version": "2.16.0",
+    "dashboards": [
+      {
+        "id": "microsoft_sqlserver-18d66970-1fb4-11e9-8a4d-eb34d2834f6b",
+        "title": "[Metrics Microsoft SQL Server] Transaction log"
+      },
+      {
+        "id": "microsoft_sqlserver-361588b0-389b-11ec-9973-85eff9a74fdb",
+        "title": "[Logs Microsoft SQL Server Audit Events] Overview"
+      },
+      {
+        "id": "microsoft_sqlserver-62b48570-fdf7-11ec-882e-ddefea6aeea3",
+        "title": "[Logs Microsoft SQL Server]  Error Log Overview"
+      },
+      {
+        "id": "microsoft_sqlserver-a2ead240-18bb-11e9-9836-f37dedd3b411",
+        "title": "[Metrics Microsoft SQL Server] Performance"
+      }
+    ]
+  },
+  {
+    "package": "mimecast",
+    "version": "3.3.1",
+    "dashboards": [
+      {
+        "id": "mimecast-042d5620-5411-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] DLP Logs Dashboard"
+      },
+      {
+        "id": "mimecast-0ebd21e0-5422-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] Threat Intel Feed - Targeted Dashboard"
+      },
+      {
+        "id": "mimecast-6c61f080-541f-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] Threat Intel Feed - Regional Dashboard"
+      },
+      {
+        "id": "mimecast-7790e470-541a-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] TTP URL Protect Logs"
+      },
+      {
+        "id": "mimecast-87fba310-5413-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] TTP Attachment Protect Logs"
+      },
+      {
+        "id": "mimecast-b4585cb0-541c-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] Access Logs Dashboard"
+      },
+      {
+        "id": "mimecast-bca36430-540f-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] SIEM Logs Dashboard"
+      },
+      {
+        "id": "mimecast-f22e62f0-5417-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] TTP Impersonation Protect Logs"
+      },
+      {
+        "id": "mimecast-f8933590-541b-11ec-bd43-b5e1f9a9c8d5",
+        "title": "[Mimecast] Audit Events Logs"
+      }
+    ]
+  },
+  {
+    "package": "miniflux",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "miniflux-c31e3493-1f45-4e5f-bf5c-08aebc8fcbf8",
+        "title": "[Logs Miniflux] Overview"
+      }
+    ]
+  },
+  {
+    "package": "mongodb",
+    "version": "1.24.0",
+    "dashboards": [
+      {
+        "id": "mongodb-Metrics-MongoDB",
+        "title": "[Metrics MongoDB] Overview"
+      },
+      {
+        "id": "mongodb-abcf35b0-0a82-11e8-bffe-ff7d4f68cf94",
+        "title": "[Logs MongoDB] Overview"
+      }
+    ]
+  },
+  {
+    "package": "mongodb_atlas",
+    "version": "1.1.0",
+    "dashboards": [
+      {
+        "id": "mongodb_atlas-16beaf93-02f4-4d5c-8d2e-b34e5c9fe8ed",
+        "title": "[Metrics MongoDB Atlas] Hardware"
+      },
+      {
+        "id": "mongodb_atlas-30078da3-455a-49a8-8710-8fb28b5ae836",
+        "title": "[Logs MongoDB Atlas] Organization"
+      },
+      {
+        "id": "mongodb_atlas-81c7e5e2-b621-452b-8dd1-cddadd7bd9bc",
+        "title": "[Logs MongoDB Atlas] Project"
+      },
+      {
+        "id": "mongodb_atlas-88554c14-2b94-424f-8a3e-b6f65722fd51",
+        "title": "[Logs MongoDB Atlas] Mongod Audit"
+      },
+      {
+        "id": "mongodb_atlas-b435ef26-546b-4e56-994e-90544e208c72",
+        "title": "[Metrics MongoDB Atlas] Process"
+      },
+      {
+        "id": "mongodb_atlas-b6ceb5eb-c380-42c1-a3ca-8fcd0bc3dc50",
+        "title": "[Logs MongoDB Atlas] Mongod Database"
+      },
+      {
+        "id": "mongodb_atlas-cc6eb0e9-9eb2-4eb1-aa02-f61d53212adb",
+        "title": "[Logs MongoDB Atlas] Alert"
+      },
+      {
+        "id": "mongodb_atlas-d4ab650a-d11b-46e7-9935-0f6090724562",
+        "title": "[Metrics MongoDB Atlas] Disk"
+      }
+    ]
+  },
+  {
+    "package": "mysql",
+    "version": "1.29.2",
+    "dashboards": [
+      {
+        "id": "mysql-57b3fb50-6309-11ea-a83e-25b8612d00cc",
+        "title": "[Metrics MySQL] Database Overview"
+      },
+      {
+        "id": "mysql-Logs-MySQL-Dashboard",
+        "title": "[Logs MySQL] Overview"
+      },
+      {
+        "id": "mysql-df471c8c-e8d0-4a06-8a3c-44a4e0429bca",
+        "title": "[Metrics MySQL] Replica Status"
+      }
+    ]
+  },
+  {
+    "package": "mysql_otel",
+    "version": "0.3.0",
+    "dashboards": [
+      {
+        "id": "mysql_otel-14f9bee0-b03e-4e6d-b386-c89d5e7589c8",
+        "title": "[MySQL OTel] Queries"
+      },
+      {
+        "id": "mysql_otel-233fa1a2-7c05-46b9-8ae6-112d42610e12",
+        "title": "[MySQL OTel] Overview"
+      },
+      {
+        "id": "mysql_otel-49452773-8358-4394-827e-d15d1e3f8467",
+        "title": "[MySQL OTel] Availability"
+      },
+      {
+        "id": "mysql_otel-71977e60-f126-4c18-8769-639e686585a3",
+        "title": "[MySQL OTel] Performance"
+      }
+    ]
+  },
+  {
+    "package": "nagios_xi",
+    "version": "1.8.0",
+    "dashboards": [
+      {
+        "id": "nagios_xi-3a61d470-a0fe-11ec-8479-e1ade3344260",
+        "title": "[Metrics Nagios XI] Overview"
+      },
+      {
+        "id": "nagios_xi-9c265030-af6f-11ec-9663-316bb496e4b6",
+        "title": "[Metrics Nagios XI] Events Dashboard"
+      },
+      {
+        "id": "nagios_xi-9f8b2710-af64-11ec-9663-316bb496e4b6",
+        "title": "[Metrics Nagios XI] Hosts Dashboard"
+      },
+      {
+        "id": "nagios_xi-d56317e0-af6d-11ec-9663-316bb496e4b6",
+        "title": "[Metrics Nagios XI] Services Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "nats",
+    "version": "1.12.0",
+    "dashboards": [
+      {
+        "id": "nats-Logs-nats-overview",
+        "title": "[Logs NATS] Overview"
+      },
+      {
+        "id": "nats-Metrics-Nats-Dashboard",
+        "title": "[Metrics NATS] Overview"
+      }
+    ]
+  },
+  {
+    "package": "netflow",
+    "version": "2.25.0",
+    "dashboards": [
+      {
+        "id": "netflow-14387a13-53bc-43a4-b9cd-63977aa8d87c",
+        "title": "[Logs Netflow] Top-N"
+      },
+      {
+        "id": "netflow-34e26884-161a-4448-9556-43b5bf2f62a2",
+        "title": "[Logs Netflow] Overview"
+      },
+      {
+        "id": "netflow-38012abe-c611-4124-8497-381fcd85acc8",
+        "title": "[Logs Netflow] Traffic Analysis"
+      },
+      {
+        "id": "netflow-77326664-23be-4bf1-a126-6d7e60cfc024",
+        "title": "[Logs Netflow] Geo Location"
+      },
+      {
+        "id": "netflow-94972700-de4a-4272-9143-2fa8d4981365",
+        "title": "[Logs Netflow] Flow records"
+      },
+      {
+        "id": "netflow-acd7a630-0c71-4840-bc9e-4a3801374a32",
+        "title": "[Logs Netflow] Conversation Partners"
+      },
+      {
+        "id": "netflow-c64665f9-d222-421e-90b0-c7310d944b8a",
+        "title": "[Logs Netflow] Autonomous Systems"
+      },
+      {
+        "id": "netflow-feebb4e6-b13e-4e4e-b9fc-d3a178276425",
+        "title": "[Logs Netflow] Flow Exporters"
+      }
+    ]
+  },
+  {
+    "package": "netskope",
+    "version": "3.1.3",
+    "dashboards": [
+      {
+        "id": "netskope-0f68b070-71f8-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Alerts] Quarantine"
+      },
+      {
+        "id": "netskope-114731b3-20a0-4dfb-9ac6-3cfcc580de86",
+        "title": "[Logs Netskope][Event V2] Overview"
+      },
+      {
+        "id": "netskope-1db9af70-71f4-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Alerts] Security Assessment"
+      },
+      {
+        "id": "netskope-388b1e00-72ae-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Events] Network"
+      },
+      {
+        "id": "netskope-40fb6505-86dc-45b1-8862-5927d7f5bbe7",
+        "title": "[Logs Netskope][Transaction] Overview"
+      },
+      {
+        "id": "netskope-4bdc8830-72af-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Events] Infrastructure"
+      },
+      {
+        "id": "netskope-93c4dce0-72a7-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Events] Overview"
+      },
+      {
+        "id": "netskope-97349920-72b0-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Events] Audit"
+      },
+      {
+        "id": "netskope-9e55e880-72b5-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Events] Application"
+      },
+      {
+        "id": "netskope-a03670f0-7208-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Alerts] UBA"
+      },
+      {
+        "id": "netskope-ae3f6d70-71e3-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Alerts] Policy"
+      },
+      {
+        "id": "netskope-e538e5c0-71ea-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Alerts] DLP"
+      },
+      {
+        "id": "netskope-e6184f90-72b6-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Events] Page"
+      },
+      {
+        "id": "netskope-eaf804d1-abd2-438b-881d-5e47462f06fc",
+        "title": "[Logs Netskope][Alerts v2] Overview"
+      },
+      {
+        "id": "netskope-f181cba0-71d9-11ec-8c4b-cb281099ee02",
+        "title": "[Logs Netskope][Alerts] Overview"
+      }
+    ]
+  },
+  {
+    "package": "network_traffic",
+    "version": "1.34.0",
+    "dashboards": [
+      {
+        "id": "network_traffic-0c2b8c10-8f20-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] TLS Sessions (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-23dc4e30-8f20-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] DNS Overview (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-472af5e0-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] DHCPv4 (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-5d8772a0-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] Cassandra (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-725d2850-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] Overview (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-89ca1b60-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] DNS Overview"
+      },
+      {
+        "id": "network_traffic-8e206570-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] Network Flows (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-9073bc00-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] DHCPv4"
+      },
+      {
+        "id": "network_traffic-9778ea20-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] Cassandra"
+      },
+      {
+        "id": "network_traffic-9cbdb2e0-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] HTTP (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-a06e2870-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] Overview"
+      },
+      {
+        "id": "network_traffic-a7628db0-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] Network Flows"
+      },
+      {
+        "id": "network_traffic-ac839280-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] HTTP"
+      },
+      {
+        "id": "network_traffic-aca7cba0-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] MongoDB (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-b2bda870-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] MongoDB"
+      },
+      {
+        "id": "network_traffic-b9b6efb0-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] MySQL"
+      },
+      {
+        "id": "network_traffic-bb91d980-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] MySQL (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-beba3350-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] NFS"
+      },
+      {
+        "id": "network_traffic-c44e6c50-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] PostgreSQL"
+      },
+      {
+        "id": "network_traffic-c9366f10-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] NFS (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-e4eeafb0-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] PostgreSQL (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-f2598850-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] Thrift"
+      },
+      {
+        "id": "network_traffic-f2bdfec0-8f1f-11ee-a185-3df81c6deea3",
+        "title": "[Network Packet Capture] Thrift (ECS compliant)"
+      },
+      {
+        "id": "network_traffic-f539ebf0-ed94-11ed-8746-89f3bb1445b1",
+        "title": "[Network Packet Capture] TLS Sessions"
+      }
+    ]
+  },
+  {
+    "package": "nextron_thor_apt_scanner",
+    "version": "0.0.1",
+    "dashboards": [
+      {
+        "id": "nextron_thor_apt_scanner-22101230-bfc3-4133-b4a8-dc79d477c174",
+        "title": "[Nextron Thor] Overview"
+      }
+    ]
+  },
+  {
+    "package": "nginx",
+    "version": "3.0.0",
+    "dashboards": [
+      {
+        "id": "nginx-023d2930-f1a5-11e7-a9ef-93c69af7b129",
+        "title": "[Metrics Nginx] Overview"
+      },
+      {
+        "id": "nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519",
+        "title": "[Logs Nginx] Access and error logs"
+      },
+      {
+        "id": "nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519",
+        "title": "[Logs Nginx] Overview"
+      }
+    ]
+  },
+  {
+    "package": "nginx_ingress_controller",
+    "version": "1.14.0",
+    "dashboards": [
+      {
+        "id": "nginx_ingress_controller-ba23759b-1201-4c5c-aff5-f0addd7eee9e",
+        "title": "[Logs Nginx Ingress Controller] Access and error logs"
+      },
+      {
+        "id": "nginx_ingress_controller-ce99d3c1-0472-4c0b-9976-46b56c2c5421",
+        "title": "[Logs Nginx Ingress Controller] Overview"
+      }
+    ]
+  },
+  {
+    "package": "nginx_ingress_controller_otel",
+    "version": "0.2.2",
+    "dashboards": [
+      {
+        "id": "nginx_ingress_controller_otel-05a72585-3900-4944-b648-2f15907872d1",
+        "title": "[OpenTelemetry] Logs Nginx Ingress Controller"
+      },
+      {
+        "id": "nginx_ingress_controller_otel-30277d32-7af7-4a29-b5e2-a77e707d8471",
+        "title": "[OpenTelemetry] Nginx Ingress Controller access and error logs"
+      }
+    ]
+  },
+  {
+    "package": "nginx_otel",
+    "version": "0.2.1",
+    "dashboards": [
+      {
+        "id": "nginx_otel-0fbba4c5-8ae3-4d8e-aadc-cc9ba3fde5ba",
+        "title": "[Metrics Nginx OTEL] Overview"
+      }
+    ]
+  },
+  {
+    "package": "nozomi_networks",
+    "version": "0.2.1",
+    "dashboards": [
+      {
+        "id": "nozomi_networks-1b267947-931d-484b-bf52-52981e3c7a72",
+        "title": "[Logs Nozomi Networks] Variable"
+      },
+      {
+        "id": "nozomi_networks-445285cb-457b-426c-9e27-f5130213f4f0",
+        "title": "[Logs Nozomi Networks] Health"
+      },
+      {
+        "id": "nozomi_networks-627fed53-e5a9-4d4b-844b-ab08b7ea4b6e",
+        "title": "[Logs Nozomi Networks] Audit"
+      },
+      {
+        "id": "nozomi_networks-746a513f-0db6-4865-8752-9b8204476309",
+        "title": "[Logs Nozomi Networks] Alert"
+      },
+      {
+        "id": "nozomi_networks-a58e56a7-001f-4d72-b8f6-ab64f78ae4b9",
+        "title": "[Logs Nozomi Networks] Asset"
+      },
+      {
+        "id": "nozomi_networks-bbccdaca-9655-43d1-92d3-372b18416cfb",
+        "title": "[Logs Nozomi Networks] Node"
+      },
+      {
+        "id": "nozomi_networks-c6154d1b-776c-4052-876f-672dc30d4d9b",
+        "title": "[Logs Nozomi Networks] Node CVE"
+      },
+      {
+        "id": "nozomi_networks-f899124c-9613-4c3d-9683-4eb6955fe6e1",
+        "title": "[Logs Nozomi Networks] Session"
+      }
+    ]
+  },
+  {
+    "package": "nvidia_gpu",
+    "version": "0.4.1",
+    "dashboards": [
+      {
+        "id": "nvidia_gpu-a3a5759a-1b3d-456d-8ab8-83e97f774030",
+        "title": "[Metrics Nvidia GPU] Overview"
+      },
+      {
+        "id": "nvidia_gpu-bac121fe-6cd9-48a7-a349-f52ffa42d56b",
+        "title": "[Metrics Nvidia GPU] GPU-Specific Overview"
+      }
+    ]
+  },
+  {
+    "package": "o365",
+    "version": "3.8.0",
+    "dashboards": [
+      {
+        "id": "o365-712e2c00-685d-11ea-8d6a-292ef5d68366",
+        "title": "[Logs o365] Audit Dashboard"
+      },
+      {
+        "id": "o365-b318fde9-a0fa-4b57-8fd1-2f8e9f5ed6f0",
+        "title": "[Logs o365] User"
+      }
+    ]
+  },
+  {
+    "package": "o365_metrics",
+    "version": "1.1.1",
+    "dashboards": [
+      {
+        "id": "o365_metrics-0a6fa214-6cd1-4970-b7a4-f168a3f33c5c",
+        "title": "[Metrics O365 Metrics] Subscriptions"
+      },
+      {
+        "id": "o365_metrics-2abb4172-9e95-458a-8ade-64403457b1f0",
+        "title": "[Metrics O365 Metrics] Microsoft Teams User Activity User Detail"
+      },
+      {
+        "id": "o365_metrics-51a8703b-513f-44e5-9569-5c40f1374f42",
+        "title": "[Metrics O365 Metrics] App Registrations"
+      },
+      {
+        "id": "o365_metrics-5a19bdb2-e9c5-4774-8397-9e1501d70e3a",
+        "title": "[Metrics O365 Metrics] OneDrive Usage Account"
+      },
+      {
+        "id": "o365_metrics-8a87d02c-46d4-4284-8df3-5a23b6b8324f",
+        "title": "[Metrics O365 Metrics] Viva Engage Groups Activity Group Detail"
+      },
+      {
+        "id": "o365_metrics-973f7d5b-6aac-4f9a-9b45-e5d4751c85ee",
+        "title": "[Metrics O365 Metrics] Entra Alerts"
+      },
+      {
+        "id": "o365_metrics-977e9818-ac21-45be-8ca4-aae0f9accca7",
+        "title": "[Metrics O365 Metrics] Active Users Services User Counts"
+      },
+      {
+        "id": "o365_metrics-9edf2772-2d81-4c6d-bb24-fa72c997a572",
+        "title": "[Metrics O365 Metrics] Office 365 Groups Activity"
+      },
+      {
+        "id": "o365_metrics-f204a268-a4d4-43dd-b7fa-c7c9fb006cbb",
+        "title": "[Metrics O365 Metrics] Entra ID Users"
+      }
+    ]
+  },
+  {
+    "package": "okta",
+    "version": "3.14.1",
+    "dashboards": [
+      {
+        "id": "okta-749203a0-67b1-11ea-a76f-bf44814e437d",
+        "title": "[Logs Okta] Overview"
+      }
+    ]
+  },
+  {
+    "package": "openai",
+    "version": "1.2.1",
+    "dashboards": [
+      {
+        "id": "openai-651bb059-f606-44fc-b704-2078d0af26da",
+        "title": "[Metrics OpenAI] OpenAI Usage Overview"
+      }
+    ]
+  },
+  {
+    "package": "opencanary",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "opencanary-96cfb6c4-bc46-4fd4-9476-e8e9550442d9",
+        "title": "[OpenCanary] Event Summary"
+      }
+    ]
+  },
+  {
+    "package": "oracle",
+    "version": "1.31.1",
+    "dashboards": [
+      {
+        "id": "oracle-55661160-08c7-11ed-9abf-15e60715cfab",
+        "title": "[Metrics Oracle] Overview"
+      },
+      {
+        "id": "oracle-59eeb380-08d7-11ed-9abf-15e60715cfab",
+        "title": "[Metrics Oracle] Sysmetric"
+      },
+      {
+        "id": "oracle-6b4866c0-1599-11ed-9607-2ba0819b3835",
+        "title": "[Metrics Oracle] Performance Metrics"
+      },
+      {
+        "id": "oracle-9e19fb00-08e1-11ed-9abf-15e60715cfab",
+        "title": "[Metrics Oracle] Tablespace"
+      },
+      {
+        "id": "oracle-b6b2c9f0-13a7-11ed-9607-2ba0819b3835",
+        "title": "[Metrics Oracle] System Statistics Metrics"
+      },
+      {
+        "id": "oracle-bdb780f0-156a-11ed-9607-2ba0819b3835",
+        "title": "[Metrics Oracle] Memory Metrics"
+      }
+    ]
+  },
+  {
+    "package": "oracle_weblogic",
+    "version": "1.9.1",
+    "dashboards": [
+      {
+        "id": "oracle_weblogic-08549310-bef8-11ec-b09e-d5f6721c5e40",
+        "title": "[Metrics Oracle WebLogic] ThreadPool"
+      },
+      {
+        "id": "oracle_weblogic-4b2b0170-b88a-11ec-b6f8-0795d197226b",
+        "title": "[Logs Oracle WebLogic] Logs Overview"
+      },
+      {
+        "id": "oracle_weblogic-ea8cae80-ba24-11ec-913e-9be55c877bed",
+        "title": "[Metrics Oracle WebLogic] Deployed Application"
+      }
+    ]
+  },
+  {
+    "package": "osquery",
+    "version": "1.24.1",
+    "dashboards": [
+      {
+        "id": "osquery-69f5ae20-eb02-11e7-8f04-51231daa5b05",
+        "title": "[Logs Osquery] Compliance pack"
+      },
+      {
+        "id": "osquery-c0a7ce90-f4aa-11e7-8647-534bb4c21040",
+        "title": "[Logs Osquery] OSSEC rootkit pack"
+      }
+    ]
+  },
+  {
+    "package": "osquery_manager",
+    "version": "1.22.0",
+    "dashboards": [
+      {
+        "id": "osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05",
+        "title": "[Osquery Manager] Compliance pack"
+      },
+      {
+        "id": "osquery_manager-c0a7ce90-f4aa-11e7-8647-534bb4c21040",
+        "title": "[Osquery Manager] OSSEC rootkit pack"
+      }
+    ]
+  },
+  {
+    "package": "otel_collector_internal_telemetry",
+    "version": "0.0.4",
+    "dashboards": [
+      {
+        "id": "otel_collector_internal_telemetry-4c979b50-19eb-411c-8cfd-6ffe37fb0092",
+        "title": "OTel Collector internal telemetry - Overview"
+      },
+      {
+        "id": "otel_collector_internal_telemetry-58ba1893-9b1b-46e7-8a32-0765a5dd120a",
+        "title": "OTel Collector internal telemetry - Traces"
+      },
+      {
+        "id": "otel_collector_internal_telemetry-8f77b7f6-0ec0-462b-bb59-0607ffc464e1",
+        "title": "OTel Collector internal telemetry - Metrics"
+      },
+      {
+        "id": "otel_collector_internal_telemetry-919a1e90-10fd-4671-9612-bb2dd2f5530a",
+        "title": "OTel Collector internal telemetry - Logs"
+      }
+    ]
+  },
+  {
+    "package": "otel_internal_telemetry",
+    "version": "0.0.3",
+    "dashboards": [
+      {
+        "id": "otel_internal_telemetry-9d120e25-539a-41b0-8b27-47a937342f3d",
+        "title": "OTel internal metrics"
+      }
+    ]
+  },
+  {
+    "package": "otel_rum_dashboards",
+    "version": "0.0.2",
+    "dashboards": [
+      {
+        "id": "otel_rum_dashboards-6a666066-7355-4aa1-9a2d-a77e16c0708c",
+        "title": "OpenTelemetry RUM JS"
+      }
+    ]
+  },
+  {
+    "package": "pad",
+    "version": "1.1.1",
+    "dashboards": [
+      {
+        "id": "pad-4bc1d5ca-01b7-4adc-b7f8-53b0933eed09",
+        "title": "Privileged Access Detection Dashboard [Windows]"
+      },
+      {
+        "id": "pad-71c4cb79-3d39-4f27-9bbf-1b273c9c37cc",
+        "title": "Privileged Access Detection Dashboard [Linux]"
+      },
+      {
+        "id": "pad-aea2c9d3-c841-4466-8c61-c0ffbf6ac976",
+        "title": "Privileged Access Detection Dashboard [Okta]"
+      }
+    ]
+  },
+  {
+    "package": "panw",
+    "version": "5.5.0",
+    "dashboards": [
+      {
+        "id": "panw-0c0fa830-dca5-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] HIP Match and Correlated Events"
+      },
+      {
+        "id": "panw-42d2b320-dcec-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] Decryption"
+      },
+      {
+        "id": "panw-4782db40-dccc-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] Authentication "
+      },
+      {
+        "id": "panw-772964e0-7591-11e9-aacf-79a3704914a0",
+        "title": "[Logs PANW] Threats Overview"
+      },
+      {
+        "id": "panw-a663eea0-dd72-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] Tunnel Inspection"
+      },
+      {
+        "id": "panw-a8dc42e0-dcc8-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] User-ID and IP-Tag"
+      },
+      {
+        "id": "panw-b1a9f7a0-dcaa-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] Global Protect"
+      },
+      {
+        "id": "panw-d3e36450-dce1-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] System and Config"
+      },
+      {
+        "id": "panw-e40ba240-7572-11e9-976e-65a8f47cc4c1",
+        "title": "[Logs PANW] Network Flows"
+      },
+      {
+        "id": "panw-f84a1440-dcf7-11ec-8b8b-1fae02ab6a5e",
+        "title": "[Logs PANW] GTP and SCTP"
+      }
+    ]
+  },
+  {
+    "package": "panw_cortex_xdr",
+    "version": "2.5.1",
+    "dashboards": [
+      {
+        "id": "panw_cortex_xdr-10c6821e-1f7c-4ea6-acf8-e667ab0f03ce",
+        "title": "[Logs Palo Alto Cortex XDR] Incidents"
+      },
+      {
+        "id": "panw_cortex_xdr-a349f1e6-6762-4a54-9512-e22b32acb9d9",
+        "title": "[Logs Palo Alto Cortex XDR] Alerts"
+      },
+      {
+        "id": "panw_cortex_xdr-acba7c6a-e721-46ea-9263-1d0d8cc61922",
+        "title": "[Logs Palo Alto Cortex XDR] Events"
+      }
+    ]
+  },
+  {
+    "package": "panw_metrics",
+    "version": "0.2.0",
+    "dashboards": [
+      {
+        "id": "panw_metrics-27ff09cf-28a5-424d-8c3d-3b30f61d82dc",
+        "title": "[Metrics Palo Alto Networks] System Overview"
+      },
+      {
+        "id": "panw_metrics-5621b556-9010-4883-a339-4aa6a0b4bd74",
+        "title": "[Metrics Palo Alto Networks] VPN Overview"
+      },
+      {
+        "id": "panw_metrics-c100764a-f935-4c7b-a0d0-7622c4e19f6f",
+        "title": "[Metrics Palo Alto Networks] Routing Overview"
+      },
+      {
+        "id": "panw_metrics-fa29a215-7679-4867-a1e7-f3f8dc0bbbef",
+        "title": "[Metrics Palo Alto Networks] Interfaces Overview"
+      }
+    ]
+  },
+  {
+    "package": "pfsense",
+    "version": "1.25.1",
+    "dashboards": [
+      {
+        "id": "pfsense-986061c0-3a9a-11eb-96b2-e765737b7534",
+        "title": "Unbound - Dashboard [pfSense]"
+      },
+      {
+        "id": "pfsense-bdb33ee0-3a8e-11eb-96b2-e765737b7534",
+        "title": "Firewall - Dashboard [pfSense]"
+      },
+      {
+        "id": "pfsense-c8b42350-3a9c-11eb-96b2-e765737b7534",
+        "title": "DHCP - Dashboard [pfSense]"
+      }
+    ]
+  },
+  {
+    "package": "php_fpm",
+    "version": "1.6.0",
+    "dashboards": [
+      {
+        "id": "php_fpm-30d6d490-60c6-11ed-a227-676557292b43",
+        "title": "[Metrics PHP-FPM] Process"
+      },
+      {
+        "id": "php_fpm-6853a270-5a92-11ed-8d56-a14fd29a60cb",
+        "title": "[Metrics PHP-FPM] Pool"
+      }
+    ]
+  },
+  {
+    "package": "ping_federate",
+    "version": "1.2.0",
+    "dashboards": [
+      {
+        "id": "ping_federate-4e1a3b90-8da8-4d5d-89e7-5c49fb4a3541",
+        "title": "[Logs PingFederate] Admin"
+      },
+      {
+        "id": "ping_federate-c975ed3a-3c11-4352-830e-84f1efaf9e92",
+        "title": "[Logs PingFederate] Audit"
+      }
+    ]
+  },
+  {
+    "package": "ping_one",
+    "version": "1.22.0",
+    "dashboards": [
+      {
+        "id": "ping_one-60aa0020-0ea5-11ed-9b69-fdafbf89c645",
+        "title": "[Logs PingOne] Audit Events"
+      }
+    ]
+  },
+  {
+    "package": "postgresql",
+    "version": "1.32.1",
+    "dashboards": [
+      {
+        "id": "postgresql-158be870-87f4-11e7-ad9c-db80de0bf8d3",
+        "title": "[Logs PostgreSQL] Overview"
+      },
+      {
+        "id": "postgresql-4288b790-b79f-11e9-a579-f5c0a5d81340",
+        "title": "[Metrics PostgreSQL] Database Overview"
+      },
+      {
+        "id": "postgresql-e4c5f230-87f3-11e7-ad9c-db80de0bf8d3",
+        "title": "[Logs PostgreSQL] Query Duration Overview"
+      }
+    ]
+  },
+  {
+    "package": "postgresql_otel",
+    "version": "0.2.1",
+    "dashboards": [
+      {
+        "id": "postgresql_otel-023149b8-d4cf-41b0-a36b-80c49ee8ba6c",
+        "title": "[Metrics PostgreSQL OTel] Database Overview"
+      }
+    ]
+  },
+  {
+    "package": "pps",
+    "version": "1.2.0",
+    "dashboards": [
+      {
+        "id": "pps-66ae8483-4391-4554-a223-11e5c6c98653",
+        "title": "[Logs Pleasant Password Server] Overview"
+      }
+    ]
+  },
+  {
+    "package": "prisma_access",
+    "version": "1.6.2",
+    "dashboards": [
+      {
+        "id": "prisma_access-29e20c1b-56d7-4faf-874a-ec0be2b71d73",
+        "title": "[Logs Prisma Access] DNS Security"
+      },
+      {
+        "id": "prisma_access-3ee4a5d1-f482-477d-a9d7-79614e47edf6",
+        "title": "[Logs Prisma Access] Decryption"
+      },
+      {
+        "id": "prisma_access-4748fc8c-61fa-4734-96c4-00434060bb91",
+        "title": "[Logs Prisma Access] UserID and IPtag"
+      },
+      {
+        "id": "prisma_access-5491eea8-ffea-4c38-853e-ecc71a029f5e",
+        "title": "[Logs Prisma Access] SCTP and Tunnel"
+      },
+      {
+        "id": "prisma_access-59f8f009-9181-4648-8d2f-0efcef9af09c",
+        "title": "[Logs Prisma Access] Traffic"
+      },
+      {
+        "id": "prisma_access-8c044964-3350-4ef9-8af0-b35842382ecb",
+        "title": "[Logs Prisma Access] System and Configuration"
+      },
+      {
+        "id": "prisma_access-954911aa-fa52-4288-9eda-b5ffd6e4b742",
+        "title": "[Logs Prisma Access] Threat"
+      },
+      {
+        "id": "prisma_access-98ffa22c-9cce-4c8f-b827-045466894b3b",
+        "title": "[Logs Prisma Access] File and URL"
+      },
+      {
+        "id": "prisma_access-9f7ebe0c-3608-4f80-bb30-14bf9da2add9",
+        "title": "[Logs Prisma Access] GlobalProtect and HIPMatch"
+      },
+      {
+        "id": "prisma_access-c44e75d2-4d32-4944-877a-d4770b8bf003",
+        "title": "[Logs Prisma Access] Authentication"
+      }
+    ]
+  },
+  {
+    "package": "prisma_cloud",
+    "version": "4.0.2",
+    "dashboards": [
+      {
+        "id": "prisma_cloud-0350ce90-731c-11ee-9b31-b9dc63d74a8c",
+        "title": "[Logs Prisma Cloud] Alert"
+      },
+      {
+        "id": "prisma_cloud-19913580-7495-11ee-9d52-2d0fa627877e",
+        "title": "[Logs Prisma Cloud] Host"
+      },
+      {
+        "id": "prisma_cloud-5bc2b380-7318-11ee-9b38-f7fd414b059a",
+        "title": "[Logs Prisma Cloud] Host Profile"
+      },
+      {
+        "id": "prisma_cloud-af1d9a50-7407-11ee-9b38-f7fd414b059a",
+        "title": "[Logs Prisma Cloud] Incident Audit"
+      },
+      {
+        "id": "prisma_cloud-b75744e3-d9f4-4717-bc31-128e06be46b6",
+        "title": "[Logs Prisma Cloud] Vulnerability"
+      },
+      {
+        "id": "prisma_cloud-d1674a40-72f7-11ee-9b38-f7fd414b059a",
+        "title": "[Logs Prisma Cloud] Audit"
+      },
+      {
+        "id": "prisma_cloud-ee17bbf9-276a-4a1f-b9c1-c18447215c58",
+        "title": "[Logs Prisma Cloud] Misconfiguration"
+      }
+    ]
+  },
+  {
+    "package": "profilingmetrics_otel",
+    "version": "0.0.4",
+    "dashboards": [
+      {
+        "id": "profilingmetrics_otel-cf4d74ec-b406-4314-9519-2569d24002fe",
+        "title": "Profilingmetrics"
+      }
+    ]
+  },
+  {
+    "package": "prometheus",
+    "version": "1.24.2",
+    "dashboards": [
+      {
+        "id": "prometheus-c181a040-3d96-11ed-b624-b12467b8df74",
+        "title": "[Metrics Prometheus] Prometheus Server overview"
+      }
+    ]
+  },
+  {
+    "package": "proofpoint_essentials",
+    "version": "0.1.0",
+    "dashboards": [
+      {
+        "id": "proofpoint_essentials-6ce9c1fd-381f-4757-9747-b8fdabdde163",
+        "title": "[Logs Proofpoint Essentials] Clicks Overview"
+      },
+      {
+        "id": "proofpoint_essentials-d44fa085-b1b7-4f05-9a6c-9777dbe737e2",
+        "title": "[Logs Proofpoint Essentials] Messages Overview"
+      }
+    ]
+  },
+  {
+    "package": "proofpoint_itm",
+    "version": "1.0.1",
+    "dashboards": [
+      {
+        "id": "proofpoint_itm-29f45960-20a5-4ca4-a40a-ad1504eb8138",
+        "title": "[Logs Proofpoint ITM] Report"
+      }
+    ]
+  },
+  {
+    "package": "proofpoint_on_demand",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "proofpoint_on_demand-77feed4b-c40f-45f4-b9dd-7094a6877609",
+        "title": "[Logs Proofpoint On Demand] Audit Overview"
+      },
+      {
+        "id": "proofpoint_on_demand-ae89dee7-9dc7-4121-ba6a-93c408307ee4",
+        "title": "[Logs Proofpoint On Demand] Message Overview"
+      },
+      {
+        "id": "proofpoint_on_demand-e84a69fa-843b-4697-8b9c-cd9b005581ef",
+        "title": "[Logs Proofpoint On Demand] Mail Overview"
+      }
+    ]
+  },
+  {
+    "package": "proofpoint_tap",
+    "version": "1.29.1",
+    "dashboards": [
+      {
+        "id": "proofpoint_tap-3ad578f0-b5a6-11ec-a9d0-e94ed15a14b9",
+        "title": "[Logs Proofpoint TAP] Blocked Clicks"
+      },
+      {
+        "id": "proofpoint_tap-770903b0-b5aa-11ec-a9d0-e94ed15a14b9",
+        "title": "[Logs Proofpoint TAP] Permitted Clicks"
+      },
+      {
+        "id": "proofpoint_tap-9899aae0-b5ad-11ec-a9d0-e94ed15a14b9",
+        "title": "[Logs Proofpoint TAP] Blocked Messages"
+      },
+      {
+        "id": "proofpoint_tap-ee5bc100-b5c8-11ec-a9d0-e94ed15a14b9",
+        "title": "[Logs Proofpoint TAP] Delivered Messages"
+      }
+    ]
+  },
+  {
+    "package": "proxysg",
+    "version": "0.8.0",
+    "dashboards": [
+      {
+        "id": "proxysg-69b7c835-b9b4-4efa-b183-69468f4688c0",
+        "title": "[ProxySG] Proxy Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "pulse_connect_secure",
+    "version": "2.6.1",
+    "dashboards": [
+      {
+        "id": "pulse_connect_secure-231bf2be-205c-40ad-9493-7de5b4ca36c2",
+        "title": "[Logs Pulse Connect Secure] Overview"
+      }
+    ]
+  },
+  {
+    "package": "qnap_nas",
+    "version": "1.25.2",
+    "dashboards": [
+      {
+        "id": "qnap_nas-32e28700-4b0c-11ec-b2cc-b9a3cc301b75",
+        "title": "[QNAP NAS] Access Logs"
+      }
+    ]
+  },
+  {
+    "package": "qualys_gav",
+    "version": "0.7.2",
+    "dashboards": [
+      {
+        "id": "qualys_gav-e7e0529f-6cb1-4b01-b5f8-568cfb07c306",
+        "title": "[Logs Qualys GAV] Asset"
+      }
+    ]
+  },
+  {
+    "package": "qualys_vmdr",
+    "version": "6.16.0",
+    "dashboards": [
+      {
+        "id": "qualys_vmdr-017c0220-1001-11ee-b28e-615808a979fd",
+        "title": "[Logs Qualys VMDR] Asset Host Detection"
+      },
+      {
+        "id": "qualys_vmdr-686c4470-11b6-11ee-a722-91244a8ae892",
+        "title": "[Logs Qualys VMDR] Knowledge Base"
+      },
+      {
+        "id": "qualys_vmdr-89c63c80-a8eb-436d-9da2-a6c988fe8f0a",
+        "title": "[Logs Qualys VMDR] User Activity Log"
+      }
+    ]
+  },
+  {
+    "package": "qualys_was",
+    "version": "0.3.1",
+    "dashboards": [
+      {
+        "id": "qualys_was-e98bb088-8853-4e6a-8887-c3f301100fe6",
+        "title": "[Qualys Web Application Scanning] Detections Summary"
+      }
+    ]
+  },
+  {
+    "package": "rabbitmq",
+    "version": "1.22.0",
+    "dashboards": [
+      {
+        "id": "rabbitmq-AV4YobKIge1VCbKU_qVo",
+        "title": "[Metrics RabbitMQ] Overview"
+      }
+    ]
+  },
+  {
+    "package": "rapid7_insightvm",
+    "version": "2.6.1",
+    "dashboards": [
+      {
+        "id": "rapid7_insightvm-a1345db0-b725-11ed-9179-55e576c8acae",
+        "title": "[Logs Rapid7 InsightVM] Vulnerability"
+      },
+      {
+        "id": "rapid7_insightvm-ae7bd8c0-b71d-11ed-9179-55e576c8acae",
+        "title": "[Logs Rapid7 InsightVM] Asset"
+      }
+    ]
+  },
+  {
+    "package": "redis",
+    "version": "1.20.0",
+    "dashboards": [
+      {
+        "id": "redis-28969190-0511-11e9-9c60-d582a238e2c5",
+        "title": "[Metrics Redis] Keys"
+      },
+      {
+        "id": "redis-7fea2930-478e-11e7-b1f0-cb29bac6bf8b",
+        "title": "[Logs Redis] Overview"
+      },
+      {
+        "id": "redis-AV4YjZ5pux-M-tCAunxK",
+        "title": "[Metrics Redis] Overview"
+      }
+    ]
+  },
+  {
+    "package": "redisenterprise",
+    "version": "0.12.0",
+    "dashboards": [
+      {
+        "id": "redisenterprise-8da53a40-5a2f-11ea-bc69-cdcc68092a57",
+        "title": "[Redis Enterprise] Overview"
+      }
+    ]
+  },
+  {
+    "package": "sailpoint_identity_sc",
+    "version": "1.2.0",
+    "dashboards": [
+      {
+        "id": "sailpoint_identity_sc-7b41587a-7abc-44f3-901e-1501ef78520e",
+        "title": "[Events Sailpoint identity security cloud] Overview"
+      }
+    ]
+  },
+  {
+    "package": "salesforce",
+    "version": "1.7.0",
+    "dashboards": [
+      {
+        "id": "salesforce-19da7408-dbd1-4745-a888-da9dadcd747d",
+        "title": "[Logs Salesforce] Apex Dashboard"
+      },
+      {
+        "id": "salesforce-31f56373-0faf-4bf9-8741-3c560bb69f82",
+        "title": "[Logs Salesforce] SetupAuditTrail Dashboard"
+      },
+      {
+        "id": "salesforce-573a6fd6-de05-499c-bd29-4ce2146baaa8",
+        "title": "[Logs Salesforce] Logout Dashboard"
+      },
+      {
+        "id": "salesforce-77a8a241-5605-46ae-815a-6dd689de2f09",
+        "title": "[Logs Salesforce] Login Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "santa",
+    "version": "3.24.0",
+    "dashboards": [
+      {
+        "id": "santa-161855f0-ff6a-11e8-93c5-d5ecd1b3e307",
+        "title": "[Logs Santa] Overview"
+      }
+    ]
+  },
+  {
+    "package": "sentinel_one",
+    "version": "2.4.1",
+    "dashboards": [
+      {
+        "id": "sentinel_one-0dd17490-bbb8-11ec-82b7-8fcb232e9538",
+        "title": "[Logs SentinelOne] Threats"
+      },
+      {
+        "id": "sentinel_one-413bf268-78f7-4bea-b668-55b5adacbf08",
+        "title": "[Logs SentinelOne] Threat Events"
+      },
+      {
+        "id": "sentinel_one-5881f5f0-bb2c-11ec-82b7-8fcb232e9538",
+        "title": "[Logs SentinelOne] Groups"
+      },
+      {
+        "id": "sentinel_one-67844880-bbb5-11ec-82b7-8fcb232e9538",
+        "title": "[Logs SentinelOne] Agents"
+      },
+      {
+        "id": "sentinel_one-899f2630-bb27-11ec-82b7-8fcb232e9538",
+        "title": "[Logs SentinelOne] Activities"
+      },
+      {
+        "id": "sentinel_one-9d3f16ad-d421-4475-b0e2-c9b3f795e0d5",
+        "title": "[Logs SentinelOne] Application Risk"
+      },
+      {
+        "id": "sentinel_one-acd472d9-a6b7-4a53-a58d-06c315764c8d",
+        "title": "[Logs SentinelOne] Application"
+      },
+      {
+        "id": "sentinel_one-bcf1f680-bba3-11ec-82b7-8fcb232e9538",
+        "title": "[Logs SentinelOne] Alerts"
+      },
+      {
+        "id": "sentinel_one-d17089b1-173e-4c17-8830-779346ace39d",
+        "title": "[Logs SentinelOne] Unified Alerts"
+      }
+    ]
+  },
+  {
+    "package": "sentinel_one_cloud_funnel",
+    "version": "1.13.1",
+    "dashboards": [
+      {
+        "id": "sentinel_one_cloud_funnel-008e94d0-facc-11ed-9768-a973b08e03b4",
+        "title": "[Logs SentinelOne Cloud Funnel] Threat Intelligence Indicator"
+      },
+      {
+        "id": "sentinel_one_cloud_funnel-42ecf8a0-fae3-11ed-a771-5bdf1dfe027b",
+        "title": "[Logs SentinelOne Cloud Funnel] Login"
+      },
+      {
+        "id": "sentinel_one_cloud_funnel-724f8d70-f966-11ed-b51d-ef5658e04999",
+        "title": "[Logs SentinelOne Cloud Funnel] Network Action"
+      },
+      {
+        "id": "sentinel_one_cloud_funnel-afecde30-f966-11ed-b51d-ef5658e04999",
+        "title": "[Logs SentinelOne Cloud Funnel] Overview"
+      },
+      {
+        "id": "sentinel_one_cloud_funnel-c90a2bc0-fa2e-11ed-b63a-6f5ce39a3d73",
+        "title": "[Logs SentinelOne Cloud Funnel] URL, Cross Process and Scheduled Task"
+      },
+      {
+        "id": "sentinel_one_cloud_funnel-dd209080-f967-11ed-b51d-ef5658e04999",
+        "title": "[Logs SentinelOne Cloud Funnel] Registry"
+      }
+    ]
+  },
+  {
+    "package": "sonicwall_firewall",
+    "version": "1.22.0",
+    "dashboards": [
+      {
+        "id": "sonicwall_firewall-782e2cf0-d78f-11ec-bc4f-47419689dcde",
+        "title": "[SonicWall Firewall] Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "sophos",
+    "version": "3.17.0",
+    "dashboards": [
+      {
+        "id": "sophos-13d06620-19af-11ee-982d-b1686976653f",
+        "title": "[Sophos UTM] HTTP events"
+      },
+      {
+        "id": "sophos-14b92300-19b0-11ee-982d-b1686976653f",
+        "title": "[Sophos UTM] Packet Filter events"
+      },
+      {
+        "id": "sophos-55522ef0-19ad-11ee-982d-b1686976653f",
+        "title": "[Sophos UTM] DHCP events"
+      },
+      {
+        "id": "sophos-60a2c260-19ad-11ee-982d-b1686976653f",
+        "title": "[Sophos UTM] Overview"
+      }
+    ]
+  },
+  {
+    "package": "sophos_central",
+    "version": "1.21.0",
+    "dashboards": [
+      {
+        "id": "sophos_central-1616f9a0-77af-11ed-98b8-2bf13cc9deaa",
+        "title": "[Logs Sophos Central] Alerts"
+      },
+      {
+        "id": "sophos_central-3ad33c00-7ad8-11ed-a685-e7c53637b621",
+        "title": "[Logs Sophos Central] Events"
+      }
+    ]
+  },
+  {
+    "package": "splunk",
+    "version": "1.0.1",
+    "dashboards": [
+      {
+        "id": "splunk-eef0d14a-7e42-414d-a0dc-a41423800158",
+        "title": "[Logs Splunk] Alert"
+      }
+    ]
+  },
+  {
+    "package": "spring_boot",
+    "version": "1.9.1",
+    "dashboards": [
+      {
+        "id": "spring_boot-6fe11330-c7f1-11ec-986a-f1e84447fd00",
+        "title": "[Spring Boot] Audit Events"
+      },
+      {
+        "id": "spring_boot-6fe782d0-ca15-11ec-b4b1-b57f75afa7dd",
+        "title": "[Spring Boot] Access logs"
+      },
+      {
+        "id": "spring_boot-c89e1510-ca15-11ec-b4b1-b57f75afa7dd",
+        "title": "[Spring Boot] Memory and Threads"
+      },
+      {
+        "id": "spring_boot-e8507040-c7b0-11ec-9c82-4b3dfe36a746",
+        "title": "[Spring Boot] Overview Dashboard"
+      }
+    ]
+  },
+  {
+    "package": "spycloud",
+    "version": "1.5.2",
+    "dashboards": [
+      {
+        "id": "spycloud-586e3060-9e51-11ee-acf7-7108ddc3dcca",
+        "title": "[Logs SpyCloud] Breach Record"
+      },
+      {
+        "id": "spycloud-9589d660-9e43-11ee-acf7-7108ddc3dcca",
+        "title": "[Logs SpyCloud] Breach Catalog"
+      },
+      {
+        "id": "spycloud-a34dc2b0-9e62-11ee-acf7-7108ddc3dcca",
+        "title": "[Logs SpyCloud] Compass"
+      }
+    ]
+  },
+  {
+    "package": "squid",
+    "version": "1.5.0",
+    "dashboards": [
+      {
+        "id": "squid-478e10c4-c49a-4f57-bc83-8ed89b47f1a5",
+        "title": "[Squid Proxy] Overview"
+      }
+    ]
+  },
+  {
+    "package": "stan",
+    "version": "1.11.0",
+    "dashboards": [
+      {
+        "id": "stan-Logs-stan-overview",
+        "title": "[Logs STAN] Overview"
+      },
+      {
+        "id": "stan-b6a60340-4371-11ea-b0c6-cb14c0977bd1",
+        "title": "[Metrics Stan] Channel Overview Metrics"
+      }
+    ]
+  },
+  {
+    "package": "stormshield",
+    "version": "1.5.1",
+    "dashboards": [
+      {
+        "id": "stormshield-5be8e340-235b-11ef-8b33-572717a2fc0b",
+        "title": "[Stormshield] Overview"
+      }
+    ]
+  },
+  {
+    "package": "sublime_security",
+    "version": "1.11.2",
+    "dashboards": [
+      {
+        "id": "sublime_security-779aade2-fbb2-425d-8647-79c2bdf2d6e0",
+        "title": "[Logs Sublime Security] Email Message"
+      },
+      {
+        "id": "sublime_security-7b4299fc-2465-46c6-bc55-dba692bb2745",
+        "title": "[Logs Sublime Security] Audit"
+      },
+      {
+        "id": "sublime_security-f4f4e3ca-1993-4a55-9d87-a7029ee0f869",
+        "title": "[Logs Sublime Security] Message Event"
+      }
+    ]
+  },
+  {
+    "package": "suricata",
+    "version": "2.27.0",
+    "dashboards": [
+      {
+        "id": "suricata-05268ee0-86d1-11e8-b59d-21efb914e65c",
+        "title": "[Logs Suricata] Alert Overview"
+      },
+      {
+        "id": "suricata-78289c40-86da-11e8-b59d-21efb914e65c",
+        "title": "[Logs Suricata] Events Overview"
+      }
+    ]
+  },
+  {
+    "package": "symantec_endpoint",
+    "version": "2.20.0",
+    "dashboards": [
+      {
+        "id": "symantec_endpoint-3ac0a690-5f71-11ec-85e4-338fc80d8393",
+        "title": "[Symantec Endpoint Log] Overview"
+      }
+    ]
+  },
+  {
+    "package": "symantec_endpoint_security",
+    "version": "1.14.2",
+    "dashboards": [
+      {
+        "id": "symantec_endpoint_security-2926c4d6-8bd4-4591-b16f-9a2fe92d9537",
+        "title": "[Logs SES] Overview"
+      },
+      {
+        "id": "symantec_endpoint_security-307802ca-681c-42d5-9518-93d8cb3f9cc6",
+        "title": "[Logs SES] Security Event"
+      },
+      {
+        "id": "symantec_endpoint_security-48a8e233-f36c-4acb-99f2-c348c6781f6f",
+        "title": "[Logs SES] File, Email and Entity"
+      },
+      {
+        "id": "symantec_endpoint_security-8f4d2ce2-c5f2-421f-be7b-ffde36b86a0f",
+        "title": "[Logs SES] Container, Module and Kernel"
+      },
+      {
+        "id": "symantec_endpoint_security-a1361bd2-d3ef-4ee3-8dfa-4930bb91be4a",
+        "title": "[Logs SES] Incident"
+      },
+      {
+        "id": "symantec_endpoint_security-bfbe8f7e-74af-4f0e-9037-793baa3709d5",
+        "title": "[Logs SES] Threat and User"
+      },
+      {
+        "id": "symantec_endpoint_security-ca452d05-b541-49e3-aa31-61d619188235",
+        "title": "[Logs SES] System, Application and Audit Event"
+      }
+    ]
+  },
+  {
+    "package": "sysdig",
+    "version": "2.2.0",
+    "dashboards": [
+      {
+        "id": "sysdig-3bf1d068-5f08-4824-9b30-72977a718b16",
+        "title": "[Logs Sysdig] Vulnerability Overview"
+      },
+      {
+        "id": "sysdig-91e1e6ee-c169-4860-9fec-bce5cd05b185",
+        "title": "[Logs Sysdig] CSPM Overview"
+      },
+      {
+        "id": "sysdig-d0ac6062-d4da-4f63-948d-4aea617909bf",
+        "title": "[Logs Sysdig] Security Events Overview"
+      },
+      {
+        "id": "sysdig-fae0ccf1-e806-4876-a7fa-7258b094b15b",
+        "title": "[Logs Sysdig] Alerts Overview"
+      }
+    ]
+  },
+  {
+    "package": "sysmon_linux",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "sysmon_linux-22fcf4b0-64d8-11ed-8c3d-9d8cab821d64",
+        "title": "[Sysmon] Sysmon for Linux Logs Overview"
+      }
+    ]
+  },
+  {
+    "package": "system",
+    "version": "2.12.4",
+    "dashboards": [
+      {
+        "id": "system-0d3f2380-fa78-11e6-ae9b-81e5311e8cab",
+        "title": "[Logs System] New users and groups"
+      },
+      {
+        "id": "system-0e70e1bd-9a57-4f17-9d96-cc97e3d3a4f9",
+        "title": "[Logs System Windows Security] System & Process Activity"
+      },
+      {
+        "id": "system-277876d0-fa2c-11e6-bbd3-29c986c96e5a",
+        "title": "[Logs System] Sudo commands"
+      },
+      {
+        "id": "system-2c4debf0-ef4f-4379-99a1-c57c307f23af",
+        "title": "[Logs System Windows Security] Logon Activity"
+      },
+      {
+        "id": "system-3c46ecdb-0a41-4be3-907e-722de8edac12",
+        "title": "[Logs System Windows Security] Directory & Account Monitoring"
+      },
+      {
+        "id": "system-5517a150-f9ce-11e6-8115-a7c18106d86a",
+        "title": "[Logs System] SSH login attempts"
+      },
+      {
+        "id": "system-71f720f0-ff18-11e9-8405-516218e3d268",
+        "title": "[System Windows Security] User Management Events"
+      },
+      {
+        "id": "system-79ffd6e0-faa0-11e6-947f-177f697178b8",
+        "title": "[Metrics System] Host overview"
+      },
+      {
+        "id": "system-Logs-syslog-dashboard",
+        "title": "[Logs System] Syslog dashboard"
+      },
+      {
+        "id": "system-Metrics-system-overview",
+        "title": "[Metrics System] Overview"
+      },
+      {
+        "id": "system-Windows-Dashboard",
+        "title": "[System] Windows Overview"
+      },
+      {
+        "id": "system-bae11b00-9bfc-11ea-87e4-49f31ec44891",
+        "title": "[System Windows Security] User Logons"
+      },
+      {
+        "id": "system-bb858830-f412-11e9-8405-516218e3d268",
+        "title": "[System Windows Security] Group Management Events"
+      },
+      {
+        "id": "system-d401ef40-a7d5-11e9-a422-d144027429da",
+        "title": "[System Windows Security] Failed and Blocked Accounts"
+      },
+      {
+        "id": "system-db94459a-7232-4d1b-aa0c-b80dece8bc3a",
+        "title": "[Logs System Windows Security] Policy & Object Monitoring"
+      }
+    ]
+  },
+  {
+    "package": "system_audit",
+    "version": "1.11.0",
+    "dashboards": [
+      {
+        "id": "system_audit-137c52f0-286a-11e9-9d21-0be348776e6c",
+        "title": "[System Audit] Package Dashboard"
+      },
+      {
+        "id": "system_audit-2be46cb0-27f2-11e9-89af-fd12d59dac90",
+        "title": "[System Audit] System Audit Overview"
+      }
+    ]
+  },
+  {
+    "package": "system_otel",
+    "version": "0.2.5",
+    "dashboards": [
+      {
+        "id": "system_otel-329ee135-f301-4dab-91f4-af52cd58cb88",
+        "title": "[OTel] Host Details - Overview"
+      },
+      {
+        "id": "system_otel-8905d3c2-508b-4b43-a0eb-f03864dd64f6",
+        "title": "[OTel] Hosts Overview"
+      },
+      {
+        "id": "system_otel-c2749107-6de5-49b5-b007-582a88de8d7c",
+        "title": "[OTel] Host Details - Metadata"
+      },
+      {
+        "id": "system_otel-c505790f-b3ef-4ca8-81a6-3554be676272",
+        "title": "[OTel] Host Details - Metrics"
+      },
+      {
+        "id": "system_otel-e21fc868-3857-47f8-88b0-7ff94a1eb8a9",
+        "title": "[OTel] Host Details - Logs"
+      }
+    ]
+  },
+  {
+    "package": "tanium",
+    "version": "1.17.0",
+    "dashboards": [
+      {
+        "id": "tanium-1cf57430-add9-11ed-baef-9ff4bc7fc264",
+        "title": "[Logs Tanium] Action History"
+      },
+      {
+        "id": "tanium-53510240-751e-11ed-ac81-f9d06ecfbe4d",
+        "title": "[Logs Tanium] Reporting"
+      },
+      {
+        "id": "tanium-bb48efc0-7221-11ed-9ca9-cffacbd3ea4b",
+        "title": "[Logs Tanium] Discover"
+      },
+      {
+        "id": "tanium-d007ae70-6712-11ed-a002-4b5caf8e6ce4",
+        "title": "[Logs Tanium] Endpoint Config"
+      },
+      {
+        "id": "tanium-ed004c30-97c3-11ed-995f-9bf277425742",
+        "title": "[Logs Tanium] Threat Response"
+      },
+      {
+        "id": "tanium-ee076ba0-7166-11ed-8152-6bb1c847deb5",
+        "title": "[Logs Tanium] Client Status"
+      }
+    ]
+  },
+  {
+    "package": "teleport",
+    "version": "1.6.0",
+    "dashboards": [
+      {
+        "id": "teleport-6ed390ba-aab9-446c-9b9b-f4fc1867656c",
+        "title": "[Teleport] Audit Events Overview"
+      }
+    ]
+  },
+  {
+    "package": "tenable_io",
+    "version": "4.9.0",
+    "dashboards": [
+      {
+        "id": "tenable_io-0d902a50-edec-11ed-b550-bd5e656b580f",
+        "title": "[Logs Tenable Vulnerability Management] Scan"
+      },
+      {
+        "id": "tenable_io-2f561e3c-2bd2-4c63-a19a-bd40c9cd6106",
+        "title": "[Logs Tenable Vulnerability Management] Audit"
+      },
+      {
+        "id": "tenable_io-4d784610-1ec2-11ed-bad4-551c615a34d1",
+        "title": "[Logs Tenable Vulnerability Management] Plugin"
+      },
+      {
+        "id": "tenable_io-84586900-1ed4-11ed-bad4-551c615a34d1",
+        "title": "[Logs Tenable Vulnerability Management] Vulnerability"
+      },
+      {
+        "id": "tenable_io-f2dacba0-1e22-11ed-bad4-551c615a34d1",
+        "title": "[Logs Tenable Vulnerability Management] Asset"
+      }
+    ]
+  },
+  {
+    "package": "tenable_ot_security",
+    "version": "1.1.0",
+    "dashboards": [
+      {
+        "id": "tenable_ot_security-83d09d64-36df-46a1-8790-9f3dfe02e153",
+        "title": "[Tenable OT Security] Events"
+      },
+      {
+        "id": "tenable_ot_security-c6423a0a-fd80-489b-8302-17ba2024f345",
+        "title": "[Tenable OT Security] Overview"
+      }
+    ]
+  },
+  {
+    "package": "tenable_sc",
+    "version": "2.1.0",
+    "dashboards": [
+      {
+        "id": "tenable_sc-38c74c00-3814-11ed-bfe4-89ace1bfa1be",
+        "title": "[Logs Tenable Security Center] Plugins"
+      },
+      {
+        "id": "tenable_sc-3b851800-380a-11ed-bfe4-89ace1bfa1be",
+        "title": "[Logs Tenable Security Center] Vulnerabilities"
+      },
+      {
+        "id": "tenable_sc-b61f3090-3806-11ed-bfe4-89ace1bfa1be",
+        "title": "[Logs Tenable Security Center] Assets"
+      }
+    ]
+  },
+  {
+    "package": "tencent_cloud",
+    "version": "0.2.0",
+    "dashboards": [
+      {
+        "id": "tencent_cloud-d409e6da-ca03-46eb-9450-19d7a2fdcb51",
+        "title": "腾讯云审计日志概览"
+      }
+    ]
+  },
+  {
+    "package": "threat_map",
+    "version": "1.1.0",
+    "dashboards": [
+      {
+        "id": "threat_map-fecb4669-516d-4de9-aa98-713aca39fa6c",
+        "title": "Threat Map"
+      }
+    ]
+  },
+  {
+    "package": "thycotic_ss",
+    "version": "1.12.1",
+    "dashboards": [
+      {
+        "id": "thycotic_ss-0cb71ae0-5bdd-11ed-b6ae-6bb0097dca82",
+        "title": "[Logs] Thycotic Secret Server"
+      }
+    ]
+  },
+  {
+    "package": "ti_abusech",
+    "version": "3.6.0",
+    "dashboards": [
+      {
+        "id": "ti_abusech-2457fb50-3bc3-11ec-ae8c-7d00429ad420",
+        "title": "[Logs abuse.ch] URLs"
+      },
+      {
+        "id": "ti_abusech-68ac01ad-dddf-476c-9a54-8c33c1047e53",
+        "title": "[Logs abuse.ch] Software and X-509 Certificates"
+      },
+      {
+        "id": "ti_abusech-6a90c980-3b32-11ec-ae50-2fdf1e96c6a6",
+        "title": "[Logs abuse.ch] Files"
+      },
+      {
+        "id": "ti_abusech-c0d8d1f0-3b20-11ec-ae50-2fdf1e96c6a6",
+        "title": "[Logs abuse.ch] Overview"
+      },
+      {
+        "id": "ti_abusech-d11a94be-9b9f-42f8-9fed-d5e89005f24d",
+        "title": "[Logs abuse.ch] Domains and IP Addresses"
+      }
+    ]
+  },
+  {
+    "package": "ti_anomali",
+    "version": "2.4.0",
+    "dashboards": [
+      {
+        "id": "ti_anomali-207f3c40-45fb-11ec-ab0c-d7f52dcaa020",
+        "title": "[Logs Anomali ThreatStream] Files"
+      },
+      {
+        "id": "ti_anomali-39699a60-45fc-11ec-ab0c-d7f52dcaa020",
+        "title": "[Logs Anomali ThreatStream] URL"
+      },
+      {
+        "id": "ti_anomali-78e08d20-45fc-11ec-ab0c-d7f52dcaa020",
+        "title": "[Logs Anomali ThreatStream] Other Indicators"
+      },
+      {
+        "id": "ti_anomali-96fe1e60-4261-11ec-b7be-d3026acdf1cf",
+        "title": "[Logs Anomali ThreatStream] Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_cif3",
+    "version": "1.18.2",
+    "dashboards": [
+      {
+        "id": "ti_cif3-6005a190-0aba-11ed-bcc0-01c79f2670f3",
+        "title": "[Logs CIFv3] FQDNs"
+      },
+      {
+        "id": "ti_cif3-63a0e470-0a30-11ed-bcc0-01c79f2670f3",
+        "title": "[Logs CIFv3] Files"
+      },
+      {
+        "id": "ti_cif3-aedada10-0ab5-11ed-bcc0-01c79f2670f3",
+        "title": "[Logs CIFv3] IPs"
+      },
+      {
+        "id": "ti_cif3-b4d9d9b0-0a2f-11ed-bcc0-01c79f2670f3",
+        "title": "[Logs CIFv3] Overview"
+      },
+      {
+        "id": "ti_cif3-bda23600-0abb-11ed-bcc0-01c79f2670f3",
+        "title": "[Logs CIFv3] Emails"
+      },
+      {
+        "id": "ti_cif3-fef149c0-0a2f-11ed-bcc0-01c79f2670f3",
+        "title": "[Logs CIFv3] URLs"
+      }
+    ]
+  },
+  {
+    "package": "ti_crowdstrike",
+    "version": "2.6.1",
+    "dashboards": [
+      {
+        "id": "ti_crowdstrike-37a9ef30-9993-11ee-9b44-fd906664033c",
+        "title": "[Logs CrowdStrike Falcon Intelligence] IOC"
+      },
+      {
+        "id": "ti_crowdstrike-b81b5020-9e64-11ee-9777-1d1f44d25bb5",
+        "title": "[Logs CrowdStrike Falcon Intelligence] Intel"
+      }
+    ]
+  },
+  {
+    "package": "ti_custom",
+    "version": "1.3.1",
+    "dashboards": [
+      {
+        "id": "ti_custom-e336dd7a-d5cb-4b7f-a6cd-85c45d0bd1ac",
+        "title": "[Custom Threat Intelligence] IOCs overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_cybersixgill",
+    "version": "1.34.1",
+    "dashboards": [
+      {
+        "id": "ti_cybersixgill-63c9fee0-5bea-11ec-9302-152fd766c738",
+        "title": "[Logs Cybersixgill] Files"
+      },
+      {
+        "id": "ti_cybersixgill-717013b0-5bed-11ec-9302-152fd766c738",
+        "title": "[Logs Cybersixgill] URLs"
+      },
+      {
+        "id": "ti_cybersixgill-c75353f0-5be8-11ec-9302-152fd766c738",
+        "title": "[Logs Cybersixgill] Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_cyware_intel_exchange",
+    "version": "0.2.0",
+    "dashboards": [
+      {
+        "id": "ti_cyware_intel_exchange-56ee88b2-39b0-44f1-a122-46ff83bdbcb0",
+        "title": "[Logs Cyware Intel Exchange] Indicator"
+      }
+    ]
+  },
+  {
+    "package": "ti_domaintools",
+    "version": "1.3.0",
+    "dashboards": [
+      {
+        "id": "ti_domaintools-7ad9a714-58db-45e3-ba84-1e2dff1eb9a5",
+        "title": "[Logs DomainTools Feeds] Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_eset",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "ti_eset-402bf6b0-8194-11ee-a704-a3364df0a052",
+        "title": "[Logs ESET] Domains, URL, IP"
+      },
+      {
+        "id": "ti_eset-4fc91930-819a-11ee-a704-a3364df0a052",
+        "title": "[Logs ESET] Files"
+      },
+      {
+        "id": "ti_eset-c27d91e0-819a-11ee-a704-a3364df0a052",
+        "title": "[Logs ESET] Other indicators"
+      },
+      {
+        "id": "ti_eset-f608e350-8192-11ee-a704-a3364df0a052",
+        "title": "[Logs ESET] Overview "
+      }
+    ]
+  },
+  {
+    "package": "ti_google_threat_intelligence",
+    "version": "0.8.1",
+    "dashboards": [
+      {
+        "id": "ti_google_threat_intelligence-0b0fb6b4-d250-4e31-a56a-bb872e4c7c4a",
+        "title": "[Logs Google Threat Intelligence] Adversary Intelligence"
+      },
+      {
+        "id": "ti_google_threat_intelligence-55f5f53b-343e-4095-b61f-1089a5273d84",
+        "title": "[Logs Google Threat Intelligence] IOC Stream Threat Intelligence"
+      },
+      {
+        "id": "ti_google_threat_intelligence-95187e5c-b4a2-45ad-b6a4-d6ce68e1f43e",
+        "title": "[Logs Google Threat Intelligence] Threat Feed Overview"
+      },
+      {
+        "id": "ti_google_threat_intelligence-9e8de699-a623-4a1b-9f63-7d641116f531",
+        "title": "[Logs Google Threat Intelligence] Threat Intelligence"
+      },
+      {
+        "id": "ti_google_threat_intelligence-fb3daf8e-b45b-4fd9-bf94-dbaf96fcfb67",
+        "title": "[Logs Google Threat Intelligence] IOC Stream Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_greynoise",
+    "version": "0.7.3",
+    "dashboards": [
+      {
+        "id": "ti_greynoise-24d2c409-0abf-415a-aa3d-a6d007c42ba3",
+        "title": "[Logs GreyNoise] Threat Feed Overview"
+      },
+      {
+        "id": "ti_greynoise-90679482-db68-4980-b69c-5f562f964d55",
+        "title": "[Logs GreyNoise] Threat Intelligence"
+      }
+    ]
+  },
+  {
+    "package": "ti_mandiant_advantage",
+    "version": "1.10.0",
+    "dashboards": [
+      {
+        "id": "ti_mandiant_advantage-6c148130-314d-11ee-a289-f15ecff976b0",
+        "title": "Mandiant Threat Intelligence Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_misp",
+    "version": "1.41.1",
+    "dashboards": [
+      {
+        "id": "ti_misp-32d9c020-71ea-11ec-8197-5d53a5437877",
+        "title": "[Logs MISP] Files"
+      },
+      {
+        "id": "ti_misp-399bb8d0-71ec-11ec-8197-5d53a5437877",
+        "title": "[Logs MISP] URLs"
+      },
+      {
+        "id": "ti_misp-563e7c80-9287-11ee-bd41-139b6277f2bf",
+        "title": "[Logs MISP Attributes] Files"
+      },
+      {
+        "id": "ti_misp-56ed8040-6c7d-11ec-9bce-f7a4dc94c294",
+        "title": "[Logs MISP] Overview"
+      },
+      {
+        "id": "ti_misp-8c76f2f0-9287-11ee-bd41-139b6277f2bf",
+        "title": "[Logs MISP Attributes] URLs"
+      },
+      {
+        "id": "ti_misp-add1e0f0-9286-11ee-bd41-139b6277f2bf",
+        "title": "[Logs MISP Attributes] Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_opencti",
+    "version": "2.12.1",
+    "dashboards": [
+      {
+        "id": "ti_opencti-0628df00-5958-11ee-ba5f-49a63bb985cd",
+        "title": "[Logs OpenCTI] Tags & Quality"
+      },
+      {
+        "id": "ti_opencti-274cda10-b452-11ee-9ed7-19d912c01624",
+        "title": "[Logs OpenCTI] Ingestion"
+      },
+      {
+        "id": "ti_opencti-83b2bef0-591c-11ee-ba5f-49a63bb985cd",
+        "title": "[Logs OpenCTI] Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_otx",
+    "version": "1.30.1",
+    "dashboards": [
+      {
+        "id": "ti_otx-7da241a0-71f3-11ec-9910-d1ceb8a1734b",
+        "title": "[Logs OTX] Overview"
+      },
+      {
+        "id": "ti_otx-83b01770-71f3-11ec-9910-d1ceb8a1734b",
+        "title": "[Logs OTX] Files"
+      },
+      {
+        "id": "ti_otx-8957ff80-71f3-11ec-9910-d1ceb8a1734b",
+        "title": "[Logs OTX] URLs"
+      },
+      {
+        "id": "ti_otx-b8cff1d0-5bc3-11ee-b268-039dec835103",
+        "title": "[Logs OTX] Domains"
+      }
+    ]
+  },
+  {
+    "package": "ti_rapid7_threat_command",
+    "version": "2.7.1",
+    "dashboards": [
+      {
+        "id": "ti_rapid7_threat_command-1abe9f50-591c-11ed-a133-234996671b18",
+        "title": "[Logs Rapid7 Threat Command] Alert Overview"
+      },
+      {
+        "id": "ti_rapid7_threat_command-20735802-0864-485a-8b6f-e138aae5900d",
+        "title": "[Logs Rapid7 Threat Command] IOC Overview"
+      },
+      {
+        "id": "ti_rapid7_threat_command-8f985fb0-6988-11ed-8bdb-110ff35bc478",
+        "title": "[Logs Rapid7 Threat Command] Vulnerability Overview"
+      }
+    ]
+  },
+  {
+    "package": "ti_recordedfuture",
+    "version": "2.4.1",
+    "dashboards": [
+      {
+        "id": "ti_recordedfuture-50e440e7-edab-496d-b9b0-f5ee64b16aa3",
+        "title": "[Logs RecordedFuture] Playbook Alert"
+      },
+      {
+        "id": "ti_recordedfuture-554321f4-a649-49da-a5ce-b3dfef1a179b",
+        "title": "[Logs RecordedFuture] Files"
+      },
+      {
+        "id": "ti_recordedfuture-57ab05de-cd7e-4779-9201-1e099f7ab23b",
+        "title": "[Logs RecordedFuture] Overview"
+      },
+      {
+        "id": "ti_recordedfuture-da0e8301-3c0b-4ba4-9389-85976e73d6ca",
+        "title": "[Logs RecordedFuture] Triggered Alert"
+      },
+      {
+        "id": "ti_recordedfuture-ea3dd012-69d8-423d-81b1-2ad9174c75d3",
+        "title": "[Logs RecordedFuture] URLs"
+      }
+    ]
+  },
+  {
+    "package": "ti_threatconnect",
+    "version": "2.0.0",
+    "dashboards": [
+      {
+        "id": "ti_threatconnect-2d465f90-973d-11ee-839e-ef65b7014120",
+        "title": "[Logs ThreatConnect] Indicator"
+      }
+    ]
+  },
+  {
+    "package": "ti_threatq",
+    "version": "1.37.1",
+    "dashboards": [
+      {
+        "id": "ti_threatq-a05fd810-78f1-11ec-a97c-7db1518ab848",
+        "title": "[Logs ThreatQ] Overview"
+      },
+      {
+        "id": "ti_threatq-ab289de0-78f1-11ec-a97c-7db1518ab848",
+        "title": "[Logs ThreatQ] Files"
+      },
+      {
+        "id": "ti_threatq-b45b0c40-78f1-11ec-a97c-7db1518ab848",
+        "title": "[Logs ThreatQ] URLs"
+      }
+    ]
+  },
+  {
+    "package": "ti_util",
+    "version": "1.7.1",
+    "dashboards": [
+      {
+        "id": "ti_util-9eff2529-fff5-4064-b825-fa089f260bfa",
+        "title": "Threat Intelligence Overview"
+      }
+    ]
+  },
+  {
+    "package": "tines",
+    "version": "1.16.0",
+    "dashboards": [
+      {
+        "id": "tines-215e32f0-9e2a-11ed-9dee-d3f2ae7796f5",
+        "title": "[Tines] Time Saved"
+      },
+      {
+        "id": "tines-c8ef4110-9a44-11ed-ad71-d13f8e88b6f1",
+        "title": "[Tines] Audit Logs"
+      }
+    ]
+  },
+  {
+    "package": "traefik",
+    "version": "2.7.0",
+    "dashboards": [
+      {
+        "id": "traefik-Logs-Traefik-Dashboard",
+        "title": "[Logs Traefik] Access logs"
+      }
+    ]
+  },
+  {
+    "package": "trellix_edr_cloud",
+    "version": "1.9.0",
+    "dashboards": [
+      {
+        "id": "trellix_edr_cloud-eb724520-0e93-11ee-9537-d3109e421092",
+        "title": "[Logs Trellix EDR Cloud] Event"
+      }
+    ]
+  },
+  {
+    "package": "trellix_epo_cloud",
+    "version": "1.15.0",
+    "dashboards": [
+      {
+        "id": "trellix_epo_cloud-1ea0a5c0-dad4-11ed-ab03-710ec626b54b",
+        "title": "[Logs Trellix ePO Cloud] Group"
+      },
+      {
+        "id": "trellix_epo_cloud-4ec166e0-daca-11ed-ab03-710ec626b54b",
+        "title": "[Logs Trellix ePO Cloud] Device"
+      },
+      {
+        "id": "trellix_epo_cloud-f6d8d960-dad1-11ed-ab03-710ec626b54b",
+        "title": "[Logs Trellix ePO Cloud] Event"
+      }
+    ]
+  },
+  {
+    "package": "trend_micro_vision_one",
+    "version": "2.8.0",
+    "dashboards": [
+      {
+        "id": "trend_micro_vision_one-02296130-0c1b-11ed-8d26-77f06c571b89",
+        "title": "[Logs Trend Micro Vision One] Audit"
+      },
+      {
+        "id": "trend_micro_vision_one-16edcded-6b80-45b9-a6fd-aa0caa5fab50",
+        "title": "[Logs Trend Micro Vision One] Telemetry"
+      },
+      {
+        "id": "trend_micro_vision_one-6b1783a3-767a-4379-99fd-b721081cd601",
+        "title": "[Trend Micro Vision One] Endpoint Activity"
+      },
+      {
+        "id": "trend_micro_vision_one-795c2840-0cda-11ed-ac7d-35d42be2de47",
+        "title": "[Logs Trend Micro Vision One] Detection"
+      },
+      {
+        "id": "trend_micro_vision_one-dc4fba10-0ce5-11ed-ac7d-35d42be2de47",
+        "title": "[Logs Trend Micro Vision One] Alert"
+      },
+      {
+        "id": "trend_micro_vision_one-f4f72f6b-e196-4c08-aa4c-cda69db25ee4",
+        "title": "[Logs Trend Micro Vision One] Network Activity"
+      }
+    ]
+  },
+  {
+    "package": "trendmicro",
+    "version": "2.8.1",
+    "dashboards": [
+      {
+        "id": "trendmicro-5036f0c0-c1c5-11ee-9590-81e76a30321d",
+        "title": "[Logs Trend Micro] Deep Security"
+      }
+    ]
+  },
+  {
+    "package": "varonis",
+    "version": "1.0.0",
+    "dashboards": [
+      {
+        "id": "varonis-9e50d608-38eb-4a84-aac7-8a0ed0e8f7b4",
+        "title": "[Logs Varonis] Events"
+      }
+    ]
+  },
+  {
+    "package": "vectra_detect",
+    "version": "1.14.0",
+    "dashboards": [
+      {
+        "id": "vectra_detect-088fd030-b923-11ed-a75d-1d76b4fe7223",
+        "title": "[Logs Vectra Detect] Host Lockdown"
+      },
+      {
+        "id": "vectra_detect-0bbae190-e96c-11ed-82b8-a7ddbad6a7d5",
+        "title": "[Logs Vectra Detect] Alert"
+      },
+      {
+        "id": "vectra_detect-346971c0-b919-11ed-a75d-1d76b4fe7223",
+        "title": "[Logs Vectra Detect] Campaign"
+      },
+      {
+        "id": "vectra_detect-607bc370-b8f7-11ed-a75d-1d76b4fe7223",
+        "title": "[Logs Vectra Detect] Audit"
+      },
+      {
+        "id": "vectra_detect-74869ba0-bcb3-11ed-837c-8b9d01cca76e",
+        "title": "[Logs Vectra Detect] Account Scoring"
+      },
+      {
+        "id": "vectra_detect-a8310570-bcb9-11ed-837c-8b9d01cca76e",
+        "title": "[Logs Vectra Detect] Host Scoring"
+      },
+      {
+        "id": "vectra_detect-ce341d40-b91f-11ed-a75d-1d76b4fe7223",
+        "title": "[Logs Vectra Detect] Account Lockdown"
+      },
+      {
+        "id": "vectra_detect-d517be50-bcbc-11ed-837c-8b9d01cca76e",
+        "title": "[Logs Vectra Detect] Account Detection"
+      },
+      {
+        "id": "vectra_detect-e44852c0-b8e5-11ed-a75d-1d76b4fe7223",
+        "title": "[Logs Vectra Detect] Health"
+      },
+      {
+        "id": "vectra_detect-f685b060-bcc1-11ed-837c-8b9d01cca76e",
+        "title": "[Logs Vectra Detect] Host Detection"
+      }
+    ]
+  },
+  {
+    "package": "vectra_rux",
+    "version": "0.3.3",
+    "dashboards": [
+      {
+        "id": "vectra_rux-36228434-8783-49ab-ac0d-82cc651c0e7d",
+        "title": "[Logs Vectra RUX] Health"
+      },
+      {
+        "id": "vectra_rux-55983c57-df67-41ea-8292-08c3c0357d05",
+        "title": "[Logs Vectra RUX] Lockdown"
+      },
+      {
+        "id": "vectra_rux-6ddf7197-c2e5-4472-a814-05bfe2caa3eb",
+        "title": "[Logs Vectra RUX] Detection Events"
+      },
+      {
+        "id": "vectra_rux-9a7d587d-e61a-40dc-886b-25aa6da16717",
+        "title": "[Logs Vectra RUX] Entity Events"
+      },
+      {
+        "id": "vectra_rux-ccfcc72d-78f4-4337-b542-de333bef5cf8",
+        "title": "[Logs Vectra RUX] Audit"
+      }
+    ]
+  },
+  {
+    "package": "vsphere",
+    "version": "1.23.1",
+    "dashboards": [
+      {
+        "id": "vsphere-172ac91f-ea16-49d1-ba21-e395c8b5eff6",
+        "title": "[Metrics VSphere] Resource Pools Overview"
+      },
+      {
+        "id": "vsphere-6ef55590-0337-11ed-80a3-e31802c6cc3f",
+        "title": "[Metrics VSphere] VMs overview"
+      },
+      {
+        "id": "vsphere-72fa1702-7400-4f53-be14-c2817001340a",
+        "title": "[Metrics VSphere] Comprehensive Storage Overview"
+      },
+      {
+        "id": "vsphere-77c5abbe-f385-4f1d-9950-7a26ae350e81",
+        "title": "[Metrics VSphere] Cluster and Network Status Insights"
+      },
+      {
+        "id": "vsphere-a2d04970-0336-11ed-80a3-e31802c6cc3f",
+        "title": "[Metrics VSphere] Hosts Overview"
+      }
+    ]
+  },
+  {
+    "package": "watchguard_firebox",
+    "version": "1.6.0",
+    "dashboards": [
+      {
+        "id": "watchguard_firebox-5fb58f2b-8720-4b57-89b6-0f727f0d260f",
+        "title": "[Logs WatchGuard Firebox] Overview"
+      }
+    ]
+  },
+  {
+    "package": "websphere_application_server",
+    "version": "1.6.1",
+    "dashboards": [
+      {
+        "id": "websphere_application_server-381af9f0-bae2-11ec-b244-51e5cddeab04",
+        "title": "[Metrics WebSphere Application Server] ThreadPool"
+      },
+      {
+        "id": "websphere_application_server-5d9b0860-b582-11ec-89b4-c91c947c1fb3",
+        "title": "[Metrics WebSphere Application Server] JDBC"
+      },
+      {
+        "id": "websphere_application_server-b8da46b0-b595-11ec-888d-b1230de080fd",
+        "title": "[Metrics WebSphere Application Server] Servlet"
+      },
+      {
+        "id": "websphere_application_server-db548380-c06d-11ec-8552-f3dc1a6b95f9",
+        "title": "[Metrics WebSphere Application Server] Session Manager"
+      }
+    ]
+  },
+  {
+    "package": "windows",
+    "version": "3.5.0",
+    "dashboards": [
+      {
+        "id": "windows-b28aaad0-2f2d-11ee-acdc-45d0efa0889d",
+        "title": "[Windows AppLocker] Audited and Blocked Applications"
+      },
+      {
+        "id": "windows-c77e06c0-9e7c-11ea-af6f-cfdb1ee1d6c8",
+        "title": "[Windows powershell] Overview"
+      },
+      {
+        "id": "windows-d9eba730-c991-11e7-9835-2f31fe08873b",
+        "title": "[Metrics Windows] Services"
+      }
+    ]
+  },
+  {
+    "package": "wiz",
+    "version": "4.1.0",
+    "dashboards": [
+      {
+        "id": "wiz-3c3519be-f4f9-4c67-a9d8-1db4182b6e6a",
+        "title": "[Logs Wiz] Defend"
+      },
+      {
+        "id": "wiz-726802c0-4007-48b9-bae5-09daa69d4368",
+        "title": "[Logs Wiz] Cloud Configuration Finding"
+      },
+      {
+        "id": "wiz-927c36f0-6358-11ee-a265-c3569aa0cebf",
+        "title": "[Logs Wiz] Vulnerability"
+      },
+      {
+        "id": "wiz-be3fd3f0-6358-11ee-9db4-21f79f2e6273",
+        "title": "[Logs Wiz] Audit"
+      },
+      {
+        "id": "wiz-d8f91a20-6363-11ee-a265-c3569aa0cebf",
+        "title": "[Logs Wiz] Issue"
+      }
+    ]
+  },
+  {
+    "package": "zeek",
+    "version": "4.1.0",
+    "dashboards": [
+      {
+        "id": "zeek-7cbb5410-3700-11e9-aa6d-ff445a78330c",
+        "title": "[Logs Zeek] Overview"
+      }
+    ]
+  },
+  {
+    "package": "zeronetworks",
+    "version": "1.19.0",
+    "dashboards": [
+      {
+        "id": "zeronetworks-eae973d0-b70d-11ee-9469-51dfba0e91e6",
+        "title": "Zero Networks Audit"
+      }
+    ]
+  },
+  {
+    "package": "zookeeper",
+    "version": "1.14.0",
+    "dashboards": [
+      {
+        "id": "zookeeper-467207a0-231e-11e9-bb66-8baac426dfd4",
+        "title": "[Metrics Zookeeper] Overview"
+      }
+    ]
+  },
+  {
+    "package": "zscaler_zia",
+    "version": "3.17.1",
+    "dashboards": [
+      {
+        "id": "zscaler_zia-03b699de-70f6-4ef0-9fa9-49c035b62635",
+        "title": "[Logs Zscaler ZIA] Audit Logs"
+      },
+      {
+        "id": "zscaler_zia-44e6d836-f55d-495d-93e0-79da0637042e",
+        "title": "[Logs Zscaler ZIA] Overview"
+      },
+      {
+        "id": "zscaler_zia-579d9380-382a-11ed-aa11-3bf35d6f0a84",
+        "title": "[Logs Zscaler ZIA] Web Overview Logs"
+      },
+      {
+        "id": "zscaler_zia-5de5ab5a-fd15-40bf-8f4c-5206f0ed7416",
+        "title": "[Logs Zscaler ZIA] Sandbox Report"
+      },
+      {
+        "id": "zscaler_zia-78eeb3f0-381d-11ed-aa11-3bf35d6f0a84",
+        "title": "[Logs Zscaler ZIA] Firewall Logs"
+      },
+      {
+        "id": "zscaler_zia-7b9f74b0-3820-11ed-aa11-3bf35d6f0a84",
+        "title": "[Logs Zscaler ZIA] Tunnel Logs"
+      },
+      {
+        "id": "zscaler_zia-b335cb40-3811-11ed-aa11-3bf35d6f0a84",
+        "title": "[Logs Zscaler ZIA] DNS Logs"
+      },
+      {
+        "id": "zscaler_zia-c12fb7c5-0f5c-4341-98fb-12dd197f00a6",
+        "title": "[Logs Zscaler ZIA] Web Access Control Logs"
+      },
+      {
+        "id": "zscaler_zia-eec7265e-2cd3-422a-924a-c3db6f5d0a42",
+        "title": "[Logs Zscaler ZIA] Endpoint DLP Logs"
+      }
+    ]
+  },
+  {
+    "package": "zscaler_zpa",
+    "version": "1.23.3",
+    "dashboards": [
+      {
+        "id": "zscaler_zpa-34f0b8a0-3a71-11ed-9e41-155bc0d23bc2",
+        "title": "[Logs Zscaler ZPA] Browser Access Logs"
+      },
+      {
+        "id": "zscaler_zpa-3b709f70-3a98-11ed-9e41-155bc0d23bc2",
+        "title": "[Logs Zscaler ZPA] User Activity and Status Logs"
+      },
+      {
+        "id": "zscaler_zpa-893ef040-3a88-11ed-9e41-155bc0d23bc2",
+        "title": "[Logs Zscaler ZPA] App Connector Status Logs"
+      },
+      {
+        "id": "zscaler_zpa-a0742450-3a89-11ed-9e41-155bc0d23bc2",
+        "title": "[Logs Zscaler ZPA] Audit Logs"
+      }
+    ]
+  }
+]

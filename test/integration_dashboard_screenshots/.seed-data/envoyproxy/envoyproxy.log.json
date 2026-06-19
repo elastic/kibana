@@ -1,0 +1,759 @@
+[
+  {
+    "@timestamp": "2024-04-25T17:51:55.294Z",
+    "agent": {
+      "ephemeral_id": "0ac9bf8d-f29a-4764-985b-39bfc313f416",
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "name": "elastic-agent-16404",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.log",
+      "namespace": "21426",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.96.113",
+      "ip": "192.168.96.113",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoyproxy": {
+      "log": {
+        "authority": "localhost:9001",
+        "log_type": "ACCESS",
+        "proxy_type": "http",
+        "request_id": "b7ba9b4c-f4b7-47c2-9718-c23aa1465f49",
+        "upstream_service_time": 0
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T02:37:47.745Z",
+      "dataset": "envoyproxy.log",
+      "duration": 0,
+      "ingested": "2026-03-10T02:37:48Z",
+      "kind": "event",
+      "original": "ACCESS [2024-04-25T17:51:55.294Z] \"GET /backend/ HTTP/1.1\" 200 - 0 141 0 0 \"192.168.0.9\" \"curl/8.4.0\" \"b7ba9b4c-f4b7-47c2-9718-c23aa1465f49\" \"localhost:9001\" \"192.168.96.113:80\"",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 141
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 0
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "64a922ed2775bc79e703cb91d8c21d2b5fa2924b41167308d87dfdcb05962d51",
+        "inode": "1124",
+        "path": "/tmp/service_logs/envoy.log"
+      },
+      "offset": 568
+    },
+    "network": {
+      "protocol": "http"
+    },
+    "related": {
+      "ip": [
+        "192.168.0.9",
+        "192.168.96.113"
+      ]
+    },
+    "source": {
+      "address": "192.168.0.9",
+      "ip": "192.168.0.9"
+    },
+    "tags": [
+      "preserve_original_event",
+      "envoy-proxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "localhost:9001",
+      "path": "/backend/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/8.4.0",
+      "version": "8.4.0"
+    }
+  },
+  {
+    "@timestamp": "2023-04-06T06:20:05.972Z",
+    "agent": {
+      "ephemeral_id": "0ac9bf8d-f29a-4764-985b-39bfc313f416",
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "name": "elastic-agent-16404",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.log",
+      "namespace": "21426",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "127.0.0.1",
+      "bytes": 0,
+      "ip": "127.0.0.1",
+      "port": 9200
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoyproxy": {
+      "log": {
+        "log_type": "ACCESS",
+        "proxy_type": "tcp",
+        "response_flags": [
+          "UF",
+          "URX"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T02:37:47.745Z",
+      "dataset": "envoyproxy.log",
+      "duration": 0,
+      "ingested": "2026-03-10T02:37:48Z",
+      "kind": "event",
+      "original": "ACCESS [2023-04-06T06:20:05.972Z] \"- - -\" 0 UF,URX 0 0 0 - \"-\" \"-\" \"-\" \"-\" \"127.0.0.1:9200\"",
+      "outcome": "failure",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "kubernetes": {
+      "container": {
+        "name": "ambassador"
+      },
+      "labels": {
+        "service": "ambassador"
+      },
+      "namespace": "default",
+      "node": {
+        "name": "minikube"
+      },
+      "pod": {
+        "name": "ambassador-76c58d9df4-jwhsg",
+        "uid": "e57d545e-2a9d-11e9-995f-08002730e0dc"
+      }
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "64a922ed2775bc79e703cb91d8c21d2b5fa2924b41167308d87dfdcb05962d51",
+        "inode": "1124",
+        "path": "/tmp/service_logs/envoy.log"
+      },
+      "offset": 1263
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "bytes": 0
+    },
+    "tags": [
+      "preserve_original_event",
+      "envoy-proxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-04-11T00:51:07.980Z",
+    "agent": {
+      "ephemeral_id": "0ac9bf8d-f29a-4764-985b-39bfc313f416",
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "name": "elastic-agent-16404",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.log",
+      "namespace": "21426",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.1.10",
+      "ip": "192.168.1.10",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoyproxy": {
+      "log": {
+        "authority": "www.elastic.co",
+        "log_type": "ACCESS",
+        "proxy_type": "http",
+        "request_id": "078d1daa-b786-4d6d-85a5-7e4366adaa19",
+        "upstream_service_time": 39000000
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T02:37:47.744Z",
+      "dataset": "envoyproxy.log",
+      "duration": 41000000,
+      "ingested": "2026-03-10T02:37:48Z",
+      "kind": "event",
+      "original": "[2019-04-11T00:51:07.980Z] \"GET /elastic/ HTTP/1.1\" 301 - 0 0 41 39 \"172.17.0.3\" \"curl/7.59.0\" \"078d1daa-b786-4d6d-85a5-7e4366adaa19\" \"www.elastic.co\" \"192.168.1.10:80\"",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 0
+        },
+        "status_code": 301
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "64a922ed2775bc79e703cb91d8c21d2b5fa2924b41167308d87dfdcb05962d51",
+        "inode": "1124",
+        "path": "/tmp/service_logs/envoy.log"
+      },
+      "offset": 399
+    },
+    "network": {
+      "protocol": "http"
+    },
+    "related": {
+      "ip": [
+        "172.17.0.3",
+        "192.168.1.10"
+      ]
+    },
+    "source": {
+      "address": "172.17.0.3",
+      "ip": "172.17.0.3"
+    },
+    "tags": [
+      "preserve_original_event",
+      "envoy-proxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "www.elastic.co",
+      "path": "/elastic/",
+      "registered_domain": "elastic.co",
+      "subdomain": "www",
+      "top_level_domain": "co"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.59.0",
+      "version": "7.59.0"
+    }
+  },
+  {
+    "@timestamp": "2019-04-11T00:31:55.439Z",
+    "agent": {
+      "ephemeral_id": "0ac9bf8d-f29a-4764-985b-39bfc313f416",
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "name": "elastic-agent-16404",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.log",
+      "namespace": "21426",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoyproxy": {
+      "log": {
+        "authority": "192.168.99.107:30901",
+        "log_type": "ACCESS",
+        "proxy_type": "http",
+        "request_id": "58436667-bf70-4fd0-9fe9-cdadadecfd55",
+        "response_flags": [
+          "NR"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T02:37:47.744Z",
+      "dataset": "envoyproxy.log",
+      "duration": 0,
+      "ingested": "2026-03-10T02:37:48Z",
+      "kind": "event",
+      "original": "[2019-04-11T00:31:55.439Z] \"GET /elastic HTTP/1.1\" 404 NR 0 0 0 - \"172.17.0.3\" \"curl/7.59.0\" \"58436667-bf70-4fd0-9fe9-cdadadecfd55\" \"192.168.99.107:30901\" \"-\"",
+      "outcome": "failure",
+      "type": [
+        "connection",
+        "protocol"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 0
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "64a922ed2775bc79e703cb91d8c21d2b5fa2924b41167308d87dfdcb05962d51",
+        "inode": "1124",
+        "path": "/tmp/service_logs/envoy.log"
+      },
+      "offset": 240
+    },
+    "network": {
+      "protocol": "http"
+    },
+    "related": {
+      "ip": [
+        "172.17.0.3"
+      ]
+    },
+    "source": {
+      "address": "172.17.0.3",
+      "ip": "172.17.0.3"
+    },
+    "tags": [
+      "preserve_original_event",
+      "envoy-proxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.99.107:30901",
+      "path": "/elastic"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.59.0",
+      "version": "7.59.0"
+    }
+  },
+  {
+    "@timestamp": "2019-04-10T03:49:34.451Z",
+    "agent": {
+      "ephemeral_id": "0ac9bf8d-f29a-4764-985b-39bfc313f416",
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "name": "elastic-agent-16404",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.log",
+      "namespace": "21426",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "67.43.156.18",
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.18",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoyproxy": {
+      "log": {
+        "authority": "httpbin.org",
+        "log_type": "ACCESS",
+        "proxy_type": "http",
+        "request_id": "413bf460-bd56-4515-ada4-2a69c5e78e54",
+        "upstream_service_time": 179000000
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T02:37:47.745Z",
+      "dataset": "envoyproxy.log",
+      "duration": 180000000,
+      "ingested": "2026-03-10T02:37:48Z",
+      "kind": "event",
+      "original": "ACCESS [2019-04-10T03:49:34.451Z] \"GET /httpbin/status/501 HTTP/1.1\" 501 - 0 0 180 179 \"172.17.0.3\" \"curl/7.59.0\" \"413bf460-bd56-4515-ada4-2a69c5e78e54\" \"httpbin.org\" \"67.43.156.18:80\"",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 0
+        },
+        "status_code": 501
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "kubernetes": {
+      "container": {
+        "name": "ambassador"
+      },
+      "labels": {
+        "service": "ambassador"
+      },
+      "namespace": "default",
+      "node": {
+        "name": "minikube"
+      },
+      "pod": {
+        "name": "ambassador-76c58d9df4-jwhsg",
+        "uid": "e57d545e-2a9d-11e9-995f-08002730e0dc"
+      }
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "64a922ed2775bc79e703cb91d8c21d2b5fa2924b41167308d87dfdcb05962d51",
+        "inode": "1124",
+        "path": "/tmp/service_logs/envoy.log"
+      },
+      "offset": 746
+    },
+    "network": {
+      "protocol": "http"
+    },
+    "related": {
+      "ip": [
+        "172.17.0.3",
+        "67.43.156.18"
+      ]
+    },
+    "source": {
+      "address": "172.17.0.3",
+      "ip": "172.17.0.3"
+    },
+    "tags": [
+      "preserve_original_event",
+      "envoy-proxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "httpbin.org",
+      "path": "/httpbin/status/501",
+      "registered_domain": "httpbin.org",
+      "top_level_domain": "org"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.59.0",
+      "version": "7.59.0"
+    }
+  },
+  {
+    "@timestamp": "2019-04-08T16:50:12.533Z",
+    "agent": {
+      "ephemeral_id": "0ac9bf8d-f29a-4764-985b-39bfc313f416",
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "name": "elastic-agent-16404",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.log",
+      "namespace": "21426",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "172.27.0.2",
+      "bytes": 87,
+      "ip": "172.27.0.2",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoyproxy": {
+      "log": {
+        "log_type": "ACCESS",
+        "proxy_type": "tcp"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T02:37:45.788Z",
+      "dataset": "envoyproxy.log",
+      "duration": 4000000,
+      "ingested": "2026-03-10T02:37:48Z",
+      "kind": "event",
+      "original": "[2019-04-08T16:50:12.533Z] \"- - -\" 0 - 87 254 4 - \"-\" \"-\" \"-\" \"-\" \"172.27.0.2:80\"",
+      "outcome": "success",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "64a922ed2775bc79e703cb91d8c21d2b5fa2924b41167308d87dfdcb05962d51",
+        "inode": "1124",
+        "path": "/tmp/service_logs/envoy.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "172.27.0.2"
+      ]
+    },
+    "source": {
+      "bytes": 254
+    },
+    "tags": [
+      "preserve_original_event",
+      "envoy-proxy",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-04-08T16:16:55.931Z",
+    "agent": {
+      "ephemeral_id": "0ac9bf8d-f29a-4764-985b-39bfc313f416",
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "name": "elastic-agent-16404",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.log",
+      "namespace": "21426",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "172.27.0.3",
+      "ip": "172.27.0.3",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0d3043b0-c5b3-4f33-91eb-63ca027c5b09",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoyproxy": {
+      "log": {
+        "authority": "localhost:8000",
+        "log_type": "ACCESS",
+        "proxy_type": "http",
+        "request_id": "c219f6da-2b7f-483e-9ced-ec323d9330a9",
+        "upstream_service_time": 4000000
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T02:37:47.744Z",
+      "dataset": "envoyproxy.log",
+      "duration": 5000000,
+      "ingested": "2026-03-10T02:37:48Z",
+      "kind": "event",
+      "original": "[2019-04-08T16:16:55.931Z] \"GET /service/1 HTTP/1.1\" 200 - 0 89 5 4 \"-\" \"curl/7.54.0\" \"c219f6da-2b7f-483e-9ced-ec323d9330a9\" \"localhost:8000\" \"172.27.0.3:80\"",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 89
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 0
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "64a922ed2775bc79e703cb91d8c21d2b5fa2924b41167308d87dfdcb05962d51",
+        "inode": "1124",
+        "path": "/tmp/service_logs/envoy.log"
+      },
+      "offset": 82
+    },
+    "network": {
+      "protocol": "http"
+    },
+    "related": {
+      "ip": [
+        "172.27.0.3"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "envoy-proxy",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "localhost:8000",
+      "path": "/service/1"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.54.0",
+      "version": "7.54.0"
+    }
+  }
+]

@@ -1,0 +1,68 @@
+{
+  "package": "ti_rapid7_threat_command",
+  "dataStreams": [
+    {
+      "dataset": "ti_rapid7_threat_command.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "rapid7.tc.alert.details.severity",
+        "rapid7.tc.alert.details.source.network_type",
+        "rapid7.tc.alert.details.subtype",
+        "rapid7.tc.alert.details.type",
+        "rapid7.tc.alert.is_closed",
+        "rapid7.tc.alert.is_flagged",
+        "rapid7.tc.alert.related_iocs",
+        "rapid7.tc.alert.takedown_status"
+      ],
+      "filterValues": {
+        "_index": [
+          "logs-ti_rapid7_threat_command_latest.alert"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_rapid7_threat_command.ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "rapid7.tc.ioc.severity",
+        "rapid7.tc.ioc.value",
+        "rapid7.tc.ioc.whitelisted",
+        "threat.indicator.confidence",
+        "threat.indicator.email.address",
+        "threat.indicator.ip",
+        "threat.indicator.provider",
+        "threat.indicator.type",
+        "threat.indicator.url.domain",
+        "threat.indicator.url.extension",
+        "threat.indicator.url.scheme"
+      ],
+      "filterValues": {
+        "rapid7.tc.ioc.whitelisted": [
+          "true"
+        ],
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "ipv6-addr",
+          "email-addr"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_rapid7_threat_command.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "rapid7.tc.vulnerability.related.campaigns",
+        "rapid7.tc.vulnerability.related.malware",
+        "rapid7.tc.vulnerability.related.threat_actors",
+        "vulnerability.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

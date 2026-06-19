@@ -1,0 +1,29 @@
+{
+  "package": "jumpcloud",
+  "dataStreams": [
+    {
+      "dataset": "jumpcloud.events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.ip",
+        "event.action",
+        "event.id",
+        "event.module",
+        "event.outcome",
+        "jumpcloud.event.auth_context.jumpcloud_protect_device.make",
+        "jumpcloud.event.auth_context.jumpcloud_protect_device.model",
+        "jumpcloud.event.auth_context.jumpcloud_protect_device.os",
+        "related.user",
+        "source.user.name",
+        "user.name",
+        "user_agent.device.name",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "package": "carbon_black_cloud",
+  "dataStreams": [
+    {
+      "dataset": "carbon_black_cloud.alert_v7",
+      "indexPattern": "logs-*",
+      "docTarget": 630,
+      "fields": [
+        "Records",
+        "carbon_black_cloud.alert.category",
+        "carbon_black_cloud.alert.device.policy",
+        "carbon_black_cloud.alert.device.target_value",
+        "carbon_black_cloud.alert.ioc.field",
+        "carbon_black_cloud.alert.ioc.hit",
+        "carbon_black_cloud.alert.policy_applied",
+        "carbon_black_cloud.alert.process.name",
+        "carbon_black_cloud.alert.process.reputation",
+        "carbon_black_cloud.alert.reason_code",
+        "carbon_black_cloud.alert.run_state",
+        "carbon_black_cloud.alert.sensor_action",
+        "carbon_black_cloud.alert.ttps",
+        "carbon_black_cloud.alert.type",
+        "carbon_black_cloud.alert.watchlists.name",
+        "carbon_black_cloud.alert.workflow.status",
+        "event.severity",
+        "host.os.type",
+        "host.os.version",
+        "process.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "carbon_black_cloud.asset_vulnerability_summary",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "carbon_black_cloud.asset_vulnerability_summary.sync.status",
+        "carbon_black_cloud.asset_vulnerability_summary.sync.type",
+        "carbon_black_cloud.asset_vulnerability_summary.type",
+        "carbon_black_cloud.asset_vulnerability_summary.vuln_count",
+        "host.hostname",
+        "host.os.name",
+        "host.os.type",
+        "host.os.version",
+        "vulnerability.score.base",
+        "vulnerability.severity"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "carbon_black_cloud.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "carbon_black_cloud.audit.flagged",
+        "client.ip",
+        "url.original"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "carbon_black_cloud.endpoint_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "carbon_black_cloud.endpoint_event.childproc.publisher.name",
+        "carbon_black_cloud.endpoint_event.childproc.publisher.state",
+        "carbon_black_cloud.endpoint_event.childproc.username",
+        "carbon_black_cloud.endpoint_event.device.external_ip",
+        "carbon_black_cloud.endpoint_event.device.os",
+        "carbon_black_cloud.endpoint_event.event_origin",
+        "carbon_black_cloud.endpoint_event.modload.effective_reputation",
+        "carbon_black_cloud.endpoint_event.process.publisher.name",
+        "carbon_black_cloud.endpoint_event.process.publisher.state",
+        "carbon_black_cloud.endpoint_event.process.username",
+        "carbon_black_cloud.endpoint_event.sensor_action",
+        "carbon_black_cloud.endpoint_event.type",
+        "event.action",
+        "host.hostname"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "carbon_black_cloud.watchlist_hit",
+      "indexPattern": "logs-*",
+      "docTarget": 510,
+      "fields": [
+        "Records",
+        "carbon_black_cloud.watchlist_hit.device.external_ip",
+        "carbon_black_cloud.watchlist_hit.device.os",
+        "carbon_black_cloud.watchlist_hit.ioc.hit",
+        "carbon_black_cloud.watchlist_hit.process.parent.publisher.name",
+        "carbon_black_cloud.watchlist_hit.process.parent.publisher.state",
+        "carbon_black_cloud.watchlist_hit.process.parent.reputation",
+        "carbon_black_cloud.watchlist_hit.process.parent.username",
+        "carbon_black_cloud.watchlist_hit.process.publisher.name",
+        "carbon_black_cloud.watchlist_hit.process.publisher.state",
+        "carbon_black_cloud.watchlist_hit.process.reputation",
+        "carbon_black_cloud.watchlist_hit.process.username",
+        "carbon_black_cloud.watchlist_hit.report.name",
+        "carbon_black_cloud.watchlist_hit.report.tags",
+        "carbon_black_cloud.watchlist_hit.watchlists.name",
+        "event.severity",
+        "host.hostname"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

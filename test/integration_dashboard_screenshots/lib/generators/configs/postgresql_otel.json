@@ -1,0 +1,31 @@
+{
+  "package": "postgresql_otel",
+  "dataStreams": [
+    {
+      "dataset": "postgresqlreceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 540,
+      "fields": [
+        "attributes.db.query.text",
+        "attributes.postgresql.calls",
+        "metrics.postgresql.blks_hit",
+        "metrics.postgresql.blks_read",
+        "metrics.postgresql.commits",
+        "metrics.postgresql.connection.max",
+        "metrics.postgresql.database.count",
+        "metrics.postgresql.rollbacks",
+        "metrics.postgresql.tup_deleted",
+        "metrics.postgresql.tup_fetched",
+        "metrics.postgresql.tup_inserted",
+        "metrics.postgresql.tup_returned",
+        "metrics.postgresql.tup_updated",
+        "postgresql.database.name",
+        "postgresql.shared_blks_hit",
+        "postgresql.shared_blks_read",
+        "postgresql.statement.query.text",
+        "postgresql.total_exec_time"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

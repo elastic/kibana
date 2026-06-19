@@ -1,0 +1,24 @@
+{
+  "package": "ti_opencti",
+  "dataStreams": [
+    {
+      "dataset": "ti_opencti.indicator",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "event.ingested",
+        "event.kind",
+        "labels.is_ioc_transform_source",
+        "opencti.indicator.observables_count",
+        "opencti.indicator.score",
+        "tags",
+        "threat.indicator.confidence",
+        "threat.indicator.marking.tlp",
+        "threat.indicator.provider",
+        "threat.indicator.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

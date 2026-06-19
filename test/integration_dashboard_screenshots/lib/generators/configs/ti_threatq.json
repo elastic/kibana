@@ -1,0 +1,39 @@
+{
+  "package": "ti_threatq",
+  "dataStreams": [
+    {
+      "dataset": "ti_threatq.threat",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "event.kind",
+        "labels.is_ioc_transform_source",
+        "threat.feed.name",
+        "threat.indicator.file.hash.md5",
+        "threat.indicator.file.hash.sha1",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.file.name",
+        "threat.indicator.file.type",
+        "threat.indicator.provider",
+        "threat.indicator.type",
+        "threat.indicator.url.domain",
+        "threat.indicator.url.extension",
+        "threat.indicator.url.port",
+        "threat.indicator.url.scheme"
+      ],
+      "filterValues": {
+        "event.kind": [
+          "enrichment"
+        ],
+        "labels.is_ioc_transform_source": [
+          "true"
+        ],
+        "threat.indicator.type": [
+          "file",
+          "url"
+        ]
+      }
+    }
+  ]
+}

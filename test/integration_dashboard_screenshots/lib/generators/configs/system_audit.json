@@ -1,0 +1,21 @@
+{
+  "package": "system_audit",
+  "dataStreams": [
+    {
+      "dataset": "system_audit.package",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.dataset",
+        "event.kind",
+        "host.id",
+        "host.os.name",
+        "host.os.version",
+        "system_audit.package.entity_id",
+        "system_audit.package.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

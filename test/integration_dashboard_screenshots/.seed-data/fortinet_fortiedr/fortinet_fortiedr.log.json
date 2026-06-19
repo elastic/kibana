@@ -1,0 +1,120 @@
+[
+  {
+    "@timestamp": "2019-09-18T06:42:18.000Z",
+    "agent": {
+      "ephemeral_id": "47353998-a4f7-4d09-b9d0-66df18973fb4",
+      "id": "f050b7ed-584d-4e18-a874-373d098f5f3f",
+      "name": "elastic-agent-41723",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortiedr.log",
+      "namespace": "71400",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f050b7ed-584d-4e18-a874-373d098f5f3f",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "blocked",
+      "agent_id_status": "verified",
+      "category": "malware",
+      "dataset": "fortinet_fortiedr.log",
+      "end": "2019-09-18T02:42:18.000Z",
+      "id": "458478",
+      "ingested": "2026-03-10T04:32:28Z",
+      "original": "<133>1 2019-09-18T06:42:18.000Z 1.1.1.1 enSilo - - - Organization: Demo;Organization ID: 156646;Event ID: 458478; Raw Data ID: 1270886879;Device Name: WIN10-VICTIM;Operating System: Windows 10 Pro N; Process Name: svchost.exe;Process Path: \\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe; Process Type: 64bit;Severity: Critical;Classification: Suspicious;Destination: File Creation; First Seen: 18-Sep-2019, 02:42:18;Last Seen: 18-Sep-2019, 02:42:18;Action: Blocked;Count: 1; Certificate: yes;Rules List: File Encryptor - Suspicious file modification;Users: WIN10-VICTIM\\U; MAC Address: 00-0C-29-D4-75-EC;Script: N/A;Script Path: N/A;Autonomous System: N/A;Country: N/A",
+      "start": "2019-09-18T02:42:18.000Z",
+      "timezone": "+00:00"
+    },
+    "fortinet": {
+      "edr": {
+        "action": "Blocked",
+        "autonomous_system": "N/A",
+        "certificate": "yes",
+        "classification": "Suspicious",
+        "count": "1",
+        "country": "N/A",
+        "destination": "File Creation",
+        "device_name": "WIN10-VICTIM",
+        "event_id": "458478",
+        "first_seen": "2019-09-18T02:42:18.000Z",
+        "last_seen": "2019-09-18T02:42:18.000Z",
+        "mac_address": "00-0C-29-D4-75-EC",
+        "operating_system": "Windows 10 Pro N",
+        "organization": "Demo",
+        "organization_id": "156646",
+        "process_name": "svchost.exe",
+        "process_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe",
+        "process_type": "64bit",
+        "raw_data_id": "1270886879",
+        "rules_list": "File Encryptor - Suspicious file modification",
+        "script": "N/A",
+        "script_path": "N/A",
+        "severity": "Critical",
+        "users": "WIN10-VICTIM\\U"
+      }
+    },
+    "host": {
+      "hostname": "WIN10-VICTIM",
+      "mac": [
+        "00-0C-29-D4-75-EC"
+      ],
+      "os": {
+        "full": "Windows 10 Pro N"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:35448"
+      },
+      "syslog": {
+        "appname": "enSilo",
+        "facility": {
+          "code": 16
+        },
+        "hostname": "1.1.1.1",
+        "priority": 133,
+        "severity": {
+          "code": 5
+        },
+        "version": "1"
+      }
+    },
+    "observer": {
+      "product": "FortiEDR",
+      "type": "edr",
+      "vendor": "Fortinet"
+    },
+    "process": {
+      "executable": "\\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe",
+      "name": "svchost.exe"
+    },
+    "related": {
+      "hosts": [
+        "WIN10-VICTIM",
+        "1.1.1.1"
+      ],
+      "user": [
+        "WIN10-VICTIM\\U"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortiedr",
+      "forwarded"
+    ],
+    "user": {
+      "id": "WIN10-VICTIM\\U"
+    }
+  }
+]

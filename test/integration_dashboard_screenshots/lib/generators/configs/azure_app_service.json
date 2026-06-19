@@ -1,0 +1,21 @@
+{
+  "package": "azure_app_service",
+  "dataStreams": [
+    {
+      "dataset": "azure_app_service.app_service_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.app_service.category",
+        "azure.app_service.level",
+        "azure.app_service.properties.client_ip",
+        "azure.app_service.properties.cs_uri_stem",
+        "azure.app_service.properties.protocol",
+        "azure.app_service.properties.sc_status",
+        "azure.app_service.properties.time_taken",
+        "azure.app_service.properties.user"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

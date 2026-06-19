@@ -1,0 +1,214 @@
+[
+  {
+    "@timestamp": "2021-03-30T07:18:42.072Z",
+    "agent": {
+      "ephemeral_id": "6258854d-1a5c-4bf7-b3be-aef825ca7e62",
+      "id": "b2005e00-2339-411a-bef5-649e34b6c416",
+      "name": "elastic-agent-12927",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "address": "10.156.0.2"
+    },
+    "data_stream": {
+      "dataset": "zeek.dhcp",
+      "namespace": "28549",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "ip": "169.254.169.254",
+      "port": 67
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b2005e00-2339-411a-bef5-649e34b6c416",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:14.669Z",
+      "dataset": "zeek.dhcp",
+      "id": [
+        "Ck0tsG4wsJxI3lIEZ"
+      ],
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dhcp.log"
+      },
+      "offset": 389
+    },
+    "network": {
+      "community_id": "1:FhnhcW06Fe47mJF88HHln2nsdMs=",
+      "name": "c.elastic-sa.internal",
+      "protocol": "dhcp",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "server": {
+      "address": "169.254.169.254"
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 68
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dhcp"
+    ],
+    "zeek": {
+      "dhcp": {
+        "address": {
+          "assigned": "10.156.0.2",
+          "client": "10.156.0.2",
+          "mac": "42:01:0a:9c:00:02",
+          "server": "169.254.169.254"
+        },
+        "domain": "c.elastic-sa.internal",
+        "duration": 0.0,
+        "lease_time": 86400,
+        "msg": {
+          "types": [
+            "ACK"
+          ]
+        }
+      },
+      "session_id": [
+        "Ck0tsG4wsJxI3lIEZ"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2016-10-16T08:11:38.771Z",
+    "agent": {
+      "ephemeral_id": "6258854d-1a5c-4bf7-b3be-aef825ca7e62",
+      "id": "b2005e00-2339-411a-bef5-649e34b6c416",
+      "name": "elastic-agent-12927",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "address": "192.168.199.132"
+    },
+    "data_stream": {
+      "dataset": "zeek.dhcp",
+      "namespace": "28549",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.199.254",
+      "ip": "192.168.199.254",
+      "port": 67
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b2005e00-2339-411a-bef5-649e34b6c416",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:12.696Z",
+      "dataset": "zeek.dhcp",
+      "id": [
+        "CmWOt6VWaNGqXYcH6",
+        "CLObLo4YHn0u23Tp8a"
+      ],
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dhcp.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "community_id": "1:HsGjbon+HsK9xnMq+1A32BR9C4Y=",
+      "name": "localdomain",
+      "protocol": "dhcp",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "192.168.199.132",
+        "192.168.199.254"
+      ]
+    },
+    "server": {
+      "address": "192.168.199.254"
+    },
+    "source": {
+      "address": "192.168.199.132",
+      "ip": "192.168.199.132",
+      "port": 68
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dhcp"
+    ],
+    "zeek": {
+      "dhcp": {
+        "address": {
+          "assigned": "192.168.199.132",
+          "client": "192.168.199.132",
+          "mac": "00:0c:29:03:df:ad",
+          "requested": "192.168.199.132",
+          "server": "192.168.199.254"
+        },
+        "client_fqdn": "DESKTOP-2AEFM7G",
+        "domain": "localdomain",
+        "duration": 0.000161,
+        "hostname": "DESKTOP-2AEFM7G",
+        "lease_time": 1800,
+        "msg": {
+          "types": [
+            "REQUEST",
+            "ACK"
+          ]
+        }
+      },
+      "session_id": [
+        "CmWOt6VWaNGqXYcH6",
+        "CLObLo4YHn0u23Tp8a"
+      ]
+    }
+  }
+]

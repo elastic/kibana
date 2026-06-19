@@ -1,0 +1,95 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:37:22.798Z",
+    "agent": {
+      "ephemeral_id": "db563a77-b419-46bf-9196-d578521a6ae4",
+      "id": "ebd59784-d683-4fe8-a8a1-eec8e080cfe4",
+      "name": "elastic-agent-77554",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vsphere.datastore",
+      "namespace": "18457",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "ebd59784-d683-4fe8-a8a1-eec8e080cfe4",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "vsphere.datastore",
+      "duration": 36182708,
+      "ingested": "2026-03-10T02:37:23Z",
+      "module": "vsphere"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-77554",
+      "ip": [
+        "172.18.0.8",
+        "172.22.0.2"
+      ],
+      "mac": [
+        "0A-5B-46-51-06-5B",
+        "82-CC-EC-C2-CF-5C"
+      ],
+      "name": "elastic-agent-77554",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "datastore",
+      "period": 20000
+    },
+    "service": {
+      "address": "https://svc-vsphere-metrics:8989/sdk",
+      "type": "vsphere"
+    },
+    "tags": "vsphere-datastore",
+    "vsphere": {
+      "datastore": {
+        "capacity": {
+          "free": {
+            "bytes": 10952166604800
+          },
+          "total": {
+            "bytes": 10995116277760
+          },
+          "used": {
+            "bytes": 42949672960,
+            "pct": 0.004
+          }
+        },
+        "fstype": "OTHER",
+        "host": {
+          "count": 1,
+          "names": "DC0_H0"
+        },
+        "id": "datastore-53",
+        "name": "LocalDS_0",
+        "status": "green",
+        "vm": {
+          "count": 4,
+          "names": [
+            "DC0_C0_RP0_VM0",
+            "DC0_C0_RP0_VM1",
+            "DC0_H0_VM0",
+            "DC0_H0_VM1"
+          ]
+        }
+      }
+    }
+  }
+]

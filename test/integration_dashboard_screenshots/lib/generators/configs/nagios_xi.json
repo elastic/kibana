@@ -1,0 +1,85 @@
+{
+  "package": "nagios_xi",
+  "dataStreams": [
+    {
+      "dataset": "nagios_xi.events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "message",
+        "nagios_xi.event.instance_id",
+        "nagios_xi.event.logentry.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nagios_xi.host",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.provider",
+        "nagios_xi.host.current_state",
+        "nagios_xi.host.display_name",
+        "nagios_xi.host.host_object_id",
+        "nagios_xi.host.performance_data.pl",
+        "nagios_xi.host.performance_data.rta",
+        "nagios_xi.host.performance_data.size",
+        "nagios_xi.host.performance_data.time",
+        "nagios_xi.service.current_load.load1",
+        "nagios_xi.service.current_load.load15",
+        "nagios_xi.service.current_load.load5",
+        "nagios_xi.service.current_state",
+        "nagios_xi.service.host_name",
+        "nagios_xi.service.ping.pl",
+        "nagios_xi.service.ping.rta",
+        "nagios_xi.service.servicestatus_id"
+      ],
+      "filterValues": {
+        "event.provider": [
+          "nagios_xi.ping",
+          "nagios_xi.current_load"
+        ]
+      }
+    },
+    {
+      "dataset": "nagios_xi.service",
+      "indexPattern": "logs-*",
+      "docTarget": 660,
+      "fields": [
+        "event.provider",
+        "nagios_xi.host.current_state",
+        "nagios_xi.host.host_object_id",
+        "nagios_xi.service.current_load.load1",
+        "nagios_xi.service.current_load.load15",
+        "nagios_xi.service.current_load.load5",
+        "nagios_xi.service.current_state",
+        "nagios_xi.service.host_name",
+        "nagios_xi.service.http.size",
+        "nagios_xi.service.http.time",
+        "nagios_xi.service.ping.pl",
+        "nagios_xi.service.ping.rta",
+        "nagios_xi.service.process.total",
+        "nagios_xi.service.root_partition.free_space",
+        "nagios_xi.service.root_partition.total_space",
+        "nagios_xi.service.root_partition.used_space",
+        "nagios_xi.service.servicestatus_id",
+        "nagios_xi.service.ssh.time",
+        "nagios_xi.service.swap_usage.free_swap",
+        "nagios_xi.service.swap_usage.total_swap",
+        "nagios_xi.service.swap_usage.used_swap",
+        "service.name"
+      ],
+      "filterValues": {
+        "event.provider": [
+          "nagios_xi.ping",
+          "nagios_xi.current_load",
+          "nagios_xi.http",
+          "nagios_xi.ssh",
+          "nagios_xi.root_partition",
+          "nagios_xi.swap_usage",
+          "nagios_xi.process"
+        ]
+      }
+    }
+  ]
+}

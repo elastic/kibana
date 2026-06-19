@@ -1,0 +1,164 @@
+[
+  {
+    "@timestamp": "2023-10-16T22:55:48.000Z",
+    "agent": {
+      "ephemeral_id": "b1216fea-0673-46bc-9d84-5257eba26514",
+      "id": "8be6adab-b172-4f14-8f77-15d17ca6a0ae",
+      "name": "elastic-agent-99405",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.endpoint_dlp",
+      "namespace": "71929",
+      "type": "logs"
+    },
+    "device": {
+      "model": {
+        "identifier": "Model-2022"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8be6adab-b172-4f14-8f77-15d17ca6a0ae",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "allow",
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "dataset": "zscaler_zia.endpoint_dlp",
+      "id": "2",
+      "ingested": "2026-03-10T03:42:57Z",
+      "kind": "alert",
+      "timezone": "GMT",
+      "type": [
+        "allowed"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "938c2cc0dcc05f2b68c4287040cfcf71",
+        "sha256": "076085239f3a10b8f387c4e5d4261abf8d109aa641be35a8d4ed2d775eb09612"
+      },
+      "path": "dest_path",
+      "type": "file"
+    },
+    "host": {
+      "hostname": "Dev 1",
+      "name": "host",
+      "os": {
+        "platform": "Windows",
+        "version": "Win-11"
+      },
+      "type": "WinUser"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:53258"
+      }
+    },
+    "related": {
+      "hash": [
+        "938c2cc0dcc05f2b68c4287040cfcf71",
+        "076085239f3a10b8f387c4e5d4261abf8d109aa641be35a8d4ed2d775eb09612"
+      ],
+      "hosts": [
+        "host",
+        "Dev 1"
+      ],
+      "user": [
+        "Administrator",
+        "TempUser"
+      ]
+    },
+    "rule": {
+      "name": [
+        "configured_rule"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-endpoint_dlp"
+    ],
+    "user": {
+      "name": "TempUser"
+    },
+    "zscaler_zia": {
+      "endpoint_dlp": {
+        "activity_type": "email_sent",
+        "additional_info": "File already open by another application",
+        "channel": "Network Drive Transfer",
+        "confirm_action": "confirm",
+        "confirm_just": "My manager approved it",
+        "datacenter": {
+          "city": "Atlanta",
+          "country": "US",
+          "name": "Georgia"
+        },
+        "day": "Mon",
+        "day_of_month": 16,
+        "department": "TempDept",
+        "destination_type": "personal_cloud_storage",
+        "device": {
+          "appversion": "Ver-2199",
+          "os": {
+            "type": "Windows"
+          },
+          "owner": "Administrator"
+        },
+        "dictionary": {
+          "id": 8
+        },
+        "dictionary_names": [
+          "[dlp]"
+        ],
+        "engine": {
+          "id": 12
+        },
+        "engine_names": [
+          "dlpengine"
+        ],
+        "event_time": "2023-10-16T22:55:48.000Z",
+        "expected_action": "block",
+        "feed_time": "2023-10-16T22:55:48.000Z",
+        "file": {
+          "doc_type": "Medical",
+          "source_path": "source_path",
+          "type": {
+            "name": "exe64"
+          },
+          "type_category": "PLS File (pls)"
+        },
+        "hour": 22,
+        "identifier": "12",
+        "item": {
+          "destination_name": "nanolog",
+          "name": "endpoint_dlp",
+          "source_name": "endpoint",
+          "type": "email_attachment"
+        },
+        "log_type": "dlp_incident",
+        "minute": 55,
+        "month": "Oct",
+        "month_of_year": 10,
+        "scan_time": 1210,
+        "scanned_bytes": 290812,
+        "second": 48,
+        "severity": "High Severity",
+        "source_type": "network_share",
+        "timezone": "GMT",
+        "year": 2023,
+        "zdp_mode": "block mode"
+      }
+    }
+  }
+]

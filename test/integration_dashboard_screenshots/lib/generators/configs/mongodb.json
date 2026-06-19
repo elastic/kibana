@@ -1,0 +1,52 @@
+{
+  "package": "mongodb",
+  "dataStreams": [
+    {
+      "dataset": "mongodb.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "log.level",
+        "message",
+        "mongodb.log.component",
+        "mongodb.log.context"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mongodb.status",
+      "indexPattern": "metrics-*",
+      "docTarget": 810,
+      "fields": [
+        "mongodb.status.asserts.msg",
+        "mongodb.status.asserts.regular",
+        "mongodb.status.asserts.rollovers",
+        "mongodb.status.asserts.user",
+        "mongodb.status.asserts.warning",
+        "mongodb.status.connections.current",
+        "mongodb.status.memory.bits",
+        "mongodb.status.memory.mapped.mb",
+        "mongodb.status.memory.mapped_with_journal.mb",
+        "mongodb.status.memory.resident.mb",
+        "mongodb.status.memory.virtual.mb",
+        "mongodb.status.ops.counters.command",
+        "mongodb.status.ops.counters.delete",
+        "mongodb.status.ops.counters.getmore",
+        "mongodb.status.ops.counters.insert",
+        "mongodb.status.ops.counters.query",
+        "mongodb.status.ops.replicated.update",
+        "mongodb.status.storage_engine.name",
+        "mongodb.status.wired_tiger.cache.dirty.bytes",
+        "mongodb.status.wired_tiger.cache.maximum.bytes",
+        "mongodb.status.wired_tiger.cache.used.bytes",
+        "mongodb.status.wired_tiger.concurrent_transactions.read.available",
+        "mongodb.status.wired_tiger.concurrent_transactions.read.out",
+        "mongodb.status.wired_tiger.concurrent_transactions.write.available",
+        "mongodb.status.wired_tiger.concurrent_transactions.write.out",
+        "service.address",
+        "service.version"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

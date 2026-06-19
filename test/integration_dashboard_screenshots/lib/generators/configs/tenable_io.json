@@ -1,0 +1,87 @@
+{
+  "package": "tenable_io",
+  "dataStreams": [
+    {
+      "dataset": "tenable_io.asset",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.domain",
+        "host.id",
+        "host.name",
+        "host.os.name",
+        "tenable_io.asset.acr_score",
+        "tenable_io.asset.deleted_at",
+        "tenable_io.asset.exposure_score",
+        "tenable_io.asset.installed_software",
+        "tenable_io.asset.last_authenticated_scan_date",
+        "tenable_io.asset.last_licensed_scan_date",
+        "tenable_io.asset.sources.name",
+        "tenable_io.asset.tags.value",
+        "tenable_io.asset.terminated_at"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tenable_io.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.outcome",
+        "tenable_io.audit.is_anonymous",
+        "tenable_io.audit.target.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tenable_io.plugin",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "tenable_io.plugin.attributes.exploited_by.malware",
+        "tenable_io.plugin.attributes.has_patch",
+        "tenable_io.plugin.attributes.risk_factor",
+        "tenable_io.plugin.attributes.solution",
+        "tenable_io.plugin.attributes.vpr.score",
+        "tenable_io.plugin.id"
+      ],
+      "filterValues": {
+        "tenable_io.plugin.attributes.exploited_by.malware": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "tenable_io.scan",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "tenable_io.scan.id",
+        "tenable_io.scan.status"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tenable_io.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "tenable_io.vulnerability.plugin.name",
+        "tenable_io.vulnerability.plugin.risk_factor",
+        "tenable_io.vulnerability.state",
+        "vulnerability.category",
+        "vulnerability.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "tenable_io.vulnerability.state": [
+          "OPEN",
+          "FIXED",
+          "REOPENED"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,243 @@
+{
+  "package": "apache_tomcat",
+  "dataStreams": [
+    {
+      "dataset": "apache_tomcat.access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.name",
+        "apache_tomcat.access.response_time",
+        "apache_tomcat.catalina.subsystem",
+        "apache_tomcat.localhost.subsystem",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "source.ip",
+        "url.original",
+        "user_agent.os.name",
+        "user_agent.os.version"
+      ],
+      "filterValues": {
+        "log.level": [
+          "info"
+        ]
+      }
+    },
+    {
+      "dataset": "apache_tomcat.cache",
+      "indexPattern": "metrics-*",
+      "docTarget": 570,
+      "fields": [
+        "apache_tomcat.cache.application_name",
+        "apache_tomcat.cache.hit.count",
+        "apache_tomcat.cache.lookup.count",
+        "apache_tomcat.cache.size.current.kb",
+        "apache_tomcat.connection_pool.connection.active.count",
+        "apache_tomcat.connection_pool.connection.idle.count",
+        "apache_tomcat.memory.heap.used.bytes",
+        "apache_tomcat.memory.non_heap.used.bytes",
+        "apache_tomcat.request.count",
+        "apache_tomcat.request.received.bytes",
+        "apache_tomcat.request.sent.bytes",
+        "apache_tomcat.request.time.total",
+        "apache_tomcat.session.application_name",
+        "apache_tomcat.thread_pool.thread.active.count",
+        "apache_tomcat.thread_pool.thread.current.busy",
+        "apache_tomcat.thread_pool.thread.current.count",
+        "apache_tomcat.thread_pool.thread.daemon.count",
+        "apache_tomcat.thread_pool.thread.peak.count",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "apache_tomcat.catalina",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.name",
+        "apache_tomcat.catalina.subsystem",
+        "apache_tomcat.localhost.subsystem",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "source.ip",
+        "url.original"
+      ],
+      "filterValues": {
+        "log.level": [
+          "info"
+        ]
+      }
+    },
+    {
+      "dataset": "apache_tomcat.connection_pool",
+      "indexPattern": "metrics-*",
+      "docTarget": 540,
+      "fields": [
+        "apache_tomcat.cache.application_name",
+        "apache_tomcat.cache.lookup.count",
+        "apache_tomcat.connection_pool.application_name",
+        "apache_tomcat.connection_pool.connection.active.count",
+        "apache_tomcat.connection_pool.connection.idle.count",
+        "apache_tomcat.memory.heap.used.bytes",
+        "apache_tomcat.memory.non_heap.used.bytes",
+        "apache_tomcat.request.count",
+        "apache_tomcat.request.received.bytes",
+        "apache_tomcat.request.sent.bytes",
+        "apache_tomcat.request.time.total",
+        "apache_tomcat.session.application_name",
+        "apache_tomcat.thread_pool.thread.active.count",
+        "apache_tomcat.thread_pool.thread.current.busy",
+        "apache_tomcat.thread_pool.thread.current.count",
+        "apache_tomcat.thread_pool.thread.daemon.count",
+        "apache_tomcat.thread_pool.thread.peak.count",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "apache_tomcat.localhost",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.name",
+        "apache_tomcat.catalina.subsystem",
+        "apache_tomcat.localhost.subsystem",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "source.ip",
+        "url.original"
+      ],
+      "filterValues": {
+        "log.level": [
+          "info"
+        ]
+      }
+    },
+    {
+      "dataset": "apache_tomcat.memory",
+      "indexPattern": "metrics-*",
+      "docTarget": 750,
+      "fields": [
+        "apache_tomcat.cache.application_name",
+        "apache_tomcat.cache.lookup.count",
+        "apache_tomcat.connection_pool.connection.active.count",
+        "apache_tomcat.connection_pool.connection.idle.count",
+        "apache_tomcat.memory.gc.collection.count",
+        "apache_tomcat.memory.gc.collection.time.ms",
+        "apache_tomcat.memory.heap.committed.bytes",
+        "apache_tomcat.memory.heap.init.bytes",
+        "apache_tomcat.memory.heap.max.bytes",
+        "apache_tomcat.memory.heap.used.bytes",
+        "apache_tomcat.memory.non_heap.committed.bytes",
+        "apache_tomcat.memory.non_heap.init.bytes",
+        "apache_tomcat.memory.non_heap.max.bytes",
+        "apache_tomcat.memory.non_heap.used.bytes",
+        "apache_tomcat.request.count",
+        "apache_tomcat.request.received.bytes",
+        "apache_tomcat.request.sent.bytes",
+        "apache_tomcat.request.time.total",
+        "apache_tomcat.session.application_name",
+        "apache_tomcat.thread_pool.thread.active.count",
+        "apache_tomcat.thread_pool.thread.current.busy",
+        "apache_tomcat.thread_pool.thread.current.count",
+        "apache_tomcat.thread_pool.thread.daemon.count",
+        "apache_tomcat.thread_pool.thread.peak.count",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "apache_tomcat.request",
+      "indexPattern": "metrics-*",
+      "docTarget": 600,
+      "fields": [
+        "apache_tomcat.cache.application_name",
+        "apache_tomcat.cache.lookup.count",
+        "apache_tomcat.connection_pool.connection.active.count",
+        "apache_tomcat.connection_pool.connection.idle.count",
+        "apache_tomcat.memory.heap.used.bytes",
+        "apache_tomcat.memory.non_heap.used.bytes",
+        "apache_tomcat.request.count",
+        "apache_tomcat.request.error.count",
+        "apache_tomcat.request.nio_connector",
+        "apache_tomcat.request.received.bytes",
+        "apache_tomcat.request.sent.bytes",
+        "apache_tomcat.request.time.max",
+        "apache_tomcat.request.time.total",
+        "apache_tomcat.session.application_name",
+        "apache_tomcat.thread_pool.thread.active.count",
+        "apache_tomcat.thread_pool.thread.current.busy",
+        "apache_tomcat.thread_pool.thread.current.count",
+        "apache_tomcat.thread_pool.thread.daemon.count",
+        "apache_tomcat.thread_pool.thread.peak.count",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "apache_tomcat.session",
+      "indexPattern": "metrics-*",
+      "docTarget": 660,
+      "fields": [
+        "apache_tomcat.cache.application_name",
+        "apache_tomcat.cache.lookup.count",
+        "apache_tomcat.connection_pool.connection.active.count",
+        "apache_tomcat.connection_pool.connection.idle.count",
+        "apache_tomcat.memory.heap.used.bytes",
+        "apache_tomcat.memory.non_heap.used.bytes",
+        "apache_tomcat.request.count",
+        "apache_tomcat.request.received.bytes",
+        "apache_tomcat.request.sent.bytes",
+        "apache_tomcat.request.time.total",
+        "apache_tomcat.session.active.total",
+        "apache_tomcat.session.application_name",
+        "apache_tomcat.session.create.total",
+        "apache_tomcat.session.expire.total",
+        "apache_tomcat.session.processing_time",
+        "apache_tomcat.session.rejected.count",
+        "apache_tomcat.thread_pool.thread.active.count",
+        "apache_tomcat.thread_pool.thread.current.busy",
+        "apache_tomcat.thread_pool.thread.current.count",
+        "apache_tomcat.thread_pool.thread.daemon.count",
+        "apache_tomcat.thread_pool.thread.peak.count",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "apache_tomcat.thread_pool",
+      "indexPattern": "metrics-*",
+      "docTarget": 690,
+      "fields": [
+        "apache_tomcat.cache.application_name",
+        "apache_tomcat.cache.lookup.count",
+        "apache_tomcat.connection_pool.connection.active.count",
+        "apache_tomcat.connection_pool.connection.idle.count",
+        "apache_tomcat.memory.heap.used.bytes",
+        "apache_tomcat.memory.non_heap.used.bytes",
+        "apache_tomcat.request.count",
+        "apache_tomcat.request.received.bytes",
+        "apache_tomcat.request.sent.bytes",
+        "apache_tomcat.request.time.total",
+        "apache_tomcat.session.application_name",
+        "apache_tomcat.thread_pool.connection.count",
+        "apache_tomcat.thread_pool.connection.max",
+        "apache_tomcat.thread_pool.executor_termination.timeout.ms",
+        "apache_tomcat.thread_pool.nio_connector",
+        "apache_tomcat.thread_pool.thread.active.count",
+        "apache_tomcat.thread_pool.thread.current.allocated.bytes",
+        "apache_tomcat.thread_pool.thread.current.busy",
+        "apache_tomcat.thread_pool.thread.current.count",
+        "apache_tomcat.thread_pool.thread.daemon.count",
+        "apache_tomcat.thread_pool.thread.peak.count",
+        "apache_tomcat.thread_pool.thread.total",
+        "service.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

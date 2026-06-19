@@ -1,0 +1,4262 @@
+[
+  {
+    "@timestamp": "2026-03-10T01:25:39.324Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "UNKNOWN[1329]"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "unknown[1329]",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 9183
+    },
+    "message": "g\u0005",
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2020-07-06T16:38:34.725Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "node": "localhost.localdomain",
+        "record_type": "SYSTEM_BOOT",
+        "sequence": 7,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:init_t:s0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "booted-system"
+      ],
+      "agent_id_status": "verified",
+      "category": "host",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": "info"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 4103
+    },
+    "process": {
+      "executable": "/usr/lib/systemd/systemd-update-utmp",
+      "name": "systemd-update-utmp",
+      "pid": 1667
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2020-07-06T16:38:34.709Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "node": "localhost.localdomain",
+        "record_type": "SERVICE_START",
+        "sequence": 6,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:init_t:s0",
+        "unit": "auditd"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "started-service"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 3847
+    },
+    "process": {
+      "executable": "/usr/lib/systemd/systemd",
+      "name": "systemd",
+      "pid": 1
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2020-07-06T16:38:34.707Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "audit_failure": "1",
+        "node": "localhost.localdomain",
+        "old": "1",
+        "record_type": "CONFIG_CHANGE",
+        "sequence": 5,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:unconfined_service_t:s0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "changed-audit-configuration"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process",
+        "configuration"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 3666
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      }
+    }
+  },
+  {
+    "@timestamp": "2020-07-06T16:38:34.588Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "format": "raw",
+        "kernel": "3.10.0-1062.9.1.el7.x86_64",
+        "node": "localhost.localdomain",
+        "op": "start",
+        "record_type": "DAEMON_START",
+        "sequence": 4686,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:auditd_t:s0",
+        "ver": "2.8.5"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "started-audit"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 3432
+    },
+    "process": {
+      "pid": 1643
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2020-02-10T21:59:44.206Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "EXECVE",
+        "sequence": 579393
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "execve",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 2661
+    },
+    "process": {
+      "args": [
+        "top"
+      ],
+      "args_count": 1,
+      "executable": "top"
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2020-02-10T21:59:44.206Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "name": "mymodule",
+        "record_type": "KERN_MODULE",
+        "sequence": 579397
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "loaded-kernel-module"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "driver"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 2721
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2019-11-15T19:01:57.054Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "SYSTEM_SHUTDOWN",
+        "sequence": 1163,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:init_t:s0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "shutdown-system"
+      ],
+      "agent_id_status": "verified",
+      "category": "host",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": "info"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 2411
+    },
+    "process": {
+      "executable": "/usr/lib/systemd/systemd-update-utmp",
+      "name": "systemd-update-utmp",
+      "pid": 4440
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2019-11-15T19:01:24.309Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "gpg_res": "1",
+        "key_enforce": false,
+        "record_type": "SOFTWARE_UPDATE",
+        "root_dir": "/",
+        "sequence": 785,
+        "ses": "3",
+        "subj": "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023",
+        "sw": "gcc-4.8.5-39.el7.x86_64",
+        "sw_type": "rpm"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "package-updated"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "package"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 1866
+    },
+    "process": {
+      "executable": "/usr/bin/python2.7",
+      "name": "yum",
+      "pid": 3157
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "1000"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2019-11-15T19:00:56.144Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "SYSTEM_BOOT",
+        "sequence": 5,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:init_t:s0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "booted-system"
+      ],
+      "agent_id_status": "verified",
+      "category": "host",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": "info"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 2169
+    },
+    "process": {
+      "executable": "/usr/lib/systemd/systemd-update-utmp",
+      "name": "systemd-update-utmp",
+      "pid": 678
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2017-12-17T10:44:41.075Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "op": "create",
+        "reason": "api",
+        "record_type": "VIRT_CONTROL",
+        "sequence": 145,
+        "ses": "3",
+        "subj": "system_u:system_r:container_runtime_t:s0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "issued-vm-control"
+      ],
+      "agent_id_status": "verified",
+      "category": "host",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": "creation"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 2786
+    },
+    "process": {
+      "executable": "/usr/bin/dockerd-current",
+      "pid": 1431
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "100"
+      },
+      "id": "0",
+      "name": "root"
+    }
+  },
+  {
+    "@timestamp": "2017-04-11T15:21:03.550Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "data": "eh^?^?echo test^Mvim /etc/pam.d/password-auth-ac^Mman pam_tty_audit^Mman pam.d^Mvim /etc^Asudo ^E/pamd.sy^?^?^?^?^?.^?m.d/sy^I-a^Ia^?-a^I^Mman pam^Mt^?grep sys^?^?^?/var/lo^Ig/me^Is^I | grep pam_tty^Mgrep pam_tty /var/log/mes^I^M^[[A^Asudo ^Msudo su^M",
+        "major": "136",
+        "minor": "0",
+        "record_type": "TTY",
+        "sequence": 1065565,
+        "ses": "762"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "typed"
+      ],
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 1151
+    },
+    "process": {
+      "name": "bash",
+      "pid": 27930
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "1000"
+      },
+      "id": "1000"
+    }
+  },
+  {
+    "@timestamp": "2017-03-16T04:02:57.805Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "op": "PAM:accounting",
+        "record_type": "USER_ACCT",
+        "sequence": 19623808,
+        "ses": "12286",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "was-authorized"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 5715
+    },
+    "process": {
+      "executable": "/bin/su",
+      "pid": 28395
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "effective": {
+        "name": "root"
+      },
+      "id": "700",
+      "name": "root",
+      "terminal": "pts/0"
+    }
+  },
+  {
+    "@timestamp": "2017-03-16T04:02:40.072Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "new_auid": "700",
+        "new_ses": "12286",
+        "old_auid": "700",
+        "old_ses": "6793",
+        "record_type": "LOGIN",
+        "sequence": 19623791,
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "changed-login-id-to"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 5119
+    },
+    "process": {
+      "pid": 28281
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "effective": {
+        "id": "700"
+      },
+      "id": "700"
+    }
+  },
+  {
+    "@timestamp": "2017-03-16T04:02:40.072Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "op": "success",
+        "record_type": "USER_AUTH",
+        "sequence": 19623789,
+        "ses": "6793",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "authenticated"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 5519
+    },
+    "process": {
+      "executable": "/usr/sbin/sshd",
+      "pid": 28281
+    },
+    "source": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "effective": {
+        "name": "admin"
+      },
+      "id": "700",
+      "name": "admin",
+      "terminal": "ssh"
+    }
+  },
+  {
+    "@timestamp": "2017-03-16T04:02:40.070Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "direction": "both",
+        "kind": "session",
+        "laddr": "89.160.20.156",
+        "lport": 50022,
+        "op": "destroy",
+        "record_type": "CRYPTO_KEY_USER",
+        "rport": 58994,
+        "sequence": 19623788,
+        "ses": "6793",
+        "spid": "28282"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "negotiated-crypto-key"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 5235
+    },
+    "process": {
+      "executable": "/usr/sbin/sshd",
+      "pid": 28281
+    },
+    "source": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "id": "0",
+      "saved": {
+        "id": "74"
+      }
+    }
+  },
+  {
+    "@timestamp": "2017-03-14T19:20:56.193Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "op": "PAM:setcred",
+        "record_type": "CRED_ACQ",
+        "sequence": 19600330,
+        "ses": "11988",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "acquired-credentials"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 4746
+    },
+    "process": {
+      "executable": "/usr/bin/sudo",
+      "pid": 4151
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "effective": {
+        "name": "root"
+      },
+      "id": "700",
+      "name": "root"
+    }
+  },
+  {
+    "@timestamp": "2017-03-14T19:20:56.193Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "op": "PAM:session_open",
+        "record_type": "USER_START",
+        "sequence": 19600331,
+        "ses": "11988",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "started-session"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "session"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 4929
+    },
+    "process": {
+      "executable": "/usr/bin/sudo",
+      "pid": 4151
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "effective": {
+        "name": "root"
+      },
+      "id": "700",
+      "name": "root"
+    }
+  },
+  {
+    "@timestamp": "2017-03-14T19:20:56.192Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "USER_CMD",
+        "sequence": 19600329,
+        "ses": "11988"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "ran-command"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 509
+    },
+    "process": {
+      "args": [
+        "/usr/lib64/nagios/plugins/check_asterisk_sip_peers",
+        "-p",
+        "202"
+      ],
+      "args_count": 3,
+      "pid": 4151,
+      "working_directory": "/"
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "id": "497"
+    }
+  },
+  {
+    "@timestamp": "2017-03-14T19:20:30.178Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "op": "PAM:session_close",
+        "record_type": "USER_END",
+        "sequence": 19600327,
+        "ses": "11988",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "ended-session"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "session"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "end"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 4373
+    },
+    "process": {
+      "executable": "/usr/bin/sudo",
+      "pid": 4121
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "effective": {
+        "name": "root"
+      },
+      "id": "700",
+      "name": "root"
+    }
+  },
+  {
+    "@timestamp": "2017-03-14T19:20:30.178Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "op": "PAM:setcred",
+        "record_type": "CRED_DISP",
+        "sequence": 19600328,
+        "ses": "11988",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "disposed-credentials"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 4562
+    },
+    "process": {
+      "executable": "/usr/bin/sudo",
+      "pid": 4121
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "700"
+      },
+      "effective": {
+        "name": "root"
+      },
+      "id": "700",
+      "name": "root"
+    }
+  },
+  {
+    "@timestamp": "2017-01-31T20:17:14.891Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "dst_prefixlen": 16,
+        "op": "SPD-delete",
+        "record_type": "MAC_IPSEC_EVENT",
+        "sequence": 18877201,
+        "ses": "4294967295",
+        "src_prefixlen": 24
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.0.0"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "mac_ipsec_event",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 0
+    },
+    "source": {
+      "address": "192.168.2.0",
+      "ip": "192.168.2.0"
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      }
+    }
+  },
+  {
+    "@timestamp": "2017-01-31T20:17:14.891Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "a0": "9",
+        "items": "0",
+        "record_type": "SYSCALL",
+        "sequence": 18877199,
+        "ses": "4294967295",
+        "success": true,
+        "syscall": "44",
+        "tty": "(none)"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "syscall",
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "x86_64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 174
+    },
+    "network": {
+      "direction": "egress"
+    },
+    "process": {
+      "executable": "/usr/libexec/strongswan/charon (deleted)",
+      "exit_code": 184,
+      "name": "charon",
+      "parent": {
+        "pid": 1240
+      },
+      "pid": 1281
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "effective": {
+        "group": {
+          "id": "0"
+        },
+        "id": "0"
+      },
+      "filesystem": {
+        "group": {
+          "id": "0"
+        },
+        "id": "0"
+      },
+      "group": {
+        "id": "0"
+      },
+      "id": "0",
+      "saved": {
+        "group": {
+          "id": "0"
+        },
+        "id": "0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2016-12-16T15:45:43.572Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "img-ctx": "system_u:object_r:svirt_image_t:s0:c444,c977",
+        "model": "selinux",
+        "record_type": "VIRT_MACHINE_ID",
+        "sequence": 23118,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:virtd_t:s0-s0:c0.c1023",
+        "uuid": "5501263b-181d-47ed-ab03-a6066f3d26bf",
+        "virt": "kvm",
+        "vm": "rhel-work3",
+        "vm-ctx": "system_u:system_r:svirt_t:s0:c444,c977"
+      }
+    },
+    "container": {
+      "name": "rhel-work3",
+      "runtime": "kvm"
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "assigned-vm-id"
+      ],
+      "agent_id_status": "verified",
+      "category": "host",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": "creation"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 3034
+    },
+    "process": {
+      "executable": "/usr/sbin/libvirtd",
+      "pid": 5637
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:44:57.892Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "DAEMON_END",
+        "sequence": 7799
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "shutdown-audit"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "end"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 9618
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-07T02:42:33.346Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "CKADDR",
+        "saddr": "02000050A9FEA9FE0000000000000000",
+        "sequence": 737
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ckaddr",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 9536
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-07T02:40:24.953Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "SOCKADDR",
+        "saddr": "02000050A9FEA9FE0000000000000000",
+        "sequence": 688
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "sockaddr",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 9452
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-07T02:21:48.360Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "fe": "0",
+        "fi": "0000000000000000",
+        "fp": "0000000000000000",
+        "fver": "0",
+        "new_pe": "0000001fffffffff",
+        "new_pi": "0000000000000000",
+        "new_pp": "0000001fffffffff",
+        "old_pe": "0000000000000000",
+        "old_pi": "0000000000000000",
+        "old_pp": "0000000000000000",
+        "record_type": "BPRM_FCAPS",
+        "sequence": 529
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "bprm_fcaps",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 9209
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-07T02:20:31.371Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "list": "4",
+        "op": "add_rule",
+        "record_type": "CONFIG_CHANGE",
+        "sequence": 478,
+        "ses": "3",
+        "subj": "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "changed-audit-configuration"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process",
+        "configuration"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 8768
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "1000"
+      }
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:20:31.371Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "CWD",
+        "sequence": 479
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "cwd",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 8931
+    },
+    "process": {
+      "working_directory": "/home/some_user"
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-07T02:20:31.371Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "dev": "08:01",
+        "inode": "17367907",
+        "item": "0",
+        "mode": "0100750",
+        "name": "/sbin/auditctl",
+        "obj": "system_u:object_r:auditctl_exec_t:s0",
+        "objtype": "NORMAL",
+        "rdev": "00:00",
+        "record_type": "PATH",
+        "sequence": 479
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "path",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 8994
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "owner": {
+        "group": {
+          "id": "0"
+        },
+        "id": "0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:17:29.033Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "id": "1000",
+        "op": "login",
+        "record_type": "USER_LOGOUT",
+        "sequence": 424,
+        "ses": "1",
+        "subj": "system_u:system_r:sshd_t:s0-s0:c0.c1023",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "logged-out"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "end"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 8550
+    },
+    "process": {
+      "executable": "/usr/sbin/sshd",
+      "pid": 1298
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "1000"
+      },
+      "effective": {
+        "id": "1000"
+      },
+      "id": "1000",
+      "terminal": "/dev/pts/0"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:17:23.193Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "hostname": "pool-96-241-146-97.washdc.fios.verizon.net",
+        "id": "1000",
+        "op": "login",
+        "record_type": "USER_LOGIN",
+        "sequence": 421,
+        "ses": "1",
+        "subj": "system_u:system_r:sshd_t:s0-s0:c0.c1023",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "logged-in"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 8280
+    },
+    "process": {
+      "executable": "/usr/sbin/sshd",
+      "pid": 1298
+    },
+    "source": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "1000"
+      },
+      "effective": {
+        "id": "1000"
+      },
+      "id": "1000",
+      "terminal": "/dev/pts/0"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:17:23.140Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "default-context": "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023",
+        "hostname": "pool-96-241-146-97.washdc.fios.verizon.net",
+        "record_type": "USER_ROLE_CHANGE",
+        "selected-context": "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023",
+        "sequence": 415,
+        "ses": "1",
+        "subj": "system_u:system_r:sshd_t:s0-s0:c0.c1023"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "changed-role-to"
+      ],
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 7882
+    },
+    "process": {
+      "executable": "/usr/sbin/sshd",
+      "pid": 1298
+    },
+    "source": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "1000"
+      },
+      "id": "0",
+      "terminal": "ssh"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:17:21.515Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "cipher": "chacha20-poly1305@openssh.com",
+        "direction": "from-server",
+        "ksize": 512,
+        "laddr": "10.142.0.2",
+        "lport": 22,
+        "op": "start",
+        "pfs": "curve25519-sha256@libssh.org",
+        "record_type": "CRYPTO_SESSION",
+        "rport": 63927,
+        "sequence": 406,
+        "ses": "4294967295",
+        "spid": "1299",
+        "subj": "system_u:system_r:sshd_t:s0-s0:c0.c1023"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "started-crypto-session"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 756
+    },
+    "process": {
+      "executable": "/usr/sbin/sshd",
+      "pid": 1298
+    },
+    "source": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0",
+      "saved": {
+        "id": "74"
+      }
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:33.000Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "USYS_CONFIG",
+        "sequence": 402,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:unconfined_service_t:s0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "changed-configuration"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 7649
+    },
+    "process": {
+      "executable": "/usr/sbin/hwclock",
+      "pid": 1232
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:32.521Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "id": "1000",
+        "op": "add-home-dir",
+        "record_type": "USER_MGMT",
+        "sequence": 393,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:unconfined_service_t:s0",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "modified-user-account"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "user",
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 7415
+    },
+    "process": {
+      "executable": "/usr/sbin/useradd",
+      "pid": 1264
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "effective": {
+        "id": "0"
+      },
+      "id": "4294967295",
+      "target": {
+        "id": "1000"
+      }
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:32.492Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "new-level": "3",
+        "old-level": "N",
+        "record_type": "SYSTEM_RUNLEVEL",
+        "sequence": 390,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:init_t:s0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "changed-to-runlevel"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 7143
+    },
+    "process": {
+      "executable": "/usr/lib/systemd/systemd-update-utmp",
+      "name": "systemd-update-utmp",
+      "pid": 1279
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:32.488Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "id": "1000",
+        "op": "add-user",
+        "record_type": "ADD_USER",
+        "sequence": 389,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:unconfined_service_t:s0",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "added-user-account"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "user",
+        "creation"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 6914
+    },
+    "process": {
+      "executable": "/usr/sbin/useradd",
+      "pid": 1264
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "effective": {
+        "id": "0"
+      },
+      "id": "4294967295",
+      "target": {
+        "id": "1000"
+      }
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:32.419Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "id": "1000",
+        "op": "add-shadow-group",
+        "record_type": "GRP_MGMT",
+        "sequence": 386,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:unconfined_service_t:s0",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "modified-group-account"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "group",
+        "change"
+      ]
+    },
+    "group": {
+      "id": "0"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 6676
+    },
+    "process": {
+      "executable": "/usr/sbin/groupadd",
+      "pid": 1235
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "effective": {
+        "id": "0"
+      },
+      "id": "4294967295"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:32.414Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "id": "1000",
+        "op": "add-group",
+        "record_type": "ADD_GROUP",
+        "sequence": 385,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:unconfined_service_t:s0",
+        "uid": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "added-group-account-to"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "group",
+        "creation"
+      ]
+    },
+    "group": {
+      "id": "1000"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 6444
+    },
+    "process": {
+      "executable": "/usr/sbin/groupadd",
+      "pid": 1235
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "effective": {
+        "id": "0"
+      },
+      "id": "4294967295"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:24.827Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "entries": 0,
+        "family": "2",
+        "record_type": "NETFILTER_CFG",
+        "sequence": 17,
+        "table": "filter"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "loaded-firewall-rule-to"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "type": [
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 6363
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:24.534Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "SERVICE_STOP",
+        "sequence": 16,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:init_t:s0",
+        "unit": "irqbalance"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "stopped-service"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "end"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 6130
+    },
+    "process": {
+      "executable": "/usr/lib/systemd/systemd",
+      "name": "systemd",
+      "pid": 1
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2016-12-07T02:16:23.864Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "record_type": "SERVICE_START",
+        "sequence": 6,
+        "ses": "4294967295",
+        "subj": "system_u:system_r:init_t:s0",
+        "unit": "auditd"
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": [
+        "started-service"
+      ],
+      "agent_id_status": "verified",
+      "category": [
+        "process"
+      ],
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 5901
+    },
+    "process": {
+      "executable": "/usr/lib/systemd/systemd",
+      "name": "systemd",
+      "pid": 1
+    },
+    "tags": [
+      "auditd-log"
+    ],
+    "user": {
+      "audit": {
+        "id": "4294967295"
+      },
+      "id": "0"
+    }
+  },
+  {
+    "@timestamp": "2016-01-03T00:37:51.394Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "proctitle": "bash",
+        "record_type": "PROCTITLE",
+        "sequence": 194438
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "proctitle",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 1706
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  },
+  {
+    "@timestamp": "2016-01-03T00:37:51.394Z",
+    "agent": {
+      "ephemeral_id": "e382c17d-2d86-4304-b80e-45b0fc44bf51",
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "name": "elastic-agent-81092",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "auditd": {
+      "log": {
+        "proctitle": "sshd: burn [priv]",
+        "record_type": "PROCTITLE",
+        "sequence": 194440
+      }
+    },
+    "data_stream": {
+      "dataset": "auditd.log",
+      "namespace": "12098",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "161df9df-0d25-4bad-8996-85f74ff8e0c3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "proctitle",
+      "agent_id_status": "verified",
+      "dataset": "auditd.log",
+      "ingested": "2026-03-10T01:25:40Z",
+      "kind": "event"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-81092",
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.6"
+      ],
+      "mac": [
+        "1E-21-C0-60-3B-FB",
+        "B6-E4-61-D2-23-F8"
+      ],
+      "name": "elastic-agent-81092",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "offset": 1772
+    },
+    "tags": [
+      "auditd-log"
+    ]
+  }
+]

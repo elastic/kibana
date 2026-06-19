@@ -1,0 +1,24 @@
+{
+  "package": "cisco_asa",
+  "dataStreams": [
+    {
+      "dataset": "cisco_asa.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco.asa.rule_name",
+        "destination.port",
+        "event.action",
+        "event.code",
+        "event.original",
+        "event.outcome",
+        "log.level",
+        "network.bytes",
+        "network.transport",
+        "source.ip",
+        "source.port"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

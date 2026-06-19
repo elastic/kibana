@@ -1,0 +1,1894 @@
+[
+  {
+    "@timestamp": "2020-09-23T05:03:28.209Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "51b856867e8f4ec089d623b92c81f128"
+      },
+      "name": "/internal/search/es",
+      "size": 107
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 747,
+        "deviceid": "860665216674",
+        "fileinfo": {
+          "filename": "/internal/search/es",
+          "magic": "ASCII text, with no line terminators",
+          "md5": "51b856867e8f4ec089d623b92c81f128",
+          "size": 107,
+          "state": "CLOSED",
+          "stored": false
+        },
+        "flow_id": 1312034511612776,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 0
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:0DgZtXfqsg8ins7neZKFct11Dbo=",
+      "iana_number": "6",
+      "protocol": "http",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.222",
+        "192.168.100.31"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 44191
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:03:28.132Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 44191
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "5a767f56dc36f6051d23ef803775e8e9"
+      },
+      "name": "/internal/search/es",
+      "size": 318
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 824,
+        "deviceid": "860665216674",
+        "fileinfo": {
+          "filename": "/internal/search/es",
+          "magic": "ASCII text, with very long lines, with no line terminators",
+          "md5": "5a767f56dc36f6051d23ef803775e8e9",
+          "size": 318,
+          "state": "CLOSED",
+          "stored": false
+        },
+        "flow_id": 1312034511612776,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "mime_type": "application/json",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 318,
+        "status_code": 200
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:0DgZtXfqsg8ins7neZKFct11Dbo=",
+      "iana_number": "6",
+      "protocol": "http",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.100.31",
+        "192.168.1.222"
+      ]
+    },
+    "source": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:03:27.260Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 599,
+        "deviceid": "860665216674",
+        "flow_id": 1312034511612776,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "mime_type": "application/json",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 318,
+        "status_code": 200
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:0DgZtXfqsg8ins7neZKFct11Dbo=",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.222",
+        "192.168.100.31"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 44191
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:02:41.077Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "67.43.156.15",
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.15",
+      "port": 53
+    },
+    "dns": {
+      "id": "28224",
+      "question": {
+        "name": "time-ios.apple.com",
+        "type": "A"
+      },
+      "type": "query"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 289,
+        "deviceid": "860665216674",
+        "flow_id": 206535698492848,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:DrM2UXVr/51WHNjvsvUqPj+MU88=",
+      "iana_number": "17",
+      "transport": "udp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.176",
+        "67.43.156.15"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.176",
+      "ip": "192.168.1.176",
+      "port": 60269
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-09-23T05:02:21.289Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "a32585f392aa640e72431abbb961c255"
+      },
+      "name": "/internal/search/es",
+      "size": 6333
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 769,
+        "deviceid": "860665216674",
+        "fileinfo": {
+          "filename": "/internal/search/es",
+          "magic": "ASCII text, with very long lines, with no line terminators",
+          "md5": "a32585f392aa640e72431abbb961c255",
+          "size": 6333,
+          "state": "CLOSED",
+          "stored": false
+        },
+        "flow_id": 1444203537876422,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 0
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:I4UBJQqMZJfuPtZwkZDG22mqIBk=",
+      "iana_number": "6",
+      "protocol": "http",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.222",
+        "192.168.100.31"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 47220
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:02:21.282Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 598,
+        "deviceid": "860665216674",
+        "flow_id": 1444203537876422,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "mime_type": "application/json",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 729,
+        "status_code": 200
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:I4UBJQqMZJfuPtZwkZDG22mqIBk=",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.222",
+        "192.168.100.31"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 47220
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:02:20.672Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 47220
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "ee8b228580c01ae19804cb965451c4b2"
+      },
+      "name": "/internal/search/es",
+      "size": 2398
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 824,
+        "deviceid": "860665216674",
+        "fileinfo": {
+          "filename": "/internal/search/es",
+          "magic": "ASCII text, with very long lines, with no line terminators",
+          "md5": "ee8b228580c01ae19804cb965451c4b2",
+          "size": 2398,
+          "state": "CLOSED",
+          "stored": false
+        },
+        "flow_id": 1444203537876422,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "mime_type": "application/json",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 809,
+        "status_code": 200
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:I4UBJQqMZJfuPtZwkZDG22mqIBk=",
+      "iana_number": "6",
+      "protocol": "http",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.100.31",
+        "192.168.1.222"
+      ]
+    },
+    "source": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:02:20.318Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 598,
+        "deviceid": "860665216674",
+        "flow_id": 1444203537876422,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "mime_type": "application/json",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 809,
+        "status_code": 200
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:I4UBJQqMZJfuPtZwkZDG22mqIBk=",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.222",
+        "192.168.100.31"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 47220
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:02:19.906Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.100.31",
+      "ip": "192.168.100.31",
+      "port": 5601
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file",
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "548d03d3e11c009da833e6e59c4adfee"
+      },
+      "name": "/internal/search/es",
+      "size": 6394
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 769,
+        "deviceid": "860665216674",
+        "fileinfo": {
+          "filename": "/internal/search/es",
+          "magic": "ASCII text, with very long lines, with no line terminators",
+          "md5": "548d03d3e11c009da833e6e59c4adfee",
+          "size": 6394,
+          "state": "CLOSED",
+          "stored": false
+        },
+        "flow_id": 1444203537876422,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "referrer": "http://192.168.100.31:5601/app/kibana"
+      },
+      "response": {
+        "bytes": 0
+      },
+      "version": "HTTP/1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:I4UBJQqMZJfuPtZwkZDG22mqIBk=",
+      "iana_number": "6",
+      "protocol": "http",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hosts": [
+        "192.168.100.31"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.222",
+        "192.168.100.31"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.222",
+      "ip": "192.168.1.222",
+      "port": 47220
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "192.168.100.31",
+      "path": "/internal/search/es"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "85.0.4183.102"
+    }
+  },
+  {
+    "@timestamp": "2020-09-23T05:02:01.175Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "67.43.156.13",
+      "as": {
+        "number": 35908
+      },
+      "domain": "cloud.fireeye.com",
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 1146,
+        "deviceid": "860665216674",
+        "flow_id": 1136872856843530,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:YekG1DgBPSO2IV15xvK9ncRxx8c=",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ingress": {
+        "interface": {
+          "name": "pether3"
+        }
+      },
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "hash": [
+        "9873b112313d7c4e5e8ef6207e6c6f0d",
+        "21536525fbf9e289f79e0f98af64bb59"
+      ],
+      "hosts": [
+        "cloud.fireeye.com"
+      ],
+      "ip": [
+        "192.168.1.99",
+        "67.43.156.13"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.99",
+      "ip": "192.168.1.99",
+      "port": 53918
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ],
+    "tls": {
+      "client": {
+        "ciphersuites": [
+          49199,
+          49195,
+          49200,
+          49196,
+          158,
+          159,
+          49191,
+          49187,
+          49192,
+          49188,
+          103,
+          107,
+          49171,
+          49161,
+          49172,
+          49162,
+          51,
+          57,
+          156,
+          157,
+          60,
+          61,
+          47,
+          53,
+          255
+        ],
+        "fingerprint": "2a:6a:46:d2:05:4d:7b:22:1b:68:02:f2:ee:f0:09:c6:ff:15:e9:58",
+        "issuer": "C=US, O=Cloudflare, Inc., CN=Cloudflare Inc ECC CA-3",
+        "ja3": "21536525fbf9e289f79e0f98af64bb59",
+        "ja3_string": "771,49199-49195-49200-49196-158-159-49191-49187-49192-49188-103-107-49171-49161-49172-49162-51-57-156-157-60-61-47-53-255,0-11-10-13-15-13172,25-24-23,0-1-2",
+        "not_after": "2021-07-01T12:00:00.000Z",
+        "not_before": "2020-07-01T00:00:00.000Z",
+        "server_name": "cloud.fireeye.com",
+        "subject": "C=US, ST=CA, L=San Francisco, O=Cloudflare, Inc., CN=fireeye.com",
+        "tls_exts": [
+          0,
+          11,
+          10,
+          13,
+          15,
+          13172
+        ]
+      },
+      "public_keylength": 65,
+      "server": {
+        "ciphersuite": 49195,
+        "ja3s": "9873b112313d7c4e5e8ef6207e6c6f0d",
+        "ja3s_string": "771,49195,0-65281-11-13172",
+        "tls_exts": [
+          0,
+          65281,
+          11,
+          13172
+        ]
+      },
+      "version": "TLS 1.2"
+    }
+  },
+  {
+    "@timestamp": "2020-09-22T08:34:44.993Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "67.43.156.14",
+      "as": {
+        "number": 35908
+      },
+      "bytes": 90,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.14",
+      "packets": 1,
+      "port": 123
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "reason": "shutdown",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 475,
+        "deviceid": "860665216674",
+        "flow": {
+          "age": 0,
+          "alerted": false,
+          "endtime": "2020-09-22T08:33:15.193Z",
+          "reason": "shutdown",
+          "starttime": "2020-09-22T08:33:15.122Z",
+          "state": "established"
+        },
+        "flow_id": 175370876476591,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:RXq9OIqNb6ISMqP+R+uVnsOCMAc=",
+      "iana_number": "17",
+      "protocol": "failed",
+      "transport": "udp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.15",
+        "67.43.156.14"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.15",
+      "bytes": 90,
+      "ip": "192.168.1.15",
+      "packets": 1,
+      "port": 39808
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-09-22T08:34:44.993Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "ff02:0000:0000:0000:0000:0000:0000:0001",
+      "bytes": 0,
+      "ip": "ff02::1",
+      "packets": 0,
+      "port": 10001
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "reason": "shutdown",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 522,
+        "deviceid": "860665216674",
+        "flow": {
+          "age": 0,
+          "alerted": false,
+          "endtime": "2020-09-22T08:34:22.764Z",
+          "reason": "shutdown",
+          "starttime": "2020-09-22T08:34:22.763Z",
+          "state": "new"
+        },
+        "flow_id": 1285126005631046,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:99eFhjuGzHgOvXPRAgULIELViPs=",
+      "iana_number": "17",
+      "protocol": "failed",
+      "transport": "udp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.99",
+        "fe80::feec:daff:fe31:b706",
+        "ff02::1"
+      ]
+    },
+    "source": {
+      "address": "fe80:0000:0000:0000:feec:daff:fe31:b706",
+      "bytes": 1680,
+      "ip": "fe80::feec:daff:fe31:b706",
+      "packets": 8,
+      "port": 44535
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-09-22T08:34:44.993Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "67.43.156.15",
+      "as": {
+        "number": 35908
+      },
+      "bytes": 59808,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.15",
+      "packets": 544,
+      "port": 5938
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "reason": "shutdown",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 611,
+        "deviceid": "860665216674",
+        "flow": {
+          "age": 13548,
+          "alerted": false,
+          "endtime": "2020-09-22T08:34:36.067Z",
+          "reason": "shutdown",
+          "starttime": "2020-09-22T04:48:48.282Z",
+          "state": "established"
+        },
+        "flow_id": 222460015300681,
+        "hostname": "fireeye-7e0de1",
+        "tcp": {
+          "ack": true,
+          "psh": true,
+          "state": "established",
+          "syn": true,
+          "tcp_flags": "1a",
+          "tcp_flags_tc": "1a",
+          "tcp_flags_ts": "1a"
+        }
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:45/AGSM9JqMdS9WIK3bAZqim3A4=",
+      "iana_number": "6",
+      "protocol": "failed",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.150",
+        "67.43.156.15"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.150",
+      "bytes": 69825,
+      "ip": "192.168.1.150",
+      "packets": 799,
+      "port": 51082
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-09-22T08:34:44.993Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "67.43.156.14",
+      "as": {
+        "number": 35908
+      },
+      "bytes": 90,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.14",
+      "packets": 1,
+      "port": 123
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "reason": "shutdown",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 476,
+        "deviceid": "860665216674",
+        "flow": {
+          "age": 0,
+          "alerted": false,
+          "endtime": "2020-09-22T08:32:06.439Z",
+          "reason": "shutdown",
+          "starttime": "2020-09-22T08:32:06.355Z",
+          "state": "established"
+        },
+        "flow_id": 1463569002949603,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:lPFhChZNfHDZ1i2YD0w8DBTTAf0=",
+      "iana_number": "17",
+      "protocol": "failed",
+      "transport": "udp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.99",
+        "192.168.1.15",
+        "67.43.156.14"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.15",
+      "bytes": 90,
+      "ip": "192.168.1.15",
+      "packets": 1,
+      "port": 52147
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-09-22T08:34:44.991Z",
+    "agent": {
+      "ephemeral_id": "cb2ae308-26ba-4969-96f3-02ede6aea18a",
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "name": "elastic-agent-11707",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fireeye.nx",
+      "namespace": "48540",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "ff02:0000:0000:0000:0000:0000:0000:0001",
+      "bytes": 0,
+      "ip": "ff02::1",
+      "packets": 0,
+      "port": 10001
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e708968a-81a2-429a-838c-5a5b36c297d3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "fireeye.nx",
+      "ingested": "2026-03-10T04:17:59Z",
+      "kind": "event",
+      "reason": "timeout",
+      "timezone": "+00:00",
+      "type": [
+        "info"
+      ]
+    },
+    "fireeye": {
+      "nx": {
+        "device_oml": 520,
+        "deviceid": "860665216674",
+        "flow": {
+          "age": 0,
+          "alerted": false,
+          "endtime": "2020-09-22T08:34:12.761Z",
+          "reason": "timeout",
+          "starttime": "2020-09-22T08:34:12.761Z",
+          "state": "new"
+        },
+        "flow_id": 721570461162990,
+        "hostname": "fireeye-7e0de1"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:34729"
+      }
+    },
+    "network": {
+      "community_id": "1:McNAQcsUcKZYOHHZYm0sD8JiBLc=",
+      "iana_number": "17",
+      "protocol": "failed",
+      "transport": "udp"
+    },
+    "observer": {
+      "hostname": "fireeye-7e0de1",
+      "ip": [
+        "192.168.1.99"
+      ],
+      "product": "NX",
+      "vendor": "Fireeye"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.99",
+        "fe80::feec:daff:fe31:b706",
+        "ff02::1"
+      ]
+    },
+    "source": {
+      "address": "fe80:0000:0000:0000:feec:daff:fe31:b706",
+      "bytes": 1680,
+      "ip": "fe80::feec:daff:fe31:b706",
+      "packets": 8,
+      "port": 45944
+    },
+    "tags": [
+      "fireeye-nx",
+      "forwarded"
+    ]
+  }
+]

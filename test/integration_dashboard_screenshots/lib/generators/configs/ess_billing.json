@@ -1,0 +1,40 @@
+{
+  "package": "ess_billing",
+  "dataStreams": [
+    {
+      "dataset": "ess_billing.billing",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.provider",
+        "ess.billing.deployment_id",
+        "ess.billing.deployment_name",
+        "ess.billing.deployment_type",
+        "ess.billing.quantity.value",
+        "ess.billing.sku",
+        "ess.billing.total_ecu",
+        "ess.billing.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ess_billing.credits",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.geo.location",
+        "cloud.instance.name",
+        "ess.billing.active",
+        "ess.billing.deployment_id",
+        "ess.billing.ecu_balance",
+        "ess.billing.ecu_quantity",
+        "ess.billing.end",
+        "ess.billing.start",
+        "ess.billing.total_ecu",
+        "ess.billing.type",
+        "event.dataset"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

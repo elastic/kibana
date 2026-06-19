@@ -1,0 +1,42 @@
+{
+  "package": "istio",
+  "dataStreams": [
+    {
+      "dataset": "istio.istiod_metrics",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "istio.istiod.labels.resource",
+        "istio.istiod.labels.type",
+        "istio.istiod.metrics.citadel_server_success_cert_issuance_count.counter",
+        "istio.istiod.metrics.galley_validation_failed.counter",
+        "istio.istiod.metrics.pilot_conflict_inbound_listener.value",
+        "istio.istiod.metrics.pilot_eds_no_instances.value",
+        "istio.istiod.metrics.pilot_inbound_updates.counter",
+        "istio.istiod.metrics.pilot_no_ip.value",
+        "istio.istiod.metrics.pilot_proxy_queue_time.histogram",
+        "istio.istiod.metrics.pilot_services.value",
+        "istio.istiod.metrics.pilot_virt_services.value",
+        "istio.istiod.metrics.pilot_xds.value",
+        "istio.istiod.metrics.pilot_xds_expired_nonce.counter",
+        "istio.istiod.metrics.pilot_xds_push_time.histogram"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "istio.proxy_metrics",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "istio.proxy.labels.destination_app",
+        "istio.proxy.labels.response_code",
+        "istio.proxy.labels.source_app",
+        "istio.proxy.metrics.istio_request_bytes.histogram",
+        "istio.proxy.metrics.istio_request_duration_milliseconds.histogram",
+        "istio.proxy.metrics.istio_requests_total.rate",
+        "istio.proxy.metrics.istio_response_bytes.histogram"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

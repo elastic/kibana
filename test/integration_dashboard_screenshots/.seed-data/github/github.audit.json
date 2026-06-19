@@ -1,0 +1,262 @@
+[
+  {
+    "@timestamp": "2023-10-29T11:40:00.000Z",
+    "agent": {
+      "ephemeral_id": "abc1fc28-926e-40cd-bd89-41fabff138a8",
+      "id": "c6532637-0f0b-4a7b-bd0f-3b711e569b50",
+      "name": "elastic-agent-75095",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "provider": "google cloud"
+    },
+    "data_stream": {
+      "dataset": "github.audit",
+      "namespace": "91129",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c6532637-0f0b-4a7b-bd0f-3b711e569b50",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "user.login",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration",
+        "web"
+      ],
+      "dataset": "github.audit",
+      "ingested": "2026-03-10T03:45:37Z",
+      "kind": "event",
+      "type": [
+        "change"
+      ]
+    },
+    "gcs": {
+      "storage": {
+        "bucket": {
+          "name": "testbucket"
+        },
+        "object": {
+          "content_type": "application/x-ndjson",
+          "name": "cloud-storage-data.log"
+        }
+      }
+    },
+    "github": {
+      "active": true,
+      "actor_id": "12345",
+      "actor_location": {
+        "country_name": "USA",
+        "ip": "192.168.1.1"
+      },
+      "business": "tech-enterprise",
+      "business_id": "56789",
+      "category": "user",
+      "device": "laptop",
+      "login_method": "password",
+      "message": "User logged in successfully.",
+      "name": "John Doe",
+      "org": "tech-corp",
+      "org_id": "67890",
+      "user_id": "12345"
+    },
+    "input": {
+      "type": "gcs"
+    },
+    "log": {
+      "file": {
+        "path": "gs://testbucket/cloud-storage-data.log"
+      },
+      "offset": 0
+    },
+    "related": {
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "john_doe",
+        "12345"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "github.audit"
+    ],
+    "user": {
+      "id": "12345",
+      "name": "john_doe",
+      "target": {
+        "id": "12345"
+      }
+    }
+  },
+  {
+    "@timestamp": "2020-12-25T23:30:56.939Z",
+    "agent": {
+      "ephemeral_id": "abc1fc28-926e-40cd-bd89-41fabff138a8",
+      "id": "c6532637-0f0b-4a7b-bd0f-3b711e569b50",
+      "name": "elastic-agent-75095",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "geo": {
+        "country_iso_code": "US"
+      }
+    },
+    "cloud": {
+      "provider": "google cloud"
+    },
+    "data_stream": {
+      "dataset": "github.audit",
+      "namespace": "91129",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c6532637-0f0b-4a7b-bd0f-3b711e569b50",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "org.oauth_app_access_approved",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration",
+        "web",
+        "iam"
+      ],
+      "dataset": "github.audit",
+      "ingested": "2026-03-10T03:45:37Z",
+      "kind": "event",
+      "type": [
+        "group",
+        "user"
+      ]
+    },
+    "gcs": {
+      "storage": {
+        "bucket": {
+          "name": "testbucket"
+        },
+        "object": {
+          "content_type": "application/x-ndjson",
+          "name": "cloud-storage-data.log"
+        }
+      }
+    },
+    "github": {
+      "category": "org",
+      "org": "Example-Org"
+    },
+    "group": {
+      "name": "Example-Org"
+    },
+    "input": {
+      "type": "gcs"
+    },
+    "log": {
+      "file": {
+        "path": "gs://testbucket/cloud-storage-data.log"
+      },
+      "offset": 510
+    },
+    "related": {
+      "user": [
+        "github-actor"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "github.audit"
+    ],
+    "user": {
+      "name": "github-actor"
+    }
+  },
+  {
+    "@timestamp": "2020-03-04T23:24:11.067Z",
+    "agent": {
+      "ephemeral_id": "abc1fc28-926e-40cd-bd89-41fabff138a8",
+      "id": "c6532637-0f0b-4a7b-bd0f-3b711e569b50",
+      "name": "elastic-agent-75095",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "provider": "google cloud"
+    },
+    "data_stream": {
+      "dataset": "github.audit",
+      "namespace": "91129",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c6532637-0f0b-4a7b-bd0f-3b711e569b50",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "organization_default_label.create",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration",
+        "web"
+      ],
+      "dataset": "github.audit",
+      "ingested": "2026-03-10T03:45:37Z",
+      "kind": "event",
+      "type": [
+        "creation"
+      ]
+    },
+    "gcs": {
+      "storage": {
+        "bucket": {
+          "name": "testbucket"
+        },
+        "object": {
+          "content_type": "application/x-ndjson",
+          "name": "cloud-storage-data.log"
+        }
+      }
+    },
+    "github": {
+      "category": "organization_default_label",
+      "org": "Example-Org"
+    },
+    "input": {
+      "type": "gcs"
+    },
+    "log": {
+      "file": {
+        "path": "gs://testbucket/cloud-storage-data.log"
+      },
+      "offset": 393
+    },
+    "related": {
+      "user": [
+        "github-actor"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "github.audit"
+    ],
+    "user": {
+      "name": "github-actor"
+    }
+  }
+]

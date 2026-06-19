@@ -1,0 +1,52 @@
+{
+  "package": "influxdb",
+  "dataStreams": [
+    {
+      "dataset": "influxdb.advstatus",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "influxdb.advstatus.query_controller.all_duration_seconds.histogram",
+        "influxdb.advstatus.query_controller.compiling_duration_seconds.histogram",
+        "influxdb.advstatus.query_controller.executing_duration_seconds.histogram",
+        "influxdb.advstatus.storage.writer_dropped_points.histogram",
+        "influxdb.advstatus.storage.writer_err_points.histogram",
+        "influxdb.advstatus.storage.writer_ok_points.histogram",
+        "influxdb.advstatus.storage.writer_req_points.histogram",
+        "influxdb.advstatus.tasks.executor_run_latency_seconds.histogram",
+        "influxdb.advstatus.tasks.executor_run_queue_delta.histogram"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "influxdb.status",
+      "indexPattern": "metrics-*",
+      "docTarget": 660,
+      "fields": [
+        "influxdb.status.buckets_total",
+        "influxdb.status.dashboards_total",
+        "influxdb.status.go_runtime.memstats_alloc_bytes",
+        "influxdb.status.go_runtime.memstats_alloc_bytes_total",
+        "influxdb.status.go_runtime.memstats_heap_alloc_bytes",
+        "influxdb.status.go_runtime.memstats_heap_idle_bytes",
+        "influxdb.status.go_runtime.memstats_heap_inuse_bytes",
+        "influxdb.status.go_runtime.threads",
+        "influxdb.status.query_controller.all_active",
+        "influxdb.status.query_controller.compiling_active",
+        "influxdb.status.query_controller.executing_active",
+        "influxdb.status.scrapers_total",
+        "influxdb.status.storage.shard_disk_size",
+        "influxdb.status.storage.wal_size",
+        "influxdb.status.tasks.scheduler_current_execution",
+        "influxdb.status.tasks.scheduler_total_execute_failure",
+        "influxdb.status.tasks.scheduler_total_execution_calls",
+        "influxdb.status.tasks.scheduler_total_release_calls",
+        "influxdb.status.tasks.scheduler_total_schedule_calls",
+        "influxdb.status.tasks.scheduler_total_schedule_fails",
+        "influxdb.status.uptime_seconds",
+        "influxdb.status.users_total"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

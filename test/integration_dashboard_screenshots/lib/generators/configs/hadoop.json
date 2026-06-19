@@ -1,0 +1,91 @@
+{
+  "package": "hadoop",
+  "dataStreams": [
+    {
+      "dataset": "hadoop.application",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "hadoop.application.allocated.mb",
+        "hadoop.application.allocated.v_cores",
+        "hadoop.application.id",
+        "hadoop.application.memory_seconds",
+        "hadoop.application.time.elapsed",
+        "hadoop.application.vcore_seconds"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "hadoop.cluster",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "hadoop.cluster.applications.failed",
+        "hadoop.cluster.applications.pending",
+        "hadoop.cluster.applications.running",
+        "hadoop.cluster.containers.allocated",
+        "hadoop.cluster.containers.pending",
+        "hadoop.cluster.containers.reserved",
+        "hadoop.cluster.node_managers.num_active",
+        "hadoop.cluster.node_managers.num_decommissioned",
+        "hadoop.cluster.node_managers.num_lost",
+        "hadoop.cluster.node_managers.num_unhealthy",
+        "hadoop.cluster.nodes.active",
+        "hadoop.cluster.nodes.lost",
+        "hadoop.cluster.nodes.unhealthy"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "hadoop.datanode",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "hadoop.datanode.blocks.cached",
+        "hadoop.datanode.bytes.read",
+        "hadoop.datanode.bytes.written",
+        "hadoop.datanode.cache.capacity",
+        "hadoop.datanode.cache.used",
+        "hadoop.datanode.disk_space.capacity",
+        "hadoop.datanode.volumes.failed",
+        "hadoop.namenode.nodes.num_dead_data",
+        "hadoop.namenode.nodes.num_decommissioning_data",
+        "hadoop.namenode.nodes.num_live_data",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "hadoop.namenode",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "hadoop.datanode.blocks.cached",
+        "hadoop.datanode.bytes.read",
+        "hadoop.datanode.bytes.written",
+        "hadoop.datanode.cache.capacity",
+        "hadoop.datanode.cache.used",
+        "hadoop.datanode.disk_space.capacity",
+        "hadoop.datanode.volumes.failed",
+        "hadoop.namenode.nodes.num_dead_data",
+        "hadoop.namenode.nodes.num_decommissioning_data",
+        "hadoop.namenode.nodes.num_live_data",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "hadoop.node_manager",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "hadoop.node_manager.container_launch_duration_avg_time",
+        "hadoop.node_manager.container_launch_duration_num_ops",
+        "hadoop.node_manager.containers.completed",
+        "hadoop.node_manager.containers.failed",
+        "hadoop.node_manager.containers.running"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

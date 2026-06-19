@@ -1,0 +1,61 @@
+{
+  "package": "rabbitmq",
+  "dataStreams": [
+    {
+      "dataset": "rabbitmq.connection",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "rabbitmq.node.mem.used.bytes",
+        "rabbitmq.node.name",
+        "rabbitmq.node.proc.used",
+        "rabbitmq.node.queue.index.journal_write.count",
+        "rabbitmq.node.queue.index.read.count",
+        "rabbitmq.node.queue.index.write.count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "rabbitmq.exchange",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "rabbitmq.node.mem.used.bytes",
+        "rabbitmq.node.name",
+        "rabbitmq.node.proc.used",
+        "rabbitmq.node.queue.index.journal_write.count",
+        "rabbitmq.node.queue.index.read.count",
+        "rabbitmq.node.queue.index.write.count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "rabbitmq.node",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "rabbitmq.node.mem.used.bytes",
+        "rabbitmq.node.name",
+        "rabbitmq.node.proc.used",
+        "rabbitmq.node.queue.index.journal_write.count",
+        "rabbitmq.node.queue.index.read.count",
+        "rabbitmq.node.queue.index.write.count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "rabbitmq.queue",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "rabbitmq.node.mem.used.bytes",
+        "rabbitmq.node.name",
+        "rabbitmq.node.proc.used",
+        "rabbitmq.node.queue.index.journal_write.count",
+        "rabbitmq.node.queue.index.read.count",
+        "rabbitmq.node.queue.index.write.count"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

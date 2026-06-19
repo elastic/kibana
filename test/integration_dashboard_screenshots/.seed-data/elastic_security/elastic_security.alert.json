@@ -1,0 +1,850 @@
+[
+  {
+    "@timestamp": "2023-06-09T13:56:03.205Z",
+    "Endpoint": {
+      "policy": {
+        "applied": {
+          "artifacts": {
+            "global": {
+              "identifiers": [
+                {
+                  "sha256": "BBBBB40ca79cf0e165053daac3e4df8b428dea81c8d20edefca330d77bc0958c1",
+                  "name": "diagnostic-configuration-v1"
+                }
+              ],
+              "snapshot": "latest",
+              "update_age": 0,
+              "version": "1.0.1049"
+            },
+            "user": {
+              "identifiers": [
+                {
+                  "sha256": "d801aacc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                  "name": "endpoint-blocklist-linux-v1"
+                }
+              ],
+              "version": "1.0.0"
+            }
+          }
+        }
+      }
+    },
+    "Events": [
+      {
+        "@timestamp": "2023-06-09T13:52:06.9710234Z",
+        "_state": 0,
+        "event": {
+          "created": "2024-06-09T13:52:06.9710234Z",
+          "kind": "event",
+          "action": "exec",
+          "id": "Na7UF0/g6QHP1vOo++++3Y8t",
+          "category": [
+            "process"
+          ],
+          "type": [
+            "start"
+          ],
+          "outcome": "unknown"
+        },
+        "message": "Endpoint process event",
+        "user": {
+          "Ext": {
+            "real": {
+              "name": "admin",
+              "id": 1005
+            }
+          },
+          "name": "admin",
+          "id": 1005
+        },
+        "_label": "script_executed",
+        "group": {
+          "Ext": {
+            "real": {
+              "name": "admin",
+              "id": 1006
+            }
+          },
+          "name": "admin",
+          "id": 1006
+        }
+      }
+    ],
+    "Responses": [
+      {
+        "result": 0,
+        "process": {
+          "name": "bash",
+          "pid": 141206,
+          "entity_id": "YyyyyyyYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2"
+        },
+        "@timestamp": "2023-06-09T13:52:07.403464561Z",
+        "action": {
+          "field": "process.entity_id",
+          "action": "kill_process",
+          "state": 0
+        },
+        "message": "Success"
+      }
+    ],
+    "agent": {
+      "build": {
+        "original": "version: 8.13.0, compiled: Wed Mar 20 20:00:00 2024, branch: HEAD, commit: f90579240155fc17f659ed37f7864ab1194ed2ea"
+      },
+      "id": "abcd-513b-4526-a34a-e229a6f15dff",
+      "type": "endpoint",
+      "version": "8.13.0"
+    },
+    "data_stream": {
+      "dataset": "elastic_security.alert",
+      "namespace": "91681",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.10.0"
+    },
+    "elastic": {
+      "agent": {
+        "id": "abcd-513b-4526-a34a-e229a6f15dff"
+      }
+    },
+    "elastic_agent": {
+      "id": "79559ac7-0c1a-42a3-9fd9-d0673b1a0e7a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "rule_detection",
+      "agent_id_status": "mismatch",
+      "category": [
+        "malware",
+        "intrusion_detection"
+      ],
+      "code": "behavior",
+      "created": "2024-06-09T13:52:07.402Z",
+      "dataset": "elastic_security.alert",
+      "id": "Na7UF0/g6Q++++3Y96",
+      "ingested": "2026-03-10T03:39:36Z",
+      "kind": "alert",
+      "original": "{\"@timestamp\":\"2023-06-09T13:56:03.205Z\",\"Endpoint\":{\"policy\":{\"applied\":{\"artifacts\":{\"global\":{\"identifiers\":[{\"name\":\"diagnostic-configuration-v1\",\"sha256\":\"BBBBB40ca79cf0e165053daac3e4df8b428dea81c8d20edefca330d77bc0958c1\"}],\"snapshot\":\"latest\",\"update_age\":0,\"version\":\"1.0.1049\"},\"user\":{\"identifiers\":[{\"name\":\"endpoint-blocklist-linux-v1\",\"sha256\":\"d801aacc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658\"}],\"version\":\"1.0.0\"}}}}},\"Events\":[{\"@timestamp\":\"2023-06-09T13:52:06.9710234Z\",\"_label\":\"script_executed\",\"_state\":0,\"event\":{\"action\":\"exec\",\"category\":[\"process\"],\"created\":\"2024-06-09T13:52:06.9710234Z\",\"id\":\"Na7UF0/g6QHP1vOo++++3Y8t\",\"kind\":\"event\",\"outcome\":\"unknown\",\"type\":[\"start\"]},\"group\":{\"Ext\":{\"real\":{\"id\":1006,\"name\":\"admin\"}},\"id\":1006,\"name\":\"admin\"},\"message\":\"Endpoint process event\",\"user\":{\"Ext\":{\"real\":{\"id\":1005,\"name\":\"admin\"}},\"id\":1005,\"name\":\"admin\"}}],\"Responses\":[{\"@timestamp\":\"2023-06-09T13:52:07.403464561Z\",\"action\":{\"action\":\"kill_process\",\"field\":\"process.entity_id\",\"state\":0},\"message\":\"Success\",\"process\":{\"entity_id\":\"YyyyyyyYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2\",\"name\":\"bash\",\"pid\":141206},\"result\":0}],\"agent\":{\"build\":{\"original\":\"version: 8.13.0, compiled: Wed Mar 20 20:00:00 2024, branch: HEAD, commit: f90579240155fc17f659ed37f7864ab1194ed2ea\"},\"id\":\"abcd-513b-4526-a34a-e229a6f15dff\",\"type\":\"endpoint\",\"version\":\"8.13.0\"},\"ecs\":{\"version\":\"8.10.0\"},\"elastic\":{\"agent\":{\"id\":\"abcd-513b-4526-a34a-e229a6f15dff\"}},\"event.action\":\"rule_detection\",\"event.agent_id_status\":\"verified\",\"event.category\":[\"malware\",\"intrusion_detection\"],\"event.code\":\"behavior\",\"event.created\":\"2024-06-09T13:52:07.402627721Z\",\"event.id\":\"Na7UF0/g6Q++++3Y96\",\"event.ingested\":\"2024-06-09T13:52:08Z\",\"event.kind\":\"signal\",\"event.outcome\":\"success\",\"event.risk_score\":73,\"event.sequence\":600720,\"event.severity\":73,\"event.type\":[\"info\",\"allowed\"],\"group\":{\"Ext\":{\"real\":{\"id\":1006,\"name\":\"admin\"}},\"id\":1006,\"name\":\"admin\"},\"host\":{\"architecture\":\"x86_64\",\"hostname\":\"siem-linux-release-sec-bis\",\"id\":\"aaaad59dd2c858c4f9b5d50c4a0e7d7\",\"ip\":[\"127.0.0.1\",\"::1\",\"89.160.20.156\"],\"mac\":[\"AA-FF-AA-FF-00-02\"],\"name\":\"siem-linux-release-sec-bis\",\"os\":{\"Ext\":{\"variant\":\"Debian\"},\"family\":\"debian\",\"full\":\"Debian 11.9\",\"kernel\":\"5.10.0-29-cloud-amd64 #1 SMP Debian 5.10.216-1 (2024-05-03)\",\"name\":\"Linux\",\"platform\":\"debian\",\"type\":\"linux\",\"version\":\"11.9\"},\"risk\":{\"calculated_level\":\"Critical\",\"calculated_score_norm\":98.00494}},\"kibana.alert.ancestors\":[{\"depth\":0,\"id\":\"f3PTBcu\",\"index\":\".ds-logs-endpoint.alerts-default-2024.05.18-002\",\"type\":\"event\"}],\"kibana.alert.depth\":1,\"kibana.alert.last_detected\":\"2023-06-09T13:56:03.235Z\",\"kibana.alert.original_event.action\":\"rule_detection\",\"kibana.alert.original_event.agent_id_status\":\"verified\",\"kibana.alert.original_event.category\":[\"malware\",\"intrusion_detection\"],\"kibana.alert.original_event.code\":\"behavior\",\"kibana.alert.original_event.created\":\"2024-06-09T13:52:07.402627721Z\",\"kibana.alert.original_event.dataset\":\"endpoint.alerts\",\"kibana.alert.original_event.id\":\"Na7UF0/abcddd++++3Y96\",\"kibana.alert.original_event.ingested\":\"2024-06-09T13:52:08Z\",\"kibana.alert.original_event.kind\":\"alert\",\"kibana.alert.original_event.module\":\"endpoint\",\"kibana.alert.original_event.outcome\":\"success\",\"kibana.alert.original_event.risk_score\":73,\"kibana.alert.original_event.sequence\":600720,\"kibana.alert.original_event.severity\":73,\"kibana.alert.original_event.type\":[\"info\",\"allowed\"],\"kibana.alert.original_time\":\"2024-06-09T13:52:07.402Z\",\"kibana.alert.reason\":\"malware, intrusion_detection event with process bash, parent process python3, by admin on siem-linux-release-sec-bis created high alert Malicious Behavior Prevention Alert: Empire Stager Execution.\",\"kibana.alert.risk_score\":73,\"kibana.alert.rule.actions\":[],\"kibana.alert.rule.author\":[\"Elastic\"],\"kibana.alert.rule.category\":\"Custom Query Rule\",\"kibana.alert.rule.consumer\":\"siem\",\"kibana.alert.rule.created_at\":\"2024-04-18T11:06:23.900Z\",\"kibana.alert.rule.created_by\":\"elastic\",\"kibana.alert.rule.description\":\"Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.\",\"kibana.alert.rule.enabled\":true,\"kibana.alert.rule.exceptions_list\":[{\"id\":\"endpoint_list\",\"list_id\":\"endpoint_list\",\"namespace_type\":\"agnostic\",\"type\":\"endpoint\"}],\"kibana.alert.rule.execution.uuid\":\"abcd-fda4-40dc-8586-f3d0fa908bc4\",\"kibana.alert.rule.false_positives\":[],\"kibana.alert.rule.from\":\"now-10m\",\"kibana.alert.rule.immutable\":true,\"kibana.alert.rule.indices\":[\"logs-endpoint.alerts-*\"],\"kibana.alert.rule.interval\":\"5m\",\"kibana.alert.rule.license\":\"Elastic License v2\",\"kibana.alert.rule.max_signals\":10000,\"kibana.alert.rule.name\":\"Malicious Behavior Prevention Alert: Empire Stager Execution\",\"kibana.alert.rule.parameters\":{\"author\":[\"Elastic\"],\"description\":\"Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.\",\"false_positives\":[],\"from\":\"now-10m\",\"immutable\":true,\"index\":[\"logs-endpoint.alerts-*\"],\"language\":\"kuery\",\"license\":\"Elastic License v2\",\"max_signals\":10000,\"query\":\"event.kind:alert and event.module:(endpoint and not endgame)\\n\",\"references\":[],\"risk_score\":47,\"risk_score_mapping\":[{\"field\":\"event.risk_score\",\"operator\":\"equals\",\"value\":\"\"}],\"rule_id\":\"abcdef-0b5f-4c3d-8305-a268d404c306\",\"rule_name_override\":\"message\",\"setup\":\"## Setup\\n\\nThis rule is configured to generate more **Max alerts per run** than the default 1000 alerts per run set for all rules. This is to ensure that it captures as many alerts as possible.\\n\\n**IMPORTANT:** The rule's **Max alerts per run** setting can be superseded by the xpack.alerting.rules.run.alerts.max Kibana config setting, which determines the maximum alerts generated by _any_ rule in the Kibana alerting framework. For example, if xpack.alerting.rules.run.alerts.max is set to 1000, this rule will still generate no more than 1000 alerts even if its own **Max alerts per run** is set higher.\\n\\nTo make sure this rule can generate as many alerts as it's configured in its own **Max alerts per run** setting, increase the xpack.alerting.rules.run.alerts.max system setting accordingly.\\n\\n**NOTE:** Changing xpack.alerting.rules.run.alerts.max is not possible in Serverless projects.\",\"severity\":\"medium\",\"severity_mapping\":[{\"field\":\"event.severity\",\"operator\":\"equals\",\"severity\":\"low\",\"value\":\"21\"}],\"threat\":[],\"timestamp_override\":\"event.ingested\",\"to\":\"now\",\"type\":\"query\",\"version\":103},\"kibana.alert.rule.producer\":\"siem\",\"kibana.alert.rule.references\":[],\"kibana.alert.rule.revision\":1,\"kibana.alert.rule.risk_score\":47,\"kibana.alert.rule.risk_score_mapping\":[{\"field\":\"event.risk_score\",\"operator\":\"equals\",\"value\":\"\"}],\"kibana.alert.rule.rule_id\":\"9a1a2dae-0b5f-4c3d-8305-a268d404c306\",\"kibana.alert.rule.rule_name_override\":\"message\",\"kibana.alert.rule.rule_type_id\":\"siem.queryRule\",\"kibana.alert.rule.severity\":\"medium\",\"kibana.alert.rule.severity_mapping\":[{\"field\":\"event.severity\",\"operator\":\"equals\",\"severity\":\"low\",\"value\":\"21\"}],\"kibana.alert.rule.tags\":[\"Data Source: Elastic Defend\"],\"kibana.alert.rule.threat\":[],\"kibana.alert.rule.timestamp_override\":\"event.ingested\",\"kibana.alert.rule.to\":\"now\",\"kibana.alert.rule.type\":\"query\",\"kibana.alert.rule.updated_at\":\"2024-05-20T01:03:43.962Z\",\"kibana.alert.rule.updated_by\":\"elastic\",\"kibana.alert.rule.uuid\":\"abcd-3ea9-4695-9a1b-4af87bead73e\",\"kibana.alert.rule.version\":103,\"kibana.alert.severity\":\"high\",\"kibana.alert.start\":\"2023-06-09T13:56:03.235Z\",\"kibana.alert.status\":\"active\",\"kibana.alert.url\":\"https://release-app/app/security/alerts/redirect/abcd?index=.alerts-security.alerts-default\u00d7tamp=2024-06-09T13:56:03.205Z\",\"kibana.alert.uuid\":\"abcdef123\",\"kibana.alert.workflow_assignee_ids\":[],\"kibana.alert.workflow_status\":\"open\",\"kibana.alert.workflow_tags\":[],\"kibana.space_ids\":[\"default\"],\"kibana.version\":\"8.14.0\",\"message\":\"Malicious Behavior Prevention Alert: Empire Stager Execution\",\"process\":{\"args\":[\"/tmp/bash\",\"exec(base64.b64decode*abcdef)\"],\"args_count\":2,\"command_line\":\"/tmp/bash exec(base64.b64decode*abcdef)\",\"entity_id\":\"YYYYYYYYYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2\",\"env_vars\":[],\"executable\":\"/tmp/bash\",\"group\":{\"id\":1006,\"name\":\"admin\"},\"hash\":{\"md5\":\"ABCDf2d21a340f2b3ee534fba5b29e417\",\"sha1\":\"ABCDc728d069ba6239c1da751a2f31fba9b1aa\",\"sha256\":\"ABCD3091f6093bd9a7b308e536fbc285aeef2c5139577cc96bc594a4845f0e13\"},\"name\":\"bash\",\"real_group\":{\"id\":1006,\"name\":\"admin\"},\"supplemental_groups\":[{\"id\":4,\"name\":\"adm\"}],\"user\":{\"id\":1005,\"name\":\"admin\"}},\"rule\":{\"description\":\"Identifies when a script interpreter executes a base64-encoded Empire stager. Empire is penetration testing software that is often utilized by attackers.\",\"id\":\"ABCD-82ff-4743-9e07-1c6901b1f0ea\",\"name\":\"Empire Stager Execution\",\"reference\":[\"https://github.com/abc/emp\",\"https://github.com/BC-abcd/emp\"],\"ruleset\":\"production\",\"version\":\"1.0.29\"},\"threat\":[{\"framework\":\"MITRE ATT\\u0026CK\",\"tactic\":{\"id\":\"TA0011\",\"name\":\"Command and Control\",\"reference\":\"https://attack.mitre.org/tactics/TA0011/\"},\"technique\":[{\"id\":\"T1132\",\"name\":\"Data Encoding\",\"reference\":\"https://attack.mitre.org/techniques/T1132/\",\"subtechnique\":[{\"id\":\"T1132.001\",\"name\":\"Standard Encoding\",\"reference\":\"https://attack.mitre.org/techniques/T1132/001/\"}]}]}],\"user\":{\"Ext\":{\"real\":{\"id\":1005,\"name\":\"admin\"}},\"id\":1005,\"name\":\"admin\",\"risk\":{\"calculated_level\":\"Critical\",\"calculated_score_norm\":98.13564}}}",
+      "outcome": "success",
+      "risk_score": 73.0,
+      "sequence": 600720,
+      "severity": 73,
+      "type": [
+        "info",
+        "allowed"
+      ]
+    },
+    "group": {
+      "Ext": {
+        "real": {
+          "id": 1006,
+          "name": "admin"
+        }
+      },
+      "id": "1006",
+      "name": "admin"
+    },
+    "host": {
+      "architecture": "x86_64",
+      "hostname": "siem-linux-release-sec-bis",
+      "id": "aaaad59dd2c858c4f9b5d50c4a0e7d7",
+      "ip": [
+        "127.0.0.1",
+        "::1",
+        "89.160.20.156"
+      ],
+      "mac": [
+        "AA-FF-AA-FF-00-02"
+      ],
+      "name": "siem-linux-release-sec-bis",
+      "os": {
+        "Ext": {
+          "variant": "Debian"
+        },
+        "family": "debian",
+        "full": "Debian 11.9",
+        "kernel": "5.10.0-29-cloud-amd64 #1 SMP Debian 5.10.216-1 (2024-05-03)",
+        "name": "Linux",
+        "platform": "debian",
+        "type": "linux",
+        "version": "11.9"
+      },
+      "risk": {
+        "calculated_level": "Critical",
+        "calculated_score_norm": 98.00494
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "kibana": {
+      "alert": {
+        "ancestors": [
+          {
+            "depth": 0,
+            "index": ".ds-logs-endpoint.alerts-default-2024.05.18-002",
+            "id": "f3PTBcu",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "last_detected": "2023-06-09T13:56:03.235Z",
+        "original_event": {
+          "action": "rule_detection",
+          "agent_id_status": "verified",
+          "category": [
+            "malware",
+            "intrusion_detection"
+          ],
+          "code": "behavior",
+          "created": "2024-06-09T13:52:07.402627721Z",
+          "dataset": "endpoint.alerts",
+          "id": "Na7UF0/abcddd++++3Y96",
+          "ingested": "2024-06-09T13:52:08Z",
+          "kind": "alert",
+          "module": "endpoint",
+          "outcome": "success",
+          "risk_score": 73,
+          "sequence": 600720,
+          "severity": 73,
+          "type": [
+            "info",
+            "allowed"
+          ]
+        },
+        "original_time": "2024-06-09T13:52:07.402Z",
+        "reason": "malware, intrusion_detection event with process bash, parent process python3, by admin on siem-linux-release-sec-bis created high alert Malicious Behavior Prevention Alert: Empire Stager Execution.",
+        "risk_score": 73,
+        "rule": {
+          "author": [
+            "Elastic"
+          ],
+          "category": "Custom Query Rule",
+          "consumer": "siem",
+          "created_at": "2024-04-18T11:06:23.900Z",
+          "created_by": "elastic",
+          "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+          "enabled": true,
+          "exceptions_list": [
+            {
+              "list_id": "endpoint_list",
+              "namespace_type": "agnostic",
+              "id": "endpoint_list",
+              "type": "endpoint"
+            }
+          ],
+          "execution": {
+            "uuid": "abcd-fda4-40dc-8586-f3d0fa908bc4"
+          },
+          "from": "now-10m",
+          "immutable": true,
+          "indices": [
+            "logs-endpoint.alerts-*"
+          ],
+          "interval": "5m",
+          "license": "Elastic License v2",
+          "max_signals": 10000,
+          "name": "Malicious Behavior Prevention Alert: Empire Stager Execution",
+          "parameters": {
+            "author": [
+              "Elastic"
+            ],
+            "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+            "from": "now-10m",
+            "immutable": true,
+            "index": [
+              "logs-endpoint.alerts-*"
+            ],
+            "language": "kuery",
+            "license": "Elastic License v2",
+            "max_signals": 10000,
+            "query": "event.kind:alert and event.module:(endpoint and not endgame)\n",
+            "risk_score": 47,
+            "risk_score_mapping": [
+              {
+                "field": "event.risk_score",
+                "operator": "equals"
+              }
+            ],
+            "rule_id": "abcdef-0b5f-4c3d-8305-a268d404c306",
+            "rule_name_override": "message",
+            "setup": "## Setup\n\nThis rule is configured to generate more **Max alerts per run** than the default 1000 alerts per run set for all rules. This is to ensure that it captures as many alerts as possible.\n\n**IMPORTANT:** The rule's **Max alerts per run** setting can be superseded by the xpack.alerting.rules.run.alerts.max Kibana config setting, which determines the maximum alerts generated by _any_ rule in the Kibana alerting framework. For example, if xpack.alerting.rules.run.alerts.max is set to 1000, this rule will still generate no more than 1000 alerts even if its own **Max alerts per run** is set higher.\n\nTo make sure this rule can generate as many alerts as it's configured in its own **Max alerts per run** setting, increase the xpack.alerting.rules.run.alerts.max system setting accordingly.\n\n**NOTE:** Changing xpack.alerting.rules.run.alerts.max is not possible in Serverless projects.",
+            "severity": "medium",
+            "severity_mapping": [
+              {
+                "severity": "low",
+                "field": "event.severity",
+                "value": "21",
+                "operator": "equals"
+              }
+            ],
+            "timestamp_override": "event.ingested",
+            "to": "now",
+            "type": "query",
+            "version": 103
+          },
+          "producer": "siem",
+          "revision": 1,
+          "risk_score": 47,
+          "risk_score_mapping": [
+            {
+              "field": "event.risk_score",
+              "operator": "equals"
+            }
+          ],
+          "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+          "rule_name_override": "message",
+          "rule_type_id": "siem.queryRule",
+          "severity": "medium",
+          "severity_mapping": [
+            {
+              "severity": "low",
+              "field": "event.severity",
+              "value": "21",
+              "operator": "equals"
+            }
+          ],
+          "tags": [
+            "Data Source: Elastic Defend"
+          ],
+          "timestamp_override": "event.ingested",
+          "to": "now",
+          "type": "query",
+          "updated_at": "2024-05-20T01:03:43.962Z",
+          "updated_by": "elastic",
+          "uuid": "abcd-3ea9-4695-9a1b-4af87bead73e",
+          "version": 103
+        },
+        "severity": "high",
+        "start": "2023-06-09T13:56:03.235Z",
+        "status": "active",
+        "url": "https://release-app/app/security/alerts/redirect/abcd?index=.alerts-security.alerts-default\u00d7tamp=2024-06-09T13:56:03.205Z",
+        "uuid": "abcdef123",
+        "workflow_status": "open"
+      },
+      "space_ids": [
+        "default"
+      ],
+      "version": "8.14.0"
+    },
+    "message": "Malicious Behavior Prevention Alert: Empire Stager Execution",
+    "process": {
+      "args": [
+        "/tmp/bash",
+        "exec(base64.b64decode*abcdef)"
+      ],
+      "args_count": 2,
+      "command_line": "/tmp/bash exec(base64.b64decode*abcdef)",
+      "entity_id": "YYYYYYYYYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2",
+      "executable": "/tmp/bash",
+      "group": {
+        "id": "1006",
+        "name": "admin"
+      },
+      "hash": {
+        "md5": "ABCDf2d21a340f2b3ee534fba5b29e417",
+        "sha1": "ABCDc728d069ba6239c1da751a2f31fba9b1aa",
+        "sha256": "ABCD3091f6093bd9a7b308e536fbc285aeef2c5139577cc96bc594a4845f0e13"
+      },
+      "name": "bash",
+      "real_group": {
+        "id": "1006",
+        "name": "admin"
+      },
+      "supplemental_groups": [
+        {
+          "name": "adm",
+          "id": "4"
+        }
+      ],
+      "user": {
+        "id": "1005",
+        "name": "admin"
+      }
+    },
+    "rule": {
+      "description": "Identifies when a script interpreter executes a base64-encoded Empire stager. Empire is penetration testing software that is often utilized by attackers.",
+      "id": "ABCD-82ff-4743-9e07-1c6901b1f0ea",
+      "name": "Empire Stager Execution",
+      "reference": [
+        "https://github.com/abc/emp",
+        "https://github.com/BC-abcd/emp"
+      ],
+      "ruleset": "production",
+      "version": "1.0.29"
+    },
+    "source_metadata": {
+      "_id": "fghiabcd",
+      "_index": "abcd-1234"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "elastic_security-alert"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "technique": [
+          {
+            "reference": "https://attack.mitre.org/techniques/T1132/",
+            "name": "Data Encoding",
+            "subtechnique": [
+              {
+                "reference": "https://attack.mitre.org/techniques/T1132/001/",
+                "name": "Standard Encoding",
+                "id": "T1132.001"
+              }
+            ],
+            "id": "T1132"
+          }
+        ],
+        "tactic": {
+          "reference": "https://attack.mitre.org/tactics/TA0011/",
+          "name": "Command and Control",
+          "id": "TA0011"
+        }
+      }
+    ],
+    "user": {
+      "Ext": {
+        "real": {
+          "id": 1005,
+          "name": "admin"
+        }
+      },
+      "id": "1005",
+      "name": "admin",
+      "risk": {
+        "calculated_level": "Critical",
+        "calculated_score_norm": 98.13564
+      }
+    }
+  },
+  {
+    "@timestamp": "2022-06-09T13:56:03.205Z",
+    "Endpoint": {
+      "policy": {
+        "applied": {
+          "artifacts": {
+            "global": {
+              "identifiers": [
+                {
+                  "sha256": "BBBBB40ca79cf0e165053daac3e4df8b428dea81c8d20edefca330d77bc0958c1",
+                  "name": "diagnostic-configuration-v1"
+                }
+              ],
+              "snapshot": "latest",
+              "update_age": 0,
+              "version": "1.0.1049"
+            },
+            "user": {
+              "identifiers": [
+                {
+                  "sha256": "d801aacc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+                  "name": "endpoint-blocklist-linux-v1"
+                }
+              ],
+              "version": "1.0.0"
+            }
+          }
+        }
+      }
+    },
+    "Events": [
+      {
+        "@timestamp": "2022-06-09T13:52:06.9710234Z",
+        "_state": 0,
+        "event": {
+          "created": "2024-06-09T13:52:06.9710234Z",
+          "kind": "event",
+          "action": "exec",
+          "id": "Na7UF0/g6QHP1vOo++++3Y8t",
+          "category": [
+            "process"
+          ],
+          "type": [
+            "start"
+          ],
+          "outcome": "unknown"
+        },
+        "message": "Endpoint process event",
+        "user": {
+          "Ext": {
+            "real": {
+              "name": "admin",
+              "id": 1005
+            }
+          },
+          "name": "admin",
+          "id": 1005
+        },
+        "_label": "script_executed",
+        "group": {
+          "Ext": {
+            "real": {
+              "name": "admin",
+              "id": 1006
+            }
+          },
+          "name": "admin",
+          "id": 1006
+        }
+      }
+    ],
+    "Responses": [
+      {
+        "result": 0,
+        "process": {
+          "name": "bash",
+          "pid": 141206,
+          "entity_id": "YyyyyyyYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2"
+        },
+        "@timestamp": "2022-06-09T13:52:07.403464561Z",
+        "action": {
+          "field": "process.entity_id",
+          "action": "kill_process",
+          "state": 0
+        },
+        "message": "Success"
+      }
+    ],
+    "agent": {
+      "build": {
+        "original": "version: 8.13.0, compiled: Wed Mar 20 20:00:00 2022, branch: HEAD, commit: f90579240155fc17f659ed37f7864ab1194ed2ea"
+      },
+      "id": "abcd-513b-4526-a34a-e229a6f15dff",
+      "type": "endpoint",
+      "version": "8.13.0"
+    },
+    "data_stream": {
+      "dataset": "elastic_security.alert",
+      "namespace": "91681",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.10.0"
+    },
+    "elastic": {
+      "agent": {
+        "id": "abcd-513b-4526-a34a-e229a6f15dff"
+      }
+    },
+    "elastic_agent": {
+      "id": "79559ac7-0c1a-42a3-9fd9-d0673b1a0e7a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "rule_detection",
+      "agent_id_status": "mismatch",
+      "category": [
+        "malware",
+        "intrusion_detection"
+      ],
+      "code": "behavior",
+      "created": "2024-06-09T13:52:07.402Z",
+      "dataset": "elastic_security.alert",
+      "id": "Na7UF0/g6Q++++3Y96",
+      "ingested": "2026-03-10T03:39:36Z",
+      "kind": "alert",
+      "original": "{\"@timestamp\":\"2022-06-09T13:56:03.205Z\",\"Endpoint\":{\"policy\":{\"applied\":{\"artifacts\":{\"global\":{\"identifiers\":[{\"name\":\"diagnostic-configuration-v1\",\"sha256\":\"BBBBB40ca79cf0e165053daac3e4df8b428dea81c8d20edefca330d77bc0958c1\"}],\"snapshot\":\"latest\",\"update_age\":0,\"version\":\"1.0.1049\"},\"user\":{\"identifiers\":[{\"name\":\"endpoint-blocklist-linux-v1\",\"sha256\":\"d801aacc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658\"}],\"version\":\"1.0.0\"}}}}},\"Events\":[{\"@timestamp\":\"2022-06-09T13:52:06.9710234Z\",\"_label\":\"script_executed\",\"_state\":0,\"event\":{\"action\":\"exec\",\"category\":[\"process\"],\"created\":\"2024-06-09T13:52:06.9710234Z\",\"id\":\"Na7UF0/g6QHP1vOo++++3Y8t\",\"kind\":\"event\",\"outcome\":\"unknown\",\"type\":[\"start\"]},\"group\":{\"Ext\":{\"real\":{\"id\":1006,\"name\":\"admin\"}},\"id\":1006,\"name\":\"admin\"},\"message\":\"Endpoint process event\",\"user\":{\"Ext\":{\"real\":{\"id\":1005,\"name\":\"admin\"}},\"id\":1005,\"name\":\"admin\"}}],\"Responses\":[{\"@timestamp\":\"2022-06-09T13:52:07.403464561Z\",\"action\":{\"action\":\"kill_process\",\"field\":\"process.entity_id\",\"state\":0},\"message\":\"Success\",\"process\":{\"entity_id\":\"YyyyyyyYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2\",\"name\":\"bash\",\"pid\":141206},\"result\":0}],\"agent\":{\"build\":{\"original\":\"version: 8.13.0, compiled: Wed Mar 20 20:00:00 2022, branch: HEAD, commit: f90579240155fc17f659ed37f7864ab1194ed2ea\"},\"id\":\"abcd-513b-4526-a34a-e229a6f15dff\",\"type\":\"endpoint\",\"version\":\"8.13.0\"},\"ecs\":{\"version\":\"8.10.0\"},\"elastic\":{\"agent\":{\"id\":\"abcd-513b-4526-a34a-e229a6f15dff\"}},\"event.action\":\"rule_detection\",\"event.agent_id_status\":\"verified\",\"event.category\":[\"malware\",\"intrusion_detection\"],\"event.code\":\"behavior\",\"event.created\":\"2024-06-09T13:52:07.402627721Z\",\"event.id\":\"Na7UF0/g6Q++++3Y96\",\"event.ingested\":\"2024-06-09T13:52:08Z\",\"event.kind\":\"signal\",\"event.outcome\":\"success\",\"event.risk_score\":73,\"event.sequence\":600720,\"event.severity\":73,\"event.type\":[\"info\",\"allowed\"],\"group\":{\"Ext\":{\"real\":{\"id\":1006,\"name\":\"admin\"}},\"id\":1006,\"name\":\"admin\"},\"host\":{\"architecture\":\"x86_64\",\"hostname\":\"siem-linux-release-sec-bis\",\"id\":\"aaaad59dd2c858c4f9b5d50c4a0e7d7\",\"ip\":[\"127.0.0.1\",\"::1\",\"89.160.20.156\"],\"mac\":[\"AA-FF-AA-FF-00-02\"],\"name\":\"siem-linux-release-sec-bis\",\"os\":{\"Ext\":{\"variant\":\"Debian\"},\"family\":\"debian\",\"full\":\"Debian 11.9\",\"kernel\":\"5.10.0-29-cloud-amd64 #1 SMP Debian 5.10.216-1 (2024-05-03)\",\"name\":\"Linux\",\"platform\":\"debian\",\"type\":\"linux\",\"version\":\"11.9\"},\"risk\":{\"calculated_level\":\"Critical\",\"calculated_score_norm\":98.00494}},\"kibana.alert.ancestors\":[{\"depth\":0,\"id\":\"f3PTBcu\",\"index\":\".ds-logs-endpoint.alerts-default-2024.05.18-002\",\"type\":\"event\"}],\"kibana.alert.depth\":1,\"kibana.alert.last_detected\":\"2022-06-09T13:56:03.235Z\",\"kibana.alert.original_event.action\":\"rule_detection\",\"kibana.alert.original_event.agent_id_status\":\"verified\",\"kibana.alert.original_event.category\":[\"malware\",\"intrusion_detection\"],\"kibana.alert.original_event.code\":\"behavior\",\"kibana.alert.original_event.created\":\"2024-06-09T13:52:07.402627721Z\",\"kibana.alert.original_event.dataset\":\"endpoint.alerts\",\"kibana.alert.original_event.id\":\"Na7UF0/abcddd++++3Y96\",\"kibana.alert.original_event.ingested\":\"2024-06-09T13:52:08Z\",\"kibana.alert.original_event.kind\":\"alert\",\"kibana.alert.original_event.module\":\"endpoint\",\"kibana.alert.original_event.outcome\":\"success\",\"kibana.alert.original_event.risk_score\":73,\"kibana.alert.original_event.sequence\":600720,\"kibana.alert.original_event.severity\":73,\"kibana.alert.original_event.type\":[\"info\",\"allowed\"],\"kibana.alert.original_time\":\"2024-06-09T13:52:07.402Z\",\"kibana.alert.reason\":\"malware, intrusion_detection event with process bash, parent process python3, by admin on siem-linux-release-sec-bis created high alert Malicious Behavior Prevention Alert: Empire Stager Execution.\",\"kibana.alert.risk_score\":73,\"kibana.alert.rule.actions\":[],\"kibana.alert.rule.author\":[\"Elastic\"],\"kibana.alert.rule.category\":\"Custom Query Rule\",\"kibana.alert.rule.consumer\":\"siem\",\"kibana.alert.rule.created_at\":\"2024-04-18T11:06:23.900Z\",\"kibana.alert.rule.created_by\":\"elastic\",\"kibana.alert.rule.description\":\"Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.\",\"kibana.alert.rule.enabled\":true,\"kibana.alert.rule.exceptions_list\":[{\"id\":\"endpoint_list\",\"list_id\":\"endpoint_list\",\"namespace_type\":\"agnostic\",\"type\":\"endpoint\"}],\"kibana.alert.rule.execution.uuid\":\"abcd-fda4-40dc-8586-f3d0fa908bc4\",\"kibana.alert.rule.false_positives\":[],\"kibana.alert.rule.from\":\"now-10m\",\"kibana.alert.rule.immutable\":true,\"kibana.alert.rule.indices\":[\"logs-endpoint.alerts-*\"],\"kibana.alert.rule.interval\":\"5m\",\"kibana.alert.rule.license\":\"Elastic License v2\",\"kibana.alert.rule.max_signals\":10000,\"kibana.alert.rule.name\":\"Malicious Behavior Prevention Alert: Empire Stager Execution\",\"kibana.alert.rule.parameters\":{\"author\":[\"Elastic\"],\"description\":\"Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.\",\"false_positives\":[],\"from\":\"now-10m\",\"immutable\":true,\"index\":[\"logs-endpoint.alerts-*\"],\"language\":\"kuery\",\"license\":\"Elastic License v2\",\"max_signals\":10000,\"query\":\"event.kind:alert and event.module:(endpoint and not endgame)\\n\",\"references\":[],\"risk_score\":47,\"risk_score_mapping\":[{\"field\":\"event.risk_score\",\"operator\":\"equals\",\"value\":\"\"}],\"rule_id\":\"abcdef-0b5f-4c3d-8305-a268d404c306\",\"rule_name_override\":\"message\",\"setup\":\"## Setup\\n\\nThis rule is configured to generate more **Max alerts per run** than the default 1000 alerts per run set for all rules. This is to ensure that it captures as many alerts as possible.\\n\\n**IMPORTANT:** The rule's **Max alerts per run** setting can be superseded by the xpack.alerting.rules.run.alerts.max Kibana config setting, which determines the maximum alerts generated by _any_ rule in the Kibana alerting framework. For example, if xpack.alerting.rules.run.alerts.max is set to 1000, this rule will still generate no more than 1000 alerts even if its own **Max alerts per run** is set higher.\\n\\nTo make sure this rule can generate as many alerts as it's configured in its own **Max alerts per run** setting, increase the xpack.alerting.rules.run.alerts.max system setting accordingly.\\n\\n**NOTE:** Changing xpack.alerting.rules.run.alerts.max is not possible in Serverless projects.\",\"severity\":\"medium\",\"severity_mapping\":[{\"field\":\"event.severity\",\"operator\":\"equals\",\"severity\":\"low\",\"value\":\"21\"}],\"threat\":[],\"timestamp_override\":\"event.ingested\",\"to\":\"now\",\"type\":\"query\",\"version\":103},\"kibana.alert.rule.producer\":\"siem\",\"kibana.alert.rule.references\":[],\"kibana.alert.rule.revision\":1,\"kibana.alert.rule.risk_score\":47,\"kibana.alert.rule.risk_score_mapping\":[{\"field\":\"event.risk_score\",\"operator\":\"equals\",\"value\":\"\"}],\"kibana.alert.rule.rule_id\":\"9a1a2dae-0b5f-4c3d-8305-a268d404c306\",\"kibana.alert.rule.rule_name_override\":\"message\",\"kibana.alert.rule.rule_type_id\":\"siem.queryRule\",\"kibana.alert.rule.severity\":\"medium\",\"kibana.alert.rule.severity_mapping\":[{\"field\":\"event.severity\",\"operator\":\"equals\",\"severity\":\"low\",\"value\":\"21\"}],\"kibana.alert.rule.tags\":[\"Data Source: Elastic Defend\"],\"kibana.alert.rule.threat\":[],\"kibana.alert.rule.timestamp_override\":\"event.ingested\",\"kibana.alert.rule.to\":\"now\",\"kibana.alert.rule.type\":\"query\",\"kibana.alert.rule.updated_at\":\"2024-05-20T01:03:43.962Z\",\"kibana.alert.rule.updated_by\":\"elastic\",\"kibana.alert.rule.uuid\":\"abcd-3ea9-4695-9a1b-4af87bead73e\",\"kibana.alert.rule.version\":103,\"kibana.alert.severity\":\"high\",\"kibana.alert.start\":\"2022-06-09T13:56:03.235Z\",\"kibana.alert.status\":\"active\",\"kibana.alert.url\":\"https://release-app/app/security/alerts/redirect/abcd?index=.alerts-security.alerts-default\u00d7tamp=2024-06-09T13:56:03.205Z\",\"kibana.alert.uuid\":\"abcdef123\",\"kibana.alert.workflow_assignee_ids\":[],\"kibana.alert.workflow_status\":\"open\",\"kibana.alert.workflow_tags\":[],\"kibana.space_ids\":[\"default\"],\"kibana.version\":\"8.14.0\",\"message\":\"Malicious Behavior Prevention Alert: Empire Stager Execution\",\"process\":{\"args\":[\"/tmp/bash\",\"exec(base64.b64decode*abcdef)\"],\"args_count\":2,\"command_line\":\"/tmp/bash exec(base64.b64decode*abcdef)\",\"entity_id\":\"YYYYYYYYYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2\",\"env_vars\":[],\"executable\":\"/tmp/bash\",\"group\":{\"id\":1006,\"name\":\"admin\"},\"hash\":{\"md5\":\"ABCDf2d21a340f2b3ee534fba5b29e417\",\"sha1\":\"ABCDc728d069ba6239c1da751a2f31fba9b1aa\",\"sha256\":\"ABCD3091f6093bd9a7b308e536fbc285aeef2c5139577cc96bc594a4845f0e13\"},\"name\":\"bash\",\"real_group\":{\"id\":1006,\"name\":\"admin\"},\"supplemental_groups\":[{\"id\":4,\"name\":\"adm\"}],\"user\":{\"id\":1005,\"name\":\"admin\"}},\"rule\":{\"description\":\"Identifies when a script interpreter executes a base64-encoded Empire stager. Empire is penetration testing software that is often utilized by attackers.\",\"id\":\"ABCD-82ff-4743-9e07-1c6901b1f0ea\",\"name\":\"Empire Stager Execution\",\"reference\":[\"https://github.com/abc/emp\",\"https://github.com/BC-abcd/emp\"],\"ruleset\":\"production\",\"version\":\"1.0.29\"},\"threat\":[{\"framework\":\"MITRE ATT\\u0026CK\",\"tactic\":{\"id\":\"TA0011\",\"name\":\"Command and Control\",\"reference\":\"https://attack.mitre.org/tactics/TA0011/\"},\"technique\":[{\"id\":\"T1132\",\"name\":\"Data Encoding\",\"reference\":\"https://attack.mitre.org/techniques/T1132/\",\"subtechnique\":[{\"id\":\"T1132.001\",\"name\":\"Standard Encoding\",\"reference\":\"https://attack.mitre.org/techniques/T1132/001/\"}]}]}],\"user\":{\"Ext\":{\"real\":{\"id\":1005,\"name\":\"admin\"}},\"id\":1005,\"name\":\"admin\",\"risk\":{\"calculated_level\":\"Critical\",\"calculated_score_norm\":98.13564}}}",
+      "outcome": "success",
+      "risk_score": 73.0,
+      "sequence": 600720,
+      "severity": 73,
+      "type": [
+        "info",
+        "allowed"
+      ]
+    },
+    "group": {
+      "Ext": {
+        "real": {
+          "id": 1006,
+          "name": "admin"
+        }
+      },
+      "id": "1006",
+      "name": "admin"
+    },
+    "host": {
+      "architecture": "x86_64",
+      "hostname": "siem-linux-release-sec-bis",
+      "id": "aaaad59dd2c858c4f9b5d50c4a0e7d7",
+      "ip": [
+        "127.0.0.1",
+        "::1",
+        "89.160.20.156"
+      ],
+      "mac": [
+        "AA-FF-AA-FF-00-02"
+      ],
+      "name": "siem-linux-release-sec-bis",
+      "os": {
+        "Ext": {
+          "variant": "Debian"
+        },
+        "family": "debian",
+        "full": "Debian 11.9",
+        "kernel": "5.10.0-29-cloud-amd64 #1 SMP Debian 5.10.216-1 (2024-05-03)",
+        "name": "Linux",
+        "platform": "debian",
+        "type": "linux",
+        "version": "11.9"
+      },
+      "risk": {
+        "calculated_level": "Critical",
+        "calculated_score_norm": 98.00494
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "kibana": {
+      "alert": {
+        "ancestors": [
+          {
+            "depth": 0,
+            "index": ".ds-logs-endpoint.alerts-default-2024.05.18-002",
+            "id": "f3PTBcu",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "last_detected": "2022-06-09T13:56:03.235Z",
+        "original_event": {
+          "action": "rule_detection",
+          "agent_id_status": "verified",
+          "category": [
+            "malware",
+            "intrusion_detection"
+          ],
+          "code": "behavior",
+          "created": "2024-06-09T13:52:07.402627721Z",
+          "dataset": "endpoint.alerts",
+          "id": "Na7UF0/abcddd++++3Y96",
+          "ingested": "2024-06-09T13:52:08Z",
+          "kind": "alert",
+          "module": "endpoint",
+          "outcome": "success",
+          "risk_score": 73,
+          "sequence": 600720,
+          "severity": 73,
+          "type": [
+            "info",
+            "allowed"
+          ]
+        },
+        "original_time": "2024-06-09T13:52:07.402Z",
+        "reason": "malware, intrusion_detection event with process bash, parent process python3, by admin on siem-linux-release-sec-bis created high alert Malicious Behavior Prevention Alert: Empire Stager Execution.",
+        "risk_score": 73,
+        "rule": {
+          "author": [
+            "Elastic"
+          ],
+          "category": "Custom Query Rule",
+          "consumer": "siem",
+          "created_at": "2024-04-18T11:06:23.900Z",
+          "created_by": "elastic",
+          "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+          "enabled": true,
+          "exceptions_list": [
+            {
+              "list_id": "endpoint_list",
+              "namespace_type": "agnostic",
+              "id": "endpoint_list",
+              "type": "endpoint"
+            }
+          ],
+          "execution": {
+            "uuid": "abcd-fda4-40dc-8586-f3d0fa908bc4"
+          },
+          "from": "now-10m",
+          "immutable": true,
+          "indices": [
+            "logs-endpoint.alerts-*"
+          ],
+          "interval": "5m",
+          "license": "Elastic License v2",
+          "max_signals": 10000,
+          "name": "Malicious Behavior Prevention Alert: Empire Stager Execution",
+          "parameters": {
+            "author": [
+              "Elastic"
+            ],
+            "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+            "from": "now-10m",
+            "immutable": true,
+            "index": [
+              "logs-endpoint.alerts-*"
+            ],
+            "language": "kuery",
+            "license": "Elastic License v2",
+            "max_signals": 10000,
+            "query": "event.kind:alert and event.module:(endpoint and not endgame)\n",
+            "risk_score": 47,
+            "risk_score_mapping": [
+              {
+                "field": "event.risk_score",
+                "operator": "equals"
+              }
+            ],
+            "rule_id": "abcdef-0b5f-4c3d-8305-a268d404c306",
+            "rule_name_override": "message",
+            "setup": "## Setup\n\nThis rule is configured to generate more **Max alerts per run** than the default 1000 alerts per run set for all rules. This is to ensure that it captures as many alerts as possible.\n\n**IMPORTANT:** The rule's **Max alerts per run** setting can be superseded by the xpack.alerting.rules.run.alerts.max Kibana config setting, which determines the maximum alerts generated by _any_ rule in the Kibana alerting framework. For example, if xpack.alerting.rules.run.alerts.max is set to 1000, this rule will still generate no more than 1000 alerts even if its own **Max alerts per run** is set higher.\n\nTo make sure this rule can generate as many alerts as it's configured in its own **Max alerts per run** setting, increase the xpack.alerting.rules.run.alerts.max system setting accordingly.\n\n**NOTE:** Changing xpack.alerting.rules.run.alerts.max is not possible in Serverless projects.",
+            "severity": "medium",
+            "severity_mapping": [
+              {
+                "severity": "low",
+                "field": "event.severity",
+                "value": "21",
+                "operator": "equals"
+              }
+            ],
+            "timestamp_override": "event.ingested",
+            "to": "now",
+            "type": "query",
+            "version": 103
+          },
+          "producer": "siem",
+          "revision": 1,
+          "risk_score": 47,
+          "risk_score_mapping": [
+            {
+              "field": "event.risk_score",
+              "operator": "equals"
+            }
+          ],
+          "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+          "rule_name_override": "message",
+          "rule_type_id": "siem.queryRule",
+          "severity": "medium",
+          "severity_mapping": [
+            {
+              "severity": "low",
+              "field": "event.severity",
+              "value": "21",
+              "operator": "equals"
+            }
+          ],
+          "tags": [
+            "Data Source: Elastic Defend"
+          ],
+          "timestamp_override": "event.ingested",
+          "to": "now",
+          "type": "query",
+          "updated_at": "2024-05-20T01:03:43.962Z",
+          "updated_by": "elastic",
+          "uuid": "abcd-3ea9-4695-9a1b-4af87bead73e",
+          "version": 103
+        },
+        "severity": "high",
+        "start": "2022-06-09T13:56:03.235Z",
+        "status": "active",
+        "url": "https://release-app/app/security/alerts/redirect/abcd?index=.alerts-security.alerts-default\u00d7tamp=2024-06-09T13:56:03.205Z",
+        "uuid": "abcdef123",
+        "workflow_status": "open"
+      },
+      "space_ids": [
+        "default"
+      ],
+      "version": "8.14.0"
+    },
+    "message": "Malicious Behavior Prevention Alert: Empire Stager Execution",
+    "process": {
+      "args": [
+        "/tmp/bash",
+        "exec(base64.b64decode*abcdef)"
+      ],
+      "args_count": 2,
+      "command_line": "/tmp/bash exec(base64.b64decode*abcdef)",
+      "entity_id": "YYYYYYYYYtNTEzYi00NTI2LWEzNGEtZTIyOWE2ZjE1ZGZmLTE0MTIwNi0xNzE3OTQxMTI2",
+      "executable": "/tmp/bash",
+      "group": {
+        "id": "1006",
+        "name": "admin"
+      },
+      "hash": {
+        "md5": "ABCDf2d21a340f2b3ee534fba5b29e417",
+        "sha1": "ABCDc728d069ba6239c1da751a2f31fba9b1aa",
+        "sha256": "ABCD3091f6093bd9a7b308e536fbc285aeef2c5139577cc96bc594a4845f0e13"
+      },
+      "name": "bash",
+      "real_group": {
+        "id": "1006",
+        "name": "admin"
+      },
+      "supplemental_groups": [
+        {
+          "name": "adm",
+          "id": "4"
+        }
+      ],
+      "user": {
+        "id": "1005",
+        "name": "admin"
+      }
+    },
+    "rule": {
+      "description": "Identifies when a script interpreter executes a base64-encoded Empire stager. Empire is penetration testing software that is often utilized by attackers.",
+      "id": "ABCD-82ff-4743-9e07-1c6901b1f0ea",
+      "name": "Empire Stager Execution",
+      "reference": [
+        "https://github.com/abc/emp",
+        "https://github.com/BC-abcd/emp"
+      ],
+      "ruleset": "production",
+      "version": "1.0.29"
+    },
+    "source_metadata": {
+      "_id": "xyzxyz123",
+      "_index": "efgh_1234"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "elastic_security-alert"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "technique": [
+          {
+            "reference": "https://attack.mitre.org/techniques/T1132/",
+            "name": "Data Encoding",
+            "subtechnique": [
+              {
+                "reference": "https://attack.mitre.org/techniques/T1132/001/",
+                "name": "Standard Encoding",
+                "id": "T1132.001"
+              }
+            ],
+            "id": "T1132"
+          }
+        ],
+        "tactic": {
+          "reference": "https://attack.mitre.org/tactics/TA0011/",
+          "name": "Command and Control",
+          "id": "TA0011"
+        }
+      }
+    ],
+    "user": {
+      "Ext": {
+        "real": {
+          "id": 1005,
+          "name": "admin"
+        }
+      },
+      "id": "1005",
+      "name": "admin",
+      "risk": {
+        "calculated_level": "Critical",
+        "calculated_score_norm": 98.13564
+      }
+    }
+  }
+]

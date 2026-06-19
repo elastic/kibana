@@ -1,0 +1,1624 @@
+[
+  {
+    "@timestamp": "2021-03-30T00:00:00.704Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 0,
+      "ip": "169.254.169.254",
+      "packets": 0,
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.756Z",
+      "dataset": "zeek.connection",
+      "id": "CpeAOT3B11CTXJgzw2",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 5492
+    },
+    "network": {
+      "bytes": 0,
+      "community_id": "1:P1p7mEvXXmc+vW6oKL9TO8XgiOQ=",
+      "direction": "outbound",
+      "packets": 0,
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 44946
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "C",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "OTH",
+        "state_message": "No SYN seen, just midstream traffic (a 'partial connection' that was not later closed)."
+      },
+      "session_id": "CpeAOT3B11CTXJgzw2"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T00:00:00.703Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 0,
+      "ip": "169.254.169.254",
+      "packets": 0,
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "id": "C3pPjh1YRYcVDiZD3",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 4884
+    },
+    "network": {
+      "bytes": 0,
+      "community_id": "1:zlvv5I2WDugh9zCIwgFKRCr6aFs=",
+      "direction": "outbound",
+      "packets": 0,
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 44944
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "C",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "OTH",
+        "state_message": "No SYN seen, just midstream traffic (a 'partial connection' that was not later closed)."
+      },
+      "session_id": "C3pPjh1YRYcVDiZD3"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T00:00:00.703Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 0,
+      "ip": "169.254.169.254",
+      "packets": 0,
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.756Z",
+      "dataset": "zeek.connection",
+      "id": "ChUxTmYLG37oO5qUb",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 5188
+    },
+    "network": {
+      "bytes": 0,
+      "community_id": "1:E6r4npj9JGrYl1AJYRB9WsOSuq4=",
+      "direction": "outbound",
+      "packets": 0,
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 44942
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "C",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "OTH",
+        "state_message": "No SYN seen, just midstream traffic (a 'partial connection' that was not later closed)."
+      },
+      "session_id": "ChUxTmYLG37oO5qUb"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T00:00:00.404Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 0,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 0,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "id": "CCicIg43lOtCQOxXnb",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 1507
+    },
+    "network": {
+      "bytes": 0,
+      "community_id": "1:H2WP+dwHKIuudV4sjhjnKf3fpGU=",
+      "direction": "outbound",
+      "packets": 0,
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 56190
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "C",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "OTH",
+        "state_message": "No SYN seen, just midstream traffic (a 'partial connection' that was not later closed)."
+      },
+      "session_id": "CCicIg43lOtCQOxXnb"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:59:50.699Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 173,
+      "ip": "169.254.169.254",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 908852,
+      "id": "Chx5fs3xQ5ALB72i4e",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 4495
+    },
+    "network": {
+      "bytes": 173,
+      "community_id": "1:B3k4XMlSCTUFWj04Y3MgyIdpqV0=",
+      "direction": "outbound",
+      "packets": 1,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 49647
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Cd",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "Chx5fs3xQ5ALB72i4e"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:59:50.698Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 230,
+      "ip": "169.254.169.254",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 1111984,
+      "id": "CAOZZi4Qrio7gUVgVc",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 4106
+    },
+    "network": {
+      "bytes": 230,
+      "community_id": "1:tv5zJqq58ufw3fbvDlETbMFY800=",
+      "direction": "outbound",
+      "packets": 1,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 50487
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Cd",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "CAOZZi4Qrio7gUVgVc"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:59:50.667Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 161,
+      "ip": "169.254.169.254",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 3319979,
+      "id": "CGUiHy4kLIF2ml95eg",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 3718
+    },
+    "network": {
+      "bytes": 161,
+      "community_id": "1:bCnXQXEPKVtzbvpzqWsri1DRNpc=",
+      "direction": "outbound",
+      "packets": 1,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 41407
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Cd",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "CGUiHy4kLIF2ml95eg"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:59:50.563Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 269,
+      "ip": "169.254.169.254",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 26802063,
+      "id": "CezEGe4jeLNkayV976",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 2943
+    },
+    "network": {
+      "bytes": 269,
+      "community_id": "1:MaT7kz/SkupGvuFVoZ2W3Q8LBfo=",
+      "direction": "outbound",
+      "packets": 1,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 38948
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Cd",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "CezEGe4jeLNkayV976"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:59:50.563Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "bytes": 304,
+      "ip": "169.254.169.254",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 25056124,
+      "id": "CKSr3w18mmW6t7bXC4",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 3330
+    },
+    "network": {
+      "bytes": 304,
+      "community_id": "1:UdmcTRiLwwI31qutgJjuqtMRZOE=",
+      "direction": "outbound",
+      "packets": 1,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 0,
+      "ip": "10.156.0.2",
+      "packets": 0,
+      "port": 40080
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Cd",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "CKSr3w18mmW6t7bXC4"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:55:00.419Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 267,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 4,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 103708982,
+      "id": "C52mXBCPJ4pPGkhr1",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 1811
+    },
+    "network": {
+      "bytes": 319,
+      "community_id": "1:nj/OEILzxKH8qUpmYiAisO39EXI=",
+      "direction": "outbound",
+      "packets": 5,
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 52,
+      "ip": "10.156.0.2",
+      "packets": 1,
+      "port": 60810
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "^hCcdafA",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "C52mXBCPJ4pPGkhr1"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:55:00.419Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 267,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 4,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 104128838,
+      "id": "CTzCky2CyLT5JJvHck",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 2188
+    },
+    "network": {
+      "bytes": 319,
+      "community_id": "1:Sec7Dn4dO7T9XJjL+suQ90bQqNA=",
+      "direction": "outbound",
+      "packets": 5,
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 52,
+      "ip": "10.156.0.2",
+      "packets": 1,
+      "port": 60804
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "^hCcdafA",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "CTzCky2CyLT5JJvHck"
+    }
+  },
+  {
+    "@timestamp": "2021-03-29T23:55:00.419Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 267,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 4,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 104333878,
+      "id": "CIkS28PDxqQnN49m2",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 2566
+    },
+    "network": {
+      "bytes": 319,
+      "community_id": "1:NRiyq2lbQDqRyNJX78PZVf5DAbQ=",
+      "direction": "outbound",
+      "packets": 5,
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "bytes": 52,
+      "ip": "10.156.0.2",
+      "packets": 1,
+      "port": 60802
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "^hCcdafA",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SHR",
+        "state_message": "Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator."
+      },
+      "session_id": "CIkS28PDxqQnN49m2"
+    }
+  },
+  {
+    "@timestamp": "2019-03-01T00:10:00.578Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 0,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 0
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "id": "Cc6NJ3GRlfjE44I3h",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 1198
+    },
+    "network": {
+      "bytes": 107,
+      "community_id": "1:/dM6GFGdrMSFfHWWVHXTte26ER4=",
+      "direction": "external",
+      "packets": 1,
+      "transport": "icmp"
+    },
+    "related": {
+      "ip": [
+        "192.168.2.205",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "192.168.2.205",
+      "bytes": 107,
+      "ip": "192.168.2.205",
+      "packets": 1
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "icmp": {
+          "code": 3,
+          "type": 3
+        },
+        "local_orig": false,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "OTH",
+        "state_message": "No SYN seen, just midstream traffic (a 'partial connection' that was not later closed)."
+      },
+      "session_id": "Cc6NJ3GRlfjE44I3h"
+    }
+  },
+  {
+    "@timestamp": "2019-01-11T06:33:37.857Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 206,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 76967000,
+      "id": "CAcJw21BbVedgFnYH5",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "start",
+        "end"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 798
+    },
+    "network": {
+      "bytes": 309,
+      "community_id": "1:Q+EpCYXlrljHS752WH18Nx1UbFw=",
+      "direction": "external",
+      "packets": 2,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 103,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 1,
+      "port": 38341
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Dd",
+        "local_orig": false,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SF",
+        "state_message": "Normal establishment and termination."
+      },
+      "session_id": "CAcJw21BbVedgFnYH5"
+    }
+  },
+  {
+    "@timestamp": "2019-01-11T06:33:36.857Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "bytes": 206,
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.755Z",
+      "dataset": "zeek.connection",
+      "duration": 76967000,
+      "id": "CAcJw21BbVedgFnYH4",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "start",
+        "end"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 398
+    },
+    "network": {
+      "bytes": 309,
+      "community_id": "1:/gtb8GnyAm+VWWDzXIdu6DL11Ao=",
+      "direction": "outbound",
+      "packets": 2,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "192.168.86.167",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "192.168.86.167",
+      "bytes": 103,
+      "ip": "192.168.86.167",
+      "packets": 1,
+      "port": 38340
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Dd",
+        "local_orig": true,
+        "local_resp": false,
+        "missed_bytes": 0,
+        "state": "SF",
+        "state_message": "Normal establishment and termination."
+      },
+      "session_id": "CAcJw21BbVedgFnYH4"
+    }
+  },
+  {
+    "@timestamp": "2019-01-11T06:33:35.857Z",
+    "agent": {
+      "ephemeral_id": "b395bc07-e610-46df-93f4-9941c7d5c680",
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "name": "elastic-agent-93552",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.connection",
+      "namespace": "99827",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.86.1",
+      "bytes": 206,
+      "ip": "192.168.86.1",
+      "packets": 1,
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d8290b8c-5250-4e70-a3b9-cc9c2a139eeb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:06.768Z",
+      "dataset": "zeek.connection",
+      "duration": 76967000,
+      "id": "CAcJw21BbVedgFnYH3",
+      "ingested": "2026-03-10T03:14:09Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "start",
+        "end"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/conn.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "bytes": 309,
+      "community_id": "1:Z26DBGVYoBKQ1FT6qfPaAqBnJik=",
+      "direction": "internal",
+      "packets": 2,
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "192.168.86.167",
+        "192.168.86.1"
+      ]
+    },
+    "source": {
+      "address": "192.168.86.167",
+      "bytes": 103,
+      "ip": "192.168.86.167",
+      "packets": 1,
+      "port": 38339
+    },
+    "tags": [
+      "forwarded",
+      "zeek-connection",
+      "local_orig",
+      "local_resp"
+    ],
+    "zeek": {
+      "connection": {
+        "history": "Dd",
+        "local_orig": true,
+        "local_resp": true,
+        "missed_bytes": 0,
+        "state": "SF",
+        "state_message": "Normal establishment and termination."
+      },
+      "session_id": "CAcJw21BbVedgFnYH3"
+    }
+  }
+]

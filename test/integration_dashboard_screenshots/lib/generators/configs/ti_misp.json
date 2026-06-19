@@ -1,0 +1,70 @@
+{
+  "package": "ti_misp",
+  "dataStreams": [
+    {
+      "dataset": "ti_misp.threat",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "event.kind",
+        "threat.indicator.file.hash.md5",
+        "threat.indicator.file.hash.sha1",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.file.hash.ssdeep",
+        "threat.indicator.file.hash.tlsh",
+        "threat.indicator.file.name",
+        "threat.indicator.file.pe.imphash",
+        "threat.indicator.file.type",
+        "threat.indicator.type",
+        "threat.indicator.url.domain",
+        "threat.indicator.url.extension",
+        "threat.indicator.url.port",
+        "threat.indicator.url.scheme"
+      ],
+      "filterValues": {
+        "event.kind": [
+          "enrichment"
+        ],
+        "threat.indicator.type": [
+          "file",
+          "url"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_misp.threat_attributes",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.kind",
+        "labels.is_ioc_transform_source",
+        "threat.indicator.file.hash.md5",
+        "threat.indicator.file.hash.sha1",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.file.hash.ssdeep",
+        "threat.indicator.file.hash.tlsh",
+        "threat.indicator.file.name",
+        "threat.indicator.file.pe.imphash",
+        "threat.indicator.file.type",
+        "threat.indicator.type",
+        "threat.indicator.url.domain",
+        "threat.indicator.url.extension",
+        "threat.indicator.url.port",
+        "threat.indicator.url.scheme"
+      ],
+      "filterValues": {
+        "event.kind": [
+          "enrichment"
+        ],
+        "threat.indicator.type": [
+          "file",
+          "url"
+        ],
+        "labels.is_ioc_transform_source": [
+          "true"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "@timestamp": "2021-11-17T04:29:38.000Z",
+    "agent": {
+      "ephemeral_id": "43884383-f5d2-48b0-9939-bb03711793ad",
+      "id": "5c417590-9181-495d-a35f-ae75002541db",
+      "name": "elastic-agent-82442",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zpa.audit",
+      "namespace": "73909",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "5c417590-9181-495d-a35f-ae75002541db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2021-11-17T04:29:38.000Z",
+      "dataset": "zscaler_zpa.audit",
+      "id": "11111111-1111-1111-1111-111111111111",
+      "ingested": "2026-03-10T04:45:51Z",
+      "kind": "event",
+      "original": "{\"ModifiedTime\":\"2021-11-17T04:29:38.000Z\",\"CreationTime\":\"2021-11-17T04:29:38.000Z\",\"ModifiedBy\":12345678901234567,\"RequestID\":\"11111111-1111-1111-1111-111111111111\",\"SessionID\":\"1idn23nlfm2q1txa5h3r4mep6\",\"AuditOldValue\":\"\",\"AuditNewValue\":\"{\\\"id\\\":\\\"72058340288495701\\\",\\\"name\\\":\\\"Some-Name\\\",\\\"domainOrIpAddress\\\":\\\"1.0.0.1\\\",\\\"description\\\":\\\"This is a description field\\\",\\\"enabled\\\":\\\"true\\\"}\",\"AuditOperationType\":\"Create\",\"ObjectType\":\"Server\",\"ObjectName\":\"Some-Name\",\"ObjectID\":12345678901234567,\"CustomerID\":98765432109876543,\"User\":\"zpaadmin@xxxxxxxxxxxxxxxxx.zpa-customer.com\",\"ClientAuditUpdate\":0}",
+      "outcome": "success",
+      "type": [
+        "creation"
+      ]
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.21.0.3:52396"
+      }
+    },
+    "organization": {
+      "id": "98765432109876543"
+    },
+    "related": {
+      "ip": [
+        "1.0.0.1"
+      ],
+      "user": [
+        "12345678901234567",
+        "zpaadmin",
+        "zpaadmin@xxxxxxxxxxxxxxxxx.zpa-customer.com"
+      ]
+    },
+    "server": {
+      "address": "1.0.0.1",
+      "ip": "1.0.0.1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "zscaler_zpa-audit"
+    ],
+    "user": {
+      "domain": "xxxxxxxxxxxxxxxxx.zpa-customer.com",
+      "email": "zpaadmin@xxxxxxxxxxxxxxxxx.zpa-customer.com",
+      "id": "12345678901234567",
+      "name": "zpaadmin"
+    },
+    "zscaler_zpa": {
+      "audit": {
+        "client_audit_update": 0,
+        "object": {
+          "id": "12345678901234567",
+          "name": "Some-Name",
+          "type": "Server"
+        },
+        "operation_type": "Create",
+        "session": {
+          "id": "1idn23nlfm2q1txa5h3r4mep6"
+        },
+        "value": {
+          "new": {
+            "description": "This is a description field",
+            "domainOrIpAddress": "1.0.0.1",
+            "enabled": "true",
+            "id": "72058340288495701",
+            "name": "Some-Name"
+          }
+        }
+      }
+    }
+  }
+]

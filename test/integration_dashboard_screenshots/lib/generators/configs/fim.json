@@ -1,0 +1,17 @@
+{
+  "package": "fim",
+  "dataStreams": [
+    {
+      "dataset": "fim.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "file.owner",
+        "file.path",
+        "host.os.platform"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

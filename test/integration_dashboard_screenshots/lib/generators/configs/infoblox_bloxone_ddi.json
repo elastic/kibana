@@ -1,0 +1,51 @@
+{
+  "package": "infoblox_bloxone_ddi",
+  "dataStreams": [
+    {
+      "dataset": "infoblox_bloxone_ddi.dhcp_lease",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "host.name",
+        "infoblox_bloxone_ddi.dhcp_lease.state",
+        "infoblox_bloxone_ddi.dhcp_lease.type",
+        "network.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "infoblox_bloxone_ddi.dns_config",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "infoblox_bloxone_ddi.dns_config.custom_root_ns.address",
+        "infoblox_bloxone_ddi.dns_config.custom_root_ns.fqdn",
+        "infoblox_bloxone_ddi.dns_config.ecs.zones.access",
+        "infoblox_bloxone_ddi.dns_config.inheritance.sources.add_edns.option_in.outgoing_query.action",
+        "infoblox_bloxone_ddi.dns_config.inheritance.sources.add_edns.option_in.outgoing_query.source",
+        "infoblox_bloxone_ddi.dns_config.inheritance.sources.ecs.block.action",
+        "infoblox_bloxone_ddi.dns_config.inheritance.sources.zone_authority.default_ttl.source",
+        "infoblox_bloxone_ddi.dns_config.zone_authority.protocol.mname"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "infoblox_bloxone_ddi.dns_data",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "infoblox_bloxone_ddi.dns_data.absolute.zone.name",
+        "infoblox_bloxone_ddi.dns_data.inheritance.sources.ttl.action",
+        "infoblox_bloxone_ddi.dns_data.inheritance.sources.ttl.source",
+        "infoblox_bloxone_ddi.dns_data.rdata.address",
+        "infoblox_bloxone_ddi.dns_data.rdata.cname",
+        "infoblox_bloxone_ddi.dns_data.rdata.type",
+        "infoblox_bloxone_ddi.dns_data.rdata.value",
+        "infoblox_bloxone_ddi.dns_data.type",
+        "infoblox_bloxone_ddi.dns_data.view_name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

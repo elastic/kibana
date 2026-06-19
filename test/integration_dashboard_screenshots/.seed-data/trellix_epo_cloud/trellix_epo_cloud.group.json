@@ -1,0 +1,164 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:23:23.557Z",
+    "agent": {
+      "ephemeral_id": "3989abd3-8c98-4964-abda-893c2b182569",
+      "id": "837467dd-fd1e-4bd2-84ee-43009fd2d256",
+      "name": "elastic-agent-99663",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trellix_epo_cloud.group",
+      "namespace": "20835",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "837467dd-fd1e-4bd2-84ee-43009fd2d256",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "trellix_epo_cloud.group",
+      "ingested": "2026-03-10T02:23:24Z",
+      "kind": "event",
+      "original": "{\"attributes\":{\"groupTypeId\":4,\"l1ParentId\":null,\"l2ParentId\":null,\"name\":\"Directory\",\"nodePath\":\"1\\\\2\",\"nodeTextPath\":\"GlobalRoot\\\\Directory\",\"nodeTextPath2\":\"\\\\\",\"notes\":null,\"parentId\":1},\"id\":\"2\",\"links\":{\"self\":\"https://api.manage.trellix.com/epo/v2/groups/2\"},\"relationships\":{\"subGroups\":{\"links\":{\"related\":\"https://api.manage.trellix.com/epo/v2/groups/2/subGroups\",\"self\":\"https://api.manage.trellix.com/epo/v2/groups/2/relationships/subGroups\"}}},\"type\":\"groups\"}",
+      "reference": "https://api.manage.trellix.com/epo/v2/groups/2",
+      "type": [
+        "group"
+      ]
+    },
+    "group": {
+      "id": "2",
+      "name": "Directory"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trellix_epo_cloud-group"
+    ],
+    "trellix_epo_cloud": {
+      "group": {
+        "attributes": {
+          "group_type": {
+            "id": "4"
+          },
+          "name": "Directory",
+          "node": {
+            "path": "1\\2",
+            "text_path": "GlobalRoot\\Directory",
+            "text_path2": "\\"
+          },
+          "parent": {
+            "id": "1"
+          }
+        },
+        "id": "2",
+        "links": {
+          "self": "https://api.manage.trellix.com/epo/v2/groups/2"
+        },
+        "relationships": {
+          "sub_groups": {
+            "links": {
+              "related": "https://api.manage.trellix.com/epo/v2/groups/2/subGroups",
+              "self": "https://api.manage.trellix.com/epo/v2/groups/2/relationships/subGroups"
+            }
+          }
+        }
+      },
+      "type": "groups"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:23:21.566Z",
+    "agent": {
+      "ephemeral_id": "3989abd3-8c98-4964-abda-893c2b182569",
+      "id": "837467dd-fd1e-4bd2-84ee-43009fd2d256",
+      "name": "elastic-agent-99663",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trellix_epo_cloud.group",
+      "namespace": "20835",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "837467dd-fd1e-4bd2-84ee-43009fd2d256",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "trellix_epo_cloud.group",
+      "ingested": "2026-03-10T02:23:24Z",
+      "kind": "event",
+      "original": "{\"attributes\":{\"groupTypeId\":7,\"l1ParentId\":null,\"l2ParentId\":null,\"name\":\"GlobalRoot\",\"nodePath\":\"1\",\"nodeTextPath\":\"GlobalRoot\",\"nodeTextPath2\":\"\\\\\",\"notes\":null,\"parentId\":0},\"id\":\"1\",\"links\":{\"self\":\"https://api.manage.trellix.com/epo/v2/groups/1\"},\"relationships\":{\"subGroups\":{\"links\":{\"related\":\"https://api.manage.trellix.com/epo/v2/groups/1/subGroups\",\"self\":\"https://api.manage.trellix.com/epo/v2/groups/1/relationships/subGroups\"}}},\"type\":\"groups\"}",
+      "reference": "https://api.manage.trellix.com/epo/v2/groups/1",
+      "type": [
+        "group"
+      ]
+    },
+    "group": {
+      "id": "1",
+      "name": "GlobalRoot"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trellix_epo_cloud-group"
+    ],
+    "trellix_epo_cloud": {
+      "group": {
+        "attributes": {
+          "group_type": {
+            "id": "7"
+          },
+          "name": "GlobalRoot",
+          "node": {
+            "path": "1",
+            "text_path": "GlobalRoot",
+            "text_path2": "\\"
+          },
+          "parent": {
+            "id": "0"
+          }
+        },
+        "id": "1",
+        "links": {
+          "self": "https://api.manage.trellix.com/epo/v2/groups/1"
+        },
+        "relationships": {
+          "sub_groups": {
+            "links": {
+              "related": "https://api.manage.trellix.com/epo/v2/groups/1/subGroups",
+              "self": "https://api.manage.trellix.com/epo/v2/groups/1/relationships/subGroups"
+            }
+          }
+        }
+      },
+      "type": "groups"
+    }
+  }
+]

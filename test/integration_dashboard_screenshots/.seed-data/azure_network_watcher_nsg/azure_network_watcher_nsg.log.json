@@ -1,0 +1,540 @@
+[
+  {
+    "@timestamp": "2018-11-13T12:01:35.391Z",
+    "agent": {
+      "ephemeral_id": "129b4578-8467-4a4b-8aca-75063c31bbee",
+      "id": "e3a6a9a6-9e41-4a62-862e-47bcf4fa8635",
+      "name": "elastic-agent-95778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "azure": {
+      "resource": {
+        "group": "FABRIKAMRG",
+        "id": "/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/FABRIKAMRG/PROVIDERS/MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/FABRIAKMVM1-NSG",
+        "name": "FABRIAKMVM1-NSG",
+        "provider": "MICROSOFT.NETWORK/NETWORKSECURITYGROUPS"
+      },
+      "storage": {
+        "blob": {
+          "content_type": "application/json",
+          "name": "testblob"
+        },
+        "container": {
+          "name": "azure-container1"
+        }
+      },
+      "subscription_id": "00000000-0000-0000-0000-000000000000"
+    },
+    "azure_network_watcher_nsg": {
+      "log": {
+        "category": "NetworkSecurityGroupFlowEvent",
+        "operation_name": "NetworkSecurityGroupFlowEvents",
+        "properties": {
+          "flows": [
+            {
+              "flows": [
+                {
+                  "tuples": [
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "TCP",
+                      "destination": {
+                        "port": 18264,
+                        "ip": "10.5.16.4"
+                      },
+                      "source": {
+                        "port": 59752,
+                        "ip": "125.64.94.197"
+                      },
+                      "traffic": {
+                        "decision": "Denied",
+                        "flow": "Inbound"
+                      },
+                      "timestamp": "2018-11-13T12:00:37.000Z"
+                    },
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "TCP",
+                      "destination": {
+                        "port": 8088,
+                        "ip": "10.5.16.4"
+                      },
+                      "source": {
+                        "port": 37433,
+                        "ip": "80.211.72.221"
+                      },
+                      "traffic": {
+                        "decision": "Denied",
+                        "flow": "Inbound"
+                      },
+                      "timestamp": "2018-11-13T12:01:15.000Z"
+                    },
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "TCP",
+                      "destination": {
+                        "port": 8088,
+                        "ip": "10.5.16.4"
+                      },
+                      "source": {
+                        "port": 60577,
+                        "ip": "46.101.199.124"
+                      },
+                      "traffic": {
+                        "decision": "Denied",
+                        "flow": "Inbound"
+                      },
+                      "timestamp": "2018-11-13T12:01:27.000Z"
+                    },
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "TCP",
+                      "destination": {
+                        "port": 52801,
+                        "ip": "10.5.16.4"
+                      },
+                      "source": {
+                        "port": 57067,
+                        "ip": "176.119.4.30"
+                      },
+                      "traffic": {
+                        "decision": "Denied",
+                        "flow": "Inbound"
+                      },
+                      "timestamp": "2018-11-13T12:01:30.000Z"
+                    }
+                  ],
+                  "mac": "00-0D-3A-F8-78-56"
+                }
+              ],
+              "rule": "DefaultRule_DenyAllInBound"
+            }
+          ],
+          "version": "2"
+        },
+        "resource_id": "/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/FABRIKAMRG/PROVIDERS/MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/FABRIAKMVM1-NSG",
+        "system_id": "a0fca5ce-022c-47b1-9735-89943b42f2fa",
+        "time": "2018-11-13T12:01:35.391Z"
+      }
+    },
+    "cloud": {
+      "provider": "azure"
+    },
+    "data_stream": {
+      "dataset": "azure_network_watcher_nsg.log",
+      "namespace": "15622",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": [
+        "10.5.16.4"
+      ],
+      "port": [
+        8088,
+        18264,
+        52801
+      ]
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e3a6a9a6-9e41-4a62-862e-47bcf4fa8635",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "azure_network_watcher_nsg.log",
+      "ingested": "2026-03-10T01:46:37Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "azure-blob-storage"
+    },
+    "log": {
+      "file": {
+        "path": "http://svc-azure-network-watcher-nsg-log:10000/devstoreaccount1/azure-container1/testblob"
+      },
+      "offset": 1001
+    },
+    "network": {
+      "direction": [
+        "inbound"
+      ],
+      "transport": [
+        "tcp"
+      ]
+    },
+    "related": {
+      "ip": [
+        "10.5.16.4",
+        "125.64.94.197",
+        "176.119.4.30",
+        "80.211.72.221",
+        "46.101.199.124"
+      ]
+    },
+    "rule": {
+      "name": [
+        "DefaultRule_DenyAllInBound"
+      ]
+    },
+    "source": {
+      "ip": [
+        "125.64.94.197",
+        "176.119.4.30",
+        "80.211.72.221",
+        "46.101.199.124"
+      ],
+      "mac": [
+        "00-0D-3A-F8-78-56"
+      ],
+      "port": [
+        60577,
+        59752,
+        37433,
+        57067
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "azure_network_watcher_nsg-log"
+    ]
+  },
+  {
+    "@timestamp": "2018-11-13T12:00:35.389Z",
+    "agent": {
+      "ephemeral_id": "129b4578-8467-4a4b-8aca-75063c31bbee",
+      "id": "e3a6a9a6-9e41-4a62-862e-47bcf4fa8635",
+      "name": "elastic-agent-95778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "azure": {
+      "resource": {
+        "group": "FABRIKAMRG",
+        "id": "/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/FABRIKAMRG/PROVIDERS/MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/FABRIAKMVM1-NSG",
+        "name": "FABRIAKMVM1-NSG",
+        "provider": "MICROSOFT.NETWORK/NETWORKSECURITYGROUPS"
+      },
+      "storage": {
+        "blob": {
+          "content_type": "application/json",
+          "name": "testblob"
+        },
+        "container": {
+          "name": "azure-container1"
+        }
+      },
+      "subscription_id": "00000000-0000-0000-0000-000000000000"
+    },
+    "azure_network_watcher_nsg": {
+      "log": {
+        "category": "NetworkSecurityGroupFlowEvent",
+        "operation_name": "NetworkSecurityGroupFlowEvents",
+        "properties": {
+          "flows": [
+            {
+              "flows": [
+                {
+                  "tuples": [
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "UDP",
+                      "destination": {
+                        "port": 443,
+                        "ip": "10.5.16.4"
+                      },
+                      "source": {
+                        "port": 28746,
+                        "ip": "94.102.49.190"
+                      },
+                      "traffic": {
+                        "decision": "Denied",
+                        "flow": "Inbound"
+                      },
+                      "timestamp": "2018-11-13T12:00:02.000Z"
+                    },
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "TCP",
+                      "destination": {
+                        "port": 59336,
+                        "ip": "10.5.16.4"
+                      },
+                      "source": {
+                        "port": 56509,
+                        "ip": "176.119.4.10"
+                      },
+                      "traffic": {
+                        "decision": "Denied",
+                        "flow": "Inbound"
+                      },
+                      "timestamp": "2018-11-13T12:00:24.000Z"
+                    },
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "TCP",
+                      "destination": {
+                        "port": 8088,
+                        "ip": "10.5.16.4"
+                      },
+                      "source": {
+                        "port": 48495,
+                        "ip": "167.99.86.8"
+                      },
+                      "traffic": {
+                        "decision": "Denied",
+                        "flow": "Inbound"
+                      },
+                      "timestamp": "2018-11-13T12:00:32.000Z"
+                    }
+                  ],
+                  "mac": "00-0D-3A-F8-78-56"
+                }
+              ],
+              "rule": "DefaultRule_DenyAllInBound"
+            },
+            {
+              "flows": [
+                {
+                  "tuples": [
+                    {
+                      "flow_state": "Begin",
+                      "protocol": "TCP",
+                      "destination": {
+                        "port": 443,
+                        "ip": "13.67.143.118"
+                      },
+                      "source": {
+                        "port": 59831,
+                        "ip": "10.5.16.4"
+                      },
+                      "traffic": {
+                        "decision": "Allowed",
+                        "flow": "Outbound"
+                      },
+                      "timestamp": "2018-11-13T11:59:37.000Z"
+                    },
+                    {
+                      "flow_state": "End",
+                      "protocol": "TCP",
+                      "bytes": {
+                        "received": 66,
+                        "sent": 66
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "13.67.143.117"
+                      },
+                      "source": {
+                        "port": 59932,
+                        "ip": "10.5.16.4"
+                      },
+                      "packets": {
+                        "received": 1,
+                        "sent": 1
+                      },
+                      "traffic": {
+                        "decision": "Allowed",
+                        "flow": "Outbound"
+                      },
+                      "timestamp": "2018-11-13T11:59:39.000Z"
+                    },
+                    {
+                      "flow_state": "Continuing",
+                      "protocol": "TCP",
+                      "bytes": {
+                        "received": 14008,
+                        "sent": 16978
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "13.67.143.115"
+                      },
+                      "source": {
+                        "port": 44931,
+                        "ip": "10.5.16.4"
+                      },
+                      "packets": {
+                        "received": 24,
+                        "sent": 30
+                      },
+                      "traffic": {
+                        "decision": "Allowed",
+                        "flow": "Outbound"
+                      },
+                      "timestamp": "2018-11-13T11:59:39.000Z"
+                    },
+                    {
+                      "flow_state": "End",
+                      "protocol": "TCP",
+                      "bytes": {
+                        "received": 7054,
+                        "sent": 8489
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "40.71.12.225"
+                      },
+                      "source": {
+                        "port": 59929,
+                        "ip": "10.5.16.4"
+                      },
+                      "packets": {
+                        "received": 12,
+                        "sent": 15
+                      },
+                      "traffic": {
+                        "decision": "Allowed",
+                        "flow": "Outbound"
+                      },
+                      "timestamp": "2018-11-13T12:00:06.000Z"
+                    }
+                  ],
+                  "mac": "00-0D-3A-F8-78-56"
+                }
+              ],
+              "rule": "DefaultRule_AllowInternetOutBound"
+            }
+          ],
+          "version": "2"
+        },
+        "resource_id": "/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/FABRIKAMRG/PROVIDERS/MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/FABRIAKMVM1-NSG",
+        "system_id": "a0fca5ce-022c-47b1-9735-89943b42f2fa",
+        "time": "2018-11-13T12:00:35.389Z"
+      }
+    },
+    "cloud": {
+      "provider": "azure"
+    },
+    "data_stream": {
+      "dataset": "azure_network_watcher_nsg.log",
+      "namespace": "15622",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": [
+        66,
+        7054,
+        14008
+      ],
+      "ip": [
+        "13.67.143.118",
+        "13.67.143.117",
+        "10.5.16.4",
+        "40.71.12.225",
+        "13.67.143.115"
+      ],
+      "packets": [
+        1,
+        12,
+        24
+      ],
+      "port": [
+        8088,
+        443,
+        59336
+      ]
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e3a6a9a6-9e41-4a62-862e-47bcf4fa8635",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "azure_network_watcher_nsg.log",
+      "ingested": "2026-03-10T01:46:37Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "azure-blob-storage"
+    },
+    "log": {
+      "file": {
+        "path": "http://svc-azure-network-watcher-nsg-log:10000/devstoreaccount1/azure-container1/testblob"
+      },
+      "offset": 1
+    },
+    "network": {
+      "direction": [
+        "outbound",
+        "inbound"
+      ],
+      "transport": [
+        "udp",
+        "tcp"
+      ]
+    },
+    "related": {
+      "ip": [
+        "13.67.143.118",
+        "13.67.143.117",
+        "10.5.16.4",
+        "40.71.12.225",
+        "13.67.143.115",
+        "176.119.4.10",
+        "94.102.49.190",
+        "167.99.86.8"
+      ]
+    },
+    "rule": {
+      "name": [
+        "DefaultRule_DenyAllInBound",
+        "DefaultRule_AllowInternetOutBound"
+      ]
+    },
+    "source": {
+      "bytes": [
+        66,
+        8489,
+        16978
+      ],
+      "ip": [
+        "176.119.4.10",
+        "10.5.16.4",
+        "94.102.49.190",
+        "167.99.86.8"
+      ],
+      "mac": [
+        "00-0D-3A-F8-78-56"
+      ],
+      "packets": [
+        1,
+        15,
+        30
+      ],
+      "port": [
+        59932,
+        44931,
+        59831,
+        28746,
+        56509,
+        59929,
+        48495
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "azure_network_watcher_nsg-log"
+    ]
+  }
+]

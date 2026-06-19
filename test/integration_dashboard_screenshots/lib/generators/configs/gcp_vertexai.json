@@ -1,0 +1,51 @@
+{
+  "package": "gcp_vertexai",
+  "dataStreams": [
+    {
+      "dataset": "gcp_vertexai.auditlogs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.user.email",
+        "event.action",
+        "gcp.vertexai.audit.resource_name",
+        "user_agent.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "gcp_vertexai.metrics",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "gcp.labels.metrics.response_code",
+        "gcp.labels.metrics.type",
+        "gcp.labels.resource.endpoint_id",
+        "gcp.labels.resource.model_user_id",
+        "gcp.vertexai.prediction.online.cpu.utilization",
+        "gcp.vertexai.prediction.online.error_count",
+        "gcp.vertexai.prediction.online.memory.bytes_used",
+        "gcp.vertexai.prediction.online.network.received_bytes_count",
+        "gcp.vertexai.prediction.online.network.sent_bytes_count",
+        "gcp.vertexai.prediction.online.prediction_latencies",
+        "gcp.vertexai.publisher.online_serving.consumed_throughput",
+        "gcp.vertexai.publisher.online_serving.model_invocation_count",
+        "gcp.vertexai.publisher.online_serving.model_invocation_latencies",
+        "gcp.vertexai.publisher.online_serving.token_count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "gcp_vertexai.prompt_response_logs",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "gcp.labels.resource.endpoint_id",
+        "gcp.vertexai.prediction.online.prediction_count",
+        "gcp.vertexai.publisher.online_serving.model_invocation_count",
+        "source.geo.region_name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

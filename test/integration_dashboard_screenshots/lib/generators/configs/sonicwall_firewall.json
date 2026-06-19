@@ -1,0 +1,39 @@
+{
+  "package": "sonicwall_firewall",
+  "dataStreams": [
+    {
+      "dataset": "sonicwall_firewall.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location",
+        "destination.ip",
+        "destination.port",
+        "event.action",
+        "event.category",
+        "event.code",
+        "event.outcome",
+        "event.type",
+        "network.protocol",
+        "network.transport",
+        "observer.name",
+        "source.geo.location",
+        "source.ip",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.action": [
+          "connection-start",
+          "connection-denied"
+        ],
+        "event.category": [
+          "network",
+          "authentication"
+        ],
+        "event.type": [
+          "start"
+        ]
+      }
+    }
+  ]
+}

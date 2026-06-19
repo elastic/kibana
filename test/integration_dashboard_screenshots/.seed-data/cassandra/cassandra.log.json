@@ -1,0 +1,7008 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:34:33.129Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 30164,
+      "origin": {
+        "file": {
+          "line": 650,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Startup complete",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:33.128Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 29980,
+      "origin": {
+        "file": {
+          "line": 564,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Not starting RPC server as requested. Use JMX (StorageService->startRPCServer()) or nodetool (enablethrift) to start it",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:33.096Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 29034,
+      "origin": {
+        "file": {
+          "line": 158,
+          "name": "Server.java"
+        }
+      }
+    },
+    "message": "Using Netty Version: [netty-buffer=netty-buffer-4.0.44.Final.452812a, netty-codec=netty-codec-4.0.44.Final.452812a, netty-codec-haproxy=netty-codec-haproxy-4.0.44.Final.452812a, netty-codec-http=netty-codec-http-4.0.44.Final.452812a, netty-codec-socks=netty-codec-socks-4.0.44.Final.452812a, netty-common=netty-common-4.0.44.Final.452812a, netty-handler=netty-handler-4.0.44.Final.452812a, netty-tcnative=netty-tcnative-1.1.33.Fork26.142ecbb, netty-transport=netty-transport-4.0.44.Final.452812a, netty-transport-native-epoll=netty-transport-native-epoll-4.0.44.Final.452812a, netty-transport-rxtx=netty-transport-rxtx-4.0.44.Final.452812a, netty-transport-sctp=netty-transport-sctp-4.0.44.Final.452812a, netty-transport-udt=netty-transport-udt-4.0.44.Final.452812a]",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:33.096Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 29856,
+      "origin": {
+        "file": {
+          "line": 159,
+          "name": "Server.java"
+        }
+      }
+    },
+    "message": "Starting listening for CQL clients on /0.0.0.0:9042 (unencrypted)...",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:33.043Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28932,
+      "origin": {
+        "file": {
+          "line": 73,
+          "name": "NativeTransportService.java"
+        }
+      }
+    },
+    "message": "Netty using Java NIO event loop",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:32.772Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28844,
+      "origin": {
+        "file": {
+          "line": 1863,
+          "name": "Gossiper.java"
+        }
+      }
+    },
+    "message": "No gossip backlog; proceeding",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.768Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28754,
+      "origin": {
+        "file": {
+          "line": 1832,
+          "name": "Gossiper.java"
+        }
+      }
+    },
+    "message": "Waiting for gossip to settle...",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.698Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28661,
+      "origin": {
+        "file": {
+          "line": 1564,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "JOINING: Finish joining ring",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.668Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28552,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_auth.roles",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.665Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28432,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_auth.role_permissions",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.663Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28316,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_auth.role_members",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.660Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28182,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_auth.resource_role_permissons_index",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.658Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:35Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 28011,
+      "origin": {
+        "file": {
+          "line": 137,
+          "name": "ViewManager.java"
+        }
+      }
+    },
+    "message": "Not submitting build tasks for views in keyspace system_auth as storage service is not initialized",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.653Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 27883,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_distributed.view_build_status",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.647Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 27758,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_distributed.repair_history",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.641Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 27448,
+      "origin": {
+        "file": {
+          "line": 137,
+          "name": "ViewManager.java"
+        }
+      }
+    },
+    "message": "Not submitting build tasks for views in keyspace system_distributed as storage service is not initialized",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.641Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 27626,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_distributed.parent_repair_history",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.635Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 27334,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_traces.sessions",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.629Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 27222,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_traces.events",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.628Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 27049,
+      "origin": {
+        "file": {
+          "line": 137,
+          "name": "ViewManager.java"
+        }
+      }
+    },
+    "message": "Not submitting build tasks for views in keyspace system_traces as storage service is not initialized",
+    "process": {
+      "thread": {
+        "name": "MigrationStage:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.345Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 21477,
+      "origin": {
+        "file": {
+          "line": 228,
+          "name": "BootStrapper.java"
+        }
+      }
+    },
+    "message": "Generated random tokens. tokens are [-1610666150894683613, -5222771785966494282, -9136824872505971635, 491932760555148968, -1785582560306040073, -8075572728714340435, -6797729159825612365, -1068240680083203348, 1299093019615134830, -5334795602271242469, 2586629526733692490, -4764899553275215790, 3249573249169668331, -5577509778644379554, -5284017032094520610, -1863409860573829342, 1380757235293108460, 974894496620729470, 6509187300543920246, -2101111248369764374, -5355283572287444972, -3536665507031303291, -6020078728933020626, 6835177294745687888, 5843899290809403798, 377892987002760664, 2587040056974082909, 4856284886714053293, -4821387015263928385, -454149018026071759, -4709409370212968153, 4868881374774832788, -9080372138455552652, 2477415526351940411, -8875122477126913785, 2213843503842760383, -2557556078470335654, 4740435461135730870, -4756269118918599905, -6588859017339055245, -8801489168274762921, -2152964370075352583, -7511056940750148901, -7539156725548112817, -563773979357862367, -2713823763944673622, -9029594766301023368, -3205855177141533351, 1625945542362739374, 1506355622155676892, -5347838425964395269, -6682261493175387518, 7199012381525940313, -2673871149249264840, -8064692741766582596, 9004395205596275669, -2402797214123932541, 8849042338731352574, -426128757268062701, 4794682455423102685, 5260400538579470205, -4310953852134260656, -6032123334402152384, -2003823442087758179, 5508732819492112161, -1686593215835443413, 4708787587429910499, 4683650885042147795, 5863934665260014176, 5304219955175540935, 2718679635612267949, -6841574516416831010, -8500354737030893472, -8629918292465060425, 1092307365105164339, -1474017936513765885, 680868246232247904, 380287301459024007, -6103980439826486316, 7537260216565288999, -4965437962387042743, 1896429558780490966, 2795729347999313127, -8720369882874715518, 6335382206832872812, 4973946466331662309, 1155254978897650410, -2197855658390787069, -1717065485357970530, 3391055131828722518, -3673429678933524665, 1737710850623859641, 5672936196960114750, -2500534216951509145, -6280202488276762168, -7835582308083748670, -5041657879863725624, -1769109471182943019, 8617025296366958970, -6046374769157154033, -8753664030828175470, 4239932699827471615, -1534130211071632551, 1335615908744929979, -4758349887378868979, -4201962949444342629, -1754817416792698401, -6668669619676635310, -828680758778897600, -7159640118061256189, -4441489109625896124, 4809745697468438490, 4341083862713771798, -7883152654034684365, 2178650621107663123, 523119357936450871, -8362506521293923358, 6919581293315896026, 346674144328763857, 837659408176174747, 2544814965981524575, -7307704790138419432, -1548112037906448895, -1300535075700118044, -8324382091003000555, 5769812600894784997, -7061540431687335760, -4317290819475296457, 424291801139436587, 8532197006619597389, 6974807872238138801, 1008262096019561381, 7168557005805824056, -4888099255390314268, 8577078488838809965, 1848485923525797738, 8146583462067540497, 580588356521707977, 4266348878776867096, -5666973247275199228, 8545909767997644337, 3281758854030372913, -6611802532822250102, -8677897007619450542, 2463992589415072851, -2964823590458498454, 2518404377557936054, -5143293602797991021, 1409432210873343393, 7608339401960818324, -8788992234182041388, -7691476959100135279, 76137758365462446, -7418420860937226531, -8949250083291718191, -8401844146159363851, 7245631982524466133, 8621435317227568237, 3495233106472186918, 3585465635440674242, -584571491624736158, 2543459053830141115, -6897094377599309678, 4383657082423962120, -7855959874795063101, 6220217941919567245, 4412346640361475389, -80844692733621715, 5540359962259514856, 2789105781438704310, -6595361430671923728, -2596313115744835048, 5901555278273705020, -1177586346795692681, -4025438563332988167, -857900976090025117, 5724144315343335891, 1125754709204432224, -1398513284101400790, -4783276005943413746, -548231742488220801, -4440437832760443532, 7483473233047905804, -1188571739954100392, -3943615288017492474, 8465296897657703342, -8358590097034266401, 2506331479277672743, 2906864002123040957, -3618650633453224959, -605776035500587114, -65587520937617705, 740408036685738852, 6936219389778999304, 2545986081694494858, 2713451231592401726, 5544301659849737093, -1292866446714053431, -9201912130319857781, 8470599619025446383, -1184708810213972619, -469853016233087717, 8650833524160685694, -9178304274946662257, 3236341450509986201, 1173423920889923740, -2748256132136387095, 3498107816833127374, -7865739452905657053, -4221448951299107289, 3339246508884476238, 3383445975522825882, -777430801597221569, 9106643468994658188, -1258994008003836369, 1892712803267372340, -8366410242701171473, -422496578727958521, 1754725044852569143, -4598876722951419694, -9181849884286379728, 8877583468245678354, 3192015486630334703, 6538849875639164752, 28420803121829655, 85684602858402100, -6797430912690705583, 3531596598107332323, 673954819213546335, 7552686265905811975, 5296852031039748877, -9102601248651951515, 8471944675852234358, -5075955682780099270, 4711499352384388431, 2462735004017083328, -7584019472482621831, 6066920736826932916, 381392984617965467, -2239184729930013581, 4747354020898830804, 7935118130702022510, -7697365480045117032, 127206980650024597, -2990781653282857695, -8895787062706649987, -4783128838362345042, -8880087631508706839, -7693688012153615436, -5801828594306408545, 2429598790182886637, -6587749225300739838, 8874652157424240556, 4955839263643821532, 2312698342695716870, -5964386687771832473]",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.338Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 21336,
+      "origin": {
+        "file": {
+          "line": 999,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "This node will not auto bootstrap because it is configured to be a seed node.",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.297Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 21247,
+      "origin": {
+        "file": {
+          "line": 916,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Starting up server gossip",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.296Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 21155,
+      "origin": {
+        "file": {
+          "line": 785,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Loading persisted ring state",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.283Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 21003,
+      "origin": {
+        "file": {
+          "line": 631,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Unable to gossip with any peers but continuing anyway since node is in its own seed list",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.274Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "WARN",
+      "offset": 20826,
+      "origin": {
+        "file": {
+          "line": 1142,
+          "name": "SystemKeyspace.java"
+        }
+      }
+    },
+    "message": "No host ID found, created 74a52faa-fdd8-4d34-bd87-ff00a9eb9697 (Note: This should happen exactly once per node).",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.270Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 20707,
+      "origin": {
+        "file": {
+          "line": 750,
+          "name": "MessagingService.java"
+        }
+      }
+    },
+    "message": "Starting Messaging Service on /172.24.0.2:7000 (eth0)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.263Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 20536,
+      "origin": {
+        "file": {
+          "line": 87,
+          "name": "IndexSummaryManager.java"
+        }
+      }
+    },
+    "message": "Initializing index summary manager with a memory pool size of 96 MB and a resize interval of 60 minutes",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.246Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 20289,
+      "origin": {
+        "file": {
+          "line": 701,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "CQL supported versions: 3.4.4 (default: 3.4.4)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.246Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 20399,
+      "origin": {
+        "file": {
+          "line": 703,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Native protocol supported versions: 3/v3, 4/v4, 5/v5-beta (default: 4/v4)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.245Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 20014,
+      "origin": {
+        "file": {
+          "line": 163,
+          "name": "QueryProcessor.java"
+        }
+      }
+    },
+    "message": "Preloaded 0 prepared statements",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.245Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 20109,
+      "origin": {
+        "file": {
+          "line": 699,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Cassandra version: 3.11.11",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.245Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 20199,
+      "origin": {
+        "file": {
+          "line": 700,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Thrift API version: 20.1.0",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.211Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19934,
+      "origin": {
+        "file": {
+          "line": 688,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Token metadata: ",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.205Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19826,
+      "origin": {
+        "file": {
+          "line": 681,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Populating token metadata from system tables",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.204Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19726,
+      "origin": {
+        "file": {
+          "line": 142,
+          "name": "CommitLog.java"
+        }
+      }
+    },
+    "message": "No commitlog files found; skipping replay",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.193Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19614,
+      "origin": {
+        "file": {
+          "line": 174,
+          "name": "AutoSavingCache.java"
+        }
+      }
+    },
+    "message": "Completed loading (0 ms; 4 keys) KeyCache cache",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.181Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19534,
+      "origin": {
+        "file": {
+          "line": 688,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Token metadata: ",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.161Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19426,
+      "origin": {
+        "file": {
+          "line": 681,
+          "name": "StorageService.java"
+        }
+      }
+    },
+    "message": "Populating token metadata from system tables",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.125Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19252,
+      "origin": {
+        "file": {
+          "line": 234,
+          "name": "BufferPool.java"
+        }
+      }
+    },
+    "message": "Global buffer pool is enabled, when pool is exhausted (max is 483.000MiB) it will allocate on heap",
+    "process": {
+      "thread": {
+        "name": "CompactionExecutor:2"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.006Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 19096,
+      "origin": {
+        "file": {
+          "line": 162,
+          "name": "CacheService.java"
+        }
+      }
+    },
+    "message": "Scheduling counter cache save to every 7200 seconds (going to save all keys).",
+    "process": {
+      "thread": {
+        "name": "MemtableFlushWriter:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.005Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18967,
+      "origin": {
+        "file": {
+          "line": 151,
+          "name": "CacheService.java"
+        }
+      }
+    },
+    "message": "Initializing counter cache with capacity of 48 MBs",
+    "process": {
+      "thread": {
+        "name": "MemtableFlushWriter:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.004Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18843,
+      "origin": {
+        "file": {
+          "line": 122,
+          "name": "CacheService.java"
+        }
+      }
+    },
+    "message": "Initializing row cache with capacity of 0 MBs",
+    "process": {
+      "thread": {
+        "name": "MemtableFlushWriter:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:24.001Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18717,
+      "origin": {
+        "file": {
+          "line": 100,
+          "name": "CacheService.java"
+        }
+      }
+    },
+    "message": "Initializing key cache with capacity of 96 MBs.",
+    "process": {
+      "thread": {
+        "name": "MemtableFlushWriter:1"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.705Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18556,
+      "origin": {
+        "file": {
+          "line": 137,
+          "name": "ViewManager.java"
+        }
+      }
+    },
+    "message": "Not submitting build tasks for views in keyspace system_schema as storage service is not initialized",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.703Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18455,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.indexes",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.700Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18351,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.aggregates",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.697Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18248,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.functions",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.694Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18149,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.types",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.691Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 18050,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.views",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.688Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17941,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.dropped_columns",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.684Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17839,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.triggers",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.680Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17738,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.columns",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.673Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17638,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.tables",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.668Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17535,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system_schema.keyspaces",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.636Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17397,
+      "origin": {
+        "file": {
+          "line": 44,
+          "name": "ApproximateTime.java"
+        }
+      }
+    },
+    "message": "Scheduling approximate time-check task with a precision of 10 milliseconds",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.550Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17243,
+      "origin": {
+        "file": {
+          "line": 137,
+          "name": "ViewManager.java"
+        }
+      }
+    },
+    "message": "Not submitting build tasks for views in keyspace system as storage service is not initialized",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.542Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17139,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.schema_aggregates",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.536Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 17036,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.schema_functions",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.530Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16933,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.schema_usertypes",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.523Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16831,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.schema_triggers",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.520Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16730,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.schema_columns",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.518Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16622,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.schema_columnfamilies",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.514Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16519,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.schema_keyspaces",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.510Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16413,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.prepared_statements",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.507Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16318,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.batchlog",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.504Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16226,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.hints",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.500Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16128,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.built_views",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.497Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 16017,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.views_builds_in_progress",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.494Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15912,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.transferred_ranges",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.491Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15809,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.available_ranges",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.488Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15708,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.size_estimates",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.485Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15605,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.sstable_activity",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.481Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15500,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.compaction_history",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.477Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15402,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.range_xfers",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.474Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15304,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.peer_events",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.470Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15212,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.peers",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.463Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15120,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.local",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.457Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 15028,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.paxos",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:23.450Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 14934,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.batches",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.982Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 14838,
+      "origin": {
+        "file": {
+          "line": 432,
+          "name": "ColumnFamilyStore.java"
+        }
+      }
+    },
+    "message": "Initializing system.IndexInfo",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.654Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 14698,
+      "origin": {
+        "file": {
+          "line": 116,
+          "name": "QueryProcessor.java"
+        }
+      }
+    },
+    "message": "Initialized prepared statement caches with 10 MB (native) and 10 MB (Thrift)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.593Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "WARN",
+      "offset": 14586,
+      "origin": {
+        "file": {
+          "line": 332,
+          "name": "StartupChecks.java"
+        }
+      }
+    },
+    "message": "Directory /opt/cassandra/data/hints doesn't exist",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.592Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "WARN",
+      "offset": 14467,
+      "origin": {
+        "file": {
+          "line": 332,
+          "name": "StartupChecks.java"
+        }
+      }
+    },
+    "message": "Directory /opt/cassandra/data/saved_caches doesn't exist",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.589Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "WARN",
+      "offset": 14351,
+      "origin": {
+        "file": {
+          "line": 332,
+          "name": "StartupChecks.java"
+        }
+      }
+    },
+    "message": "Directory /opt/cassandra/data/commitlog doesn't exist",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.582Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "WARN",
+      "offset": 14240,
+      "origin": {
+        "file": {
+          "line": 332,
+          "name": "StartupChecks.java"
+        }
+      }
+    },
+    "message": "Directory /opt/cassandra/data/data doesn't exist",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.574Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "WARN",
+      "offset": 14034,
+      "origin": {
+        "file": {
+          "line": 311,
+          "name": "StartupChecks.java"
+        }
+      }
+    },
+    "message": "Maximum number of memory map areas per process (vm.max_map_count) 262144 is too low, recommended value: 1048575, you can change it with sysctl.",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.573Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 13900,
+      "origin": {
+        "file": {
+          "line": 185,
+          "name": "SigarLibrary.java"
+        }
+      }
+    },
+    "message": "Sigar could not be initialized, test for checking degraded mode omitted.",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.572Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 13723,
+      "origin": {
+        "file": {
+          "line": 57,
+          "name": "SigarLibrary.java"
+        }
+      }
+    },
+    "message": "Could not initialize SIGAR library org.hyperic.sigar.Sigar.getFileSystemListNative()[Lorg/hyperic/sigar/FileSystem; ",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.558Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 13636,
+      "origin": {
+        "file": {
+          "line": 44,
+          "name": "SigarLibrary.java"
+        }
+      }
+    },
+    "message": "Initializing SIGAR library",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.554Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 13387,
+      "origin": {
+        "file": {
+          "line": 140,
+          "name": "StartupChecks.java"
+        }
+      }
+    },
+    "message": "jemalloc seems to be preloaded from /usr/local/lib/libjemalloc.so",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.554Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 13515,
+      "origin": {
+        "file": {
+          "line": 176,
+          "name": "StartupChecks.java"
+        }
+      }
+    },
+    "message": "JMX is enabled to receive remote connections on port: 7199",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.553Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 13301,
+      "origin": {
+        "file": {
+          "line": 176,
+          "name": "NativeLibrary.java"
+        }
+      }
+    },
+    "message": "JNA mlockall successful",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.225Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 9147,
+      "origin": {
+        "file": {
+          "line": 505,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Classpath: /etc/cassandra:/opt/cassandra/build/classes/main:/opt/cassandra/build/classes/thrift:/opt/cassandra/lib/HdrHistogram-2.1.9.jar:/opt/cassandra/lib/ST4-4.0.8.jar:/opt/cassandra/lib/airline-0.6.jar:/opt/cassandra/lib/antlr-runtime-3.5.2.jar:/opt/cassandra/lib/apache-cassandra-3.11.11.jar:/opt/cassandra/lib/apache-cassandra-thrift-3.11.11.jar:/opt/cassandra/lib/asm-5.0.4.jar:/opt/cassandra/lib/caffeine-2.2.6.jar:/opt/cassandra/lib/cassandra-driver-core-3.0.1-shaded.jar:/opt/cassandra/lib/commons-cli-1.1.jar:/opt/cassandra/lib/commons-codec-1.9.jar:/opt/cassandra/lib/commons-lang3-3.1.jar:/opt/cassandra/lib/commons-math3-3.2.jar:/opt/cassandra/lib/compress-lzf-0.8.4.jar:/opt/cassandra/lib/concurrent-trees-2.4.0.jar:/opt/cassandra/lib/concurrentlinkedhashmap-lru-1.4.jar:/opt/cassandra/lib/disruptor-3.0.1.jar:/opt/cassandra/lib/ecj-4.4.2.jar:/opt/cassandra/lib/guava-18.0.jar:/opt/cassandra/lib/high-scale-lib-1.0.6.jar:/opt/cassandra/lib/hppc-0.5.4.jar:/opt/cassandra/lib/jackson-annotations-2.9.10.jar:/opt/cassandra/lib/jackson-core-2.9.10.jar:/opt/cassandra/lib/jackson-databind-2.9.10.8.jar:/opt/cassandra/lib/jamm-0.3.0.jar:/opt/cassandra/lib/javax.inject-1.jar:/opt/cassandra/lib/jbcrypt-0.3m.jar:/opt/cassandra/lib/jcl-over-slf4j-1.7.7.jar:/opt/cassandra/lib/jctools-core-1.2.1.jar:/opt/cassandra/lib/jflex-1.6.0.jar:/opt/cassandra/lib/jna-4.2.2.jar:/opt/cassandra/lib/joda-time-2.4.jar:/opt/cassandra/lib/json-simple-1.1.jar:/opt/cassandra/lib/libthrift-0.9.2.jar:/opt/cassandra/lib/log4j-over-slf4j-1.7.7.jar:/opt/cassandra/lib/logback-classic-1.1.3.jar:/opt/cassandra/lib/logback-core-1.1.3.jar:/opt/cassandra/lib/lz4-1.3.0.jar:/opt/cassandra/lib/metrics-core-3.1.5.jar:/opt/cassandra/lib/metrics-jvm-3.1.5.jar:/opt/cassandra/lib/metrics-logback-3.1.5.jar:/opt/cassandra/lib/netty-all-4.0.44.Final.jar:/opt/cassandra/lib/ohc-core-0.4.4.jar:/opt/cassandra/lib/ohc-core-j8-0.4.4.jar:/opt/cassandra/lib/reporter-config-base-3.0.3.jar:/opt/cassandra/lib/reporter-config3-3.0.3.jar:/opt/cassandra/lib/sigar-1.6.4.jar:/opt/cassandra/lib/slf4j-api-1.7.7.jar:/opt/cassandra/lib/snakeyaml-1.11.jar:/opt/cassandra/lib/snappy-java-1.1.1.7.jar:/opt/cassandra/lib/snowball-stemmer-1.3.0.581.1.jar:/opt/cassandra/lib/stream-2.5.2.jar:/opt/cassandra/lib/thrift-server-0.3.7.jar:/opt/cassandra/lib/jsr223/*/*.jar::/opt/cassandra/lib/jamm-0.3.0.jar:jolokia-jvm-1.6.0-agent.jar",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.225Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 11598,
+      "origin": {
+        "file": {
+          "line": 507,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "JVM Arguments: [-Xloggc:/opt/cassandra/logs/gc.log, -ea, -XX:+UseThreadPriorities, -XX:ThreadPriorityPolicy=42, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:StringTableSize=1000003, -XX:+AlwaysPreTouch, -XX:-UseBiasedLocking, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -XX:+UseParNewGC, -XX:+UseConcMarkSweepGC, -XX:+CMSParallelRemarkEnabled, -XX:SurvivorRatio=8, -XX:MaxTenuringThreshold=1, -XX:CMSInitiatingOccupancyFraction=75, -XX:+UseCMSInitiatingOccupancyOnly, -XX:CMSWaitDuration=10000, -XX:+CMSParallelInitialMarkEnabled, -XX:+CMSEdenChunksRecordAlways, -XX:+CMSClassUnloadingEnabled, -XX:+PrintGCDetails, -XX:+PrintGCDateStamps, -XX:+PrintHeapAtGC, -XX:+PrintTenuringDistribution, -XX:+PrintGCApplicationStoppedTime, -XX:+PrintPromotionFailure, -XX:+UseGCLogFileRotation, -XX:NumberOfGCLogFiles=10, -XX:GCLogFileSize=10M, -Xms1984M, -Xmx1984M, -Xmn496M, -XX:+UseCondCardMark, -XX:CompileCommandFile=/etc/cassandra/hotspot_compiler, -javaagent:/opt/cassandra/lib/jamm-0.3.0.jar, -Dcassandra.jmx.remote.port=7199, -Dcom.sun.management.jmxremote.rmi.port=7199, -Dcom.sun.management.jmxremote.authenticate=true, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/opt/cassandra/lib/sigar-bin, -javaagent:jolokia-jvm-1.6.0-agent.jar=host=0.0.0.0,port=8778,user=ffa,password=ffa, -Dcassandra.libjemalloc=/usr/local/lib/libjemalloc.so, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/opt/cassandra/logs, -Dcassandra.storagedir=/opt/cassandra/data, -Dcassandra-foreground=yes]",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.224Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 8772,
+      "origin": {
+        "file": {
+          "line": 503,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Par Survivor Space Heap memory: init = 51970048(50752K) used = 0(0K) committed = 51970048(50752K) max = 51970048(50752K)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.224Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 8957,
+      "origin": {
+        "file": {
+          "line": 503,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "CMS Old Gen Heap memory: init = 1560281088(1523712K) used = 0(0K) committed = 1560281088(1523712K) max = 1560281088(1523712K)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.223Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 8208,
+      "origin": {
+        "file": {
+          "line": 503,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Metaspace Non-heap memory: init = 0(0K) used = 19594712(19135K) committed = 20185088(19712K) max = -1(-1K)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.223Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 8379,
+      "origin": {
+        "file": {
+          "line": 503,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Compressed Class Space Non-heap memory: init = 0(0K) used = 2369272(2313K) committed = 2621440(2560K) max = 1073741824(1048576K)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.223Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 8572,
+      "origin": {
+        "file": {
+          "line": 503,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Par Eden Space Heap memory: init = 416153600(406400K) used = 158151616(154444K) committed = 416153600(406400K) max = 416153600(406400K)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.222Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 7927,
+      "origin": {
+        "file": {
+          "line": 498,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Heap size: 1.889GiB/1.889GiB",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.222Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 8020,
+      "origin": {
+        "file": {
+          "line": 503,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Code Cache Non-heap memory: init = 2555904(2496K) used = 4769920(4658K) committed = 4849664(4736K) max = 134217728(131072K)",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.221Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 7721,
+      "origin": {
+        "file": {
+          "line": 490,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "Hostname: 67d6532e3ff4",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.221Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 7808,
+      "origin": {
+        "file": {
+          "line": 497,
+          "name": "CassandraDaemon.java"
+        }
+      }
+    },
+    "message": "JVM vendor/version: OpenJDK 64-Bit Server VM/1.8.0_322",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.213Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 7575,
+      "origin": {
+        "file": {
+          "line": 253,
+          "name": "JMXServerUtils.java"
+        }
+      }
+    },
+    "message": "Configured JMX server at: service:jmx:rmi://0.0.0.0/jndi/rmi://0.0.0.0:7199/jmxrmi",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.136Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 7383,
+      "origin": {
+        "file": {
+          "line": 775,
+          "name": "DatabaseDescriptor.java"
+        }
+      }
+    },
+    "message": "Back-pressure is disabled with strategy org.apache.cassandra.net.RateBasedBackPressure{high_ratio=0.9, factor=5, flow=FAST}.",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.135Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 7223,
+      "origin": {
+        "file": {
+          "line": 123,
+          "name": "RateBasedBackPressure.java"
+        }
+      }
+    },
+    "message": "Initialized back-pressure with high ratio: 0.9, factor: 5, flow: FAST, window size: 2000.",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.118Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "WARN",
+      "offset": 7034,
+      "origin": {
+        "file": {
+          "line": 579,
+          "name": "DatabaseDescriptor.java"
+        }
+      }
+    },
+    "message": "Only 19.222GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.022Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 6791,
+      "origin": {
+        "file": {
+          "line": 439,
+          "name": "DatabaseDescriptor.java"
+        }
+      }
+    },
+    "message": "Global memtable on-heap threshold is enabled at 483MB",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.022Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 6912,
+      "origin": {
+        "file": {
+          "line": 443,
+          "name": "DatabaseDescriptor.java"
+        }
+      }
+    },
+    "message": "Global memtable off-heap threshold is enabled at 483MB",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.021Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 130,
+      "origin": {
+        "file": {
+          "line": 539,
+          "name": "Config.java"
+        }
+      }
+    },
+    "message": "Node configuration:[allocate_tokens_for_keyspace=null; authenticator=AllowAllAuthenticator; authorizer=AllowAllAuthorizer; auto_bootstrap=true; auto_snapshot=true; back_pressure_enabled=false; back_pressure_strategy=org.apache.cassandra.net.RateBasedBackPressure{high_ratio=0.9, factor=5, flow=FAST}; batch_size_fail_threshold_in_kb=50; batch_size_warn_threshold_in_kb=5; batchlog_replay_throttle_in_kb=1024; broadcast_address=172.24.0.2; broadcast_rpc_address=172.24.0.2; buffer_pool_use_heap_if_exhausted=true; cas_contention_timeout_in_ms=1000; cdc_enabled=false; cdc_free_space_check_interval_ms=250; cdc_raw_directory=null; cdc_total_space_in_mb=0; check_for_duplicate_rows_during_compaction=true; check_for_duplicate_rows_during_reads=true; client_encryption_options=<REDACTED>; cluster_name=Test Cluster; column_index_cache_size_in_kb=2; column_index_size_in_kb=64; commit_failure_policy=stop; commitlog_compression=null; commitlog_directory=null; commitlog_max_compression_buffers_in_pool=3; commitlog_periodic_queue_size=-1; commitlog_segment_size_in_mb=32; commitlog_sync=periodic; commitlog_sync_batch_window_in_ms=NaN; commitlog_sync_period_in_ms=10000; commitlog_total_space_in_mb=null; compaction_large_partition_warning_threshold_mb=100; compaction_throughput_mb_per_sec=16; concurrent_compactors=null; concurrent_counter_writes=32; concurrent_materialized_view_writes=32; concurrent_reads=32; concurrent_replicates=null; concurrent_writes=32; counter_cache_keys_to_save=2147483647; counter_cache_save_period=7200; counter_cache_size_in_mb=null; counter_write_request_timeout_in_ms=5000; credentials_cache_max_entries=1000; credentials_update_interval_in_ms=-1; credentials_validity_in_ms=2000; cross_node_timeout=false; data_file_directories=[Ljava.lang.String;@2928854b; disk_access_mode=auto; disk_failure_policy=stop; disk_optimization_estimate_percentile=0.95; disk_optimization_page_cross_chance=0.1; disk_optimization_strategy=ssd; dynamic_snitch=true; dynamic_snitch_badness_threshold=0.1; dynamic_snitch_reset_interval_in_ms=600000; dynamic_snitch_update_interval_in_ms=100; enable_drop_compact_storage=false; enable_materialized_views=true; enable_sasi_indexes=true; enable_scripted_user_defined_functions=false; enable_user_defined_functions=false; enable_user_defined_functions_threads=true; encryption_options=<REDACTED>; endpoint_snitch=SimpleSnitch; file_cache_round_up=null; file_cache_size_in_mb=null; gc_log_threshold_in_ms=200; gc_warn_threshold_in_ms=1000; hinted_handoff_disabled_datacenters=[]; hinted_handoff_enabled=true; hinted_handoff_throttle_in_kb=1024; hints_compression=null; hints_directory=null; hints_flush_period_in_ms=10000; incremental_backups=false; index_interval=null; index_summary_capacity_in_mb=null; index_summary_resize_interval_in_minutes=60; initial_token=null; inter_dc_stream_throughput_outbound_megabits_per_sec=200; inter_dc_tcp_nodelay=false; internode_authenticator=null; internode_compression=dc; internode_recv_buff_size_in_bytes=0; internode_send_buff_size_in_bytes=0; key_cache_keys_to_save=2147483647; key_cache_save_period=14400; key_cache_size_in_mb=null; listen_address=172.24.0.2; listen_interface=null; listen_interface_prefer_ipv6=false; listen_on_broadcast_address=false; max_hint_window_in_ms=10800000; max_hints_delivery_threads=2; max_hints_file_size_in_mb=128; max_mutation_size_in_kb=null; max_streaming_retries=3; max_value_size_in_mb=256; memtable_allocation_type=heap_buffers; memtable_cleanup_threshold=null; memtable_flush_writers=0; memtable_heap_space_in_mb=null; memtable_offheap_space_in_mb=null; min_free_space_per_drive_in_mb=50; native_transport_flush_in_batches_legacy=true; native_transport_max_concurrent_connections=-1; native_transport_max_concurrent_connections_per_ip=-1; native_transport_max_concurrent_requests_in_bytes=-1; native_transport_max_concurrent_requests_in_bytes_per_ip=-1; native_transport_max_frame_size_in_mb=256; native_transport_max_negotiable_protocol_version=-2147483648; native_transport_max_threads=128; native_transport_port=9042; native_transport_port_ssl=null; num_tokens=256; otc_backlog_expiration_interval_ms=200; otc_coalescing_enough_coalesced_messages=8; otc_coalescing_strategy=DISABLED; otc_coalescing_window_us=200; partitioner=org.apache.cassandra.dht.Murmur3Partitioner; permissions_cache_max_entries=1000; permissions_update_interval_in_ms=-1; permissions_validity_in_ms=2000; phi_convict_threshold=8.0; prepared_statements_cache_size_mb=null; range_request_timeout_in_ms=10000; read_request_timeout_in_ms=5000; repair_session_max_tree_depth=18; request_scheduler=org.apache.cassandra.scheduler.NoScheduler; request_scheduler_id=null; request_scheduler_options=null; request_timeout_in_ms=10000; role_manager=CassandraRoleManager; roles_cache_max_entries=1000; roles_update_interval_in_ms=-1; roles_validity_in_ms=2000; row_cache_class_name=org.apache.cassandra.cache.OHCProvider; row_cache_keys_to_save=2147483647; row_cache_save_period=0; row_cache_size_in_mb=0; rpc_address=0.0.0.0; rpc_interface=null; rpc_interface_prefer_ipv6=false; rpc_keepalive=true; rpc_listen_backlog=50; rpc_max_threads=2147483647; rpc_min_threads=16; rpc_port=9160; rpc_recv_buff_size_in_bytes=null; rpc_send_buff_size_in_bytes=null; rpc_server_type=sync; saved_caches_directory=null; seed_provider=org.apache.cassandra.locator.SimpleSeedProvider{seeds=172.24.0.2}; server_encryption_options=<REDACTED>; slow_query_log_timeout_in_ms=500; snapshot_before_compaction=false; snapshot_on_duplicate_row_detection=false; ssl_storage_port=7001; sstable_preemptive_open_interval_in_mb=50; start_native_transport=true; start_rpc=false; storage_port=7000; stream_throughput_outbound_megabits_per_sec=200; streaming_keep_alive_period_in_secs=300; streaming_socket_timeout_in_ms=86400000; thrift_framed_transport_size_in_mb=15; thrift_max_message_length_in_mb=16; thrift_prepared_statements_cache_size_mb=null; tombstone_failure_threshold=100000; tombstone_warn_threshold=1000; tracetype_query_ttl=86400; tracetype_repair_ttl=604800; transparent_data_encryption_options=org.apache.cassandra.config.TransparentDataEncryptionOptions@27ae2fd0; trickle_fsync=false; trickle_fsync_interval_in_kb=10240; truncate_request_timeout_in_ms=60000; unlogged_batch_across_partitions_warn_threshold=10; user_defined_function_fail_timeout=1500; user_defined_function_warn_timeout=500; user_function_timeout_policy=die; windows_timer_interval=1; write_request_timeout_in_ms=2000]",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:22.021Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 6655,
+      "origin": {
+        "file": {
+          "line": 381,
+          "name": "DatabaseDescriptor.java"
+        }
+      }
+    },
+    "message": "DiskAccessMode 'auto' determined to be mmap, indexAccessMode is mmap",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:34:21.818Z",
+    "agent": {
+      "ephemeral_id": "888070d1-65de-4c4a-91bf-c4eadad28489",
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "name": "elastic-agent-66936",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "cassandra.log",
+      "namespace": "55492",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e8936af8-d4cd-4edc-acb2-a6604ff2938b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "database"
+      ],
+      "dataset": "cassandra.log",
+      "ingested": "2026-03-10T02:34:34Z",
+      "kind": "event",
+      "module": "cassandra",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cassandra/system.log"
+      },
+      "level": "INFO",
+      "offset": 0,
+      "origin": {
+        "file": {
+          "line": 92,
+          "name": "YamlConfigurationLoader.java"
+        }
+      }
+    },
+    "message": "Configuration location: file:/etc/cassandra/cassandra.yaml",
+    "process": {
+      "thread": {
+        "name": "main"
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cassandra-systemlogs"
+    ]
+  }
+]

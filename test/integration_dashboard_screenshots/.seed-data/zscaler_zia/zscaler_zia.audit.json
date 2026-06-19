@@ -1,0 +1,97 @@
+[
+  {
+    "@timestamp": "2023-10-16T22:55:48.000Z",
+    "agent": {
+      "ephemeral_id": "a5a2c09b-1945-47e1-8ecf-985cbe520f7b",
+      "id": "eca684dc-b627-4219-9604-817d0793bef3",
+      "name": "elastic-agent-16239",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.audit",
+      "namespace": "79141",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "eca684dc-b627-4219-9604-817d0793bef3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "error": {
+      "code": "AUTHENTICATION_FAILED"
+    },
+    "event": {
+      "action": "activate",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "zscaler_zia.audit",
+      "id": "1234",
+      "ingested": "2026-03-10T03:33:21Z",
+      "kind": "event",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "change"
+      ]
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:40644"
+      }
+    },
+    "related": {
+      "ip": [
+        "89.160.20.112"
+      ],
+      "user": [
+        "example",
+        "example@zscaler.com"
+      ]
+    },
+    "rule": {
+      "category": "DLP_DICTIONARY",
+      "name": "SSL Rule Name",
+      "ruleset": "DATA_LOSS_PREVENTION_RESOURCE"
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.112"
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-audit"
+    ],
+    "user": {
+      "domain": "zscaler.com",
+      "email": "example@zscaler.com",
+      "name": "example"
+    },
+    "zscaler_zia": {
+      "audit": {
+        "audit_log_type": "ZIA Portal Audit Log",
+        "interface": "API",
+        "result": "SUCCESS"
+      }
+    }
+  }
+]

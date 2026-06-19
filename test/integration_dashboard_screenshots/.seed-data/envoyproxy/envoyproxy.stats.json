@@ -1,0 +1,1761 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:40:27.290Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_total": {
+          "value": 1.0
+        },
+        "name": "service_kibana"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:31Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.289Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_healthy": {
+          "value": 0.0
+        },
+        "name": "service_kibana"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:31Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.288Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "http": {
+        "conn_manager_prefix": "ingress_http",
+        "downstream_cx_http1_total": {
+          "count": 1.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:31Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.287Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "http": {
+        "conn_manager_prefix": "ingress_http",
+        "downstream_cx_rx_bytes_total": {
+          "count": 0.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:31Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.287Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "listener": {
+        "address": "0.0.0.0_443",
+        "ssl": {
+          "cipher": "TLS_CHACHA20_POLY1305_SHA256"
+        },
+        "ssl_ciphers": {
+          "count": 0.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:31Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.285Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "listener": {
+        "address": "0.0.0.0_443",
+        "ssl": {
+          "version": "TLSv1.3"
+        },
+        "ssl_versions": {
+          "count": 1.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.287Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "default_total_match_count": {
+          "count": 1.0
+        },
+        "name": "service_es_2"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.285Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_total": {
+          "value": 1.0
+        },
+        "name": "service_es_2"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.288Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "name": "service_kibana",
+        "upstream_cx_tx_bytes_total": {
+          "count": 232.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:31Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.287Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "name": "service_kibana",
+        "ssl_sigalgs": {
+          "count": 1.0
+        }
+      },
+      "listener": {
+        "ssl": {
+          "sigalg": "rsa_pss_rsae_sha256"
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:31Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.285Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "external_upstream_rq": {
+          "count": 1.0
+        },
+        "name": "service_kibana",
+        "response_code": "200"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.284Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "listener": {
+        "address": "0.0.0.0_443",
+        "worker_downstream_cx_active": {
+          "value": 4.0
+        },
+        "worker_id": "1"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.284Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "http": {
+        "conn_manager_prefix": "ingress_http"
+      },
+      "listener": {
+        "address": "0.0.0.0_443",
+        "http_downstream_rq_completed": {
+          "count": 1.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.284Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "default_total_match_count": {
+          "count": 1.0
+        },
+        "name": "service_test"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.285Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "default_total_match_count": {
+          "count": 1.0
+        },
+        "name": "service_test_defender"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.284Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_total": {
+          "value": 1.0
+        },
+        "name": "service_test_defender"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.284Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "thread_local_cluster_manager": {
+        "worker_0_clusters_inflated": {
+          "value": 7.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:30Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.283Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "server": {
+        "wip_protos": {
+          "count": 0.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.282Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "tls_inspector": {
+        "sni_found": {
+          "count": 0.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.281Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "listener": {
+        "address": "0.0.0.0_443",
+        "worker_downstream_cx_active": {
+          "value": 2.0
+        },
+        "worker_id": "0"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.280Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "http": {
+        "conn_manager_prefix": "ingress_http",
+        "downstream_rq_xx": {
+          "count": 1.0
+        },
+        "response_code_class": "2"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.280Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "listener": {
+        "address": "0.0.0.0_443",
+        "ssl_no_certificate": {
+          "count": 1.0
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.281Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_total": {
+          "value": 1.0
+        },
+        "name": "service_fleet_1"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.281Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_degraded": {
+          "value": 0.0
+        },
+        "name": "service_es_1"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.282Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_change": {
+          "count": 1.0
+        },
+        "name": "service_es_3"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.281Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "membership_degraded": {
+          "value": 0.0
+        },
+        "name": "service_es_3"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.282Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "name": "service_kibana",
+        "ssl_versions": {
+          "count": 1.0
+        }
+      },
+      "listener": {
+        "ssl": {
+          "version": "TLSv1.2"
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:40:27.281Z",
+    "agent": {
+      "ephemeral_id": "f9aed01a-0a4d-4ca5-9953-3321753aa884",
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "name": "elastic-agent-39889",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "envoyproxy.stats",
+      "namespace": "64684",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fd9b4927-f9fc-4c17-a5f3-82adcef536d1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "envoy": {
+      "cluster": {
+        "external_upstream_rq_xx": {
+          "count": 0.0
+        },
+        "name": "service_kibana"
+      },
+      "http": {
+        "response_code_class": "2"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "envoyproxy.stats",
+      "ingested": "2026-03-10T02:40:28Z",
+      "kind": "metric",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39889",
+      "ip": [
+        "172.18.0.7",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "86-E8-69-A6-F7-96",
+        "A2-58-9F-78-38-92"
+      ],
+      "name": "elastic-agent-39889",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "service": {
+      "type": "statsd"
+    }
+  }
+]

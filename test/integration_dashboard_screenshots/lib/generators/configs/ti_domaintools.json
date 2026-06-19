@@ -1,0 +1,61 @@
+{
+  "package": "ti_domaintools",
+  "dataStreams": [
+    {
+      "dataset": "ti_domaintools.domaindiscovery_feed",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "domaintools.timestamp"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ti_domaintools.domainhotlist_feed",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "domaintools.domain",
+        "domaintools.timestamp"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ti_domaintools.domainrdap_feed",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "domaintools.timestamp"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ti_domaintools.domainrisk_feed",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "domaintools.domain",
+        "domaintools.timestamp"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ti_domaintools.nad_feed",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "domaintools.timestamp"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ti_domaintools.nod_feed",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "domaintools.timestamp"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

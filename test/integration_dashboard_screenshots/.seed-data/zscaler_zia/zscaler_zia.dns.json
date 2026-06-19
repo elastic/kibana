@@ -1,0 +1,421 @@
+[
+  {
+    "@timestamp": "2023-10-16T22:55:48.000Z",
+    "agent": {
+      "ephemeral_id": "d8e3643b-656f-48f8-af53-bfc3ff7da015",
+      "id": "48569979-1bec-4494-ba23-554999a2b63b",
+      "name": "elastic-agent-93710",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "provider": "zscaler.net"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.dns",
+      "namespace": "91090",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.0"
+    },
+    "device": {
+      "model": {
+        "name": "VMware7,1"
+      }
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "www.example.com",
+          "type": "IPv4"
+        }
+      ],
+      "question": {
+        "name": "mail.safemarch.com",
+        "type": "A record"
+      },
+      "response_code": "EMPTY_RESP"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "48569979-1bec-4494-ba23-554999a2b63b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "zscaler_zia.dns",
+      "duration": 1000000000,
+      "id": "45648954",
+      "ingested": "2026-03-10T03:38:18Z",
+      "kind": "event",
+      "timezone": "GMT",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "hostname": "admin",
+      "name": "thinkpadsmith",
+      "os": {
+        "version": "Microsoft Windows 10 Enterprise;64 bit"
+      },
+      "type": "Zscaler Client Connector"
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "application": "google dns",
+      "protocol": "dns",
+      "transport": [
+        "tcp"
+      ]
+    },
+    "organization": {
+      "name": "Zscaler"
+    },
+    "related": {
+      "hosts": [
+        "thinkpadsmith",
+        "admin"
+      ],
+      "ip": [
+        "81.2.69.192",
+        "175.16.199.0"
+      ],
+      "user": [
+        "jsmith",
+        "jdoe1",
+        "jdoe1@safemarch.com"
+      ]
+    },
+    "rule": {
+      "name": [
+        "RULE_1",
+        "RULE_RES"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.192",
+      "port": 1025
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-dns"
+    ],
+    "user": {
+      "domain": "safemarch.com",
+      "email": "jdoe1@safemarch.com",
+      "name": "jdoe1"
+    },
+    "zscaler_zia": {
+      "dns": {
+        "datacenter": {
+          "city": "Sa",
+          "country": "US",
+          "name": "CA Client Node DC"
+        },
+        "day": "Mon",
+        "day_of_month": 16,
+        "department": "EDept",
+        "dept": "Sales",
+        "device": {
+          "appversion": "4.3.0.18",
+          "os": {
+            "type": "Windows OS"
+          },
+          "owner": "jsmith"
+        },
+        "dns": {
+          "category": "Network Service",
+          "gateway": {
+            "rule": "DNS GATEWAY Rule 1",
+            "status": "PRIMARY_SERVER_RESPONSE_PASS"
+          }
+        },
+        "dom": {
+          "category": "Professional Services"
+        },
+        "ecs": {
+          "prefix": "192.168.0.0",
+          "slot": "ECS Slot #17"
+        },
+        "ednsreq": "XP44535PP",
+        "eedone": "Yes",
+        "epochtime": "2020-01-04T09:00:00.000Z",
+        "hour": 22,
+        "http_code": "100",
+        "istcp": "1",
+        "loc": "Headquarters",
+        "location": "ELocation",
+        "login": "jdoe@safemarch.com",
+        "minutes": 55,
+        "month": "Oct",
+        "month_of_year": 10,
+        "obfuscated": {
+          "client_source_ip": "9960223283",
+          "device": {
+            "name": "2175092224",
+            "owner": "10831489"
+          },
+          "dom": {
+            "category": "4951704103"
+          },
+          "host_name": "2168890624"
+        },
+        "request": {
+          "action": "REQ_ALLOW"
+        },
+        "response": {
+          "action": "RES_Action",
+          "category": "Adult Themes"
+        },
+        "second": 48,
+        "timezone": "GMT",
+        "year": 2023
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-10-16T22:55:48.000Z",
+    "agent": {
+      "ephemeral_id": "d8e3643b-656f-48f8-af53-bfc3ff7da015",
+      "id": "48569979-1bec-4494-ba23-554999a2b63b",
+      "name": "elastic-agent-93710",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "provider": "zscaler.net"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.dns",
+      "namespace": "91090",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.0"
+    },
+    "device": {
+      "model": {
+        "name": "VMware7,1"
+      }
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "192.168.2.200",
+          "type": "IPv4"
+        }
+      ],
+      "question": {
+        "name": "mail.safemarch.com",
+        "type": "A record"
+      },
+      "resolved_ip": [
+        "192.168.2.200"
+      ],
+      "response_code": "EMPTY_RESP"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "48569979-1bec-4494-ba23-554999a2b63b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "zscaler_zia.dns",
+      "duration": 1000000000,
+      "id": "45648954",
+      "ingested": "2026-03-10T03:38:18Z",
+      "kind": "event",
+      "timezone": "GMT",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "hostname": "admin",
+      "name": "thinkpadsmith",
+      "os": {
+        "version": "Microsoft Windows 10 Enterprise;64 bit"
+      },
+      "type": "Zscaler Client Connector"
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "application": "google dns",
+      "protocol": "dns",
+      "transport": [
+        "tcp"
+      ]
+    },
+    "organization": {
+      "name": "Zscaler"
+    },
+    "related": {
+      "hosts": [
+        "thinkpadsmith",
+        "admin"
+      ],
+      "ip": [
+        "192.168.2.200",
+        "81.2.69.192",
+        "175.16.199.0"
+      ],
+      "user": [
+        "jsmith",
+        "jdoe1",
+        "jdoe1@safemarch.com"
+      ]
+    },
+    "rule": {
+      "name": [
+        "RULE_1",
+        "RULE_RES"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.192",
+      "port": 1025
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-dns"
+    ],
+    "user": {
+      "domain": "safemarch.com",
+      "email": "jdoe1@safemarch.com",
+      "name": "jdoe1"
+    },
+    "zscaler_zia": {
+      "dns": {
+        "datacenter": {
+          "city": "Sa",
+          "country": "US",
+          "name": "CA Client Node DC"
+        },
+        "day": "Mon",
+        "day_of_month": 16,
+        "department": "EDept",
+        "dept": "Sales",
+        "device": {
+          "appversion": "4.3.0.18",
+          "os": {
+            "type": "Windows OS"
+          },
+          "owner": "jsmith"
+        },
+        "dns": {
+          "category": "Network Service",
+          "gateway": {
+            "rule": "DNS GATEWAY Rule 1",
+            "status": "PRIMARY_SERVER_RESPONSE_PASS"
+          }
+        },
+        "dom": {
+          "category": "Professional Services"
+        },
+        "ecs": {
+          "prefix": "192.168.0.0",
+          "slot": "ECS Slot #17"
+        },
+        "ednsreq": "XP44535PP",
+        "eedone": "No",
+        "epochtime": "2020-01-04T09:00:00.000Z",
+        "hour": 22,
+        "http_code": "100",
+        "istcp": "0",
+        "loc": "Headquarters",
+        "location": "ELocation",
+        "login": "jdoe@safemarch.com",
+        "minutes": 55,
+        "month": "Oct",
+        "month_of_year": 10,
+        "obfuscated": {
+          "client_source_ip": "9960223283",
+          "device": {
+            "name": "2175092224",
+            "owner": "10831489"
+          },
+          "dom": {
+            "category": "4951704103"
+          },
+          "host_name": "2168890624"
+        },
+        "request": {
+          "action": "REQ_ALLOW"
+        },
+        "response": {
+          "action": "RES_Action"
+        },
+        "second": 48,
+        "timezone": "GMT",
+        "year": 2023
+      }
+    }
+  }
+]

@@ -1,0 +1,700 @@
+[
+  {
+    "@timestamp": "2023-10-20T09:54:11.496Z",
+    "agent": {
+      "ephemeral_id": "9b5cccf6-8781-47ef-8951-b2f1f491029e",
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "name": "elastic-agent-78593",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+      }
+    },
+    "data_stream": {
+      "dataset": "m365_defender.alert",
+      "namespace": "19735",
+      "type": "logs"
+    },
+    "device": {
+      "id": [
+        "f18bd540-d5e4-46e0-8ddd-3d03a59e4e14"
+      ]
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "created": "2023-10-20T09:54:10.856Z",
+      "dataset": "m365_defender.alert",
+      "duration": 2132000000,
+      "end": "2023-10-20T09:51:41.647Z",
+      "id": "dab4728eea-b128-44e3-ac16-a21f73b5436b_1",
+      "ingested": "2026-03-10T01:13:37Z",
+      "kind": "alert",
+      "original": "{\"actorDisplayName\":null,\"additionalData\":null,\"alertPolicyId\":null,\"alertWebUrl\":\"https://security.microsoft.com/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"assignedTo\":null,\"category\":\"Discovery\",\"classification\":null,\"comments\":[],\"createdDateTime\":\"2023-10-20T09:54:10.8560905Z\",\"description\":\"A known tool or technique was used to gather information on this device. Attackers might be trying to gather information about the target device or network for later attacks.\",\"detectionSource\":\"microsoftDefenderForCloud\",\"detectorId\":\"9bfe28a9-21eb-4f8a-b51e-38ebd3650c88\",\"determination\":null,\"evidence\":[{\"@odata.type\":\"#microsoft.graph.security.deviceEvidence\",\"azureAdDeviceId\":\"f18bd540-d5e4-46e0-8ddd-3d03a59e4e14\",\"createdDateTime\":\"2023-10-20T09:54:10.8833333Z\",\"defenderAvStatus\":\"notSupported\",\"detailedRoles\":[\"PrimaryDevice\"],\"deviceDnsName\":\"clw555test\",\"firstSeenDateTime\":\"2023-10-20T09:50:17.7383987Z\",\"healthStatus\":\"inactive\",\"ipInterfaces\":[],\"loggedOnUsers\":[{\"accountName\":\"CDPUserIS-38411\",\"domainName\":\"AzureAD\"}],\"mdeDeviceId\":\"505d70d89cfa3428f7aac7d2eb3a64c60fd3d843\",\"onboardingStatus\":\"onboarded\",\"osBuild\":22621,\"osPlatform\":\"Windows11\",\"rbacGroupId\":0,\"rbacGroupName\":null,\"remediationStatus\":\"none\",\"remediationStatusDetails\":null,\"riskScore\":\"high\",\"roles\":[],\"tags\":[],\"verdict\":\"unknown\",\"version\":\"22H2\",\"vmMetadata\":null}],\"firstActivityDateTime\":\"2023-10-20T09:51:39.5154802Z\",\"id\":\"dab4728eea-b128-44e3-ac16-a21f73b5436b_1\",\"incidentId\":\"23\",\"incidentWebUrl\":\"https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"lastActivityDateTime\":\"2023-10-20T09:51:41.6475257Z\",\"lastUpdateDateTime\":\"2023-10-20T09:54:11.4966667Z\",\"mitreTechniques\":[\"T1057\",\"T1059.001\"],\"productName\":\"Microsoft Defender for Endpoint\",\"providerAlertId\":\"b4728eea-b128-44e3-ac16-a21f73b5436b_1\",\"recommendedActions\":\"A. Validate the alert.\\n1. Review the alert and inspect the tool that was used to gather information. Inspect the account that was used to launch the tool.\\n2. Check the device timeline for other suspicious activities.\\n3. Locate unfamiliar processes in the process tree. Check files for prevalence, their locations, and digital signatures.\\n4. Submit relevant files for deep analysis and review file behaviors.\\n5. Identify unusual system activity with system owners.\\n\\nB. Scope the incident. Find related devices in the incident graph. \\n\\nC.  Contain and mitigate the breach. Stop suspicious scripts or processes, isolate affected devices, decommission compromised accounts or reset passwords, block IP addresses and URLs, and install security updates.\\n\\nD. Contact your incident response team or contact Microsoft support for investigation and remediation services.\",\"resolvedDateTime\":null,\"serviceSource\":\"microsoftDefenderForCloud\",\"severity\":\"low\",\"status\":\"new\",\"tenantId\":\"3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"threatDisplayName\":null,\"threatFamilyName\":null,\"title\":\"Suspicious Process Discovery\"}",
+      "provider": "microsoftDefenderForCloud",
+      "severity": 21,
+      "start": "2023-10-20T09:51:39.515Z",
+      "type": [
+        "info"
+      ],
+      "url": "https://security.microsoft.com/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+    },
+    "host": {
+      "hostname": [
+        "clw555test"
+      ],
+      "id": [
+        "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843"
+      ],
+      "os": {
+        "name": [
+          "Windows11"
+        ],
+        "version": [
+          "22H2"
+        ]
+      }
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "m365_defender": {
+      "alert": {
+        "category": "Discovery",
+        "created_datetime": "2023-10-20T09:54:10.856Z",
+        "description": "A known tool or technique was used to gather information on this device. Attackers might be trying to gather information about the target device or network for later attacks.",
+        "detection_source": "microsoftDefenderForCloud",
+        "detector_id": "9bfe28a9-21eb-4f8a-b51e-38ebd3650c88",
+        "evidence": [
+          {
+            "logged_on_users": [
+              {
+                "domain_name": "AzureAD",
+                "account_name": "CDPUserIS-38411"
+              }
+            ],
+            "created_datetime": "2023-10-20T09:54:10.883Z",
+            "remediation_status": "none",
+            "odata_type": "#microsoft.graph.security.deviceEvidence",
+            "os_build": "22621",
+            "first_seen_datetime": "2023-10-20T09:50:17.738Z",
+            "azure_ad_device_id": "f18bd540-d5e4-46e0-8ddd-3d03a59e4e14",
+            "health_status": "inactive",
+            "onboarding_status": "onboarded",
+            "risk_score": "high",
+            "os_platform": "Windows11",
+            "version": "22H2",
+            "rbac_group": {
+              "id": "0"
+            },
+            "defender_av_status": "notSupported",
+            "verdict": "unknown",
+            "detailed_roles": [
+              "PrimaryDevice"
+            ],
+            "mde_device_id": "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843",
+            "device_dns_name": "clw555test"
+          }
+        ],
+        "first_activity_datetime": "2023-10-20T09:51:39.515Z",
+        "id": "dab4728eea-b128-44e3-ac16-a21f73b5436b_1",
+        "incident_id": "23",
+        "incident_web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/incidents/23",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        },
+        "last_activity_datetime": "2023-10-20T09:51:41.647Z",
+        "last_update_datetime": "2023-10-20T09:54:11.496Z",
+        "mitre_techniques": [
+          "T1057",
+          "T1059.001"
+        ],
+        "provider_alert_id": "b4728eea-b128-44e3-ac16-a21f73b5436b_1",
+        "recommended_actions": "A. Validate the alert.\n1. Review the alert and inspect the tool that was used to gather information. Inspect the account that was used to launch the tool.\n2. Check the device timeline for other suspicious activities.\n3. Locate unfamiliar processes in the process tree. Check files for prevalence, their locations, and digital signatures.\n4. Submit relevant files for deep analysis and review file behaviors.\n5. Identify unusual system activity with system owners.\n\nB. Scope the incident. Find related devices in the incident graph. \n\nC.  Contain and mitigate the breach. Stop suspicious scripts or processes, isolate affected devices, decommission compromised accounts or reset passwords, block IP addresses and URLs, and install security updates.\n\nD. Contact your incident response team or contact Microsoft support for investigation and remediation services.",
+        "service_source": "microsoftDefenderForCloud",
+        "severity": "low",
+        "status": "new",
+        "tenant_id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+        "title": "Suspicious Process Discovery",
+        "web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        }
+      }
+    },
+    "message": "A known tool or technique was used to gather information on this device. Attackers might be trying to gather information about the target device or network for later attacks.",
+    "related": {
+      "hosts": [
+        "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843",
+        "Windows11",
+        "22H2",
+        "clw555test",
+        "AzureAD"
+      ],
+      "user": [
+        "CDPUserIS-38411"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "m365_defender-alert"
+    ],
+    "threat": {
+      "tactic": {
+        "name": [
+          "Discovery"
+        ]
+      },
+      "technique": {
+        "subtechnique": {
+          "id": [
+            "T1057",
+            "T1059.001"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-10-20T09:54:11.496Z",
+    "agent": {
+      "ephemeral_id": "9b5cccf6-8781-47ef-8951-b2f1f491029e",
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "name": "elastic-agent-78593",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+      }
+    },
+    "data_stream": {
+      "dataset": "m365_defender.alert",
+      "namespace": "19735",
+      "type": "logs"
+    },
+    "device": {
+      "id": [
+        "f18bd540-d5e4-46e0-8ddd-3d03a59e4e14"
+      ]
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "created": "2023-10-20T09:54:10.856Z",
+      "dataset": "m365_defender.alert",
+      "duration": 2132000000,
+      "end": "2023-10-20T09:51:41.647Z",
+      "id": "dab4728eea-b128-44e3-ac16-a21f73b5436b_10",
+      "ingested": "2026-03-10T01:13:37Z",
+      "kind": "alert",
+      "original": "{\"actorDisplayName\":null,\"additionalData\":null,\"alertPolicyId\":null,\"alertWebUrl\":\"https://security.microsoft.com/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"assignedTo\":null,\"category\":\"Discovery\",\"classification\":null,\"comments\":[],\"createdDateTime\":\"2023-10-20T09:54:10.8560905Z\",\"description\":\"A known tool or technique was used to gather information on this device. Attackers might be trying to gather information about the target device or network for later attacks.\",\"detectionSource\":\"microsoftDefenderForCloud\",\"detectorId\":\"9bfe28a9-21eb-4f8a-b51e-38ebd3650c88\",\"determination\":null,\"evidence\":[{\"@odata.type\":\"#microsoft.graph.security.deviceEvidence\",\"azureAdDeviceId\":\"f18bd540-d5e4-46e0-8ddd-3d03a59e4e14\",\"createdDateTime\":\"2023-10-20T09:54:10.8833333Z\",\"defenderAvStatus\":\"notSupported\",\"detailedRoles\":[\"PrimaryDevice\"],\"deviceDnsName\":\"clw555test\",\"firstSeenDateTime\":\"2023-10-20T09:50:17.7383987Z\",\"healthStatus\":\"inactive\",\"ipInterfaces\":[],\"loggedOnUsers\":[{\"accountName\":\"CDPUserIS-38411\",\"domainName\":\"AzureAD\"}],\"mdeDeviceId\":\"505d70d89cfa3428f7aac7d2eb3a64c60fd3d843\",\"onboardingStatus\":\"onboarded\",\"osBuild\":22621,\"osPlatform\":\"Windows11\",\"rbacGroupId\":0,\"rbacGroupName\":null,\"remediationStatus\":\"none\",\"remediationStatusDetails\":null,\"riskScore\":\"high\",\"roles\":[],\"tags\":[],\"verdict\":\"unknown\",\"version\":\"22H2\",\"vmMetadata\":null}],\"firstActivityDateTime\":\"2023-10-20T09:51:39.5154802Z\",\"id\":\"dab4728eea-b128-44e3-ac16-a21f73b5436b_10\",\"incidentId\":\"23\",\"incidentWebUrl\":\"https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"lastActivityDateTime\":\"2023-10-20T09:51:41.6475257Z\",\"lastUpdateDateTime\":\"2023-10-20T09:54:11.4966667Z\",\"mitreTechniques\":[\"T1057\",\"T1059.001\"],\"productName\":\"Microsoft Defender for Endpoint\",\"providerAlertId\":\"b4728eea-b128-44e3-ac16-a21f73b5436b_1\",\"recommendedActions\":\"A. Validate the alert.\\n1. Review the alert and inspect the tool that was used to gather information. Inspect the account that was used to launch the tool.\\n2. Check the device timeline for other suspicious activities.\\n3. Locate unfamiliar processes in the process tree. Check files for prevalence, their locations, and digital signatures.\\n4. Submit relevant files for deep analysis and review file behaviors.\\n5. Identify unusual system activity with system owners.\\n\\nB. Scope the incident. Find related devices in the incident graph. \\n\\nC.  Contain and mitigate the breach. Stop suspicious scripts or processes, isolate affected devices, decommission compromised accounts or reset passwords, block IP addresses and URLs, and install security updates.\\n\\nD. Contact your incident response team or contact Microsoft support for investigation and remediation services.\",\"resolvedDateTime\":null,\"serviceSource\":\"microsoftDefenderForCloud\",\"severity\":\"high\",\"status\":\"new\",\"tenantId\":\"3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"threatDisplayName\":null,\"threatFamilyName\":null,\"title\":\"Suspicious Process Discovery\"}",
+      "provider": "microsoftDefenderForCloud",
+      "severity": 73,
+      "start": "2023-10-20T09:51:39.515Z",
+      "type": [
+        "info"
+      ],
+      "url": "https://security.microsoft.com/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+    },
+    "host": {
+      "hostname": [
+        "clw555test"
+      ],
+      "id": [
+        "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843"
+      ],
+      "os": {
+        "name": [
+          "Windows11"
+        ],
+        "version": [
+          "22H2"
+        ]
+      }
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "m365_defender": {
+      "alert": {
+        "category": "Discovery",
+        "created_datetime": "2023-10-20T09:54:10.856Z",
+        "description": "A known tool or technique was used to gather information on this device. Attackers might be trying to gather information about the target device or network for later attacks.",
+        "detection_source": "microsoftDefenderForCloud",
+        "detector_id": "9bfe28a9-21eb-4f8a-b51e-38ebd3650c88",
+        "evidence": [
+          {
+            "logged_on_users": [
+              {
+                "domain_name": "AzureAD",
+                "account_name": "CDPUserIS-38411"
+              }
+            ],
+            "created_datetime": "2023-10-20T09:54:10.883Z",
+            "remediation_status": "none",
+            "odata_type": "#microsoft.graph.security.deviceEvidence",
+            "os_build": "22621",
+            "first_seen_datetime": "2023-10-20T09:50:17.738Z",
+            "azure_ad_device_id": "f18bd540-d5e4-46e0-8ddd-3d03a59e4e14",
+            "health_status": "inactive",
+            "onboarding_status": "onboarded",
+            "risk_score": "high",
+            "os_platform": "Windows11",
+            "version": "22H2",
+            "rbac_group": {
+              "id": "0"
+            },
+            "defender_av_status": "notSupported",
+            "verdict": "unknown",
+            "detailed_roles": [
+              "PrimaryDevice"
+            ],
+            "mde_device_id": "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843",
+            "device_dns_name": "clw555test"
+          }
+        ],
+        "first_activity_datetime": "2023-10-20T09:51:39.515Z",
+        "id": "dab4728eea-b128-44e3-ac16-a21f73b5436b_10",
+        "incident_id": "23",
+        "incident_web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/incidents/23",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        },
+        "last_activity_datetime": "2023-10-20T09:51:41.647Z",
+        "last_update_datetime": "2023-10-20T09:54:11.496Z",
+        "mitre_techniques": [
+          "T1057",
+          "T1059.001"
+        ],
+        "provider_alert_id": "b4728eea-b128-44e3-ac16-a21f73b5436b_1",
+        "recommended_actions": "A. Validate the alert.\n1. Review the alert and inspect the tool that was used to gather information. Inspect the account that was used to launch the tool.\n2. Check the device timeline for other suspicious activities.\n3. Locate unfamiliar processes in the process tree. Check files for prevalence, their locations, and digital signatures.\n4. Submit relevant files for deep analysis and review file behaviors.\n5. Identify unusual system activity with system owners.\n\nB. Scope the incident. Find related devices in the incident graph. \n\nC.  Contain and mitigate the breach. Stop suspicious scripts or processes, isolate affected devices, decommission compromised accounts or reset passwords, block IP addresses and URLs, and install security updates.\n\nD. Contact your incident response team or contact Microsoft support for investigation and remediation services.",
+        "service_source": "microsoftDefenderForCloud",
+        "severity": "high",
+        "status": "new",
+        "tenant_id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+        "title": "Suspicious Process Discovery",
+        "web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/alerts/dab4728eea-b128-44e3-ac16-a21f73b5436b_1",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        }
+      }
+    },
+    "message": "A known tool or technique was used to gather information on this device. Attackers might be trying to gather information about the target device or network for later attacks.",
+    "related": {
+      "hosts": [
+        "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843",
+        "Windows11",
+        "22H2",
+        "clw555test",
+        "AzureAD"
+      ],
+      "user": [
+        "CDPUserIS-38411"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "m365_defender-alert"
+    ],
+    "threat": {
+      "tactic": {
+        "name": [
+          "Discovery"
+        ]
+      },
+      "technique": {
+        "subtechnique": {
+          "id": [
+            "T1057",
+            "T1059.001"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-10-20T09:54:10.466Z",
+    "agent": {
+      "ephemeral_id": "9b5cccf6-8781-47ef-8951-b2f1f491029e",
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "name": "elastic-agent-78593",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+      }
+    },
+    "data_stream": {
+      "dataset": "m365_defender.alert",
+      "namespace": "19735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2023-10-20T09:54:06.750Z",
+      "dataset": "m365_defender.alert",
+      "duration": 0,
+      "end": "2023-10-20T09:51:39.515Z",
+      "id": "da2046fc02-67f1-41f5-923d-ef916d70c005_1",
+      "ingested": "2026-03-10T01:13:37Z",
+      "kind": "alert",
+      "original": "{\"actorDisplayName\":null,\"additionalData\":null,\"alertPolicyId\":null,\"alertWebUrl\":\"https://security.microsoft.com/alerts/da2046fc02-67f1-41f5-923d-ef916d70c005_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"assignedTo\":null,\"category\":\"Execution\",\"classification\":null,\"comments\":[],\"createdDateTime\":\"2023-10-20T09:54:06.750499Z\",\"description\":\" This is a test alert \\nA suspicious Powershell commandline was found on the machine. This commandline might be used during installation, exploration, or in some cases with lateral movement activities which are used by attackers to invoke modules, download external payloads, and get more information about the system. Attackers usually use Powershell to bypass security protection mechanisms by executing their payload in memory without touching the disk and leaving any trace.\",\"detectionSource\":\"microsoftDefenderForEndpoint\",\"detectorId\":\"de54c08f-c3f5-40e3-ae58-7e3fffbc2574\",\"determination\":null,\"evidence\":[{\"@odata.type\":\"#microsoft.graph.security.userEvidence\",\"createdDateTime\":\"2023-10-20T09:54:06.84Z\",\"detailedRoles\":[],\"remediationStatus\":\"none\",\"remediationStatusDetails\":null,\"roles\":[],\"tags\":[],\"userAccount\":{\"accountName\":\"CDPUserIS-38411\",\"azureAdUserId\":\"588d7c15-8565-448e-bc2d-57f2b7c4c58a\",\"displayName\":null,\"domainName\":\"AzureAD\",\"userPrincipalName\":\"cdp.38411@crestdatasys.com\",\"userSid\":\"S-1-12-1-1485667349-1150190949-4065799612-2328216759\"},\"verdict\":\"unknown\"}],\"firstActivityDateTime\":\"2023-10-20T09:51:39.5154802Z\",\"id\":\"da2046fc02-67f1-41f5-923d-ef916d70c005_1\",\"incidentId\":\"23\",\"incidentWebUrl\":\"https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"lastActivityDateTime\":\"2023-10-20T09:51:39.5154802Z\",\"lastUpdateDateTime\":\"2023-10-20T09:54:10.4666667Z\",\"mitreTechniques\":[\"T1059.001\"],\"productName\":\"Microsoft Defender for Endpoint\",\"providerAlertId\":\"2046fc02-67f1-41f5-923d-ef916d70c005_1\",\"recommendedActions\":\" This is a test alert \\n1. Examine the PowerShell commandline to understand what commands were executed. Note: the script may need to be decoded if it is base64-encoded\\n2. Search the script for more indicators to investigate - for example IP addresses (potential C\\u0026C servers), target computers etc.\\n3. Explore the timeline of this and other related machines for additional suspect activities around the time of the alert. \\n4. Look for the process that invoked this PowerShell run and their origin. Consider submitting any suspect files in the chain for deep analysis for detailed behavior information.\",\"resolvedDateTime\":null,\"serviceSource\":\"microsoftDefenderForEndpoint\",\"severity\":\"informational\",\"status\":\"new\",\"tenantId\":\"3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"threatDisplayName\":null,\"threatFamilyName\":null,\"title\":\"[Test Alert] Suspicious Powershell commandline\"}",
+      "provider": "microsoftDefenderForEndpoint",
+      "severity": 21,
+      "start": "2023-10-20T09:51:39.515Z",
+      "type": [
+        "info"
+      ],
+      "url": "https://security.microsoft.com/alerts/da2046fc02-67f1-41f5-923d-ef916d70c005_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "m365_defender": {
+      "alert": {
+        "category": "Execution",
+        "created_datetime": "2023-10-20T09:54:06.750Z",
+        "description": " This is a test alert \nA suspicious Powershell commandline was found on the machine. This commandline might be used during installation, exploration, or in some cases with lateral movement activities which are used by attackers to invoke modules, download external payloads, and get more information about the system. Attackers usually use Powershell to bypass security protection mechanisms by executing their payload in memory without touching the disk and leaving any trace.",
+        "detection_source": "microsoftDefenderForEndpoint",
+        "detector_id": "de54c08f-c3f5-40e3-ae58-7e3fffbc2574",
+        "evidence": [
+          {
+            "verdict": "unknown",
+            "user_account": {
+              "user_principal_name": "cdp.38411@crestdatasys.com",
+              "domain_name": "AzureAD",
+              "account_name": "CDPUserIS-38411",
+              "user_sid": "S-1-12-1-1485667349-1150190949-4065799612-2328216759",
+              "azure_ad_user_id": "588d7c15-8565-448e-bc2d-57f2b7c4c58a"
+            },
+            "created_datetime": "2023-10-20T09:54:06.840Z",
+            "remediation_status": "none",
+            "odata_type": "#microsoft.graph.security.userEvidence"
+          }
+        ],
+        "first_activity_datetime": "2023-10-20T09:51:39.515Z",
+        "id": "da2046fc02-67f1-41f5-923d-ef916d70c005_1",
+        "incident_id": "23",
+        "incident_web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/incidents/23",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        },
+        "last_activity_datetime": "2023-10-20T09:51:39.515Z",
+        "last_update_datetime": "2023-10-20T09:54:10.466Z",
+        "mitre_techniques": [
+          "T1059.001"
+        ],
+        "provider_alert_id": "2046fc02-67f1-41f5-923d-ef916d70c005_1",
+        "recommended_actions": " This is a test alert \n1. Examine the PowerShell commandline to understand what commands were executed. Note: the script may need to be decoded if it is base64-encoded\n2. Search the script for more indicators to investigate - for example IP addresses (potential C&C servers), target computers etc.\n3. Explore the timeline of this and other related machines for additional suspect activities around the time of the alert. \n4. Look for the process that invoked this PowerShell run and their origin. Consider submitting any suspect files in the chain for deep analysis for detailed behavior information.",
+        "service_source": "microsoftDefenderForEndpoint",
+        "severity": "informational",
+        "status": "new",
+        "tenant_id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+        "title": "[Test Alert] Suspicious Powershell commandline",
+        "web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/alerts/da2046fc02-67f1-41f5-923d-ef916d70c005_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/alerts/da2046fc02-67f1-41f5-923d-ef916d70c005_1",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        }
+      }
+    },
+    "message": " This is a test alert \nA suspicious Powershell commandline was found on the machine. This commandline might be used during installation, exploration, or in some cases with lateral movement activities which are used by attackers to invoke modules, download external payloads, and get more information about the system. Attackers usually use Powershell to bypass security protection mechanisms by executing their payload in memory without touching the disk and leaving any trace.",
+    "related": {
+      "hosts": [
+        "AzureAD"
+      ],
+      "user": [
+        "588d7c15-8565-448e-bc2d-57f2b7c4c58a",
+        "cdp.38411@crestdatasys.com",
+        "CDPUserIS-38411",
+        "S-1-12-1-1485667349-1150190949-4065799612-2328216759"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "m365_defender-alert"
+    ],
+    "threat": {
+      "tactic": {
+        "name": [
+          "Execution"
+        ]
+      },
+      "technique": {
+        "subtechnique": {
+          "id": [
+            "T1059.001"
+          ]
+        }
+      }
+    },
+    "user": {
+      "domain": [
+        "AzureAD"
+      ],
+      "email": [
+        "cdp.38411@crestdatasys.com"
+      ],
+      "id": [
+        "588d7c15-8565-448e-bc2d-57f2b7c4c58a"
+      ],
+      "name": [
+        "CDPUserIS-38411"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-10-20T09:54:07.503Z",
+    "agent": {
+      "ephemeral_id": "9b5cccf6-8781-47ef-8951-b2f1f491029e",
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "name": "elastic-agent-78593",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+      }
+    },
+    "data_stream": {
+      "dataset": "m365_defender.alert",
+      "namespace": "19735",
+      "type": "logs"
+    },
+    "device": {
+      "id": [
+        "f18bd540-d5e4-46e0-8ddd-3d03a59e4e14"
+      ]
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7649cdf4-1633-4cef-8b5c-4139696cbf90",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "created": "2023-10-20T09:53:09.883Z",
+      "dataset": "m365_defender.alert",
+      "duration": 2478000000,
+      "end": "2023-10-20T09:51:41.993Z",
+      "id": "daefa1828b-dd4e-405c-8a3b-aa28596830dd_1",
+      "ingested": "2026-03-10T01:13:37Z",
+      "kind": "alert",
+      "original": "{\"actorDisplayName\":null,\"additionalData\":null,\"alertPolicyId\":null,\"alertWebUrl\":\"https://security.microsoft.com/alerts/daefa1828b-dd4e-405c-8a3b-aa28596830dd_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"assignedTo\":null,\"category\":\"Execution\",\"classification\":null,\"comments\":[],\"createdDateTime\":\"2023-10-20T09:53:09.8839373Z\",\"description\":\"A suspicious PowerShell activity was observed on the machine. \\nThis behavior may indicate that PowerShell was used during installation, exploration, or in some cases in lateral movement activities which are used by attackers to invoke modules, download external payloads, or get more information about the system. Attackers usually use PowerShell to bypass security protection mechanisms by executing their payload in memory without touching the disk and leaving any trace.\",\"detectionSource\":\"microsoftDefenderForEndpoint\",\"detectorId\":\"7f1c3609-a3ff-40e2-995b-c01770161d68\",\"determination\":null,\"evidence\":[{\"@odata.type\":\"#microsoft.graph.security.deviceEvidence\",\"azureAdDeviceId\":\"f18bd540-d5e4-46e0-8ddd-3d03a59e4e14\",\"createdDateTime\":\"2023-10-20T09:53:10.1933333Z\",\"defenderAvStatus\":\"notSupported\",\"detailedRoles\":[\"PrimaryDevice\"],\"deviceDnsName\":\"clw555test\",\"firstSeenDateTime\":\"2023-10-20T09:50:17.7383987Z\",\"healthStatus\":\"inactive\",\"ipInterfaces\":[\"192.168.5.65\",\"fe80::cfe4:80b:615c:38fb\",\"127.0.0.1\",\"::1\"],\"loggedOnUsers\":[{\"accountName\":\"CDPUserIS-38411\",\"domainName\":\"AzureAD\"}],\"mdeDeviceId\":\"505d70d89cfa3428f7aac7d2eb3a64c60fd3d843\",\"onboardingStatus\":\"onboarded\",\"osBuild\":22621,\"osPlatform\":\"Windows11\",\"rbacGroupId\":0,\"rbacGroupName\":null,\"remediationStatus\":\"none\",\"remediationStatusDetails\":null,\"riskScore\":\"high\",\"roles\":[],\"tags\":[],\"verdict\":\"unknown\",\"version\":\"22H2\",\"vmMetadata\":null}],\"firstActivityDateTime\":\"2023-10-20T09:51:39.5154802Z\",\"id\":\"daefa1828b-dd4e-405c-8a3b-aa28596830dd_1\",\"incidentId\":\"23\",\"incidentWebUrl\":\"https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"lastActivityDateTime\":\"2023-10-20T09:51:41.9939003Z\",\"lastUpdateDateTime\":\"2023-10-20T09:54:07.5033333Z\",\"mitreTechniques\":[\"T1059.001\"],\"productName\":\"Microsoft Defender for Endpoint\",\"providerAlertId\":\"efa1828b-dd4e-405c-8a3b-aa28596830dd_1\",\"recommendedActions\":\"1. Examine the PowerShell command line to understand what commands were executed. Note: the content may need to be decoded if it is Base64-encoded.\\n2. Search the script for more indicators to investigate - for example IP addresses (potential C\\u0026C servers), target computers etc.\\n3. Explore the timeline of this and other related machines for additional suspect activities around the time of the alert.\\n4. Look for the process that invoked this PowerShell run and their origin. Consider submitting any suspect files in the chain for deep analysis for detailed behavior information.\",\"resolvedDateTime\":null,\"serviceSource\":\"microsoftDefenderForEndpoint\",\"severity\":\"medium\",\"status\":\"new\",\"tenantId\":\"3adb963c-8e61-48e8-a06d-6dbb0dacea39\",\"threatDisplayName\":null,\"threatFamilyName\":null,\"title\":\"Suspicious PowerShell command line\"}",
+      "provider": "microsoftDefenderForEndpoint",
+      "severity": 47,
+      "start": "2023-10-20T09:51:39.515Z",
+      "type": [
+        "info"
+      ],
+      "url": "https://security.microsoft.com/alerts/daefa1828b-dd4e-405c-8a3b-aa28596830dd_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39"
+    },
+    "host": {
+      "hostname": [
+        "clw555test"
+      ],
+      "id": [
+        "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843"
+      ],
+      "ip": [
+        "192.168.5.65",
+        "fe80::cfe4:80b:615c:38fb",
+        "127.0.0.1",
+        "::1"
+      ],
+      "os": {
+        "name": [
+          "Windows11"
+        ],
+        "version": [
+          "22H2"
+        ]
+      }
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "m365_defender": {
+      "alert": {
+        "category": "Execution",
+        "created_datetime": "2023-10-20T09:53:09.883Z",
+        "description": "A suspicious PowerShell activity was observed on the machine. \nThis behavior may indicate that PowerShell was used during installation, exploration, or in some cases in lateral movement activities which are used by attackers to invoke modules, download external payloads, or get more information about the system. Attackers usually use PowerShell to bypass security protection mechanisms by executing their payload in memory without touching the disk and leaving any trace.",
+        "detection_source": "microsoftDefenderForEndpoint",
+        "detector_id": "7f1c3609-a3ff-40e2-995b-c01770161d68",
+        "evidence": [
+          {
+            "logged_on_users": [
+              {
+                "domain_name": "AzureAD",
+                "account_name": "CDPUserIS-38411"
+              }
+            ],
+            "created_datetime": "2023-10-20T09:53:10.193Z",
+            "remediation_status": "none",
+            "odata_type": "#microsoft.graph.security.deviceEvidence",
+            "os_build": "22621",
+            "first_seen_datetime": "2023-10-20T09:50:17.738Z",
+            "azure_ad_device_id": "f18bd540-d5e4-46e0-8ddd-3d03a59e4e14",
+            "health_status": "inactive",
+            "onboarding_status": "onboarded",
+            "risk_score": "high",
+            "os_platform": "Windows11",
+            "version": "22H2",
+            "rbac_group": {
+              "id": "0"
+            },
+            "defender_av_status": "notSupported",
+            "verdict": "unknown",
+            "detailed_roles": [
+              "PrimaryDevice"
+            ],
+            "mde_device_id": "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843",
+            "device_dns_name": "clw555test",
+            "ip_interfaces": [
+              "192.168.5.65",
+              "fe80::cfe4:80b:615c:38fb",
+              "127.0.0.1",
+              "::1"
+            ]
+          }
+        ],
+        "first_activity_datetime": "2023-10-20T09:51:39.515Z",
+        "id": "daefa1828b-dd4e-405c-8a3b-aa28596830dd_1",
+        "incident_id": "23",
+        "incident_web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/incidents/23?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/incidents/23",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        },
+        "last_activity_datetime": "2023-10-20T09:51:41.993Z",
+        "last_update_datetime": "2023-10-20T09:54:07.503Z",
+        "mitre_techniques": [
+          "T1059.001"
+        ],
+        "provider_alert_id": "efa1828b-dd4e-405c-8a3b-aa28596830dd_1",
+        "recommended_actions": "1. Examine the PowerShell command line to understand what commands were executed. Note: the content may need to be decoded if it is Base64-encoded.\n2. Search the script for more indicators to investigate - for example IP addresses (potential C&C servers), target computers etc.\n3. Explore the timeline of this and other related machines for additional suspect activities around the time of the alert.\n4. Look for the process that invoked this PowerShell run and their origin. Consider submitting any suspect files in the chain for deep analysis for detailed behavior information.",
+        "service_source": "microsoftDefenderForEndpoint",
+        "severity": "medium",
+        "status": "new",
+        "tenant_id": "3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+        "title": "Suspicious PowerShell command line",
+        "web_url": {
+          "domain": "security.microsoft.com",
+          "original": "https://security.microsoft.com/alerts/daefa1828b-dd4e-405c-8a3b-aa28596830dd_1?tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "path": "/alerts/daefa1828b-dd4e-405c-8a3b-aa28596830dd_1",
+          "query": "tid=3adb963c-8e61-48e8-a06d-6dbb0dacea39",
+          "scheme": "https"
+        }
+      }
+    },
+    "message": "A suspicious PowerShell activity was observed on the machine. \nThis behavior may indicate that PowerShell was used during installation, exploration, or in some cases in lateral movement activities which are used by attackers to invoke modules, download external payloads, or get more information about the system. Attackers usually use PowerShell to bypass security protection mechanisms by executing their payload in memory without touching the disk and leaving any trace.",
+    "related": {
+      "hosts": [
+        "505d70d89cfa3428f7aac7d2eb3a64c60fd3d843",
+        "Windows11",
+        "22H2",
+        "clw555test",
+        "AzureAD"
+      ],
+      "ip": [
+        "192.168.5.65",
+        "fe80::cfe4:80b:615c:38fb",
+        "127.0.0.1",
+        "::1"
+      ],
+      "user": [
+        "CDPUserIS-38411"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "m365_defender-alert"
+    ],
+    "threat": {
+      "tactic": {
+        "name": [
+          "Execution"
+        ]
+      },
+      "technique": {
+        "subtechnique": {
+          "id": [
+            "T1059.001"
+          ]
+        }
+      }
+    }
+  }
+]

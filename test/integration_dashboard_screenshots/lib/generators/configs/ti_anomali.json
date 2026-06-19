@@ -1,0 +1,83 @@
+{
+  "package": "ti_anomali",
+  "dataStreams": [
+    {
+      "dataset": "ti_anomali.intelligence",
+      "indexPattern": "logs-*",
+      "docTarget": 600,
+      "fields": [
+        "anomali.threatstream.state",
+        "event.dataset",
+        "event.kind",
+        "labels.is_ioc_transform_source",
+        "threat.feed.name",
+        "threat.indicator.confidence",
+        "threat.indicator.email.address",
+        "threat.indicator.file.hash.md5",
+        "threat.indicator.file.hash.sha1",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.file.hash.sha512",
+        "threat.indicator.first_seen",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.ip",
+        "threat.indicator.last_seen",
+        "threat.indicator.marking.tlp",
+        "threat.indicator.provider",
+        "threat.indicator.type",
+        "threat.indicator.url.domain",
+        "threat.indicator.url.scheme"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "file",
+          "url"
+        ],
+        "labels.is_ioc_transform_source": [
+          "true"
+        ],
+        "event.kind": [
+          "enrichment"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_anomali.threatstream",
+      "indexPattern": "logs-*",
+      "docTarget": 600,
+      "fields": [
+        "anomali.threatstream.state",
+        "event.dataset",
+        "event.kind",
+        "labels.is_ioc_transform_source",
+        "threat.feed.name",
+        "threat.indicator.confidence",
+        "threat.indicator.email.address",
+        "threat.indicator.file.hash.md5",
+        "threat.indicator.file.hash.sha1",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.file.hash.sha512",
+        "threat.indicator.first_seen",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.ip",
+        "threat.indicator.last_seen",
+        "threat.indicator.marking.tlp",
+        "threat.indicator.provider",
+        "threat.indicator.type",
+        "threat.indicator.url.domain",
+        "threat.indicator.url.scheme"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "file",
+          "url"
+        ],
+        "labels.is_ioc_transform_source": [
+          "true"
+        ],
+        "event.kind": [
+          "enrichment"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,2954 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:35:48.937Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 485736
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 34,
+              "active": 0,
+              "batches": 25,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 34
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 34,
+              "retry": 0,
+              "total": 34
+            },
+            "queue": {
+              "acked": 34,
+              "added": {
+                "bytes": 0,
+                "events": 34
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 34
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 34
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 5.4,
+            "15": 4.87,
+            "5": 4.94,
+            "norm": {
+              "1": 0.54,
+              "15": 0.487,
+              "5": 0.494
+            }
+          }
+        },
+        "uptime": {
+          "ms": 485736
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 3615792,
+      "ingested": "2026-03-10T03:35:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:48.937Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 425737
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 30,
+              "active": 0,
+              "batches": 22,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 30
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 30,
+              "retry": 0,
+              "total": 30
+            },
+            "queue": {
+              "acked": 30,
+              "added": {
+                "bytes": 0,
+                "events": 30
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 30
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 30
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 3.87,
+            "15": 4.8,
+            "5": 4.72,
+            "norm": {
+              "1": 0.387,
+              "15": 0.48,
+              "5": 0.472
+            }
+          }
+        },
+        "uptime": {
+          "ms": 425737
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2414292,
+      "ingested": "2026-03-10T03:34:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:43.775Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 480573
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 32,
+              "active": 0,
+              "batches": 31,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 32
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 33,
+              "retry": 0,
+              "total": 33
+            },
+            "queue": {
+              "acked": 32,
+              "added": {
+                "bytes": 0,
+                "events": 33
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 32
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 32
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 5.61,
+            "15": 4.88,
+            "5": 4.98,
+            "norm": {
+              "1": 0.561,
+              "15": 0.488,
+              "5": 0.498
+            }
+          }
+        },
+        "uptime": {
+          "ms": 480573
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 3194833,
+      "ingested": "2026-03-10T03:35:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:48.937Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 365736
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 26,
+              "active": 0,
+              "batches": 19,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 26
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 26,
+              "retry": 0,
+              "total": 26
+            },
+            "queue": {
+              "acked": 26,
+              "added": {
+                "bytes": 0,
+                "events": 26
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 26
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 26
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 4.06,
+            "15": 4.87,
+            "5": 4.94,
+            "norm": {
+              "1": 0.406,
+              "15": 0.487,
+              "5": 0.494
+            }
+          }
+        },
+        "uptime": {
+          "ms": 365736
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 1865500,
+      "ingested": "2026-03-10T03:33:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:43.773Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 420573
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 28,
+              "active": 0,
+              "batches": 27,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 28
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 29,
+              "retry": 0,
+              "total": 29
+            },
+            "queue": {
+              "acked": 28,
+              "added": {
+                "bytes": 0,
+                "events": 29
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 28
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 28
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 4.04,
+            "15": 4.81,
+            "5": 4.77,
+            "norm": {
+              "1": 0.404,
+              "15": 0.481,
+              "5": 0.477
+            }
+          }
+        },
+        "uptime": {
+          "ms": 420573
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2593792,
+      "ingested": "2026-03-10T03:34:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:43.773Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 360573
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 24,
+              "active": 0,
+              "batches": 23,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 24
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 25,
+              "retry": 0,
+              "total": 25
+            },
+            "queue": {
+              "acked": 24,
+              "added": {
+                "bytes": 0,
+                "events": 25
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 24
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 24
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 4.33,
+            "15": 4.89,
+            "5": 5.01,
+            "norm": {
+              "1": 0.433,
+              "15": 0.489,
+              "5": 0.501
+            }
+          }
+        },
+        "uptime": {
+          "ms": 360573
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2567375,
+      "ingested": "2026-03-10T03:33:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:48.933Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 305737
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 22,
+              "active": 0,
+              "batches": 16,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 22
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 22,
+              "retry": 0,
+              "total": 22
+            },
+            "queue": {
+              "acked": 22,
+              "added": {
+                "bytes": 0,
+                "events": 22
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 22
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 22
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 4.68,
+            "15": 4.93,
+            "5": 5.18,
+            "norm": {
+              "1": 0.468,
+              "15": 0.493,
+              "5": 0.518
+            }
+          }
+        },
+        "uptime": {
+          "ms": 305737
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2542541,
+      "ingested": "2026-03-10T03:32:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:48.935Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 245737
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 18,
+              "active": 0,
+              "batches": 13,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 18
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 18,
+              "retry": 0,
+              "total": 18
+            },
+            "queue": {
+              "acked": 18,
+              "added": {
+                "bytes": 0,
+                "events": 18
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 18
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 18
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 6.27,
+            "15": 4.98,
+            "5": 5.41,
+            "norm": {
+              "1": 0.627,
+              "15": 0.498,
+              "5": 0.541
+            }
+          }
+        },
+        "uptime": {
+          "ms": 245737
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 5038500,
+      "ingested": "2026-03-10T03:31:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:43.770Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 300574
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 20,
+              "active": 0,
+              "batches": 19,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 20
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 21,
+              "retry": 0,
+              "total": 21
+            },
+            "queue": {
+              "acked": 20,
+              "added": {
+                "bytes": 0,
+                "events": 21
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 20
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 20
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 4.91,
+            "15": 4.95,
+            "5": 5.23,
+            "norm": {
+              "1": 0.491,
+              "15": 0.495,
+              "5": 0.523
+            }
+          }
+        },
+        "uptime": {
+          "ms": 300574
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2650458,
+      "ingested": "2026-03-10T03:32:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:48.941Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 185740
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 14,
+              "active": 0,
+              "batches": 10,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 14
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 14,
+              "retry": 0,
+              "total": 14
+            },
+            "queue": {
+              "acked": 14,
+              "added": {
+                "bytes": 0,
+                "events": 14
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 14
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 14
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 5.25,
+            "15": 4.9,
+            "5": 5.22,
+            "norm": {
+              "1": 0.525,
+              "15": 0.49,
+              "5": 0.522
+            }
+          }
+        },
+        "uptime": {
+          "ms": 185740
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2143042,
+      "ingested": "2026-03-10T03:30:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:43.772Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 240572
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 16,
+              "active": 0,
+              "batches": 15,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 16
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 17,
+              "retry": 0,
+              "total": 17
+            },
+            "queue": {
+              "acked": 16,
+              "added": {
+                "bytes": 0,
+                "events": 17
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 16
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 16
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 5.69,
+            "15": 4.94,
+            "5": 5.28,
+            "norm": {
+              "1": 0.569,
+              "15": 0.494,
+              "5": 0.528
+            }
+          }
+        },
+        "uptime": {
+          "ms": 240572
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 3339083,
+      "ingested": "2026-03-10T03:31:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:48.936Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 125736
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 10,
+              "active": 0,
+              "batches": 7,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 10
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 10,
+              "retry": 0,
+              "total": 10
+            },
+            "queue": {
+              "acked": 10,
+              "added": {
+                "bytes": 0,
+                "events": 10
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 10
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 10
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 6.0,
+            "15": 4.9,
+            "5": 5.3,
+            "norm": {
+              "1": 0.6,
+              "15": 0.49,
+              "5": 0.53
+            }
+          }
+        },
+        "uptime": {
+          "ms": 125736
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2530500,
+      "ingested": "2026-03-10T03:29:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:43.776Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 180576
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 12,
+              "active": 0,
+              "batches": 11,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 12
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 13,
+              "retry": 0,
+              "total": 13
+            },
+            "queue": {
+              "acked": 12,
+              "added": {
+                "bytes": 0,
+                "events": 13
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 12
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 12
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 5.45,
+            "15": 4.91,
+            "5": 5.26,
+            "norm": {
+              "1": 0.545,
+              "15": 0.491,
+              "5": 0.526
+            }
+          }
+        },
+        "uptime": {
+          "ms": 180576
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2431458,
+      "ingested": "2026-03-10T03:30:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:43.778Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 120581
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 8,
+              "active": 0,
+              "batches": 7,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 8
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 9,
+              "retry": 0,
+              "total": 9
+            },
+            "queue": {
+              "acked": 8,
+              "added": {
+                "bytes": 0,
+                "events": 9
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 8
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 8
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 5.65,
+            "15": 4.88,
+            "5": 5.22,
+            "norm": {
+              "1": 0.565,
+              "15": 0.488,
+              "5": 0.522
+            }
+          }
+        },
+        "uptime": {
+          "ms": 120581
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 7513083,
+      "ingested": "2026-03-10T03:29:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:48.946Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 65746
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 6,
+              "active": 0,
+              "batches": 4,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 6
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 6,
+              "retry": 0,
+              "total": 6
+            },
+            "queue": {
+              "acked": 6,
+              "added": {
+                "bytes": 0,
+                "events": 6
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 6
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 6
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 5.89,
+            "15": 4.85,
+            "5": 5.18,
+            "norm": {
+              "1": 0.589,
+              "15": 0.485,
+              "5": 0.518
+            }
+          }
+        },
+        "uptime": {
+          "ms": 65746
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2653250,
+      "ingested": "2026-03-10T03:28:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:43.773Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 60572
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 4,
+              "active": 0,
+              "batches": 3,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 4
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 5,
+              "retry": 0,
+              "total": 5
+            },
+            "queue": {
+              "acked": 4,
+              "added": {
+                "bytes": 0,
+                "events": 5
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 4
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 1,
+                "pct": 0.00024390244
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 4
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 6.05,
+            "15": 4.85,
+            "5": 5.2,
+            "norm": {
+              "1": 0.605,
+              "15": 0.485,
+              "5": 0.52
+            }
+          }
+        },
+        "uptime": {
+          "ms": 60572
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2061125,
+      "ingested": "2026-03-10T03:28:44Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:48.934Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "39bd9aab-ae37-4f21-8663-c956aed67580",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "39bd9aab-ae37-4f21-8663-c956aed67580",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 5733
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 2,
+              "active": 0,
+              "batches": 1,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 2
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 0,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 2,
+              "retry": 0,
+              "total": 2
+            },
+            "queue": {
+              "acked": 2,
+              "added": {
+                "bytes": 0,
+                "events": 2
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 2
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 2
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 3.76,
+            "15": 4.62,
+            "5": 4.55,
+            "norm": {
+              "1": 0.376,
+              "15": 0.462,
+              "5": 0.455
+            }
+          }
+        },
+        "uptime": {
+          "ms": 5733
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "beat/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 2112292,
+      "ingested": "2026-03-10T03:27:49Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:43.771Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "id": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+      "stats": {
+        "beat": {
+          "host": "docker-fleet-server",
+          "name": "docker-fleet-server",
+          "type": "metricbeat",
+          "uuid": "f78e5e31-be98-46a3-b983-5adfc985ef37",
+          "version": "9.3.1"
+        },
+        "info": {
+          "ephemeral_id": "",
+          "name": "docker-fleet-se",
+          "uptime": {
+            "ms": 570
+          },
+          "version": "9.3.1"
+        },
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 0,
+              "active": 0,
+              "batches": 0,
+              "dropped": 0,
+              "duplicates": 0,
+              "failed": 0,
+              "toomany": 0,
+              "total": 0
+            },
+            "read": {
+              "bytes": 0,
+              "errors": 0
+            },
+            "type": "otelconsumer",
+            "write": {
+              "bytes": 0,
+              "errors": 0,
+              "latency": {
+                "histogram": {
+                  "count": 0,
+                  "max": 0.0,
+                  "median": 0,
+                  "p95": 0.0,
+                  "p99": 0.0
+                }
+              }
+            }
+          },
+          "pipeline": {
+            "clients": 4,
+            "events": {
+              "active": 1,
+              "dropped": 0,
+              "failed": 0,
+              "filtered": 0,
+              "published": 0,
+              "retry": 0,
+              "total": 1
+            },
+            "queue": {
+              "acked": 0,
+              "added": {
+                "bytes": 0,
+                "events": 0
+              },
+              "consumed": {
+                "bytes": 0,
+                "events": 0
+              },
+              "filled": {
+                "bytes": 0,
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100,
+              "removed": {
+                "bytes": 0,
+                "events": 0
+              }
+            }
+          }
+        },
+        "system": {
+          "cpu": {
+            "cores": 10
+          },
+          "load": {
+            "1": 3.65,
+            "15": 4.62,
+            "5": 4.55,
+            "norm": {
+              "1": 0.365,
+              "15": 0.462,
+              "5": 0.455
+            }
+          }
+        },
+        "uptime": {
+          "ms": 570
+        }
+      },
+      "type": "metricbeat"
+    },
+    "component": {
+      "binary": "metricbeat",
+      "id": "http/metrics-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.metricbeat",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "metricbeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.metricbeat",
+      "duration": 1630333,
+      "ingested": "2026-03-10T03:27:47Z",
+      "module": "beat"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "name": "beat",
+      "type": "beat"
+    }
+  }
+]

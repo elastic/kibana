@@ -1,0 +1,11 @@
+# Credentials
+.env
+.auth-state.json
+
+# Generated outputs
+.test-artifacts/
+.report/
+
+# Cached repos and generated data
+.integrations-cache/
+.corpora/

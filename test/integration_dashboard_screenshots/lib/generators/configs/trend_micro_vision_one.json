@@ -1,0 +1,89 @@
+{
+  "package": "trend_micro_vision_one",
+  "dataStreams": [
+    {
+      "dataset": "trend_micro_vision_one.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.severity",
+        "log.level",
+        "trend_micro_vision_one.alert.impact_scope.entities.type",
+        "trend_micro_vision_one.alert.indicators.type",
+        "trend_micro_vision_one.alert.investigation_status",
+        "trend_micro_vision_one.alert.matched_rule.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "trend_micro_vision_one.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "trend_micro_vision_one.audit.access_type",
+        "trend_micro_vision_one.audit.category",
+        "trend_micro_vision_one.audit.result"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "trend_micro_vision_one.detection",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "file.type",
+        "network.direction",
+        "network.protocol",
+        "os.name",
+        "trend_micro_vision_one.detection.action_result",
+        "trend_micro_vision_one.detection.behavior_category",
+        "trend_micro_vision_one.detection.block",
+        "trend_micro_vision_one.detection.detection_source",
+        "trend_micro_vision_one.detection.policy.name",
+        "trend_micro_vision_one.detection.profile",
+        "trend_micro_vision_one.detection.sender",
+        "trend_micro_vision_one.detection.tags",
+        "trend_micro_vision_one.detection.threat_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "trend_micro_vision_one.endpoint_activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.address",
+        "host.name",
+        "host.os.name",
+        "source.ip",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "trend_micro_vision_one.network_activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "host.hostname",
+        "host.os.name",
+        "rule.category",
+        "source.ip",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "trend_micro_vision_one.telemetry",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "trend_micro_vision_one.telemetry.event_subtype",
+        "trend_micro_vision_one.telemetry.event_type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "package": "infoblox_nios",
+  "dataStreams": [
+    {
+      "dataset": "infoblox_nios.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.ip",
+        "client.mac",
+        "client.port",
+        "dns.answers.name",
+        "dns.header_flags",
+        "dns.question.class",
+        "dns.question.name",
+        "dns.question.type",
+        "dns.response_code",
+        "event.action",
+        "infoblox_nios.log.audit.apparently_via",
+        "infoblox_nios.log.type",
+        "user.name"
+      ],
+      "filterValues": {
+        "infoblox_nios.log.type": [
+          "DHCP",
+          "AUDIT",
+          "DNS"
+        ],
+        "event.action": [
+          "login_denied"
+        ]
+      }
+    }
+  ]
+}

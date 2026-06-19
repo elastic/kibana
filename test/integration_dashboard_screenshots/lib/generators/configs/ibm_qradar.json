@@ -1,0 +1,36 @@
+{
+  "package": "ibm_qradar",
+  "dataStreams": [
+    {
+      "dataset": "ibm_qradar.offense",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "event.severity",
+        "ibm_qradar.offense.inactive",
+        "ibm_qradar.offense.log_sources.name",
+        "ibm_qradar.offense.log_sources.type_name",
+        "ibm_qradar.offense.offense_source",
+        "ibm_qradar.offense.protected",
+        "ibm_qradar.offense.status",
+        "labels.is_transform_source",
+        "rule.author",
+        "rule.category",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {
+        "ibm_qradar.offense.inactive": [
+          "false"
+        ],
+        "ibm_qradar.offense.protected": [
+          "true"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

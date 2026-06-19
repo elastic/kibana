@@ -1,0 +1,78 @@
+{
+  "package": "azure_ai_foundry",
+  "dataStreams": [
+    {
+      "dataset": "azure_ai_foundry.logs",
+      "indexPattern": "logs-*",
+      "docTarget": 690,
+      "fields": [
+        "azure.ai_foundry.duration_ms",
+        "azure.ai_foundry.is_request_success",
+        "azure.ai_foundry.properties.backend_request_body.model",
+        "azure.ai_foundry.properties.backend_response_body.choices.content_filter_results.protected_material_code.detected",
+        "azure.ai_foundry.properties.backend_response_body.choices.content_filter_results.protected_material_code.filtered",
+        "azure.ai_foundry.properties.backend_response_body.choices.content_filter_results.protected_material_text.detected",
+        "azure.ai_foundry.properties.backend_response_body.choices.content_filter_results.protected_material_text.filtered",
+        "azure.ai_foundry.properties.backend_response_body.choices.finish_reason",
+        "azure.ai_foundry.properties.backend_response_body.content_filtered_categories.category_name",
+        "azure.ai_foundry.properties.backend_response_body.content_filtered_categories.severity",
+        "azure.ai_foundry.properties.backend_response_body.error.code",
+        "azure.ai_foundry.properties.backend_response_body.error.innererror.content_filter_result.jailbreak.detected",
+        "azure.ai_foundry.properties.backend_response_body.error.innererror.content_filter_result.jailbreak.filtered",
+        "azure.ai_foundry.properties.backend_response_body.error.innererror.content_filtered_categories.category_name",
+        "azure.ai_foundry.properties.backend_response_body.error.innererror.content_filtered_categories.severity",
+        "azure.ai_foundry.properties.backend_response_body.usage.total_tokens",
+        "azure.ai_foundry.properties.backend_response_code",
+        "azure.ai_foundry.sku",
+        "azure.resource.group",
+        "azure.resource.name",
+        "azure.subscription_id",
+        "event.outcome",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure.ai_foundry",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.ai_foundry.input_tokens.total",
+        "azure.ai_foundry.model_availability_rate.avg",
+        "azure.ai_foundry.model_requests.total",
+        "azure.ai_foundry.normalized_time_between_tokens.avg",
+        "azure.ai_foundry.normalized_time_to_first_token.avg",
+        "azure.ai_foundry.output_tokens.total",
+        "azure.ai_foundry.time_to_last_byte.avg",
+        "azure.ai_foundry.time_to_response.avg",
+        "azure.ai_foundry.total_tokens.total",
+        "azure.dimensions.model_deployment_name",
+        "azure.dimensions.model_name",
+        "azure.dimensions.status_code",
+        "azure.resource.group",
+        "azure.resource.name",
+        "azure.subscription_id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure.billing",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.billing.currency",
+        "azure.billing.pretax_cost",
+        "azure.billing.product",
+        "azure.resource.group",
+        "azure.resource.name",
+        "azure.resource.type",
+        "azure.subscription_name"
+      ],
+      "filterValues": {
+        "azure.resource.type": [
+          "Microsoft.CognitiveServices"
+        ]
+      }
+    }
+  ]
+}

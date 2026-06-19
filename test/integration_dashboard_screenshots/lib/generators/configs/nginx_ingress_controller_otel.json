@@ -1,0 +1,31 @@
+{
+  "package": "nginx_ingress_controller_otel",
+  "dataStreams": [
+    {
+      "dataset": "nginx_ingress_controller.access.otel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "attributes.geo.location",
+        "body.structured.http.response.body.size",
+        "body.structured.upstream.name",
+        "body.structured.upstream.response.size",
+        "body.structured.url.original",
+        "body.structured.url.path",
+        "body.structured.user_agent.name",
+        "resource.attributes.host.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nginx_ingress_controller.error.otel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "body.structured.log.level",
+        "body.structured.source.file.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

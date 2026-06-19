@@ -1,0 +1,58 @@
+{
+  "package": "qualys_vmdr",
+  "dataStreams": [
+    {
+      "dataset": "qualys_vmdr.asset_host_detection",
+      "indexPattern": "logs-*",
+      "docTarget": 510,
+      "fields": [
+        "cloud.provider",
+        "cloud.service.name",
+        "host.id",
+        "qualys_vmdr.asset_host_detection.list.is_disabled",
+        "qualys_vmdr.asset_host_detection.list.port",
+        "qualys_vmdr.asset_host_detection.list.qds.severity",
+        "qualys_vmdr.asset_host_detection.list.qds_factors.name",
+        "qualys_vmdr.asset_host_detection.list.severity",
+        "qualys_vmdr.asset_host_detection.list.status",
+        "qualys_vmdr.asset_host_detection.list.times.found",
+        "qualys_vmdr.asset_host_detection.list.type",
+        "qualys_vmdr.asset_host_detection.metadata.ec2.attribute.last.error.value",
+        "qualys_vmdr.asset_host_detection.metadata.ec2.attribute.last.status",
+        "qualys_vmdr.asset_host_detection.metadata.ec2.attribute.name",
+        "qualys_vmdr.asset_host_detection.metadata.ec2.attribute.value",
+        "qualys_vmdr.asset_host_detection.tags.id",
+        "qualys_vmdr.asset_host_detection.tags.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "qualys_vmdr.knowledge_base",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "qualys_vmdr.knowledge_base.is_disabled",
+        "qualys_vmdr.knowledge_base.patchable",
+        "qualys_vmdr.knowledge_base.published_datetime",
+        "qualys_vmdr.knowledge_base.software_list.vendor",
+        "qualys_vmdr.knowledge_base.vuln_type",
+        "vulnerability.category",
+        "vulnerability.severity"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "qualys_vmdr.user_activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.provider",
+        "user.name",
+        "user.roles"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

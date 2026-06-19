@@ -1,0 +1,541 @@
+[
+  {
+    "@timestamp": "2020-11-24T15:02:21.000Z",
+    "agent": {
+      "ephemeral_id": "315e23e0-6ca6-495f-8184-2abd54e2ae72",
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "name": "elastic-agent-46700",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda_cloudgen_firewall": {
+      "log": {
+        "app_rule": "<App>:ALL-APPS",
+        "apps": [
+          "Web browsing",
+          "Microsoft Services"
+        ],
+        "fw_info": 2007,
+        "protos": [
+          "HTTPS direct",
+          "HTTPS",
+          "All HTTP protocols"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "namespace": "83590",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "67.43.156.78",
+      "as": {
+        "number": 35908
+      },
+      "bytes": 561503,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.78",
+      "mac": "00-0C-29-00-D6-00",
+      "nat": {
+        "ip": "67.43.156.100"
+      },
+      "packets": 439,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "End",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "duration": 8436000000,
+      "ingested": "2026-03-10T01:58:55Z",
+      "kind": "event",
+      "type": [
+        "end"
+      ]
+    },
+    "input": {
+      "type": "lumberjack"
+    },
+    "labels": {
+      "origin_address": "172.20.0.3:46060"
+    },
+    "network": {
+      "community_id": "1:HGU1tX9W2VUF5ND2ey3X6Niv/AQ=",
+      "iana_number": "6",
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "eth0"
+        }
+      },
+      "hostname": "cgf-scout-int",
+      "ingress": {
+        "interface": {
+          "name": "eth0"
+        }
+      },
+      "product": "ngfw",
+      "serial_number": "4f94abdf7a8c465fa2cd76f680ecafd1",
+      "type": "firewall",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "10.17.35.171",
+        "67.43.156.78"
+      ]
+    },
+    "rule": {
+      "name": "BOX-LAN-2-INTERNET"
+    },
+    "source": {
+      "address": "10.17.35.171",
+      "bytes": 7450,
+      "ip": "10.17.35.171",
+      "mac": "00-0C-29-9A-0A-78",
+      "nat": {
+        "ip": "10.17.35.175"
+      },
+      "packets": 129,
+      "port": 40532
+    },
+    "tags": [
+      "barracuda_cloudgen_firewall-log",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-05-15T15:46:06.000Z",
+    "agent": {
+      "ephemeral_id": "315e23e0-6ca6-495f-8184-2abd54e2ae72",
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "name": "elastic-agent-46700",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "namespace": "83590",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.130",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.130",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "block",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "ingested": "2026-03-10T01:58:58Z",
+      "kind": "event",
+      "severity": 3,
+      "type": [
+        "denied"
+      ]
+    },
+    "input": {
+      "type": "lumberjack"
+    },
+    "labels": {
+      "origin_address": "172.20.0.3:46060"
+    },
+    "log": {
+      "level": "Warning"
+    },
+    "network": {
+      "iana_number": "6",
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "hostname": "cgf-scout-int",
+      "product": "ngfw",
+      "serial_number": "4f94abdf7a8c465fa2cd76f680ecafd1",
+      "type": "firewall",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "10.17.35.169",
+        "89.160.20.130"
+      ]
+    },
+    "rule": {
+      "category": "Web Attack",
+      "description": "ID: 1054837 WEB Remote File Inclusion /etc/passwd",
+      "ruleset": "IPS"
+    },
+    "source": {
+      "address": "10.17.35.169",
+      "ip": "10.17.35.169"
+    },
+    "tags": [
+      "barracuda_cloudgen_firewall-log",
+      "forwarded"
+    ],
+    "user": {
+      "name": "user45"
+    }
+  },
+  {
+    "@timestamp": "2018-05-15T15:42:32.000Z",
+    "agent": {
+      "ephemeral_id": "315e23e0-6ca6-495f-8184-2abd54e2ae72",
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "name": "elastic-agent-46700",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "namespace": "83590",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.129",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.129",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "block",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "ingested": "2026-03-10T01:58:57Z",
+      "kind": "event",
+      "severity": 3,
+      "type": [
+        "denied"
+      ]
+    },
+    "input": {
+      "type": "lumberjack"
+    },
+    "labels": {
+      "origin_address": "172.20.0.3:46060"
+    },
+    "log": {
+      "level": "Warning"
+    },
+    "network": {
+      "iana_number": "6",
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "hostname": "cgf-scout-int",
+      "product": "ngfw",
+      "serial_number": "4f94abdf7a8c465fa2cd76f680ecafd1",
+      "type": "firewall",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "10.17.35.169",
+        "89.160.20.129"
+      ]
+    },
+    "rule": {
+      "description": "ad43f5fc1d679c8d766824abb41b2b28b364c3c8;.pdf",
+      "ruleset": "ATD"
+    },
+    "source": {
+      "address": "10.17.35.169",
+      "ip": "10.17.35.169"
+    },
+    "tags": [
+      "barracuda_cloudgen_firewall-log",
+      "forwarded"
+    ],
+    "user": {
+      "name": "user42"
+    }
+  },
+  {
+    "@timestamp": "2018-05-15T15:42:27.000Z",
+    "agent": {
+      "ephemeral_id": "315e23e0-6ca6-495f-8184-2abd54e2ae72",
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "name": "elastic-agent-46700",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "namespace": "83590",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "10.0.6.96",
+      "ip": "10.0.6.96",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "block",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "ingested": "2026-03-10T01:58:56Z",
+      "kind": "event",
+      "severity": 3,
+      "type": [
+        "denied"
+      ]
+    },
+    "input": {
+      "type": "lumberjack"
+    },
+    "labels": {
+      "origin_address": "172.20.0.3:46060"
+    },
+    "log": {
+      "level": "Warning"
+    },
+    "network": {
+      "iana_number": "6",
+      "transport": "tcp",
+      "type": "ipv4"
+    },
+    "observer": {
+      "hostname": "cgf-scout-int",
+      "product": "ngfw",
+      "serial_number": "4f94abdf7a8c465fa2cd76f680ecafd1",
+      "type": "firewall",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "10.17.35.169",
+        "10.0.6.96"
+      ]
+    },
+    "rule": {
+      "description": "Eicar-Test-Signature",
+      "ruleset": "Virus"
+    },
+    "source": {
+      "address": "10.17.35.169",
+      "ip": "10.17.35.169"
+    },
+    "tags": [
+      "barracuda_cloudgen_firewall-log",
+      "forwarded"
+    ],
+    "user": {
+      "name": "user42"
+    }
+  },
+  {
+    "@timestamp": "2018-05-15T11:23:17.000Z",
+    "agent": {
+      "ephemeral_id": "315e23e0-6ca6-495f-8184-2abd54e2ae72",
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "name": "elastic-agent-46700",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda_cloudgen_firewall": {
+      "log": {
+        "app_rule": "<App>:<pass-no-match>",
+        "traffic_type": 0,
+        "user_type": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "namespace": "83590",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "175.16.199.12",
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.12",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "b62af09b-a4fd-4b6b-a7d0-20e44af85b55",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "0",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "barracuda_cloudgen_firewall.log",
+      "ingested": "2026-03-10T01:58:59Z",
+      "kind": "event",
+      "type": [
+        "allowed"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "mime_type": "text/html; charset=UTF-8"
+      },
+      "response": {
+        "body": {
+          "bytes": 59558
+        },
+        "status_code": 200
+      }
+    },
+    "input": {
+      "type": "lumberjack"
+    },
+    "labels": {
+      "origin_address": "172.20.0.3:46060"
+    },
+    "network": {
+      "type": "ipv4"
+    },
+    "observer": {
+      "hostname": "cgf-scout-int",
+      "product": "ngfw",
+      "serial_number": "4f94abdf7a8c465fa2cd76f680ecafd1",
+      "type": "firewall",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "192.168.42.124",
+        "175.16.199.12"
+      ]
+    },
+    "rule": {
+      "name": "LAN-2-INTERNET"
+    },
+    "source": {
+      "address": "192.168.42.124",
+      "ip": "192.168.42.124",
+      "port": 50646
+    },
+    "tags": [
+      "barracuda_cloudgen_firewall-log",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "www.heise.de",
+      "original": "https://www.heise.de/",
+      "path": "/",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Other",
+      "original": "wget/1.19.2 (linux-gnu)",
+      "os": {
+        "name": "Linux"
+      }
+    }
+  }
+]

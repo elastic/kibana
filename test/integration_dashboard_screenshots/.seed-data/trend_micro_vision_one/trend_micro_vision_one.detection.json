@@ -1,0 +1,932 @@
+[
+  {
+    "@timestamp": "2020-10-15T01:16:32.000Z",
+    "agent": {
+      "ephemeral_id": "67dd3935-99b4-4877-a5a4-8640e56dd002",
+      "id": "eaf1b187-ed83-4af0-97d5-1dd69f7ba3bb",
+      "name": "elastic-agent-99059",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trend_micro_vision_one.detection",
+      "namespace": "39181",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "Workgroup",
+      "ip": [
+        "81.2.69.142"
+      ],
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "eaf1b187-ed83-4af0-97d5-1dd69f7ba3bb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "clean",
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "created": "2026-03-10T02:23:20.530Z",
+      "dataset": "trend_micro_vision_one.detection",
+      "id": "100117",
+      "ingested": "2026-03-10T02:23:23Z",
+      "kind": "event",
+      "original": "{\"act\":\"Clean\",\"actResult\":\"Quarantined successfully\",\"app\":\"HTTP\",\"appGroup\":\"HTTP\",\"aptRelated\":\"0\",\"behaviorCat\":\"Grey-Detection\",\"blocking\":\"Web reputation\",\"cat\":50,\"cccaDetection\":\"Yes\",\"cccaDetectionSource\":\"GLOBAL_INTELLIGENCE\",\"cccaRiskLevel\":3,\"clientFlag\":\"dst\",\"cnt\":\"1\",\"component\":[\"PATTERN_VSAPI 17.101.92 2021-09-30 04:23:27-07:00\"],\"compressedFileSize\":\"0\",\"detectionType\":\"File\",\"deviceDirection\":\"outbound\",\"deviceGUID\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"deviceMacAddress\":\"00-00-5E-00-53-23\",\"deviceProcessName\":\"/snap/core/10126/usr/lib/snapd/snapd\",\"dhost\":\"samplehost\",\"domainName\":\"Workgroup\",\"dpt\":53,\"dst\":[\"81.2.69.142\"],\"dstGroup\":\"Default\",\"end\":\"2021-09-30T09:40:04-08:00\",\"endpointGUID\":\"1234-1234-1234\",\"endpointHostName\":\"abc-docker\",\"endpointIp\":[\"81.2.69.142\"],\"endpointMacAddress\":\"00-00-5E-00-53-23\",\"engType\":\"Virus Scan Engine (OS 2003, x64)\",\"engVer\":\"12.500.1004\",\"eventId\":\"100117\",\"eventName\":\"INTEGRITY_MONITORING_EVENT\",\"eventSubName\":\"Attack Discovery\",\"eventTime\":1602724592000,\"eventTimeDT\":\"2021-06-10T01:38:38+00:00\",\"fileHash\":\"3395856ce81f2b7382dee72602f798b642f14140\",\"fileName\":[\"Unconfirmed 145081.crdownload\"],\"fileOperation\":\"Deleted\",\"filePath\":\"/etc/systemd/system\",\"filePathName\":\"/etc/systemd/system/snap-xxxx-1246.xxxx\",\"fileSize\":\"0\",\"firstAct\":\"Clean\",\"firstActResult\":\"Unable to clean file\",\"fullPath\":\"C:\\\\\\\\Users\\\\\\\\user1\\\\\\\\Downloads\\\\\\\\Unconfirmed 145081.crdownload\",\"hostName\":\"samplehost\",\"httpReferer\":\"http://www.example.com/\",\"interestedHost\":\"abc-docker\",\"interestedIp\":[\"81.2.69.192\"],\"interestedMacAddress\":\"00-00-5E-00-53-23\",\"mDevice\":[\"81.2.69.192\"],\"mDeviceGUID\":\"C5B09EDD-C725-907F-29D9-B8C30D18C48F\",\"malName\":\"Eicar_test_1\",\"malType\":\"Virus/Malware\",\"mitreMapping\":[\"T1090 (TA0005)\"],\"mitreVersion\":\"v6\",\"mpname\":\"Cloud One - Workload Security\",\"mpver\":\"Deep Security/20.0.222\",\"objectCmd\":[\"C:\\\\\\\\Program Files (x86)\\\\\\\\Microsoft\\\\\\\\Edge\\\\\\\\Application\\\\\\\\msedge.exe --profile-directory=Default\"],\"objectFileHashMd5\":\"761AEFF7E6B110970285B9C20C9E1DCA\",\"objectFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"objectFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"objectFileName\":\"Unconfirmed 142899.crdownload:SmartScreen\",\"objectFilePath\":\"C:\\\\\\\\Users\\\\\\\\user1\\\\\\\\Downloads\\\\\\\\Unconfirmed 142899.crdownload:SmartScreen\",\"objectName\":\"CloudEndpointService.exe\",\"objectPid\":7660,\"objectSigner\":[\"OS\"],\"parentCmd\":\"C:\\\\\\\\os\\\\\\\\system32\\\\\\\\svchost.exe -k DcomLaunch -p\",\"parentFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"parentFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"parentFilePath\":\"C:\\\\\\\\os\\\\\\\\System32\\\\\\\\svchost.exe\",\"peerHost\":\"samplehost\",\"peerIp\":[\"81.2.69.192\"],\"pname\":\"Apex One\",\"processCmd\":\"-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca\",\"processFileHashMd5\":\"761AEFF7E6B110970285B9C20C9E1DCA\",\"processFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"processFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"processFilePath\":\"C:\\\\\\\\Program Files (x86)\\\\\\\\os\\\\\\\\Application\\\\\\\\msedge.exe\",\"processName\":\"string\",\"processPid\":0,\"processSigner\":\"OS Publisher\",\"productCode\":\"sao\",\"pver\":\"20.0.0.877\",\"request\":\"https://example.com\",\"requestClientApplication\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1\",\"rt\":\"2020-10-15T01:16:32.000Z\",\"rt_utc\":\"2020-10-15T01:16:32.000Z\",\"searchDL\":\"DDL\",\"spt\":58871,\"src\":\"81.2.69.192\",\"srcGroup\":\"Default\",\"tacticId\":[\"TA0005\"],\"tags\":[\"XSAE.F2140\",\"XSAE.F3066\"],\"threatName\":\"Malicious_identified_CnC_querying_on_UDP_detected\",\"uuid\":\"1234-1234-1234\"}",
+      "severity": 50,
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+        "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+        "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+      },
+      "name": [
+        "Unconfirmed 145081.crdownload"
+      ],
+      "path": "/etc/systemd/system/snap-xxxx-1246.xxxx",
+      "size": 0
+    },
+    "host": {
+      "hostname": "samplehost",
+      "id": "1234-1234-1234",
+      "ip": [
+        "81.2.69.142"
+      ],
+      "mac": [
+        "00-00-5E-00-53-23"
+      ],
+      "name": "abc-docker"
+    },
+    "http": {
+      "request": {
+        "referrer": "http://www.example.com/"
+      }
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "network": {
+      "direction": "outbound",
+      "protocol": "http"
+    },
+    "observer": {
+      "hostname": "samplehost",
+      "mac": [
+        "00-00-5E-00-53-23"
+      ]
+    },
+    "process": {
+      "command_line": "-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca",
+      "entity_id": "0",
+      "name": "string",
+      "pid": 0
+    },
+    "related": {
+      "hash": [
+        "761AEFF7E6B110970285B9C20C9E1DCA",
+        "00496B4D53CEFE031B9702B3385C9F4430999932",
+        "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7",
+        "3395856ce81f2b7382dee72602f798b642f14140"
+      ],
+      "hosts": [
+        "samplehost",
+        "abc-docker"
+      ],
+      "ip": [
+        "81.2.69.142",
+        "81.2.69.192"
+      ]
+    },
+    "source": {
+      "ip": "81.2.69.192",
+      "port": 58871
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trend_micro_vision_one-detection"
+    ],
+    "threat": {
+      "tactic": {
+        "id": [
+          "TA0005"
+        ]
+      }
+    },
+    "trend_micro_vision_one": {
+      "detection": {
+        "action": "Clean",
+        "action_result": "Quarantined successfully",
+        "behavior_category": "Grey-Detection",
+        "block": "Web reputation",
+        "client_flag": "dst",
+        "component_version": [
+          "PATTERN_VSAPI 17.101.92 2021-09-30 04:23:27-07:00"
+        ],
+        "compressed_file_size": 0,
+        "destination": {
+          "ip": [
+            "81.2.69.142"
+          ],
+          "ip_group": "Default",
+          "port": 53
+        },
+        "detection": "Yes",
+        "detection_source": "GLOBAL_INTELLIGENCE",
+        "detection_type": "File",
+        "device": {
+          "direction": "outbound",
+          "guid": "C5B09EDD-C725-907F-29D9-B8C30D18C48F",
+          "host": "samplehost",
+          "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "ip": [
+            "81.2.69.192"
+          ],
+          "mac": "00-00-5E-00-53-23",
+          "process_name": "/snap/core/10126/usr/lib/snapd/snapd"
+        },
+        "domain": {
+          "name": "Workgroup"
+        },
+        "end_time": "2021-09-30T17:40:04.000Z",
+        "endpoint": {
+          "guid": "1234-1234-1234",
+          "hostname": "abc-docker",
+          "ip": [
+            "81.2.69.142"
+          ],
+          "mac": "00-00-5E-00-53-23"
+        },
+        "engine_type": "Virus Scan Engine (OS 2003, x64)",
+        "engine_version": "12.500.1004",
+        "event_id": "100117",
+        "event_name": "INTEGRITY_MONITORING_EVENT",
+        "event_time_dt": "2021-06-10T01:38:38.000Z",
+        "file_hash": "3395856ce81f2b7382dee72602f798b642f14140",
+        "file_name": [
+          "Unconfirmed 145081.crdownload"
+        ],
+        "file_operation": "Deleted",
+        "file_path": "/etc/systemd/system",
+        "file_path_name": "/etc/systemd/system/snap-xxxx-1246.xxxx",
+        "file_size": 0,
+        "first_action": "Clean",
+        "first_action_result": "Unable to clean file",
+        "full_path": "C:\\\\Users\\\\user1\\\\Downloads\\\\Unconfirmed 145081.crdownload",
+        "hostname": "samplehost",
+        "http_referer": "http://www.example.com/",
+        "interested": {
+          "host": "abc-docker",
+          "ip": [
+            "81.2.69.192"
+          ],
+          "mac": "00-00-5E-00-53-23"
+        },
+        "malware_name": "Eicar_test_1",
+        "malware_type": "Virus/Malware",
+        "mproduct": {
+          "name": "Cloud One - Workload Security",
+          "version": "Deep Security/20.0.222"
+        },
+        "object": {
+          "cmd": [
+            "C:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe --profile-directory=Default"
+          ],
+          "file": {
+            "hash": {
+              "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "name": "Unconfirmed 142899.crdownload:SmartScreen",
+            "path": "C:\\\\Users\\\\user1\\\\Downloads\\\\Unconfirmed 142899.crdownload:SmartScreen"
+          },
+          "name": "CloudEndpointService.exe",
+          "pid": 7660,
+          "signer": [
+            "OS"
+          ]
+        },
+        "parent": {
+          "cmd": "C:\\\\os\\\\system32\\\\svchost.exe -k DcomLaunch -p",
+          "file": {
+            "hash": {
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "path": "C:\\\\os\\\\System32\\\\svchost.exe"
+          }
+        },
+        "peer": {
+          "host": "samplehost",
+          "ip": [
+            "81.2.69.192"
+          ]
+        },
+        "process": {
+          "cmd": "-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca",
+          "file": {
+            "hash": {
+              "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "path": "C:\\\\Program Files (x86)\\\\os\\\\Application\\\\msedge.exe"
+          },
+          "name": "string",
+          "pid": 0,
+          "signer": "OS Publisher"
+        },
+        "product": {
+          "code": "sao",
+          "name": "Apex One",
+          "version": "20.0.0.877"
+        },
+        "protocol": "HTTP",
+        "protocol_group": "HTTP",
+        "related_apt": false,
+        "request": "https://example.com",
+        "request_client_application": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+        "risk_level": 3,
+        "rt": "2020-10-15T01:16:32.000Z",
+        "rt_utc": "2020-10-15T01:16:32.000Z",
+        "search_data_lake": "DDL",
+        "security_analytics": {
+          "engine": {
+            "name": [
+              "T1090 (TA0005)"
+            ],
+            "version": "v6"
+          }
+        },
+        "severity_level": 50,
+        "source": {
+          "group": "Default",
+          "ip": "81.2.69.192",
+          "port": 58871
+        },
+        "sub_name": "Attack Discovery",
+        "tactic_id": [
+          "TA0005"
+        ],
+        "tags": [
+          "XSAE.F2140",
+          "XSAE.F3066"
+        ],
+        "threat_name": "Malicious_identified_CnC_querying_on_UDP_detected",
+        "total_count": 1,
+        "uuid": "1234-1234-1234"
+      }
+    },
+    "url": {
+      "domain": "example.com",
+      "original": "https://example.com",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "iPhone"
+      },
+      "name": "Mobile Safari",
+      "original": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+      "os": {
+        "full": "iOS 12.1",
+        "name": "iOS",
+        "version": "12.1"
+      },
+      "version": "12.0"
+    }
+  },
+  {
+    "@timestamp": "2020-10-15T01:16:32.000Z",
+    "agent": {
+      "ephemeral_id": "67dd3935-99b4-4877-a5a4-8640e56dd002",
+      "id": "eaf1b187-ed83-4af0-97d5-1dd69f7ba3bb",
+      "name": "elastic-agent-99059",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trend_micro_vision_one.detection",
+      "namespace": "39181",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "Workgroup",
+      "ip": [
+        "81.2.69.142"
+      ],
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "eaf1b187-ed83-4af0-97d5-1dd69f7ba3bb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "clean",
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "created": "2026-03-10T02:23:22.526Z",
+      "dataset": "trend_micro_vision_one.detection",
+      "id": "100117",
+      "ingested": "2026-03-10T02:23:23Z",
+      "kind": "event",
+      "original": "{\"act\":\"Clean\",\"actResult\":\"Quarantined successfully\",\"app\":\"HTTP\",\"appGroup\":\"HTTP\",\"aptRelated\":\"0\",\"behaviorCat\":\"Grey-Detection\",\"blocking\":\"Web reputation\",\"cat\":50,\"cccaDetection\":\"Yes\",\"cccaDetectionSource\":\"GLOBAL_INTELLIGENCE\",\"cccaRiskLevel\":3,\"clientFlag\":\"dst\",\"cnt\":\"1\",\"component\":[\"PATTERN_VSAPI 17.101.92 2021-09-30 04:23:27-07:00\"],\"compressedFileSize\":\"0\",\"detectionType\":\"File\",\"deviceDirection\":\"outbound\",\"deviceGUID\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"deviceMacAddress\":\"00-00-5E-00-53-23\",\"deviceProcessName\":\"/snap/core/10126/usr/lib/snapd/snapd\",\"dhost\":\"samplehost\",\"domainName\":\"Workgroup\",\"dpt\":53,\"dst\":[\"81.2.69.142\"],\"dstGroup\":\"Default\",\"end\":\"2021-09-30T09:40:04-08:00\",\"endpointGUID\":\"1234-1234-1234\",\"endpointHostName\":\"abc-docker\",\"endpointIp\":[\"81.2.69.142\"],\"endpointMacAddress\":\"00-00-5E-00-53-23\",\"engType\":\"Virus Scan Engine (OS 2003, x64)\",\"engVer\":\"12.500.1004\",\"eventId\":\"100117\",\"eventName\":\"INTEGRITY_MONITORING_EVENT\",\"eventSubName\":\"Attack Discovery\",\"eventTime\":1602724592000,\"eventTimeDT\":\"2021-06-10T01:38:38+00:00\",\"fileHash\":\"3395856ce81f2b7382dee72602f798b642f14140\",\"fileName\":[\"Unconfirmed 145081.crdownload\"],\"fileOperation\":\"Deleted\",\"filePath\":\"/etc/systemd/system\",\"filePathName\":\"/etc/systemd/system/snap-xxxx-1246.xxxx\",\"fileSize\":\"0\",\"firstAct\":\"Clean\",\"firstActResult\":\"Unable to clean file\",\"fullPath\":\"C:\\\\\\\\Users\\\\\\\\user1\\\\\\\\Downloads\\\\\\\\Unconfirmed 145081.crdownload\",\"hostName\":\"samplehost\",\"httpReferer\":\"http://www.example.com/\",\"interestedHost\":\"abc-docker\",\"interestedIp\":[\"81.2.69.192\"],\"interestedMacAddress\":\"00-00-5E-00-53-23\",\"mDevice\":[\"81.2.69.192\"],\"mDeviceGUID\":\"C5B09EDD-C725-907F-29D9-B8C30D18C48F\",\"malName\":\"Eicar_test_1\",\"malType\":\"Virus/Malware\",\"mitreMapping\":[\"T1090 (TA0005)\"],\"mitreVersion\":\"v6\",\"mpname\":\"Cloud One - Workload Security\",\"mpver\":\"Deep Security/20.0.222\",\"objectCmd\":[\"C:\\\\\\\\Program Files (x86)\\\\\\\\Microsoft\\\\\\\\Edge\\\\\\\\Application\\\\\\\\msedge.exe --profile-directory=Default\"],\"objectFileHashMd5\":\"761AEFF7E6B110970285B9C20C9E1DCA\",\"objectFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"objectFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"objectFileName\":\"Unconfirmed 142899.crdownload:SmartScreen\",\"objectFilePath\":\"C:\\\\\\\\Users\\\\\\\\user1\\\\\\\\Downloads\\\\\\\\Unconfirmed 142899.crdownload:SmartScreen\",\"objectName\":\"CloudEndpointService.exe\",\"objectPid\":7660,\"objectSigner\":[\"OS\"],\"parentCmd\":\"C:\\\\\\\\os\\\\\\\\system32\\\\\\\\svchost.exe -k DcomLaunch -p\",\"parentFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"parentFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"parentFilePath\":\"C:\\\\\\\\os\\\\\\\\System32\\\\\\\\svchost.exe\",\"peerHost\":\"samplehost\",\"peerIp\":[\"81.2.69.192\"],\"pname\":\"Apex One\",\"processCmd\":\"-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca\",\"processFileHashMd5\":\"761AEFF7E6B110970285B9C20C9E1DCA\",\"processFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"processFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"processFilePath\":\"C:\\\\\\\\Program Files (x86)\\\\\\\\os\\\\\\\\Application\\\\\\\\msedge.exe\",\"processName\":\"string\",\"processPid\":0,\"processSigner\":\"OS Publisher\",\"productCode\":\"sao\",\"pver\":\"20.0.0.877\",\"requestClientApplication\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1\",\"requests\":\"https://ex-ample.com\",\"rt\":\"2020-10-15T01:16:32.000Z\",\"rt_utc\":\"2020-10-15T01:16:32.000Z\",\"searchDL\":\"DDL\",\"spt\":58871,\"src\":\"81.2.69.192\",\"srcGroup\":\"Default\",\"tacticId\":[\"TA0005\"],\"tags\":[\"XSAE.F2140\",\"XSAE.F3066\"],\"threatName\":\"Malicious_identified_CnC_querying_on_UDP_detected\",\"uuid\":\"1234-1234-1234\"}",
+      "severity": 50,
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+        "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+        "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+      },
+      "name": [
+        "Unconfirmed 145081.crdownload"
+      ],
+      "path": "/etc/systemd/system/snap-xxxx-1246.xxxx",
+      "size": 0
+    },
+    "host": {
+      "hostname": "samplehost",
+      "id": "1234-1234-1234",
+      "ip": [
+        "81.2.69.142"
+      ],
+      "mac": [
+        "00-00-5E-00-53-23"
+      ],
+      "name": "abc-docker"
+    },
+    "http": {
+      "request": {
+        "referrer": "http://www.example.com/"
+      }
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "network": {
+      "direction": "outbound",
+      "protocol": "http"
+    },
+    "observer": {
+      "hostname": "samplehost",
+      "mac": [
+        "00-00-5E-00-53-23"
+      ]
+    },
+    "process": {
+      "command_line": "-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca",
+      "entity_id": "0",
+      "name": "string",
+      "pid": 0
+    },
+    "related": {
+      "hash": [
+        "761AEFF7E6B110970285B9C20C9E1DCA",
+        "00496B4D53CEFE031B9702B3385C9F4430999932",
+        "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7",
+        "3395856ce81f2b7382dee72602f798b642f14140"
+      ],
+      "hosts": [
+        "samplehost",
+        "abc-docker"
+      ],
+      "ip": [
+        "81.2.69.142",
+        "81.2.69.192"
+      ]
+    },
+    "source": {
+      "ip": "81.2.69.192",
+      "port": 58871
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trend_micro_vision_one-detection"
+    ],
+    "threat": {
+      "tactic": {
+        "id": [
+          "TA0005"
+        ]
+      }
+    },
+    "trend_micro_vision_one": {
+      "detection": {
+        "action": "Clean",
+        "action_result": "Quarantined successfully",
+        "behavior_category": "Grey-Detection",
+        "block": "Web reputation",
+        "client_flag": "dst",
+        "component_version": [
+          "PATTERN_VSAPI 17.101.92 2021-09-30 04:23:27-07:00"
+        ],
+        "compressed_file_size": 0,
+        "destination": {
+          "ip": [
+            "81.2.69.142"
+          ],
+          "ip_group": "Default",
+          "port": 53
+        },
+        "detection": "Yes",
+        "detection_source": "GLOBAL_INTELLIGENCE",
+        "detection_type": "File",
+        "device": {
+          "direction": "outbound",
+          "guid": "C5B09EDD-C725-907F-29D9-B8C30D18C48F",
+          "host": "samplehost",
+          "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "ip": [
+            "81.2.69.192"
+          ],
+          "mac": "00-00-5E-00-53-23",
+          "process_name": "/snap/core/10126/usr/lib/snapd/snapd"
+        },
+        "domain": {
+          "name": "Workgroup"
+        },
+        "end_time": "2021-09-30T17:40:04.000Z",
+        "endpoint": {
+          "guid": "1234-1234-1234",
+          "hostname": "abc-docker",
+          "ip": [
+            "81.2.69.142"
+          ],
+          "mac": "00-00-5E-00-53-23"
+        },
+        "engine_type": "Virus Scan Engine (OS 2003, x64)",
+        "engine_version": "12.500.1004",
+        "event_id": "100117",
+        "event_name": "INTEGRITY_MONITORING_EVENT",
+        "event_time_dt": "2021-06-10T01:38:38.000Z",
+        "file_hash": "3395856ce81f2b7382dee72602f798b642f14140",
+        "file_name": [
+          "Unconfirmed 145081.crdownload"
+        ],
+        "file_operation": "Deleted",
+        "file_path": "/etc/systemd/system",
+        "file_path_name": "/etc/systemd/system/snap-xxxx-1246.xxxx",
+        "file_size": 0,
+        "first_action": "Clean",
+        "first_action_result": "Unable to clean file",
+        "full_path": "C:\\\\Users\\\\user1\\\\Downloads\\\\Unconfirmed 145081.crdownload",
+        "hostname": "samplehost",
+        "http_referer": "http://www.example.com/",
+        "interested": {
+          "host": "abc-docker",
+          "ip": [
+            "81.2.69.192"
+          ],
+          "mac": "00-00-5E-00-53-23"
+        },
+        "malware_name": "Eicar_test_1",
+        "malware_type": "Virus/Malware",
+        "mproduct": {
+          "name": "Cloud One - Workload Security",
+          "version": "Deep Security/20.0.222"
+        },
+        "object": {
+          "cmd": [
+            "C:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe --profile-directory=Default"
+          ],
+          "file": {
+            "hash": {
+              "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "name": "Unconfirmed 142899.crdownload:SmartScreen",
+            "path": "C:\\\\Users\\\\user1\\\\Downloads\\\\Unconfirmed 142899.crdownload:SmartScreen"
+          },
+          "name": "CloudEndpointService.exe",
+          "pid": 7660,
+          "signer": [
+            "OS"
+          ]
+        },
+        "parent": {
+          "cmd": "C:\\\\os\\\\system32\\\\svchost.exe -k DcomLaunch -p",
+          "file": {
+            "hash": {
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "path": "C:\\\\os\\\\System32\\\\svchost.exe"
+          }
+        },
+        "peer": {
+          "host": "samplehost",
+          "ip": [
+            "81.2.69.192"
+          ]
+        },
+        "process": {
+          "cmd": "-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca",
+          "file": {
+            "hash": {
+              "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "path": "C:\\\\Program Files (x86)\\\\os\\\\Application\\\\msedge.exe"
+          },
+          "name": "string",
+          "pid": 0,
+          "signer": "OS Publisher"
+        },
+        "product": {
+          "code": "sao",
+          "name": "Apex One",
+          "version": "20.0.0.877"
+        },
+        "protocol": "HTTP",
+        "protocol_group": "HTTP",
+        "related_apt": false,
+        "request": "https://ex-ample.com",
+        "request_client_application": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+        "risk_level": 3,
+        "rt": "2020-10-15T01:16:32.000Z",
+        "rt_utc": "2020-10-15T01:16:32.000Z",
+        "search_data_lake": "DDL",
+        "security_analytics": {
+          "engine": {
+            "name": [
+              "T1090 (TA0005)"
+            ],
+            "version": "v6"
+          }
+        },
+        "severity_level": 50,
+        "source": {
+          "group": "Default",
+          "ip": "81.2.69.192",
+          "port": 58871
+        },
+        "sub_name": "Attack Discovery",
+        "tactic_id": [
+          "TA0005"
+        ],
+        "tags": [
+          "XSAE.F2140",
+          "XSAE.F3066"
+        ],
+        "threat_name": "Malicious_identified_CnC_querying_on_UDP_detected",
+        "total_count": 1,
+        "uuid": "1234-1234-1234"
+      }
+    },
+    "url": {
+      "domain": "ex-ample.com",
+      "original": "https://ex-ample.com",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "iPhone"
+      },
+      "name": "Mobile Safari",
+      "original": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+      "os": {
+        "full": "iOS 12.1",
+        "name": "iOS",
+        "version": "12.1"
+      },
+      "version": "12.0"
+    }
+  },
+  {
+    "@timestamp": "2020-10-15T01:16:32.000Z",
+    "agent": {
+      "ephemeral_id": "67dd3935-99b4-4877-a5a4-8640e56dd002",
+      "id": "eaf1b187-ed83-4af0-97d5-1dd69f7ba3bb",
+      "name": "elastic-agent-99059",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trend_micro_vision_one.detection",
+      "namespace": "39181",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "Workgroup",
+      "ip": [
+        "81.2.69.142"
+      ],
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "eaf1b187-ed83-4af0-97d5-1dd69f7ba3bb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "clean",
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "created": "2026-03-10T02:23:22.527Z",
+      "dataset": "trend_micro_vision_one.detection",
+      "id": "100117",
+      "ingested": "2026-03-10T02:23:23Z",
+      "kind": "event",
+      "original": "{\"act\":\"Clean\",\"actResult\":\"Quarantined successfully\",\"app\":\"HTTP\",\"appGroup\":\"HTTP\",\"aptRelated\":\"0\",\"behaviorCat\":\"Grey-Detection\",\"blocking\":\"Web reputation\",\"cat\":50,\"cccaDetection\":\"Yes\",\"cccaDetectionSource\":\"GLOBAL_INTELLIGENCE\",\"cccaRiskLevel\":3,\"clientFlag\":\"dst\",\"cnt\":\"1\",\"component\":[\"PATTERN_VSAPI 17.101.92 2021-09-30 04:23:27-07:00\"],\"compressedFileSize\":\"0\",\"detectionType\":\"File\",\"deviceDirection\":\"outbound\",\"deviceGUID\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"deviceMacAddress\":\"00-00-5E-00-53-23\",\"deviceProcessName\":\"/snap/core/10126/usr/lib/snapd/snapd\",\"dhost\":\"samplehost\",\"domainName\":\"Workgroup\",\"dpt\":53,\"dst\":[\"81.2.69.142\"],\"dstGroup\":\"Default\",\"end\":\"2021-09-30T09:40:04-08:00\",\"endpointGUID\":\"1234-1234-1234\",\"endpointHostName\":\"abc-docker\",\"endpointIp\":[\"81.2.69.142\"],\"endpointMacAddress\":\"00-00-5E-00-53-23\",\"engType\":\"Virus Scan Engine (OS 2003, x64)\",\"engVer\":\"12.500.1004\",\"eventId\":\"100117\",\"eventName\":\"INTEGRITY_MONITORING_EVENT\",\"eventSubName\":\"Attack Discovery\",\"eventTime\":1602724592000,\"eventTimeDT\":\"2021-06-10T01:38:38+00:00\",\"fileHash\":\"3395856ce81f2b7382dee72602f798b642f14140\",\"fileName\":[\"Unconfirmed 145081.crdownload\"],\"fileOperation\":\"Deleted\",\"filePath\":\"/etc/systemd/system\",\"filePathName\":\"/etc/systemd/system/snap-xxxx-1246.xxxx\",\"fileSize\":\"0\",\"firstAct\":\"Clean\",\"firstActResult\":\"Unable to clean file\",\"fullPath\":\"C:\\\\\\\\Users\\\\\\\\user1\\\\\\\\Downloads\\\\\\\\Unconfirmed 145081.crdownload\",\"hostName\":\"samplehost\",\"httpReferer\":\"http://www.example.com/\",\"interestedHost\":\"abc-docker\",\"interestedIp\":[\"81.2.69.192\"],\"interestedMacAddress\":\"00-00-5E-00-53-23\",\"mDevice\":[\"81.2.69.192\"],\"mDeviceGUID\":\"C5B09EDD-C725-907F-29D9-B8C30D18C48F\",\"malName\":\"Eicar_test_1\",\"malType\":\"Virus/Malware\",\"mitreMapping\":[\"T1090 (TA0005)\"],\"mitreVersion\":\"v6\",\"mpname\":\"Cloud One - Workload Security\",\"mpver\":\"Deep Security/20.0.222\",\"objectCmd\":[\"C:\\\\\\\\Program Files (x86)\\\\\\\\Microsoft\\\\\\\\Edge\\\\\\\\Application\\\\\\\\msedge.exe --profile-directory=Default\"],\"objectFileHashMd5\":\"761AEFF7E6B110970285B9C20C9E1DCA\",\"objectFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"objectFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"objectFileName\":\"Unconfirmed 142899.crdownload:SmartScreen\",\"objectFilePath\":\"C:\\\\\\\\Users\\\\\\\\user1\\\\\\\\Downloads\\\\\\\\Unconfirmed 142899.crdownload:SmartScreen\",\"objectName\":\"CloudEndpointService.exe\",\"objectPid\":7660,\"objectSigner\":[\"OS\"],\"parentCmd\":\"C:\\\\\\\\os\\\\\\\\system32\\\\\\\\svchost.exe -k DcomLaunch -p\",\"parentFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"parentFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"parentFilePath\":\"C:\\\\\\\\os\\\\\\\\System32\\\\\\\\svchost.exe\",\"peerHost\":\"samplehost\",\"peerIp\":[\"81.2.69.192\"],\"pname\":\"Apex One\",\"processCmd\":\"-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca\",\"processFileHashMd5\":\"761AEFF7E6B110970285B9C20C9E1DCA\",\"processFileHashSha1\":\"00496B4D53CEFE031B9702B3385C9F4430999932\",\"processFileHashSha256\":\"7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7\",\"processFilePath\":\"C:\\\\\\\\Program Files (x86)\\\\\\\\os\\\\\\\\Application\\\\\\\\msedge.exe\",\"processName\":\"string\",\"processPid\":0,\"processSigner\":\"OS Publisher\",\"productCode\":\"sao\",\"pver\":\"20.0.0.877\",\"requestClientApplication\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1\",\"requests\":\"https://ex-maple.ca\",\"rt\":\"2020-10-15T01:16:32.000Z\",\"rt_utc\":\"2020-10-15T01:16:32.000Z\",\"searchDL\":\"DDL\",\"spt\":58871,\"src\":\"81.2.69.192\",\"srcGroup\":\"Default\",\"tacticId\":[\"TA0005\"],\"tags\":[\"XSAE.F2140\",\"XSAE.F3066\"],\"threatName\":\"Malicious_identified_CnC_querying_on_UDP_detected\",\"uuid\":\"1234-1234-1234\"}",
+      "severity": 50,
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+        "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+        "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+      },
+      "name": [
+        "Unconfirmed 145081.crdownload"
+      ],
+      "path": "/etc/systemd/system/snap-xxxx-1246.xxxx",
+      "size": 0
+    },
+    "host": {
+      "hostname": "samplehost",
+      "id": "1234-1234-1234",
+      "ip": [
+        "81.2.69.142"
+      ],
+      "mac": [
+        "00-00-5E-00-53-23"
+      ],
+      "name": "abc-docker"
+    },
+    "http": {
+      "request": {
+        "referrer": "http://www.example.com/"
+      }
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "network": {
+      "direction": "outbound",
+      "protocol": "http"
+    },
+    "observer": {
+      "hostname": "samplehost",
+      "mac": [
+        "00-00-5E-00-53-23"
+      ]
+    },
+    "process": {
+      "command_line": "-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca",
+      "entity_id": "0",
+      "name": "string",
+      "pid": 0
+    },
+    "related": {
+      "hash": [
+        "761AEFF7E6B110970285B9C20C9E1DCA",
+        "00496B4D53CEFE031B9702B3385C9F4430999932",
+        "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7",
+        "3395856ce81f2b7382dee72602f798b642f14140"
+      ],
+      "hosts": [
+        "samplehost",
+        "abc-docker"
+      ],
+      "ip": [
+        "81.2.69.142",
+        "81.2.69.192"
+      ]
+    },
+    "source": {
+      "ip": "81.2.69.192",
+      "port": 58871
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trend_micro_vision_one-detection"
+    ],
+    "threat": {
+      "tactic": {
+        "id": [
+          "TA0005"
+        ]
+      }
+    },
+    "trend_micro_vision_one": {
+      "detection": {
+        "action": "Clean",
+        "action_result": "Quarantined successfully",
+        "behavior_category": "Grey-Detection",
+        "block": "Web reputation",
+        "client_flag": "dst",
+        "component_version": [
+          "PATTERN_VSAPI 17.101.92 2021-09-30 04:23:27-07:00"
+        ],
+        "compressed_file_size": 0,
+        "destination": {
+          "ip": [
+            "81.2.69.142"
+          ],
+          "ip_group": "Default",
+          "port": 53
+        },
+        "detection": "Yes",
+        "detection_source": "GLOBAL_INTELLIGENCE",
+        "detection_type": "File",
+        "device": {
+          "direction": "outbound",
+          "guid": "C5B09EDD-C725-907F-29D9-B8C30D18C48F",
+          "host": "samplehost",
+          "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "ip": [
+            "81.2.69.192"
+          ],
+          "mac": "00-00-5E-00-53-23",
+          "process_name": "/snap/core/10126/usr/lib/snapd/snapd"
+        },
+        "domain": {
+          "name": "Workgroup"
+        },
+        "end_time": "2021-09-30T17:40:04.000Z",
+        "endpoint": {
+          "guid": "1234-1234-1234",
+          "hostname": "abc-docker",
+          "ip": [
+            "81.2.69.142"
+          ],
+          "mac": "00-00-5E-00-53-23"
+        },
+        "engine_type": "Virus Scan Engine (OS 2003, x64)",
+        "engine_version": "12.500.1004",
+        "event_id": "100117",
+        "event_name": "INTEGRITY_MONITORING_EVENT",
+        "event_time_dt": "2021-06-10T01:38:38.000Z",
+        "file_hash": "3395856ce81f2b7382dee72602f798b642f14140",
+        "file_name": [
+          "Unconfirmed 145081.crdownload"
+        ],
+        "file_operation": "Deleted",
+        "file_path": "/etc/systemd/system",
+        "file_path_name": "/etc/systemd/system/snap-xxxx-1246.xxxx",
+        "file_size": 0,
+        "first_action": "Clean",
+        "first_action_result": "Unable to clean file",
+        "full_path": "C:\\\\Users\\\\user1\\\\Downloads\\\\Unconfirmed 145081.crdownload",
+        "hostname": "samplehost",
+        "http_referer": "http://www.example.com/",
+        "interested": {
+          "host": "abc-docker",
+          "ip": [
+            "81.2.69.192"
+          ],
+          "mac": "00-00-5E-00-53-23"
+        },
+        "malware_name": "Eicar_test_1",
+        "malware_type": "Virus/Malware",
+        "mproduct": {
+          "name": "Cloud One - Workload Security",
+          "version": "Deep Security/20.0.222"
+        },
+        "object": {
+          "cmd": [
+            "C:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe --profile-directory=Default"
+          ],
+          "file": {
+            "hash": {
+              "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "name": "Unconfirmed 142899.crdownload:SmartScreen",
+            "path": "C:\\\\Users\\\\user1\\\\Downloads\\\\Unconfirmed 142899.crdownload:SmartScreen"
+          },
+          "name": "CloudEndpointService.exe",
+          "pid": 7660,
+          "signer": [
+            "OS"
+          ]
+        },
+        "parent": {
+          "cmd": "C:\\\\os\\\\system32\\\\svchost.exe -k DcomLaunch -p",
+          "file": {
+            "hash": {
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "path": "C:\\\\os\\\\System32\\\\svchost.exe"
+          }
+        },
+        "peer": {
+          "host": "samplehost",
+          "ip": [
+            "81.2.69.192"
+          ]
+        },
+        "process": {
+          "cmd": "-ServerName:App.AppX9yct9q388jvt4h7y0gn06smzkxcsnt8m.mca",
+          "file": {
+            "hash": {
+              "md5": "761AEFF7E6B110970285B9C20C9E1DCA",
+              "sha1": "00496B4D53CEFE031B9702B3385C9F4430999932",
+              "sha256": "7778ED68F4646BAA38C4F36B16A1AE393ACECD694948102B5CF0773AB08237D7"
+            },
+            "path": "C:\\\\Program Files (x86)\\\\os\\\\Application\\\\msedge.exe"
+          },
+          "name": "string",
+          "pid": 0,
+          "signer": "OS Publisher"
+        },
+        "product": {
+          "code": "sao",
+          "name": "Apex One",
+          "version": "20.0.0.877"
+        },
+        "protocol": "HTTP",
+        "protocol_group": "HTTP",
+        "related_apt": false,
+        "request": "https://ex-maple.ca",
+        "request_client_application": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+        "risk_level": 3,
+        "rt": "2020-10-15T01:16:32.000Z",
+        "rt_utc": "2020-10-15T01:16:32.000Z",
+        "search_data_lake": "DDL",
+        "security_analytics": {
+          "engine": {
+            "name": [
+              "T1090 (TA0005)"
+            ],
+            "version": "v6"
+          }
+        },
+        "severity_level": 50,
+        "source": {
+          "group": "Default",
+          "ip": "81.2.69.192",
+          "port": 58871
+        },
+        "sub_name": "Attack Discovery",
+        "tactic_id": [
+          "TA0005"
+        ],
+        "tags": [
+          "XSAE.F2140",
+          "XSAE.F3066"
+        ],
+        "threat_name": "Malicious_identified_CnC_querying_on_UDP_detected",
+        "total_count": 1,
+        "uuid": "1234-1234-1234"
+      }
+    },
+    "url": {
+      "domain": "ex-maple.ca",
+      "original": "https://ex-maple.ca",
+      "scheme": "https"
+    },
+    "user_agent": {
+      "device": {
+        "name": "iPhone"
+      },
+      "name": "Mobile Safari",
+      "original": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+      "os": {
+        "full": "iOS 12.1",
+        "name": "iOS",
+        "version": "12.1"
+      },
+      "version": "12.0"
+    }
+  }
+]

@@ -1,0 +1,79 @@
+{
+  "package": "apache",
+  "dataStreams": [
+    {
+      "dataset": "apache.access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "apache.error.module",
+        "host.hostname",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "source.address",
+        "source.geo.location",
+        "url.original",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "apache.error",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "apache.error.module",
+        "host.hostname",
+        "log.level",
+        "message",
+        "source.address",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "apache.status",
+      "indexPattern": "metrics-*",
+      "docTarget": 960,
+      "fields": [
+        "apache.status.bytes_per_sec",
+        "apache.status.connections.async.closing",
+        "apache.status.connections.async.keep_alive",
+        "apache.status.connections.async.writing",
+        "apache.status.connections.total",
+        "apache.status.cpu.children_system",
+        "apache.status.cpu.children_user",
+        "apache.status.cpu.load",
+        "apache.status.cpu.system",
+        "apache.status.cpu.user",
+        "apache.status.load.1",
+        "apache.status.load.15",
+        "apache.status.load.5",
+        "apache.status.requests_per_sec",
+        "apache.status.scoreboard.closing_connection",
+        "apache.status.scoreboard.dns_lookup",
+        "apache.status.scoreboard.gracefully_finishing",
+        "apache.status.scoreboard.idle_cleanup",
+        "apache.status.scoreboard.keepalive",
+        "apache.status.scoreboard.logging",
+        "apache.status.scoreboard.open_slot",
+        "apache.status.scoreboard.reading_request",
+        "apache.status.scoreboard.sending_reply",
+        "apache.status.scoreboard.starting_up",
+        "apache.status.scoreboard.total",
+        "apache.status.scoreboard.waiting_for_connection",
+        "apache.status.total_accesses",
+        "apache.status.total_bytes",
+        "apache.status.uptime.uptime",
+        "apache.status.workers.busy",
+        "apache.status.workers.idle",
+        "host.hostname"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

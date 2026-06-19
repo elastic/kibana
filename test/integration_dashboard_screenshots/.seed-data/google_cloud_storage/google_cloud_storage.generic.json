@@ -1,0 +1,59 @@
+[
+  {
+    "@timestamp": "2026-03-10T04:48:27.313Z",
+    "agent": {
+      "ephemeral_id": "feaed54c-c188-4ca0-90ae-4b28c639ba78",
+      "id": "f9dab7c8-79f3-47aa-8669-fc162d6f7bc3",
+      "name": "elastic-agent-84066",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "provider": "google cloud"
+    },
+    "data_stream": {
+      "dataset": "google_cloud_storage.generic",
+      "namespace": "78821",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "f9dab7c8-79f3-47aa-8669-fc162d6f7bc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "google_cloud_storage.generic",
+      "ingested": "2026-03-10T04:48:30Z"
+    },
+    "gcs": {
+      "storage": {
+        "bucket": {
+          "name": "testbucket"
+        },
+        "object": {
+          "content_type": "application/x-ndjson",
+          "json_data": [],
+          "name": "testdata.log"
+        }
+      }
+    },
+    "input": {
+      "type": "gcs"
+    },
+    "log": {
+      "file": {
+        "path": "gs://testbucket/testdata.log"
+      },
+      "offset": 0
+    },
+    "message": "{ \"testmessage\": \"success\" }",
+    "tags": [
+      "forwarded",
+      "google_cloud_storage-generic"
+    ]
+  }
+]

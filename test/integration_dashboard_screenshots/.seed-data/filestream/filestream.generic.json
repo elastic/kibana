@@ -1,0 +1,64 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:58:04.726Z",
+    "agent": {
+      "ephemeral_id": "30d9343c-7fdc-4d29-9b32-f588e98d1392",
+      "id": "d579443e-cd4b-4116-8839-aa528de831f1",
+      "name": "elastic-agent-61967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "filestream.generic",
+      "namespace": "63279",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "d579443e-cd4b-4116-8839-aa528de831f1",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "filestream.generic",
+      "ingested": "2026-03-10T02:58:07Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-61967",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.9"
+      ],
+      "mac": [
+        "7E-54-B8-19-83-FC",
+        "AA-2D-B0-91-09-52"
+      ],
+      "name": "elastic-agent-61967",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "inode": "1292",
+        "path": "/tmp/service_logs/test-filestream-native.log"
+      },
+      "offset": "0"
+    },
+    "message": "small"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "name": "integration-dashboard-screenshots",
+  "private": true,
+  "description": "Framework for capturing screenshots of all integration dashboards",
+  "scripts": {
+    "start:kibana": "./start_kibana.sh",
+    "start:kibana:baseline": "./start_kibana.sh false",
+    "ingest": "./run.sh ingest",
+    "screenshot": "./run.sh screenshot",
+    "screenshot:update": "./run.sh screenshot:update",
+    "screenshot:reset": "./run.sh screenshot:reset",
+    "local": "./run.sh local"
+  }
+}

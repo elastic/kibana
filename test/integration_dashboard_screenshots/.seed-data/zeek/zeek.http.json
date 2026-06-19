@@ -1,0 +1,878 @@
+[
+  {
+    "@timestamp": "2021-03-30T05:16:06.285Z",
+    "agent": {
+      "ephemeral_id": "a0c68ba7-d213-4976-b109-3b3039fff8b3",
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "name": "elastic-agent-73116",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.http",
+      "namespace": "92891",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "web"
+      ],
+      "created": "2026-03-10T03:16:31.867Z",
+      "dataset": "zeek.http",
+      "id": "C7DWRE1zsvxUK9RyW1",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        }
+      },
+      "response": {
+        "body": {
+          "bytes": 503
+        },
+        "status_code": 200
+      },
+      "version": "1.0"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/http.log"
+      },
+      "offset": 2355
+    },
+    "network": {
+      "community_id": "1:ajUcq0AI8azqE0a1li4/jRMwcKw=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 42292
+    },
+    "tags": [
+      "forwarded",
+      "zeek-http"
+    ],
+    "zeek": {
+      "http": {
+        "resp_fuids": [
+          "FQhm6z1cISaOxMzzR6"
+        ],
+        "resp_mime_types": [
+          "application/ocsp-response"
+        ],
+        "status_msg": "OK",
+        "tags": [],
+        "trans_depth": 1
+      },
+      "session_id": "C7DWRE1zsvxUK9RyW1"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T05:16:04.250Z",
+    "agent": {
+      "ephemeral_id": "a0c68ba7-d213-4976-b109-3b3039fff8b3",
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "name": "elastic-agent-73116",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.http",
+      "namespace": "92891",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "web"
+      ],
+      "created": "2026-03-10T03:16:31.867Z",
+      "dataset": "zeek.http",
+      "id": "C6oCGd24yB2dZ7y7z7",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        }
+      },
+      "response": {
+        "body": {
+          "bytes": 503
+        },
+        "status_code": 200
+      },
+      "version": "1.0"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/http.log"
+      },
+      "offset": 2010
+    },
+    "network": {
+      "community_id": "1:BZ8++u2MIGSTzB1PMApm+Z7ySCw=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 42164
+    },
+    "tags": [
+      "forwarded",
+      "zeek-http"
+    ],
+    "zeek": {
+      "http": {
+        "resp_fuids": [
+          "F1imAq4yUjbwyK7NO2"
+        ],
+        "resp_mime_types": [
+          "application/ocsp-response"
+        ],
+        "status_msg": "OK",
+        "tags": [],
+        "trans_depth": 1
+      },
+      "session_id": "C6oCGd24yB2dZ7y7z7"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T05:16:00.171Z",
+    "agent": {
+      "ephemeral_id": "a0c68ba7-d213-4976-b109-3b3039fff8b3",
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "name": "elastic-agent-73116",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.http",
+      "namespace": "92891",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "web"
+      ],
+      "created": "2026-03-10T03:16:31.867Z",
+      "dataset": "zeek.http",
+      "id": "CrI5Xg30caNXnNvEse",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        }
+      },
+      "response": {
+        "body": {
+          "bytes": 503
+        },
+        "status_code": 200
+      },
+      "version": "1.0"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/http.log"
+      },
+      "offset": 1665
+    },
+    "network": {
+      "community_id": "1:/5C96eJFQOtyIA58kKSJqNHqFag=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 41960
+    },
+    "tags": [
+      "forwarded",
+      "zeek-http"
+    ],
+    "zeek": {
+      "http": {
+        "resp_fuids": [
+          "F8vozz46VoxeAmqLv3"
+        ],
+        "resp_mime_types": [
+          "application/ocsp-response"
+        ],
+        "status_msg": "OK",
+        "tags": [],
+        "trans_depth": 1
+      },
+      "session_id": "CrI5Xg30caNXnNvEse"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T05:15:55.599Z",
+    "agent": {
+      "ephemeral_id": "a0c68ba7-d213-4976-b109-3b3039fff8b3",
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "name": "elastic-agent-73116",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.http",
+      "namespace": "92891",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "web"
+      ],
+      "created": "2026-03-10T03:16:31.867Z",
+      "dataset": "zeek.http",
+      "id": "CxhRTwkHNRsHxBw34",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        }
+      },
+      "response": {
+        "body": {
+          "bytes": 191
+        },
+        "status_code": 301
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/http.log"
+      },
+      "offset": 1322
+    },
+    "network": {
+      "community_id": "1:WGP7lVikdNxSruwUqKr9UJsM6cg=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 55378
+    },
+    "tags": [
+      "forwarded",
+      "zeek-http"
+    ],
+    "zeek": {
+      "http": {
+        "resp_fuids": [
+          "FVGTq31RBgKGE02hx7"
+        ],
+        "resp_mime_types": [
+          "text/html"
+        ],
+        "status_msg": "Moved Permanently",
+        "tags": [],
+        "trans_depth": 1
+      },
+      "session_id": "CxhRTwkHNRsHxBw34"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T05:15:54.277Z",
+    "agent": {
+      "ephemeral_id": "a0c68ba7-d213-4976-b109-3b3039fff8b3",
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "name": "elastic-agent-73116",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.http",
+      "namespace": "92891",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "web"
+      ],
+      "created": "2026-03-10T03:16:31.867Z",
+      "dataset": "zeek.http",
+      "id": "CdqHhA1AsxBIjmVZ9",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        }
+      },
+      "response": {
+        "body": {
+          "bytes": 503
+        },
+        "status_code": 200
+      },
+      "version": "1.0"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/http.log"
+      },
+      "offset": 978
+    },
+    "network": {
+      "community_id": "1:Va3F0U8tWSumaLfdIthiogJqVoM=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 57896
+    },
+    "tags": [
+      "forwarded",
+      "zeek-http"
+    ],
+    "zeek": {
+      "http": {
+        "resp_fuids": [
+          "FM01o54RU9pez8AJba"
+        ],
+        "resp_mime_types": [
+          "application/ocsp-response"
+        ],
+        "status_msg": "OK",
+        "tags": [],
+        "trans_depth": 1
+      },
+      "session_id": "CdqHhA1AsxBIjmVZ9"
+    }
+  },
+  {
+    "@timestamp": "2019-01-17T06:36:59.757Z",
+    "agent": {
+      "ephemeral_id": "a0c68ba7-d213-4976-b109-3b3039fff8b3",
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "name": "elastic-agent-73116",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.http",
+      "namespace": "92891",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "GET",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "web"
+      ],
+      "created": "2026-03-10T03:16:31.867Z",
+      "dataset": "zeek.http",
+      "id": "CMnIaR2V8VXyu7EPs",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 32
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/http.log"
+      },
+      "offset": 575
+    },
+    "network": {
+      "community_id": "1:61UpXAOHdoCqwl0IE7pv7Zrqgig=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.20.8.197",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "address": "10.20.8.197",
+      "ip": "10.20.8.197",
+      "port": 35684
+    },
+    "tags": [
+      "forwarded",
+      "zeek-http"
+    ],
+    "url": {
+      "domain": "httpbin.org",
+      "original": "/ip",
+      "path": "/ip"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.58.0",
+      "version": "7.58.0"
+    },
+    "zeek": {
+      "http": {
+        "resp_fuids": [
+          "FwGPlr1GcKUWWdkXoi"
+        ],
+        "resp_mime_types": [
+          "text/json"
+        ],
+        "status_msg": "OK",
+        "tags": [],
+        "trans_depth": 1
+      },
+      "session_id": "CMnIaR2V8VXyu7EPs"
+    }
+  },
+  {
+    "@timestamp": "2019-01-17T01:05:30.172Z",
+    "agent": {
+      "ephemeral_id": "a0c68ba7-d213-4976-b109-3b3039fff8b3",
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "name": "elastic-agent-73116",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.http",
+      "namespace": "92891",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.156",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "20ef90be-d66d-4d58-a9db-08b345caa50a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "GET",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "web"
+      ],
+      "created": "2026-03-10T03:16:29.888Z",
+      "dataset": "zeek.http",
+      "id": "CCNp8v1SNzY7v9d1Ih",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 0
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 3735
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/http.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "community_id": "1:TXs3dhUTv+gqBJnP8SIFZaOWpyM=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "10.178.98.102",
+        "89.160.20.156"
+      ],
+      "user": [
+        "user"
+      ]
+    },
+    "source": {
+      "address": "10.178.98.102",
+      "ip": "10.178.98.102",
+      "port": 62995
+    },
+    "tags": [
+      "forwarded",
+      "zeek-http"
+    ],
+    "url": {
+      "domain": "ocsp.apple.com",
+      "original": "/ocsp04-aaica02/ME4wTKADAgEAMEUwQzBBMAkGBSsOAwIaBQAEFNqvF+Za6oA4ceFRLsAWwEInjUhJBBQx6napI3Sl39T97qDBpp7GEQ4R7AIIUP1IOZZ86ns=",
+      "path": "/ocsp04-aaica02/ME4wTKADAgEAMEUwQzBBMAkGBSsOAwIaBQAEFNqvF+Za6oA4ceFRLsAWwEInjUhJBBQx6napI3Sl39T97qDBpp7GEQ4R7AIIUP1IOZZ86ns=",
+      "username": "user"
+    },
+    "user": {
+      "name": "user"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Other",
+      "original": "com.apple.trustd/2.0"
+    },
+    "zeek": {
+      "http": {
+        "resp_fuids": [
+          "F5zuip1tSwASjNAHy7"
+        ],
+        "resp_mime_types": [
+          "application/ocsp-response"
+        ],
+        "status_msg": "OK",
+        "tags": [],
+        "trans_depth": 1
+      },
+      "session_id": "CCNp8v1SNzY7v9d1Ih"
+    }
+  }
+]

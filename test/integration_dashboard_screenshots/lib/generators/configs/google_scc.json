@@ -1,0 +1,47 @@
+{
+  "package": "google_scc",
+  "dataStreams": [
+    {
+      "dataset": "google_scc.asset",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_scc.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_scc.audit.resource.type",
+        "log.level"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_scc.finding",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.project.id",
+        "event.id",
+        "google_scc.finding.category",
+        "google_scc.finding.class",
+        "google_scc.finding.mute.state",
+        "google_scc.finding.severity",
+        "google_scc.finding.state",
+        "threat.tactic.name",
+        "threat.technique.name",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "google_scc.finding.class": [
+          "VULNERABILITY",
+          "THREAT"
+        ]
+      }
+    }
+  ]
+}

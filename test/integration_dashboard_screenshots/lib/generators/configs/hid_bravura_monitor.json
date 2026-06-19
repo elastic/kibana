@@ -1,0 +1,153 @@
+{
+  "package": "hid_bravura_monitor",
+  "dataStreams": [
+    {
+      "dataset": "hid_bravura_monitor.log",
+      "indexPattern": "logs-*",
+      "docTarget": 870,
+      "fields": [
+        "event.action",
+        "event.category",
+        "event.code",
+        "event.outcome",
+        "hid_bravura_monitor.perf.duration",
+        "hid_bravura_monitor.perf.event",
+        "hid_bravura_monitor.perf.exe",
+        "hid_bravura_monitor.perf.function",
+        "hid_bravura_monitor.perf.kind",
+        "hid_bravura_monitor.perf.message",
+        "hid_bravura_monitor.perf.operation",
+        "hid_bravura_monitor.perf.receivequeue",
+        "hid_bravura_monitor.perf.result",
+        "hid_bravura_monitor.perf.targetid",
+        "hid_bravura_monitor.perf.transid",
+        "host.hostname",
+        "host.name",
+        "log.level",
+        "log.logger",
+        "user.id",
+        "user.name",
+        "winlog.channel",
+        "winlog.event_data.Module",
+        "winlog.event_data.Profile",
+        "winlog.event_data.Recipient",
+        "winlog.event_data.Requester",
+        "winlog.event_id",
+        "winlog.provider_name",
+        "winlog.user.name"
+      ],
+      "filterValues": {
+        "log.level": [
+          "Warning",
+          "Error",
+          "critical",
+          "warning",
+          "error"
+        ],
+        "winlog.provider_name": [
+          "Hitachi-Hitachi ID Systems-Hitachi ID Suite"
+        ],
+        "event.code": [
+          "30",
+          "31",
+          "32",
+          "33",
+          "28",
+          "29",
+          "52",
+          "53",
+          "54",
+          "55",
+          "56",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "121",
+          "6",
+          "8",
+          "9",
+          "10",
+          "78",
+          "81",
+          "82",
+          "83",
+          "84"
+        ],
+        "log.logger": [
+          "iddiscover.exe",
+          "pamlws.exe",
+          "psupdate.exe",
+          "ajaxsvc.exe",
+          "psf.exe",
+          "psa.exe",
+          "iddb.exe"
+        ],
+        "hid_bravura_monitor.perf.kind": [
+          "PerfSproc",
+          "PerfExe",
+          "PerfPsupdate",
+          "PerfIDWFM",
+          "PerfConnector",
+          "PerfReplication",
+          "PerfAjax",
+          "PerfIDAPI"
+        ],
+        "hid_bravura_monitor.perf.exe": [
+          "psupdate.exe"
+        ],
+        "hid_bravura_monitor.perf.function": [
+          "*Search*"
+        ],
+        "hid_bravura_monitor.perf.transid": [
+          "C_AUTHCHAIN_LOGIN"
+        ],
+        "event.action": [
+          "logged-in",
+          "logged-in-special"
+        ],
+        "winlog.event_id": [
+          "4740",
+          "4728",
+          "4732",
+          "4756",
+          "4735",
+          "4624",
+          "4625",
+          "4648"
+        ]
+      }
+    },
+    {
+      "dataset": "hid_bravura_monitor.winlog",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.code",
+        "event.outcome",
+        "hid_bravura_monitor.perf.address",
+        "hid_bravura_monitor.perf.duration",
+        "hid_bravura_monitor.perf.kind",
+        "hid_bravura_monitor.perf.targetid",
+        "host.name",
+        "log.logger",
+        "winlog.provider_name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

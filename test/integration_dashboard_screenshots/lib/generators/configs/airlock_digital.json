@@ -1,0 +1,46 @@
+{
+  "package": "airlock_digital",
+  "dataStreams": [
+    {
+      "dataset": "airlock_digital.agent",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "airlock_digital.agent.poilcy_details.trusted_config",
+        "airlock_digital.agent.status_value",
+        "host.hostname",
+        "host.id",
+        "host.os.full",
+        "rule.id",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "airlock_digital.execution_histories",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "airlock_digital.execution_histories.type_value",
+        "file.name",
+        "host.hostname",
+        "process.parent.name",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "airlock_digital.server_activities",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "airlock_digital.server_activities.task",
+        "event.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

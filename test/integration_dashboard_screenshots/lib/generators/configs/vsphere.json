@@ -1,0 +1,200 @@
+{
+  "package": "vsphere",
+  "dataStreams": [
+    {
+      "dataset": "vsphere.cluster",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "vsphere.cluster.datastore.names",
+        "vsphere.cluster.host.names",
+        "vsphere.cluster.id",
+        "vsphere.cluster.name",
+        "vsphere.cluster.network.names",
+        "vsphere.network.host.names",
+        "vsphere.network.id",
+        "vsphere.network.name",
+        "vsphere.network.status",
+        "vsphere.network.type",
+        "vsphere.network.vm.names"
+      ],
+      "filterValues": {
+        "vsphere.network.status": [
+          "green",
+          "red"
+        ]
+      }
+    },
+    {
+      "dataset": "vsphere.datastore",
+      "indexPattern": "metrics-*",
+      "docTarget": 510,
+      "fields": [
+        "vsphere.datastore.capacity.free.bytes",
+        "vsphere.datastore.capacity.total.bytes",
+        "vsphere.datastore.capacity.used.bytes",
+        "vsphere.datastore.capacity.used.pct",
+        "vsphere.datastore.disk.capacity.bytes",
+        "vsphere.datastore.disk.provisioned.bytes",
+        "vsphere.datastore.fstype",
+        "vsphere.datastore.host.names",
+        "vsphere.datastore.id",
+        "vsphere.datastore.name",
+        "vsphere.datastore.status",
+        "vsphere.datastore.vm.names",
+        "vsphere.datastorecluster.capacity.bytes",
+        "vsphere.datastorecluster.datastore.names",
+        "vsphere.datastorecluster.free_space.bytes",
+        "vsphere.datastorecluster.id",
+        "vsphere.datastorecluster.name"
+      ],
+      "filterValues": {
+        "vsphere.datastore.status": [
+          "green",
+          "red"
+        ]
+      }
+    },
+    {
+      "dataset": "vsphere.datastorecluster",
+      "indexPattern": "metrics-*",
+      "docTarget": 510,
+      "fields": [
+        "vsphere.datastore.capacity.free.bytes",
+        "vsphere.datastore.capacity.total.bytes",
+        "vsphere.datastore.capacity.used.bytes",
+        "vsphere.datastore.capacity.used.pct",
+        "vsphere.datastore.disk.capacity.bytes",
+        "vsphere.datastore.disk.provisioned.bytes",
+        "vsphere.datastore.fstype",
+        "vsphere.datastore.host.names",
+        "vsphere.datastore.id",
+        "vsphere.datastore.name",
+        "vsphere.datastore.status",
+        "vsphere.datastore.vm.names",
+        "vsphere.datastorecluster.capacity.bytes",
+        "vsphere.datastorecluster.datastore.names",
+        "vsphere.datastorecluster.free_space.bytes",
+        "vsphere.datastorecluster.id",
+        "vsphere.datastorecluster.name"
+      ],
+      "filterValues": {
+        "vsphere.datastore.status": [
+          "green",
+          "red"
+        ]
+      }
+    },
+    {
+      "dataset": "vsphere.host",
+      "indexPattern": "metrics-*",
+      "docTarget": 600,
+      "fields": [
+        "vsphere.host.cpu.free.mhz",
+        "vsphere.host.cpu.total.mhz",
+        "vsphere.host.cpu.used.mhz",
+        "vsphere.host.datastore.names",
+        "vsphere.host.disk.latency.total.ms",
+        "vsphere.host.disk.total.bytes",
+        "vsphere.host.id",
+        "vsphere.host.memory.free.bytes",
+        "vsphere.host.memory.total.bytes",
+        "vsphere.host.memory.used.bytes",
+        "vsphere.host.name",
+        "vsphere.host.network.names",
+        "vsphere.host.network.packets.dropped.received.count",
+        "vsphere.host.network.packets.dropped.transmitted.count",
+        "vsphere.host.network.packets.errors.received.count",
+        "vsphere.host.network.packets.errors.transmitted.count",
+        "vsphere.host.network.packets.received.count",
+        "vsphere.host.network.packets.transmitted.count",
+        "vsphere.host.status",
+        "vsphere.host.vm.names"
+      ],
+      "filterValues": {
+        "vsphere.host.status": [
+          "green",
+          "red"
+        ]
+      }
+    },
+    {
+      "dataset": "vsphere.network",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "vsphere.cluster.datastore.names",
+        "vsphere.cluster.host.names",
+        "vsphere.cluster.id",
+        "vsphere.cluster.name",
+        "vsphere.cluster.network.names",
+        "vsphere.network.host.names",
+        "vsphere.network.id",
+        "vsphere.network.name",
+        "vsphere.network.status",
+        "vsphere.network.type",
+        "vsphere.network.vm.names"
+      ],
+      "filterValues": {
+        "vsphere.network.status": [
+          "green",
+          "red"
+        ]
+      }
+    },
+    {
+      "dataset": "vsphere.resourcepool",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "vsphere.resourcepool.cpu.demand.mhz",
+        "vsphere.resourcepool.cpu.entitlement.mhz",
+        "vsphere.resourcepool.cpu.entitlement.static.mhz",
+        "vsphere.resourcepool.cpu.usage.mhz",
+        "vsphere.resourcepool.id",
+        "vsphere.resourcepool.memory.entitlement.bytes",
+        "vsphere.resourcepool.memory.entitlement.static.bytes",
+        "vsphere.resourcepool.memory.private.bytes",
+        "vsphere.resourcepool.memory.shared.bytes",
+        "vsphere.resourcepool.memory.usage.guest.bytes",
+        "vsphere.resourcepool.memory.usage.host.bytes",
+        "vsphere.resourcepool.name",
+        "vsphere.resourcepool.status",
+        "vsphere.resourcepool.vm.count"
+      ],
+      "filterValues": {
+        "vsphere.resourcepool.status": [
+          "green",
+          "red"
+        ]
+      }
+    },
+    {
+      "dataset": "vsphere.virtualmachine",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "vsphere.virtualmachine.cpu.used.mhz",
+        "vsphere.virtualmachine.datastore.names",
+        "vsphere.virtualmachine.host.hostname",
+        "vsphere.virtualmachine.id",
+        "vsphere.virtualmachine.memory.total.guest.bytes",
+        "vsphere.virtualmachine.name",
+        "vsphere.virtualmachine.network_names",
+        "vsphere.virtualmachine.os",
+        "vsphere.virtualmachine.snapshot.info.createtime",
+        "vsphere.virtualmachine.snapshot.info.description",
+        "vsphere.virtualmachine.snapshot.info.id",
+        "vsphere.virtualmachine.snapshot.info.name",
+        "vsphere.virtualmachine.snapshot.info.state",
+        "vsphere.virtualmachine.status"
+      ],
+      "filterValues": {
+        "vsphere.virtualmachine.status": [
+          "green",
+          "red"
+        ]
+      }
+    }
+  ]
+}

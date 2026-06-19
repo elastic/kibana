@@ -1,0 +1,25 @@
+{
+  "package": "splunk",
+  "dataStreams": [
+    {
+      "dataset": "splunk.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "event.action",
+        "event.reason",
+        "event.severity",
+        "host.name",
+        "host.os.name",
+        "source.address",
+        "source.ip",
+        "splunk.alert.friendly_name",
+        "splunk.alert.severity",
+        "splunk.alert.source",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "package": "mysql",
+  "dataStreams": [
+    {
+      "dataset": "mysql.error",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "log.level",
+        "message"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mysql.replica_status",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "mysql.replica_status.seconds_behind_source",
+        "mysql.replica_status.source.binary_log_file",
+        "mysql.replica_status.source.file_info",
+        "mysql.replica_status.source.host.name",
+        "mysql.replica_status.source.log_position.exec",
+        "mysql.replica_status.source.log_position.read",
+        "mysql.replica_status.source.server.id",
+        "mysql.replica_status.source.server.uuid",
+        "mysql.replica_status.thread.sql.delay.sec",
+        "service.address",
+        "source.port"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mysql.slowlog",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.duration",
+        "log.level",
+        "message",
+        "mysql.slowlog.query",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mysql.status",
+      "indexPattern": "metrics-*",
+      "docTarget": 960,
+      "fields": [
+        "mysql.status.aborted.clients",
+        "mysql.status.aborted.connects",
+        "mysql.status.bytes.received",
+        "mysql.status.bytes.sent",
+        "mysql.status.cache.ssl.hits",
+        "mysql.status.cache.ssl.misses",
+        "mysql.status.cache.ssl.size",
+        "mysql.status.cache.table.open_cache.hits",
+        "mysql.status.cache.table.open_cache.misses",
+        "mysql.status.cache.table.open_cache.overflows",
+        "mysql.status.command.delete",
+        "mysql.status.command.insert",
+        "mysql.status.command.select",
+        "mysql.status.command.update",
+        "mysql.status.connection.errors.accept",
+        "mysql.status.connection.errors.internal",
+        "mysql.status.connection.errors.max",
+        "mysql.status.connection.errors.peer_address",
+        "mysql.status.connection.errors.select",
+        "mysql.status.connections",
+        "mysql.status.innodb.buffer_pool.pages.data",
+        "mysql.status.innodb.buffer_pool.pages.free",
+        "mysql.status.innodb.buffer_pool.pages.total",
+        "mysql.status.innodb.buffer_pool.pool.reads",
+        "mysql.status.innodb.buffer_pool.read.requests",
+        "mysql.status.max_used_connections",
+        "mysql.status.open.files",
+        "mysql.status.open.streams",
+        "mysql.status.open.tables",
+        "mysql.status.questions",
+        "mysql.status.threads.connected",
+        "mysql.status.threads.running"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

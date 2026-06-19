@@ -1,0 +1,29 @@
+{
+  "package": "pfsense",
+  "dataStreams": [
+    {
+      "dataset": "pfsense.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.ip",
+        "destination.geo.country_name",
+        "dns.question.name",
+        "dns.question.registered_domain",
+        "dns.question.type",
+        "event.action",
+        "event.provider",
+        "network.transport",
+        "observer.ingress.interface.name",
+        "source.geo.country_name"
+      ],
+      "filterValues": {
+        "event.provider": [
+          "unbound",
+          "filterlog",
+          "dhcpd"
+        ]
+      }
+    }
+  ]
+}

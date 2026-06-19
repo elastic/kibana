@@ -1,0 +1,79 @@
+{
+  "package": "tencent_cloud",
+  "dataStreams": [
+    {
+      "dataset": "tencent_cloud.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.account.id",
+        "event.action",
+        "source.geo.location",
+        "tencent_cloud.audit.actionType",
+        "tencent_cloud.audit.apiErrorCode",
+        "tencent_cloud.audit.errorMessage",
+        "tencent_cloud.audit.eventType",
+        "tencent_cloud.audit.resourceName",
+        "tencent_cloud.audit.resourceSet.resourceType",
+        "tencent_cloud.audit.resourceType",
+        "tencent_cloud.audit.sensitiveAction",
+        "tencent_cloud.audit.userIdentity.principalId",
+        "tencent_cloud.audit.userIdentity.roleSessionName"
+      ],
+      "filterValues": {
+        "tencent_cloud.audit.eventType": [
+          "ApiCall"
+        ],
+        "tencent_cloud.audit.apiErrorCode": [
+          "0"
+        ],
+        "tencent_cloud.audit.errorMessage": [
+          "ok"
+        ],
+        "tencent_cloud.audit.sensitiveAction": [
+          "0"
+        ]
+      }
+    },
+    {
+      "dataset": "tencent_cloud.clb",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "http.request.body.bytes",
+        "http.response.body.bytes",
+        "source.ip",
+        "tencent_cloud.clb.request_time",
+        "tencent_cloud.clb.upstream_response_time"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tencent_cloud.cos",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "http.request.method",
+        "http.response.status_code",
+        "source.geo.location",
+        "source.ip",
+        "tencent_cloud.cos.bucketName"
+      ],
+      "filterValues": {
+        "http.request.method": [
+          "GET"
+        ]
+      }
+    },
+    {
+      "dataset": "tencent_cloud.scf",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "faas.name",
+        "http.response.status_code"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:35:01.980Z",
+    "agent": {
+      "ephemeral_id": "9cf102f4-d9d2-4c65-a4f6-8e8669eb2358",
+      "id": "ac25e3dc-ba41-4eb3-8f12-57d380439a08",
+      "name": "elastic-agent-39117",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vsphere.cluster",
+      "namespace": "39988",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "ac25e3dc-ba41-4eb3-8f12-57d380439a08",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "vsphere.cluster",
+      "duration": 37816167,
+      "ingested": "2026-03-10T02:35:03Z",
+      "module": "vsphere"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-39117",
+      "ip": [
+        "172.18.0.9",
+        "172.23.0.2"
+      ],
+      "mac": [
+        "0E-63-97-8E-FA-06",
+        "46-9D-F9-43-E6-87"
+      ],
+      "name": "elastic-agent-39117",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "cluster",
+      "period": 20000
+    },
+    "service": {
+      "address": "https://svc-vsphere-metrics:8989/sdk",
+      "type": "vsphere"
+    },
+    "tags": "vsphere-cluster",
+    "vsphere": {
+      "cluster": {
+        "datastore": {
+          "count": 1,
+          "names": "LocalDS_0"
+        },
+        "host": {
+          "count": 3,
+          "names": [
+            "DC0_C0_H0",
+            "DC0_C0_H1",
+            "DC0_C0_H2"
+          ]
+        },
+        "id": "domain-c28",
+        "name": "DC0_C0",
+        "network": {
+          "count": 3,
+          "names": [
+            "DC0_DVPG0",
+            "DVS0-DVUplinks-10",
+            "VM Network"
+          ]
+        },
+        "resourcepool": {
+          "id": "resgroup-27"
+        }
+      }
+    }
+  }
+]

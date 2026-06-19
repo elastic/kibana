@@ -1,0 +1,209 @@
+[
+  {
+    "@timestamp": "2026-03-10T04:09:34.228Z",
+    "agent": {
+      "ephemeral_id": "5b7584b2-239a-412c-904b-eda4ab50040d",
+      "id": "04e29c2a-e051-422f-b085-6f5157298518",
+      "name": "elastic-agent-40398",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "github.security_advisories",
+      "namespace": "31616",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e29c2a-e051-422f-b085-6f5157298518",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "vulnerability"
+      ],
+      "dataset": "github.security_advisories",
+      "ingested": "2026-03-10T04:09:35Z",
+      "kind": "enrichment",
+      "type": [
+        "info"
+      ]
+    },
+    "github": {
+      "security_advisory": {
+        "cve_id": "CVE-2025-5592",
+        "cvss": {
+          "score": 7.3,
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "cvss_severities": {
+          "cvss_v3": {
+            "score": 7.3,
+            "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          },
+          "cvss_v4": {
+            "score": 6.9,
+            "vector_string": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X"
+          }
+        },
+        "cwes": [
+          {
+            "cwe_id": "CWE-119",
+            "name": "Improper Restriction of Operations within the Bounds of a Memory Buffer"
+          }
+        ],
+        "description": "A vulnerability, which was classified as critical, has been found in FreeFloat FTP Server 1.0. Affected by this issue is some unknown functionality of the component PASSIVE Command Handler. The manipulation leads to buffer overflow. The attack may be launched remotely. The exploit has been disclosed to the public and may be used.",
+        "ghsa_id": "GHSA-p5r3-w88m-mm8j",
+        "html_url": "https://github.com/advisories/GHSA-p5r3-w88m-mm8j",
+        "identifiers": [
+          {
+            "type": "GHSA",
+            "value": "GHSA-p5r3-w88m-mm8j"
+          },
+          {
+            "type": "CVE",
+            "value": "CVE-2025-5592"
+          }
+        ],
+        "nvd_published_at": "2025-06-04T14:15:35.000Z",
+        "published_at": "2025-06-04T15:30:40.000Z",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2025-5592",
+          "https://fitoxs.com/exploit/exploit-d28993dd71bcf3fbc63ff58db41e5f10a3ff7932e72d9e25c556cf18921a98e3.txt",
+          "https://vuldb.com/?ctiid.311078",
+          "https://vuldb.com/?id.311078",
+          "https://vuldb.com/?submit.586990",
+          "https://github.com/advisories/GHSA-p5r3-w88m-mm8j"
+        ],
+        "severity": "medium",
+        "summary": "A vulnerability, which was classified as critical, has been found in FreeFloat FTP Server 1.0....",
+        "type": "unreviewed",
+        "updated_at": "2025-06-04T15:30:46.000Z",
+        "url": "https://api.github.com/advisories/GHSA-p5r3-w88m-mm8j"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "forwarded",
+      "github-security-advisories"
+    ],
+    "url": {
+      "domain": "github.com",
+      "full": "https://github.com/advisories/GHSA-p5r3-w88m-mm8j",
+      "original": "https://github.com/advisories/GHSA-p5r3-w88m-mm8j",
+      "path": "/advisories/GHSA-p5r3-w88m-mm8j",
+      "scheme": "https"
+    },
+    "vulnerability": {
+      "classification": "CVSS",
+      "description": "A vulnerability, which was classified as critical, has been found in FreeFloat FTP Server 1.0. Affected by this issue is some unknown functionality of the component PASSIVE Command Handler. The manipulation leads to buffer overflow. The attack may be launched remotely. The exploit has been disclosed to the public and may be used.",
+      "enumeration": "CVE",
+      "id": "CVE-2025-5592",
+      "score": {
+        "base": 7.3
+      },
+      "severity": "medium"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:09:32.246Z",
+    "agent": {
+      "ephemeral_id": "5b7584b2-239a-412c-904b-eda4ab50040d",
+      "id": "04e29c2a-e051-422f-b085-6f5157298518",
+      "name": "elastic-agent-40398",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "github.security_advisories",
+      "namespace": "31616",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e29c2a-e051-422f-b085-6f5157298518",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "vulnerability"
+      ],
+      "dataset": "github.security_advisories",
+      "ingested": "2026-03-10T04:09:35Z",
+      "kind": "enrichment",
+      "type": [
+        "info"
+      ]
+    },
+    "github": {
+      "security_advisory": {
+        "cve_id": "CVE-2025-23096",
+        "cvss_severities": {
+          "cvss_v3": {
+            "score": 0.0
+          },
+          "cvss_v4": {
+            "score": 0.0
+          }
+        },
+        "description": "An issue was discovered in Samsung Mobile Processor Exynos 1280, 2200, 1380, 1480, 2400. A Double Free in the mobile processor leads to privilege escalation.",
+        "ghsa_id": "GHSA-vpq6-j9hp-2h3w",
+        "html_url": "https://github.com/advisories/GHSA-vpq6-j9hp-2h3w",
+        "identifiers": [
+          {
+            "type": "GHSA",
+            "value": "GHSA-vpq6-j9hp-2h3w"
+          },
+          {
+            "type": "CVE",
+            "value": "CVE-2025-23096"
+          }
+        ],
+        "nvd_published_at": "2025-06-04T15:15:23.000Z",
+        "published_at": "2025-06-04T15:30:41.000Z",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2025-23096",
+          "https://semiconductor.samsung.com/support/quality-support/product-security-updates",
+          "https://semiconductor.samsung.com/support/quality-support/product-security-updates/cve-2025-23096",
+          "https://github.com/advisories/GHSA-vpq6-j9hp-2h3w"
+        ],
+        "severity": "unknown",
+        "summary": "An issue was discovered in Samsung Mobile Processor Exynos 1280, 2200, 1380, 1480, 2400. A Double...",
+        "type": "unreviewed",
+        "updated_at": "2025-06-04T15:30:46.000Z",
+        "url": "https://api.github.com/advisories/GHSA-vpq6-j9hp-2h3w"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "forwarded",
+      "github-security-advisories"
+    ],
+    "url": {
+      "domain": "github.com",
+      "full": "https://github.com/advisories/GHSA-vpq6-j9hp-2h3w",
+      "original": "https://github.com/advisories/GHSA-vpq6-j9hp-2h3w",
+      "path": "/advisories/GHSA-vpq6-j9hp-2h3w",
+      "scheme": "https"
+    },
+    "vulnerability": {
+      "classification": "CVSS",
+      "description": "An issue was discovered in Samsung Mobile Processor Exynos 1280, 2200, 1380, 1480, 2400. A Double Free in the mobile processor leads to privilege escalation.",
+      "enumeration": "CVE",
+      "id": "CVE-2025-23096",
+      "severity": "unknown"
+    }
+  }
+]

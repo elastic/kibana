@@ -1,0 +1,48 @@
+{
+  "package": "ti_cif3",
+  "dataStreams": [
+    {
+      "dataset": "ti_cif3.feed",
+      "indexPattern": "logs-*",
+      "docTarget": 600,
+      "fields": [
+        "event.dataset",
+        "event.kind",
+        "labels.is_ioc_transform_source",
+        "threat.indicator.as.number",
+        "threat.indicator.description",
+        "threat.indicator.email.address",
+        "threat.indicator.file.hash.md5",
+        "threat.indicator.file.hash.sha1",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.file.hash.sha512",
+        "threat.indicator.file.hash.ssdeep",
+        "threat.indicator.file.pe.imphash",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.geo.location",
+        "threat.indicator.ip",
+        "threat.indicator.type",
+        "threat.indicator.url.domain",
+        "threat.indicator.url.extension",
+        "threat.indicator.url.port",
+        "threat.indicator.url.scheme"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "file",
+          "ipv6-addr",
+          "ipv4-addr",
+          "email-addr",
+          "url"
+        ],
+        "labels.is_ioc_transform_source": [
+          "true"
+        ],
+        "event.kind": [
+          "enrichment"
+        ]
+      }
+    }
+  ]
+}

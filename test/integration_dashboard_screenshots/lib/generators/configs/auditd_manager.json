@@ -1,0 +1,15 @@
+{
+  "package": "auditd_manager",
+  "dataStreams": [
+    {
+      "dataset": "auditd_manager.auditd",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "auditd.summary.actor.primary",
+        "process.executable"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

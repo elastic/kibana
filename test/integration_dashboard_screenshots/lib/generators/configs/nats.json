@@ -1,0 +1,81 @@
+{
+  "package": "nats",
+  "dataStreams": [
+    {
+      "dataset": "nats.connection",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "nats.connection.in.bytes",
+        "nats.connection.name",
+        "nats.connection.pending_bytes",
+        "nats.connection.uptime"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nats.connections",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "nats.connections.total",
+        "nats.server.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nats.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "log.level",
+        "nats.log.msg.bytes",
+        "nats.log.msg.subject",
+        "nats.log.msg.type",
+        "network.direction"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nats.routes",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "nats.routes.total",
+        "nats.server.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nats.stats",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "nats.server.id",
+        "nats.stats.in.bytes",
+        "nats.stats.in.messages",
+        "nats.stats.mem.bytes",
+        "nats.stats.slow_consumers",
+        "nats.stats.total_connections",
+        "nats.stats.uptime"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nats.subscriptions",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "nats.subscriptions.cache.fanout.avg",
+        "nats.subscriptions.cache.fanout.max",
+        "nats.subscriptions.cache.hit_rate",
+        "nats.subscriptions.cache.size",
+        "nats.subscriptions.inserts",
+        "nats.subscriptions.matches",
+        "nats.subscriptions.removes",
+        "nats.subscriptions.total"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

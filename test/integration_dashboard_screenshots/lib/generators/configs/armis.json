@@ -1,0 +1,69 @@
+{
+  "package": "armis",
+  "dataStreams": [
+    {
+      "dataset": "armis.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "armis.alert.severity",
+        "armis.alert.status",
+        "armis.alert.title",
+        "event.id",
+        "event.severity",
+        "host.id",
+        "labels.is_transform_source",
+        "rule.name"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "armis.device",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "armis.device.business_impact",
+        "armis.device.site.location",
+        "armis.device.type",
+        "device.manufacturer",
+        "host.id",
+        "host.ip",
+        "host.os.family",
+        "host.risk.static_score",
+        "host.type",
+        "labels.is_transform_source"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "armis.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "armis.vulnerability.attack_complexity",
+        "armis.vulnerability.availability_impact",
+        "armis.vulnerability.confidentiality_impact",
+        "armis.vulnerability.integrity_impact",
+        "armis.vulnerability.last_detected",
+        "armis.vulnerability.scope",
+        "armis.vulnerability.status",
+        "armis.vulnerability.threat_actors",
+        "armis.vulnerability.type",
+        "armis.vulnerability.user_interaction",
+        "host.id",
+        "user.name",
+        "vulnerability.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "package": "ti_cyware_intel_exchange",
+  "dataStreams": [
+    {
+      "dataset": "ti_cyware_intel_exchange.indicator",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "labels.is_transform_source",
+        "threat.indicator.geo.country_name",
+        "threat.indicator.marking.tlp",
+        "threat.indicator.provider",
+        "threat.indicator.type",
+        "ti_cyware_intel_exchange.indicator.ctix_score",
+        "ti_cyware_intel_exchange.indicator.is_deprecated",
+        "ti_cyware_intel_exchange.indicator.is_revoked",
+        "ti_cyware_intel_exchange.indicator.sdo_type"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

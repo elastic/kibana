@@ -1,0 +1,25 @@
+{
+  "package": "suricata",
+  "dataStreams": [
+    {
+      "dataset": "suricata.eve",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.country_iso_code",
+        "destination.geo.location",
+        "event.kind",
+        "event.type",
+        "host.name",
+        "network.protocol",
+        "network.transport",
+        "rule.category",
+        "rule.name",
+        "source.geo.country_iso_code",
+        "source.geo.location",
+        "suricata.eve.event_type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

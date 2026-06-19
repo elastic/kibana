@@ -1,0 +1,653 @@
+[
+  {
+    "@timestamp": "2024-10-26T10:16:42.000Z",
+    "agent": {
+      "ephemeral_id": "4c2d76e3-c7dd-43d7-852f-6081fceca2fb",
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "name": "elastic-agent-95617",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.detection_event",
+      "namespace": "26480",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "threat"
+      ],
+      "dataset": "vectra_rux.detection_event",
+      "id": "32986",
+      "ingested": "2026-03-10T02:37:10Z",
+      "kind": "alert",
+      "original": "{\"category\":\"command_and_control\",\"certainty\":0,\"d_type_vname\":\"Hidden HTTPS Tunnel\",\"detail\":{},\"detection_href\":\"https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603\",\"detection_id\":32986,\"detection_type\":\"Hidden HTTPS Tunnel\",\"entity_id\":976,\"entity_uid\":\"deltics-1\",\"event_timestamp\":\"2024-10-26T10:16:42Z\",\"id\":4,\"mitre\":[\"T1043\",\"T1094\",\"T1024\",\"T1132\",\"T1001\",\"T1008\",\"T1071\",\"T1032\",\"T1105\",\"T1108\"],\"severity\":0,\"threat\":0,\"triaged\":false,\"type\":\"host\",\"url\":\"https://123589577.cc1.portal.vectra.ai/hosts/976\"}",
+      "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "severity": 0,
+      "type": [
+        "info",
+        "indicator"
+      ],
+      "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+    },
+    "host": {
+      "id": "976",
+      "risk": {
+        "calculated_score": 0.0
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "976"
+      ]
+    },
+    "rule": {
+      "name": "Hidden HTTPS Tunnel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-detection_event"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603"
+      },
+      "tactic": {
+        "name": [
+          "command_and_control"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ]
+      }
+    },
+    "url": {
+      "domain": "123589577.cc1.portal.vectra.ai",
+      "original": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "path": "/detections/32986",
+      "query": "detail_id=99603",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "detection_event": {
+        "category": "command_and_control",
+        "certainty": 0,
+        "d_type_vname": "Hidden HTTPS Tunnel",
+        "detection": {
+          "href": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+          "id": "32986",
+          "type": "Hidden HTTPS Tunnel"
+        },
+        "entity": {
+          "id": "976",
+          "uid": "deltics-1"
+        },
+        "event_timestamp": "2024-10-26T10:16:42.000Z",
+        "id": "4",
+        "mitre": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ],
+        "severity": 0,
+        "threat": 0,
+        "triaged": false,
+        "type": "host",
+        "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-10-25T10:16:42.000Z",
+    "agent": {
+      "ephemeral_id": "4c2d76e3-c7dd-43d7-852f-6081fceca2fb",
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "name": "elastic-agent-95617",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.detection_event",
+      "namespace": "26480",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "threat"
+      ],
+      "dataset": "vectra_rux.detection_event",
+      "id": "32986",
+      "ingested": "2026-03-10T02:37:10Z",
+      "kind": "alert",
+      "original": "{\"category\":\"command_and_control\",\"certainty\":0,\"d_type_vname\":\"Hidden HTTPS Tunnel\",\"detail\":{},\"detection_href\":\"https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603\",\"detection_id\":32986,\"detection_type\":\"Hidden HTTPS Tunnel\",\"entity_id\":976,\"entity_uid\":\"deltics-1\",\"event_timestamp\":\"2024-10-25T10:16:42Z\",\"id\":3,\"mitre\":[\"T1043\",\"T1094\",\"T1024\",\"T1132\",\"T1001\",\"T1008\",\"T1071\",\"T1032\",\"T1105\",\"T1108\"],\"severity\":0,\"threat\":0,\"triaged\":false,\"type\":\"host\",\"url\":\"https://123589577.cc1.portal.vectra.ai/hosts/976\"}",
+      "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "severity": 0,
+      "type": [
+        "info",
+        "indicator"
+      ],
+      "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+    },
+    "host": {
+      "id": "976",
+      "risk": {
+        "calculated_score": 0.0
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "976"
+      ]
+    },
+    "rule": {
+      "name": "Hidden HTTPS Tunnel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-detection_event"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603"
+      },
+      "tactic": {
+        "name": [
+          "command_and_control"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ]
+      }
+    },
+    "url": {
+      "domain": "123589577.cc1.portal.vectra.ai",
+      "original": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "path": "/detections/32986",
+      "query": "detail_id=99603",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "detection_event": {
+        "category": "command_and_control",
+        "certainty": 0,
+        "d_type_vname": "Hidden HTTPS Tunnel",
+        "detection": {
+          "href": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+          "id": "32986",
+          "type": "Hidden HTTPS Tunnel"
+        },
+        "entity": {
+          "id": "976",
+          "uid": "deltics-1"
+        },
+        "event_timestamp": "2024-10-25T10:16:42.000Z",
+        "id": "3",
+        "mitre": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ],
+        "severity": 0,
+        "threat": 0,
+        "triaged": false,
+        "type": "host",
+        "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-10-24T10:16:42.000Z",
+    "agent": {
+      "ephemeral_id": "4c2d76e3-c7dd-43d7-852f-6081fceca2fb",
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "name": "elastic-agent-95617",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.detection_event",
+      "namespace": "26480",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "threat"
+      ],
+      "dataset": "vectra_rux.detection_event",
+      "id": "32986",
+      "ingested": "2026-03-10T02:37:10Z",
+      "kind": "alert",
+      "original": "{\"category\":\"command_and_control\",\"certainty\":0,\"d_type_vname\":\"Hidden HTTPS Tunnel\",\"detail\":{},\"detection_href\":\"https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603\",\"detection_id\":32986,\"detection_type\":\"Hidden HTTPS Tunnel\",\"entity_id\":976,\"entity_uid\":\"deltics-1\",\"event_timestamp\":\"2024-10-24T10:16:42Z\",\"id\":2,\"mitre\":[\"T1043\",\"T1094\",\"T1024\",\"T1132\",\"T1001\",\"T1008\",\"T1071\",\"T1032\",\"T1105\",\"T1108\"],\"severity\":0,\"threat\":0,\"triaged\":false,\"type\":\"host\",\"url\":\"https://123589577.cc1.portal.vectra.ai/hosts/976\"}",
+      "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "severity": 0,
+      "type": [
+        "info",
+        "indicator"
+      ],
+      "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+    },
+    "host": {
+      "id": "976",
+      "risk": {
+        "calculated_score": 0.0
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "976"
+      ]
+    },
+    "rule": {
+      "name": "Hidden HTTPS Tunnel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-detection_event"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603"
+      },
+      "tactic": {
+        "name": [
+          "command_and_control"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ]
+      }
+    },
+    "url": {
+      "domain": "123589577.cc1.portal.vectra.ai",
+      "original": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "path": "/detections/32986",
+      "query": "detail_id=99603",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "detection_event": {
+        "category": "command_and_control",
+        "certainty": 0,
+        "d_type_vname": "Hidden HTTPS Tunnel",
+        "detection": {
+          "href": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+          "id": "32986",
+          "type": "Hidden HTTPS Tunnel"
+        },
+        "entity": {
+          "id": "976",
+          "uid": "deltics-1"
+        },
+        "event_timestamp": "2024-10-24T10:16:42.000Z",
+        "id": "2",
+        "mitre": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ],
+        "severity": 0,
+        "threat": 0,
+        "triaged": false,
+        "type": "host",
+        "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-10-23T10:16:42.000Z",
+    "agent": {
+      "ephemeral_id": "4c2d76e3-c7dd-43d7-852f-6081fceca2fb",
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "name": "elastic-agent-95617",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.detection_event",
+      "namespace": "26480",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "threat"
+      ],
+      "dataset": "vectra_rux.detection_event",
+      "id": "32986",
+      "ingested": "2026-03-10T02:37:10Z",
+      "kind": "alert",
+      "original": "{\"category\":\"command_and_control\",\"certainty\":0,\"d_type_vname\":\"Hidden HTTPS Tunnel\",\"detail\":{},\"detection_href\":\"https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603\",\"detection_id\":32986,\"detection_type\":\"Hidden HTTPS Tunnel\",\"entity_id\":976,\"entity_uid\":\"deltics-1\",\"event_timestamp\":\"2024-10-23T10:16:42Z\",\"id\":1,\"mitre\":[\"T1043\",\"T1094\",\"T1024\",\"T1132\",\"T1001\",\"T1008\",\"T1071\",\"T1032\",\"T1105\",\"T1108\"],\"severity\":0,\"threat\":0,\"triaged\":false,\"type\":\"host\",\"url\":\"https://123589577.cc1.portal.vectra.ai/hosts/976\"}",
+      "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "severity": 0,
+      "type": [
+        "info",
+        "indicator"
+      ],
+      "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+    },
+    "host": {
+      "id": "976",
+      "risk": {
+        "calculated_score": 0.0
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "976"
+      ]
+    },
+    "rule": {
+      "name": "Hidden HTTPS Tunnel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-detection_event"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603"
+      },
+      "tactic": {
+        "name": [
+          "command_and_control"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ]
+      }
+    },
+    "url": {
+      "domain": "123589577.cc1.portal.vectra.ai",
+      "original": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+      "path": "/detections/32986",
+      "query": "detail_id=99603",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "detection_event": {
+        "category": "command_and_control",
+        "certainty": 0,
+        "d_type_vname": "Hidden HTTPS Tunnel",
+        "detection": {
+          "href": "https://123589577.cc1.portal.vectra.ai/detections/32986?detail_id=99603",
+          "id": "32986",
+          "type": "Hidden HTTPS Tunnel"
+        },
+        "entity": {
+          "id": "976",
+          "uid": "deltics-1"
+        },
+        "event_timestamp": "2024-10-23T10:16:42.000Z",
+        "id": "1",
+        "mitre": [
+          "T1043",
+          "T1094",
+          "T1024",
+          "T1132",
+          "T1001",
+          "T1008",
+          "T1071",
+          "T1032",
+          "T1105",
+          "T1108"
+        ],
+        "severity": 0,
+        "threat": 0,
+        "triaged": false,
+        "type": "host",
+        "url": "https://123589577.cc1.portal.vectra.ai/hosts/976"
+      }
+    }
+  },
+  {
+    "@timestamp": "2022-09-13T16:31:35.000Z",
+    "agent": {
+      "ephemeral_id": "4c2d76e3-c7dd-43d7-852f-6081fceca2fb",
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "name": "elastic-agent-95617",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.detection_event",
+      "namespace": "26480",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "bf7e630d-d702-40b7-8ab5-1b483069874d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "vectra_rux.detection_event",
+      "id": "959",
+      "ingested": "2026-03-10T02:37:10Z",
+      "kind": "alert",
+      "original": "{\"category\":\"command_and_control\",\"certainty\":50,\"d_type_vname\":\"Azure AD Redundant Access Creation\",\"detail\":{},\"detection_href\":\"https://207031206993.uw2.devportal.vectra.ai/detections/959?detail_id=94341\",\"detection_id\":959,\"detection_type\":\"Azure AD Redundant Access Creation\",\"entity_href\":\"https://207031206993.uw2.devportal.vectra.ai/accounts/1\",\"entity_id\":1,\"entity_uid\":\"O365:ServicePrincipal_3fb87dda-882a-49e1-88b9-67d2499b2fd4\",\"event_timestamp\":\"2022-09-13T16:31:35Z\",\"id\":5,\"mitre\":[\"T1526\"],\"severity\":5,\"src_entity\":\"O365:ServicePrincipal_3fb87dda-882a-49e1-88b9-67d2499b2fd4\",\"threat\":50,\"triaged\":false,\"type\":\"account\",\"url\":\"https://207031206993.uw2.devportal.vectra.ai/detections/959\"}",
+      "reference": "https://207031206993.uw2.devportal.vectra.ai/detections/959?detail_id=94341",
+      "severity": 5,
+      "type": [
+        "indicator"
+      ],
+      "url": "https://207031206993.uw2.devportal.vectra.ai/detections/959"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "user": [
+        "1"
+      ]
+    },
+    "rule": {
+      "name": "Azure AD Redundant Access Creation"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-detection_event"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://207031206993.uw2.devportal.vectra.ai/detections/959?detail_id=94341"
+      },
+      "tactic": {
+        "name": [
+          "command_and_control"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1526"
+        ]
+      }
+    },
+    "url": {
+      "domain": "207031206993.uw2.devportal.vectra.ai",
+      "original": "https://207031206993.uw2.devportal.vectra.ai/detections/959?detail_id=94341",
+      "path": "/detections/959",
+      "query": "detail_id=94341",
+      "scheme": "https"
+    },
+    "user": {
+      "id": "1",
+      "risk": {
+        "calculated_score": 50.0
+      }
+    },
+    "vectra_rux": {
+      "detection_event": {
+        "category": "command_and_control",
+        "certainty": 50,
+        "d_type_vname": "Azure AD Redundant Access Creation",
+        "detection": {
+          "href": "https://207031206993.uw2.devportal.vectra.ai/detections/959?detail_id=94341",
+          "id": "959",
+          "type": "Azure AD Redundant Access Creation"
+        },
+        "entity": {
+          "id": "1",
+          "uid": "O365:ServicePrincipal_3fb87dda-882a-49e1-88b9-67d2499b2fd4"
+        },
+        "event_timestamp": "2022-09-13T16:31:35.000Z",
+        "id": "5",
+        "mitre": [
+          "T1526"
+        ],
+        "severity": 5,
+        "src_entity": "O365:ServicePrincipal_3fb87dda-882a-49e1-88b9-67d2499b2fd4",
+        "threat": 50,
+        "triaged": false,
+        "type": "account",
+        "url": "https://207031206993.uw2.devportal.vectra.ai/detections/959"
+      }
+    }
+  }
+]

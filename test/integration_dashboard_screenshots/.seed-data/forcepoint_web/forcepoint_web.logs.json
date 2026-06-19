@@ -1,0 +1,114 @@
+[
+  {
+    "@timestamp": "2022-12-16T07:05:25.000Z",
+    "agent": {
+      "ephemeral_id": "c6d3e26d-f6ee-4c2f-bd28-26bf66d16041",
+      "id": "d81a7ec0-d269-4d13-b71a-470f0300b163",
+      "name": "elastic-agent-78528",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "forcepoint_web.logs",
+      "namespace": "64841",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "3.24.198.68"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "d81a7ec0-d269-4d13-b71a-470f0300b163",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "allowed",
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "forcepoint_web.logs",
+      "ingested": "2026-03-10T04:21:35Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "forcepoint_web": {
+      "action": "Allowed",
+      "category": [
+        "Reference Materials",
+        "Trusted Server Downloads"
+      ],
+      "connection_ip": "202.4.188.96",
+      "date": "16/12/2022",
+      "destination_ip": "3.24.198.68",
+      "http_request_method": "Connect",
+      "http_status_code": "200",
+      "policy_name": "Org Internal Server Policy",
+      "risk_class": [
+        "Business Usage",
+        "None"
+      ],
+      "time": "07:05:25",
+      "user": "anonymous",
+      "user_agent_string": "Java/11.0.6"
+    },
+    "http": {
+      "request": {
+        "method": "CONNECT"
+      },
+      "response": {
+        "status_code": 200
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "related": {
+      "ip": [
+        "3.24.198.68",
+        "202.4.188.96"
+      ],
+      "user": [
+        "anonymous"
+      ]
+    },
+    "rule": {
+      "name": "Org Internal Server Policy"
+    },
+    "source": {
+      "nat": {
+        "ip": "202.4.188.96"
+      }
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "domain": "aom-au.nearmap.com",
+      "original": "https://aom-au.nearmap.com:443/",
+      "path": "/",
+      "port": 443,
+      "registered_domain": "nearmap.com",
+      "scheme": "https",
+      "subdomain": "aom-au",
+      "top_level_domain": "com"
+    },
+    "user": {
+      "id": "anonymous",
+      "name": "anonymous"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Spider"
+      },
+      "name": "Java",
+      "original": "Java/11.0.6",
+      "version": "0.6"
+    }
+  }
+]

@@ -1,0 +1,217 @@
+[
+  {
+    "@timestamp": "2024-07-29T06:01:27.000Z",
+    "abnormal_security": {
+      "ai_security_mailbox": {
+        "attack": {
+          "type": "Attack Type: Spam"
+        },
+        "campaign_id": "gff51768-c446-34e1-97a8-9802c29c3ebd",
+        "first_reported": "2024-07-29T06:01:27.000Z",
+        "from": {
+          "address": "john@example.com",
+          "name": "john"
+        },
+        "judgement_status": "Spam",
+        "last_reported": "2024-07-29T06:01:27.000Z",
+        "message_id": "8369181238656832368",
+        "recipient": {
+          "address": "bob@example.com",
+          "name": "bob"
+        },
+        "subject": "Important document"
+      }
+    },
+    "agent": {
+      "ephemeral_id": "e689cd70-77a4-46b4-9002-a9db53086e65",
+      "id": "11ed445c-6f37-46f3-8200-cda5751883de",
+      "name": "elastic-agent-45393",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "abnormal_security.ai_security_mailbox",
+      "namespace": "88716",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "name": "bob"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "11ed445c-6f37-46f3-8200-cda5751883de",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "john@example.com"
+        ]
+      },
+      "subject": "Important document",
+      "to": {
+        "address": [
+          "bob@example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "abnormal_security.ai_security_mailbox",
+      "id": "8369181238656832368",
+      "ingested": "2026-03-10T01:46:09Z",
+      "kind": "enrichment",
+      "original": "{\"attackType\":\"Attack Type: Spam\",\"campaignId\":\"gff51768-c446-34e1-97a8-9802c29c3ebd\",\"firstReported\":\"2024-07-29T06:01:27Z\",\"fromAddress\":\"john@example.com\",\"fromName\":\"john\",\"judgementStatus\":\"Spam\",\"lastReported\":\"2024-07-29T06:01:27Z\",\"messageId\":\"8369181238656832368\",\"overallStatus\":\"\",\"recipientAddress\":\"bob@example.com\",\"recipientName\":\"bob\",\"subject\":\"Important document\"}",
+      "type": [
+        "indicator"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Inbound Email Security",
+      "vendor": "Abnormal"
+    },
+    "related": {
+      "user": [
+        "john",
+        "john@example.com",
+        "bob@example.com",
+        "bob"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "abnormal_security-ai_security_mailbox"
+    ],
+    "threat": {
+      "indicator": {
+        "email": {
+          "address": "john@example.com"
+        },
+        "name": "john@example.com",
+        "type": "email-addr"
+      },
+      "tactic": {
+        "name": [
+          "Attack Type: Spam"
+        ]
+      }
+    },
+    "user": {
+      "name": "john"
+    }
+  },
+  {
+    "@timestamp": "2024-07-26T10:30:06.000Z",
+    "abnormal_security": {
+      "ai_security_mailbox": {
+        "attack": {
+          "type": "Attack Type: Graymail"
+        },
+        "campaign_id": "fff51768-c446-34e1-97a8-9802c29c3ebd",
+        "first_reported": "2024-07-26T10:30:06.000Z",
+        "from": {
+          "address": "bob@example.com",
+          "name": "bob@example.com"
+        },
+        "judgement_status": "Safe",
+        "last_reported": "2024-07-26T10:30:06.000Z",
+        "message_id": "7063250485337877109",
+        "overall_status": "No Action Needed",
+        "recipient": {
+          "address": "john@example.com",
+          "name": "john"
+        },
+        "subject": "Days of Understanding 2024"
+      }
+    },
+    "agent": {
+      "ephemeral_id": "e689cd70-77a4-46b4-9002-a9db53086e65",
+      "id": "11ed445c-6f37-46f3-8200-cda5751883de",
+      "name": "elastic-agent-45393",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "abnormal_security.ai_security_mailbox",
+      "namespace": "88716",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "name": "john"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "11ed445c-6f37-46f3-8200-cda5751883de",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "bob@example.com"
+        ]
+      },
+      "subject": "Days of Understanding 2024",
+      "to": {
+        "address": [
+          "john@example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "abnormal_security.ai_security_mailbox",
+      "id": "7063250485337877109",
+      "ingested": "2026-03-10T01:46:09Z",
+      "kind": "event",
+      "original": "{\"attackType\":\"Attack Type: Graymail\",\"campaignId\":\"fff51768-c446-34e1-97a8-9802c29c3ebd\",\"firstReported\":\"2024-07-26T10:30:06Z\",\"fromAddress\":\"bob@example.com\",\"fromName\":\"bob@example.com\",\"judgementStatus\":\"Safe\",\"lastReported\":\"2024-07-26T10:30:06Z\",\"messageId\":\"7063250485337877109\",\"overallStatus\":\"No Action Needed\",\"recipientAddress\":\"john@example.com\",\"recipientName\":\"john\",\"subject\":\"Days of Understanding 2024\"}"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Inbound Email Security",
+      "vendor": "Abnormal"
+    },
+    "related": {
+      "user": [
+        "bob@example.com",
+        "john@example.com",
+        "john"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "abnormal_security-ai_security_mailbox"
+    ],
+    "threat": {
+      "tactic": {
+        "name": [
+          "Attack Type: Graymail"
+        ]
+      }
+    },
+    "user": {
+      "email": "bob@example.com"
+    }
+  }
+]

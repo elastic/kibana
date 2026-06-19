@@ -1,0 +1,5378 @@
+[
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 68119155 RID [0] Response '2.0.0 OK  1687954632 redactedstring - gsmtp'",
+        "recipient_id": "0",
+        "response": "'2.0.0 OK  1687954632 redactedstring - gsmtp'"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 68119155 Subject \"redacted subject\"",
+        "subject": "redacted subject"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 68119155 queued for delivery",
+        "message_status": "queued"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "Message finished MID 68119155 done",
+        "message_status": "finished"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "engine": "CASE bulk",
+        "message": "MID 68119155 interim verdict using engine: CASE bulk"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "engine": "Sophos CLEAN",
+        "message": "MID 68119155 interim AV verdict using Sophos CLEAN"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "engine": "GRAYMAIL positive",
+        "message": "MID 68119155 using engine: GRAYMAIL positive"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 68119155 Outbreak Filters: verdict negative",
+        "subject": "Outbreak Filters",
+        "verdict_scale": "negative"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "engine": "SPF Verdict Cache using cached verdict",
+        "message": "MID 68119155 using engine: SPF Verdict Cache using cached verdict"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "email": "redacted@redactedMailFrom.com",
+        "message": "MID 68119155 Message-ID '<redacted@redactedMailFrom.com>'"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 68119155 DMARC: Verification passed",
+        "verified": "passed"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "dmarc"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 68119155 SPF: mailfrom identity no-reply@redactedMailFrom.com Pass (v=spf1)",
+        "verified": "Pass"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "no-reply@redactedMailFrom.com"
+        ]
+      },
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "spf"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 68119155 matched all recipients for per-recipient policy DEFAULT in the inbound table",
+        "policy": "DEFAULT"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "direction": "inbound",
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "email_tracker_header": "redactedTrackerHeader",
+        "message": "MID 68119155 SDR: Tracker Header : redactedTrackerHeader"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "env": "redactedMailFrom.com",
+        "helo": "redacted.redactedMailFrom.com",
+        "message": "MID 68119155 SDR: Domains for which SDR is requested: reverse DNS host: redacted.redactedMailFrom.com, helo: redacted.redactedMailFrom.com, env-from: redactedMailFrom.com, header-from: redactedMailFrom.com, reply-to: redactedMailFrom.com"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "dns": {
+      "question": {
+        "name": "redacted.redactedMailFrom.com"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "redactedMailFrom.com"
+        ]
+      },
+      "message_id": "68119155",
+      "to": {
+        "address": [
+          "redactedMailFrom.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "domain": "redacted.redactedMailFrom.com",
+        "maturity": "30 days (or greater)",
+        "message": "MID 68119155 SDR: Consolidated Sender Threat Level: Neutral, Threat Category: N/A, Suspected Domain(s) : N/A (other reasons for verdict). Sender Maturity: 30 days (or greater) for domain: redacted.redactedMailFrom.com",
+        "suspected_domains": "N/A",
+        "threat_category": "N/A",
+        "threat_level": "Neutral"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "dkim_aligned": true,
+        "message": "MID 68119155 DMARC: Message from domain redactedMailFrom.com, DMARC pass (SPF aligned True, DKIM aligned True)",
+        "spf_aligned": true,
+        "verified": "pass"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "redactedMailFrom.com"
+        ]
+      },
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "dmarc"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "details": "d=redactedMailFrom.com s=srsa2048 i=@redactedMailFrom.com",
+        "message": "MID 68119155 DKIM: pass signature verified (d=redactedMailFrom.com s=srsa2048 i=@redactedMailFrom.com)",
+        "verified": "verified"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "dkim"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "details": "reputation verdict : SKIPPED (no attachment in message)",
+        "message": "MID 68119155 AMP file reputation verdict : SKIPPED (no attachment in message)"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68119155"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "file": {
+      "extension": "AMP"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "CLEAN",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 69391938 - Result 'CLEAN' ()",
+        "type": "Result"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "69391938"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "Encrypted",
+        "category": {
+          "name": "antivirus"
+        },
+        "encrypted_hash": "0x8004021",
+        "message": "sophos  antivirus - MID 68431780 0 - Error - 'Encrypted' '0x8004021'",
+        "rank": 0,
+        "type": "Error"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68431780"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": "error"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "CXmail/Phish-O",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 66842418 0 - Virus 'CXmail/Phish-O' 'body.scan/Payment.html' 1 0",
+        "rank": 0,
+        "type": "Virus"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "66842418"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "file": {
+      "name": "Payment.html"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "CXmail/MalPE-FL",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 68016096 0 - Virus 'CXmail/MalPE-FL' 'body.scan/redactedFileName.rar/redactedFileName.exe' 1 0",
+        "rank": 0,
+        "type": "Virus"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68016096"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "file": {
+      "name": "redactedFileName.rar/redactedFileName.exe"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "CXmail/MalPE-AC",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 68016096 0 - Virus 'CXmail/MalPE-AC' 'body.scan/redactedFileName.rar' 1 0",
+        "rank": 0,
+        "type": "Virus"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "68016096"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "file": {
+      "name": "redactedFileName.rar"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "Mal/DrodRar-AIC",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 66298546 0 - Virus 'Mal/DrodRar-AIC' 'body.scan/anotherFileName.arj' 1 0",
+        "rank": 0,
+        "type": "Virus"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "66298546"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "file": {
+      "name": "anotherFileName.arj"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "Troj/MSIL-TAR",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 67753636 0 - Virus 'Troj/MSIL-TAR' 'body.scan/otherFileName.exe' 1 0",
+        "rank": 0,
+        "type": "Virus"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "67753636"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "file": {
+      "name": "otherFileName.exe"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "Max Files Exceeded",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 66710307 7 - Limit - 'Max Files Exceeded'",
+        "rank": 7,
+        "type": "Limit"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "66710307"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-09-12T11:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "antivirus_result": "timed out on message",
+        "category": {
+          "name": "antivirus"
+        },
+        "message": "sophos  antivirus - MID 66708787 - timed out on message"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "66708787"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": "vulnerability",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "observer": {
+      "vendor": "sophos"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-30T15:12:26.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "5xx_hard_bounces": 0,
+        "active_recipients": 0,
+        "attempted_recipients": 0,
+        "bmld": 0,
+        "cache": {
+          "exceptions": 0,
+          "expired": 0,
+          "hits": 0,
+          "misses": 0
+        },
+        "case_ld": 0,
+        "category": {
+          "name": "status"
+        },
+        "cmrkld": 0,
+        "completed_recipients": 0,
+        "cpu": {
+          "elapsed_time": 32182,
+          "total_time": 91,
+          "utilization": 0
+        },
+        "crt": {
+          "delivery_connection_id": "1",
+          "injection_connection_id": "0"
+        },
+        "current": {
+          "inbound_connections": 0,
+          "outbound_connections": 0
+        },
+        "deleted_recipients": 0,
+        "delivered_recipients": 0,
+        "destination_memory": 3,
+        "disk_io": 0,
+        "dns": {
+          "hard_bounces": 0,
+          "requests": 0
+        },
+        "dropped_messages": 0,
+        "encryption_queue": 0,
+        "estimated": {
+          "quarantine": 0,
+          "quarantine_release_queue": 0
+        },
+        "expired_hard_bounces": 0,
+        "filter_hard_bounces": 0,
+        "generated_bounce_recipients": 0,
+        "global_unsubscribe_hits": 0,
+        "hard_bounce_recipients": 0,
+        "injected": {
+          "bytes": 0,
+          "messages": 0,
+          "recipients": 0
+        },
+        "log_available": "148G",
+        "log_used": 5,
+        "max_io": 487,
+        "mcafee_ld": 0,
+        "message": "Status: CPULd 0 DskIO 0 RAMUtil 1 QKUsd 0 QKFre 8388608 CrtMID 0 CrtICID 0 CrtDCID 1 InjMsg 0 InjRcp 0 GenBncRcp 0 RejRcp 0 DrpMsg 0 SftBncEvnt 0 CmpRcp 0 HrdBncRcp 0 DnsHrdBnc 0 5XXHrdBnc 0 FltrHrdBnc 0 ExpHrdBnc 0 OtrHrdBnc 0 DlvRcp 0 DelRcp 0 GlbUnsbHt 0 ActvRcp 0 UnatmptRcp 0 AtmptRcp 0 CrtCncIn 0 CrtCncOut 0 DnsReq 0 NetReq 0 CchHit 0 CchMis 0 CchEct 0 CchExp 0 CPUTTm 91 CPUETm 32182 MaxIO 487 RAMUsd 125195690 MMLen 0 DstInMem 3 ResCon 0 WorkQ 0 QuarMsgs 0 QuarQKUsd 0 LogUsd 5 SophLd 99 BMLd 0 CASELd 0 TotalLd 47 LogAvail 148G EuQ 0 EuqRls 0 CmrkLd 0 McafLd 0 SwIn 338 SwOut 681 SwPgIn 2123 SwPgOut 7156 SwapUsage 0% RptLd 0 QtnLd 0 EncrQ 0 InjBytes 0",
+        "messages_length": 0,
+        "network_requests": 0,
+        "other_hard_bounces": 0,
+        "quarantine": {
+          "load": 0,
+          "messages": 0,
+          "queue_kilobytes_used": 0
+        },
+        "queue_kilobytes_free": 8388608,
+        "queue_kilobytes_usd": 0,
+        "ram": {
+          "used": 125195690,
+          "utilization": 1
+        },
+        "rejected_recipients": 0,
+        "reporting_load": 0,
+        "resource_conservation": 0,
+        "soft_bounced_events": 0,
+        "sophos_ld": 99,
+        "swap_usage": "0%",
+        "swapped": {
+          "in": 338,
+          "out": 681,
+          "page": {
+            "in": 2123,
+            "out": 7156
+          }
+        },
+        "total_ld": 47,
+        "unattempted_recipients": 0,
+        "work_queue": 0
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "0"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 182
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "content_scanner"
+        },
+        "message": "PF: Starting multi-threaded Perceptive server (pid=17729)",
+        "object_category": "multi-threaded Perceptive server",
+        "vendor_action": "Starting"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "process": {
+      "pid": 17729
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "content_scanner"
+        },
+        "message": "PF: Restarting content_scanner service.",
+        "object": "content_scanner",
+        "object_category": "service.",
+        "vendor_action": "Restarting"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "alert_category": "Quarantine",
+        "category": {
+          "name": "error_logs"
+        },
+        "description": "Failed to connect to quarantine",
+        "message": "Quarantine: Failed to connect to quarantine"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "error_logs"
+        },
+        "message": "Internal SMTP giving up on message to example.com with subject 'Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...': Unrecoverable error."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "subject": "'Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...': Unrecoverable error",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "smtp"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "error_logs"
+        },
+        "description": "Error while sending alert",
+        "message": "Error while sending alert: Unable to send System/Warning alert to example.com with subject \"Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...\"."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "subject": "Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "alert",
+      "timezone": "UTC",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "critical",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "error_logs"
+        },
+        "message": "Internal SMTP system attempting to send a message to example.com with subject 'Critical <System> example.com: Log Error: Subscription error_logs: Failed to connect to 10....' (attempt #0)."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "subject": "'Critical <System> example.com: Log Error: Subscription error_logs: Failed to connect to 10....' (attempt #0)",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "smtp"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "message": "req:1.128.3.4 user:admin id:2v10z5fEuDsvhdbVE6Ck 200 GET xxx.png HTTP/1.1 Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+      }
+    },
+    "client": {
+      "ip": "1.128.3.4"
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "cisco_secure_email_gateway.log",
+      "id": "2v10z5fEuDsvhdbVE6Ck",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "ip": [
+        "1.128.3.4"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ],
+    "url": {
+      "path": "xxx.png"
+    },
+    "user": {
+      "name": "admin"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+      "os": {
+        "full": "Windows 10",
+        "name": "Windows",
+        "version": "10"
+      },
+      "version": "99.0.4844.51"
+    }
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "message": "req:1.128.3.4 user:- id:2v10z5fEuDsvhdbVE6Ck 200 GET xxx.png HTTP/1.1 -"
+      }
+    },
+    "client": {
+      "ip": "1.128.3.4"
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "cisco_secure_email_gateway.log",
+      "id": "2v10z5fEuDsvhdbVE6Ck",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "ip": [
+        "1.128.3.4"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ],
+    "url": {
+      "path": "xxx.png"
+    }
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "action": "logged out",
+        "category": {
+          "name": "gui_logs"
+        },
+        "message": "Action: User admin logged out from session 5GPz0QDlfxUYQ0Y3PgYN beacuse of inactivity timeout",
+        "session": "5GPz0QDlfxUYQ0Y3PgYN"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "session"
+      ],
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "end"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ],
+    "user": {
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "message": "Session fRK3TSjzhHhoI9CV5Kvt user:admin expired",
+        "result": "expired",
+        "session": "fRK3TSjzhHhoI9CV5Kvt"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "session"
+      ],
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "end"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ],
+    "user": {
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "destination": "/mail_policies/email_security_manager/incoming_mail_policies",
+        "message": "Session fRK3TSjzhHhoI9CV5Kvt from 1.128.3.4 not found Destination:/mail_policies/email_security_manager/incoming_mail_policies",
+        "session": "fRK3TSjzhHhoI9CV5Kvt"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "host": {
+      "ip": "1.128.3.4"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "ip": [
+        "1.128.3.4"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "action": "The HTTPS session has been established successfully.",
+        "category": {
+          "name": "gui_logs"
+        },
+        "destination": "/login",
+        "message": "SourceIP:1.128.3.4 Destination:/login Username:admin Privilege:admin session:5GPz0QDlfxUYQ0Y3PgYN Action: The HTTPS session has been established successfully.",
+        "privilege": "admin",
+        "session": "5GPz0QDlfxUYQ0Y3PgYN"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "host": {
+      "ip": "1.128.3.4"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "ip": [
+        "1.128.3.4"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ],
+    "user": {
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "description": "No root directory for Periodic Reports Archive. Probably, running first time...",
+        "message": "PERIODIC REPORTS: No root directory for Periodic Reports Archive. Probably, running first time...",
+        "subject": "PERIODIC REPORTS"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "description": "OS error opening URL 'http://example.com/vtl/xxx.txt'",
+        "message": "Could not fetch current Virus Threat Level: OS error opening URL 'http://example.com/vtl/xxx.txt'",
+        "subject": "Could not fetch current Virus Threat Level"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "description": "336151574, 'error:14094416:SSL routines:ssl3_read_bytes:sslv3 alert certificate unknown'",
+        "message": "SSL error with client 0.0.0.0:000 - (336151574, 'error:14094416:SSL routines:ssl3_read_bytes:sslv3 alert certificate unknown')",
+        "subject": "SSL error with client"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "ip": [
+        "0.0.0.0"
+      ]
+    },
+    "source": {
+      "ip": "0.0.0.0",
+      "port": 0
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "gui_logs"
+        },
+        "description": "[Errno 54] Connection reset by peer",
+        "message": "Error in https connection from host 0.0.0.0 port 000 - [Errno 54] Connection reset by peer",
+        "subject": "Error in https connection from host"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "ip": [
+        "0.0.0.0"
+      ]
+    },
+    "source": {
+      "ip": "0.0.0.0",
+      "port": 0
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "action": "changed",
+        "category": {
+          "name": "gui_logs"
+        },
+        "message": "Passphrase has been changed for user admin",
+        "object": "Passphrase"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ],
+    "user": {
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "system"
+        },
+        "commit_changes": " Added a second CLI log for examples",
+        "message": "PID 1237: User admin commit changes: Added a second CLI log for examples"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "process": {
+      "pid": 1237
+    },
+    "related": {
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ],
+    "user": {
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "system"
+        },
+        "message": "lame DNS referral: qname:example.net ns_name:example.net zone:example.net ref_zone:example.net referrals:[(524666183436709L, 0, 'insecure', 'example.net'), (524666183436709L, 0, 'insecure', 'example.net')]",
+        "name": "lame DNS referral",
+        "ns_name": "example.net",
+        "qname": "example.net",
+        "ref_zone": "example.net",
+        "referrals": "[(524666183436709L, 0, 'insecure', 'example.net'), (524666183436709L, 0, 'insecure', 'example.net')]",
+        "zone": "example.net"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "system"
+        },
+        "description": "Unable to contact root servers.",
+        "message": "Failed to bootstrap the DNS resolver. Unable to contact root servers.",
+        "subject": "Failed to bootstrap the DNS resolver"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "system"
+        },
+        "description": "'dummy_ip' looking up",
+        "message": "DNS query network error '[Errno 51] Network is unreachable' to 'dummy_ip' looking up ' '",
+        "subject": "DNS query network error '[Errno 51] Network is unreachable'"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:31:14.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "system"
+        },
+        "description": "'' to IP dummy_ip looking up example.de",
+        "message": "Received an invalid DNS Response: '' to IP dummy_ip looking up example.de",
+        "subject": "Received an invalid DNS Response"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "act": "QUARANTINED",
+        "appliance": {
+          "product": "C100V Email Security Virtual Appliance",
+          "vendor": "Cisco",
+          "version": "14.0.0-657"
+        },
+        "category": {
+          "name": "consolidated_event"
+        },
+        "cef_format_version": "0",
+        "cfp1_label": "SBRSScore",
+        "cs1": "DEFAULT",
+        "cs1_label": "MailPolicy",
+        "cs3": "N/A",
+        "cs3_label": "SDRThreatCategory",
+        "cs4": "example.com",
+        "cs4_label": "ExternalMsgID",
+        "cs6": "Weak",
+        "cs6_label": "SDRRepScore",
+        "data": {
+          "ip": "1.128.3.4"
+        },
+        "device_direction": "incoming",
+        "esa": {
+          "amp_verdict": "UNKNOWN",
+          "as_verdict": "NEGATIVE",
+          "attachment_details": "{'test.txt': {'AMP': {'Verdict': 'FILE UNKNOWN', 'fileHash': '7f843d263304fb0516d6210e9de4fa7f01f2f623074aab6e3ee7051f7b785cfa'}, 'BodyScanner': {'fsize': 10059}}}",
+          "av_verdict": "NEGATIVE",
+          "content_filter_verdict": "MATCH",
+          "dlp_verdict": "NOT_EVALUATED",
+          "final_action_details": "To POLICY",
+          "friendly_from": "example.com",
+          "graymail_verdict": "NEGATIVE",
+          "helo": {
+            "ip": "1.128.3.4"
+          },
+          "injection_connection_id": "134",
+          "mail_flow_policy": "ACCEPT",
+          "mf_verdict": "NOT_EVALUATED",
+          "msg_size": 11873,
+          "outbreak_filter_verdict": "POSITIVE",
+          "sdr_consolidated_domain_age": "27 years 2 months 15 days",
+          "sender_group": "UNKNOWNLIST",
+          "spf_verdict": "{'mailfrom': {'result': 'None', 'sender': 'example.com'}, 'helo': {'result': 'None', 'sender': 'postmaster'}, 'pra': {'result': 'None', 'sender': 'example.com'}}"
+        },
+        "event": {
+          "name": "Consolidated Log Event"
+        },
+        "event_class_id": "ESA_CONSOLIDATED_LOG_EVENT",
+        "listener": {
+          "name": "Incomingmail"
+        },
+        "message": "CEF:0|Cisco|C100V Email Security Virtual Appliance|14.0.0-657|ESA_CONSOLIDATED_LOG_EVENT|Consolidated Log Event|5|deviceExternalId=42127C7DDEE76852677B-F80CE8074CD3 ESAMID=1053 ESAICID=134 ESAAMPVerdict=UNKNOWN ESAASVerdict=NEGATIVE ESAAVVerdict=NEGATIVE  ESACFVerdict=MATCH endTime=Thu Mar 18 08:04:46 2021 ESADLPVerdict=NOT_EVALUATED dvc=1.128.3.4 ESAAttachmentDetails={'test.txt': {'AMP': {'Verdict': 'FILE UNKNOWN', 'fileHash': '7f843d263304fb0516d6210e9de4fa7f01f2f623074aab6e3ee7051f7b785cfa'}, 'BodyScanner': {'fsize': 10059}}} ESAFriendlyFrom=example.com ESAGMVerdict=NEGATIVE startTime=Thu Mar 18 08:04:29 2021 deviceInboundInterface=Incomingmail deviceDirection=0 ESAMailFlowPolicy=ACCEPT suser=example.com cs1Label=MailPolicy cs1=DEFAULT ESAMFVerdict=NOT_EVALUATED act=QUARANTINED ESAFinalActionDetails=To POLICY cs4Label=ExternalMsgID cs4='<example.com>' ESAMsgSize=11873 ESAOFVerdict=POSITIVE duser=example.com ESAHeloIP=1.128.3.4 cfp1Label=SBRSScore cfp1=None ESASDRDomainAge=27 years 2 months 15 days cs3Label=SDRThreatCategory cs3=N/A cs6Label=SDRRepScore cs6=Weak ESASPFVerdict={'mailfrom': {'result': 'None', 'sender': 'example.com'}, 'helo': {'result': 'None', 'sender': 'postmaster'}, 'pra': {'result': 'None', 'sender': 'example.com'}} sourceHostName=unknown ESASenderGroup=UNKNOWNLIST sourceAddress=1.128.3.4 msg='Testing'"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "direction": "inbound",
+      "from": {
+        "address": [
+          "example.com"
+        ]
+      },
+      "message_id": "1053",
+      "subject": "Testing",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "end": "2021-03-18T08:04:46.000Z",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "severity": "5",
+      "start": "2021-03-18T08:04:29.000Z",
+      "timezone": "UTC"
+    },
+    "host": {
+      "id": "42127C7DDEE76852677B-F80CE8074CD3"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "ip": [
+        "1.128.3.4"
+      ]
+    },
+    "source": {
+      "domain": "unknown",
+      "ip": "1.128.3.4"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "description": "DLP policy match: 'PCI-DSS (Payment Card Industry Data Security Standard)'.",
+        "message": "MID 111 DLP violation. Severity: LOW (Risk Factor: 15). DLP policy match: 'PCI-DSS (Payment Card Industry Data Security Standard)'.",
+        "risk_factor": 15,
+        "severity": "LOW",
+        "subject": "DLP violation"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "111"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "graymail [CONFIG] Starting graymail configuration handler",
+        "object": "graymail configuration handler",
+        "vendor_action": "Starting"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "URL_REP_CLIENT: Configuration changed. Triggering restart of URL Reputation client service.",
+        "object": "URL Reputation client service",
+        "object_attr": "Configuration",
+        "type": "changed",
+        "vendor_action": "restart"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": "change"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "A System/Warning alert was sent to example.com with subject \"Warning <System> cisco.esa: URL category definitions have changed.; Added new category '...\"."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "subject": "\"Warning <System> cisco.esa: URL category definitions have changed.; Added new category '...\"",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "alert",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "address": "1.128.3.4",
+        "category": {
+          "name": "mail_logs"
+        },
+        "connection_status": "New",
+        "injection_connection_id": "5",
+        "interface": "1.128.3.4",
+        "message": "New SMTP ICID 5 interface Management (1.128.3.4) address 1.128.3.4 reverse dns host xxx.com verified yes",
+        "verified": "yes"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "dns": {
+      "question": {
+        "name": "xxx.com"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "smtp"
+    },
+    "related": {
+      "ip": [
+        "1.128.3.4"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "connection_status": "Start",
+        "injection_connection_id": "5",
+        "message": "Start MID 6 ICID 5"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "6"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "injection_connection_id": "5",
+        "message": "MID 6 ICID 5 From: <example.com>"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "example.com"
+        ]
+      },
+      "message_id": "6"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "injection_connection_id": "5",
+        "message": "MID 6 ICID 5 RID 0 To: <example.com>",
+        "recipient_id": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "6",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "MID 6 ready 100 bytes from <example.com>",
+        "read_bytes": 100
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "example.com"
+        ]
+      },
+      "message_id": "6"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "connection_status": "close",
+        "injection_connection_id": "5",
+        "message": "ICID 5 close"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "address": "1.128.3.4",
+        "category": {
+          "name": "mail_logs"
+        },
+        "delivery_connection_id": "8",
+        "interface": "1.128.3.4",
+        "message": "New SMTP DCID 8 interface 1.128.3.4 address 1.128.3.4",
+        "message_status": "New"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "smtp"
+    },
+    "related": {
+      "ip": [
+        "1.128.3.4"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "delivery_connection_id": "8",
+        "message": "Delivery start DCID 8 MID 6 to RID [0]",
+        "message_status": "Delivery start",
+        "recipient_id": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "6"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "delivery_connection_id": "8",
+        "message": "Message done DCID 8 MID 6 to RID [0]",
+        "message_status": "Message done",
+        "recipient_id": "0"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "message_id": "6"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:30Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "connection_status": "close",
+        "delivery_connection_id": "8",
+        "message": "DCID 8 close"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:30Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "description": "Please check and update your filters to use the new definitions",
+        "message": "URL category definitions have changed. Please check and update your filters to use the new definitions",
+        "subject": "URL category definitions have changed"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:30Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "description": "Error while sending alert",
+        "message": "Error while sending alert: Unable to send System/Warning alert to example.com with subject \"Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...\"."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "subject": "Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:30Z",
+      "kind": "alert",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "critical",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "description": "Please contact your authorized Cisco sales representative.",
+        "message": "Your \"IronPort Anti-Spam\" key will expire in under 60 day(s). Please contact your authorized Cisco sales representative.",
+        "subject": "Your \"IronPort Anti-Spam\" key will expire in under 60 day(s)"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "Internal SMTP system successfully sent a message to example.com with subject 'Warning <System> cisco.esa: Your \"Sophos Anti-Virus\" key will expire in under 60 day(s)....'."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "subject": "'Warning <System> cisco.esa: Your \"Sophos Anti-Virus\" key will expire in under 60 day(s)....'",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "smtp"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "message": "Internal SMTP giving up on message to example.com with subject 'Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...': Unrecoverable error."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "subject": "'Warning <System> example.com: Your \"IronPort Email Encryption\" key will expire in under 60...': Unrecoverable error",
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "critical",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "smtp"
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "mail_logs"
+        },
+        "description": "Failed to send message",
+        "message": "Internal SMTP Error: Failed to send message to host 0.0.0.0:000 for recipient example.com: Unexpected SMTP response \"553\", expecting code starting with \"2\", response was ['#5.1.8 Domain of sender address <alert@cisco.esa> does not exist'].",
+        "subject": "Unexpected SMTP response \"553\", expecting code starting with \"2\", response was ['#5.1.8 Domain of sender address <alert@cisco.esa> does not exist']."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "0.0.0.0",
+      "port": 0
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "to": {
+        "address": [
+          "example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:34Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "network": {
+      "protocol": "smtp"
+    },
+    "related": {
+      "ip": [
+        "0.0.0.0"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "amp"
+        },
+        "message": "File reputation query initiating. File Name = 'mod-6.exe', MID = 5, File Size = 1673216 bytes, File Type = application/x-dosexec"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "attachments": {
+        "file": {
+          "name": "mod-6.exe",
+          "size": 1673216
+        }
+      },
+      "content_type": "application/x-dosexec",
+      "message_id": "5"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "amp"
+        },
+        "disposition": "MALICIOUS",
+        "malware": "W32.061DEF69B5-100.SBX.TG",
+        "message": "Response received for file reputation query from Cloud. FileName = 'mod-6.exe', MID = 5, Disposition = MALICIOUS, Malware = W32.061DEF69B5-100.SBX.TG,Reputation Score = 73, sha256 =061def69b5c100e9979610fa5675bd19258b19a7ff538b5c2d230b467c312f19, upload_action = 2",
+        "reputation_score": "73",
+        "upload": {
+          "action": "2"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "attachments": {
+        "file": {
+          "hash": {
+            "sha256": "061def69b5c100e9979610fa5675bd19258b19a7ff538b5c2d230b467c312f19"
+          },
+          "name": "mod-6.exe"
+        }
+      },
+      "message_id": "5"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "hash": [
+        "061def69b5c100e9979610fa5675bd19258b19a7ff538b5c2d230b467c312f19"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "amp"
+        },
+        "details": "Analysis is completed for the File SHA256[16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc]",
+        "disposition": "3",
+        "message": "File Analysis complete. SHA256: 16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc, Submit Timestamp: 1475825466, Update Timestamp: 1475825953, Disposition: 3 Score: 100, run_id: 194926004 Details: Analysis is completed for the File SHA256[16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc] Spyname:[W32.16454AFF50-100.SBX.TG]",
+        "run_id": "194926004",
+        "score": 100,
+        "spy_name": "W32.16454AFF50-100.SBX.TG",
+        "submit": {
+          "timestamp": "2016-10-07T07:31:06.000Z"
+        },
+        "update": {
+          "timestamp": "2016-10-07T07:39:13.000Z"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "attachments": {
+        "file": {
+          "hash": {
+            "sha256": "16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc"
+          }
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "hash": [
+        "16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "amp"
+        },
+        "message": "File not uploaded for analysis. MID = 0 File SHA256[a5f28f1fed7c2fe88bcdf403710098977fa12c32d13bfbd78bbe27e95b245f82] file mime[text/plain] Reason: No active/dynamic contents exists"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "attachments": {
+        "file": {
+          "hash": {
+            "sha256": "a5f28f1fed7c2fe88bcdf403710098977fa12c32d13bfbd78bbe27e95b245f82"
+          },
+          "mime_type": "text/plain"
+        }
+      },
+      "message_id": "0"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "reason": "No active/dynamic contents exists",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "hash": [
+        "a5f28f1fed7c2fe88bcdf403710098977fa12c32d13bfbd78bbe27e95b245f82"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "backoff": 986,
+        "category": {
+          "name": "amp"
+        },
+        "details": "discarding ...",
+        "message": "File analysis upload skipped. SHA256: b5c7e26491983baa713c9a2910ee868efd891661c6a0553b28f17b8fdc8cc3ef,Timestamp[1454782976] details[File SHA256[b5c7e26491983baa713c9a2910ee868efd891661c6a0553b28f17b8fdc8cc3ef] file mime[application/pdf], upload priority[Low] not uploaded, re-tries[3], backoff[986] discarding ...]",
+        "retries": 3,
+        "submit": {
+          "timestamp": "2016-02-06T18:22:56.000Z"
+        },
+        "upload": {
+          "priority": "Low"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "attachments": {
+        "file": {
+          "hash": {
+            "sha256": "b5c7e26491983baa713c9a2910ee868efd891661c6a0553b28f17b8fdc8cc3ef"
+          },
+          "mime_type": "application/pdf"
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "hash": [
+        "b5c7e26491983baa713c9a2910ee868efd891661c6a0553b28f17b8fdc8cc3ef"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "amp"
+        },
+        "message": "SHA256: 69e17e213732da0d0cbc48ae7030a4a18e0c1289f510e8b139945787f67692a5,Timestamp[1454959409] details[Server Response HTTP code:[502]]",
+        "server_error_details": "Server Response HTTP code:[502]",
+        "submit": {
+          "timestamp": "2016-02-08T19:23:29.000Z"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "attachments": {
+        "file": {
+          "hash": {
+            "sha256": "69e17e213732da0d0cbc48ae7030a4a18e0c1289f510e8b139945787f67692a5"
+          }
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "hash": [
+        "69e17e213732da0d0cbc48ae7030a4a18e0c1289f510e8b139945787f67692a5"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "category": {
+          "name": "amp"
+        },
+        "message": "Retrospective verdict received. SHA256: 16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc, Timestamp: 1475832815.7, Verdict: MALICIOUS, Reputation Score: 0, Spyname: W32.16454AFF50-100.SBX.",
+        "reputation_score": "0",
+        "spy_name": "W32.16454AFF50-100.SBX.",
+        "submit": {
+          "timestamp": "2016-10-07T09:33:35.700Z"
+        },
+        "verdict": "MALICIOUS"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "attachments": {
+        "file": {
+          "hash": {
+            "sha256": "16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc"
+          }
+        }
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "related": {
+      "hash": [
+        "16454aff5082c2e9df43f3e3b9cdba3c6ae1766416e548c30a971786db570bfc"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "case_id": "72324",
+        "category": {
+          "name": "antispam"
+        },
+        "message": "case antispam - engine (72324) : case-daemon: Initializing Child",
+        "object_category": "antispam - engine",
+        "result": "Initializing Child"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "case_id": "15703",
+        "category": {
+          "name": "antispam"
+        },
+        "message": "case antispam - engine (15703) : case-daemon: all children killed, exitting",
+        "object": "children",
+        "object_category": "antispam - engine",
+        "result": "exitting"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-17T18:24:37.000Z",
+    "agent": {
+      "ephemeral_id": "e7d01af8-989f-475b-9b1e-91f57b5dd6c8",
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "name": "elastic-agent-20581",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_secure_email_gateway": {
+      "log": {
+        "case_id": "15703",
+        "category": {
+          "name": "antispam"
+        },
+        "command": "SIGHUP",
+        "message": "case antispam - engine (15703) : case-daemon: server killed by SIGHUP, shutting down",
+        "object": "server",
+        "object_category": "antispam - engine",
+        "result": "shutting down"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_secure_email_gateway.log",
+      "namespace": "33981",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "7aa66d50-8fb9-4e12-8cf4-3c9722448bdb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "cisco_secure_email_gateway.log",
+      "ingested": "2026-03-10T00:56:29Z",
+      "kind": "event",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "info",
+      "source": {
+        "address": "172.19.0.3:50018"
+      },
+      "syslog": {
+        "priority": 166
+      }
+    },
+    "tags": [
+      "forwarded",
+      "cisco_secure_email_gateway-log"
+    ]
+  }
+]

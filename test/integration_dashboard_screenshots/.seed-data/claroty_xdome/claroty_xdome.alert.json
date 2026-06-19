@@ -1,0 +1,1315 @@
+[
+  {
+    "@timestamp": "2025-03-28T03:07:32.432Z",
+    "agent": {
+      "ephemeral_id": "ca4e38ca-9dd4-4bf2-8e08-8802f826976b",
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "name": "elastic-agent-57690",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "claroty_xdome": {
+      "alert": {
+        "category": "Risk",
+        "class": "Pre-Defined Alerts",
+        "description": "2 Schneider Electric EGX100MG OT Gateway detected as End-of-Life",
+        "detected_time": "2025-03-28T03:07:32.432Z",
+        "device": {
+          "activity_rate": 59.0,
+          "asset_id": "GHNFBRF",
+          "assignees": [
+            "3rd Party SOC (Group)",
+            "Ben Jackman",
+            "Jose Alegria",
+            "Kelvin Kan"
+          ],
+          "assignees_data": [
+            {
+              "is_active": true,
+              "id": "ben.jackman",
+              "display_name": "Ben Jackman",
+              "type": "user"
+            }
+          ],
+          "avg": {
+            "online_per_day": 14.2
+          },
+          "category": "OT",
+          "collection": {
+            "interfaces": {
+              "seen_reported_from": [
+                "ens142@demo-collection-atl-06",
+                "ens192@demo-collection-bos-02"
+              ]
+            },
+            "servers": {
+              "seen_reported_from": [
+                "demo-collection-atl-06",
+                "demo-collection-bos-02"
+              ]
+            }
+          },
+          "connection": {
+            "type_list": [
+              "Ethernet"
+            ]
+          },
+          "data_sources_seen_reported_from": [
+            "Passive Collection"
+          ],
+          "effective_likelihood_subscore": {
+            "points": 45.35196,
+            "value": "Very Low"
+          },
+          "end_of": {
+            "life": {
+              "date": "2023-06-23T00:00:00.000Z",
+              "state": "End-Of-Life"
+            },
+            "sale_date": "2020-09-29T00:00:00.000Z"
+          },
+          "financial_cost": "Unknown",
+          "first_seen_list": [
+            "2025-02-27T16:52:10.005Z"
+          ],
+          "impact_subscore": {
+            "points": 100.0,
+            "value": "Critical"
+          },
+          "insecure_protocols": {
+            "points": 0.0,
+            "value": "Very Low"
+          },
+          "internet_communication": "No",
+          "ip": {
+            "assignment_list": [
+              "Static"
+            ],
+            "list": [
+              "216.160.83.56"
+            ],
+            "value": "216.160.83.56"
+          },
+          "is_online": true,
+          "is_resolved": false,
+          "ise": {
+            "security_group": {
+              "description_list": [
+                "Servers Group - Exported from xDome"
+              ],
+              "name_list": [
+                "Servers_sgt"
+              ],
+              "tag_list": [
+                "5"
+              ]
+            }
+          },
+          "known_vulnerabilities": {
+            "points": 80.15559,
+            "value": "High"
+          },
+          "labels": [
+            "Aceria Albany",
+            "warning",
+            "\u30d1\u30c3\u30c1\u6709\u7121\u78ba\u8a8d",
+            "\u30ea\u30b9\u30af\u4f4e\u6e1b\u691c\u8a0e",
+            "\u91ce\u826f\u30c7\u30d0\u30a4\u30b9"
+          ],
+          "last": {
+            "seen": {
+              "list": [
+                "2025-03-28T02:21:36.838Z"
+              ],
+              "on_switch_list": [
+                "2025-03-09T09:42:01.005Z"
+              ],
+              "reported": "2025-03-29T02:21:16.059Z"
+            }
+          },
+          "likelihood_subscore": {
+            "points": 66.69405,
+            "value": "Critical"
+          },
+          "mac": {
+            "list": [
+              "00:80:f4:fa:6e:42"
+            ],
+            "oui_list": [
+              "Telemecanique Electrique"
+            ]
+          },
+          "machine_type": "Physical",
+          "manufacturer": "Schneider Electric",
+          "model": {
+            "name": "EGX100MG"
+          },
+          "network": {
+            "scope_list": [
+              "Default"
+            ]
+          },
+          "network_list": [
+            "Industrial"
+          ],
+          "number_of_nics": 1,
+          "organization": {
+            "firewall_group_name": "No Zone"
+          },
+          "os": {
+            "category": "Other"
+          },
+          "purdue_level": {
+            "source": "Auto-Assigned",
+            "value": "Level 2"
+          },
+          "recommended": {
+            "firewall_group_name": "Servers"
+          },
+          "retired": {
+            "value": false
+          },
+          "risk_score": {
+            "points": 67.211174,
+            "value": "Critical"
+          },
+          "serial_number": "542001156291",
+          "site": {
+            "group_name": "No Group",
+            "name": "BOS-02"
+          },
+          "software_or_firmware_version": "005.001.015",
+          "subcategory": "Control",
+          "switch": {
+            "ip_list": [
+              "175.16.199.0"
+            ],
+            "location_list": [
+              "dep qKYGc"
+            ],
+            "mac_list": [
+              "00:11:93:c3:ed:48"
+            ],
+            "port_list": [
+              "Fa/0/40"
+            ]
+          },
+          "type": {
+            "family": "OT Gateway",
+            "value": "OT Gateway"
+          },
+          "uid": "b4fb528b-59d0-4569-986b-197aef938f5b",
+          "utilization_rate": 0.0,
+          "visibility_score": {
+            "level": "Excellent",
+            "value": 98
+          },
+          "vlan": {
+            "description_list": [
+              "VLAN 125"
+            ],
+            "list": [
+              "125"
+            ],
+            "name_list": [
+              "VLAN 125"
+            ]
+          }
+        },
+        "devices_count": 1,
+        "friendly_name": "Device End-of-Life: EGX100MG",
+        "id": "2",
+        "iot_devices_count": 0,
+        "it_devices_count": 0,
+        "medical_devices_count": 0,
+        "name": "Device End-of-Life: EGX100MG",
+        "ot_devices_count": 2,
+        "status": "Unresolved",
+        "type_name": "Device End-of-Life",
+        "unresolved_devices_count": 2,
+        "updated_time": "2025-03-28T03:07:32.432Z"
+      }
+    },
+    "data_stream": {
+      "dataset": "claroty_xdome.alert",
+      "namespace": "21758",
+      "type": "logs"
+    },
+    "device": {
+      "manufacturer": "Schneider Electric",
+      "model": {
+        "identifier": "EGX100MG"
+      },
+      "serial_number": "542001156291"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "device-endoflife-egx100mg",
+      "agent_id_status": "verified",
+      "dataset": "claroty_xdome.alert",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "alert",
+      "original": "{\"activity_rate\":59,\"alert_info\":{\"alert_class\":\"Pre-Defined Alerts\",\"alert_name\":\"Device End-of-Life: EGX100MG\",\"alert_type_name\":\"Device End-of-Life\",\"category\":\"Risk\",\"description\":\"2 Schneider Electric EGX100MG OT Gateway detected as End-of-Life\",\"detected_time\":\"2025-03-28T03:07:32.432639Z\",\"devices_count\":1,\"id\":2,\"iot_devices_count\":0,\"it_devices_count\":0,\"malicious_ip_tags_list\":null,\"medical_devices_count\":0,\"ot_devices_count\":2,\"status\":\"Unresolved\",\"unresolved_devices_count\":2,\"updated_time\":\"2025-03-28T03:07:32.432639Z\"},\"asset_id\":\"GHNFBRF\",\"assignees\":[\"3rd Party SOC (Group)\",\"Ben Jackman\",\"Jose Alegria\",\"Kelvin Kan\"],\"assignees_data\":[{\"display_name\":\"Ben Jackman\",\"id\":\"ben.jackman\",\"is_active\":true,\"type\":\"user\"}],\"avg_online_per_day\":14.2,\"collection_interfaces_seen_reported_from\":[\"ens142@demo-collection-atl-06\",\"ens192@demo-collection-bos-02\"],\"collection_servers_seen_reported_from\":[\"demo-collection-atl-06\",\"demo-collection-bos-02\"],\"connection_type_list\":[\"Ethernet\"],\"data_sources_seen_reported_from\":[\"Passive Collection\"],\"device_category\":\"OT\",\"device_name\":\"216.160.83.56\",\"device_subcategory\":\"Control\",\"device_type\":\"OT Gateway\",\"device_type_family\":\"OT Gateway\",\"effective_likelihood_subscore\":\"Very Low\",\"effective_likelihood_subscore_points\":45.35196,\"end_of_life_date\":\"2023-06-23\",\"end_of_life_state\":\"End-Of-Life\",\"end_of_sale_date\":\"2020-09-29\",\"financial_cost\":\"Unknown\",\"first_seen_list\":[\"2025-02-27T16:52:10.005074+00:00\"],\"impact_subscore\":\"Critical\",\"impact_subscore_points\":100,\"insecure_protocols\":\"Very Low\",\"insecure_protocols_points\":0,\"internet_communication\":\"No\",\"ip_assignment_list\":[\"Static\"],\"ip_list\":[\"216.160.83.56\"],\"is_online\":true,\"is_resolved\":false,\"ise_security_group_description_list\":[\"Servers Group - Exported from xDome\"],\"ise_security_group_name_list\":[\"Servers_sgt\"],\"ise_security_group_tag_list\":[5],\"known_vulnerabilities\":\"High\",\"known_vulnerabilities_points\":80.15559,\"labels\":[\"Aceria Albany\",\"warning\",\"\u30d1\u30c3\u30c1\u6709\u7121\u78ba\u8a8d\",\"\u30ea\u30b9\u30af\u4f4e\u6e1b\u691c\u8a0e\",\"\u91ce\u826f\u30c7\u30d0\u30a4\u30b9\"],\"last_seen_list\":[\"2025-03-28T02:21:36.838895+00:00\"],\"last_seen_on_switch_list\":[\"2025-03-09T09:42:01.005104+00:00\"],\"last_seen_reported\":\"2025-03-29T02:21:16.059042+00:00\",\"likelihood_subscore\":\"Critical\",\"likelihood_subscore_points\":66.69405,\"mac_list\":[\"00:80:f4:fa:6e:42\"],\"mac_oui_list\":[\"Telemecanique Electrique\"],\"machine_type\":\"Physical\",\"manufacturer\":\"Schneider Electric\",\"model\":\"EGX100MG\",\"network_list\":[\"Industrial\"],\"network_scope_list\":[\"Default\"],\"number_of_nics\":1,\"organization_firewall_group_name\":\"No Zone\",\"os_category\":\"Other\",\"purdue_level\":\"Level 2\",\"purdue_level_source\":\"Auto-Assigned\",\"recommended_firewall_group_name\":\"Servers\",\"retired\":false,\"risk_score\":\"Critical\",\"risk_score_points\":67.211174,\"serial_number\":\"542001156291\",\"site_group_name\":\"No Group\",\"site_name\":\"BOS-02\",\"software_or_firmware_version\":\"005.001.015\",\"switch_ip_list\":[\"175.16.199.0\"],\"switch_location_list\":[\"dep qKYGc\"],\"switch_mac_list\":[\"00:11:93:c3:ed:48\"],\"switch_port_list\":[\"Fa/0/40\"],\"uid\":\"b4fb528b-59d0-4569-986b-197aef938f5b\",\"utilization_rate\":0,\"visibility_score\":98,\"visibility_score_level\":\"Excellent\",\"vlan_description_list\":[\"VLAN 125\"],\"vlan_list\":[125],\"vlan_name_list\":[\"VLAN 125\"]}",
+      "risk_score": 67.211174,
+      "severity": 99
+    },
+    "host": {
+      "geo": {
+        "city_name": "Milton",
+        "continent_name": "North America",
+        "country_iso_code": "US",
+        "country_name": "United States",
+        "location": {
+          "lat": 47.25129998289049,
+          "lon": -122.31490007601678
+        },
+        "region_iso_code": "US-WA",
+        "region_name": "Washington"
+      },
+      "id": "b4fb528b-59d0-4569-986b-197aef938f5b",
+      "ip": [
+        "216.160.83.56"
+      ],
+      "mac": [
+        "00-80-F4-FA-6E-42"
+      ],
+      "os": {
+        "family": "Other"
+      },
+      "type": "OT Gateway"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "2 Schneider Electric EGX100MG OT Gateway detected as End-of-Life",
+    "observer": {
+      "ingress": {
+        "vlan": {
+          "id": [
+            "125"
+          ],
+          "name": [
+            "VLAN 125"
+          ]
+        }
+      },
+      "product": "xDome",
+      "vendor": "Claroty"
+    },
+    "related": {
+      "hosts": [
+        "BOS-02",
+        "b4fb528b-59d0-4569-986b-197aef938f5b"
+      ],
+      "ip": [
+        "216.160.83.56",
+        "175.16.199.0"
+      ],
+      "user": [
+        "3rd Party SOC (Group)",
+        "Ben Jackman",
+        "Jose Alegria",
+        "Kelvin Kan",
+        "ben.jackman"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "claroty_xdome-alert"
+    ]
+  },
+  {
+    "@timestamp": "2025-03-28T03:07:32.432Z",
+    "agent": {
+      "ephemeral_id": "ca4e38ca-9dd4-4bf2-8e08-8802f826976b",
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "name": "elastic-agent-57690",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "claroty_xdome": {
+      "alert": {
+        "category": "Risk",
+        "class": "Pre-Defined Alerts",
+        "description": "2 Schneider Electric EGX100MG OT Gateway detected as End-of-Life",
+        "detected_time": "2025-03-28T03:07:32.432Z",
+        "device": {
+          "activity_rate": 100.0,
+          "asset_id": "DOQIAZN",
+          "assignees": [
+            "3rd Party SOC (Group)",
+            "Ben Jackman",
+            "Jose Alegria",
+            "Kelvin Kan"
+          ],
+          "assignees_data": [
+            {
+              "is_active": true,
+              "id": "kelvin.k@claroty.com",
+              "display_name": "Kelvin Kan",
+              "type": "user"
+            }
+          ],
+          "avg": {
+            "online_per_day": 24.0
+          },
+          "category": "OT",
+          "collection": {
+            "interfaces": {
+              "seen_reported_from": [
+                "ens164@demo-collection-atl-06"
+              ]
+            },
+            "servers": {
+              "seen_reported_from": [
+                "demo-collection-atl-06",
+                "demo-collection-bos-02"
+              ]
+            }
+          },
+          "connection": {
+            "type_list": [
+              "Ethernet"
+            ]
+          },
+          "data_sources_seen_reported_from": [
+            "Passive Collection",
+            "Edge Scan"
+          ],
+          "edge": {
+            "hosts_seen_reported_from": [
+              "001c01abae6c (old Edge ID)"
+            ],
+            "locations_seen_reported_from": [
+              "Plant-1"
+            ]
+          },
+          "effective_likelihood_subscore": {
+            "points": 66.69405,
+            "value": "Critical"
+          },
+          "end_of": {
+            "life": {
+              "date": "2023-06-23T00:00:00.000Z",
+              "state": "End-Of-Life"
+            },
+            "sale_date": "2020-09-29T00:00:00.000Z"
+          },
+          "financial_cost": "Unknown",
+          "first_seen_list": [
+            "2024-06-11T04:52:34.005Z"
+          ],
+          "impact_subscore": {
+            "points": 100.0,
+            "value": "Critical"
+          },
+          "insecure_protocols": {
+            "points": 0.0,
+            "value": "Very Low"
+          },
+          "internet_communication": "No",
+          "ip": {
+            "assignment_list": [
+              "Static"
+            ],
+            "list": [
+              "175.16.199.0"
+            ],
+            "value": "175.16.199.0"
+          },
+          "is_online": false,
+          "is_resolved": false,
+          "ise": {
+            "security_group": {
+              "description_list": [
+                "Servers Group - Exported from xDome"
+              ],
+              "name_list": [
+                "Servers_sgt"
+              ],
+              "tag_list": [
+                "5"
+              ]
+            }
+          },
+          "known_vulnerabilities": {
+            "points": 80.15559,
+            "value": "High"
+          },
+          "labels": [
+            "Aceria Albany",
+            "Urgent",
+            "\u30d1\u30c3\u30c1\u6709\u7121\u78ba\u8a8d"
+          ],
+          "last": {
+            "seen": {
+              "list": [
+                "2024-10-29T07:47:07.005Z"
+              ],
+              "reported": "2024-10-29T07:47:07.005Z"
+            }
+          },
+          "likelihood_subscore": {
+            "points": 66.69405,
+            "value": "Critical"
+          },
+          "mac": {
+            "list": [
+              "00:80:f4:d2:a0:1b"
+            ],
+            "oui_list": [
+              "Telemecanique Electrique"
+            ]
+          },
+          "machine_type": "Physical",
+          "manufacturer": "Schneider Electric",
+          "model": {
+            "name": "EGX100MG"
+          },
+          "network": {
+            "scope_list": [
+              "Default"
+            ]
+          },
+          "network_list": [
+            "Industrial"
+          ],
+          "number_of_nics": 1,
+          "organization": {
+            "firewall_group_name": "No Zone"
+          },
+          "os": {
+            "category": "Other"
+          },
+          "purdue_level": {
+            "source": "Auto-Assigned",
+            "value": "Level 2"
+          },
+          "recommended": {
+            "firewall_group_name": "Servers"
+          },
+          "retired": {
+            "value": false
+          },
+          "risk_score": {
+            "points": 80.01643,
+            "value": "Critical"
+          },
+          "serial_number": "542001393122",
+          "site": {
+            "group_name": "No Group",
+            "name": "BOS-02"
+          },
+          "software_or_firmware_version": "005.001.015",
+          "subcategory": "Control",
+          "type": {
+            "family": "OT Gateway",
+            "value": "OT Gateway"
+          },
+          "uid": "f5f422b3-1443-4c9b-bbe7-3260aa80a9da",
+          "utilization_rate": 0.0,
+          "visibility_score": {
+            "level": "Excellent",
+            "value": 98
+          },
+          "vlan": {
+            "description_list": [
+              "VLAN 121"
+            ],
+            "list": [
+              "121"
+            ],
+            "name_list": [
+              "VLAN 121"
+            ]
+          }
+        },
+        "devices_count": 1,
+        "friendly_name": "Device End-of-Life: EGX100MG",
+        "id": "2",
+        "iot_devices_count": 0,
+        "it_devices_count": 0,
+        "medical_devices_count": 0,
+        "name": "Device End-of-Life: EGX100MG",
+        "ot_devices_count": 2,
+        "status": "Unresolved",
+        "type_name": "Device End-of-Life",
+        "unresolved_devices_count": 2,
+        "updated_time": "2025-03-28T03:07:32.432Z"
+      }
+    },
+    "data_stream": {
+      "dataset": "claroty_xdome.alert",
+      "namespace": "21758",
+      "type": "logs"
+    },
+    "device": {
+      "manufacturer": "Schneider Electric",
+      "model": {
+        "identifier": "EGX100MG"
+      },
+      "serial_number": "542001393122"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "device-endoflife-egx100mg",
+      "agent_id_status": "verified",
+      "dataset": "claroty_xdome.alert",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "alert",
+      "original": "{\"activity_rate\":100,\"alert_info\":{\"alert_class\":\"Pre-Defined Alerts\",\"alert_name\":\"Device End-of-Life: EGX100MG\",\"alert_type_name\":\"Device End-of-Life\",\"category\":\"Risk\",\"description\":\"2 Schneider Electric EGX100MG OT Gateway detected as End-of-Life\",\"detected_time\":\"2025-03-28T03:07:32.432639Z\",\"devices_count\":1,\"id\":2,\"iot_devices_count\":0,\"it_devices_count\":0,\"malicious_ip_tags_list\":null,\"medical_devices_count\":0,\"ot_devices_count\":2,\"status\":\"Unresolved\",\"unresolved_devices_count\":2,\"updated_time\":\"2025-03-28T03:07:32.432639Z\"},\"asset_id\":\"DOQIAZN\",\"assignees\":[\"3rd Party SOC (Group)\",\"Ben Jackman\",\"Jose Alegria\",\"Kelvin Kan\"],\"assignees_data\":[{\"display_name\":\"Kelvin Kan\",\"id\":\"kelvin.k@claroty.com\",\"is_active\":true,\"type\":\"user\"}],\"avg_online_per_day\":24,\"collection_interfaces_seen_reported_from\":[\"ens164@demo-collection-atl-06\"],\"collection_servers_seen_reported_from\":[\"demo-collection-atl-06\",\"demo-collection-bos-02\"],\"connection_type_list\":[\"Ethernet\"],\"data_sources_seen_reported_from\":[\"Passive Collection\",\"Edge Scan\"],\"device_category\":\"OT\",\"device_name\":\"175.16.199.0\",\"device_subcategory\":\"Control\",\"device_type\":\"OT Gateway\",\"device_type_family\":\"OT Gateway\",\"edge_hosts_seen_reported_from\":[\"001c01abae6c (old Edge ID)\"],\"edge_locations_seen_reported_from\":[\"Plant-1\"],\"effective_likelihood_subscore\":\"Critical\",\"effective_likelihood_subscore_points\":66.69405,\"end_of_life_date\":\"2023-06-23\",\"end_of_life_state\":\"End-Of-Life\",\"end_of_sale_date\":\"2020-09-29\",\"financial_cost\":\"Unknown\",\"first_seen_list\":[\"2024-06-11T04:52:34.005373+00:00\"],\"impact_subscore\":\"Critical\",\"impact_subscore_points\":100,\"insecure_protocols\":\"Very Low\",\"insecure_protocols_points\":0,\"internet_communication\":\"No\",\"ip_assignment_list\":[\"Static\"],\"ip_list\":[\"175.16.199.0\"],\"is_online\":false,\"is_resolved\":false,\"ise_security_group_description_list\":[\"Servers Group - Exported from xDome\"],\"ise_security_group_name_list\":[\"Servers_sgt\"],\"ise_security_group_tag_list\":[5],\"known_vulnerabilities\":\"High\",\"known_vulnerabilities_points\":80.15559,\"labels\":[\"Aceria Albany\",\"Urgent\",\"\u30d1\u30c3\u30c1\u6709\u7121\u78ba\u8a8d\"],\"last_seen_list\":[\"2024-10-29T07:47:07.005373+00:00\"],\"last_seen_reported\":\"2024-10-29T07:47:07.005373+00:00\",\"likelihood_subscore\":\"Critical\",\"likelihood_subscore_points\":66.69405,\"mac_list\":[\"00:80:f4:d2:a0:1b\"],\"mac_oui_list\":[\"Telemecanique Electrique\"],\"machine_type\":\"Physical\",\"manufacturer\":\"Schneider Electric\",\"model\":\"EGX100MG\",\"network_list\":[\"Industrial\"],\"network_scope_list\":[\"Default\"],\"number_of_nics\":1,\"organization_firewall_group_name\":\"No Zone\",\"os_category\":\"Other\",\"purdue_level\":\"Level 2\",\"purdue_level_source\":\"Auto-Assigned\",\"recommended_firewall_group_name\":\"Servers\",\"retired\":false,\"risk_score\":\"Critical\",\"risk_score_points\":80.01643,\"serial_number\":\"542001393122\",\"site_group_name\":\"No Group\",\"site_name\":\"BOS-02\",\"software_or_firmware_version\":\"005.001.015\",\"uid\":\"f5f422b3-1443-4c9b-bbe7-3260aa80a9da\",\"utilization_rate\":0,\"visibility_score\":98,\"visibility_score_level\":\"Excellent\",\"vlan_description_list\":[\"VLAN 121\"],\"vlan_list\":[121],\"vlan_name_list\":[\"VLAN 121\"]}",
+      "risk_score": 80.01643,
+      "severity": 99
+    },
+    "host": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "id": "f5f422b3-1443-4c9b-bbe7-3260aa80a9da",
+      "ip": [
+        "175.16.199.0"
+      ],
+      "mac": [
+        "00-80-F4-D2-A0-1B"
+      ],
+      "os": {
+        "family": "Other"
+      },
+      "type": "OT Gateway"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "2 Schneider Electric EGX100MG OT Gateway detected as End-of-Life",
+    "observer": {
+      "ingress": {
+        "vlan": {
+          "id": [
+            "121"
+          ],
+          "name": [
+            "VLAN 121"
+          ]
+        }
+      },
+      "product": "xDome",
+      "vendor": "Claroty"
+    },
+    "related": {
+      "hosts": [
+        "BOS-02",
+        "f5f422b3-1443-4c9b-bbe7-3260aa80a9da"
+      ],
+      "ip": [
+        "175.16.199.0"
+      ],
+      "user": [
+        "3rd Party SOC (Group)",
+        "Ben Jackman",
+        "Jose Alegria",
+        "Kelvin Kan",
+        "kelvin.k@claroty.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "claroty_xdome-alert"
+    ]
+  },
+  {
+    "@timestamp": "2025-03-28T03:07:32.195Z",
+    "agent": {
+      "ephemeral_id": "ca4e38ca-9dd4-4bf2-8e08-8802f826976b",
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "name": "elastic-agent-57690",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "claroty_xdome": {
+      "alert": {
+        "category": "Risk",
+        "class": "Pre-Defined Alerts",
+        "description": "46 Zebra Technologies ZT410 Mobile Printer have been detected that will enter the End-of-Life state in 09/01/25",
+        "detected_time": "2025-03-28T03:07:32.195Z",
+        "device": {
+          "activity_rate": 67.0,
+          "applied_acl": {
+            "list": [
+              "Claroty_ZT410_Wired_Access"
+            ],
+            "type_list": [
+              "Cisco dACL"
+            ]
+          },
+          "asset_id": "JAKBHWV",
+          "assignees": [
+            "Sergei Ridkey"
+          ],
+          "assignees_data": [
+            {
+              "is_active": true,
+              "id": "sergei.r",
+              "display_name": "Sergei Ridkey",
+              "type": "user"
+            }
+          ],
+          "authentication_user_list": [
+            "00-0C-C6-01-37-B10"
+          ],
+          "avg": {
+            "online_per_day": 16.2
+          },
+          "category": "IoT",
+          "collection": {
+            "interfaces": {
+              "seen_reported_from": [
+                "ens142@demo-collection-sv_1",
+                "ens192@demo-collection-sv_1",
+                "ens192@demo-collection-sv_2"
+              ]
+            },
+            "servers": {
+              "seen_reported_from": [
+                "demo-collection-sv_1",
+                "demo-collection-sv_2"
+              ]
+            }
+          },
+          "combined_os": "Proprietary Link-OS 4",
+          "connection": {
+            "type_list": [
+              "Ethernet"
+            ]
+          },
+          "data_sources_seen_reported_from": [
+            "Passive Collection",
+            "Integration"
+          ],
+          "effective_likelihood_subscore": {
+            "points": 27.971817,
+            "value": "Very Low"
+          },
+          "end_of": {
+            "life": {
+              "date": "2025-09-01T00:00:00.000Z",
+              "state": "End-Of-Life Notification"
+            }
+          },
+          "financial_cost": "$10,000-$100,000",
+          "first_seen_list": [
+            "2024-11-23T05:22:38.150Z"
+          ],
+          "handles_pii": "Yes",
+          "impact_subscore": {
+            "points": 53.3,
+            "value": "Medium"
+          },
+          "insecure_protocols": {
+            "points": 0.0,
+            "value": "Very Low"
+          },
+          "integration_types_reported_from": [
+            "Cisco ISE"
+          ],
+          "integrations_reported_from": [
+            "Cisco ISE (Cisco ISE)"
+          ],
+          "internet_communication": "Yes",
+          "ip": {
+            "assignment_list": [
+              "DHCP"
+            ],
+            "list": [
+              "1.128.0.0"
+            ],
+            "value": "1.128.0.0"
+          },
+          "is_online": false,
+          "is_resolved": false,
+          "ise": {
+            "authentication_method_list": [
+              "mab"
+            ],
+            "security_group": {
+              "description_list": [
+                "Printers Group - Exported from xDome"
+              ],
+              "name_list": [
+                "Printers_sgt"
+              ],
+              "tag_list": [
+                "4"
+              ]
+            }
+          },
+          "known_vulnerabilities": {
+            "points": 18.98562,
+            "value": "Low"
+          },
+          "labels": [
+            "Exposed & EOL Asset",
+            "Exposed EOL Asset",
+            "OT Internet Klabin",
+            "SL1_Win 7 EWS with Critical KVs"
+          ],
+          "last": {
+            "seen": {
+              "list": [
+                "2025-02-09T00:30:28.150Z"
+              ],
+              "on_switch_list": [
+                "2025-03-09T09:42:01.150Z"
+              ],
+              "reported": "2025-02-09T00:30:28.150Z"
+            }
+          },
+          "likelihood_subscore": {
+            "points": 63.57231,
+            "value": "High"
+          },
+          "mac": {
+            "list": [
+              "00:07:4d:c1:06:20"
+            ],
+            "oui_list": [
+              "Zebra Technologies Corp."
+            ]
+          },
+          "machine_type": "Physical",
+          "manufacturer": "Zebra Technologies",
+          "model": {
+            "name": "ZT410"
+          },
+          "network": {
+            "scope_list": [
+              "Default"
+            ]
+          },
+          "network_list": [
+            "Industrial"
+          ],
+          "number_of_nics": 1,
+          "organization": {
+            "firewall_group_name": "No Zone"
+          },
+          "os": {
+            "category": "Proprietary",
+            "name": "Proprietary",
+            "revision": "4",
+            "subcategory": "Link-OS",
+            "version": "Link-OS"
+          },
+          "purdue_level": {
+            "source": "Auto-Assigned",
+            "value": "Level 3"
+          },
+          "recommended": {
+            "firewall_group_name": "Printers"
+          },
+          "retired": {
+            "value": false
+          },
+          "risk_score": {
+            "points": 38.10309,
+            "value": "Low"
+          },
+          "serial_number": "18J171636094",
+          "site": {
+            "group_name": "No Group",
+            "name": "SV_1"
+          },
+          "software_or_firmware_version": "V75.20.01Z",
+          "subcategory": "General IoT",
+          "switch": {
+            "location_list": [
+              "dep JzkRK"
+            ],
+            "mac_list": [
+              "00:12:00:36:4e:5f"
+            ],
+            "port_list": [
+              "Fa/1/12"
+            ]
+          },
+          "type": {
+            "family": "Mobile Printer",
+            "value": "Mobile Printer"
+          },
+          "uid": "010510c5-fffd-4aa6-9bc5-51c1c79fa21e",
+          "utilization_rate": 0.0,
+          "visibility_score": {
+            "level": "Excellent",
+            "value": 99
+          },
+          "vlan": {
+            "description_list": [
+              "Bldg1-Flr3"
+            ],
+            "list": [
+              "103"
+            ],
+            "name_list": [
+              "Bldg1-Flr3"
+            ]
+          }
+        },
+        "devices_count": 1,
+        "friendly_name": "Device End-of-Life: ZT410",
+        "id": "1",
+        "iot_devices_count": 46,
+        "it_devices_count": 0,
+        "medical_devices_count": 0,
+        "name": "Device End-of-Life: ZT410",
+        "ot_devices_count": 0,
+        "status": "Unresolved",
+        "type_name": "Device End-of-Life",
+        "unresolved_devices_count": 46,
+        "updated_time": "2025-03-28T03:07:32.195Z"
+      }
+    },
+    "data_stream": {
+      "dataset": "claroty_xdome.alert",
+      "namespace": "21758",
+      "type": "logs"
+    },
+    "device": {
+      "manufacturer": "Zebra Technologies",
+      "model": {
+        "identifier": "ZT410"
+      },
+      "serial_number": "18J171636094"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "device-endoflife-zt410",
+      "agent_id_status": "verified",
+      "dataset": "claroty_xdome.alert",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "alert",
+      "original": "{\"activity_rate\":67,\"alert_info\":{\"alert_class\":\"Pre-Defined Alerts\",\"alert_name\":\"Device End-of-Life: ZT410\",\"alert_type_name\":\"Device End-of-Life\",\"category\":\"Risk\",\"description\":\"46 Zebra Technologies ZT410 Mobile Printer have been detected that will enter the End-of-Life state in 09/01/25\",\"detected_time\":\"2025-03-28T03:07:32.195965Z\",\"devices_count\":1,\"id\":1,\"iot_devices_count\":46,\"it_devices_count\":0,\"malicious_ip_tags_list\":null,\"medical_devices_count\":0,\"ot_devices_count\":0,\"status\":\"Unresolved\",\"unresolved_devices_count\":46,\"updated_time\":\"2025-03-28T03:07:32.195965Z\"},\"applied_acl_list\":[\"Claroty_ZT410_Wired_Access\"],\"applied_acl_type_list\":[\"Cisco dACL\"],\"asset_id\":\"JAKBHWV\",\"assignees\":[\"Sergei Ridkey\"],\"assignees_data\":[{\"display_name\":\"Sergei Ridkey\",\"id\":\"sergei.r\",\"is_active\":true,\"type\":\"user\"}],\"authentication_user_list\":[\"00-0C-C6-01-37-B10\"],\"avg_online_per_day\":16.2,\"collection_interfaces_seen_reported_from\":[\"ens142@demo-collection-sv_1\",\"ens192@demo-collection-sv_1\",\"ens192@demo-collection-sv_2\"],\"collection_servers_seen_reported_from\":[\"demo-collection-sv_1\",\"demo-collection-sv_2\"],\"combined_os\":\"Proprietary Link-OS 4\",\"connection_type_list\":[\"Ethernet\"],\"data_sources_seen_reported_from\":[\"Passive Collection\",\"Integration\"],\"device_category\":\"IoT\",\"device_name\":\"1.128.0.0\",\"device_subcategory\":\"General IoT\",\"device_type\":\"Mobile Printer\",\"device_type_family\":\"Mobile Printer\",\"dhcp_fingerprint\":null,\"dhcp_last_seen_hostname\":null,\"domains\":[],\"effective_likelihood_subscore\":\"Very Low\",\"effective_likelihood_subscore_points\":27.971817,\"end_of_life_date\":\"2025-09-01\",\"end_of_life_state\":\"End-Of-Life Notification\",\"financial_cost\":\"$10,000-$100,000\",\"first_seen_list\":[\"2024-11-23T05:22:38.150546+00:00\"],\"handles_pii\":\"Yes\",\"http_hostnames\":[],\"impact_subscore\":\"Medium\",\"impact_subscore_points\":53.3,\"insecure_protocols\":\"Very Low\",\"insecure_protocols_points\":0,\"integration_types_reported_from\":[\"Cisco ISE\"],\"integrations_reported_from\":[\"Cisco ISE (Cisco ISE)\"],\"internet_communication\":\"Yes\",\"ip_assignment_list\":[\"DHCP\"],\"ip_list\":[\"1.128.0.0\"],\"is_online\":false,\"is_resolved\":false,\"ise_authentication_method_list\":[\"mab\"],\"ise_security_group_description_list\":[\"Printers Group - Exported from xDome\"],\"ise_security_group_name_list\":[\"Printers_sgt\"],\"ise_security_group_tag_list\":[4],\"known_vulnerabilities\":\"Low\",\"known_vulnerabilities_points\":18.98562,\"labels\":[\"Exposed \\u0026 EOL Asset\",\"Exposed EOL Asset\",\"OT Internet Klabin\",\"SL1_Win 7 EWS with Critical KVs\"],\"last_seen_list\":[\"2025-02-09T00:30:28.150546+00:00\"],\"last_seen_on_switch_list\":[\"2025-03-09T09:42:01.150629+00:00\"],\"last_seen_reported\":\"2025-02-09T00:30:28.150546+00:00\",\"likelihood_subscore\":\"High\",\"likelihood_subscore_points\":63.57231,\"local_name\":null,\"mac_list\":[\"00:07:4d:c1:06:20\"],\"mac_oui_list\":[\"Zebra Technologies Corp.\"],\"machine_type\":\"Physical\",\"manufacturer\":\"Zebra Technologies\",\"model\":\"ZT410\",\"network_list\":[\"Industrial\"],\"network_scope_list\":[\"Default\"],\"number_of_nics\":1,\"organization_firewall_group_name\":\"No Zone\",\"os_category\":\"Proprietary\",\"os_name\":\"Proprietary\",\"os_revision\":\"4\",\"os_subcategory\":\"Link-OS\",\"os_version\":\"Link-OS\",\"phi\":null,\"purdue_level\":\"Level 3\",\"purdue_level_source\":\"Auto-Assigned\",\"recommended_firewall_group_name\":\"Printers\",\"retired\":false,\"risk_score\":\"Low\",\"risk_score_points\":38.10309,\"serial_number\":\"18J171636094\",\"site_group_name\":\"No Group\",\"site_name\":\"SV_1\",\"software_or_firmware_version\":\"V75.20.01Z\",\"switch_location_list\":[\"dep JzkRK\"],\"switch_mac_list\":[\"00:12:00:36:4e:5f\"],\"switch_port_list\":[\"Fa/1/12\"],\"uid\":\"010510c5-fffd-4aa6-9bc5-51c1c79fa21e\",\"utilization_rate\":0,\"visibility_score\":99,\"visibility_score_level\":\"Excellent\",\"vlan_description_list\":[\"Bldg1-Flr3\"],\"vlan_list\":[103],\"vlan_name_list\":[\"Bldg1-Flr3\"]}",
+      "risk_score": 38.10309,
+      "severity": 21
+    },
+    "host": {
+      "id": "010510c5-fffd-4aa6-9bc5-51c1c79fa21e",
+      "ip": [
+        "1.128.0.0"
+      ],
+      "mac": [
+        "00-07-4D-C1-06-20"
+      ],
+      "os": {
+        "family": "Proprietary",
+        "full": "Proprietary Link-OS 4",
+        "name": "Proprietary",
+        "version": "Link-OS"
+      },
+      "type": "Mobile Printer"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "46 Zebra Technologies ZT410 Mobile Printer have been detected that will enter the End-of-Life state in 09/01/25",
+    "observer": {
+      "ingress": {
+        "vlan": {
+          "id": [
+            "103"
+          ],
+          "name": [
+            "Bldg1-Flr3"
+          ]
+        }
+      },
+      "product": "xDome",
+      "vendor": "Claroty"
+    },
+    "related": {
+      "hosts": [
+        "Proprietary Link-OS 4",
+        "Proprietary",
+        "SV_1",
+        "010510c5-fffd-4aa6-9bc5-51c1c79fa21e"
+      ],
+      "ip": [
+        "1.128.0.0"
+      ],
+      "user": [
+        "Sergei Ridkey",
+        "sergei.r"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "claroty_xdome-alert"
+    ]
+  },
+  {
+    "@timestamp": "2025-03-28T03:07:32.195Z",
+    "agent": {
+      "ephemeral_id": "ca4e38ca-9dd4-4bf2-8e08-8802f826976b",
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "name": "elastic-agent-57690",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "claroty_xdome": {
+      "alert": {
+        "category": "Risk",
+        "class": "Pre-Defined Alerts",
+        "description": "46 Zebra Technologies ZT410 Mobile Printer have been detected that will enter the End-of-Life state in 09/01/25",
+        "detected_time": "2025-03-28T03:07:32.195Z",
+        "device": {
+          "activity_rate": 81.0,
+          "applied_acl": {
+            "list": [
+              "Claroty_ZT410_Wired_Access"
+            ],
+            "type_list": [
+              "Cisco dACL"
+            ]
+          },
+          "asset_id": "JYMQXBD",
+          "assignees": [
+            "Sergei Ridkey"
+          ],
+          "assignees_data": [
+            {
+              "is_active": true,
+              "id": "sergei.r",
+              "display_name": "Sergei Ridkey",
+              "type": "user"
+            }
+          ],
+          "authentication_user_list": [
+            "00-0C-C6-01-37-B10"
+          ],
+          "avg": {
+            "online_per_day": 19.6
+          },
+          "category": "IoT",
+          "collection": {
+            "interfaces": {
+              "seen_reported_from": [
+                "ens142@demo-collection-albany"
+              ]
+            },
+            "servers": {
+              "seen_reported_from": [
+                "demo-collection-albany"
+              ]
+            }
+          },
+          "combined_os": "Proprietary Link-OS 4",
+          "connection": {
+            "type_list": [
+              "Ethernet"
+            ]
+          },
+          "data_sources_seen_reported_from": [
+            "Passive Collection",
+            "Integration"
+          ],
+          "effective_likelihood_subscore": {
+            "points": 27.971817,
+            "value": "Very Low"
+          },
+          "end_of": {
+            "life": {
+              "date": "2025-09-01T00:00:00.000Z",
+              "state": "End-Of-Life Notification"
+            }
+          },
+          "financial_cost": "$10,000-$100,000",
+          "first_seen_list": [
+            "2024-10-31T18:04:22.124Z"
+          ],
+          "handles_pii": "Yes",
+          "impact_subscore": {
+            "points": 53.3,
+            "value": "Medium"
+          },
+          "insecure_protocols": {
+            "points": 0.0,
+            "value": "Very Low"
+          },
+          "integration_types_reported_from": [
+            "Cisco ISE"
+          ],
+          "integrations_reported_from": [
+            "Cisco ISE (Cisco ISE)"
+          ],
+          "internet_communication": "Yes",
+          "ip": {
+            "assignment_list": [
+              "DHCP"
+            ],
+            "list": [
+              "175.16.199.0"
+            ],
+            "value": "175.16.199.0"
+          },
+          "is_online": true,
+          "is_resolved": false,
+          "ise": {
+            "authentication_method_list": [
+              "mab"
+            ],
+            "security_group": {
+              "description_list": [
+                "Printers Group - Exported from xDome"
+              ],
+              "name_list": [
+                "Printers_sgt"
+              ],
+              "tag_list": [
+                "4"
+              ]
+            }
+          },
+          "known_vulnerabilities": {
+            "points": 18.98562,
+            "value": "Low"
+          },
+          "labels": [
+            "Exposed & EOL Asset",
+            "Exposed EOL Asset",
+            "OT Internet Klabin",
+            "SL1_Win 7 EWS with Critical KVs"
+          ],
+          "last": {
+            "seen": {
+              "list": [
+                "2025-03-28T02:33:56.957Z"
+              ],
+              "reported": "2025-03-29T02:33:36.178Z"
+            }
+          },
+          "likelihood_subscore": {
+            "points": 63.57231,
+            "value": "High"
+          },
+          "mac": {
+            "list": [
+              "00:07:4d:e6:74:8b"
+            ],
+            "oui_list": [
+              "Zebra Technologies Corp."
+            ]
+          },
+          "machine_type": "Physical",
+          "manufacturer": "Zebra Technologies",
+          "model": {
+            "name": "ZT410"
+          },
+          "network": {
+            "scope_list": [
+              "Default"
+            ]
+          },
+          "network_list": [
+            "Industrial"
+          ],
+          "number_of_nics": 1,
+          "organization": {
+            "firewall_group_name": "No Zone"
+          },
+          "os": {
+            "category": "Proprietary",
+            "name": "Proprietary",
+            "revision": "4",
+            "subcategory": "Link-OS",
+            "version": "Link-OS"
+          },
+          "purdue_level": {
+            "source": "Auto-Assigned",
+            "value": "Level 3"
+          },
+          "recommended": {
+            "firewall_group_name": "Printers"
+          },
+          "retired": {
+            "value": false
+          },
+          "risk_score": {
+            "points": 38.10309,
+            "value": "Low"
+          },
+          "serial_number": "18J171001738",
+          "site": {
+            "group_name": "No Group",
+            "name": "Columbia"
+          },
+          "software_or_firmware_version": "V75.20.01Z",
+          "subcategory": "General IoT",
+          "type": {
+            "family": "Mobile Printer",
+            "value": "Mobile Printer"
+          },
+          "uid": "0345f24e-f082-45a6-8560-ad83dee2c9aa",
+          "utilization_rate": 0.0,
+          "visibility_score": {
+            "level": "Excellent",
+            "value": 99
+          },
+          "vlan": {
+            "description_list": [
+              "Bldg1-Flr8"
+            ],
+            "list": [
+              "108"
+            ],
+            "name_list": [
+              "Bldg1-Flr8"
+            ]
+          }
+        },
+        "devices_count": 1,
+        "friendly_name": "Device End-of-Life: ZT410",
+        "id": "1",
+        "iot_devices_count": 46,
+        "it_devices_count": 0,
+        "medical_devices_count": 0,
+        "name": "Device End-of-Life: ZT410",
+        "ot_devices_count": 0,
+        "status": "Unresolved",
+        "type_name": "Device End-of-Life",
+        "unresolved_devices_count": 46,
+        "updated_time": "2025-03-28T03:07:32.195Z"
+      }
+    },
+    "data_stream": {
+      "dataset": "claroty_xdome.alert",
+      "namespace": "21758",
+      "type": "logs"
+    },
+    "device": {
+      "manufacturer": "Zebra Technologies",
+      "model": {
+        "identifier": "ZT410"
+      },
+      "serial_number": "18J171001738"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c9d69d3a-8fae-4d3e-a6c3-978c80508257",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "device-endoflife-zt410",
+      "agent_id_status": "verified",
+      "dataset": "claroty_xdome.alert",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "alert",
+      "original": "{\"activity_rate\":81,\"alert_info\":{\"alert_class\":\"Pre-Defined Alerts\",\"alert_name\":\"Device End-of-Life: ZT410\",\"alert_type_name\":\"Device End-of-Life\",\"category\":\"Risk\",\"description\":\"46 Zebra Technologies ZT410 Mobile Printer have been detected that will enter the End-of-Life state in 09/01/25\",\"detected_time\":\"2025-03-28T03:07:32.195965Z\",\"devices_count\":1,\"id\":1,\"iot_devices_count\":46,\"it_devices_count\":0,\"malicious_ip_tags_list\":null,\"medical_devices_count\":0,\"ot_devices_count\":0,\"status\":\"Unresolved\",\"unresolved_devices_count\":46,\"updated_time\":\"2025-03-28T03:07:32.195965Z\"},\"applied_acl_list\":[\"Claroty_ZT410_Wired_Access\"],\"applied_acl_type_list\":[\"Cisco dACL\"],\"asset_id\":\"JYMQXBD\",\"assignees\":[\"Sergei Ridkey\"],\"assignees_data\":[{\"display_name\":\"Sergei Ridkey\",\"id\":\"sergei.r\",\"is_active\":true,\"type\":\"user\"}],\"authentication_user_list\":[\"00-0C-C6-01-37-B10\"],\"avg_online_per_day\":19.6,\"collection_interfaces_seen_reported_from\":[\"ens142@demo-collection-albany\"],\"collection_servers_seen_reported_from\":[\"demo-collection-albany\"],\"combined_os\":\"Proprietary Link-OS 4\",\"connection_type_list\":[\"Ethernet\"],\"data_sources_seen_reported_from\":[\"Passive Collection\",\"Integration\"],\"device_category\":\"IoT\",\"device_name\":\"175.16.199.0\",\"device_subcategory\":\"General IoT\",\"device_type\":\"Mobile Printer\",\"device_type_family\":\"Mobile Printer\",\"effective_likelihood_subscore\":\"Very Low\",\"effective_likelihood_subscore_points\":27.971817,\"end_of_life_date\":\"2025-09-01\",\"end_of_life_state\":\"End-Of-Life Notification\",\"financial_cost\":\"$10,000-$100,000\",\"first_seen_list\":[\"2024-10-31T18:04:22.124046+00:00\"],\"handles_pii\":\"Yes\",\"impact_subscore\":\"Medium\",\"impact_subscore_points\":53.3,\"insecure_protocols\":\"Very Low\",\"insecure_protocols_points\":0,\"integration_types_reported_from\":[\"Cisco ISE\"],\"integrations_reported_from\":[\"Cisco ISE (Cisco ISE)\"],\"internet_communication\":\"Yes\",\"ip_assignment_list\":[\"DHCP\"],\"ip_list\":[\"175.16.199.0\"],\"is_online\":true,\"is_resolved\":false,\"ise_authentication_method_list\":[\"mab\"],\"ise_security_group_description_list\":[\"Printers Group - Exported from xDome\"],\"ise_security_group_name_list\":[\"Printers_sgt\"],\"ise_security_group_tag_list\":[4],\"known_vulnerabilities\":\"Low\",\"known_vulnerabilities_points\":18.98562,\"labels\":[\"Exposed \\u0026 EOL Asset\",\"Exposed EOL Asset\",\"OT Internet Klabin\",\"SL1_Win 7 EWS with Critical KVs\"],\"last_seen_list\":[\"2025-03-28T02:33:56.957867+00:00\"],\"last_seen_reported\":\"2025-03-29T02:33:36.178014+00:00\",\"likelihood_subscore\":\"High\",\"likelihood_subscore_points\":63.57231,\"mac_list\":[\"00:07:4d:e6:74:8b\"],\"mac_oui_list\":[\"Zebra Technologies Corp.\"],\"machine_type\":\"Physical\",\"manufacturer\":\"Zebra Technologies\",\"model\":\"ZT410\",\"network_list\":[\"Industrial\"],\"network_scope_list\":[\"Default\"],\"number_of_nics\":1,\"organization_firewall_group_name\":\"No Zone\",\"os_category\":\"Proprietary\",\"os_name\":\"Proprietary\",\"os_revision\":\"4\",\"os_subcategory\":\"Link-OS\",\"os_version\":\"Link-OS\",\"purdue_level\":\"Level 3\",\"purdue_level_source\":\"Auto-Assigned\",\"recommended_firewall_group_name\":\"Printers\",\"retired\":false,\"risk_score\":\"Low\",\"risk_score_points\":38.10309,\"serial_number\":\"18J171001738\",\"site_group_name\":\"No Group\",\"site_name\":\"Columbia\",\"software_or_firmware_version\":\"V75.20.01Z\",\"uid\":\"0345f24e-f082-45a6-8560-ad83dee2c9aa\",\"utilization_rate\":0,\"visibility_score\":99,\"visibility_score_level\":\"Excellent\",\"vlan_description_list\":[\"Bldg1-Flr8\"],\"vlan_list\":[108],\"vlan_name_list\":[\"Bldg1-Flr8\"]}",
+      "risk_score": 38.10309,
+      "severity": 21
+    },
+    "host": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "id": "0345f24e-f082-45a6-8560-ad83dee2c9aa",
+      "ip": [
+        "175.16.199.0"
+      ],
+      "mac": [
+        "00-07-4D-E6-74-8B"
+      ],
+      "os": {
+        "family": "Proprietary",
+        "full": "Proprietary Link-OS 4",
+        "name": "Proprietary",
+        "version": "Link-OS"
+      },
+      "type": "Mobile Printer"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "46 Zebra Technologies ZT410 Mobile Printer have been detected that will enter the End-of-Life state in 09/01/25",
+    "observer": {
+      "ingress": {
+        "vlan": {
+          "id": [
+            "108"
+          ],
+          "name": [
+            "Bldg1-Flr8"
+          ]
+        }
+      },
+      "product": "xDome",
+      "vendor": "Claroty"
+    },
+    "related": {
+      "hosts": [
+        "Proprietary Link-OS 4",
+        "Proprietary",
+        "Columbia",
+        "0345f24e-f082-45a6-8560-ad83dee2c9aa"
+      ],
+      "ip": [
+        "175.16.199.0"
+      ],
+      "user": [
+        "Sergei Ridkey",
+        "sergei.r"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "claroty_xdome-alert"
+    ]
+  }
+]

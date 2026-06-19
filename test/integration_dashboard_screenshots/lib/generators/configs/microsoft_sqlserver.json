@@ -1,0 +1,79 @@
+{
+  "package": "microsoft_sqlserver",
+  "dataStreams": [
+    {
+      "dataset": "microsoft_sqlserver.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "sqlserver.audit.action_id",
+        "sqlserver.audit.class_type"
+      ],
+      "filterValues": {
+        "sqlserver.audit.class_type": [
+          "SQL LOGIN",
+          "SQL USER",
+          "WINDOWS LOGIN",
+          "LOGIN",
+          "ROLE",
+          "SERVER ROLE",
+          "DATABASE AUDIT SPECIFICATION",
+          "SERVER AUDIT SPECIFICATION",
+          "AUDIT"
+        ],
+        "sqlserver.audit.action_id": [
+          "ALTER",
+          "CREATE",
+          "DROP",
+          "DATABASE_ROLE_MEMBER_CHANGE_GROUP",
+          "SERVER_ROLE_MEMBER_CHANGE_GROUP"
+        ],
+        "event.action": [
+          "login-failed"
+        ]
+      }
+    },
+    {
+      "dataset": "microsoft_sqlserver.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.original",
+        "message",
+        "microsoft_sqlserver.log.origin"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_sqlserver.performance",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "mssql.metrics.batch_requests_per_sec",
+        "mssql.metrics.buffer_cache_hit_ratio",
+        "mssql.metrics.lock_waits_per_sec",
+        "mssql.metrics.transactions",
+        "mssql.metrics.user_connections"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_sqlserver.transaction_log",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "mssql.metrics.active_log_size",
+        "mssql.metrics.database_name",
+        "mssql.metrics.log_recovery_size",
+        "mssql.metrics.log_since_last_checkpoint",
+        "mssql.metrics.log_space_in_bytes_since_last_backup",
+        "mssql.metrics.total_log_size_bytes",
+        "mssql.metrics.used_log_space_bytes",
+        "mssql.metrics.used_log_space_pct",
+        "service.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

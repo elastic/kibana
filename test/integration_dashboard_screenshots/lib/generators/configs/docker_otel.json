@@ -1,0 +1,35 @@
+{
+  "package": "docker_otel",
+  "dataStreams": [
+    {
+      "dataset": "dockerstatsreceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 510,
+      "fields": [
+        "attributes.device_major",
+        "attributes.interface",
+        "attributes.operation",
+        "container.blockio.io_service_bytes_recursive",
+        "container.cpu.usage.kernelmode",
+        "container.cpu.usage.usermode",
+        "container.cpu.utilization",
+        "container.hostname",
+        "container.id",
+        "container.image.name",
+        "container.memory.percent",
+        "container.memory.usage.limit",
+        "container.memory.usage.total",
+        "container.name",
+        "container.network.io.usage.rx_bytes",
+        "container.network.io.usage.tx_bytes",
+        "container.runtime"
+      ],
+      "filterValues": {
+        "attributes.operation": [
+          "read",
+          "write"
+        ]
+      }
+    }
+  ]
+}

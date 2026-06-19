@@ -1,0 +1,21 @@
+{
+  "package": "checkpoint_email",
+  "dataStreams": [
+    {
+      "dataset": "checkpoint_email.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_email.event.confidence_indicator",
+        "checkpoint_email.event.saas",
+        "checkpoint_email.event.severity_enum",
+        "checkpoint_email.event.state",
+        "checkpoint_email.event.type",
+        "email.sender.address",
+        "event.id",
+        "organization.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

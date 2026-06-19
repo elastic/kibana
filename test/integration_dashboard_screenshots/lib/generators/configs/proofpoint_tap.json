@@ -1,0 +1,71 @@
+{
+  "package": "proofpoint_tap",
+  "dataStreams": [
+    {
+      "dataset": "proofpoint_tap.clicks_blocked",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location",
+        "destination.ip",
+        "email.to.address",
+        "proofpoint_tap.clicks_blocked.classification",
+        "proofpoint_tap.clicks_blocked.threat.status",
+        "url.full"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_tap.clicks_permitted",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location",
+        "destination.ip",
+        "email.to.address",
+        "proofpoint_tap.clicks_permitted.classification",
+        "proofpoint_tap.clicks_permitted.threat.status",
+        "url.full"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_tap.message_blocked",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.to.address",
+        "email.x_mailer",
+        "proofpoint_tap.message_blocked.completely_rewritten",
+        "proofpoint_tap.message_blocked.message_parts.disposition",
+        "proofpoint_tap.message_blocked.message_parts.sandbox_status",
+        "proofpoint_tap.message_blocked.quarantine.folder",
+        "proofpoint_tap.message_blocked.quarantine.rule",
+        "proofpoint_tap.message_blocked.threat_info_map.classification",
+        "proofpoint_tap.message_blocked.threat_info_map.threat.status",
+        "proofpoint_tap.message_blocked.threat_info_map.threat.type",
+        "source.geo.location",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_tap.message_delivered",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.to.address",
+        "email.x_mailer",
+        "proofpoint_tap.message_delivered.completely_rewritten",
+        "proofpoint_tap.message_delivered.message_parts.disposition",
+        "proofpoint_tap.message_delivered.message_parts.sandbox_status",
+        "proofpoint_tap.message_delivered.threat_info_map.classification",
+        "proofpoint_tap.message_delivered.threat_info_map.threat.status",
+        "proofpoint_tap.message_delivered.threat_info_map.threat.type",
+        "source.geo.location",
+        "source.ip"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

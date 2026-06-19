@@ -1,0 +1,159 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:51:33.691Z",
+    "agent": {
+      "ephemeral_id": "aaadc04c-ef59-4ad3-9e13-9fefa9f6c280",
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "name": "elastic-agent-24055",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "id": "aa534e49-edfd-4541-8256-8bbf34f122b4",
+      "type": "microsoft_entra_id_user"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_entra_id.user",
+      "namespace": "36723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "entityanalytics_entra_id.user",
+      "ingested": "2026-03-10T03:51:34Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-24055\",\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"ephemeral_id\":\"aaadc04c-ef59-4ad3-9e13-9fefa9f6c280\",\"type\":\"filebeat\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:51:33.691Z\",\"ecs\":{\"version\":\"8.11.0\"},\"azure_ad\":{\"businessPhones\":[\"55-692-8856\",\"552-265-6614\"],\"mail\":\"First21480_Last11836@example.com\",\"mobilePhone\":\"231-482-2649\",\"officeLocation\":\"608 St N, Somewhere, ABC, XYZ\",\"displayName\":\"First21480 Last11836\",\"surname\":\"Last11836\",\"jobTitle\":\"Manager\",\"givenName\":\"First21480\",\"userPrincipalName\":\"First21480.Last11836@example.com\",\"accountEnabled\":true},\"data_stream\":{\"namespace\":\"36723\",\"type\":\"logs\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"elastic_agent\":{\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"version\":\"9.3.1\",\"snapshot\":false},\"event\":{\"action\":\"user-discovered\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"user\":{\"id\":\"aa534e49-edfd-4541-8256-8bbf34f122b4\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_entra_id.entity\"},\"tags\":[\"all-entities\",\"preserve_original_event\",\"forwarded\",\"entityanalytics_entra_id-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_entra_id.entity-36723\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "user",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_entra_id.entity"
+    },
+    "related": {
+      "user": [
+        "First21480_Last11836@example.com",
+        "First21480.Last11836@example.com",
+        "First21480 Last11836",
+        "aa534e49-edfd-4541-8256-8bbf34f122b4"
+      ]
+    },
+    "tags": [
+      "all-entities",
+      "preserve_original_event",
+      "forwarded",
+      "entityanalytics_entra_id-entity"
+    ],
+    "user": {
+      "email": "First21480_Last11836@example.com",
+      "enabled": true,
+      "first_name": "First21480",
+      "full_name": "First21480 Last11836",
+      "id": "aa534e49-edfd-4541-8256-8bbf34f122b4",
+      "job_title": "Manager",
+      "last_name": "Last11836",
+      "name": "First21480.Last11836@example.com",
+      "phone": [
+        "231-482-2649",
+        "55-692-8856",
+        "552-265-6614"
+      ],
+      "work": {
+        "location_name": "608 St N, Somewhere, ABC, XYZ"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:51:33.691Z",
+    "agent": {
+      "ephemeral_id": "aaadc04c-ef59-4ad3-9e13-9fefa9f6c280",
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "name": "elastic-agent-24055",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "id": "feb6a386-612a-4ed1-9b13-2adc73074a19",
+      "type": "microsoft_entra_id_user"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_entra_id.user",
+      "namespace": "36723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "entityanalytics_entra_id.user",
+      "ingested": "2026-03-10T03:51:34Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-24055\",\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"type\":\"filebeat\",\"ephemeral_id\":\"aaadc04c-ef59-4ad3-9e13-9fefa9f6c280\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:51:33.691Z\",\"azure_ad\":{\"mobilePhone\":\"385-169-3671\",\"mail\":\"First45375_Last58638@example.com\",\"officeLocation\":\"682 St N, Somewhere, ABC, XYZ\",\"displayName\":\"First45375 Last58638\",\"surname\":\"Last58638\",\"givenName\":\"First45375\",\"jobTitle\":\"Tech Writer\",\"accountEnabled\":false,\"userPrincipalName\":\"First45375.Last58638@example.com\"},\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"36723\",\"type\":\"logs\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"elastic_agent\":{\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"version\":\"9.3.1\",\"snapshot\":false},\"event\":{\"action\":\"user-discovered\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"user\":{\"id\":\"feb6a386-612a-4ed1-9b13-2adc73074a19\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_entra_id.entity\"},\"tags\":[\"all-entities\",\"preserve_original_event\",\"forwarded\",\"entityanalytics_entra_id-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_entra_id.entity-36723\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "user",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_entra_id.entity"
+    },
+    "related": {
+      "user": [
+        "First45375_Last58638@example.com",
+        "First45375.Last58638@example.com",
+        "First45375 Last58638",
+        "feb6a386-612a-4ed1-9b13-2adc73074a19"
+      ]
+    },
+    "tags": [
+      "all-entities",
+      "preserve_original_event",
+      "forwarded",
+      "entityanalytics_entra_id-entity"
+    ],
+    "user": {
+      "email": "First45375_Last58638@example.com",
+      "first_name": "First45375",
+      "full_name": "First45375 Last58638",
+      "id": "feb6a386-612a-4ed1-9b13-2adc73074a19",
+      "job_title": "Tech Writer",
+      "last_name": "Last58638",
+      "name": "First45375.Last58638@example.com",
+      "phone": [
+        "385-169-3671"
+      ],
+      "work": {
+        "location_name": "682 St N, Somewhere, ABC, XYZ"
+      }
+    }
+  }
+]

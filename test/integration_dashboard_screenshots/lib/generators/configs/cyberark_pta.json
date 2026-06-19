@@ -1,0 +1,20 @@
+{
+  "package": "cyberark_pta",
+  "dataStreams": [
+    {
+      "dataset": "cyberark_pta.events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "cyberark_pta.log.event_type",
+        "destination.ip",
+        "destination.user.name",
+        "event.severity",
+        "source.ip",
+        "source.user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "package": "vectra_detect",
+  "dataStreams": [
+    {
+      "dataset": "vectra_detect.log",
+      "indexPattern": "logs-*",
+      "docTarget": 960,
+      "fields": [
+        "destination.domain",
+        "destination.geo.country_iso_code",
+        "destination.ip",
+        "event.action",
+        "event.id",
+        "event.outcome",
+        "event.severity",
+        "host.id",
+        "host.ip",
+        "host.mac",
+        "host.name",
+        "host.risk.static_level",
+        "log.syslog.severity.code",
+        "log.syslog.severity.name",
+        "network.transport",
+        "source.geo.country_iso_code",
+        "source.ip",
+        "user.name",
+        "user.risk.static_level",
+        "user.roles",
+        "user.target.id",
+        "user.target.name",
+        "vectra_detect.log.alert.category",
+        "vectra_detect.log.category",
+        "vectra_detect.log.certainty",
+        "vectra_detect.log.d_type.name",
+        "vectra_detect.log.dst.key_asset",
+        "vectra_detect.log.event_type",
+        "vectra_detect.log.privilege",
+        "vectra_detect.log.src.key_asset",
+        "vectra_detect.log.threat.score",
+        "vectra_detect.log.type"
+      ],
+      "filterValues": {
+        "vectra_detect.log.event_type": [
+          "vectra_json_health"
+        ]
+      }
+    }
+  ]
+}

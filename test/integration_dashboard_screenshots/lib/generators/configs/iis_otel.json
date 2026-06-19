@@ -1,0 +1,27 @@
+{
+  "package": "iis_otel",
+  "dataStreams": [
+    {
+      "dataset": "iisreceiver.otel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "direction",
+        "iis.connection.active",
+        "iis.connection.anonymous",
+        "iis.connection.attempt.count",
+        "iis.network.blocked",
+        "iis.network.file.count",
+        "iis.network.io",
+        "iis.request.count",
+        "iis.request.queue.age.max",
+        "iis.request.queue.count",
+        "iis.request.rejected",
+        "iis.site",
+        "iis.thread.active",
+        "iis.uptime"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

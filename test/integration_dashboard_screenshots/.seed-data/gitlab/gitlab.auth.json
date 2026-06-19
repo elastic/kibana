@@ -1,0 +1,812 @@
+[
+  {
+    "@timestamp": "2024-05-31T14:39:59.837Z",
+    "agent": {
+      "ephemeral_id": "ad16ea5c-11c6-444e-9224-511f2ec959de",
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "name": "elastic-agent-74610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "data_stream": {
+      "dataset": "gitlab.auth",
+      "namespace": "33041",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "gitlab.auth",
+      "id": "01HZ7HFRAEYXN6YYZ45FKBF9B8",
+      "ingested": "2026-03-10T04:38:45Z",
+      "kind": "event",
+      "original": "{\"severity\":\"ERROR\",\"time\":\"2024-05-31T14:39:59.837Z\",\"correlation_id\":\"01HZ7HFRAEYXN6YYZ45FKBF9B8\",\"message\":\"Rack_Attack\",\"env\":\"throttle\",\"remote_ip\":\"192.168.65.1\",\"request_method\":\"POST\",\"path\":\"/api/v4/users?private_token=glpat-xxxxxxxxxxxx&email=test@elastic.co&name=test&username=test\",\"matched\":\"throttle_authenticated_api\",\"status\":429,\"user_id\":2,\"meta.user\":\"test\",\"redis_calls\":1,\"redis_duration_s\":0.000288,\"redis_read_bytes\":1,\"redis_write_bytes\":73,\"redis_rate_limiting_calls\":1,\"redis_rate_limiting_duration_s\":0.000288,\"redis_rate_limiting_read_bytes\":1,\"redis_rate_limiting_write_bytes\":73,\"db_count\":3,\"db_write_count\":0,\"db_cached_count\":1,\"db_txn_count\":0,\"db_replica_txn_count\":0,\"db_primary_txn_count\":0,\"db_main_txn_count\":0,\"db_ci_txn_count\":0,\"db_main_replica_txn_count\":0,\"db_ci_replica_txn_count\":0,\"db_replica_count\":0,\"db_primary_count\":3,\"db_main_count\":3,\"db_ci_count\":0,\"db_main_replica_count\":0,\"db_ci_replica_count\":0,\"db_replica_cached_count\":0,\"db_primary_cached_count\":1,\"db_main_cached_count\":1,\"db_ci_cached_count\":0,\"db_main_replica_cached_count\":0,\"db_ci_replica_cached_count\":0,\"db_replica_wal_count\":0,\"db_primary_wal_count\":0,\"db_main_wal_count\":0,\"db_ci_wal_count\":0,\"db_main_replica_wal_count\":0,\"db_ci_replica_wal_count\":0,\"db_replica_wal_cached_count\":0,\"db_primary_wal_cached_count\":0,\"db_main_wal_cached_count\":0,\"db_ci_wal_cached_count\":0,\"db_main_replica_wal_cached_count\":0,\"db_ci_replica_wal_cached_count\":0,\"db_replica_txn_duration_s\":0.0,\"db_primary_txn_duration_s\":0.0,\"db_main_txn_duration_s\":0.0,\"db_ci_txn_duration_s\":0.0,\"db_main_replica_txn_duration_s\":0.0,\"db_ci_replica_txn_duration_s\":0.0,\"db_replica_duration_s\":0.0,\"db_primary_duration_s\":0.001,\"db_main_duration_s\":0.001,\"db_ci_duration_s\":0.0,\"db_main_replica_duration_s\":0.0,\"db_ci_replica_duration_s\":0.0,\"cpu_s\":0.011389,\"mem_objects\":5166,\"mem_bytes\":448024,\"mem_mallocs\":1444,\"mem_total_bytes\":654664,\"pid\":1068,\"worker_id\":\"puma_4\",\"rate_limiting_gates\":[]}",
+      "severity": 3,
+      "type": [
+        "info"
+      ]
+    },
+    "gitlab": {
+      "auth": {
+        "cpu_s": 0,
+        "db_cached_count": 1,
+        "db_ci_cached_count": 0,
+        "db_ci_count": 0,
+        "db_ci_duration_s": 0.0,
+        "db_ci_replica_cached_count": 0,
+        "db_ci_replica_count": 0,
+        "db_ci_replica_duration_s": 0.0,
+        "db_ci_replica_txn_count": 0,
+        "db_ci_replica_txn_duration_s": 0.0,
+        "db_ci_replica_wal_cached_count": 0,
+        "db_ci_replica_wal_count": 0,
+        "db_ci_txn_count": 0,
+        "db_ci_txn_duration_s": 0.0,
+        "db_ci_wal_cached_count": 0,
+        "db_ci_wal_count": 0,
+        "db_count": 3,
+        "db_main_cached_count": 1,
+        "db_main_count": 3,
+        "db_main_duration_s": 0.001,
+        "db_main_replica_cached_count": 0,
+        "db_main_replica_count": 0,
+        "db_main_replica_duration_s": 0.0,
+        "db_main_replica_txn_count": 0,
+        "db_main_replica_txn_duration_s": 0.0,
+        "db_main_replica_wal_cached_count": 0,
+        "db_main_replica_wal_count": 0,
+        "db_main_txn_count": 0,
+        "db_main_txn_duration_s": 0.0,
+        "db_main_wal_cached_count": 0,
+        "db_main_wal_count": 0,
+        "db_primary_cached_count": 1,
+        "db_primary_count": 3,
+        "db_primary_duration_s": 0.001,
+        "db_primary_txn_count": 0,
+        "db_primary_txn_duration_s": 0.0,
+        "db_primary_wal_cached_count": 0,
+        "db_primary_wal_count": 0,
+        "db_replica_cached_count": 0,
+        "db_replica_count": 0,
+        "db_replica_duration_s": 0.0,
+        "db_replica_txn_count": 0,
+        "db_replica_txn_duration_s": 0.0,
+        "db_replica_wal_cached_count": 0,
+        "db_replica_wal_count": 0,
+        "db_txn_count": 0,
+        "db_write_count": 0,
+        "env": "throttle",
+        "matched": "throttle_authenticated_api",
+        "mem_bytes": 448024,
+        "mem_mallocs": 1444,
+        "mem_objects": 5166,
+        "mem_total_bytes": 654664,
+        "message": "Rack_Attack",
+        "meta": {
+          "user": "test"
+        },
+        "redis_calls": 1,
+        "redis_duration_s": 0.000288,
+        "redis_rate_limiting_calls": 1,
+        "redis_rate_limiting_duration_s": 0.000288,
+        "redis_rate_limiting_read_bytes": 1,
+        "redis_rate_limiting_write_bytes": 73,
+        "redis_read_bytes": 1,
+        "redis_write_bytes": 73,
+        "worker_id": "puma_4"
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-74610",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.9"
+      ],
+      "mac": [
+        "92-D0-B6-4A-3E-E6",
+        "F6-F0-5C-9A-AE-79"
+      ],
+      "name": "elastic-agent-74610",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "POST"
+      },
+      "response": {
+        "status_code": 429
+      }
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "ae6f7ff6865558211849f77e1d50b0509e19a8848f1be69aaa7c7a2d1f5d7525",
+        "inode": "3478",
+        "path": "/tmp/service_logs/test-gitlab-auth.log"
+      },
+      "offset": 5885
+    },
+    "process": {
+      "pid": 1068
+    },
+    "related": {
+      "ip": [
+        "192.168.65.1"
+      ]
+    },
+    "source": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "gitlab-auth"
+    ],
+    "url": {
+      "path": "/api/v4/users",
+      "query": "private_token=glpat-xxxxxxxxxxxx&email=test@elastic.co&name=test&username=test"
+    },
+    "user": {
+      "id": "2"
+    }
+  },
+  {
+    "@timestamp": "2024-05-31T12:24:58.112Z",
+    "agent": {
+      "ephemeral_id": "ad16ea5c-11c6-444e-9224-511f2ec959de",
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "name": "elastic-agent-74610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "data_stream": {
+      "dataset": "gitlab.auth",
+      "namespace": "33041",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "gitlab.auth",
+      "id": "01HZ79RGFQE862KRM3SVDZ3GSE",
+      "ingested": "2026-03-10T04:38:45Z",
+      "kind": "event",
+      "original": "{\"severity\":\"ERROR\",\"time\":\"2024-05-31T12:24:58.112Z\",\"correlation_id\":\"01HZ79RGFQE862KRM3SVDZ3GSE\",\"message\":\"Rack_Attack\",\"env\":\"throttle\",\"remote_ip\":\"192.168.65.1\",\"request_method\":\"GET\",\"path\":\"/api/v4/projects\",\"matched\":\"throttle_unauthenticated_api\",\"status\":429,\"redis_calls\":1,\"redis_duration_s\":0.00033,\"redis_read_bytes\":1,\"redis_write_bytes\":81,\"redis_rate_limiting_calls\":1,\"redis_rate_limiting_duration_s\":0.00033,\"redis_rate_limiting_read_bytes\":1,\"redis_rate_limiting_write_bytes\":81,\"db_count\":0,\"db_write_count\":0,\"db_cached_count\":0,\"db_txn_count\":0,\"db_replica_txn_count\":0,\"db_primary_txn_count\":0,\"db_main_txn_count\":0,\"db_ci_txn_count\":0,\"db_main_replica_txn_count\":0,\"db_ci_replica_txn_count\":0,\"db_replica_count\":0,\"db_primary_count\":0,\"db_main_count\":0,\"db_ci_count\":0,\"db_main_replica_count\":0,\"db_ci_replica_count\":0,\"db_replica_cached_count\":0,\"db_primary_cached_count\":0,\"db_main_cached_count\":0,\"db_ci_cached_count\":0,\"db_main_replica_cached_count\":0,\"db_ci_replica_cached_count\":0,\"db_replica_wal_count\":0,\"db_primary_wal_count\":0,\"db_main_wal_count\":0,\"db_ci_wal_count\":0,\"db_main_replica_wal_count\":0,\"db_ci_replica_wal_count\":0,\"db_replica_wal_cached_count\":0,\"db_primary_wal_cached_count\":0,\"db_main_wal_cached_count\":0,\"db_ci_wal_cached_count\":0,\"db_main_replica_wal_cached_count\":0,\"db_ci_replica_wal_cached_count\":0,\"db_replica_txn_duration_s\":0.0,\"db_primary_txn_duration_s\":0.0,\"db_main_txn_duration_s\":0.0,\"db_ci_txn_duration_s\":0.0,\"db_main_replica_txn_duration_s\":0.0,\"db_ci_replica_txn_duration_s\":0.0,\"db_replica_duration_s\":0.0,\"db_primary_duration_s\":0.0,\"db_main_duration_s\":0.0,\"db_ci_duration_s\":0.0,\"db_main_replica_duration_s\":0.0,\"db_ci_replica_duration_s\":0.0,\"cpu_s\":0.007194,\"mem_objects\":3821,\"mem_bytes\":368312,\"mem_mallocs\":1281,\"mem_total_bytes\":521152,\"pid\":1142,\"worker_id\":\"puma_2\",\"rate_limiting_gates\":[]}",
+      "severity": 3,
+      "type": [
+        "info"
+      ]
+    },
+    "gitlab": {
+      "auth": {
+        "cpu_s": 0,
+        "db_cached_count": 0,
+        "db_ci_cached_count": 0,
+        "db_ci_count": 0,
+        "db_ci_duration_s": 0.0,
+        "db_ci_replica_cached_count": 0,
+        "db_ci_replica_count": 0,
+        "db_ci_replica_duration_s": 0.0,
+        "db_ci_replica_txn_count": 0,
+        "db_ci_replica_txn_duration_s": 0.0,
+        "db_ci_replica_wal_cached_count": 0,
+        "db_ci_replica_wal_count": 0,
+        "db_ci_txn_count": 0,
+        "db_ci_txn_duration_s": 0.0,
+        "db_ci_wal_cached_count": 0,
+        "db_ci_wal_count": 0,
+        "db_count": 0,
+        "db_main_cached_count": 0,
+        "db_main_count": 0,
+        "db_main_duration_s": 0.0,
+        "db_main_replica_cached_count": 0,
+        "db_main_replica_count": 0,
+        "db_main_replica_duration_s": 0.0,
+        "db_main_replica_txn_count": 0,
+        "db_main_replica_txn_duration_s": 0.0,
+        "db_main_replica_wal_cached_count": 0,
+        "db_main_replica_wal_count": 0,
+        "db_main_txn_count": 0,
+        "db_main_txn_duration_s": 0.0,
+        "db_main_wal_cached_count": 0,
+        "db_main_wal_count": 0,
+        "db_primary_cached_count": 0,
+        "db_primary_count": 0,
+        "db_primary_duration_s": 0.0,
+        "db_primary_txn_count": 0,
+        "db_primary_txn_duration_s": 0.0,
+        "db_primary_wal_cached_count": 0,
+        "db_primary_wal_count": 0,
+        "db_replica_cached_count": 0,
+        "db_replica_count": 0,
+        "db_replica_duration_s": 0.0,
+        "db_replica_txn_count": 0,
+        "db_replica_txn_duration_s": 0.0,
+        "db_replica_wal_cached_count": 0,
+        "db_replica_wal_count": 0,
+        "db_txn_count": 0,
+        "db_write_count": 0,
+        "env": "throttle",
+        "matched": "throttle_unauthenticated_api",
+        "mem_bytes": 368312,
+        "mem_mallocs": 1281,
+        "mem_objects": 3821,
+        "mem_total_bytes": 521152,
+        "message": "Rack_Attack",
+        "redis_calls": 1,
+        "redis_duration_s": 0.00033,
+        "redis_rate_limiting_calls": 1,
+        "redis_rate_limiting_duration_s": 0.00033,
+        "redis_rate_limiting_read_bytes": 1,
+        "redis_rate_limiting_write_bytes": 81,
+        "redis_read_bytes": 1,
+        "redis_write_bytes": 81,
+        "worker_id": "puma_2"
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-74610",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.9"
+      ],
+      "mac": [
+        "92-D0-B6-4A-3E-E6",
+        "F6-F0-5C-9A-AE-79"
+      ],
+      "name": "elastic-agent-74610",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "status_code": 429
+      }
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "ae6f7ff6865558211849f77e1d50b0509e19a8848f1be69aaa7c7a2d1f5d7525",
+        "inode": "3478",
+        "path": "/tmp/service_logs/test-gitlab-auth.log"
+      },
+      "offset": 4012
+    },
+    "process": {
+      "pid": 1142
+    },
+    "related": {
+      "ip": [
+        "192.168.65.1"
+      ]
+    },
+    "source": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "gitlab-auth"
+    ],
+    "url": {
+      "path": "/api/v4/projects"
+    }
+  },
+  {
+    "@timestamp": "2024-05-31T12:24:57.729Z",
+    "agent": {
+      "ephemeral_id": "ad16ea5c-11c6-444e-9224-511f2ec959de",
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "name": "elastic-agent-74610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "data_stream": {
+      "dataset": "gitlab.auth",
+      "namespace": "33041",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "gitlab.auth",
+      "id": "01HZ79RG3N4NP8RY61SVCKDDND",
+      "ingested": "2026-03-10T04:38:45Z",
+      "kind": "event",
+      "original": "{\"severity\":\"ERROR\",\"time\":\"2024-05-31T12:24:57.729Z\",\"correlation_id\":\"01HZ79RG3N4NP8RY61SVCKDDND\",\"message\":\"Rack_Attack\",\"env\":\"throttle\",\"remote_ip\":\"192.168.65.1\",\"request_method\":\"GET\",\"path\":\"/api/v4/projects\",\"matched\":\"throttle_unauthenticated_api\",\"status\":429,\"redis_calls\":2,\"redis_duration_s\":0.000666,\"redis_read_bytes\":1,\"redis_write_bytes\":81,\"redis_rate_limiting_calls\":2,\"redis_rate_limiting_duration_s\":0.000666,\"redis_rate_limiting_read_bytes\":1,\"redis_rate_limiting_write_bytes\":81,\"db_count\":0,\"db_write_count\":0,\"db_cached_count\":0,\"db_txn_count\":0,\"db_replica_txn_count\":0,\"db_primary_txn_count\":0,\"db_main_txn_count\":0,\"db_ci_txn_count\":0,\"db_main_replica_txn_count\":0,\"db_ci_replica_txn_count\":0,\"db_replica_count\":0,\"db_primary_count\":0,\"db_main_count\":0,\"db_ci_count\":0,\"db_main_replica_count\":0,\"db_ci_replica_count\":0,\"db_replica_cached_count\":0,\"db_primary_cached_count\":0,\"db_main_cached_count\":0,\"db_ci_cached_count\":0,\"db_main_replica_cached_count\":0,\"db_ci_replica_cached_count\":0,\"db_replica_wal_count\":0,\"db_primary_wal_count\":0,\"db_main_wal_count\":0,\"db_ci_wal_count\":0,\"db_main_replica_wal_count\":0,\"db_ci_replica_wal_count\":0,\"db_replica_wal_cached_count\":0,\"db_primary_wal_cached_count\":0,\"db_main_wal_cached_count\":0,\"db_ci_wal_cached_count\":0,\"db_main_replica_wal_cached_count\":0,\"db_ci_replica_wal_cached_count\":0,\"db_replica_txn_duration_s\":0.0,\"db_primary_txn_duration_s\":0.0,\"db_main_txn_duration_s\":0.0,\"db_ci_txn_duration_s\":0.0,\"db_main_replica_txn_duration_s\":0.0,\"db_ci_replica_txn_duration_s\":0.0,\"db_replica_duration_s\":0.0,\"db_primary_duration_s\":0.0,\"db_main_duration_s\":0.0,\"db_ci_duration_s\":0.0,\"db_main_replica_duration_s\":0.0,\"db_ci_replica_duration_s\":0.0,\"cpu_s\":0.00834,\"mem_objects\":3823,\"mem_bytes\":418584,\"mem_mallocs\":1694,\"mem_total_bytes\":571504,\"pid\":1159,\"worker_id\":\"puma_0\",\"rate_limiting_gates\":[]}",
+      "severity": 3,
+      "type": [
+        "info"
+      ]
+    },
+    "gitlab": {
+      "auth": {
+        "cpu_s": 0,
+        "db_cached_count": 0,
+        "db_ci_cached_count": 0,
+        "db_ci_count": 0,
+        "db_ci_duration_s": 0.0,
+        "db_ci_replica_cached_count": 0,
+        "db_ci_replica_count": 0,
+        "db_ci_replica_duration_s": 0.0,
+        "db_ci_replica_txn_count": 0,
+        "db_ci_replica_txn_duration_s": 0.0,
+        "db_ci_replica_wal_cached_count": 0,
+        "db_ci_replica_wal_count": 0,
+        "db_ci_txn_count": 0,
+        "db_ci_txn_duration_s": 0.0,
+        "db_ci_wal_cached_count": 0,
+        "db_ci_wal_count": 0,
+        "db_count": 0,
+        "db_main_cached_count": 0,
+        "db_main_count": 0,
+        "db_main_duration_s": 0.0,
+        "db_main_replica_cached_count": 0,
+        "db_main_replica_count": 0,
+        "db_main_replica_duration_s": 0.0,
+        "db_main_replica_txn_count": 0,
+        "db_main_replica_txn_duration_s": 0.0,
+        "db_main_replica_wal_cached_count": 0,
+        "db_main_replica_wal_count": 0,
+        "db_main_txn_count": 0,
+        "db_main_txn_duration_s": 0.0,
+        "db_main_wal_cached_count": 0,
+        "db_main_wal_count": 0,
+        "db_primary_cached_count": 0,
+        "db_primary_count": 0,
+        "db_primary_duration_s": 0.0,
+        "db_primary_txn_count": 0,
+        "db_primary_txn_duration_s": 0.0,
+        "db_primary_wal_cached_count": 0,
+        "db_primary_wal_count": 0,
+        "db_replica_cached_count": 0,
+        "db_replica_count": 0,
+        "db_replica_duration_s": 0.0,
+        "db_replica_txn_count": 0,
+        "db_replica_txn_duration_s": 0.0,
+        "db_replica_wal_cached_count": 0,
+        "db_replica_wal_count": 0,
+        "db_txn_count": 0,
+        "db_write_count": 0,
+        "env": "throttle",
+        "matched": "throttle_unauthenticated_api",
+        "mem_bytes": 418584,
+        "mem_mallocs": 1694,
+        "mem_objects": 3823,
+        "mem_total_bytes": 571504,
+        "message": "Rack_Attack",
+        "redis_calls": 2,
+        "redis_duration_s": 0.000666,
+        "redis_rate_limiting_calls": 2,
+        "redis_rate_limiting_duration_s": 0.000666,
+        "redis_rate_limiting_read_bytes": 1,
+        "redis_rate_limiting_write_bytes": 81,
+        "redis_read_bytes": 1,
+        "redis_write_bytes": 81,
+        "worker_id": "puma_0"
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-74610",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.9"
+      ],
+      "mac": [
+        "92-D0-B6-4A-3E-E6",
+        "F6-F0-5C-9A-AE-79"
+      ],
+      "name": "elastic-agent-74610",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "status_code": 429
+      }
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "ae6f7ff6865558211849f77e1d50b0509e19a8848f1be69aaa7c7a2d1f5d7525",
+        "inode": "3478",
+        "path": "/tmp/service_logs/test-gitlab-auth.log"
+      },
+      "offset": 2138
+    },
+    "process": {
+      "pid": 1159
+    },
+    "related": {
+      "ip": [
+        "192.168.65.1"
+      ]
+    },
+    "source": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "gitlab-auth"
+    ],
+    "url": {
+      "path": "/api/v4/projects"
+    }
+  },
+  {
+    "@timestamp": "2024-05-31T12:24:57.330Z",
+    "agent": {
+      "ephemeral_id": "ad16ea5c-11c6-444e-9224-511f2ec959de",
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "name": "elastic-agent-74610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "data_stream": {
+      "dataset": "gitlab.auth",
+      "namespace": "33041",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "gitlab.auth",
+      "id": "01HZ79RFQ9K41JQBXF49J73B49",
+      "ingested": "2026-03-10T04:38:45Z",
+      "kind": "event",
+      "original": "{\"severity\":\"ERROR\",\"time\":\"2024-05-31T12:24:57.330Z\",\"correlation_id\":\"01HZ79RFQ9K41JQBXF49J73B49\",\"message\":\"Rack_Attack\",\"env\":\"throttle\",\"remote_ip\":\"192.168.65.1\",\"request_method\":\"GET\",\"path\":\"/api/v4/projects\",\"matched\":\"throttle_unauthenticated_api\",\"status\":429,\"redis_calls\":1,\"redis_duration_s\":0.000269,\"redis_read_bytes\":1,\"redis_write_bytes\":81,\"redis_rate_limiting_calls\":1,\"redis_rate_limiting_duration_s\":0.000269,\"redis_rate_limiting_read_bytes\":1,\"redis_rate_limiting_write_bytes\":81,\"db_count\":0,\"db_write_count\":0,\"db_cached_count\":0,\"db_txn_count\":0,\"db_replica_txn_count\":0,\"db_primary_txn_count\":0,\"db_main_txn_count\":0,\"db_ci_txn_count\":0,\"db_main_replica_txn_count\":0,\"db_ci_replica_txn_count\":0,\"db_replica_count\":0,\"db_primary_count\":0,\"db_main_count\":0,\"db_ci_count\":0,\"db_main_replica_count\":0,\"db_ci_replica_count\":0,\"db_replica_cached_count\":0,\"db_primary_cached_count\":0,\"db_main_cached_count\":0,\"db_ci_cached_count\":0,\"db_main_replica_cached_count\":0,\"db_ci_replica_cached_count\":0,\"db_replica_wal_count\":0,\"db_primary_wal_count\":0,\"db_main_wal_count\":0,\"db_ci_wal_count\":0,\"db_main_replica_wal_count\":0,\"db_ci_replica_wal_count\":0,\"db_replica_wal_cached_count\":0,\"db_primary_wal_cached_count\":0,\"db_main_wal_cached_count\":0,\"db_ci_wal_cached_count\":0,\"db_main_replica_wal_cached_count\":0,\"db_ci_replica_wal_cached_count\":0,\"db_replica_txn_duration_s\":0.0,\"db_primary_txn_duration_s\":0.0,\"db_main_txn_duration_s\":0.0,\"db_ci_txn_duration_s\":0.0,\"db_main_replica_txn_duration_s\":0.0,\"db_ci_replica_txn_duration_s\":0.0,\"db_replica_duration_s\":0.0,\"db_primary_duration_s\":0.0,\"db_main_duration_s\":0.0,\"db_ci_duration_s\":0.0,\"db_main_replica_duration_s\":0.0,\"db_ci_replica_duration_s\":0.0,\"cpu_s\":0.006771,\"mem_objects\":3752,\"mem_bytes\":368312,\"mem_mallocs\":1283,\"mem_total_bytes\":518392,\"pid\":1162,\"worker_id\":\"puma_4\",\"rate_limiting_gates\":[]}",
+      "severity": 3,
+      "type": [
+        "info"
+      ]
+    },
+    "gitlab": {
+      "auth": {
+        "cpu_s": 0,
+        "db_cached_count": 0,
+        "db_ci_cached_count": 0,
+        "db_ci_count": 0,
+        "db_ci_duration_s": 0.0,
+        "db_ci_replica_cached_count": 0,
+        "db_ci_replica_count": 0,
+        "db_ci_replica_duration_s": 0.0,
+        "db_ci_replica_txn_count": 0,
+        "db_ci_replica_txn_duration_s": 0.0,
+        "db_ci_replica_wal_cached_count": 0,
+        "db_ci_replica_wal_count": 0,
+        "db_ci_txn_count": 0,
+        "db_ci_txn_duration_s": 0.0,
+        "db_ci_wal_cached_count": 0,
+        "db_ci_wal_count": 0,
+        "db_count": 0,
+        "db_main_cached_count": 0,
+        "db_main_count": 0,
+        "db_main_duration_s": 0.0,
+        "db_main_replica_cached_count": 0,
+        "db_main_replica_count": 0,
+        "db_main_replica_duration_s": 0.0,
+        "db_main_replica_txn_count": 0,
+        "db_main_replica_txn_duration_s": 0.0,
+        "db_main_replica_wal_cached_count": 0,
+        "db_main_replica_wal_count": 0,
+        "db_main_txn_count": 0,
+        "db_main_txn_duration_s": 0.0,
+        "db_main_wal_cached_count": 0,
+        "db_main_wal_count": 0,
+        "db_primary_cached_count": 0,
+        "db_primary_count": 0,
+        "db_primary_duration_s": 0.0,
+        "db_primary_txn_count": 0,
+        "db_primary_txn_duration_s": 0.0,
+        "db_primary_wal_cached_count": 0,
+        "db_primary_wal_count": 0,
+        "db_replica_cached_count": 0,
+        "db_replica_count": 0,
+        "db_replica_duration_s": 0.0,
+        "db_replica_txn_count": 0,
+        "db_replica_txn_duration_s": 0.0,
+        "db_replica_wal_cached_count": 0,
+        "db_replica_wal_count": 0,
+        "db_txn_count": 0,
+        "db_write_count": 0,
+        "env": "throttle",
+        "matched": "throttle_unauthenticated_api",
+        "mem_bytes": 368312,
+        "mem_mallocs": 1283,
+        "mem_objects": 3752,
+        "mem_total_bytes": 518392,
+        "message": "Rack_Attack",
+        "redis_calls": 1,
+        "redis_duration_s": 0.000269,
+        "redis_rate_limiting_calls": 1,
+        "redis_rate_limiting_duration_s": 0.000269,
+        "redis_rate_limiting_read_bytes": 1,
+        "redis_rate_limiting_write_bytes": 81,
+        "redis_read_bytes": 1,
+        "redis_write_bytes": 81,
+        "worker_id": "puma_4"
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-74610",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.9"
+      ],
+      "mac": [
+        "92-D0-B6-4A-3E-E6",
+        "F6-F0-5C-9A-AE-79"
+      ],
+      "name": "elastic-agent-74610",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "status_code": 429
+      }
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "ae6f7ff6865558211849f77e1d50b0509e19a8848f1be69aaa7c7a2d1f5d7525",
+        "inode": "3478",
+        "path": "/tmp/service_logs/test-gitlab-auth.log"
+      },
+      "offset": 263
+    },
+    "process": {
+      "pid": 1162
+    },
+    "related": {
+      "ip": [
+        "192.168.65.1"
+      ]
+    },
+    "source": {
+      "address": "192.168.65.1",
+      "ip": "192.168.65.1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "gitlab-auth"
+    ],
+    "url": {
+      "path": "/api/v4/projects"
+    }
+  },
+  {
+    "@timestamp": "2023-04-19T22:14:25.893Z",
+    "agent": {
+      "ephemeral_id": "ad16ea5c-11c6-444e-9224-511f2ec959de",
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "name": "elastic-agent-74610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "address": "67.43.156.18",
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.18"
+    },
+    "data_stream": {
+      "dataset": "gitlab.auth",
+      "namespace": "33041",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "7b85eaaa-ac1c-4ca8-9891-a2ef9b52423a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "gitlab.auth",
+      "id": "01GYDSAKAN2SPZPAMJNRWW5H8S",
+      "ingested": "2026-03-10T04:38:45Z",
+      "kind": "event",
+      "original": "{\"severity\": \"ERROR\",\"time\": \"2023-04-19T22:14:25.893Z\",\"correlation_id\": \"01GYDSAKAN2SPZPAMJNRWW5H8S\",\"message\": \"Rack_Attack\",\"env\": \"blocklist\",\"remote_ip\": \"67.43.156.18\",\"request_method\": \"GET\",\"path\": \"/group/project.git/info/refs?service=git-upload-pack\"}",
+      "severity": 3,
+      "type": [
+        "info"
+      ]
+    },
+    "gitlab": {
+      "auth": {
+        "env": "blocklist",
+        "message": "Rack_Attack"
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-74610",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.9"
+      ],
+      "mac": [
+        "92-D0-B6-4A-3E-E6",
+        "F6-F0-5C-9A-AE-79"
+      ],
+      "name": "elastic-agent-74610",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      }
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "ae6f7ff6865558211849f77e1d50b0509e19a8848f1be69aaa7c7a2d1f5d7525",
+        "inode": "3478",
+        "path": "/tmp/service_logs/test-gitlab-auth.log"
+      },
+      "offset": 0
+    },
+    "related": {
+      "ip": [
+        "67.43.156.18"
+      ]
+    },
+    "source": {
+      "address": "67.43.156.18",
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.18"
+    },
+    "tags": [
+      "preserve_original_event",
+      "gitlab-auth"
+    ],
+    "url": {
+      "path": "/group/project.git/info/refs",
+      "query": "service=git-upload-pack"
+    }
+  }
+]

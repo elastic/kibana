@@ -1,0 +1,19 @@
+{
+  "package": "elastic_security",
+  "dataStreams": [
+    {
+      "dataset": "elastic_security.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.severity",
+        "host.os.full",
+        "kibana.alert.url",
+        "rule.name",
+        "source_metadata._index"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

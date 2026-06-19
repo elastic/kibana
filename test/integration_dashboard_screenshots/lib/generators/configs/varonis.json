@@ -1,0 +1,24 @@
+{
+  "package": "varonis",
+  "dataStreams": [
+    {
+      "dataset": "varonis.logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "_id",
+        "destination.user.name",
+        "event.action",
+        "event.dataset",
+        "event.outcome",
+        "event.severity",
+        "event.severity_label",
+        "file.name",
+        "file.path",
+        "varonis.logs.rule_id",
+        "varonis.logs.rule_name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "package": "azure_openai",
+  "dataStreams": [
+    {
+      "dataset": "azure_openai.logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.open_ai.category",
+        "azure.open_ai.operation_name",
+        "azure.open_ai.properties.model_deployment_name",
+        "azure.open_ai.properties.request_time",
+        "azure.open_ai.properties.response_time",
+        "azure.open_ai.result_signature"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure_openai.metrics",
+      "indexPattern": "logs-*",
+      "docTarget": 810,
+      "fields": [
+        "azure.billing.currency",
+        "azure.billing.pretax_cost",
+        "azure.billing.product",
+        "azure.billing.usage_start",
+        "azure.dimensions.api_name",
+        "azure.dimensions.model_deployment_name",
+        "azure.dimensions.model_name",
+        "azure.dimensions.model_version",
+        "azure.dimensions.status_code",
+        "azure.dimensions.stream_type",
+        "azure.open_ai.active_tokens.total",
+        "azure.open_ai.context_tokens_cache_match_rate.avg",
+        "azure.open_ai.generated_tokens.total",
+        "azure.open_ai.processed_prompt_tokens.total",
+        "azure.open_ai.properties.backend_request_body.model",
+        "azure.open_ai.properties.backend_response_body.choices.finish_reason",
+        "azure.open_ai.properties.backend_response_body.content_filtered_categories.category_name",
+        "azure.open_ai.properties.backend_response_body.content_filtered_categories.severity",
+        "azure.open_ai.properties.backend_response_body.error.code",
+        "azure.open_ai.properties.backend_response_body.error.innererror.content_filtered_categories.category_name",
+        "azure.open_ai.properties.backend_response_body.error.innererror.content_filtered_categories.severity",
+        "azure.open_ai.properties.backend_response_body.usage.total_tokens",
+        "azure.open_ai.provisioned_managed_utilization_v2.avg",
+        "azure.open_ai.requests.total",
+        "azure.open_ai.time_to_response.avg",
+        "azure.open_ai.token_transaction.total",
+        "event.duration"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure.open_ai",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.dimensions.model_deployment_name",
+        "azure.open_ai.generated_tokens.total",
+        "azure.open_ai.processed_prompt_tokens.total",
+        "azure.open_ai.requests.total",
+        "azure.open_ai.token_transaction.total"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,338 @@
+{
+  "package": "kafka",
+  "dataStreams": [
+    {
+      "dataset": "kafka.broker",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "kafka.broker.id",
+        "kafka.consumergroup.client.id",
+        "kafka.consumergroup.consumer_lag",
+        "kafka.consumergroup.id",
+        "kafka.consumergroup.offset",
+        "kafka.partition.id",
+        "kafka.partition.offset.newest",
+        "kafka.partition.offset.oldest",
+        "kafka.partition.partition.is_leader",
+        "kafka.partition.partition.replica",
+        "kafka.partition.topic_broker_id",
+        "kafka.partition.topic_id",
+        "kafka.topic.name",
+        "metricset.name",
+        "service.address"
+      ],
+      "filterValues": {
+        "kafka.topic.name": [
+          "__consumer_offsets"
+        ],
+        "metricset.name": [
+          "partition"
+        ]
+      }
+    },
+    {
+      "dataset": "kafka.consumer",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "kafka.consumer.bytes_consumed",
+        "kafka.consumer.client_id",
+        "kafka.consumer.fetch_rate",
+        "kafka.consumer.in.bytes_per_sec",
+        "kafka.consumer.max_lag",
+        "kafka.consumer.records_consumed",
+        "kafka.partition.id",
+        "kafka.topic.name",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.consumergroup",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "kafka.broker.id",
+        "kafka.consumergroup.client.id",
+        "kafka.consumergroup.consumer_lag",
+        "kafka.consumergroup.id",
+        "kafka.consumergroup.offset",
+        "kafka.partition.id",
+        "kafka.partition.offset.newest",
+        "kafka.partition.offset.oldest",
+        "kafka.partition.partition.is_leader",
+        "kafka.partition.partition.replica",
+        "kafka.partition.topic_broker_id",
+        "kafka.partition.topic_id",
+        "kafka.topic.name",
+        "metricset.name",
+        "service.address"
+      ],
+      "filterValues": {
+        "kafka.topic.name": [
+          "__consumer_offsets"
+        ],
+        "metricset.name": [
+          "partition"
+        ]
+      }
+    },
+    {
+      "dataset": "kafka.controller",
+      "indexPattern": "metrics-*",
+      "docTarget": 660,
+      "fields": [
+        "kafka.controller.controller_event_manager.event_queue_processing_time_ms.max",
+        "kafka.controller.controller_event_manager.event_queue_processing_time_ms.p95",
+        "kafka.controller.controller_event_manager.event_queue_processing_time_ms.p99",
+        "kafka.controller.controller_event_manager.event_queue_time_ms.max",
+        "kafka.controller.controller_event_manager.event_queue_time_ms.p95",
+        "kafka.controller.controller_event_manager.event_queue_time_ms.p99",
+        "kafka.controller.kafka_controller.active_broker_count",
+        "kafka.controller.kafka_controller.active_controller_count",
+        "kafka.controller.kafka_controller.event_queue_operations_started_count",
+        "kafka.controller.kafka_controller.event_queue_operations_timed_out_count",
+        "kafka.controller.kafka_controller.fenced_broker_count",
+        "kafka.controller.kafka_controller.global_partition_count",
+        "kafka.controller.kafka_controller.global_topic_count",
+        "kafka.controller.kafka_controller.last_applied_record_lag_ms",
+        "kafka.controller.kafka_controller.last_applied_record_offset",
+        "kafka.controller.kafka_controller.last_committed_record_offset",
+        "kafka.controller.kafka_controller.metadata_error_count",
+        "kafka.controller.kafka_controller.new_active_controllers_count",
+        "kafka.controller.kafka_controller.offline_partitions_count",
+        "kafka.controller.kafka_controller.preferred_replica_imbalance_count",
+        "kafka.controller.kafka_controller.timed_out_broker_heartbeat_count",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.jvm",
+      "indexPattern": "metrics-*",
+      "docTarget": 750,
+      "fields": [
+        "kafka.jvm.buffer_pool.name",
+        "kafka.jvm.buffer_pool.total_capacity",
+        "kafka.jvm.buffer_pool.used",
+        "kafka.jvm.classes.loaded_count",
+        "kafka.jvm.compilation.time_ms",
+        "kafka.jvm.gc.collection_count",
+        "kafka.jvm.gc.collection_time_ms",
+        "kafka.jvm.gc.name",
+        "kafka.jvm.memory.heap_usage.committed",
+        "kafka.jvm.memory.heap_usage.max",
+        "kafka.jvm.memory.heap_usage.used",
+        "kafka.jvm.memory.non_heap_usage.committed",
+        "kafka.jvm.memory.non_heap_usage.used",
+        "kafka.jvm.memory.objects_pending_finalization",
+        "kafka.jvm.memory_pool.name",
+        "kafka.jvm.memory_pool.usage.max",
+        "kafka.jvm.memory_pool.usage.used",
+        "kafka.jvm.runtime.uptime",
+        "kafka.jvm.runtime.vm_name",
+        "kafka.jvm.runtime.vm_vendor",
+        "kafka.jvm.runtime.vm_version",
+        "kafka.jvm.threads.current_count",
+        "kafka.jvm.threads.daemon_count",
+        "kafka.jvm.threads.peak_count",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "kafka.log.class",
+        "kafka.log.component",
+        "kafka.log.trace.class",
+        "kafka.log.trace.full",
+        "log.level",
+        "message",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.log_manager",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "Log_Directory",
+        "Status",
+        "kafka.log_manager.cleaner.dead_thread_count",
+        "kafka.log_manager.cleaner.max_buffer_utilization_percent",
+        "kafka.log_manager.cleaner.recopy_percent",
+        "kafka.log_manager.cleaner_manager.max_dirty_percent",
+        "kafka.log_manager.cleaner_manager.time_since_last_run_ms",
+        "kafka.log_manager.cleaner_manager.uncleanable_bytes.value",
+        "kafka.log_manager.cleaner_manager.uncleanable_partitions_count.value",
+        "kafka.log_manager.directory_offline_count.value",
+        "kafka.log_manager.flush_stats.rate_and_time_ms.count",
+        "kafka.log_manager.flush_stats.rate_and_time_ms.mean_rate",
+        "kafka.log_manager.remaining_logs_to_recover",
+        "kafka.log_manager.remaining_segments_to_recover",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.network",
+      "indexPattern": "metrics-*",
+      "docTarget": 660,
+      "fields": [
+        "kafka.network.acceptor_blocked.count",
+        "kafka.network.acceptor_blocked.listener",
+        "kafka.network.processor_idle_percent.value",
+        "kafka.network.request_metrics.error_type",
+        "kafka.network.request_metrics.errors_per_min.one_min_rate",
+        "kafka.network.request_metrics.local_time_ms.p95",
+        "kafka.network.request_metrics.message_conversions_time_ms.p95",
+        "kafka.network.request_metrics.message_conversions_time_ms.request_type",
+        "kafka.network.request_metrics.remote_time_ms.p95",
+        "kafka.network.request_metrics.request_bytes.p95",
+        "kafka.network.request_metrics.request_bytes.request_type",
+        "kafka.network.request_metrics.request_queue_time_ms.p95",
+        "kafka.network.request_metrics.response_queue_time_ms.p95",
+        "kafka.network.request_metrics.response_send_time_ms.p95",
+        "kafka.network.request_metrics.temporary_memory_bytes.p95",
+        "kafka.network.request_metrics.temporary_memory_bytes.request_type",
+        "kafka.network.request_metrics.throttle_time_ms.p95",
+        "kafka.network.request_metrics.total_time_ms.p95",
+        "kafka.network.request_metrics.total_time_ms.request_type",
+        "kafka.network.socket_server.expired_connections_killed_count",
+        "kafka.network.socket_server.memory_pool_used",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.partition",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "kafka.broker.id",
+        "kafka.consumergroup.client.id",
+        "kafka.consumergroup.consumer_lag",
+        "kafka.consumergroup.id",
+        "kafka.consumergroup.offset",
+        "kafka.partition.id",
+        "kafka.partition.offset.newest",
+        "kafka.partition.offset.oldest",
+        "kafka.partition.partition.is_leader",
+        "kafka.partition.partition.replica",
+        "kafka.partition.topic_broker_id",
+        "kafka.partition.topic_id",
+        "kafka.topic.name",
+        "metricset.name",
+        "service.address"
+      ],
+      "filterValues": {
+        "kafka.topic.name": [
+          "__consumer_offsets"
+        ],
+        "metricset.name": [
+          "partition"
+        ]
+      }
+    },
+    {
+      "dataset": "kafka.producer",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "kafka.producer.available_buffer_bytes",
+        "kafka.producer.batch_size_avg",
+        "kafka.producer.batch_size_max",
+        "kafka.producer.client_id",
+        "kafka.producer.io_wait",
+        "kafka.producer.out.bytes_per_sec",
+        "kafka.producer.record_error_rate",
+        "kafka.producer.record_retry_rate",
+        "kafka.producer.record_size_avg",
+        "kafka.producer.record_size_max",
+        "kafka.producer.records_per_request",
+        "kafka.producer.request_rate",
+        "kafka.producer.response_rate",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.raft",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "kafka.raft.append_records_rate",
+        "kafka.raft.commit_latency_avg",
+        "kafka.raft.commit_latency_max",
+        "kafka.raft.current_epoch",
+        "kafka.raft.current_leader",
+        "kafka.raft.current_state",
+        "kafka.raft.current_vote",
+        "kafka.raft.fetch_records_rate",
+        "kafka.raft.high_watermark",
+        "kafka.raft.log_end_offset",
+        "kafka.raft.number_of_voters",
+        "kafka.raft.number_unknown_voter_connections",
+        "kafka.raft.poll_idle_ratio_avg",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.replica_manager",
+      "indexPattern": "metrics-*",
+      "docTarget": 510,
+      "fields": [
+        "kafka.replica_manager.at_min_isr_partition_count",
+        "kafka.replica_manager.failed_isr_updates_per_sec.one_minute_rate",
+        "kafka.replica_manager.isr_expands_per_sec.one_minute_rate",
+        "kafka.replica_manager.isr_shrinks_per_sec.one_minute_rate",
+        "kafka.replica_manager.offline_replica_count",
+        "kafka.replica_manager.partition_count",
+        "kafka.replica_manager.reassigning_partitions",
+        "kafka.replica_manager.replica_alter_log_dirs_manager.dead_thread_count",
+        "kafka.replica_manager.replica_alter_log_dirs_manager.failed_partitions_count",
+        "kafka.replica_manager.replica_alter_log_dirs_manager.max_lag",
+        "kafka.replica_manager.replica_alter_log_dirs_manager.min_fetch_rate",
+        "kafka.replica_manager.replica_fetcher_manager.dead_thread_count",
+        "kafka.replica_manager.replica_fetcher_manager.failed_partitions_count",
+        "kafka.replica_manager.replica_fetcher_manager.max_lag",
+        "kafka.replica_manager.replica_fetcher_manager.min_fetch_rate",
+        "kafka.replica_manager.under_replicated_partitions",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "kafka.topic",
+      "indexPattern": "metrics-*",
+      "docTarget": 540,
+      "fields": [
+        "kafka.partition.id",
+        "kafka.topic.log.end_offset",
+        "kafka.topic.log.segments_count",
+        "kafka.topic.log.size",
+        "kafka.topic.log.start_offset",
+        "kafka.topic.name",
+        "kafka.topic.partition.at_min_isr",
+        "kafka.topic.partition.insync_replicas_count",
+        "kafka.topic.partition.replicas_count",
+        "kafka.topic.partition.under_min_isr",
+        "kafka.topic.partition.under_replicated",
+        "kafka.topic.topic.bytes_in_per_sec",
+        "kafka.topic.topic.bytes_out_per_sec",
+        "kafka.topic.topic.bytes_rejected_per_sec",
+        "kafka.topic.topic.fetch_requests_per_sec",
+        "kafka.topic.topic.messages_in_per_sec",
+        "kafka.topic.topic.name",
+        "service.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

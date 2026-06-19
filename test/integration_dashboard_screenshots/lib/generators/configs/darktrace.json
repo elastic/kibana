@@ -1,0 +1,75 @@
+{
+  "package": "darktrace",
+  "dataStreams": [
+    {
+      "dataset": "darktrace.ai_analyst_alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "darktrace.ai_analyst_alert.category",
+        "darktrace.ai_analyst_alert.group_score",
+        "darktrace.ai_analyst_alert.is_acknowledged",
+        "darktrace.ai_analyst_alert.is_external_triggered",
+        "darktrace.ai_analyst_alert.is_user_triggered",
+        "darktrace.ai_analyst_alert.summariser",
+        "event.id",
+        "event.reason",
+        "event.risk_score",
+        "host.hostname"
+      ],
+      "filterValues": {
+        "darktrace.ai_analyst_alert.is_user_triggered": [
+          "true"
+        ],
+        "darktrace.ai_analyst_alert.is_external_triggered": [
+          "true"
+        ],
+        "darktrace.ai_analyst_alert.is_acknowledged": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "darktrace.model_breach_alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "darktrace.model_breach_alert.device.vendor",
+        "darktrace.model_breach_alert.model.behaviour",
+        "darktrace.model_breach_alert.model.is_active",
+        "darktrace.model_breach_alert.model.throttle",
+        "darktrace.model_breach_alert.pbid",
+        "event.action",
+        "event.risk_score",
+        "event.severity",
+        "host.id",
+        "host.type",
+        "rule.category",
+        "rule.name",
+        "rule.uuid"
+      ],
+      "filterValues": {
+        "darktrace.model_breach_alert.model.is_active": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "darktrace.system_status_alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "darktrace.system_status_alert.name",
+        "darktrace.system_status_alert.priority_level",
+        "darktrace.system_status_alert.status",
+        "event.id",
+        "host.hostname"
+      ],
+      "filterValues": {
+        "darktrace.system_status_alert.status": [
+          "active"
+        ]
+      }
+    }
+  ]
+}

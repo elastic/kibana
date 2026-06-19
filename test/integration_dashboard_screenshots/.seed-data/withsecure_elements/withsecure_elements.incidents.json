@@ -1,0 +1,229 @@
+[
+  {
+    "@timestamp": "2025-11-26T17:41:00.000Z",
+    "agent": {
+      "ephemeral_id": "5af8dce4-094a-4417-84c8-deb632ce76ab",
+      "id": "75faca8e-8be4-48be-9f5b-598129395393",
+      "name": "elastic-agent-38676",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "withsecure_elements.incidents",
+      "namespace": "63317",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "75faca8e-8be4-48be-9f5b-598129395393",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "detected",
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-11-26T17:41:00.000Z",
+      "dataset": "withsecure_elements.incidents",
+      "end": "2025-11-26T17:41:02.000Z",
+      "id": "9d948gcf-g8fg-69c9-0dca-5729fa072ege",
+      "ingested": "2026-03-10T03:14:01Z",
+      "kind": "alert",
+      "module": "withsecure_elements",
+      "original": "{\"categories\":[\"SUSPICIOUS_ACTIVITY\"],\"createdTimestamp\":\"2025-11-26T17:41:00.000Z\",\"incidentId\":\"9d948gcf-g8fg-69c9-0dca-5729fa072ege\",\"incidentPublicId\":\"2532078-23322\",\"initialReceivedTimestamp\":\"2025-11-26T17:41:00.000Z\",\"name\":\"Detection in TEST-WORKSTATION-03\",\"organizationId\":\"777f240c-752d-4eb5-8422-94c5336e3005\",\"resolution\":\"investigating\",\"riskLevel\":\"high\",\"riskScore\":85,\"severity\":\"high\",\"sources\":[\"endpoint\"],\"status\":\"in_progress\",\"updatedTimestamp\":\"2025-11-26T17:41:02.000Z\"}",
+      "outcome": "success",
+      "provider": "withsecure_elements",
+      "risk_score": 85.0,
+      "severity": 73,
+      "start": "2025-11-26T17:41:00.000Z",
+      "type": [
+        "incident"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "withsecure_elements": {
+      "incidents": {
+        "categories": [
+          "SUSPICIOUS_ACTIVITY"
+        ],
+        "createdTimestamp": "2025-11-26T17:41:00.000Z",
+        "incidentId": "9d948gcf-g8fg-69c9-0dca-5729fa072ege",
+        "incidentPublicId": "2532078-23322",
+        "initialReceivedTimestamp": "2025-11-26T17:41:00.000Z",
+        "name": "Detection in TEST-WORKSTATION-03",
+        "organizationId": "777f240c-752d-4eb5-8422-94c5336e3005",
+        "resolution": "investigating",
+        "riskLevel": "high",
+        "riskScore": 85.0,
+        "severity": "high",
+        "sources": [
+          "endpoint"
+        ],
+        "status": "in_progress",
+        "updatedTimestamp": "2025-11-26T17:41:02.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-11-26T16:40:00.000Z",
+    "agent": {
+      "ephemeral_id": "5af8dce4-094a-4417-84c8-deb632ce76ab",
+      "id": "75faca8e-8be4-48be-9f5b-598129395393",
+      "name": "elastic-agent-38676",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "withsecure_elements.incidents",
+      "namespace": "63317",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "75faca8e-8be4-48be-9f5b-598129395393",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "detected",
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-11-26T16:40:00.000Z",
+      "dataset": "withsecure_elements.incidents",
+      "end": "2025-11-26T16:40:01.000Z",
+      "id": "8c837fbe-f7ef-58b8-9cb9-4618e9617dfd",
+      "ingested": "2026-03-10T03:14:01Z",
+      "kind": "alert",
+      "module": "withsecure_elements",
+      "original": "{\"categories\":[\"MALWARE\"],\"createdTimestamp\":\"2025-11-26T16:40:00.000Z\",\"incidentId\":\"8c837fbe-f7ef-58b8-9cb9-4618e9617dfd\",\"incidentPublicId\":\"2532078-23321\",\"initialReceivedTimestamp\":\"2025-11-26T16:40:00.000Z\",\"name\":\"Detection in TEST-WORKSTATION-02\",\"organizationId\":\"777f240c-752d-4eb5-8422-94c5336e3005\",\"resolution\":\"unconfirmed\",\"riskLevel\":\"warning\",\"riskScore\":50,\"severity\":\"warning\",\"sources\":[\"endpoint\"],\"status\":\"new\",\"updatedTimestamp\":\"2025-11-26T16:40:01.000Z\"}",
+      "outcome": "success",
+      "provider": "withsecure_elements",
+      "risk_score": 50.0,
+      "start": "2025-11-26T16:40:00.000Z",
+      "type": [
+        "incident"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "withsecure_elements": {
+      "incidents": {
+        "categories": [
+          "MALWARE"
+        ],
+        "createdTimestamp": "2025-11-26T16:40:00.000Z",
+        "incidentId": "8c837fbe-f7ef-58b8-9cb9-4618e9617dfd",
+        "incidentPublicId": "2532078-23321",
+        "initialReceivedTimestamp": "2025-11-26T16:40:00.000Z",
+        "name": "Detection in TEST-WORKSTATION-02",
+        "organizationId": "777f240c-752d-4eb5-8422-94c5336e3005",
+        "resolution": "unconfirmed",
+        "riskLevel": "warning",
+        "riskScore": 50.0,
+        "severity": "warning",
+        "sources": [
+          "endpoint"
+        ],
+        "status": "new",
+        "updatedTimestamp": "2025-11-26T16:40:01.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-11-26T15:39:57.574Z",
+    "agent": {
+      "ephemeral_id": "5af8dce4-094a-4417-84c8-deb632ce76ab",
+      "id": "75faca8e-8be4-48be-9f5b-598129395393",
+      "name": "elastic-agent-38676",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "withsecure_elements.incidents",
+      "namespace": "63317",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "75faca8e-8be4-48be-9f5b-598129395393",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "detected",
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-11-26T15:39:57.574Z",
+      "dataset": "withsecure_elements.incidents",
+      "end": "2025-11-26T15:39:58.719Z",
+      "id": "7b726ead-e6de-47a7-8ba8-3507d8506cec",
+      "ingested": "2026-03-10T03:14:01Z",
+      "kind": "alert",
+      "module": "withsecure_elements",
+      "original": "{\"categories\":[\"ABNORMAL_PROCESS_EXECUTION\"],\"createdTimestamp\":\"2025-11-26T15:39:57.574Z\",\"incidentId\":\"7b726ead-e6de-47a7-8ba8-3507d8506cec\",\"incidentPublicId\":\"2532078-23320\",\"initialReceivedTimestamp\":\"2025-11-26T15:39:00.000Z\",\"name\":\"Detection in TEST-WORKSTATION-01\",\"organizationId\":\"777f240c-752d-4eb5-8422-94c5336e3005\",\"resolution\":\"merged\",\"riskLevel\":\"info\",\"riskScore\":0,\"severity\":\"info\",\"sources\":[\"endpoint\"],\"status\":\"closed\",\"updatedTimestamp\":\"2025-11-26T15:39:58.719Z\"}",
+      "outcome": "success",
+      "provider": "withsecure_elements",
+      "risk_score": 0.0,
+      "severity": 21,
+      "start": "2025-11-26T15:39:57.574Z",
+      "type": [
+        "incident"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "withsecure_elements": {
+      "incidents": {
+        "categories": [
+          "ABNORMAL_PROCESS_EXECUTION"
+        ],
+        "createdTimestamp": "2025-11-26T15:39:57.574Z",
+        "incidentId": "7b726ead-e6de-47a7-8ba8-3507d8506cec",
+        "incidentPublicId": "2532078-23320",
+        "initialReceivedTimestamp": "2025-11-26T15:39:00.000Z",
+        "name": "Detection in TEST-WORKSTATION-01",
+        "organizationId": "777f240c-752d-4eb5-8422-94c5336e3005",
+        "resolution": "merged",
+        "riskLevel": "info",
+        "riskScore": 0.0,
+        "severity": "info",
+        "sources": [
+          "endpoint"
+        ],
+        "status": "closed",
+        "updatedTimestamp": "2025-11-26T15:39:58.719Z"
+      }
+    }
+  }
+]

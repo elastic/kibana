@@ -1,0 +1,52 @@
+{
+  "package": "jamf_compliance_reporter",
+  "dataStreams": [
+    {
+      "dataset": "jamf_compliance_reporter.log",
+      "indexPattern": "logs-*",
+      "docTarget": 990,
+      "fields": [
+        "event.action",
+        "event.outcome",
+        "host.hostname",
+        "host.os.version",
+        "jamf_compliance_reporter.log.app_metric_info.cpu_percentage",
+        "jamf_compliance_reporter.log.audio_video_device_info.audio_device.manufacturer",
+        "jamf_compliance_reporter.log.audio_video_device_info.device_status",
+        "jamf_compliance_reporter.log.audit_class_verification_info.restored_default",
+        "jamf_compliance_reporter.log.compliancereporter_license_info.status",
+        "jamf_compliance_reporter.log.compliancereporter_license_info.type",
+        "jamf_compliance_reporter.log.dataset",
+        "jamf_compliance_reporter.log.event_attributes.attributes.quarantine.agent_bundle_identifier",
+        "jamf_compliance_reporter.log.event_attributes.attributes.quarantine.agent_name",
+        "jamf_compliance_reporter.log.event_attributes.audit_level",
+        "jamf_compliance_reporter.log.event_attributes.file_license_info.license_type",
+        "jamf_compliance_reporter.log.event_attributes.file_license_info.license_version",
+        "jamf_compliance_reporter.log.event_attributes.job.state",
+        "jamf_compliance_reporter.log.event_attributes.log.remote_endpoint_type_awskinesis.region",
+        "jamf_compliance_reporter.log.event_score",
+        "jamf_compliance_reporter.log.file_event_info.item.created",
+        "jamf_compliance_reporter.log.file_event_info.item.is_directory",
+        "jamf_compliance_reporter.log.file_event_info.item.is_file",
+        "jamf_compliance_reporter.log.file_event_info.item.removed",
+        "jamf_compliance_reporter.log.file_event_info.user_dropped",
+        "jamf_compliance_reporter.log.hardware_event_info.device.class",
+        "jamf_compliance_reporter.log.hardware_event_info.device.status",
+        "jamf_compliance_reporter.log.hardware_event_info.device_attributes.io.power_management.device_power_state",
+        "jamf_compliance_reporter.log.hardware_event_info.device_attributes.usb.product_name",
+        "jamf_compliance_reporter.log.hardware_event_info.device_attributes.usb.vendor_name",
+        "jamf_compliance_reporter.log.header.action",
+        "process.user.name",
+        "user.group.name",
+        "user.name"
+      ],
+      "filterValues": {
+        "jamf_compliance_reporter.log.dataset": [
+          "audit",
+          "event",
+          "app_metrics"
+        ]
+      }
+    }
+  ]
+}

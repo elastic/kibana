@@ -1,0 +1,28 @@
+{
+  "package": "o365",
+  "dataStreams": [
+    {
+      "dataset": "o365.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.category",
+        "event.code",
+        "event.outcome",
+        "event.provider",
+        "o365.audit.ObjectId",
+        "user.email",
+        "user.name",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.version"
+      ],
+      "filterValues": {
+        "event.category": [
+          "authentication"
+        ]
+      }
+    }
+  ]
+}

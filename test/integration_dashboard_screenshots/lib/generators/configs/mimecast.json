@@ -1,0 +1,141 @@
+{
+  "package": "mimecast",
+  "dataStreams": [
+    {
+      "dataset": "mimecast.audit_events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "client.geo.location",
+        "client.ip",
+        "event.action",
+        "mimecast.application",
+        "user.email"
+      ],
+      "filterValues": {
+        "event.action": [
+          "user-logged-on",
+          "logon-authentication-failed"
+        ]
+      }
+    },
+    {
+      "dataset": "mimecast.dlp_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "email.from.address",
+        "event.action",
+        "rule.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mimecast.siem_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "email.direction",
+        "error.type",
+        "event.action",
+        "event.outcome",
+        "event.reason",
+        "mimecast.log_type"
+      ],
+      "filterValues": {
+        "mimecast.log_type": [
+          "process",
+          "delivery",
+          "receipt"
+        ],
+        "event.action": [
+          "Hld",
+          "Rej"
+        ],
+        "event.outcome": [
+          "failure"
+        ]
+      }
+    },
+    {
+      "dataset": "mimecast.threat_intel_malware_customer",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "threat.indicator.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mimecast.threat_intel_malware_grid",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "threat.indicator.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mimecast.ttp_ap_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "email.attachments.file.extension",
+        "email.from.address",
+        "email.to.address",
+        "mimecast.result"
+      ],
+      "filterValues": {
+        "mimecast.result": [
+          "malicious"
+        ]
+      }
+    },
+    {
+      "dataset": "mimecast.ttp_ip_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "email.from.address",
+        "email.to.address",
+        "mimecast.identifiers",
+        "mimecast.taggedMalicious"
+      ],
+      "filterValues": {
+        "mimecast.identifiers": [
+          "similar_internal_domain",
+          "reply_address_mismatch",
+          "internal_user_name",
+          "newly_observed_domain",
+          "advanced_similar_internal_domain"
+        ],
+        "mimecast.taggedMalicious": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "mimecast.ttp_url_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "mimecast.category",
+        "mimecast.scanResult",
+        "url.original"
+      ],
+      "filterValues": {
+        "mimecast.scanResult": [
+          "malicious"
+        ]
+      }
+    }
+  ]
+}

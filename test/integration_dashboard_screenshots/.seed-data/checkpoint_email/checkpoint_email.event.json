@@ -1,0 +1,433 @@
+[
+  {
+    "@timestamp": "2024-10-15T10:27:40.294Z",
+    "agent": {
+      "ephemeral_id": "f71d2496-6220-4aa0-afe3-9a99b42fcb31",
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "name": "elastic-agent-82515",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_email": {
+      "event": {
+        "confidence_indicator": "detected",
+        "created": "2024-10-15T10:27:40.294Z",
+        "customer_id": "elastictest",
+        "data": "#{\"entity_id\": \"81555d1d0defabcdefabcdabcdcb6c1aa44\", \"entity_type\": \"avanan_dlp\", \"disable_link\": true, \"label\": \"SmartDLP\"} has detected #{\"entity_id\": \"81555d1d0defabcdefabcdabcdcb6c1aa44\", \"entity_type\": \"avanan_dlp\", \"disable_link\": true, \"label\": \"PII\"} leak in '#{\"entity_id\": \"40d926d7c01234567890123456789b2f\", \"entity_type\": \"google_mail_email\", \"label\": \"Resume\"}' (#{\"entity_id\": \"113310123456789535444\", \"entity_type\": \"google_user\", \"label\": \"alice@example.io\"}'s mailbox)",
+        "description": "SmartDLP has detected PII leak in 'Resume' (alice@example.io's mailbox)",
+        "entity_id": "4abcdefabcdefabcdefc44ca3798cb2f",
+        "entity_link": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZS9nb29nbGVfbWFpbF9gysdjvvsvDFGERgfvsdverERBERsdvsdv2EzNzk4Y2IyZg==",
+        "id": "73af5abcdef0123456789d08abfce324",
+        "saas": "google_mail",
+        "sender_address": "alice@example.io",
+        "severity": 3,
+        "severity_enum": "Medium",
+        "state": "dismissed",
+        "type": "dlp"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_email.event",
+      "namespace": "99772",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "sender": {
+        "address": "alice@example.io"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "created": "2024-10-15T10:27:40.294Z",
+      "dataset": "checkpoint_email.event",
+      "id": "73af5abcdef0123456789d08abfce324",
+      "ingested": "2026-03-10T02:48:29Z",
+      "kind": "alert",
+      "original": "{\"actions\":[],\"additionalData\":null,\"availableEventActions\":null,\"confidenceIndicator\":\"detected\",\"customerId\":\"elastictest\",\"data\":\"#{\\\"entity_id\\\": \\\"81555d1d0defabcdefabcdabcdcb6c1aa44\\\", \\\"entity_type\\\": \\\"avanan_dlp\\\", \\\"disable_link\\\": true, \\\"label\\\": \\\"SmartDLP\\\"} has detected #{\\\"entity_id\\\": \\\"81555d1d0defabcdefabcdabcdcb6c1aa44\\\", \\\"entity_type\\\": \\\"avanan_dlp\\\", \\\"disable_link\\\": true, \\\"label\\\": \\\"PII\\\"} leak in '#{\\\"entity_id\\\": \\\"40d926d7c01234567890123456789b2f\\\", \\\"entity_type\\\": \\\"google_mail_email\\\", \\\"label\\\": \\\"Resume\\\"}' (#{\\\"entity_id\\\": \\\"113310123456789535444\\\", \\\"entity_type\\\": \\\"google_user\\\", \\\"label\\\": \\\"alice@example.io\\\"}'s mailbox)\",\"description\":\"SmartDLP has detected PII leak in 'Resume' (alice@example.io's mailbox)\",\"entityId\":\"4abcdefabcdefabcdefc44ca3798cb2f\",\"entityLink\":\"https://in.portal.checkpoint.com/dashboard/email\\u0026collaboration/CGS1?route=cHJvZmlsZS9nb29nbGVfbWFpbF9gysdjvvsvDFGERgfvsdverERBERsdvsdv2EzNzk4Y2IyZg==\",\"eventCreated\":\"2024-10-15T10:27:40.294099+00:00\",\"eventId\":\"73af5abcdef0123456789d08abfce324\",\"saas\":\"google_mail\",\"senderAddress\":\"alice@example.io\",\"severity\":\"3\",\"state\":\"dismissed\",\"type\":\"dlp\"}",
+      "severity": 3,
+      "type": [
+        "info"
+      ],
+      "url": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZS9nb29nbGVfbWFpbF9gysdjvvsvDFGERgfvsdverERBERsdvsdv2EzNzk4Y2IyZg=="
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "SmartDLP has detected PII leak in 'Resume' (alice@example.io's mailbox)",
+    "observer": {
+      "product": "Harmony Email & Collaboration",
+      "vendor": "Check Point"
+    },
+    "organization": {
+      "name": "elastictest"
+    },
+    "related": {
+      "user": [
+        "alice@example.io"
+      ]
+    },
+    "source": {
+      "user": {
+        "domain": "example.io",
+        "email": "alice@example.io",
+        "name": "alice"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "checkpoint_email-event"
+    ]
+  },
+  {
+    "@timestamp": "2024-10-15T09:47:06.592Z",
+    "agent": {
+      "ephemeral_id": "f71d2496-6220-4aa0-afe3-9a99b42fcb31",
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "name": "elastic-agent-82515",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_email": {
+      "event": {
+        "confidence_indicator": "malicious",
+        "created": "2024-10-15T09:47:06.592Z",
+        "customer_id": "elasticteam",
+        "data": "#{\"entity_id\": \"ad6ada66e6fabcdefabcdefc240dd9d0\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Phishing\"} attempt detected in an email from #{\"entity_id\": null, \"entity_type\": \"google_user\", \"disable_link\": true, \"label\": \"google-support@webnotifications.net\"} - '#{\"entity_id\": \"ad6ada66e6fabcdefabcdefc240dd9d0\", \"entity_type\": \"google_mail_email\", \"label\": \"Office Holiday Party - Folder Share\"}' (#{\"entity_id\": \"113310123456789535444\", \"entity_type\": \"google_user\", \"label\": \"team@example.com\"}'s mailbox)",
+        "description": "Phishing attempt detected in an email from google-support@webnotifications.net - 'Office Holiday Party - Folder Share' (team@example.com's mailbox)",
+        "destination_address": "team@example.com",
+        "email_subject": "Office Holiday Party - Folder Share",
+        "entity_id": "ad6ada66e6fabcdefabcdefc240dd9d0",
+        "entity_link": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZsdverberGRTHTYJbgbrtHYNRTGbdfbtryrtM2YyNTlkYTY0MmMyNDBkZDlkMA==",
+        "id": "13007abcdef01234567896d00f44a7dd4",
+        "saas": "google_mail",
+        "scan_type": "avanan_ap_scan",
+        "sender_address": "google-support@webnotifications.net",
+        "severity": 4,
+        "severity_enum": "High",
+        "state": "new",
+        "type": "phishing"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_email.event",
+      "namespace": "99772",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "domain": "example.com",
+        "email": "team@example.com",
+        "name": "team"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "sender": {
+        "address": "google-support@webnotifications.net"
+      },
+      "subject": "Office Holiday Party - Folder Share",
+      "to": {
+        "address": [
+          "team@example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "created": "2024-10-15T09:47:06.592Z",
+      "dataset": "checkpoint_email.event",
+      "id": "13007abcdef01234567896d00f44a7dd4",
+      "ingested": "2026-03-10T02:48:29Z",
+      "kind": "alert",
+      "original": "{\"actions\":[],\"additionalData\":null,\"availableEventActions\":null,\"confidenceIndicator\":\"malicious\",\"customerId\":\"elasticteam\",\"data\":\"#{\\\"entity_id\\\": \\\"ad6ada66e6fabcdefabcdefc240dd9d0\\\", \\\"entity_type\\\": \\\"avanan_ap_scan\\\", \\\"label\\\": \\\"Phishing\\\"} attempt detected in an email from #{\\\"entity_id\\\": null, \\\"entity_type\\\": \\\"google_user\\\", \\\"disable_link\\\": true, \\\"label\\\": \\\"google-support@webnotifications.net\\\"} - '#{\\\"entity_id\\\": \\\"ad6ada66e6fabcdefabcdefc240dd9d0\\\", \\\"entity_type\\\": \\\"google_mail_email\\\", \\\"label\\\": \\\"Office Holiday Party - Folder Share\\\"}' (#{\\\"entity_id\\\": \\\"113310123456789535444\\\", \\\"entity_type\\\": \\\"google_user\\\", \\\"label\\\": \\\"team@example.com\\\"}'s mailbox)\",\"description\":\"Phishing attempt detected in an email from google-support@webnotifications.net - 'Office Holiday Party - Folder Share' (team@example.com's mailbox)\",\"entityId\":\"ad6ada66e6fabcdefabcdefc240dd9d0\",\"entityLink\":\"https://in.portal.checkpoint.com/dashboard/email\\u0026collaboration/CGS1?route=cHJvZmlsZsdverberGRTHTYJbgbrtHYNRTGbdfbtryrtM2YyNTlkYTY0MmMyNDBkZDlkMA==\",\"eventCreated\":\"2024-10-15T09:47:06.592720+00:00\",\"eventId\":\"13007abcdef01234567896d00f44a7dd4\",\"saas\":\"google_mail\",\"senderAddress\":\"google-support@webnotifications.net\",\"severity\":\"4\",\"state\":\"new\",\"type\":\"phishing\"}",
+      "severity": 4,
+      "type": [
+        "info"
+      ],
+      "url": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZsdverberGRTHTYJbgbrtHYNRTGbdfbtryrtM2YyNTlkYTY0MmMyNDBkZDlkMA=="
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Phishing attempt detected in an email from google-support@webnotifications.net - 'Office Holiday Party - Folder Share' (team@example.com's mailbox)",
+    "observer": {
+      "product": "Harmony Email & Collaboration",
+      "vendor": "Check Point"
+    },
+    "organization": {
+      "name": "elasticteam"
+    },
+    "related": {
+      "user": [
+        "team@example.com",
+        "google-support@webnotifications.net"
+      ]
+    },
+    "source": {
+      "user": {
+        "domain": "webnotifications.net",
+        "email": "google-support@webnotifications.net",
+        "name": "google-support"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "checkpoint_email-event"
+    ]
+  },
+  {
+    "@timestamp": "2024-10-15T06:08:40.022Z",
+    "agent": {
+      "ephemeral_id": "f71d2496-6220-4aa0-afe3-9a99b42fcb31",
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "name": "elastic-agent-82515",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_email": {
+      "event": {
+        "actions": [
+          {
+            "related_entity_id": "abaabcdef01234567894115b9e64da71",
+            "create_time": "2024-10-15T07:02:54.452Z",
+            "action_type": "quarantine_email"
+          },
+          {
+            "related_entity_id": "abaabcdef01234567894115b9e64da71",
+            "create_time": "2024-10-15T07:03:16.882Z",
+            "action_type": "google_mail_email_change_subject"
+          },
+          {
+            "related_entity_id": "abaabcdef01234567894115b9e64da71",
+            "create_time": "2024-10-15T07:03:24.885Z",
+            "action_type": "restore_email"
+          },
+          {
+            "related_entity_id": "abaabcdef01234567894115b9e64da71",
+            "create_time": "2024-10-15T07:04:27.507Z",
+            "action_type": "move_to_spam"
+          },
+          {
+            "related_entity_id": "abaabcdef01234567894115b9e64da71",
+            "create_time": "2024-10-15T07:08:47.587Z",
+            "action_type": "google_mail_email_change_subject"
+          }
+        ],
+        "confidence_indicator": "malicious",
+        "created": "2024-10-15T06:08:40.022Z",
+        "customer_id": "exampletest",
+        "data": "#{\"entity_id\": \"6fd32d1acccf10123456789513886822\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Phishing\"} attempt detected in an email from #{\"entity_id\": null, \"entity_type\": \"google_user\", \"disable_link\": true, \"label\": \"info@example.in\"} - '#{\"entity_id\": \"6fd32d1aabcdef012345678913886822\", \"entity_type\": \"google_mail_email\", \"label\": \"Support: Link\"}' (#{\"entity_id\": \"113301234567896535444\", \"entity_type\": \"google_user\", \"label\": \"alex@example.com\"}'s mailbox)",
+        "description": "Phishing attempt detected in an email from info@example.in - 'Support: Link' (alex@example.com's mailbox)",
+        "destination_address": "alex@example.com",
+        "email_subject": "Support: Link",
+        "entity_id": "6fd32d1acccf146b03725eb513886822",
+        "entity_link": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZS9nb29nbGregevTTevfVETgervfdvrGETGEFVefvefgqergERVeriMDM3MjVlYjUxMzg4NjgyMg==",
+        "id": "abaabcdef01234567894115b9e64da71",
+        "saas": "google_mail",
+        "scan_type": "avanan_ap_scan",
+        "sender_address": "info@example.in",
+        "severity": 5,
+        "severity_enum": "Critical",
+        "state": "exception",
+        "type": "phishing"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_email.event",
+      "namespace": "99772",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "domain": "example.com",
+        "email": "alex@example.com",
+        "name": "alex"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "sender": {
+        "address": "info@example.in"
+      },
+      "subject": "Support: Link",
+      "to": {
+        "address": [
+          "alex@example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "created": "2024-10-15T06:08:40.022Z",
+      "dataset": "checkpoint_email.event",
+      "id": "abaabcdef01234567894115b9e64da71",
+      "ingested": "2026-03-10T02:48:29Z",
+      "kind": "alert",
+      "original": "{\"actions\":[{\"actionType\":\"quarantine_email\",\"createTime\":\"2024-10-15T07:02:54.452012Z\",\"relatedEntityId\":\"abaabcdef01234567894115b9e64da71\"},{\"actionType\":\"google_mail_email_change_subject\",\"createTime\":\"2024-10-15T07:03:16.882267Z\",\"relatedEntityId\":\"abaabcdef01234567894115b9e64da71\"},{\"actionType\":\"restore_email\",\"createTime\":\"2024-10-15T07:03:24.885973Z\",\"relatedEntityId\":\"abaabcdef01234567894115b9e64da71\"},{\"actionType\":\"move_to_spam\",\"createTime\":\"2024-10-15T07:04:27.507214Z\",\"relatedEntityId\":\"abaabcdef01234567894115b9e64da71\"},{\"actionType\":\"google_mail_email_change_subject\",\"createTime\":\"2024-10-15T07:08:47.587776Z\",\"relatedEntityId\":\"abaabcdef01234567894115b9e64da71\"}],\"additionalData\":null,\"availableEventActions\":null,\"confidenceIndicator\":\"malicious\",\"customerId\":\"exampletest\",\"data\":\"#{\\\"entity_id\\\": \\\"6fd32d1acccf10123456789513886822\\\", \\\"entity_type\\\": \\\"avanan_ap_scan\\\", \\\"label\\\": \\\"Phishing\\\"} attempt detected in an email from #{\\\"entity_id\\\": null, \\\"entity_type\\\": \\\"google_user\\\", \\\"disable_link\\\": true, \\\"label\\\": \\\"info@example.in\\\"} - '#{\\\"entity_id\\\": \\\"6fd32d1aabcdef012345678913886822\\\", \\\"entity_type\\\": \\\"google_mail_email\\\", \\\"label\\\": \\\"Support: Link\\\"}' (#{\\\"entity_id\\\": \\\"113301234567896535444\\\", \\\"entity_type\\\": \\\"google_user\\\", \\\"label\\\": \\\"alex@example.com\\\"}'s mailbox)\",\"description\":\"Phishing attempt detected in an email from info@example.in - 'Support: Link' (alex@example.com's mailbox)\",\"entityId\":\"6fd32d1acccf146b03725eb513886822\",\"entityLink\":\"https://in.portal.checkpoint.com/dashboard/email\\u0026collaboration/CGS1?route=cHJvZmlsZS9nb29nbGregevTTevfVETgervfdvrGETGEFVefvefgqergERVeriMDM3MjVlYjUxMzg4NjgyMg==\",\"eventCreated\":\"2024-10-15T06:08:40.022596+00:00\",\"eventId\":\"abaabcdef01234567894115b9e64da71\",\"saas\":\"google_mail\",\"senderAddress\":\"info@example.in\",\"severity\":\"5\",\"state\":\"exception\",\"type\":\"phishing\"}",
+      "severity": 5,
+      "type": [
+        "info"
+      ],
+      "url": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZS9nb29nbGregevTTevfVETgervfdvrGETGEFVefvefgqergERVeriMDM3MjVlYjUxMzg4NjgyMg=="
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Phishing attempt detected in an email from info@example.in - 'Support: Link' (alex@example.com's mailbox)",
+    "observer": {
+      "product": "Harmony Email & Collaboration",
+      "vendor": "Check Point"
+    },
+    "organization": {
+      "name": "exampletest"
+    },
+    "related": {
+      "user": [
+        "alex@example.com",
+        "info@example.in"
+      ]
+    },
+    "source": {
+      "user": {
+        "domain": "example.in",
+        "email": "info@example.in",
+        "name": "info"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "checkpoint_email-event"
+    ]
+  },
+  {
+    "@timestamp": "2024-10-14T07:02:11.229Z",
+    "agent": {
+      "ephemeral_id": "f71d2496-6220-4aa0-afe3-9a99b42fcb31",
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "name": "elastic-agent-82515",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_email": {
+      "event": {
+        "confidence_indicator": "detected",
+        "created": "2024-10-14T07:02:11.229Z",
+        "customer_id": "exampletest",
+        "data": "#{\"entity_id\": \"a6d8674a04c30123456789e4d3ebd98\", \"entity_type\": \"google_mail_email\", \"label\": \"Shadow IT\"} - #{\"entity_id\": \"113012345678906535444\", \"entity_type\": \"google_user\", \"label\": \"john@example.com\"} is using #{\"entity_id\": \"google.com\", \"entity_type\": \"av_dns_info\", \"label\": \"google.com (Search Engine)\"}",
+        "description": "Shadow IT - john@example.com is using google.com (Search Engine)",
+        "entity_id": "25e0c50123456789e351b0dafa6aafa6",
+        "entity_link": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZS9nsfhvbksdvnjhvdfVBsdbdfFbdbdBDBBdbrtHyujYJNtnhtnhtnOTIxZTM1MWIwZGFmYTZhYWZhNg==",
+        "id": "a6d8674a04c30123456789e4d3ebd98",
+        "saas": "google_mail",
+        "sender_address": "google-workspace-alerts-noreply@google.com",
+        "severity": 3,
+        "severity_enum": "Medium",
+        "state": "pending",
+        "type": "shadow_it"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_email.event",
+      "namespace": "99772",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "481c9aa7-ffd5-4cf4-9d4a-91b45f45144c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "sender": {
+        "address": "google-workspace-alerts-noreply@google.com"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email",
+        "threat"
+      ],
+      "created": "2024-10-14T07:02:11.229Z",
+      "dataset": "checkpoint_email.event",
+      "id": "a6d8674a04c30123456789e4d3ebd98",
+      "ingested": "2026-03-10T02:48:29Z",
+      "kind": "alert",
+      "original": "{\"actions\":[],\"additionalData\":null,\"availableEventActions\":null,\"confidenceIndicator\":\"detected\",\"customerId\":\"exampletest\",\"data\":\"#{\\\"entity_id\\\": \\\"a6d8674a04c30123456789e4d3ebd98\\\", \\\"entity_type\\\": \\\"google_mail_email\\\", \\\"label\\\": \\\"Shadow IT\\\"} - #{\\\"entity_id\\\": \\\"113012345678906535444\\\", \\\"entity_type\\\": \\\"google_user\\\", \\\"label\\\": \\\"john@example.com\\\"} is using #{\\\"entity_id\\\": \\\"google.com\\\", \\\"entity_type\\\": \\\"av_dns_info\\\", \\\"label\\\": \\\"google.com (Search Engine)\\\"}\",\"description\":\"Shadow IT - john@example.com is using google.com (Search Engine)\",\"entityId\":\"25e0c50123456789e351b0dafa6aafa6\",\"entityLink\":\"https://in.portal.checkpoint.com/dashboard/email\\u0026collaboration/CGS1?route=cHJvZmlsZS9nsfhvbksdvnjhvdfVBsdbdfFbdbdBDBBdbrtHyujYJNtnhtnhtnOTIxZTM1MWIwZGFmYTZhYWZhNg==\",\"eventCreated\":\"2024-10-14T07:02:11.229935+00:00\",\"eventId\":\"a6d8674a04c30123456789e4d3ebd98\",\"saas\":\"google_mail\",\"senderAddress\":\"google-workspace-alerts-noreply@google.com\",\"severity\":\"3\",\"state\":\"pending\",\"type\":\"shadow_it\"}",
+      "severity": 3,
+      "type": [
+        "info",
+        "indicator"
+      ],
+      "url": "https://in.portal.checkpoint.com/dashboard/email&collaboration/CGS1?route=cHJvZmlsZS9nsfhvbksdvnjhvdfVBsdbdfFbdbdBDBBdbrtHyujYJNtnhtnhtnOTIxZTM1MWIwZGFmYTZhYWZhNg=="
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Shadow IT - john@example.com is using google.com (Search Engine)",
+    "observer": {
+      "product": "Harmony Email & Collaboration",
+      "vendor": "Check Point"
+    },
+    "organization": {
+      "name": "exampletest"
+    },
+    "related": {
+      "user": [
+        "google-workspace-alerts-noreply@google.com"
+      ]
+    },
+    "source": {
+      "user": {
+        "domain": "google.com",
+        "email": "google-workspace-alerts-noreply@google.com",
+        "name": "google-workspace-alerts-noreply"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "checkpoint_email-event"
+    ]
+  }
+]

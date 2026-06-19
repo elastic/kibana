@@ -1,0 +1,15 @@
+{
+  "package": "first_epss",
+  "dataStreams": [
+    {
+      "dataset": "first_epss.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "first_epss.vulnerability.epss",
+        "vulnerability.id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

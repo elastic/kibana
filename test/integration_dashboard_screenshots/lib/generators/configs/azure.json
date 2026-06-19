@@ -1,0 +1,145 @@
+{
+  "package": "azure",
+  "dataStreams": [
+    {
+      "dataset": "azure.activitylogs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.activitylogs.category",
+        "azure.activitylogs.event_category",
+        "azure.activitylogs.identity.authorization.action",
+        "azure.activitylogs.identity.claims_initiated_by_user.fullname",
+        "azure.activitylogs.identity.claims_initiated_by_user.name",
+        "azure.activitylogs.operation_name",
+        "azure.activitylogs.result_type",
+        "azure.resource.group",
+        "azure.resource.name",
+        "azure.resource.provider",
+        "azure.subscription_id",
+        "event.outcome",
+        "geo.country_name",
+        "source.ip"
+      ],
+      "filterValues": {
+        "azure.activitylogs.event_category": [
+          "Administrative"
+        ]
+      }
+    },
+    {
+      "dataset": "azure.firewall_logs",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "azure.firewall.operation_name",
+        "cloud.account.id",
+        "destination.address",
+        "destination.bytes",
+        "destination.geo.country_name",
+        "destination.ip",
+        "dns.question.name",
+        "event.category",
+        "event.kind",
+        "event.type",
+        "network.protocol",
+        "network.transport",
+        "observer.name",
+        "rule.name",
+        "source.address",
+        "source.bytes",
+        "source.geo.country_name",
+        "source.ip"
+      ],
+      "filterValues": {
+        "azure.firewall.operation_name": [
+          "AzureFirewallApplicationRuleLog",
+          "AzureFirewallNatRuleLog",
+          "AzureFirewallNetworkRuleLog",
+          "AzureFirewallDnsProxyLog"
+        ],
+        "event.kind": [
+          "event"
+        ],
+        "event.category": [
+          "network"
+        ],
+        "event.type": [
+          "allowed",
+          "denied"
+        ]
+      }
+    },
+    {
+      "dataset": "azure.graphactivitylogs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.tenant_id",
+        "cloud.region",
+        "http.request.method",
+        "http.response.status_code",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure.identity_protection",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.identityprotection.category",
+        "azure.identityprotection.properties.detected_datetime",
+        "azure.identityprotection.properties.detection_timing_type",
+        "azure.identityprotection.properties.ip_address",
+        "azure.identityprotection.properties.risk_event_type",
+        "azure.identityprotection.properties.risk_level",
+        "azure.identityprotection.properties.risk_state",
+        "azure.identityprotection.properties.source",
+        "azure.identityprotection.properties.user_display_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure.provisioning",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.provisioning.category",
+        "azure.provisioning.operation_name",
+        "azure.provisioning.properties.action",
+        "azure.provisioning.properties.activity_datetime",
+        "azure.provisioning.properties.provisioning_status_info.status",
+        "azure.provisioning.properties.source_identity.identity_type",
+        "azure.provisioning.properties.source_identity.name",
+        "azure.provisioning.properties.source_system.name",
+        "azure.provisioning.properties.target_system.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "azure.springcloudlogs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.resource.group",
+        "azure.resource.name",
+        "azure.springcloudlogs.category",
+        "azure.springcloudlogs.operation_name",
+        "azure.springcloudlogs.properties.app_name",
+        "azure.springcloudlogs.properties.instance_name",
+        "azure.springcloudlogs.properties.logger",
+        "azure.springcloudlogs.properties.service_name",
+        "azure.springcloudlogs.properties.type",
+        "azure.subscription_id",
+        "log.level"
+      ],
+      "filterValues": {
+        "azure.springcloudlogs.category": [
+          "SystemLogs",
+          "ApplicationConsole"
+        ]
+      }
+    }
+  ]
+}

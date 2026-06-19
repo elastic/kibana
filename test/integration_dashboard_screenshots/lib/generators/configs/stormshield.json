@@ -1,0 +1,30 @@
+{
+  "package": "stormshield",
+  "dataStreams": [
+    {
+      "dataset": "stormshield.log",
+      "indexPattern": "logs-*",
+      "docTarget": 510,
+      "fields": [
+        "destination.as.organization.name",
+        "destination.geo.country_name",
+        "destination.geo.location",
+        "event.action",
+        "event.duration",
+        "log.syslog.facility.name",
+        "log.syslog.severity.name",
+        "network.protocol",
+        "network.transport",
+        "source.as.organization.name",
+        "source.geo.country_name",
+        "source.geo.location",
+        "stormshield.fw",
+        "stormshield.in_bytes",
+        "stormshield.logtype",
+        "stormshield.out_bytes",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

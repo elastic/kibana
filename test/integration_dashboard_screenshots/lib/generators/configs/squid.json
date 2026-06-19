@@ -1,0 +1,27 @@
+{
+  "package": "squid",
+  "dataStreams": [
+    {
+      "dataset": "squid.log",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.address",
+        "destination.bytes",
+        "destination.geo.country_name",
+        "destination.geo.location",
+        "event.duration",
+        "event.outcome",
+        "http.request.method",
+        "source.address",
+        "source.geo.country_name",
+        "source.geo.location",
+        "squid.content_type",
+        "squid.peer_status",
+        "squid.result_code",
+        "squid.status_code"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

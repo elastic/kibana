@@ -1,0 +1,43 @@
+{
+  "package": "microsoft_dnsserver",
+  "dataStreams": [
+    {
+      "dataset": "microsoft_dnsserver.analytical",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.name",
+        "destination.geo.location",
+        "destination.ip",
+        "dns.question.name",
+        "dns.question.type",
+        "dns.response_code",
+        "event.action",
+        "microsoft_dnsserver.analytical.description",
+        "microsoft_dnsserver.analytical.interface_ip",
+        "network.bytes",
+        "network.direction",
+        "source.geo.country_name",
+        "source.geo.location",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_dnsserver.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.name",
+        "event.action",
+        "event.code",
+        "log.level",
+        "microsoft_dnsserver.audit.policy",
+        "microsoft_dnsserver.audit.scope",
+        "microsoft_dnsserver.audit.zone",
+        "related.user"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

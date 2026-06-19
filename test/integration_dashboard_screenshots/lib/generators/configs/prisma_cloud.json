@@ -1,0 +1,145 @@
+{
+  "package": "prisma_cloud",
+  "dataStreams": [
+    {
+      "dataset": "prisma_cloud.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.provider",
+        "cloud.service.name",
+        "event.id",
+        "prisma_cloud.alert.policy.id",
+        "prisma_cloud.alert.policy.name",
+        "prisma_cloud.alert.policy.severity",
+        "prisma_cloud.alert.policy.type",
+        "prisma_cloud.alert.resource.id",
+        "prisma_cloud.alert.resource.name",
+        "prisma_cloud.alert.resource.region.value",
+        "prisma_cloud.alert.resource.type",
+        "prisma_cloud.alert.status"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "prisma_cloud.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.outcome",
+        "prisma_cloud.audit.resource.name",
+        "prisma_cloud.audit.resource.type",
+        "user.email"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "prisma_cloud.host",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "host.type",
+        "os.name",
+        "package.name",
+        "package.type",
+        "prisma_cloud.host.agentless",
+        "prisma_cloud.host.compliance_distribution.critical",
+        "prisma_cloud.host.compliance_distribution.high",
+        "prisma_cloud.host.compliance_distribution.low",
+        "prisma_cloud.host.compliance_distribution.medium",
+        "prisma_cloud.host.compliance_distribution.total",
+        "prisma_cloud.host.vulnerability.distribution.critical",
+        "prisma_cloud.host.vulnerability.distribution.high",
+        "prisma_cloud.host.vulnerability.distribution.low",
+        "prisma_cloud.host.vulnerability.distribution.medium",
+        "prisma_cloud.host.vulnerability.distribution.total"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "prisma_cloud.host_profile",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "prisma_cloud.host_profile.apps.listening_ports.port",
+        "prisma_cloud.host_profile.apps.name",
+        "prisma_cloud.host_profile.apps.outgoing_ports.command",
+        "prisma_cloud.host_profile.apps.outgoing_ports.country",
+        "prisma_cloud.host_profile.apps.outgoing_ports.port",
+        "prisma_cloud.host_profile.apps.outgoing_ports.process_path",
+        "prisma_cloud.host_profile.ssh_events.country"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "prisma_cloud.incident_audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.provider",
+        "cloud.region",
+        "event.id",
+        "os.full",
+        "prisma_cloud.incident_audit.data.ip",
+        "prisma_cloud.incident_audit.data.severity",
+        "prisma_cloud.incident_audit.data.user",
+        "prisma_cloud.incident_audit.type",
+        "rule.name",
+        "threat.technique.name",
+        "threat.technique.subtechnique.name"
+      ],
+      "filterValues": {
+        "threat.technique.name": [
+          "networkServiceScanning"
+        ]
+      }
+    },
+    {
+      "dataset": "prisma_cloud.misconfiguration",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.provider",
+        "prisma_cloud.misconfiguration.overall_passed",
+        "prisma_cloud.misconfiguration.scanned_policy.severity",
+        "resource.id",
+        "resource.name",
+        "resource.type",
+        "result.evaluation"
+      ],
+      "filterValues": {
+        "prisma_cloud.misconfiguration.overall_passed": [
+          "true",
+          "false"
+        ],
+        "result.evaluation": [
+          "passed",
+          "failed"
+        ]
+      }
+    },
+    {
+      "dataset": "prisma_cloud.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "package.fixed_version",
+        "package.name",
+        "prisma_cloud.vulnerability.at_risk",
+        "prisma_cloud.vulnerability.discovered_date",
+        "prisma_cloud.vulnerability.internet_exposed",
+        "prisma_cloud.vulnerability.patchable",
+        "resource.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "prisma_cloud.vulnerability.at_risk": [
+          "Y"
+        ]
+      }
+    }
+  ]
+}

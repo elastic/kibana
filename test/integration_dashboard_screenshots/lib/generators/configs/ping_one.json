@@ -1,0 +1,27 @@
+{
+  "package": "ping_one",
+  "dataStreams": [
+    {
+      "dataset": "ping_one.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "client.user.name",
+        "event.action",
+        "event.outcome",
+        "ping_one.audit.actors.client.type",
+        "ping_one.audit.actors.user.type",
+        "ping_one.audit.resources.name",
+        "ping_one.audit.resources.type",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.action": [
+          "password.check_failed",
+          "password.check_succeeded"
+        ]
+      }
+    }
+  ]
+}

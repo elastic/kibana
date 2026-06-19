@@ -1,0 +1,377 @@
+[
+  {
+    "agent": {
+      "name": "elastic-agent-41727",
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "ephemeral_id": "99f02f43-a3e4-4f1c-84c8-9f858749e025",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2016-04-29T15:18:21.000Z",
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    },
+    "data_stream": {
+      "namespace": "41439",
+      "type": "metrics",
+      "dataset": "docker.event"
+    },
+    "host": {
+      "hostname": "elastic-agent-41727",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "type": "linux",
+        "family": "",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-41727",
+      "mac": [
+        "0A-02-A1-31-7C-A5",
+        "92-0F-76-5A-6E-1C"
+      ],
+      "architecture": "aarch64"
+    },
+    "elastic_agent": {
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "metricset": {
+      "name": "event"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:45:18Z",
+      "module": "docker",
+      "dataset": "docker.event"
+    },
+    "docker": {
+      "event": {
+        "actor": {
+          "attributes": {
+            "image": "alpine",
+            "com_example_some-label": "some-label-value",
+            "name": "my-container"
+          },
+          "id": "ede54ee1afda366ab42f824e8a5ffd195155d853ceaec74a927f249ea270c743"
+        },
+        "action": "create",
+        "from": "",
+        "id": "",
+        "type": "container",
+        "status": ""
+      }
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-41727",
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "type": "metricbeat",
+      "ephemeral_id": "99f02f43-a3e4-4f1c-84c8-9f858749e025",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2016-04-29T15:18:21.000Z",
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "data_stream": {
+      "namespace": "41439",
+      "type": "metrics",
+      "dataset": "docker.event"
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    },
+    "elastic_agent": {
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-41727",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "family": "",
+        "type": "linux",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "containerized": false,
+      "name": "elastic-agent-41727",
+      "mac": [
+        "0A-02-A1-31-7C-A5",
+        "92-0F-76-5A-6E-1C"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "name": "event"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:45:19Z",
+      "module": "docker",
+      "dataset": "docker.event"
+    },
+    "docker": {
+      "event": {
+        "actor": {
+          "attributes": {
+            "image": "alpine",
+            "com_example_some-label": "some-label-value",
+            "name": "my-container"
+          },
+          "id": "ede54ee1afda366ab42f824e8a5ffd195155d853ceaec74a927f249ea270c743"
+        },
+        "action": "create",
+        "from": "",
+        "id": "",
+        "type": "container",
+        "status": ""
+      }
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-41727",
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "ephemeral_id": "99f02f43-a3e4-4f1c-84c8-9f858749e025",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2016-04-29T15:18:21.000Z",
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "data_stream": {
+      "namespace": "41439",
+      "type": "metrics",
+      "dataset": "docker.event"
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    },
+    "elastic_agent": {
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-41727",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "type": "linux",
+        "family": "",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-41727",
+      "mac": [
+        "0A-02-A1-31-7C-A5",
+        "92-0F-76-5A-6E-1C"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "name": "event"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:45:20Z",
+      "module": "docker",
+      "dataset": "docker.event"
+    },
+    "docker": {
+      "event": {
+        "actor": {
+          "attributes": {
+            "image": "alpine",
+            "com_example_some-label": "some-label-value",
+            "name": "my-container"
+          },
+          "id": "ede54ee1afda366ab42f824e8a5ffd195155d853ceaec74a927f249ea270c743"
+        },
+        "action": "create",
+        "from": "",
+        "id": "",
+        "type": "container",
+        "status": ""
+      }
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-41727",
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "ephemeral_id": "99f02f43-a3e4-4f1c-84c8-9f858749e025",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2016-04-29T15:18:21.000Z",
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    },
+    "data_stream": {
+      "namespace": "41439",
+      "type": "metrics",
+      "dataset": "docker.event"
+    },
+    "elastic_agent": {
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-41727",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "family": "",
+        "type": "linux",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-41727",
+      "mac": [
+        "0A-02-A1-31-7C-A5",
+        "92-0F-76-5A-6E-1C"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "name": "event"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:45:21Z",
+      "module": "docker",
+      "dataset": "docker.event"
+    },
+    "docker": {
+      "event": {
+        "actor": {
+          "attributes": {
+            "image": "alpine",
+            "com_example_some-label": "some-label-value",
+            "name": "my-container"
+          },
+          "id": "ede54ee1afda366ab42f824e8a5ffd195155d853ceaec74a927f249ea270c743"
+        },
+        "action": "create",
+        "from": "",
+        "id": "",
+        "type": "container",
+        "status": ""
+      }
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-41727",
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "type": "metricbeat",
+      "ephemeral_id": "99f02f43-a3e4-4f1c-84c8-9f858749e025",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2016-04-29T15:18:21.000Z",
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "data_stream": {
+      "namespace": "41439",
+      "type": "metrics",
+      "dataset": "docker.event"
+    },
+    "service": {
+      "address": "tcp://svc-mocker:3000",
+      "type": "docker"
+    },
+    "elastic_agent": {
+      "id": "af7e45eb-4054-4269-ae09-85bfd91d53c2",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-41727",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "type": "linux",
+        "family": "",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-41727",
+      "mac": [
+        "0A-02-A1-31-7C-A5",
+        "92-0F-76-5A-6E-1C"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "name": "event"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:45:21Z",
+      "module": "docker",
+      "dataset": "docker.event"
+    },
+    "docker": {
+      "event": {
+        "actor": {
+          "attributes": {
+            "image": "alpine",
+            "com_example_some-label": "some-label-value",
+            "name": "my-container"
+          },
+          "id": "ede54ee1afda366ab42f824e8a5ffd195155d853ceaec74a927f249ea270c743"
+        },
+        "action": "create",
+        "from": "",
+        "id": "",
+        "type": "container",
+        "status": ""
+      }
+    }
+  }
+]

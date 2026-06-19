@@ -1,0 +1,16 @@
+{
+  "package": "coredns",
+  "dataStreams": [
+    {
+      "dataset": "coredns.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "dns.question.name",
+        "fileset.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "package": "sysmon_linux",
+  "dataStreams": [
+    {
+      "dataset": "sysmon_linux.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "event.type",
+        "log.level",
+        "winlog.event_id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

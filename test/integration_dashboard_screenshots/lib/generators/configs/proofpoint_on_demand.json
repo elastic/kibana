@@ -1,0 +1,65 @@
+{
+  "package": "proofpoint_on_demand",
+  "dataStreams": [
+    {
+      "dataset": "proofpoint_on_demand.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.id",
+        "log.level",
+        "proofpoint_on_demand.audit.resource_type",
+        "source.ip",
+        "source.user.email"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_on_demand.mail",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "event.id",
+        "network.protocol",
+        "observer.hostname",
+        "proofpoint_on_demand.mail.sm.mailer",
+        "proofpoint_on_demand.mail.sm.tls.verify"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_on_demand.message",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.message_id",
+        "email.to.address",
+        "network.direction",
+        "network.protocol",
+        "observer.hostname",
+        "proofpoint_on_demand.message.action_dmarc.rule",
+        "proofpoint_on_demand.message.filter.disposition",
+        "proofpoint_on_demand.message.filter.quarantine.folder",
+        "proofpoint_on_demand.message.final_module",
+        "proofpoint_on_demand.message.final_rule",
+        "source.geo.country_iso_code",
+        "source.ip",
+        "tls.cipher"
+      ],
+      "filterValues": {
+        "network.direction": [
+          "outbound",
+          "inbound"
+        ],
+        "proofpoint_on_demand.message.final_module": [
+          "spam",
+          "av"
+        ]
+      }
+    }
+  ]
+}

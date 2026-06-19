@@ -1,0 +1,342 @@
+[
+  {
+    "@timestamp": "2022-06-29T00:32:23.000Z",
+    "agent": {
+      "ephemeral_id": "94885d4d-7f4e-47a8-99f6-b53fa19a391d",
+      "id": "fe27d3ba-6433-438b-99b9-0dafa9d11b19",
+      "name": "elastic-agent-95569",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "26",
+        "product": "PTA",
+        "vendor": "CyberArk",
+        "version": "11.4"
+      },
+      "extensions": {
+        "destinationAddress": "10.0.1.20",
+        "destinationHostName": "components.cyberark.local",
+        "destinationUserName": "svc_account@components.cyberark.local",
+        "deviceCustomDate1": "2022-06-29T00:32:23.000Z",
+        "deviceCustomDate1Label": "DetectionDate",
+        "deviceCustomString1": "None",
+        "deviceCustomString1Label": "ExtraData",
+        "deviceCustomString2": "62bb9d97c2dcd9b6beb4cc15",
+        "deviceCustomString2Label": "EventID",
+        "deviceCustomString3": "https://components.cyberark.local:443/PasswordVault/v10/pta/events/62bb9d97c2dcd9b6beb4cc15",
+        "deviceCustomString3Label": "PTALink",
+        "deviceCustomString4": "None",
+        "deviceCustomString4Label": "ExternalLink",
+        "sourceHostName": "None",
+        "sourceUserName": "Administrator(Vault user)"
+      },
+      "name": "Active dormant Vault user",
+      "severity": "5",
+      "version": "0"
+    },
+    "cyberark_pta": {
+      "log": {
+        "event_type": "26"
+      }
+    },
+    "data_stream": {
+      "dataset": "cyberark_pta.events",
+      "namespace": "53711",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "components.cyberark.local",
+      "ip": "10.0.1.20",
+      "user": {
+        "domain": "components.cyberark.local",
+        "email": "svc_account@components.cyberark.local",
+        "name": "svc_account"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fe27d3ba-6433-438b-99b9-0dafa9d11b19",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "26",
+      "dataset": "cyberark_pta.events",
+      "id": "62bb9d97c2dcd9b6beb4cc15",
+      "ingested": "2026-03-10T02:18:04Z",
+      "original": "CEF:0|CyberArk|PTA|11.4|26|Active dormant Vault user|5|suser=Administrator(Vault user) shost=None src=None duser=svc_account@components.cyberark.local dhost=components.cyberark.local dst=10.0.1.20 cs1Label=ExtraData cs1=None cs2Label=EventID cs2=62bb9d97c2dcd9b6beb4cc15 deviceCustomDate1Label=DetectionDate deviceCustomDate1=1656462743000 cs3Label=PTALink cs3=https://components.cyberark.local:443/PasswordVault/v10/pta/events/62bb9d97c2dcd9b6beb4cc15 cs4Label=ExternalLink cs4=None",
+      "reason": "Active dormant Vault user",
+      "reference": "https://components.cyberark.local:443/PasswordVault/v10/pta/events/62bb9d97c2dcd9b6beb4cc15",
+      "severity": 5,
+      "timezone": "+00:00",
+      "url": "None"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:41282"
+      }
+    },
+    "observer": {
+      "product": "PTA",
+      "vendor": "CyberArk",
+      "version": "11.4"
+    },
+    "related": {
+      "user": [
+        "Administrator(Vault user)",
+        "svc_account",
+        "svc_account@components.cyberark.local"
+      ]
+    },
+    "source": {
+      "domain": "None",
+      "user": {
+        "name": "Administrator(Vault user)"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "cyberark_pta",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2014-01-01T12:05:00.000Z",
+    "agent": {
+      "ephemeral_id": "94885d4d-7f4e-47a8-99f6-b53fa19a391d",
+      "id": "fe27d3ba-6433-438b-99b9-0dafa9d11b19",
+      "name": "elastic-agent-95569",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "1",
+        "product": "PTA",
+        "vendor": "CyberArk",
+        "version": "12.6"
+      },
+      "extensions": {
+        "destinationAddress": "2.2.2.2",
+        "destinationHostName": "dev1.domain.com",
+        "destinationUserName": "andy@dev1.domain.com",
+        "deviceCustomDate1": "2014-01-01T12:05:00.000Z",
+        "deviceCustomDate1Label": "detectionDate",
+        "deviceCustomString1": "None",
+        "deviceCustomString1Label": "ExtraData",
+        "deviceCustomString2": "52b06812ec3500ed864c461e",
+        "deviceCustomString2Label": "EventID",
+        "deviceCustomString3": "https://1.1.1.1/incidents/52b06812ec3500ed864c461e",
+        "deviceCustomString3Label": "PTAlink",
+        "deviceCustomString4": "None",
+        "deviceCustomString4Label": "ExternalLink",
+        "sourceAddress": "1.1.1.1",
+        "sourceHostName": "prod1.domain.com",
+        "sourceUserName": "mike2@prod1.domain.com"
+      },
+      "name": "Suspected credentials theft",
+      "severity": "8",
+      "version": "0"
+    },
+    "cyberark_pta": {
+      "log": {
+        "event_type": "1"
+      }
+    },
+    "data_stream": {
+      "dataset": "cyberark_pta.events",
+      "namespace": "53711",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "dev1.domain.com",
+      "ip": "2.2.2.2",
+      "user": {
+        "domain": "dev1.domain.com",
+        "email": "andy@dev1.domain.com",
+        "name": "andy"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fe27d3ba-6433-438b-99b9-0dafa9d11b19",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "1",
+      "dataset": "cyberark_pta.events",
+      "id": "52b06812ec3500ed864c461e",
+      "ingested": "2026-03-10T02:18:04Z",
+      "original": "CEF:0|CyberArk|PTA|12.6|1|Suspected credentials theft|8|suser=mike2@prod1.domain.com shost=prod1.domain.com src=1.1.1.1 duser=andy@dev1.domain.com dhost=dev1.domain.com dst=2.2.2.2 cs1Label=ExtraData cs1=None cs2Label=EventID cs2=52b06812ec3500ed864c461e deviceCustomDate1Label=detectionDate deviceCustomDate1=1388577900000 cs3Label=PTAlink cs3=https://1.1.1.1/incidents/52b06812ec3500ed864c461e cs4Label=ExternalLink cs4=None",
+      "reason": "Suspected credentials theft",
+      "reference": "https://1.1.1.1/incidents/52b06812ec3500ed864c461e",
+      "severity": 8,
+      "timezone": "+00:00",
+      "url": "None"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:41282"
+      }
+    },
+    "observer": {
+      "product": "PTA",
+      "vendor": "CyberArk",
+      "version": "12.6"
+    },
+    "related": {
+      "user": [
+        "mike2",
+        "mike2@prod1.domain.com",
+        "andy",
+        "andy@dev1.domain.com"
+      ]
+    },
+    "source": {
+      "domain": "prod1.domain.com",
+      "ip": "1.1.1.1",
+      "user": {
+        "domain": "prod1.domain.com",
+        "email": "mike2@prod1.domain.com",
+        "name": "mike2"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "cyberark_pta",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2014-01-01T12:05:00.000Z",
+    "agent": {
+      "ephemeral_id": "94885d4d-7f4e-47a8-99f6-b53fa19a391d",
+      "id": "fe27d3ba-6433-438b-99b9-0dafa9d11b19",
+      "name": "elastic-agent-95569",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "1",
+        "product": "PTA",
+        "vendor": "CyberArk",
+        "version": "12.6"
+      },
+      "extensions": {
+        "destinationAddress": "2.2.2.2",
+        "destinationHostName": "dev1.domain.com",
+        "destinationUserName": "andy@dev1.domain.com",
+        "deviceCustomDate1": "2014-01-01T12:05:00.000Z",
+        "deviceCustomDate1Label": "detectionDate",
+        "deviceCustomString1": "None",
+        "deviceCustomString1Label": "ExtraData",
+        "deviceCustomString2": "52b06812ec3500ed864c461e",
+        "deviceCustomString2Label": "EventID",
+        "deviceCustomString3": "https://1.1.1.1/incidents/52b06812ec3500ed864c461e",
+        "deviceCustomString3Label": "PTAlink",
+        "deviceCustomString4": "None",
+        "deviceCustomString4Label": "ExternalLink",
+        "sourceAddress": "1.1.1.1",
+        "sourceHostName": "prod1.domain.com",
+        "sourceUserName": "mike2@prod1.domain.com"
+      },
+      "name": "Suspected credentials theft",
+      "severity": "8",
+      "version": "0"
+    },
+    "cyberark_pta": {
+      "log": {
+        "event_type": "1"
+      }
+    },
+    "data_stream": {
+      "dataset": "cyberark_pta.events",
+      "namespace": "53711",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "dev1.domain.com",
+      "ip": "2.2.2.2",
+      "user": {
+        "domain": "dev1.domain.com",
+        "email": "andy@dev1.domain.com",
+        "name": "andy"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fe27d3ba-6433-438b-99b9-0dafa9d11b19",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "1",
+      "dataset": "cyberark_pta.events",
+      "id": "52b06812ec3500ed864c461e",
+      "ingested": "2026-03-10T02:18:04Z",
+      "original": "Nov 11 11:00:00 81.2.69.144 CEF:0|CyberArk|PTA|12.6|1|Suspected credentials theft|8|suser=mike2@prod1.domain.com shost=prod1.domain.com src=1.1.1.1 duser=andy@dev1.domain.com dhost=dev1.domain.com dst=2.2.2.2 cs1Label=ExtraData cs1=None cs2Label=EventID cs2=52b06812ec3500ed864c461e deviceCustomDate1Label=detectionDate deviceCustomDate1=1388577900000 cs3Label=PTAlink cs3=https://1.1.1.1/incidents/52b06812ec3500ed864c461e cs4Label=ExternalLink cs4=None",
+      "reason": "Suspected credentials theft",
+      "reference": "https://1.1.1.1/incidents/52b06812ec3500ed864c461e",
+      "severity": 8,
+      "timezone": "+00:00",
+      "url": "None"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.19.0.3:41282"
+      }
+    },
+    "observer": {
+      "ip": [
+        "81.2.69.144"
+      ],
+      "product": "PTA",
+      "vendor": "CyberArk",
+      "version": "12.6"
+    },
+    "related": {
+      "user": [
+        "mike2",
+        "mike2@prod1.domain.com",
+        "andy",
+        "andy@dev1.domain.com"
+      ]
+    },
+    "source": {
+      "domain": "prod1.domain.com",
+      "ip": "1.1.1.1",
+      "user": {
+        "domain": "prod1.domain.com",
+        "email": "mike2@prod1.domain.com",
+        "name": "mike2"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "cyberark_pta",
+      "forwarded"
+    ]
+  }
+]

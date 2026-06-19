@@ -1,0 +1,56 @@
+{
+  "package": "haproxy",
+  "dataStreams": [
+    {
+      "dataset": "haproxy.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "haproxy.backend_name",
+        "haproxy.frontend_name",
+        "http.response.status_code",
+        "source.address",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "haproxy.stat",
+      "indexPattern": "metrics-*",
+      "docTarget": 690,
+      "fields": [
+        "haproxy.stat.check.duration",
+        "haproxy.stat.component_type",
+        "haproxy.stat.connection.time.avg",
+        "haproxy.stat.connection.total",
+        "haproxy.stat.downtime",
+        "haproxy.stat.in.bytes",
+        "haproxy.stat.out.bytes",
+        "haproxy.stat.proxy.name",
+        "haproxy.stat.queue.time.avg",
+        "haproxy.stat.request.denied",
+        "haproxy.stat.request.errors",
+        "haproxy.stat.request.total",
+        "haproxy.stat.response.errors",
+        "haproxy.stat.response.http.2xx",
+        "haproxy.stat.response.http.3xx",
+        "haproxy.stat.response.http.4xx",
+        "haproxy.stat.response.http.5xx",
+        "haproxy.stat.response.http.other",
+        "haproxy.stat.response.time.avg",
+        "haproxy.stat.server.id",
+        "haproxy.stat.session.rate.value",
+        "haproxy.stat.session.total",
+        "haproxy.stat.status"
+      ],
+      "filterValues": {
+        "haproxy.stat.component_type": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    }
+  ]
+}

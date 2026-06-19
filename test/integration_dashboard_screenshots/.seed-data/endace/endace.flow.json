@@ -1,0 +1,89 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:45:25.008Z",
+    "agent": {
+      "ephemeral_id": "ebb8e038-4c9d-4eac-a317-c55e9c397887",
+      "id": "69665cb7-ce40-4f07-86c7-1f61be841f0c",
+      "name": "elastic-agent-25819",
+      "type": "packetbeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "endace.flow",
+      "namespace": "44411",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 92,
+      "ip": "10.0.0.2",
+      "mac": "00-00-00-00-00-02",
+      "packets": 2
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "69665cb7-ce40-4f07-86c7-1f61be841f0c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "network_flow",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "endace.flow",
+      "duration": 39890709,
+      "end": "2026-03-10T03:45:14.082Z",
+      "ingested": "2026-03-10T03:45:26Z",
+      "kind": "event",
+      "reference": "/vision2/pivotintovision/?title=endace_pivot&datasources=tag:rotation-file&start=1773114014042&end=1773114614082&tools=trafficOverTime_by_app,conversations_by_ipaddress&ip_conv=10.0.0.1%2610.0.0.2",
+      "start": "2026-03-10T03:45:14.042Z",
+      "type": [
+        "connection",
+        "end"
+      ]
+    },
+    "flow": {
+      "final": true,
+      "id": "EQAA////DP////////8BAAEAAAAAAAEAAAAAAAIKAAABCgAAAg"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-25819",
+      "ip": [
+        "172.20.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "AE-E5-4E-74-81-A9",
+        "C2-F7-9E-36-50-23"
+      ],
+      "name": "elastic-agent-25819",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "network": {
+      "bytes": 184,
+      "community_id": "1:YcMyyWJfhc95EW1GfXt6jlZ3DiQ=",
+      "packets": 4,
+      "transport": "icmp",
+      "type": "ipv4"
+    },
+    "source": {
+      "bytes": 92,
+      "ip": "10.0.0.1",
+      "mac": "00-00-00-00-00-01",
+      "packets": 2
+    },
+    "type": "flow"
+  }
+]

@@ -1,0 +1,124 @@
+{
+  "package": "redis",
+  "dataStreams": [
+    {
+      "dataset": "redis.info",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "process.pid",
+        "redis.info.clients.blocked",
+        "redis.info.clients.connected",
+        "redis.info.cpu.used.sys",
+        "redis.info.cpu.used.user",
+        "redis.info.memory.used.peak",
+        "redis.info.server.mode",
+        "redis.info.server.multiplexing_api",
+        "redis.info.server.uptime",
+        "redis.keyspace.id",
+        "redis.keyspace.keys",
+        "service.address",
+        "service.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "redis.key",
+      "indexPattern": "metrics-*",
+      "docTarget": 510,
+      "fields": [
+        "process.pid",
+        "redis.info.clients.blocked",
+        "redis.info.clients.connected",
+        "redis.info.cpu.used.sys",
+        "redis.info.cpu.used.user",
+        "redis.info.memory.used.peak",
+        "redis.info.server.mode",
+        "redis.info.server.multiplexing_api",
+        "redis.info.server.uptime",
+        "redis.key.expire.ttl",
+        "redis.key.id",
+        "redis.key.length",
+        "redis.key.type",
+        "redis.keyspace.id",
+        "redis.keyspace.keys",
+        "service.address",
+        "service.version"
+      ],
+      "filterValues": {
+        "redis.key.type": [
+          "list",
+          "string"
+        ],
+        "redis.keyspace.id": [
+          "db0",
+          "db1"
+        ]
+      }
+    },
+    {
+      "dataset": "redis.keyspace",
+      "indexPattern": "metrics-*",
+      "docTarget": 510,
+      "fields": [
+        "process.pid",
+        "redis.info.clients.blocked",
+        "redis.info.clients.connected",
+        "redis.info.cpu.used.sys",
+        "redis.info.cpu.used.user",
+        "redis.info.memory.used.peak",
+        "redis.info.server.mode",
+        "redis.info.server.multiplexing_api",
+        "redis.info.server.uptime",
+        "redis.key.expire.ttl",
+        "redis.key.id",
+        "redis.key.length",
+        "redis.key.type",
+        "redis.keyspace.id",
+        "redis.keyspace.keys",
+        "service.address",
+        "service.version"
+      ],
+      "filterValues": {
+        "redis.key.type": [
+          "list",
+          "string"
+        ],
+        "redis.keyspace.id": [
+          "db0",
+          "db1"
+        ]
+      }
+    },
+    {
+      "dataset": "redis.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "log.level",
+        "message",
+        "redis.log.role",
+        "redis.slowlog.cmd",
+        "redis.slowlog.duration.us",
+        "redis.slowlog.key"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "redis.slowlog",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "log.level",
+        "message",
+        "redis.log.role",
+        "redis.slowlog.cmd",
+        "redis.slowlog.duration.us",
+        "redis.slowlog.key"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

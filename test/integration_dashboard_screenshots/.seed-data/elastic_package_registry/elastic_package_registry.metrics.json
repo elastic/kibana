@@ -1,0 +1,549 @@
+[
+  {
+    "agent": {
+      "name": "elastic-agent-60465",
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "ephemeral_id": "c92fa545-00d9-456a-ba6e-332c2b6f5282",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2026-03-10T03:37:10.466Z",
+    "ecs": {
+      "version": "8.3.1"
+    },
+    "service": {
+      "address": "http://svc-elastic_package_registry:9110/metrics",
+      "type": "elastic_package_registry"
+    },
+    "data_stream": {
+      "namespace": "93259",
+      "type": "metrics",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "elastic_agent": {
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-60465",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "type": "linux",
+        "family": "",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-60465",
+      "mac": [
+        "46-FB-27-5C-19-29",
+        "B2-19-7A-A6-E7-81"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "period": 30000,
+      "name": "collector"
+    },
+    "event": {
+      "duration": 14183209,
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:37:13Z",
+      "kind": "metric",
+      "module": "prometheus",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "package_registry": {
+      "start_time": "2026-03-10T03:36:59.240Z",
+      "start_time_seconds": 1773113819.24,
+      "number_indexed_packages": 1,
+      "in_flight_requests": 0,
+      "storage_indexer": {
+        "update_index_success_total": {
+          "counter": 0
+        },
+        "update_index_duration_seconds": {
+          "histogram": {
+            "counts": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "values": [
+              0.0025,
+              0.0075,
+              0.0175,
+              0.037500000000000006,
+              0.07500000000000001,
+              0.175,
+              0.375,
+              0.75,
+              1.75,
+              3.75,
+              7.5,
+              10
+            ]
+          }
+        },
+        "update_index_error_total": {
+          "counter": 0
+        }
+      },
+      "labels": {
+        "instance": "svc-elastic_package_registry:9110",
+        "job": "prometheus"
+      },
+      "uptime": 11
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-60465",
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "ephemeral_id": "c92fa545-00d9-456a-ba6e-332c2b6f5282",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2026-03-10T03:37:10.466Z",
+    "ecs": {
+      "version": "8.3.1"
+    },
+    "service": {
+      "address": "http://svc-elastic_package_registry:9110/metrics",
+      "type": "elastic_package_registry"
+    },
+    "data_stream": {
+      "namespace": "93259",
+      "type": "metrics",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "elastic_agent": {
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-60465",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "type": "linux",
+        "family": "",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-60465",
+      "mac": [
+        "46-FB-27-5C-19-29",
+        "B2-19-7A-A6-E7-81"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "period": 30000,
+      "name": "collector"
+    },
+    "event": {
+      "duration": 14188667,
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:37:13Z",
+      "kind": "metric",
+      "module": "prometheus",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "package_registry": {
+      "http": {
+        "request_size_bytes": {
+          "histogram": {
+            "counts": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "values": [
+              8,
+              24,
+              48,
+              96,
+              192,
+              384,
+              768,
+              33280,
+              163840,
+              262144
+            ]
+          }
+        },
+        "response_size_bytes": {
+          "histogram": {
+            "counts": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "values": [
+              8,
+              24,
+              48,
+              96,
+              192,
+              384,
+              768,
+              33280,
+              163840,
+              262144
+            ]
+          }
+        },
+        "request_duration_seconds": {
+          "histogram": {
+            "counts": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "values": [
+              0.0025,
+              0.0075,
+              0.0175,
+              0.037500000000000006,
+              0.07500000000000001,
+              0.175,
+              0.375,
+              0.75,
+              1.75,
+              3.75,
+              7.5,
+              10
+            ]
+          }
+        }
+      },
+      "http_requests_total": {
+        "counter": 9
+      },
+      "labels": {
+        "path": "/",
+        "code": "200",
+        "instance": "svc-elastic_package_registry:9110",
+        "method": "get",
+        "job": "prometheus"
+      }
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-60465",
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "type": "metricbeat",
+      "ephemeral_id": "c92fa545-00d9-456a-ba6e-332c2b6f5282",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2026-03-10T03:37:10.466Z",
+    "ecs": {
+      "version": "8.3.1"
+    },
+    "service": {
+      "address": "http://svc-elastic_package_registry:9110/metrics",
+      "type": "elastic_package_registry"
+    },
+    "data_stream": {
+      "namespace": "93259",
+      "type": "metrics",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "elastic_agent": {
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-60465",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "type": "linux",
+        "family": "",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-60465",
+      "mac": [
+        "46-FB-27-5C-19-29",
+        "B2-19-7A-A6-E7-81"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "period": 30000,
+      "name": "collector"
+    },
+    "event": {
+      "duration": 14193792,
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:37:13Z",
+      "kind": "metric",
+      "module": "prometheus",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "package_registry": {
+      "indexer": {
+        "get_duration_seconds": {
+          "histogram": {
+            "counts": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "values": [
+              0.0025,
+              0.0075,
+              0.0175,
+              0.037500000000000006,
+              0.07500000000000001,
+              0.175,
+              0.375,
+              0.75,
+              1.75,
+              3.75,
+              7.5,
+              10
+            ]
+          }
+        }
+      },
+      "labels": {
+        "instance": "svc-elastic_package_registry:9110",
+        "indexer": "FileSystemIndexer",
+        "job": "prometheus"
+      }
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-60465",
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "ephemeral_id": "c92fa545-00d9-456a-ba6e-332c2b6f5282",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2026-03-10T03:37:10.466Z",
+    "ecs": {
+      "version": "8.3.1"
+    },
+    "service": {
+      "address": "http://svc-elastic_package_registry:9110/metrics",
+      "type": "elastic_package_registry"
+    },
+    "data_stream": {
+      "namespace": "93259",
+      "type": "metrics",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "host": {
+      "hostname": "elastic-agent-60465",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "family": "",
+        "type": "linux",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-60465",
+      "mac": [
+        "46-FB-27-5C-19-29",
+        "B2-19-7A-A6-E7-81"
+      ],
+      "architecture": "aarch64"
+    },
+    "elastic_agent": {
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "metricset": {
+      "period": 30000,
+      "name": "collector"
+    },
+    "event": {
+      "duration": 1977082543,
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:37:13Z",
+      "kind": "metric",
+      "module": "prometheus",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "package_registry": {
+      "indexer": {
+        "get_duration_seconds": {
+          "histogram": {
+            "counts": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "values": [
+              0.0025,
+              0.0075,
+              0.0175,
+              0.037500000000000006,
+              0.07500000000000001,
+              0.175,
+              0.375,
+              0.75,
+              1.75,
+              3.75,
+              7.5,
+              10
+            ]
+          }
+        }
+      },
+      "labels": {
+        "instance": "svc-elastic_package_registry:9110",
+        "indexer": "ZipFileSystemIndexer",
+        "job": "prometheus"
+      }
+    }
+  },
+  {
+    "agent": {
+      "name": "elastic-agent-60465",
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "ephemeral_id": "c92fa545-00d9-456a-ba6e-332c2b6f5282",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "@timestamp": "2026-03-10T03:37:10.466Z",
+    "ecs": {
+      "version": "8.3.1"
+    },
+    "service": {
+      "address": "http://svc-elastic_package_registry:9110/metrics",
+      "type": "elastic_package_registry"
+    },
+    "data_stream": {
+      "namespace": "93259",
+      "type": "metrics",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "elastic_agent": {
+      "id": "0ae4837c-46ba-4f35-a9c2-6aa96814ce9d",
+      "version": "9.3.1",
+      "snapshot": false
+    },
+    "host": {
+      "hostname": "elastic-agent-60465",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "family": "",
+        "type": "linux",
+        "version": "20230201",
+        "platform": "wolfi"
+      },
+      "containerized": false,
+      "ip": [
+        "172.19.0.2",
+        "172.18.0.4"
+      ],
+      "name": "elastic-agent-60465",
+      "mac": [
+        "46-FB-27-5C-19-29",
+        "B2-19-7A-A6-E7-81"
+      ],
+      "architecture": "aarch64"
+    },
+    "metricset": {
+      "period": 30000,
+      "name": "collector"
+    },
+    "event": {
+      "duration": 1977086335,
+      "agent_id_status": "verified",
+      "ingested": "2026-03-10T03:37:13Z",
+      "kind": "metric",
+      "module": "prometheus",
+      "dataset": "elastic_package_registry.metrics"
+    },
+    "package_registry": {
+      "labels": {
+        "instance": "95b3c094a485",
+        "job": "prometheus",
+        "version": "1.11.0"
+      }
+    }
+  }
+]

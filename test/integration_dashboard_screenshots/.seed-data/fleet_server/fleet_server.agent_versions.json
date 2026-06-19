@@ -1,0 +1,1406 @@
+[
+  {
+    "@timestamp": "2026-03-10T04:20:53.811Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:20:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 14,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:19:53.766Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:19:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 16,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:18:53.736Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:18:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 16,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:17:53.682Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:17:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 15,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:16:53.775Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:16:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 15,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:15:53.627Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:15:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 15,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:14:53.597Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:14:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 14,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:13:53.632Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:13:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 14,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:12:53.548Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:12:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 14,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:11:53.534Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:11:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 13,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:10:53.486Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:10:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 13,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:09:53.441Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:09:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 13,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:08:53.470Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:08:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 13,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:07:53.370Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:07:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 13,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:06:53.425Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:06:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 13,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:05:53.310Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:05:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 12,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:04:53.376Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:04:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 12,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:03:53.251Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:03:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 12,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:02:53.224Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:02:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 11,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:01:53.230Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:01:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 11,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T04:00:53.192Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T04:00:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 11,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:59:53.164Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:59:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 11,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:58:53.214Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:58:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 10,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:57:53.087Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:57:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 10,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:56:53.094Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:56:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 10,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:55:53.070Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:55:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:54:53.028Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:54:53Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:53:52.982Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:53:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:52:52.928Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:52:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:51:52.932Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:51:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:50:52.887Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:50:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:49:52.911Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:49:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:48:52.939Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:48:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:47:52.806Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:47:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 7,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:46:52.836Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:46:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 6,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:45:52.794Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:45:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 7,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:44:52.749Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:44:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 4,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:43:52.628Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:43:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 7,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:42:52.597Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:42:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 7,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:41:52.450Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:41:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:40:52.422Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:40:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:39:52.333Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:39:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:38:52.249Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:38:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:37:52.636Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:37:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:36:52.142Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:36:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.044Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:52.052Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:34:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:52.015Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:33:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 9,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:51.948Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:32:51Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:52.593Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:31:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 10,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.725Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 10,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.745Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 5,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:51.691Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:28:51Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 10,
+        "version": "9.3.1"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:52.365Z",
+    "agent": {
+      "id": "3b52e2f8-214c-4266-829d-8eb7a4ed43d1",
+      "type": "kibana",
+      "version": "9.3.1"
+    },
+    "cluster": {
+      "id": "Qcg7qKrXQtiC6qNpIHkFaw"
+    },
+    "data_stream": {
+      "dataset": "fleet_server.agent_versions",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:52Z"
+    },
+    "fleet": {
+      "agent": {
+        "count": 8,
+        "version": "9.3.1"
+      }
+    }
+  }
+]

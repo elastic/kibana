@@ -1,0 +1,144 @@
+{
+  "package": "nozomi_networks",
+  "dataStreams": [
+    {
+      "dataset": "nozomi_networks.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.risk_score",
+        "network.protocol",
+        "nozomi_networks.alert.ack",
+        "nozomi_networks.alert.name",
+        "nozomi_networks.alert.status",
+        "nozomi_networks.alert.threat_name",
+        "nozomi_networks.alert.type_name"
+      ],
+      "filterValues": {
+        "nozomi_networks.alert.status": [
+          "open",
+          "close"
+        ],
+        "nozomi_networks.alert.ack": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "nozomi_networks.asset",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.risk_score",
+        "host.os.name",
+        "network.protocol",
+        "nozomi_networks.asset.name",
+        "nozomi_networks.asset.technology_category",
+        "nozomi_networks.asset.type",
+        "nozomi_networks.asset.vendor",
+        "nozomi_networks.asset.zones"
+      ],
+      "filterValues": {
+        "nozomi_networks.asset.technology_category": [
+          "IoT",
+          "IT",
+          "OT"
+        ]
+      }
+    },
+    {
+      "dataset": "nozomi_networks.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.id",
+        "nozomi_networks.audit.controller",
+        "source.ip",
+        "user.email",
+        "user_agent.original"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nozomi_networks.health",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "nozomi_networks.health.sensor_appliance_type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nozomi_networks.node",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.os.full",
+        "network.protocol",
+        "network.vlan.id",
+        "nozomi_networks.node.is_public",
+        "nozomi_networks.node.name",
+        "nozomi_networks.node.vendor",
+        "nozomi_networks.node.zone",
+        "service.node.roles",
+        "service.type"
+      ],
+      "filterValues": {
+        "nozomi_networks.node.is_public": [
+          "false",
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "nozomi_networks.node_cve",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "nozomi_networks.node_cve.resolved",
+        "nozomi_networks.node_cve.type",
+        "vulnerability.category",
+        "vulnerability.id",
+        "vulnerability.score.base"
+      ],
+      "filterValues": {
+        "nozomi_networks.node_cve.resolved": [
+          "true",
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "nozomi_networks.session",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "event.id",
+        "network.bytes",
+        "network.packets",
+        "network.transport",
+        "network.vlan.id",
+        "nozomi_networks.session.protocol",
+        "nozomi_networks.session.status",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nozomi_networks.variable",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.ip",
+        "nozomi_networks.variable.flow_status",
+        "nozomi_networks.variable.name",
+        "nozomi_networks.variable.protocol",
+        "nozomi_networks.variable.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "package": "awsfargate",
+  "dataStreams": [
+    {
+      "dataset": "awsfargate.task_stats",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "awsfargate.task_stats.cluster_name",
+        "awsfargate.task_stats.cpu.total.norm.pct",
+        "awsfargate.task_stats.diskio.read.bytes",
+        "awsfargate.task_stats.diskio.write.bytes",
+        "awsfargate.task_stats.identifier",
+        "awsfargate.task_stats.memory.usage.total",
+        "awsfargate.task_stats.memory_hard_limit",
+        "cloud.region",
+        "container.id",
+        "container.labels.com_amazonaws_ecs_task-definition-family",
+        "container.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

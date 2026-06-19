@@ -1,0 +1,17 @@
+{
+  "package": "miniflux",
+  "dataStreams": [
+    {
+      "dataset": "miniflux.feed_entry",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "miniflux.feed.category.title",
+        "miniflux.feed.id",
+        "miniflux.status",
+        "miniflux.tags"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:12:17.829Z",
+    "agent": {
+      "ephemeral_id": "a2b21507-764c-4550-adbd-5bc47dd8bbc4",
+      "id": "187eeb94-2ce8-48f9-a61f-380d6a3c3dc9",
+      "name": "elastic-agent-44316",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "apache_spark": {
+      "application": {
+        "mbean": "metrics:name=application.PythonWordCount.1773108733091.runtime_ms,type=gauges",
+        "name": "PythonWordCount.1773108733091",
+        "runtime": {
+          "ms": 4829
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "apache_spark.application",
+      "namespace": "46507",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "187eeb94-2ce8-48f9-a61f-380d6a3c3dc9",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "apache_spark.application",
+      "duration": 99808250,
+      "ingested": "2026-03-10T02:12:19Z",
+      "kind": "metric",
+      "module": "apache_spark",
+      "type": "info"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-44316",
+      "ip": [
+        "172.18.0.6",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "BE-9B-61-C5-DE-3A",
+        "E2-81-62-8A-7C-23"
+      ],
+      "name": "elastic-agent-44316",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "jmx",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://apache-spark-main:7777/jolokia/%3FignoreErrors=true&canonicalNaming=false",
+      "type": "jolokia"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:12:17.829Z",
+    "agent": {
+      "ephemeral_id": "a2b21507-764c-4550-adbd-5bc47dd8bbc4",
+      "id": "187eeb94-2ce8-48f9-a61f-380d6a3c3dc9",
+      "name": "elastic-agent-44316",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "apache_spark": {
+      "application": {
+        "cores": 8,
+        "mbean": "metrics:name=application.PythonWordCount.1773108733091.cores,type=gauges",
+        "name": "PythonWordCount.1773108733091"
+      }
+    },
+    "data_stream": {
+      "dataset": "apache_spark.application",
+      "namespace": "46507",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "187eeb94-2ce8-48f9-a61f-380d6a3c3dc9",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "apache_spark.application",
+      "duration": 99959458,
+      "ingested": "2026-03-10T02:12:19Z",
+      "kind": "metric",
+      "module": "apache_spark",
+      "type": "info"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-44316",
+      "ip": [
+        "172.18.0.6",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "BE-9B-61-C5-DE-3A",
+        "E2-81-62-8A-7C-23"
+      ],
+      "name": "elastic-agent-44316",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "jmx",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://apache-spark-main:7777/jolokia/%3FignoreErrors=true&canonicalNaming=false",
+      "type": "jolokia"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:12:17.829Z",
+    "agent": {
+      "ephemeral_id": "a2b21507-764c-4550-adbd-5bc47dd8bbc4",
+      "id": "187eeb94-2ce8-48f9-a61f-380d6a3c3dc9",
+      "name": "elastic-agent-44316",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "apache_spark": {
+      "application": {
+        "mbean": "metrics:name=application.PythonWordCount.1773108733091.status,type=gauges",
+        "name": "PythonWordCount.1773108733091",
+        "status": "RUNNING"
+      }
+    },
+    "data_stream": {
+      "dataset": "apache_spark.application",
+      "namespace": "46507",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "187eeb94-2ce8-48f9-a61f-380d6a3c3dc9",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "apache_spark.application",
+      "duration": 99962167,
+      "ingested": "2026-03-10T02:12:19Z",
+      "kind": "metric",
+      "module": "apache_spark",
+      "type": "info"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-44316",
+      "ip": [
+        "172.18.0.6",
+        "172.20.0.2"
+      ],
+      "mac": [
+        "BE-9B-61-C5-DE-3A",
+        "E2-81-62-8A-7C-23"
+      ],
+      "name": "elastic-agent-44316",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "jmx",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://apache-spark-main:7777/jolokia/%3FignoreErrors=true&canonicalNaming=false",
+      "type": "jolokia"
+    }
+  }
+]

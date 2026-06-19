@@ -1,0 +1,555 @@
+[
+  {
+    "@timestamp": "2026-03-10T00:51:44.740Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:44.740Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"103\",\"score\":97,\"sharedfoldername\":\"SampleSFName\",\"users\":{\"can_administer\":false,\"give\":false,\"readonly\":true,\"sites\":[\"sss.com\"],\"username\":\"sample.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "SampleSFName",
+        "score": 97.0,
+        "shared_folder": {
+          "id": "103"
+        },
+        "user": {
+          "can_administer": false,
+          "give": false,
+          "name": "sample.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "sss.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "sample.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "sample.user@lastpass.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T00:51:44.740Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:44.740Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"103\",\"score\":97,\"sharedfoldername\":\"SampleSFName\",\"users\":{\"can_administer\":false,\"give\":false,\"readonly\":true,\"sites\":[\"ssss.com\"],\"username\":\"sample2.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "SampleSFName",
+        "score": 97.0,
+        "shared_folder": {
+          "id": "103"
+        },
+        "user": {
+          "can_administer": false,
+          "give": false,
+          "name": "sample2.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "ssss.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "sample2.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "sample2.user@lastpass.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T00:51:44.737Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:44.737Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"101\",\"score\":99,\"sharedfoldername\":\"ThisSFName\",\"users\":{\"can_administer\":false,\"give\":false,\"readonly\":true,\"sites\":[\"zzz.com\"],\"username\":\"jane.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "ThisSFName",
+        "score": 99.0,
+        "shared_folder": {
+          "id": "101"
+        },
+        "user": {
+          "can_administer": false,
+          "give": false,
+          "name": "jane.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "zzz.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "jane.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "jane.user@lastpass.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T00:51:44.737Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:44.737Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"101\",\"score\":99,\"sharedfoldername\":\"ThisSFName\",\"users\":{\"can_administer\":false,\"give\":false,\"readonly\":true,\"sites\":[\"ccc.com\"],\"username\":\"john.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "ThisSFName",
+        "score": 99.0,
+        "shared_folder": {
+          "id": "101"
+        },
+        "user": {
+          "can_administer": false,
+          "give": false,
+          "name": "john.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "ccc.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "john.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "john.user@lastpass.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T00:51:44.737Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:44.737Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"101\",\"score\":99,\"sharedfoldername\":\"ThisSFName\",\"users\":{\"can_administer\":false,\"give\":false,\"readonly\":true,\"sites\":[\"ddd.com\"],\"username\":\"doe.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "ThisSFName",
+        "score": 99.0,
+        "shared_folder": {
+          "id": "101"
+        },
+        "user": {
+          "can_administer": false,
+          "give": false,
+          "name": "doe.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "ddd.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "doe.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "doe.user@lastpass.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T00:51:44.737Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:44.737Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"102\",\"score\":98,\"sharedfoldername\":\"ThatSFName\",\"users\":{\"can_administer\":false,\"give\":false,\"readonly\":true,\"sites\":[\"ccc.com\"],\"username\":\"john.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "ThatSFName",
+        "score": 98.0,
+        "shared_folder": {
+          "id": "102"
+        },
+        "user": {
+          "can_administer": false,
+          "give": false,
+          "name": "john.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "ccc.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "john.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "john.user@lastpass.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T00:51:44.737Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:44.737Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"102\",\"score\":98,\"sharedfoldername\":\"ThatSFName\",\"users\":{\"can_administer\":false,\"give\":false,\"readonly\":true,\"sites\":[\"ddd.com\"],\"username\":\"doe.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "ThatSFName",
+        "score": 98.0,
+        "shared_folder": {
+          "id": "102"
+        },
+        "user": {
+          "can_administer": false,
+          "give": false,
+          "name": "doe.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "ddd.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "doe.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "doe.user@lastpass.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T00:51:42.761Z",
+    "agent": {
+      "ephemeral_id": "6b7be1d2-2e7d-42e3-8462-fc0779f23e33",
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "name": "elastic-agent-23778",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lastpass.detailed_shared_folder",
+      "namespace": "24131",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9e96a5ca-7e47-4f52-952b-703a324760f0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T00:51:42.761Z",
+      "dataset": "lastpass.detailed_shared_folder",
+      "ingested": "2026-03-10T00:51:45Z",
+      "kind": "state",
+      "original": "{\"id\":\"101\",\"score\":99,\"sharedfoldername\":\"ThisSFName\",\"users\":{\"can_administer\":true,\"give\":false,\"readonly\":true,\"sites\":[\"aaa.com\",\"bbb.com\"],\"username\":\"joe.user@lastpass.com\"}}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lastpass": {
+      "detailed_shared_folder": {
+        "name": "ThisSFName",
+        "score": 99.0,
+        "shared_folder": {
+          "id": "101"
+        },
+        "user": {
+          "can_administer": true,
+          "give": false,
+          "name": "joe.user@lastpass.com",
+          "read_only": true,
+          "site": [
+            "aaa.com",
+            "bbb.com"
+          ]
+        }
+      }
+    },
+    "related": {
+      "user": [
+        "joe.user@lastpass.com"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "lastpass-detailed_shared_folder"
+    ],
+    "user": {
+      "email": "joe.user@lastpass.com"
+    }
+  }
+]

@@ -1,0 +1,1117 @@
+[
+  {
+    "@timestamp": "2021-03-30T11:59:57.761Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "ip": "169.254.169.254",
+      "port": 53
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "a.privatelink.msidentity.com",
+          "ttl": 250
+        },
+        {
+          "data": "prda.aadg.msidentity.com",
+          "ttl": 250
+        },
+        {
+          "data": "www.tm.a.prd.aadg.akadns.net",
+          "ttl": 250
+        }
+      ],
+      "header_flags": [
+        "RA"
+      ],
+      "id": "46754",
+      "question": {
+        "name": "login.microsoftonline.com",
+        "registered_domain": "microsoftonline.com",
+        "subdomain": "login",
+        "top_level_domain": "com"
+      },
+      "resolved_ip": [],
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "C86PHA3q1KAtU7gAkb",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 2749
+    },
+    "network": {
+      "community_id": "1:N7oujavZ/cuIywgO6/pC98vwlEA=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 41064
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": true,
+        "RD": false,
+        "TC": false,
+        "TTLs": [
+          250.0,
+          250.0,
+          250.0
+        ],
+        "answers": [
+          "a.privatelink.msidentity.com",
+          "prda.aadg.msidentity.com",
+          "www.tm.a.prd.aadg.akadns.net"
+        ],
+        "query": "login.microsoftonline.com",
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "trans_id": "46754"
+      },
+      "session_id": "C86PHA3q1KAtU7gAkb"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T11:59:57.761Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "ip": "169.254.169.254",
+      "port": 53
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "a.privatelink.msidentity.com",
+          "ttl": 299
+        },
+        {
+          "data": "prda.aadg.msidentity.com",
+          "ttl": 214
+        },
+        {
+          "data": "www.tm.a.prd.aadg.trafficmanager.net",
+          "ttl": 243
+        },
+        {
+          "data": "89.160.20.156",
+          "ttl": 243
+        },
+        {
+          "data": "1.128.31.143",
+          "ttl": 243
+        },
+        {
+          "data": "89.160.20.156",
+          "ttl": 243
+        },
+        {
+          "data": "1.128.31.1",
+          "ttl": 243
+        },
+        {
+          "data": "89.160.20.156",
+          "ttl": 243
+        },
+        {
+          "data": "1.128.31.135",
+          "ttl": 243
+        },
+        {
+          "data": "1.128.31.6",
+          "ttl": 243
+        },
+        {
+          "data": "89.160.20.156",
+          "ttl": 243
+        }
+      ],
+      "header_flags": [
+        "RA"
+      ],
+      "id": "53055",
+      "question": {
+        "name": "login.microsoftonline.com",
+        "registered_domain": "microsoftonline.com",
+        "subdomain": "login",
+        "top_level_domain": "com"
+      },
+      "resolved_ip": [
+        "89.160.20.156",
+        "1.128.31.143",
+        "89.160.20.156",
+        "1.128.31.1",
+        "89.160.20.156",
+        "1.128.31.135",
+        "1.128.31.6",
+        "89.160.20.156"
+      ],
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "Cna5vz1pk7Z32m8HZ6",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 3183
+    },
+    "network": {
+      "community_id": "1:OU1QmYLNS7foY4WyXrPP5U+61gY=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 33681
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": true,
+        "RD": false,
+        "TC": false,
+        "TTLs": [
+          299.0,
+          214.0,
+          243.0,
+          243.0,
+          243.0,
+          243.0,
+          243.0,
+          243.0,
+          243.0,
+          243.0,
+          243.0
+        ],
+        "answers": [
+          "a.privatelink.msidentity.com",
+          "prda.aadg.msidentity.com",
+          "www.tm.a.prd.aadg.trafficmanager.net",
+          "89.160.20.156",
+          "1.128.31.143",
+          "89.160.20.156",
+          "1.128.31.1",
+          "89.160.20.156",
+          "1.128.31.135",
+          "1.128.31.6",
+          "89.160.20.156"
+        ],
+        "query": "login.microsoftonline.com",
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "trans_id": "53055"
+      },
+      "session_id": "Cna5vz1pk7Z32m8HZ6"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T11:59:57.390Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "ip": "169.254.169.254",
+      "port": 53
+    },
+    "dns": {
+      "id": "23824",
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "CkQ7DU1qCEGKL5xgg6",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 2134
+    },
+    "network": {
+      "community_id": "1:QkIpxnpH97j86kx7bhhLsHjN/rQ=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 42609
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": false,
+        "RD": false,
+        "TC": false,
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "trans_id": "23824"
+      },
+      "session_id": "CkQ7DU1qCEGKL5xgg6"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T11:59:57.389Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "ip": "169.254.169.254",
+      "port": 53
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "89.160.20.156",
+          "ttl": 119
+        }
+      ],
+      "header_flags": [
+        "RA"
+      ],
+      "id": "7284",
+      "question": {
+        "name": "portal.swiftcrypto.com",
+        "registered_domain": "swiftcrypto.com",
+        "subdomain": "portal",
+        "top_level_domain": "com"
+      },
+      "resolved_ip": [
+        "89.160.20.156"
+      ],
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "CfFSjicQIGB8hU7L6",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 2405
+    },
+    "network": {
+      "community_id": "1:aX1h2YdV1k52+2IPjd7Yc/94TWk=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 52269
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": true,
+        "RD": false,
+        "TC": false,
+        "TTLs": [
+          119.0
+        ],
+        "answers": [
+          "89.160.20.156"
+        ],
+        "query": "portal.swiftcrypto.com",
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "trans_id": "7284"
+      },
+      "session_id": "CfFSjicQIGB8hU7L6"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T11:59:57.020Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "ip": "169.254.169.254",
+      "port": 53
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "manage.office.com.trafficmanager.net",
+          "ttl": 8
+        },
+        {
+          "data": "o365adtapiproddeu001.cloudapp.net",
+          "ttl": 13
+        }
+      ],
+      "header_flags": [
+        "RA"
+      ],
+      "id": "58530",
+      "question": {
+        "name": "manage.office.com",
+        "registered_domain": "office.com",
+        "subdomain": "manage",
+        "top_level_domain": "com"
+      },
+      "resolved_ip": [],
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "C7NcBd1QRK1mrqmaQe",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 1306
+    },
+    "network": {
+      "community_id": "1:yKCQYaKN7zl66Qw/2WuHp/11zxI=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 40091
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": true,
+        "RD": false,
+        "TC": false,
+        "TTLs": [
+          8.0,
+          13.0
+        ],
+        "answers": [
+          "manage.office.com.trafficmanager.net",
+          "o365adtapiproddeu001.cloudapp.net"
+        ],
+        "query": "manage.office.com",
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "trans_id": "58530"
+      },
+      "session_id": "C7NcBd1QRK1mrqmaQe"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T11:59:57.020Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "169.254.169.254",
+      "ip": "169.254.169.254",
+      "port": 53
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "manage.office.com.trafficmanager.net",
+          "ttl": 293
+        },
+        {
+          "data": "o365adtapiproddeu001.cloudapp.net",
+          "ttl": 28
+        },
+        {
+          "data": "89.160.20.156",
+          "ttl": 8
+        }
+      ],
+      "header_flags": [
+        "RA"
+      ],
+      "id": "55540",
+      "question": {
+        "name": "manage.office.com",
+        "registered_domain": "office.com",
+        "subdomain": "manage",
+        "top_level_domain": "com"
+      },
+      "resolved_ip": [
+        "89.160.20.156"
+      ],
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "CXzjOC13LkKzr4a80e",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 1709
+    },
+    "network": {
+      "community_id": "1:5I9/w/CKNoPVgg1yXfSirRUTTGw=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "10.156.0.2",
+        "169.254.169.254"
+      ]
+    },
+    "source": {
+      "address": "10.156.0.2",
+      "ip": "10.156.0.2",
+      "port": 38190
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": true,
+        "RD": false,
+        "TC": false,
+        "TTLs": [
+          293.0,
+          28.0,
+          8.0
+        ],
+        "answers": [
+          "manage.office.com.trafficmanager.net",
+          "o365adtapiproddeu001.cloudapp.net",
+          "89.160.20.156"
+        ],
+        "query": "manage.office.com",
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "trans_id": "55540"
+      },
+      "session_id": "CXzjOC13LkKzr4a80e"
+    }
+  },
+  {
+    "@timestamp": "2019-08-29T16:23:50.734Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "224.0.0.251",
+      "ip": "224.0.0.251",
+      "port": 5353
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "bravia-4k-gb-5c89f865c9d569ab338815b35e3acc56._googlecast._tcp.local",
+          "ttl": 120
+        }
+      ],
+      "header_flags": [
+        "AA"
+      ],
+      "id": "0",
+      "resolved_ip": [],
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "CdiVAw7jJw6gsX5H",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 910
+    },
+    "network": {
+      "community_id": "1:QIR5YXlirWwWA18ZyY/RnvQoaic=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "192.168.86.237",
+        "224.0.0.251"
+      ]
+    },
+    "source": {
+      "address": "192.168.86.237",
+      "ip": "192.168.86.237",
+      "port": 5353
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": true,
+        "RA": false,
+        "RD": false,
+        "TC": false,
+        "TTLs": [
+          120.0
+        ],
+        "answers": [
+          "bravia-4k-gb-5c89f865c9d569ab338815b35e3acc56._googlecast._tcp.local"
+        ],
+        "query": "_googlecast._tcp.local",
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "trans_id": "0"
+      },
+      "session_id": "CdiVAw7jJw6gsX5H"
+    }
+  },
+  {
+    "@timestamp": "2019-08-29T16:23:50.680Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "ff02::fb",
+      "ip": "ff02::fb",
+      "port": 5353
+    },
+    "dns": {
+      "id": "0",
+      "question": {
+        "class": "IN",
+        "type": "PTR"
+      },
+      "type": "query"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.596Z",
+      "dataset": "zeek.dns",
+      "id": "C19a1k4lTv46YMbeOk",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 567
+    },
+    "network": {
+      "community_id": "1:Jq0sRtlGSMjsvMBE1ZYybbR2tI0=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "fe80::4ef:15cf:769f:ff21",
+        "ff02::fb"
+      ]
+    },
+    "source": {
+      "address": "fe80::4ef:15cf:769f:ff21",
+      "ip": "fe80::4ef:15cf:769f:ff21",
+      "port": 5353
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": false,
+        "RD": false,
+        "TC": false,
+        "qclass": 1,
+        "qclass_name": "C_INTERNET",
+        "qtype": 12,
+        "qtype_name": "PTR",
+        "query": "_googlecast._tcp.local",
+        "rejected": false,
+        "trans_id": "0"
+      },
+      "session_id": "C19a1k4lTv46YMbeOk"
+    }
+  },
+  {
+    "@timestamp": "2019-01-11T06:33:35.857Z",
+    "agent": {
+      "ephemeral_id": "071fb062-a173-45a5-a8f8-7dc92e0fffbf",
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "name": "elastic-agent-44370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dns",
+      "namespace": "46863",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.86.1",
+      "ip": "192.168.86.1",
+      "port": 53
+    },
+    "dns": {
+      "answers": [
+        {
+          "data": "proxy-production-us-west1.gcp.cloud.es.io",
+          "ttl": 119
+        },
+        {
+          "data": "proxy-production-us-west1-v1-009.gcp.cloud.es.io",
+          "ttl": 119
+        },
+        {
+          "data": "89.160.20.156",
+          "ttl": 59
+        }
+      ],
+      "header_flags": [
+        "RD",
+        "RA"
+      ],
+      "id": "15209",
+      "question": {
+        "class": "IN",
+        "name": "dd625ffb4fc54735b281862aa1cd6cd4.us-west1.gcp.cloud.es.io",
+        "registered_domain": "es.io",
+        "subdomain": "dd625ffb4fc54735b281862aa1cd6cd4.us-west1.gcp.cloud",
+        "top_level_domain": "io",
+        "type": "A"
+      },
+      "resolved_ip": [
+        "89.160.20.156"
+      ],
+      "response_code": "NOERROR",
+      "type": "answer"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e61d0f9c-a404-4647-bd5e-f83c1b122bda",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:27.611Z",
+      "dataset": "zeek.dns",
+      "duration": 76967000,
+      "id": "CAcJw21BbVedgFnYH3",
+      "ingested": "2026-03-10T03:16:30Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dns.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "community_id": "1:Z26DBGVYoBKQ1FT6qfPaAqBnJik=",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "related": {
+      "ip": [
+        "192.168.86.167",
+        "192.168.86.1"
+      ]
+    },
+    "source": {
+      "address": "192.168.86.167",
+      "ip": "192.168.86.167",
+      "port": 38339
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dns"
+    ],
+    "zeek": {
+      "dns": {
+        "AA": false,
+        "RA": true,
+        "RD": true,
+        "TC": false,
+        "TTLs": [
+          119.0,
+          119.0,
+          59.0
+        ],
+        "answers": [
+          "proxy-production-us-west1.gcp.cloud.es.io",
+          "proxy-production-us-west1-v1-009.gcp.cloud.es.io",
+          "89.160.20.156"
+        ],
+        "qclass": 1,
+        "qclass_name": "C_INTERNET",
+        "qtype": 1,
+        "qtype_name": "A",
+        "query": "dd625ffb4fc54735b281862aa1cd6cd4.us-west1.gcp.cloud.es.io",
+        "rcode": 0,
+        "rcode_name": "NOERROR",
+        "rejected": false,
+        "rtt": 0.076967,
+        "trans_id": "15209"
+      },
+      "session_id": "CAcJw21BbVedgFnYH3"
+    }
+  }
+]

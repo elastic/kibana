@@ -1,0 +1,282 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:56:16.768Z",
+    "agent": {
+      "ephemeral_id": "2f1d44b8-e184-47e5-9fe8-a42c848da388",
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "name": "elastic-agent-26311",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "create_date": "2013-06-24T16:39:18.000Z",
+      "id": "00ub0oNGTSWTBKOLGLNR",
+      "last_seen": "2013-06-24T17:39:19.000Z",
+      "last_status_change_date": "2013-06-24T16:39:19.000Z",
+      "last_updated": "2013-07-02T21:36:25.344Z",
+      "status": "ACTIVE",
+      "type": "okta_user",
+      "vendor": "OKTA"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_okta.user",
+      "namespace": "20707",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entityanalytics_okta": {
+      "groups": [
+        {
+          "profile": {
+            "name": "Everyone",
+            "description": "All users in your organization"
+          },
+          "id": "ODc3ZTBjNGZjY2Y4YmRi"
+        }
+      ],
+      "user": {
+        "activated": "2013-06-24T16:39:19.000Z",
+        "created": "2013-06-24T16:39:18.000Z",
+        "credentials": {
+          "provider": {
+            "name": "OKTA",
+            "type": "OKTA"
+          },
+          "recovery_question": {
+            "is_set": true
+          }
+        },
+        "id": "00ub0oNGTSWTBKOLGLNR",
+        "last_login": "2013-06-24T17:39:19.000Z",
+        "last_updated": "2013-07-02T21:36:25.344Z",
+        "password_changed": "2013-07-02T21:36:25.344Z",
+        "profile": {
+          "email": "isaac.brock@example.com",
+          "first_name": "Isaac",
+          "last_name": "Brock",
+          "login": "isaac.brock@example.com",
+          "mobile_phone": "555-415-1337"
+        },
+        "status": "ACTIVE",
+        "status_changed": "2013-06-24T16:39:19.000Z"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "entityanalytics_okta.user",
+      "ingested": "2026-03-10T03:56:17Z",
+      "kind": "asset",
+      "original": "{\"agent\":{\"name\":\"elastic-agent-26311\",\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"ephemeral_id\":\"2f1d44b8-e184-47e5-9fe8-a42c848da388\",\"type\":\"filebeat\",\"version\":\"9.3.1\"},\"roles\":[],\"elastic_agent\":{\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"version\":\"9.3.1\",\"snapshot\":false},\"okta_domain\":\"trial-xxxxxxx-admin.okta.com\",\"groups\":[{\"profile\":{\"name\":\"Everyone\",\"description\":\"All users in your organization\"},\"id\":\"ODc3ZTBjNGZjY2Y4YmRi\"}],\"tags\":[\"preserve_original_event\",\"preserve_duplicate_custom_fields\",\"forwarded\",\"entityanalytics_okta-entity\"],\"factors\":[],\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_okta.entity\"},\"input\":{\"type\":\"entity-analytics\"},\"@timestamp\":\"2026-03-10T03:56:16.768Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"20707\",\"type\":\"logs\",\"dataset\":\"entityanalytics_okta.entity\"},\"event\":{\"kind\":\"asset\",\"dataset\":\"entityanalytics_okta.entity\"},\"okta\":{\"lastLogin\":\"2013-06-24T17:39:19Z\",\"lastUpdated\":\"2013-07-02T21:36:25.344Z\",\"passwordChanged\":\"2013-07-02T21:36:25.344Z\",\"credentials\":{\"password\":{},\"provider\":{\"name\":\"OKTA\",\"type\":\"OKTA\"},\"recovery_question\":{}},\"created\":\"2013-06-24T16:39:18Z\",\"profile\":{\"firstName\":\"Isaac\",\"lastName\":\"Brock\",\"mobilePhone\":\"555-415-1337\",\"login\":\"isaac.brock@example.com\",\"email\":\"isaac.brock@example.com\"},\"statusChanged\":\"2013-06-24T16:39:19Z\",\"id\":\"00ub0oNGTSWTBKOLGLNR\",\"type\":null,\"status\":\"ACTIVE\",\"activated\":\"2013-06-24T16:39:19Z\"},\"user\":{\"id\":\"00ub0oNGTSWTBKOLGLNR\"},\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_okta.entity-20707\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "user",
+        "info"
+      ]
+    },
+    "host": {
+      "name": "trial-xxxxxxx-admin.okta.com"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_okta.entity"
+    },
+    "related": {
+      "user": [
+        "00ub0oNGTSWTBKOLGLNR",
+        "isaac.brock@example.com",
+        "Isaac",
+        "Brock"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "entityanalytics_okta-entity"
+    ],
+    "user": {
+      "account": {
+        "activated_date": "2013-06-24T16:39:19.000Z",
+        "change_date": "2013-06-24T16:39:19.000Z",
+        "create_date": "2013-06-24T16:39:18.000Z",
+        "password_change_date": "2013-07-02T21:36:25.344Z",
+        "status": {
+          "deprovisioned": false,
+          "locked_out": false,
+          "password_expired": false,
+          "recovery": false,
+          "suspended": false
+        }
+      },
+      "email": "isaac.brock@example.com",
+      "group": {
+        "id": [
+          "ODc3ZTBjNGZjY2Y4YmRi"
+        ],
+        "name": [
+          "Everyone"
+        ]
+      },
+      "id": "00ub0oNGTSWTBKOLGLNR",
+      "name": "isaac.brock@example.com",
+      "profile": {
+        "first_name": "Isaac",
+        "last_name": "Brock",
+        "mobile_phone": "555-415-1337",
+        "status": "ACTIVE"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:56:12.566Z",
+    "agent": {
+      "ephemeral_id": "2f1d44b8-e184-47e5-9fe8-a42c848da388",
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "name": "elastic-agent-26311",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "create_date": "2013-06-24T16:39:18.000Z",
+      "id": "00ub0oNGTSWTBKOLGLNR",
+      "last_seen": "2013-06-24T17:39:19.000Z",
+      "last_status_change_date": "2013-06-24T16:39:19.000Z",
+      "last_updated": "2013-07-02T21:36:25.344Z",
+      "status": "ACTIVE",
+      "type": "okta_user",
+      "vendor": "OKTA"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_okta.user",
+      "namespace": "20707",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entityanalytics_okta": {
+      "groups": [
+        {
+          "profile": {
+            "name": "Everyone",
+            "description": "All users in your organization"
+          },
+          "id": "ODc3ZTBjNGZjY2Y4YmRi"
+        }
+      ],
+      "user": {
+        "activated": "2013-06-24T16:39:19.000Z",
+        "created": "2013-06-24T16:39:18.000Z",
+        "credentials": {
+          "provider": {
+            "name": "OKTA",
+            "type": "OKTA"
+          },
+          "recovery_question": {
+            "is_set": true
+          }
+        },
+        "id": "00ub0oNGTSWTBKOLGLNR",
+        "last_login": "2013-06-24T17:39:19.000Z",
+        "last_updated": "2013-07-02T21:36:25.344Z",
+        "password_changed": "2013-07-02T21:36:25.344Z",
+        "profile": {
+          "email": "isaac.brock@example.com",
+          "first_name": "Isaac",
+          "last_name": "Brock",
+          "login": "isaac.brock@example.com",
+          "mobile_phone": "555-415-1337"
+        },
+        "status": "ACTIVE",
+        "status_changed": "2013-06-24T16:39:19.000Z"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "entityanalytics_okta.user",
+      "ingested": "2026-03-10T03:56:15Z",
+      "kind": "asset",
+      "original": "{\"agent\":{\"name\":\"elastic-agent-26311\",\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"type\":\"filebeat\",\"ephemeral_id\":\"2f1d44b8-e184-47e5-9fe8-a42c848da388\",\"version\":\"9.3.1\"},\"roles\":[],\"elastic_agent\":{\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"version\":\"9.3.1\",\"snapshot\":false},\"okta_domain\":\"trial-xxxxxxx-admin.okta.com\",\"groups\":[{\"profile\":{\"name\":\"Everyone\",\"description\":\"All users in your organization\"},\"id\":\"ODc3ZTBjNGZjY2Y4YmRi\"}],\"factors\":[],\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_okta.entity\"},\"tags\":[\"preserve_original_event\",\"preserve_duplicate_custom_fields\",\"forwarded\",\"entityanalytics_okta-entity\"],\"input\":{\"type\":\"entity-analytics\"},\"@timestamp\":\"2026-03-10T03:56:12.566Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"20707\",\"type\":\"logs\",\"dataset\":\"entityanalytics_okta.entity\"},\"event\":{\"kind\":\"asset\",\"dataset\":\"entityanalytics_okta.entity\"},\"okta\":{\"lastLogin\":\"2013-06-24T17:39:19Z\",\"lastUpdated\":\"2013-07-02T21:36:25.344Z\",\"passwordChanged\":\"2013-07-02T21:36:25.344Z\",\"credentials\":{\"password\":{},\"provider\":{\"name\":\"OKTA\",\"type\":\"OKTA\"},\"recovery_question\":{}},\"created\":\"2013-06-24T16:39:18Z\",\"profile\":{\"firstName\":\"Isaac\",\"lastName\":\"Brock\",\"mobilePhone\":\"555-415-1337\",\"login\":\"isaac.brock@example.com\",\"email\":\"isaac.brock@example.com\"},\"statusChanged\":\"2013-06-24T16:39:19Z\",\"id\":\"00ub0oNGTSWTBKOLGLNR\",\"type\":null,\"activated\":\"2013-06-24T16:39:19Z\",\"status\":\"ACTIVE\"},\"user\":{\"id\":\"00ub0oNGTSWTBKOLGLNR\"},\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_okta.entity-20707\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "user",
+        "info"
+      ]
+    },
+    "host": {
+      "name": "trial-xxxxxxx-admin.okta.com"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_okta.entity"
+    },
+    "related": {
+      "user": [
+        "00ub0oNGTSWTBKOLGLNR",
+        "isaac.brock@example.com",
+        "Isaac",
+        "Brock"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "entityanalytics_okta-entity"
+    ],
+    "user": {
+      "account": {
+        "activated_date": "2013-06-24T16:39:19.000Z",
+        "change_date": "2013-06-24T16:39:19.000Z",
+        "create_date": "2013-06-24T16:39:18.000Z",
+        "password_change_date": "2013-07-02T21:36:25.344Z",
+        "status": {
+          "deprovisioned": false,
+          "locked_out": false,
+          "password_expired": false,
+          "recovery": false,
+          "suspended": false
+        }
+      },
+      "email": "isaac.brock@example.com",
+      "group": {
+        "id": [
+          "ODc3ZTBjNGZjY2Y4YmRi"
+        ],
+        "name": [
+          "Everyone"
+        ]
+      },
+      "id": "00ub0oNGTSWTBKOLGLNR",
+      "name": "isaac.brock@example.com",
+      "profile": {
+        "first_name": "Isaac",
+        "last_name": "Brock",
+        "mobile_phone": "555-415-1337",
+        "status": "ACTIVE"
+      }
+    }
+  }
+]

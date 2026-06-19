@@ -1,0 +1,100 @@
+{
+  "package": "vectra_rux",
+  "dataStreams": [
+    {
+      "dataset": "vectra_rux.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.outcome",
+        "user.name",
+        "user.roles",
+        "vectra_rux.audit.user.type"
+      ],
+      "filterValues": {
+        "event.outcome": [
+          "success",
+          "failure"
+        ]
+      }
+    },
+    {
+      "dataset": "vectra_rux.detection_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "threat.tactic.name",
+        "threat.technique.id",
+        "vectra_rux.detection_event.category",
+        "vectra_rux.detection_event.certainty",
+        "vectra_rux.detection_event.detection.type",
+        "vectra_rux.detection_event.threat",
+        "vectra_rux.detection_event.triaged",
+        "vectra_rux.detection_event.type"
+      ],
+      "filterValues": {
+        "vectra_rux.detection_event.type": [
+          "account",
+          "host"
+        ],
+        "vectra_rux.detection_event.triaged": [
+          "true",
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "vectra_rux.entity_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.severity",
+        "vectra_rux.entity_event.category",
+        "vectra_rux.entity_event.is_prioritized",
+        "vectra_rux.entity_event.type",
+        "vectra_rux.entity_event.urgency.score"
+      ],
+      "filterValues": {
+        "vectra_rux.entity_event.type": [
+          "account",
+          "host"
+        ],
+        "vectra_rux.entity_event.is_prioritized": [
+          "true",
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "vectra_rux.health",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.cpu.usage",
+        "network.vlan.id",
+        "vectra_rux.health.cpu.idle_percent",
+        "vectra_rux.health.cpu.system_percent",
+        "vectra_rux.health.disk.disk_utilization.free_bytes",
+        "vectra_rux.health.disk.disk_utilization.usage_percent",
+        "vectra_rux.health.disk.disk_utilization.used_bytes",
+        "vectra_rux.health.memory.free_bytes",
+        "vectra_rux.health.memory.usage_percent",
+        "vectra_rux.health.memory.used_bytes",
+        "vectra_rux.health.power.error",
+        "vectra_rux.health.power.status"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "vectra_rux.lockdown",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "user.name",
+        "vectra_rux.lockdown.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

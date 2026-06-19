@@ -1,0 +1,85 @@
+[
+  {
+    "@timestamp": "2013-02-26T22:05:32.298Z",
+    "agent": {
+      "ephemeral_id": "5c702a64-b48a-4f35-aff0-3e68e5be10a0",
+      "id": "18586295-72c9-438c-8bd0-ad1761ec9aba",
+      "name": "elastic-agent-32493",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dce_rpc",
+      "namespace": "45246",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "172.16.128.202",
+      "ip": "172.16.128.202",
+      "port": 445
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "18586295-72c9-438c-8bd0-ad1761ec9aba",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "BrowserrQueryOtherDomains",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:08.392Z",
+      "dataset": "zeek.dce_rpc",
+      "id": "CsNHVHa1lzFtvJzT8",
+      "ingested": "2026-03-10T03:14:11Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dce_rpc.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "community_id": "1:SJNAD5vtzZuhQjGtfaI8svTnyuw=",
+      "protocol": "dce_rpc",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "172.16.133.6",
+        "172.16.128.202"
+      ]
+    },
+    "source": {
+      "address": "172.16.133.6",
+      "ip": "172.16.133.6",
+      "port": 1728
+    },
+    "tags": [
+      "forwarded",
+      "zeek-dce-rpc"
+    ],
+    "zeek": {
+      "dce_rpc": {
+        "endpoint": "browser",
+        "named_pipe": "\\PIPE\\browser",
+        "operation": "BrowserrQueryOtherDomains",
+        "rtt": 0
+      },
+      "session_id": "CsNHVHa1lzFtvJzT8"
+    }
+  }
+]

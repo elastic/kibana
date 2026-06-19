@@ -1,0 +1,104 @@
+[
+  {
+    "@timestamp": "2008-11-26T20:05:08.705Z",
+    "agent": {
+      "ephemeral_id": "dda2bb5a-2f7d-4349-96b7-dccc9fb12770",
+      "id": "d62e6e52-5ff3-4a9c-a07f-55ac1dc54554",
+      "name": "elastic-agent-31534",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dnp3",
+      "namespace": "17187",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1",
+      "port": 20000
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "d62e6e52-5ff3-4a9c-a07f-55ac1dc54554",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "read",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:14:12.757Z",
+      "dataset": "zeek.dnp3",
+      "id": "CQV6tj1w1t4WzQpHoe",
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-31534",
+      "ip": [
+        "172.27.0.2",
+        "172.18.0.12"
+      ],
+      "mac": [
+        "32-1A-46-BB-B0-D7",
+        "E2-2A-78-DC-5D-41"
+      ],
+      "name": "elastic-agent-31534",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dnp3.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "community_id": "1:E57Z1w3RrSdR+fi6rSZblbQVhzY=",
+      "protocol": "dnp3",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1",
+      "port": 42942
+    },
+    "tags": [
+      "zeek-dnp3"
+    ],
+    "zeek": {
+      "dnp3": {
+        "function": {
+          "request": "READ"
+        }
+      },
+      "session_id": "CQV6tj1w1t4WzQpHoe"
+    }
+  }
+]

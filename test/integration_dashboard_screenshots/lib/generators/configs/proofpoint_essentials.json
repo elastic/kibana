@@ -1,0 +1,95 @@
+{
+  "package": "proofpoint_essentials",
+  "dataStreams": [
+    {
+      "dataset": "proofpoint_essentials.clicks_blocked",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "proofpoint_essentials.threat.classification",
+        "proofpoint_essentials.threat.click_time",
+        "proofpoint_essentials.threat.event_type",
+        "proofpoint_essentials.threat.message_time",
+        "proofpoint_essentials.threat.threat_status",
+        "proofpoint_essentials.threat.threats_info_map.classification",
+        "proofpoint_essentials.threat.threats_info_map.threat_type",
+        "rule.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_essentials.clicks_permitted",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "proofpoint_essentials.threat.classification",
+        "proofpoint_essentials.threat.click_time",
+        "proofpoint_essentials.threat.event_type",
+        "proofpoint_essentials.threat.message_time",
+        "proofpoint_essentials.threat.threat_status",
+        "proofpoint_essentials.threat.threats_info_map.classification",
+        "proofpoint_essentials.threat.threats_info_map.threat_type",
+        "rule.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_essentials.message_blocked",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "proofpoint_essentials.threat.classification",
+        "proofpoint_essentials.threat.click_time",
+        "proofpoint_essentials.threat.event_type",
+        "proofpoint_essentials.threat.message_time",
+        "proofpoint_essentials.threat.threat_status",
+        "proofpoint_essentials.threat.threats_info_map.classification",
+        "proofpoint_essentials.threat.threats_info_map.threat_type",
+        "rule.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_essentials.message_delivered",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "proofpoint_essentials.threat.classification",
+        "proofpoint_essentials.threat.click_time",
+        "proofpoint_essentials.threat.event_type",
+        "proofpoint_essentials.threat.message_time",
+        "proofpoint_essentials.threat.threat_status",
+        "proofpoint_essentials.threat.threats_info_map.classification",
+        "proofpoint_essentials.threat.threats_info_map.threat_type",
+        "rule.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "proofpoint_essentials.threat",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "proofpoint_essentials.threat.classification",
+        "proofpoint_essentials.threat.click_time",
+        "proofpoint_essentials.threat.event_type",
+        "proofpoint_essentials.threat.message_time",
+        "proofpoint_essentials.threat.threat_status",
+        "proofpoint_essentials.threat.threats_info_map.classification",
+        "proofpoint_essentials.threat.threats_info_map.threat_type",
+        "rule.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

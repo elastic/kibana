@@ -1,0 +1,76 @@
+[
+  {
+    "@timestamp": "2022-02-24T07:29:48.000Z",
+    "agent": {
+      "ephemeral_id": "3bb499c9-7a00-4fdb-ad3d-825978f328ba",
+      "id": "e6cac91b-4911-4078-a876-bd98948abf3e",
+      "name": "elastic-agent-55647",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trend_micro_vision_one.audit",
+      "namespace": "55490",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "e6cac91b-4911-4078-a876-bd98948abf3e",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "created": "2026-03-10T02:21:00.392Z",
+      "dataset": "trend_micro_vision_one.audit",
+      "ingested": "2026-03-10T02:21:03Z",
+      "kind": "event",
+      "original": "{\"accessType\":\"Console\",\"activity\":\"string\",\"category\":\"Logon and Logoff\",\"details\":{\"property1\":\"string\",\"property2\":\"string\"},\"loggedDateTime\":\"2022-02-24T07:29:48Z\",\"loggedRole\":\"Master Administrator\",\"loggedUser\":\"Root Account\",\"result\":\"Unsuccessful\"}",
+      "outcome": "failure",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "Root Account"
+      ]
+    },
+    "source": {
+      "user": {
+        "name": "Root Account",
+        "roles": [
+          "Master Administrator"
+        ]
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trend_micro_vision_one-audit"
+    ],
+    "trend_micro_vision_one": {
+      "audit": {
+        "access_type": "Console",
+        "activity": "string",
+        "category": "Logon and Logoff",
+        "details": {
+          "property1": "string",
+          "property2": "string"
+        },
+        "logged_role": "Master Administrator",
+        "logged_user": "Root Account",
+        "result": "Unsuccessful"
+      }
+    }
+  }
+]

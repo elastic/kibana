@@ -1,0 +1,59 @@
+{
+  "package": "tenable_ot_security",
+  "dataStreams": [
+    {
+      "dataset": "tenable_ot_security.assets",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "event.id",
+        "host.geo.location",
+        "tenable_ot_security.assets.category",
+        "tenable_ot_security.assets.criticality",
+        "tenable_ot_security.assets.id",
+        "tenable_ot_security.assets.ips",
+        "tenable_ot_security.assets.macs",
+        "tenable_ot_security.assets.name",
+        "tenable_ot_security.assets.risk.total_risk",
+        "tenable_ot_security.assets.type",
+        "tenable_ot_security.events.category",
+        "tenable_ot_security.events.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tenable_ot_security.events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "tenable_ot_security.events.resolved",
+        "tenable_ot_security.events.severity"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tenable_ot_security.system_log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "event.id",
+        "host.geo.location",
+        "tenable_ot_security.assets.category",
+        "tenable_ot_security.assets.criticality",
+        "tenable_ot_security.assets.id",
+        "tenable_ot_security.assets.ips",
+        "tenable_ot_security.assets.macs",
+        "tenable_ot_security.assets.name",
+        "tenable_ot_security.assets.risk.total_risk",
+        "tenable_ot_security.assets.type",
+        "tenable_ot_security.events.category",
+        "tenable_ot_security.events.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

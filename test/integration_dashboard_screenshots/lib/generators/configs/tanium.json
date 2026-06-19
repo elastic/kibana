@@ -1,0 +1,92 @@
+{
+  "package": "tanium",
+  "dataStreams": [
+    {
+      "dataset": "tanium.action_history",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "tanium.action_history.approver",
+        "tanium.action_history.status"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tanium.client_status",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.id",
+        "host.name",
+        "tanium.client_status.full_version",
+        "tanium.client_status.last_registration"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tanium.discover",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "os.full",
+        "tanium.discover.managed",
+        "tanium.discover.satellite.name",
+        "tanium.discover.unmanageable"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tanium.endpoint_config",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "tanium.endpoint_config.action",
+        "tanium.endpoint_config.manifest.item_count",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tanium.reporting",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "os.name",
+        "tanium.reporting.is_virtual",
+        "tanium.reporting.manufacturer",
+        "tanium.reporting.model"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "tanium.threat_response",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "event.action",
+        "event.id",
+        "host.name",
+        "os.platform",
+        "source.ip",
+        "tanium.threat_response.event.name",
+        "tanium.threat_response.other_parameters.log_details.name",
+        "tanium.threat_response.other_parameters.log_details.payload_decoded.finding.first_seen",
+        "tanium.threat_response.other_parameters.log_details.payload_decoded.finding.hunt_id",
+        "tanium.threat_response.other_parameters.log_details.payload_decoded.finding.id",
+        "tanium.threat_response.other_parameters.log_details.payload_decoded.finding.last_seen",
+        "tanium.threat_response.other_parameters.log_details.payload_decoded.finding.source_name",
+        "tanium.threat_response.other_parameters.log_details.payload_decoded.finding.threat_id",
+        "tanium.threat_response.other_parameters.log_details.source",
+        "tanium.threat_response.other_parameters.log_details.type",
+        "tanium.threat_response.priority",
+        "tanium.threat_response.severity",
+        "user.id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

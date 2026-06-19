@@ -1,0 +1,17 @@
+{
+  "package": "santa",
+  "dataStreams": [
+    {
+      "dataset": "santa.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.name",
+        "santa.certificate.common_name",
+        "santa.decision",
+        "santa.reason"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

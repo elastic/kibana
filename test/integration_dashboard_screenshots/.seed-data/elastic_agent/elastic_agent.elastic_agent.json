@@ -1,0 +1,3245 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:35:50.840Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2332625,
+      "ingested": "2026-03-10T03:35:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 300642304
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 270,
+            "time": {
+              "ms": 270
+            }
+          },
+          "total": {
+            "ticks": 2050,
+            "time": {
+              "ms": 2050
+            },
+            "value": 2050
+          },
+          "user": {
+            "ticks": 1780,
+            "time": {
+              "ms": 1780
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28661000
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:46.563Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2692917,
+      "ingested": "2026-03-10T03:35:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 301187072
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 670,
+            "time": {
+              "ms": 670
+            }
+          },
+          "total": {
+            "ticks": 3420,
+            "time": {
+              "ms": 3420
+            },
+            "value": 3420
+          },
+          "user": {
+            "ticks": 2750,
+            "time": {
+              "ms": 2750
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 30
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:48.410Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1892833,
+      "ingested": "2026-03-10T03:35:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:46.759Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 1124,
+              "active": 0,
+              "batches": 213,
+              "dropped": 0,
+              "total": 1124
+            },
+            "write": {
+              "bytes": 355685
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:35:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:50.840Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 3723167,
+      "ingested": "2026-03-10T03:34:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 302452736
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 250,
+            "time": {
+              "ms": 250
+            }
+          },
+          "total": {
+            "ticks": 1970,
+            "time": {
+              "ms": 1970
+            },
+            "value": 1970
+          },
+          "user": {
+            "ticks": 1720,
+            "time": {
+              "ms": 1720
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28661000
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:46.567Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1928167,
+      "ingested": "2026-03-10T03:34:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 302202880
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 600,
+            "time": {
+              "ms": 600
+            }
+          },
+          "total": {
+            "ticks": 3010,
+            "time": {
+              "ms": 3010
+            },
+            "value": 3010
+          },
+          "user": {
+            "ticks": 2410,
+            "time": {
+              "ms": 2410
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 30
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:48.415Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2097791,
+      "ingested": "2026-03-10T03:34:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:46.746Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 1049,
+              "active": 0,
+              "batches": 185,
+              "dropped": 0,
+              "total": 1049
+            },
+            "write": {
+              "bytes": 323046
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:34:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:50.850Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 37303208,
+      "ingested": "2026-03-10T03:33:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 300269568
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 230,
+            "time": {
+              "ms": 230
+            }
+          },
+          "total": {
+            "ticks": 1890,
+            "time": {
+              "ms": 1890
+            },
+            "value": 1890
+          },
+          "user": {
+            "ticks": 1660,
+            "time": {
+              "ms": 1660
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28661000
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:46.563Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2432333,
+      "ingested": "2026-03-10T03:33:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 301080576
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 560,
+            "time": {
+              "ms": 560
+            }
+          },
+          "total": {
+            "ticks": 2680,
+            "time": {
+              "ms": 2680
+            },
+            "value": 2680
+          },
+          "user": {
+            "ticks": 2120,
+            "time": {
+              "ms": 2120
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 30
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:48.411Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2577583,
+      "ingested": "2026-03-10T03:33:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:46.727Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 1015,
+              "active": 0,
+              "batches": 163,
+              "dropped": 0,
+              "total": 1015
+            },
+            "write": {
+              "bytes": 302343
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:33:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:50.837Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1658917,
+      "ingested": "2026-03-10T03:32:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 297930752
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 210,
+            "time": {
+              "ms": 210
+            }
+          },
+          "total": {
+            "ticks": 1800,
+            "time": {
+              "ms": 1800
+            },
+            "value": 1800
+          },
+          "user": {
+            "ticks": 1590,
+            "time": {
+              "ms": 1590
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28661000
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:46.558Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1903834,
+      "ingested": "2026-03-10T03:32:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 296689664
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 520,
+            "time": {
+              "ms": 520
+            }
+          },
+          "total": {
+            "ticks": 2440,
+            "time": {
+              "ms": 2440
+            },
+            "value": 2440
+          },
+          "user": {
+            "ticks": 1920,
+            "time": {
+              "ms": 1920
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 31
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:48.407Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2561917,
+      "ingested": "2026-03-10T03:32:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:46.708Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 940,
+              "active": 0,
+              "batches": 137,
+              "dropped": 0,
+              "total": 940
+            },
+            "write": {
+              "bytes": 270800
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:32:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:50.840Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 7105125,
+      "ingested": "2026-03-10T03:31:52Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 299016192
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 170,
+            "time": {
+              "ms": 170
+            }
+          },
+          "total": {
+            "ticks": 1560,
+            "time": {
+              "ms": 1560
+            },
+            "value": 1560
+          },
+          "user": {
+            "ticks": 1390,
+            "time": {
+              "ms": 1390
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28398856
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:46.565Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2950125,
+      "ingested": "2026-03-10T03:31:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 299585536
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 460,
+            "time": {
+              "ms": 460
+            }
+          },
+          "total": {
+            "ticks": 2030,
+            "time": {
+              "ms": 2030
+            },
+            "value": 2030
+          },
+          "user": {
+            "ticks": 1570,
+            "time": {
+              "ms": 1570
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 31
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:48.410Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1773834,
+      "ingested": "2026-03-10T03:31:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:46.687Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 891,
+              "active": 0,
+              "batches": 114,
+              "dropped": 0,
+              "total": 891
+            },
+            "write": {
+              "bytes": 246471
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:31:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:50.840Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1407792,
+      "ingested": "2026-03-10T03:30:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 302448640
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 120,
+            "time": {
+              "ms": 120
+            }
+          },
+          "total": {
+            "ticks": 1350,
+            "time": {
+              "ms": 1350
+            },
+            "value": 1350
+          },
+          "user": {
+            "ticks": 1230,
+            "time": {
+              "ms": 1230
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28398856
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:46.562Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1487875,
+      "ingested": "2026-03-10T03:30:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 302862336
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 240,
+            "time": {
+              "ms": 240
+            }
+          },
+          "total": {
+            "ticks": 1110,
+            "time": {
+              "ms": 1110
+            },
+            "value": 1110
+          },
+          "user": {
+            "ticks": 870,
+            "time": {
+              "ms": 870
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 31
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:48.410Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2494625,
+      "ingested": "2026-03-10T03:30:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:46.679Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 828,
+              "active": 0,
+              "batches": 92,
+              "dropped": 0,
+              "total": 828
+            },
+            "write": {
+              "bytes": 219572
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:30:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:50.840Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1749708,
+      "ingested": "2026-03-10T03:29:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 296808448
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 100,
+            "time": {
+              "ms": 100
+            }
+          },
+          "total": {
+            "ticks": 1230,
+            "time": {
+              "ms": 1230
+            },
+            "value": 1230
+          },
+          "user": {
+            "ticks": 1130,
+            "time": {
+              "ms": 1130
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28136712
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:46.563Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2568209,
+      "ingested": "2026-03-10T03:29:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 296366080
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 180,
+            "time": {
+              "ms": 180
+            }
+          },
+          "total": {
+            "ticks": 730,
+            "time": {
+              "ms": 730
+            },
+            "value": 730
+          },
+          "user": {
+            "ticks": 550,
+            "time": {
+              "ms": 550
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 31
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:48.411Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2015167,
+      "ingested": "2026-03-10T03:29:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:46.667Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 623,
+              "active": 0,
+              "batches": 59,
+              "dropped": 0,
+              "total": 623
+            },
+            "write": {
+              "bytes": 157390
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:29:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:50.840Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1847875,
+      "ingested": "2026-03-10T03:28:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 297996288
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 80,
+            "time": {
+              "ms": 80
+            }
+          },
+          "total": {
+            "ticks": 1130,
+            "time": {
+              "ms": 1130
+            },
+            "value": 1130
+          },
+          "user": {
+            "ticks": 1050,
+            "time": {
+              "ms": 1050
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28136712
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:46.563Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2925250,
+      "ingested": "2026-03-10T03:28:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 296595456
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 140,
+            "time": {
+              "ms": 140
+            }
+          },
+          "total": {
+            "ticks": 500,
+            "time": {
+              "ms": 500
+            },
+            "value": 500
+          },
+          "user": {
+            "ticks": 360,
+            "time": {
+              "ms": 360
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 31
+        },
+        "memory": {
+          "size": 76200393
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:48.420Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2129333,
+      "ingested": "2026-03-10T03:28:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:46.647Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 570,
+              "active": 0,
+              "batches": 38,
+              "dropped": 0,
+              "total": 570
+            },
+            "write": {
+              "bytes": 133851
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:28:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:50.838Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-agent"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-agent",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1817250,
+      "ingested": "2026-03-10T03:27:51Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://localhost:6791/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 283758592
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 50,
+            "time": {
+              "ms": 50
+            }
+          },
+          "total": {
+            "ticks": 1010,
+            "time": {
+              "ms": 1010
+            },
+            "value": 1010
+          },
+          "user": {
+            "ticks": 960,
+            "time": {
+              "ms": 960
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 22
+        },
+        "memory": {
+          "size": 28136712
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:48.407Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "fleet-server",
+      "id": "fleet-server-default"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "fleet_server",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 2513417,
+      "ingested": "2026-03-10T03:27:49Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:46.560Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "elastic-agent",
+      "id": "elastic-otel-collector"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "duration": 1791666,
+      "ingested": "2026-03-10T03:27:47Z",
+      "module": "http"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/stats",
+      "type": "http"
+    },
+    "system": {
+      "process": {
+        "cgroup": {
+          "cpu": {
+            "id": "/",
+            "stats": {
+              "periods": 0,
+              "throttled": {
+                "ns": 0,
+                "periods": 0
+              }
+            }
+          },
+          "memory": {
+            "id": "/",
+            "mem": {
+              "usage": {
+                "bytes": 281063424
+              }
+            }
+          }
+        },
+        "cpu": {
+          "system": {
+            "ticks": 90,
+            "time": {
+              "ms": 90
+            }
+          },
+          "total": {
+            "ticks": 290,
+            "time": {
+              "ms": 290
+            },
+            "value": 290
+          },
+          "user": {
+            "ticks": 200,
+            "time": {
+              "ms": 200
+            }
+          }
+        },
+        "fd": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 26
+        },
+        "memory": {
+          "size": 67549641
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:43.348Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "version": "9.3.1"
+    },
+    "beat": {
+      "stats": {
+        "libbeat": {
+          "output": {
+            "events": {
+              "acked": 0,
+              "dropped": 0
+            }
+          },
+          "pipeline": {
+            "queue": {
+              "filled": {
+                "events": 0,
+                "pct": 0.0
+              },
+              "max_events": 4100
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "binary": "elastic-otel-collector",
+      "id": "elasticsearch-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.elastic_agent",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "elastic-otel-collector",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.elastic_agent",
+      "ingested": "2026-03-10T03:27:46Z"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "stats"
+    }
+  }
+]

@@ -1,0 +1,80 @@
+{
+  "package": "microsoft_defender_endpoint",
+  "dataStreams": [
+    {
+      "dataset": "microsoft_defender_endpoint.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.severity",
+        "host.hostname",
+        "microsoft.defender_endpoint.assignedTo",
+        "microsoft.defender_endpoint.evidence.domainName",
+        "microsoft.defender_endpoint.evidence.ipAddress",
+        "microsoft.defender_endpoint.incidentId",
+        "microsoft.defender_endpoint.status",
+        "rule.description",
+        "threat.technique.name",
+        "timestamp",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_defender_endpoint.machine",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.id",
+        "host.os.platform",
+        "host.os.type",
+        "host.risk.calculated_level",
+        "microsoft_defender_endpoint.machine.exposure_level",
+        "microsoft_defender_endpoint.machine.health_status"
+      ],
+      "filterValues": {
+        "microsoft_defender_endpoint.machine.health_status": [
+          "Inactive",
+          "Active"
+        ]
+      }
+    },
+    {
+      "dataset": "microsoft_defender_endpoint.machine_action",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "host.hostname",
+        "microsoft_defender_endpoint.machine_action.scope",
+        "microsoft_defender_endpoint.machine_action.status",
+        "microsoft_defender_endpoint.machine_action.type",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_defender_endpoint.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "host.id",
+        "host.name",
+        "host.os.platform",
+        "microsoft_defender_endpoint.vulnerability.exploitability_level",
+        "microsoft_defender_endpoint.vulnerability.first_seen_timestamp",
+        "microsoft_defender_endpoint.vulnerability.last_seen_timestamp",
+        "package.name",
+        "vulnerability.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "microsoft_defender_endpoint.vulnerability.exploitability_level": [
+          "ExploitIsVerified",
+          "ExploitIsPublic"
+        ]
+      }
+    }
+  ]
+}

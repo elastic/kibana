@@ -1,0 +1,1860 @@
+[
+  {
+    "@timestamp": "2024-09-06T08:32:28.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "e71ae8af-f40e-49cb-9bef-1a91602f8faf",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000001",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "7469cc568ad6821fd9d925542730a7d8"
+      },
+      "name": "svchost.exe",
+      "size": 47040,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "NETWORK SERVICE"
+      }
+    },
+    "related": {
+      "hash": [
+        "7469cc568ad6821fd9d925542730a7d8"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin",
+        "NETWORK SERVICE"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:28.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "e71ae8af-f40e-49cb-9bef-1a91602f8faf",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000004",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "7469cc568ad6821fd9d925542730a7d8"
+      },
+      "name": "svchost.exe",
+      "size": 47040,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "NETWORK SERVICE"
+      }
+    },
+    "related": {
+      "hash": [
+        "7469cc568ad6821fd9d925542730a7d8"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin",
+        "NETWORK SERVICE"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:28.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "e71ae8af-f40e-49cb-9bef-1a91602f8faf",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000007",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "7469cc568ad6821fd9d925542730a7d8"
+      },
+      "name": "svchost.exe",
+      "size": 47040,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "NETWORK SERVICE"
+      }
+    },
+    "related": {
+      "hash": [
+        "7469cc568ad6821fd9d925542730a7d8"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin",
+        "NETWORK SERVICE"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:28.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "e71ae8af-f40e-49cb-9bef-1a91602f8faf",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000010",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "7469cc568ad6821fd9d925542730a7d8"
+      },
+      "name": "svchost.exe",
+      "size": 47040,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "NETWORK SERVICE"
+      }
+    },
+    "related": {
+      "hash": [
+        "7469cc568ad6821fd9d925542730a7d8"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin",
+        "NETWORK SERVICE"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:26.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "087e116c-c098-44ba-95dd-064a90189b4a",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000002",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bb7c48cddde076e7eb44022520f40f77"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bb7c48cddde076e7eb44022520f40f77"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:26.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "087e116c-c098-44ba-95dd-064a90189b4a",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000005",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bb7c48cddde076e7eb44022520f40f77"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bb7c48cddde076e7eb44022520f40f77"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:26.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "087e116c-c098-44ba-95dd-064a90189b4a",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000008",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bb7c48cddde076e7eb44022520f40f77"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bb7c48cddde076e7eb44022520f40f77"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-02T08:53:44.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"URL\",\"exclusion_value\":{\"default_value\":\"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "Medium",
+        "description": "Detected bot activity [Anti-Bot test.TC.e]. To exclude: On the Harmony Endpoint Management add an exclusion of type \"URL\" with value: \"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Communication with C&C"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "6c239c74-89a9-4797-ab6b-75a2b2a6afd7",
+        "policy": {
+          "date": "2024-08-29T13:12:51.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 2
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "proxy_src_ip": "89.160.20.128",
+        "sequencenum": 16777215,
+        "severity": "Critical",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "country_name": "UnitedStates"
+      },
+      "ip": "89.160.20.128"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66d5-7d9d00000003",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bd075be9d011daaa82c3f9ff2572076e"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bd075be9d011daaa82c3f9ff2572076e"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102",
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Anti-Bot test.TC.e"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "www.threat-cloud.com"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-02T08:53:44.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"URL\",\"exclusion_value\":{\"default_value\":\"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "Medium",
+        "description": "Detected bot activity [Anti-Bot test.TC.e]. To exclude: On the Harmony Endpoint Management add an exclusion of type \"URL\" with value: \"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Communication with C&C"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "6c239c74-89a9-4797-ab6b-75a2b2a6afd7",
+        "policy": {
+          "date": "2024-08-29T13:12:51.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 2
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "proxy_src_ip": "89.160.20.128",
+        "sequencenum": 16777215,
+        "severity": "Critical",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "country_name": "UnitedStates"
+      },
+      "ip": "89.160.20.128"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66d5-7d9d00000006",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bd075be9d011daaa82c3f9ff2572076e"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bd075be9d011daaa82c3f9ff2572076e"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102",
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Anti-Bot test.TC.e"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "www.threat-cloud.com"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-02T08:53:44.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"URL\",\"exclusion_value\":{\"default_value\":\"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "Medium",
+        "description": "Detected bot activity [Anti-Bot test.TC.e]. To exclude: On the Harmony Endpoint Management add an exclusion of type \"URL\" with value: \"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Communication with C&C"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "6c239c74-89a9-4797-ab6b-75a2b2a6afd7",
+        "policy": {
+          "date": "2024-08-29T13:12:51.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 2
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "proxy_src_ip": "89.160.20.128",
+        "sequencenum": 16777215,
+        "severity": "Critical",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "country_name": "UnitedStates"
+      },
+      "ip": "89.160.20.128"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66d5-7d9d00000009",
+      "ingested": "2026-03-10T02:34:22Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bd075be9d011daaa82c3f9ff2572076e"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bd075be9d011daaa82c3f9ff2572076e"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102",
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Anti-Bot test.TC.e"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "www.threat-cloud.com"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:28.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "e71ae8af-f40e-49cb-9bef-1a91602f8faf",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000011",
+      "ingested": "2026-03-10T02:34:25Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "7469cc568ad6821fd9d925542730a7d8"
+      },
+      "name": "svchost.exe",
+      "size": 47040,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "NETWORK SERVICE"
+      }
+    },
+    "related": {
+      "hash": [
+        "7469cc568ad6821fd9d925542730a7d8"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin",
+        "NETWORK SERVICE"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:28.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "e71ae8af-f40e-49cb-9bef-1a91602f8faf",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000014",
+      "ingested": "2026-03-10T02:34:25Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "7469cc568ad6821fd9d925542730a7d8"
+      },
+      "name": "svchost.exe",
+      "size": 47040,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "NETWORK SERVICE"
+      }
+    },
+    "related": {
+      "hash": [
+        "7469cc568ad6821fd9d925542730a7d8"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin",
+        "NETWORK SERVICE"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-06T08:32:26.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"Domain\",\"exclusion_value\":{\"default_value\":\"malware.wicar.org\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "High",
+        "description": "Detected dns query to malicious domain malware.wicar.org [Infecting Website.RS.TC.32eclVjT]. To exclude: On the Harmony Endpoint Management add an Anti-Bot exclusion of type Domain with value: \"malware.wicar.org\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Access to site known to contain malware"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "087e116c-c098-44ba-95dd-064a90189b4a",
+        "policy": {
+          "date": "2024-09-03T10:46:14.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 3
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "sequencenum": 16777215,
+        "severity": "High",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66da-bf6400000012",
+      "ingested": "2026-03-10T02:34:25Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bb7c48cddde076e7eb44022520f40f77"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bb7c48cddde076e7eb44022520f40f77"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Infecting Website.RS.TC.32eclVjT"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "malware.wicar.org"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-09-02T08:53:44.000Z",
+    "agent": {
+      "ephemeral_id": "d610389a-c475-4673-bb5e-6a3ba20bbe00",
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "name": "elastic-agent-93671",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "checkpoint_harmony_endpoint": {
+      "antibot": {
+        "advanced_info": "\"exclusions\":[{\"exclusion_engine_type\":\"Anti Bot exclusions\",\"exclusion_type\":\"URL\",\"exclusion_value\":{\"default_value\":\"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\",\"md5\":\"\",\"original_name\":\"\",\"signer\":\"\",\"process\":\"\",\"protection\":\"\",\"comment\":\"\"}}]",
+        "client": {
+          "name": "Check Point Endpoint Security Client",
+          "version": "88.50.0213"
+        },
+        "confidence_level": "Medium",
+        "description": "Detected bot activity [Anti-Bot test.TC.e]. To exclude: On the Harmony Endpoint Management add an exclusion of type \"URL\" with value: \"http://www.threat-cloud.com/test/files/MediumConfidenceBot.html\"",
+        "event_type": "Anti Bot Event",
+        "installed_products": "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Anti-Bot; Forensics; Threat Emulation",
+        "malware": {
+          "action": "Communication with C&C"
+        },
+        "packet_capture": "Packet Capture",
+        "packet_capture_unique_id": "6c239c74-89a9-4797-ab6b-75a2b2a6afd7",
+        "policy": {
+          "date": "2024-08-29T13:12:51.000Z",
+          "name": "Default Anti-Bot settings",
+          "number": 2
+        },
+        "product": {
+          "family": "Endpoint",
+          "name": "Anti-Bot"
+        },
+        "protection_type": "URL Reputation",
+        "proxy_src_ip": "89.160.20.128",
+        "sequencenum": 16777215,
+        "severity": "Critical",
+        "tenant_id": "3e15ed24-89ff-4986-a204-c425cee4ba48",
+        "type": "Log"
+      }
+    },
+    "data_stream": {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "namespace": "77231",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "country_name": "UnitedStates"
+      },
+      "ip": "89.160.20.128"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "b752498b-fd98-4cb2-b117-dfa6d376966a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Detect",
+      "agent_id_status": "verified",
+      "category": [
+        "malware"
+      ],
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "id": "a4640108-91b1-0f19-66d5-7d9d00000013",
+      "ingested": "2026-03-10T02:34:25Z",
+      "kind": "event",
+      "module": "checkpoint_harmony_endpoint",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "bd075be9d011daaa82c3f9ff2572076e"
+      },
+      "name": "chrome.exe",
+      "size": 2742376,
+      "type": "exe"
+    },
+    "host": {
+      "hostname": "DESKTOP-E2P4OL0",
+      "ip": [
+        "10.35.38.102"
+      ],
+      "name": "DESKTOP-E2P4OL0",
+      "os": {
+        "name": "Microsoft Windows 10 Pro",
+        "version": "10.0-19045-SP0.0-SMP"
+      },
+      "type": [
+        "Desktop"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "related": {
+      "hash": [
+        "bd075be9d011daaa82c3f9ff2572076e"
+      ],
+      "hosts": [
+        "DESKTOP-E2P4OL0"
+      ],
+      "ip": [
+        "10.35.38.102",
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "rule": {
+      "name": "Anti-Bot test.TC.e"
+    },
+    "tags": [
+      "forwarded"
+    ],
+    "url": {
+      "original": "www.threat-cloud.com"
+    },
+    "user": {
+      "domain": "SMC User",
+      "id": "S-1-5-21-3766288932-3295778425-2939962592-1001",
+      "name": [
+        "admin"
+      ]
+    }
+  }
+]

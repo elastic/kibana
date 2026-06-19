@@ -1,0 +1,556 @@
+[
+  {
+    "@timestamp": "2025-03-04T06:42:20.000Z",
+    "agent": {
+      "ephemeral_id": "0f2f199f-62b1-44df-91c2-a2c1c5522b00",
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "name": "elastic-agent-30227",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.audit",
+      "namespace": "16512",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "vectra_rux.audit",
+      "ingested": "2026-03-10T02:34:51Z",
+      "kind": "event",
+      "original": "{\"api_client_id\":null,\"event_action\":\"created\",\"event_data\":{\"account_note\":{\"account_id\":\"57\",\"note_id\":\"684\"}},\"event_object\":\"detection_tag\",\"event_timestamp\":\"2025-03-04T06:42:20Z\",\"id\":2,\"message\":\"Tag testdev has been added to detections with ids [172]\",\"result_status\":\"success\",\"source_ip\":\"81.2.69.142\",\"user_id\":22285,\"user_role\":\"Security Analyst\",\"user_type\":\"JWT\",\"username\":\"john.doe@net.co\",\"version\":\"202502.14.0\"}",
+      "outcome": "success",
+      "type": [
+        "creation"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Tag testdev has been added to detections with ids [172]",
+    "observer": {
+      "product": "Vectra RUX",
+      "version": "202502.14.0"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.142"
+      ],
+      "user": [
+        "22285",
+        "john.doe",
+        "john.doe@net.co"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.142"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-audit"
+    ],
+    "user": {
+      "domain": "net.co",
+      "email": "john.doe@net.co",
+      "id": "22285",
+      "name": "john.doe",
+      "roles": [
+        "Security Analyst"
+      ]
+    },
+    "vectra_rux": {
+      "audit": {
+        "event": {
+          "action": "created",
+          "data": {
+            "account_note": {
+              "account_id": "57",
+              "note_id": "684"
+            }
+          },
+          "object": "detection_tag",
+          "timestamp": "2025-03-04T06:42:20.000Z"
+        },
+        "id": "2",
+        "message": "Tag testdev has been added to detections with ids [172]",
+        "result_status": "success",
+        "source_ip": "81.2.69.142",
+        "user": {
+          "id": "22285",
+          "name": "john.doe@net.co",
+          "role": "Security Analyst",
+          "type": "JWT"
+        },
+        "version": "202502.14.0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-03-03T06:42:20.000Z",
+    "agent": {
+      "ephemeral_id": "0f2f199f-62b1-44df-91c2-a2c1c5522b00",
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "name": "elastic-agent-30227",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.audit",
+      "namespace": "16512",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "vectra_rux.audit",
+      "ingested": "2026-03-10T02:34:51Z",
+      "kind": "event",
+      "original": "{\"api_client_id\":null,\"event_action\":\"created\",\"event_data\":{\"account_note\":{\"account_id\":\"57\",\"note_id\":\"684\"}},\"event_object\":\"detection_tag\",\"event_timestamp\":\"2025-03-03T06:42:20Z\",\"id\":1,\"message\":\"Tag testdev has been added to detections with ids [172]\",\"result_status\":\"success\",\"source_ip\":\"81.2.69.142\",\"user_id\":22284,\"user_role\":\"Security Analyst\",\"user_type\":\"JWT\",\"username\":\"john.doe@net.co\",\"version\":\"202502.14.0\"}",
+      "outcome": "success",
+      "type": [
+        "creation"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Tag testdev has been added to detections with ids [172]",
+    "observer": {
+      "product": "Vectra RUX",
+      "version": "202502.14.0"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.142"
+      ],
+      "user": [
+        "22284",
+        "john.doe",
+        "john.doe@net.co"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.142"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-audit"
+    ],
+    "user": {
+      "domain": "net.co",
+      "email": "john.doe@net.co",
+      "id": "22284",
+      "name": "john.doe",
+      "roles": [
+        "Security Analyst"
+      ]
+    },
+    "vectra_rux": {
+      "audit": {
+        "event": {
+          "action": "created",
+          "data": {
+            "account_note": {
+              "account_id": "57",
+              "note_id": "684"
+            }
+          },
+          "object": "detection_tag",
+          "timestamp": "2025-03-03T06:42:20.000Z"
+        },
+        "id": "1",
+        "message": "Tag testdev has been added to detections with ids [172]",
+        "result_status": "success",
+        "source_ip": "81.2.69.142",
+        "user": {
+          "id": "22284",
+          "name": "john.doe@net.co",
+          "role": "Security Analyst",
+          "type": "JWT"
+        },
+        "version": "202502.14.0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-02-12T00:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "0f2f199f-62b1-44df-91c2-a2c1c5522b00",
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "name": "elastic-agent-30227",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.audit",
+      "namespace": "16512",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "updated",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "vectra_rux.audit",
+      "ingested": "2026-03-10T02:34:51Z",
+      "kind": "event",
+      "original": "{\"api_client_id\":\"0cc5c3a9-4b1d-4b3a-9c5c-3a9b1d4b3a9b\",\"event_action\":\"updated\",\"event_data\":{},\"event_object\":\"account_tags\",\"event_timestamp\":\"2025-02-12T00:00:00.000Z\",\"id\":5,\"message\":\"[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']\",\"result_status\":\"success\",\"source_ip\":\"89.160.20.156\",\"user_id\":5,\"user_role\":\"Security Analyst\",\"user_type\":\"API_CLIENT\",\"username\":\"admin\",\"version\":\"2022.0.0\"}",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']",
+    "observer": {
+      "product": "Vectra RUX",
+      "version": "2022.0.0"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.156"
+      ],
+      "user": [
+        "5",
+        "admin"
+      ]
+    },
+    "source": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-audit"
+    ],
+    "user": {
+      "id": "5",
+      "name": "admin",
+      "roles": [
+        "Security Analyst"
+      ]
+    },
+    "vectra_rux": {
+      "audit": {
+        "api_client_id": "0cc5c3a9-4b1d-4b3a-9c5c-3a9b1d4b3a9b",
+        "event": {
+          "action": "updated",
+          "object": "account_tags",
+          "timestamp": "2025-02-12T00:00:00.000Z"
+        },
+        "id": "5",
+        "message": "[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']",
+        "result_status": "success",
+        "source_ip": "89.160.20.156",
+        "user": {
+          "id": "5",
+          "name": "admin",
+          "role": "Security Analyst",
+          "type": "API_CLIENT"
+        },
+        "version": "2022.0.0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-02-08T00:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "0f2f199f-62b1-44df-91c2-a2c1c5522b00",
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "name": "elastic-agent-30227",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.audit",
+      "namespace": "16512",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "updated",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "vectra_rux.audit",
+      "ingested": "2026-03-10T02:34:51Z",
+      "kind": "event",
+      "original": "{\"api_client_id\":\"0cc5c3a9-4b1d-4b3a-9c5c-3a9b1d4b3a9b\",\"event_action\":\"updated\",\"event_data\":{},\"event_object\":\"account_tags\",\"event_timestamp\":\"2025-02-08T00:00:00.000Z\",\"id\":4,\"message\":\"[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']\",\"result_status\":\"success\",\"source_ip\":\"89.160.20.156\",\"user_id\":4,\"user_role\":\"Security Analyst\",\"user_type\":\"API_CLIENT\",\"username\":\"admin\",\"version\":\"2022.0.0\"}",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']",
+    "observer": {
+      "product": "Vectra RUX",
+      "version": "2022.0.0"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.156"
+      ],
+      "user": [
+        "4",
+        "admin"
+      ]
+    },
+    "source": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-audit"
+    ],
+    "user": {
+      "id": "4",
+      "name": "admin",
+      "roles": [
+        "Security Analyst"
+      ]
+    },
+    "vectra_rux": {
+      "audit": {
+        "api_client_id": "0cc5c3a9-4b1d-4b3a-9c5c-3a9b1d4b3a9b",
+        "event": {
+          "action": "updated",
+          "object": "account_tags",
+          "timestamp": "2025-02-08T00:00:00.000Z"
+        },
+        "id": "4",
+        "message": "[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']",
+        "result_status": "success",
+        "source_ip": "89.160.20.156",
+        "user": {
+          "id": "4",
+          "name": "admin",
+          "role": "Security Analyst",
+          "type": "API_CLIENT"
+        },
+        "version": "2022.0.0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-02-01T00:00:00.000Z",
+    "agent": {
+      "ephemeral_id": "0f2f199f-62b1-44df-91c2-a2c1c5522b00",
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "name": "elastic-agent-30227",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.audit",
+      "namespace": "16512",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "c002edf3-7a5f-4f30-bf78-b03ae866f6fb",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "updated",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "vectra_rux.audit",
+      "ingested": "2026-03-10T02:34:51Z",
+      "kind": "event",
+      "original": "{\"api_client_id\":\"0cc5c3a9-4b1d-4b3a-9c5c-3a9b1d4b3a9b\",\"event_action\":\"updated\",\"event_data\":{},\"event_object\":\"account_tags\",\"event_timestamp\":\"2025-02-01T00:00:00.000Z\",\"id\":3,\"message\":\"[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']\",\"result_status\":\"success\",\"source_ip\":\"89.160.20.156\",\"user_id\":3,\"user_role\":\"Security Analyst\",\"user_type\":\"API_CLIENT\",\"username\":\"admin\",\"version\":\"2022.0.0\"}",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']",
+    "observer": {
+      "product": "Vectra RUX",
+      "version": "2022.0.0"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.156"
+      ],
+      "user": [
+        "3",
+        "admin"
+      ]
+    },
+    "source": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-audit"
+    ],
+    "user": {
+      "id": "3",
+      "name": "admin",
+      "roles": [
+        "Security Analyst"
+      ]
+    },
+    "vectra_rux": {
+      "audit": {
+        "api_client_id": "0cc5c3a9-4b1d-4b3a-9c5c-3a9b1d4b3a9b",
+        "event": {
+          "action": "updated",
+          "object": "account_tags",
+          "timestamp": "2025-02-01T00:00:00.000Z"
+        },
+        "id": "3",
+        "message": "[table:linked_account][id:1] with tags [] was changed to ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']",
+        "result_status": "success",
+        "source_ip": "89.160.20.156",
+        "user": {
+          "id": "3",
+          "name": "admin",
+          "role": "Security Analyst",
+          "type": "API_CLIENT"
+        },
+        "version": "2022.0.0"
+      }
+    }
+  }
+]

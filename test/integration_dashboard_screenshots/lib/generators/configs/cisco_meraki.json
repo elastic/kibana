@@ -1,0 +1,24 @@
+{
+  "package": "cisco_meraki",
+  "dataStreams": [
+    {
+      "dataset": "cisco_meraki.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_meraki.event_subtype",
+        "cisco_meraki.event_type",
+        "event.action",
+        "event.category",
+        "source.mac",
+        "url.original"
+      ],
+      "filterValues": {
+        "cisco_meraki.event_subtype": [
+          "rogue_ssid_detected",
+          "ssid_spoofing_detected"
+        ]
+      }
+    }
+  ]
+}

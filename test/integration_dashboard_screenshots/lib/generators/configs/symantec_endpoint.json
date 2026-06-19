@@ -1,0 +1,20 @@
+{
+  "package": "symantec_endpoint",
+  "dataStreams": [
+    {
+      "dataset": "symantec_endpoint.log",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "event.category",
+        "event.provider",
+        "event.type",
+        "file.path",
+        "host.name",
+        "process.executable"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "package": "sentinel_one",
+  "dataStreams": [
+    {
+      "dataset": "sentinel_one.activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "observer.os.family",
+        "sentinel_one.account.name",
+        "sentinel_one.activity.agent.id",
+        "sentinel_one.activity.description.primary",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sentinel_one.agent",
+      "indexPattern": "logs-*",
+      "docTarget": 570,
+      "fields": [
+        "host.id",
+        "host.name",
+        "host.os.name",
+        "host.os.type",
+        "sentinel_one.agent.active_threats_count",
+        "sentinel_one.agent.apps_vulnerability_status",
+        "sentinel_one.agent.firewall_enabled",
+        "sentinel_one.agent.group.ip",
+        "sentinel_one.agent.infected",
+        "sentinel_one.agent.installer_type",
+        "sentinel_one.agent.is_active",
+        "sentinel_one.agent.is_pending_uninstall",
+        "sentinel_one.agent.is_uninstalled",
+        "sentinel_one.agent.is_up_to_date",
+        "sentinel_one.agent.machine.type",
+        "sentinel_one.agent.mitigation_mode",
+        "sentinel_one.agent.os.arch",
+        "sentinel_one.agent.scan.status",
+        "sentinel_one.site.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sentinel_one.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.type",
+        "host.os.family",
+        "observer.version",
+        "rule.name",
+        "sentinel_one.alert.info.status",
+        "sentinel_one.alert.rule.scope_level",
+        "sentinel_one.alert.rule.severity",
+        "sentinel_one.alert.rule.treat_as_threat"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sentinel_one.application",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "host.os.name",
+        "labels.is_transform_source",
+        "package.installed",
+        "sentinel_one.application.detection_date"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "sentinel_one.application_risk",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "sentinel_one.application_risk.application",
+        "sentinel_one.application_risk.severity",
+        "vulnerability.cve"
+      ],
+      "filterValues": {
+        "sentinel_one.application_risk.severity": [
+          "CRITICAL",
+          "HIGH"
+        ]
+      }
+    },
+    {
+      "dataset": "sentinel_one.group",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "group.id",
+        "group.name",
+        "sentinel_one.group.agent.count",
+        "sentinel_one.group.rank",
+        "sentinel_one.group.type",
+        "user.full_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sentinel_one.threat",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "sentinel_one.agent.console_migration_status",
+        "sentinel_one.threat.agent.infected",
+        "sentinel_one.threat.agent.is_active",
+        "sentinel_one.threat.agent.mitigation_mode",
+        "sentinel_one.threat.confidence_level",
+        "sentinel_one.threat.detection.engines.title",
+        "sentinel_one.threat.file.extension.type",
+        "sentinel_one.threat.id",
+        "sentinel_one.threat.incident.status",
+        "sentinel_one.threat.mitigation.status",
+        "sentinel_one.threat.mitigation_status.action",
+        "sentinel_one.threat.mitigation_status.status",
+        "sentinel_one.threat.name",
+        "sentinel_one.threat_classification.name",
+        "threat.indicator.file.extension",
+        "threat.technique.id"
+      ],
+      "filterValues": {
+        "sentinel_one.threat.incident.status": [
+          "resolved",
+          "unresolved"
+        ],
+        "sentinel_one.threat.mitigation.status": [
+          "active",
+          "mitigated",
+          "blocked"
+        ],
+        "sentinel_one.agent.console_migration_status": [
+          "suspicious"
+        ]
+      }
+    },
+    {
+      "dataset": "sentinel_one.threat_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "file.type",
+        "labels.is_transform_source",
+        "source.ip",
+        "threat.indicator.name"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "sentinel_one.unified_alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "file.hash.sha1",
+        "file.type",
+        "host.name",
+        "host.os.type",
+        "sentinel_one.threat_classification.name",
+        "sentinel_one.unified_alert.analytics.category",
+        "sentinel_one.unified_alert.assets.asset_type_classifier",
+        "sentinel_one.unified_alert.assets.category",
+        "sentinel_one.unified_alert.assignee.user_id",
+        "sentinel_one.unified_alert.attack_surfaces",
+        "sentinel_one.unified_alert.confidence_level",
+        "sentinel_one.unified_alert.detected_at",
+        "sentinel_one.unified_alert.name",
+        "sentinel_one.unified_alert.severity",
+        "sentinel_one.unified_alert.status"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

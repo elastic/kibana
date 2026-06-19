@@ -1,0 +1,95 @@
+{
+  "package": "bitdefender",
+  "dataStreams": [
+    {
+      "dataset": "bitdefender.push_configuration",
+      "indexPattern": "logs-*",
+      "docTarget": 930,
+      "fields": [
+        "bitdefender.id",
+        "bitdefender.push.configuration.serviceSettings.url",
+        "bitdefender.push.configuration.status",
+        "bitdefender.push.configuration.subscribeToEventTypes.adcloud",
+        "bitdefender.push.configuration.subscribeToEventTypes.antiexploit",
+        "bitdefender.push.configuration.subscribeToEventTypes.aph",
+        "bitdefender.push.configuration.subscribeToEventTypes.av",
+        "bitdefender.push.configuration.subscribeToEventTypes.avc",
+        "bitdefender.push.configuration.subscribeToEventTypes.dp",
+        "bitdefender.push.configuration.subscribeToEventTypes.endpoint-moved-in",
+        "bitdefender.push.configuration.subscribeToEventTypes.endpoint-moved-out",
+        "bitdefender.push.configuration.subscribeToEventTypes.exchange-malware",
+        "bitdefender.push.configuration.subscribeToEventTypes.exchange-user-credentials",
+        "bitdefender.push.configuration.subscribeToEventTypes.fw",
+        "bitdefender.push.configuration.subscribeToEventTypes.hd",
+        "bitdefender.push.configuration.subscribeToEventTypes.hwid-change",
+        "bitdefender.push.configuration.subscribeToEventTypes.install",
+        "bitdefender.push.configuration.subscribeToEventTypes.modules",
+        "bitdefender.push.configuration.subscribeToEventTypes.network-monitor",
+        "bitdefender.push.configuration.subscribeToEventTypes.network-sandboxing",
+        "bitdefender.push.configuration.subscribeToEventTypes.new-incident",
+        "bitdefender.push.configuration.subscribeToEventTypes.ransomware-mitigation",
+        "bitdefender.push.configuration.subscribeToEventTypes.registration",
+        "bitdefender.push.configuration.subscribeToEventTypes.security-container-update-available",
+        "bitdefender.push.configuration.subscribeToEventTypes.supa-update-status",
+        "bitdefender.push.configuration.subscribeToEventTypes.sva",
+        "bitdefender.push.configuration.subscribeToEventTypes.sva-load",
+        "bitdefender.push.configuration.subscribeToEventTypes.task-status",
+        "bitdefender.push.configuration.subscribeToEventTypes.troubleshooting-activity",
+        "bitdefender.push.configuration.subscribeToEventTypes.uc",
+        "bitdefender.push.configuration.subscribeToEventTypes.uninstall"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "bitdefender.push_notifications",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "bitdefender.id",
+        "event.action",
+        "event.kind",
+        "event.module",
+        "event.severity",
+        "organization.id",
+        "organization.name",
+        "related.hosts",
+        "related.ip",
+        "related.user",
+        "threat.software.name"
+      ],
+      "filterValues": {
+        "event.kind": [
+          "alert"
+        ],
+        "event.module": [
+          "new-incident"
+        ],
+        "event.severity": [
+          "99",
+          "73"
+        ]
+      }
+    },
+    {
+      "dataset": "bitdefender.push_statistics",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "bitdefender.id",
+        "bitdefender.push.stats.count.errorMessages",
+        "bitdefender.push.stats.count.events",
+        "bitdefender.push.stats.count.sentMessages",
+        "bitdefender.push.stats.count.testEvents",
+        "bitdefender.push.stats.error.configurationError",
+        "bitdefender.push.stats.error.connectionError",
+        "bitdefender.push.stats.error.serviceError",
+        "bitdefender.push.stats.error.statusCode2xx",
+        "bitdefender.push.stats.error.statusCode300",
+        "bitdefender.push.stats.error.statusCode400",
+        "bitdefender.push.stats.error.statusCode500",
+        "bitdefender.push.stats.error.timeout"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

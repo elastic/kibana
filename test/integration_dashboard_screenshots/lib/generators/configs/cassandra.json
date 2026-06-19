@@ -1,0 +1,68 @@
+{
+  "package": "cassandra",
+  "dataStreams": [
+    {
+      "dataset": "cassandra.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "log.level",
+        "log.origin.file.line",
+        "log.origin.file.name",
+        "message",
+        "process.thread.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cassandra.metrics",
+      "indexPattern": "metrics-*",
+      "docTarget": 1000,
+      "fields": [
+        "cassandra.metrics.cache.key_cache.requests.one_minute_rate",
+        "cassandra.metrics.cache.row_cache.requests.one_minute_rate",
+        "cassandra.metrics.client_request.casread.one_minute_rate",
+        "cassandra.metrics.client_request.caswrite.one_minute_rate",
+        "cassandra.metrics.client_request.range_slice.one_minute_rate",
+        "cassandra.metrics.client_request.read.count",
+        "cassandra.metrics.client_request.read.one_minute_rate",
+        "cassandra.metrics.client_request.read.timeouts",
+        "cassandra.metrics.client_request.read.timeoutsms",
+        "cassandra.metrics.client_request.read.unavailablesms",
+        "cassandra.metrics.client_request.write.count",
+        "cassandra.metrics.client_request.write.one_minute_rate",
+        "cassandra.metrics.client_request.write.timeouts",
+        "cassandra.metrics.client_request.write.timeoutsms",
+        "cassandra.metrics.client_request.write.unavailables",
+        "cassandra.metrics.dropped_message.batch_remove",
+        "cassandra.metrics.dropped_message.batch_store",
+        "cassandra.metrics.dropped_message.counter_mutation",
+        "cassandra.metrics.dropped_message.hint",
+        "cassandra.metrics.dropped_message.mutation",
+        "cassandra.metrics.dropped_message.paged_range",
+        "cassandra.metrics.dropped_message.range_slice",
+        "cassandra.metrics.dropped_message.read",
+        "cassandra.metrics.dropped_message.read_repair",
+        "cassandra.metrics.dropped_message.request_response",
+        "cassandra.metrics.dropped_message.trace",
+        "cassandra.metrics.memory.heap_usage.used",
+        "cassandra.metrics.memory.other_usage.used",
+        "cassandra.metrics.storage.exceptions",
+        "cassandra.metrics.storage.load",
+        "cassandra.metrics.system.cluster",
+        "cassandra.metrics.system.data_center",
+        "cassandra.metrics.system.joining_nodes",
+        "cassandra.metrics.system.leaving_nodes",
+        "cassandra.metrics.system.live_nodes",
+        "cassandra.metrics.system.moving_nodes",
+        "cassandra.metrics.system.rack",
+        "cassandra.metrics.system.unreachable_nodes",
+        "cassandra.metrics.system.version",
+        "cassandra.metrics.task.complete",
+        "cassandra.metrics.task.pending",
+        "service.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

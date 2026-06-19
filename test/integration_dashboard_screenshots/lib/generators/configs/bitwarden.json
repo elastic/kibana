@@ -1,0 +1,56 @@
+{
+  "package": "bitwarden",
+  "dataStreams": [
+    {
+      "dataset": "bitwarden.collection",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "group.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "bitwarden.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "bitwarden.event.device.name",
+        "bitwarden.event.type.name",
+        "source.geo.country_iso_code",
+        "source.user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "bitwarden.group",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "group.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "bitwarden.member",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "bitwarden.member.status.name",
+        "bitwarden.member.type.name",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "bitwarden.policy",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "bitwarden.policy.id",
+        "bitwarden.policy.type.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

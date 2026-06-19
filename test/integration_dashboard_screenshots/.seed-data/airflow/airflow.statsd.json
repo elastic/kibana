@@ -1,0 +1,376 @@
+[
+  {
+    "@timestamp": "2026-03-10T01:57:26.459Z",
+    "agent": {
+      "ephemeral_id": "333b5558-149f-4cf0-85b2-5d8b4b4ec883",
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "name": "elastic-agent-30539",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "airflow": {
+      "dag_total_parse_time": {
+        "value": 0.0029031969997959095
+      }
+    },
+    "data_stream": {
+      "dataset": "airflow.statsd",
+      "namespace": "89232",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "airflow.statsd",
+      "ingested": "2026-03-10T01:57:27Z",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-30539",
+      "ip": [
+        "172.18.0.4",
+        "172.19.0.2"
+      ],
+      "mac": [
+        "EA-4C-65-57-62-1E",
+        "EE-F4-87-CC-5F-95"
+      ],
+      "name": "elastic-agent-30539",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "server"
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T01:57:26.458Z",
+    "agent": {
+      "ephemeral_id": "333b5558-149f-4cf0-85b2-5d8b4b4ec883",
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "name": "elastic-agent-30539",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "airflow": {
+      "pool_name": "default_pool",
+      "pool_open_slots": {
+        "value": 128.0
+      }
+    },
+    "data_stream": {
+      "dataset": "airflow.statsd",
+      "namespace": "89232",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "airflow.statsd",
+      "ingested": "2026-03-10T01:57:27Z",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-30539",
+      "ip": [
+        "172.18.0.4",
+        "172.19.0.2"
+      ],
+      "mac": [
+        "EA-4C-65-57-62-1E",
+        "EE-F4-87-CC-5F-95"
+      ],
+      "name": "elastic-agent-30539",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "server"
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T01:57:26.457Z",
+    "agent": {
+      "ephemeral_id": "333b5558-149f-4cf0-85b2-5d8b4b4ec883",
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "name": "elastic-agent-30539",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "airflow": {
+      "pool_name": "default_pool",
+      "pool_queued_slots": {
+        "value": 0.0
+      }
+    },
+    "data_stream": {
+      "dataset": "airflow.statsd",
+      "namespace": "89232",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "airflow.statsd",
+      "ingested": "2026-03-10T01:57:27Z",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-30539",
+      "ip": [
+        "172.18.0.4",
+        "172.19.0.2"
+      ],
+      "mac": [
+        "EA-4C-65-57-62-1E",
+        "EE-F4-87-CC-5F-95"
+      ],
+      "name": "elastic-agent-30539",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "server"
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T01:57:26.458Z",
+    "agent": {
+      "ephemeral_id": "333b5558-149f-4cf0-85b2-5d8b4b4ec883",
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "name": "elastic-agent-30539",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "airflow": {
+      "scheduler_heartbeat": {
+        "count": 1.0
+      }
+    },
+    "data_stream": {
+      "dataset": "airflow.statsd",
+      "namespace": "89232",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "airflow.statsd",
+      "ingested": "2026-03-10T01:57:27Z",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-30539",
+      "ip": [
+        "172.18.0.4",
+        "172.19.0.2"
+      ],
+      "mac": [
+        "EA-4C-65-57-62-1E",
+        "EE-F4-87-CC-5F-95"
+      ],
+      "name": "elastic-agent-30539",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "server"
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T01:57:26.457Z",
+    "agent": {
+      "ephemeral_id": "333b5558-149f-4cf0-85b2-5d8b4b4ec883",
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "name": "elastic-agent-30539",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "airflow": {
+      "executor_running_tasks": {
+        "value": 0.0
+      }
+    },
+    "data_stream": {
+      "dataset": "airflow.statsd",
+      "namespace": "89232",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "airflow.statsd",
+      "ingested": "2026-03-10T01:57:27Z",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-30539",
+      "ip": [
+        "172.18.0.4",
+        "172.19.0.2"
+      ],
+      "mac": [
+        "EA-4C-65-57-62-1E",
+        "EE-F4-87-CC-5F-95"
+      ],
+      "name": "elastic-agent-30539",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "server"
+    },
+    "service": {
+      "type": "statsd"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T01:57:26.456Z",
+    "agent": {
+      "ephemeral_id": "333b5558-149f-4cf0-85b2-5d8b4b4ec883",
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "name": "elastic-agent-30539",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "airflow": {
+      "executor_open_slots": {
+        "value": 32.0
+      }
+    },
+    "data_stream": {
+      "dataset": "airflow.statsd",
+      "namespace": "89232",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "291c5e13-84ad-4534-823b-79b8cfc68b5b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "airflow.statsd",
+      "ingested": "2026-03-10T01:57:27Z",
+      "module": "statsd"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-30539",
+      "ip": [
+        "172.18.0.4",
+        "172.19.0.2"
+      ],
+      "mac": [
+        "EA-4C-65-57-62-1E",
+        "EE-F4-87-CC-5F-95"
+      ],
+      "name": "elastic-agent-30539",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "server"
+    },
+    "service": {
+      "type": "statsd"
+    }
+  }
+]

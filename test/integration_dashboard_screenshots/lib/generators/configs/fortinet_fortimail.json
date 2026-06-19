@@ -1,0 +1,37 @@
+{
+  "package": "fortinet_fortimail",
+  "dataStreams": [
+    {
+      "dataset": "fortinet_fortimail.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.direction",
+        "email.from.address",
+        "email.to.address",
+        "email.x_mailer",
+        "event.action",
+        "fortinet_fortimail.log.endpoint",
+        "fortinet_fortimail.log.module",
+        "fortinet_fortimail.log.resolved",
+        "fortinet_fortimail.log.status",
+        "fortinet_fortimail.log.sub_module",
+        "fortinet_fortimail.log.sub_type",
+        "fortinet_fortimail.log.type",
+        "log.level",
+        "server.domain",
+        "user.name"
+      ],
+      "filterValues": {
+        "fortinet_fortimail.log.type": [
+          "spam",
+          "virus",
+          "encrypt",
+          "event",
+          "kevent",
+          "statistics"
+        ]
+      }
+    }
+  ]
+}

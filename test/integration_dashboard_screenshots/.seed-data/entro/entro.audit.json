@@ -1,0 +1,302 @@
+[
+  {
+    "@timestamp": "2025-06-27T23:15:28.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "ac7b0d91-ad2e-4783-b7bf-a760445a01c6",
+    "event.ingested": "2026-03-10T02:35:28Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ]
+  },
+  {
+    "@timestamp": "2025-06-27T20:12:44.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "a05d6a3d-6468-4fcc-994e-f525011c53cf",
+    "event.ingested": "2026-03-10T02:35:28Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "log.origin.file.line": 100,
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ],
+    "vulnerability.category": [
+      "Secret"
+    ],
+    "vulnerability.description": "GENERIC_CREDS_WINDOWS_PASSWORD",
+    "vulnerability.value": "asdfasdf"
+  },
+  {
+    "@timestamp": "2025-06-27T20:12:44.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "a22d6a3d-6468-4fdd-994e-f5250dasdacf",
+    "event.ingested": "2026-03-10T02:35:28Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "log.origin.file.line": 100,
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ],
+    "vulnerability.category": [
+      "Secret"
+    ],
+    "vulnerability.description": "GENERIC_CREDS_WINDOWS_PASSWORD",
+    "vulnerability.value": "asdfasdfasdf"
+  },
+  {
+    "@timestamp": "2025-06-27T20:12:44.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "a22d6a3d-6468-4fdd-994e-f5250dasdacf",
+    "event.ingested": "2026-03-10T02:35:28Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "log.origin.file.line": 100,
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ],
+    "vulnerability.category": [
+      "Secret"
+    ],
+    "vulnerability.description": "AWS_ACCESS_KEY_ID",
+    "vulnerability.value": "asdfasdf"
+  },
+  {
+    "@timestamp": "2025-05-27T23:15:28.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "dc7b0d91-ad2e-4783-b7bf-a760445a01c6",
+    "event.ingested": "2026-03-10T02:35:26Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ]
+  },
+  {
+    "@timestamp": "2025-05-27T20:12:44.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "105d6a3d-6468-4fcc-994e-f525011c53cf",
+    "event.ingested": "2026-03-10T02:35:26Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "log.origin.file.line": 878,
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ],
+    "vulnerability.category": [
+      "Secret"
+    ],
+    "vulnerability.description": "GENERIC_CREDS_WINDOWS_PASSWORD",
+    "vulnerability.value": "asd123123"
+  },
+  {
+    "@timestamp": "2025-05-27T20:12:44.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "122d6a3d-6468-4fdd-994e-f5250dasdacf",
+    "event.ingested": "2026-03-10T02:35:26Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "log.origin.file.line": 878,
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ],
+    "vulnerability.category": [
+      "Secret"
+    ],
+    "vulnerability.description": "GENERIC_CREDS_WINDOWS_PASSWORD",
+    "vulnerability.value": "tasd121113"
+  },
+  {
+    "@timestamp": "2025-05-27T20:12:44.000Z",
+    "agent.ephemeral_id": "6f1d1f2c-4733-4bcd-89da-1fcae1158596",
+    "agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "agent.name": "elastic-agent-31708",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "data_stream.dataset": "entro.audit",
+    "data_stream.namespace": "29031",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "9e0c70da-5201-4760-b296-62cb2f4d94fa",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "vulnerability"
+    ],
+    "event.dataset": "entro.audit",
+    "event.id": "122d6a3d-6468-4fdd-994e-f5250dasdacf",
+    "event.ingested": "2026-03-10T02:35:26Z",
+    "event.kind": "event",
+    "event.type": [
+      "info"
+    ],
+    "host.name": "elastic-agent-31708",
+    "input.type": "cel",
+    "log.origin.file.line": 878,
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "entro-event"
+    ],
+    "vulnerability.category": [
+      "Secret"
+    ],
+    "vulnerability.description": "AWS_ACCESS_KEY_ID",
+    "vulnerability.value": "ABCDEF12345789"
+  }
+]

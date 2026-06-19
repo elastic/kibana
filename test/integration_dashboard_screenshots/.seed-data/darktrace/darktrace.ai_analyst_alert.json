@@ -1,0 +1,226 @@
+[
+  {
+    "@timestamp": "2021-08-03T14:48:09.240Z",
+    "agent": {
+      "ephemeral_id": "d90fec9b-1598-4beb-a599-48698a3749cf",
+      "id": "6573f870-0e4c-4328-b69a-8e3ff5753bf5",
+      "name": "elastic-agent-23831",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "darktrace": {
+      "ai_analyst_alert": {
+        "activity_id": "abcd1234",
+        "aia_score": 98.0,
+        "attack_phases": [
+          5
+        ],
+        "breach_devices": [
+          {
+            "subnet": "VPN",
+            "ip": "81.2.69.144",
+            "did": 10,
+            "sid": 12
+          }
+        ],
+        "category": "critical",
+        "children": [
+          "eabcdef0-1234-1234-1234-cabcdefghij9"
+        ],
+        "created_at": "2021-08-03T14:48:09.240Z",
+        "current_group": "eabc1234-1234-1234-1234-cabcdefg0011",
+        "details": [
+          [
+            {
+              "contents": [
+                {
+                  "values": [
+                    {
+                      "subnet": "VPN",
+                      "ip": "175.16.199.1",
+                      "did": 10,
+                      "sid": 12
+                    }
+                  ],
+                  "type": "device"
+                }
+              ],
+              "header": "Breaching Device"
+            }
+          ],
+          [
+            {
+              "contents": [
+                {
+                  "values": [
+                    {
+                      "start": 1627985298683,
+                      "end": 1628000141220
+                    }
+                  ],
+                  "type": "timestampRange",
+                  "key": "Time"
+                },
+                {
+                  "values": [
+                    16
+                  ],
+                  "type": "integer",
+                  "key": "Number of unique IPs"
+                },
+                {
+                  "values": [
+                    {
+                      "ip": "81.2.69.192"
+                    },
+                    {
+                      "ip": "175.16.199.1"
+                    },
+                    {
+                      "ip": "175.16.199.3"
+                    }
+                  ],
+                  "type": "device",
+                  "key": "Targeted IP ranges include"
+                },
+                {
+                  "values": [
+                    22
+                  ],
+                  "type": "integer",
+                  "key": "Destination port"
+                },
+                {
+                  "values": [
+                    40
+                  ],
+                  "type": "integer",
+                  "key": "Connection count"
+                },
+                {
+                  "values": [
+                    100
+                  ],
+                  "type": "percentage",
+                  "key": "Percentage successful"
+                }
+              ],
+              "header": "SSH Activity"
+            }
+          ]
+        ],
+        "group_by_activity": false,
+        "group_category": "critical",
+        "group_score": 72.9174234,
+        "grouping_ids": [
+          "abcdef12"
+        ],
+        "id": "eabc0011-1234-1234-1234-cabcdefg0011",
+        "is_acknowledged": false,
+        "is_external_triggered": false,
+        "is_pinned": true,
+        "is_user_triggered": false,
+        "periods": [
+          {
+            "start": "2021-08-03T10:08:18.683Z",
+            "end": "2021-08-03T14:15:41.220Z"
+          }
+        ],
+        "related_breaches": [
+          {
+            "model_name": "Unusual Activity / Unusual Activity from Re-Activated Device",
+            "pbid": 1234,
+            "threat_score": 37,
+            "timestamp": "2021-08-03T13:25:57.000Z"
+          }
+        ],
+        "summariser": "AdminConnSummary",
+        "summary": "The device 175.16.199.1 was observed making unusual internal SSH connections to a wide range of devices.\n\nThough this behaviour could be the result of legitimate remote access or administration, it could also be a sign of attempted lateral movement by a compromised machine.\n\nConsequently, if this activity was not expected, the security team may wish to investigate further.",
+        "title": "Extensive Unusual SSH Connections"
+      }
+    },
+    "data_stream": {
+      "dataset": "darktrace.ai_analyst_alert",
+      "namespace": "66785",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "6573f870-0e4c-4328-b69a-8e3ff5753bf5",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2026-03-10T03:22:56.351Z",
+      "dataset": "darktrace.ai_analyst_alert",
+      "duration": [
+        14842537000000
+      ],
+      "end": [
+        "2021-08-03T14:15:41.220Z"
+      ],
+      "id": "eabc0011-1234-1234-1234-cabcdefg0011",
+      "ingested": "2026-03-10T03:22:59Z",
+      "kind": "alert",
+      "original": "{\"acknowledged\":false,\"activityId\":\"abcd1234\",\"aiaScore\":98,\"attackPhases\":[5],\"breachDevices\":[{\"did\":10,\"hostname\":null,\"identifier\":null,\"ip\":\"81.2.69.144\",\"mac\":null,\"sid\":12,\"subnet\":\"VPN\"}],\"category\":\"critical\",\"children\":[\"eabcdef0-1234-1234-1234-cabcdefghij9\"],\"createdAt\":1628002089240,\"currentGroup\":\"eabc1234-1234-1234-1234-cabcdefg0011\",\"details\":[[{\"contents\":[{\"key\":null,\"type\":\"device\",\"values\":[{\"did\":10,\"hostname\":null,\"identifier\":null,\"ip\":\"175.16.199.1\",\"mac\":null,\"sid\":12,\"subnet\":\"VPN\"}]}],\"header\":\"Breaching Device\"}],[{\"contents\":[{\"key\":\"Time\",\"type\":\"timestampRange\",\"values\":[{\"end\":1628000141220,\"start\":1627985298683}]},{\"key\":\"Number of unique IPs\",\"type\":\"integer\",\"values\":[16]},{\"key\":\"Targeted IP ranges include\",\"type\":\"device\",\"values\":[{\"did\":null,\"hostname\":null,\"identifier\":null,\"ip\":\"81.2.69.192\",\"mac\":null,\"sid\":null,\"subnet\":null},{\"did\":null,\"hostname\":null,\"identifier\":null,\"ip\":\"175.16.199.1\",\"mac\":null,\"sid\":null,\"subnet\":null},{\"did\":null,\"hostname\":null,\"identifier\":null,\"ip\":\"175.16.199.3\",\"mac\":null,\"sid\":null,\"subnet\":null}]},{\"key\":\"Destination port\",\"type\":\"integer\",\"values\":[22]},{\"key\":\"Connection count\",\"type\":\"integer\",\"values\":[40]},{\"key\":\"Percentage successful\",\"type\":\"percentage\",\"values\":[100]}],\"header\":\"SSH Activity\"}]],\"externalTriggered\":false,\"groupByActivity\":false,\"groupCategory\":\"critical\",\"groupPreviousGroups\":null,\"groupScore\":\"72.9174234\",\"groupingIds\":[\"abcdef12\"],\"id\":\"eabc0011-1234-1234-1234-cabcdefg0011\",\"periods\":[{\"end\":1628000141220,\"start\":1627985298683}],\"pinned\":true,\"relatedBreaches\":[{\"modelName\":\"Unusual Activity / Unusual Activity from Re-Activated Device\",\"pbid\":1234,\"threatScore\":37,\"timestamp\":1627997157000}],\"summariser\":\"AdminConnSummary\",\"summary\":\"The device 175.16.199.1 was observed making unusual internal SSH connections to a wide range of devices.\\n\\nThough this behaviour could be the result of legitimate remote access or administration, it could also be a sign of attempted lateral movement by a compromised machine.\\n\\nConsequently, if this activity was not expected, the security team may wish to investigate further.\",\"title\":\"Extensive Unusual SSH Connections\",\"userTriggered\":false}",
+      "reason": "Extensive Unusual SSH Connections",
+      "risk_score": 98.0,
+      "risk_score_norm": 98.0,
+      "start": [
+        "2021-08-03T10:08:18.683Z"
+      ],
+      "type": [
+        "indicator"
+      ]
+    },
+    "host": {
+      "id": [
+        "10"
+      ],
+      "ip": [
+        "81.2.69.144"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "message": "The device 175.16.199.1 was observed making unusual internal SSH connections to a wide range of devices.\n\nThough this behaviour could be the result of legitimate remote access or administration, it could also be a sign of attempted lateral movement by a compromised machine.\n\nConsequently, if this activity was not expected, the security team may wish to investigate further.",
+    "related": {
+      "ip": [
+        "81.2.69.144",
+        "175.16.199.1",
+        "81.2.69.192",
+        "175.16.199.3"
+      ]
+    },
+    "rule": {
+      "name": [
+        "Unusual Activity / Unusual Activity from Re-Activated Device"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "darktrace-ai_analyst_alert"
+    ],
+    "threat": {
+      "enrichments": {
+        "matched": {
+          "id": [
+            "eabcdef0-1234-1234-1234-cabcdefghij9"
+          ]
+        }
+      },
+      "group": {
+        "id": "eabc1234-1234-1234-1234-cabcdefg0011"
+      }
+    }
+  }
+]

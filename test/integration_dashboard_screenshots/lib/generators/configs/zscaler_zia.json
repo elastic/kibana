@@ -1,0 +1,196 @@
+{
+  "package": "zscaler_zia",
+  "dataStreams": [
+    {
+      "dataset": "zscaler_zia.alerts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zscaler_zia.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "rule.category",
+        "rule.ruleset",
+        "source.ip",
+        "user.email",
+        "zscaler_zia.audit.interface",
+        "zscaler_zia.audit.result"
+      ],
+      "filterValues": {
+        "rule.ruleset": [
+          "LOGIN"
+        ]
+      }
+    },
+    {
+      "dataset": "zscaler_zia.dns",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "dns.response_code",
+        "event.duration",
+        "network.application",
+        "network.transport",
+        "rule.name",
+        "source.geo.country_iso_code",
+        "source.ip",
+        "zscaler_zia.dns.department",
+        "zscaler_zia.dns.dns.category",
+        "zscaler_zia.dns.dns.gateway.status",
+        "zscaler_zia.dns.http_code",
+        "zscaler_zia.dns.request.action"
+      ],
+      "filterValues": {
+        "rule.name": [
+          "None"
+        ]
+      }
+    },
+    {
+      "dataset": "zscaler_zia.endpoint_dlp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "host.type",
+        "rule.name",
+        "zscaler_zia.endpoint_dlp.channel",
+        "zscaler_zia.endpoint_dlp.dictionary.id",
+        "zscaler_zia.endpoint_dlp.engine.id",
+        "zscaler_zia.endpoint_dlp.file.type.name",
+        "zscaler_zia.endpoint_dlp.severity"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zscaler_zia.firewall",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.country_iso_code",
+        "event.duration",
+        "network.application",
+        "network.protocol",
+        "rule.name",
+        "user.name",
+        "zscaler_zia.firewall.client.destination.ip",
+        "zscaler_zia.firewall.client.source.ip",
+        "zscaler_zia.firewall.flow_type",
+        "zscaler_zia.firewall.server.destination.ip",
+        "zscaler_zia.firewall.server.source.ip",
+        "zscaler_zia.firewall.threat.category",
+        "zscaler_zia.firewall.threat.name",
+        "zscaler_zia.firewall.tunnel.ip"
+      ],
+      "filterValues": {
+        "zscaler_zia.firewall.threat.category": [
+          "None"
+        ],
+        "zscaler_zia.firewall.threat.name": [
+          "None"
+        ],
+        "network.protocol": [
+          "none"
+        ],
+        "rule.name": [
+          "None"
+        ]
+      }
+    },
+    {
+      "dataset": "zscaler_zia.sandbox_report",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.duration",
+        "file.hash.md5",
+        "zscaler_zia.sandbox_report.classification.category",
+        "zscaler_zia.sandbox_report.classification.detected_malware",
+        "zscaler_zia.sandbox_report.classification.type",
+        "zscaler_zia.sandbox_report.file_properties.file_type",
+        "zscaler_zia.sandbox_report.summary.category",
+        "zscaler_zia.sandbox_report.summary.status",
+        "zscaler_zia.sandbox_report.system_summary.risk"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zscaler_zia.tunnel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "event.action",
+        "event.reason",
+        "source.ip",
+        "zscaler_zia.tunnel.action.type",
+        "zscaler_zia.tunnel.authentication.algorithm",
+        "zscaler_zia.tunnel.authentication.type",
+        "zscaler_zia.tunnel.encryption.algorithm",
+        "zscaler_zia.tunnel.locationname",
+        "zscaler_zia.tunnel.type",
+        "zscaler_zia.tunnel.vendor.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zscaler_zia.web",
+      "indexPattern": "logs-*",
+      "docTarget": 630,
+      "fields": [
+        "event.action",
+        "event.reason",
+        "http.request.bytes",
+        "http.response.bytes",
+        "network.protocol",
+        "rule.name",
+        "url.original",
+        "user.name",
+        "zscaler_zia.web.app.name",
+        "zscaler_zia.web.dlp.dictionaries.name",
+        "zscaler_zia.web.dlp.md5",
+        "zscaler_zia.web.file.type",
+        "zscaler_zia.web.location",
+        "zscaler_zia.web.malware.category",
+        "zscaler_zia.web.response.code",
+        "zscaler_zia.web.rule.type",
+        "zscaler_zia.web.ssl_decrypted",
+        "zscaler_zia.web.threat.name",
+        "zscaler_zia.web.url.category.sub",
+        "zscaler_zia.web.url.category.super",
+        "zscaler_zia.web.url.category_method"
+      ],
+      "filterValues": {
+        "zscaler_zia.web.threat.name": [
+          "None"
+        ],
+        "zscaler_zia.web.dlp.md5": [
+          "None"
+        ],
+        "event.action": [
+          "allowed"
+        ],
+        "zscaler_zia.web.rule.type": [
+          "Warning"
+        ],
+        "rule.name": [
+          "None"
+        ],
+        "zscaler_zia.web.response.code": [
+          "200"
+        ],
+        "zscaler_zia.web.ssl_decrypted": [
+          "No",
+          "Yes"
+        ]
+      }
+    }
+  ]
+}

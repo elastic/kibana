@@ -1,0 +1,777 @@
+[
+  {
+    "@timestamp": "2023-10-20T16:45:11.000Z",
+    "agent": {
+      "ephemeral_id": "cea577a7-97a5-485c-b3a2-20d9e7d511e0",
+      "id": "0a3908d7-962b-4986-9083-a62fc60609ea",
+      "name": "elastic-agent-31586",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "provider": "zscaler.net"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.web",
+      "namespace": "77780",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "twitter.com",
+      "ip": "10.0.0.200"
+    },
+    "device": {
+      "id": "5678",
+      "model": {
+        "identifier": "iPhone 14 Pro"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0a3908d7-962b-4986-9083-a62fc60609ea",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "blocked",
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "zscaler_zia.web",
+      "id": "321654987",
+      "ingested": "2026-03-10T04:38:38Z",
+      "kind": "event",
+      "outcome": "failure",
+      "reason": "Social Media Policy",
+      "timezone": "GMT",
+      "type": [
+        "access"
+      ]
+    },
+    "file": {
+      "extension": [
+        "jpg"
+      ],
+      "hash": {
+        "md5": "890abcdef123456789012345678901gh",
+        "sha256": "d6e8f0a2b4c6d8e0f2a4b6c8d0e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8"
+      },
+      "name": [
+        "photo.jpg",
+        "profile_pic.jpg"
+      ],
+      "type": "file"
+    },
+    "host": {
+      "hostname": "IPHONE01:3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D",
+      "name": "iphone-garcia",
+      "os": {
+        "type": "ios",
+        "version": "iOS 17.0.3"
+      },
+      "type": "Zscaler Client Connector"
+    },
+    "http": {
+      "request": {
+        "bytes": 500,
+        "method": "GET",
+        "referrer": "twitter.com/home"
+      },
+      "response": {
+        "bytes": 0
+      },
+      "version": [
+        "2.0",
+        "2"
+      ]
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "https"
+    },
+    "organization": {
+      "name": "Finance Corp"
+    },
+    "related": {
+      "hash": [
+        "cdef0123456789abcdef012345678901",
+        "890abcdef123456789012345678901gh",
+        "d6e8f0a2b4c6d8e0f2a4b6c8d0e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8"
+      ],
+      "hosts": [
+        "iphone-garcia",
+        "IPHONE01:3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D"
+      ],
+      "ip": [
+        "192.168.40.50",
+        "10.0.0.202",
+        "10.5.5.1",
+        "192.168.6.100",
+        "10.0.0.201",
+        "10.0.0.200"
+      ],
+      "user": [
+        "agarcia",
+        "agarcia@financecorp.com"
+      ]
+    },
+    "rule": {
+      "name": [
+        "Social_Block",
+        "DLP_None",
+        "Social_Media_Block"
+      ]
+    },
+    "source": {
+      "ip": "10.0.0.201",
+      "nat": {
+        "ip": "192.168.40.50"
+      },
+      "port": 32109
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-web"
+    ],
+    "threat": {
+      "indicator": {
+        "name": "890abcdef123456789012345678901gh"
+      }
+    },
+    "tls": {
+      "cipher": "TLS_AES_256_GCM_SHA384"
+    },
+    "url": {
+      "domain": "twitter.com",
+      "full": "https://twitter.com/feed",
+      "original": "https://twitter.com/feed",
+      "path": "/feed",
+      "scheme": "https"
+    },
+    "user": {
+      "domain": "financecorp.com",
+      "email": "agarcia@financecorp.com",
+      "name": "agarcia"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Other",
+      "original": "Twitter/9.0 iOS/17.0.3",
+      "os": {
+        "full": "iOS 17.0.3",
+        "name": "iOS",
+        "version": "17.0.3"
+      }
+    },
+    "zscaler_zia": {
+      "web": {
+        "alpn_protocol": "HTTPS",
+        "app": {
+          "class": "Social Media",
+          "name": "Twitter",
+          "risk_score": "High"
+        },
+        "bandwidth_class_name": "Social Media",
+        "bandwidth_rule_name": "Block Social",
+        "bandwidth_throttle": "Yes",
+        "bypassed": {
+          "time": "2023-10-20T16:45:11.000Z",
+          "traffic": "0"
+        },
+        "client": {
+          "cipher_reuse": "Yes",
+          "public_ip": "10.0.0.202",
+          "ssl": {
+            "fail_count": 0
+          },
+          "tls_keyex_alg": "ECDHE",
+          "tls_keyex_hybrid_offers": 0,
+          "tls_keyex_non_pqc_offers": 1,
+          "tls_keyex_pqc_offers": 0,
+          "tls_keyex_unknown_offers": 0,
+          "tls_sig_alg": "rsa_pkcs1_sha256",
+          "tls_sig_hybrid_offers": 0,
+          "tls_sig_non_pqc_offers": 1,
+          "tls_sig_pqc_offers": 0,
+          "tls_sig_unknown_offers": 0,
+          "tls_version": "TLS1.3"
+        },
+        "content_type": "text/html",
+        "datacenter": {
+          "city": "Chicago",
+          "country": "US",
+          "name": "CHI Client Node DC"
+        },
+        "day": "Fri",
+        "day_of_month": 20,
+        "department": "Finance",
+        "device": {
+          "appversion": "192.168.40.200",
+          "os": {
+            "type": "iOS"
+          },
+          "owner": "agarcia"
+        },
+        "df": {
+          "host": {
+            "head": "twitter_host",
+            "name": "twitter_hostname"
+          }
+        },
+        "dlp": {
+          "dictionaries": {
+            "hit_count": "0"
+          },
+          "identifier": "1010828272283470444",
+          "md5": "cdef0123456789abcdef012345678901"
+        },
+        "dstip_country": "United States",
+        "eedone": "No",
+        "epochtime": "2023-10-20T16:45:11.000Z",
+        "file": {
+          "class": "Image Content",
+          "type": "Image Files"
+        },
+        "flow_type": "Blocked",
+        "forward_gateway": {
+          "ip": "10.5.5.1",
+          "name": "FWD_5"
+        },
+        "forward_type": "Blocked",
+        "ft_rulename": "Block Images",
+        "hour": 16,
+        "is_dst_cntry_risky": "No",
+        "is_src_cntry_risky": "No",
+        "is_ssl_certificate_expired": "No",
+        "is_ssl_certificate_selfsigned": "No",
+        "is_ssl_certificate_untrusted": "Pass",
+        "key_protection_type": "Secure Enclave",
+        "location": "Chicago Office",
+        "minute": 45,
+        "mobile": {
+          "application": {
+            "category": "Social Networking",
+            "name": "Twitter"
+          },
+          "dev": {
+            "type": "Apple iOS"
+          }
+        },
+        "module": "URL Filtering",
+        "month": "Oct",
+        "month_of_year": 10,
+        "nss": {
+          "service": {
+            "ip": "192.168.6.100"
+          }
+        },
+        "obfuscated": {
+          "app_rule_label": "9744639424",
+          "bendwidth": {
+            "class_name": "54275933"
+          },
+          "client": {
+            "ip": "10645138431",
+            "public": {
+              "ip": "1068499182"
+            }
+          },
+          "device": {
+            "host_name": "6612235068",
+            "name": "6619536668",
+            "owner": "54275933"
+          },
+          "dlp": {
+            "dictionaries": "54275933",
+            "engine": "8538748700",
+            "rule": {
+              "name": "11301720196"
+            }
+          },
+          "forward_gateway_name": "13238931543",
+          "login": "8538748700",
+          "rule": {
+            "name": "7844009544"
+          },
+          "url": {
+            "category": "11400851726",
+            "filter_rule_label": "8396148547"
+          },
+          "zpa_app_segment": "12092691175"
+        },
+        "policy": {
+          "reason": "Blocked"
+        },
+        "product_version": "5.2.1.400_08",
+        "prompt_req": "Block",
+        "redirect_policy_name": "FWD_Rule_5",
+        "referer": {
+          "host": "twitter.com for https://twitter.com/home"
+        },
+        "request": {
+          "header_size": 250,
+          "payload": 250
+        },
+        "response": {
+          "code": "403",
+          "header_size": 0,
+          "payload": 0
+        },
+        "risk": {
+          "score": 60.0
+        },
+        "rule": {
+          "type": "URL Filtering"
+        },
+        "second": 11,
+        "server": {
+          "certificate": {
+            "validation": {
+              "period": "N/A"
+            }
+          },
+          "certificate_validation_chain": "N/A",
+          "certificate_validation_type": "N/A",
+          "cipher": "N/A",
+          "cipher_reuse": "N/A",
+          "ocsp_result": "N/A",
+          "tls_keyex_alg": "N/A",
+          "tls_sig_alg": "N/A",
+          "tls_version": "N/A",
+          "wildcard_certificate": "N/A"
+        },
+        "srcip_country": "United States",
+        "ssl_decrypted": "No",
+        "ssl_rulename": "N/A",
+        "threat": {
+          "severity": "Low (1\u201339)"
+        },
+        "throttle": {
+          "request_size": 0,
+          "response_size": 0
+        },
+        "timezone": "GMT",
+        "total": {
+          "size": 500
+        },
+        "traffic_redirect_method": "PAC File",
+        "upload": {
+          "file": {
+            "class": "image_class",
+            "type": "Image Files"
+          }
+        },
+        "url": {
+          "category": {
+            "sub": "Social Networking",
+            "super": "Personal"
+          },
+          "category_method": "Database A",
+          "class": "Blocked Category"
+        },
+        "user_agent": {
+          "class": "Mobile App",
+          "token": "Twitter iOS (9.x)"
+        },
+        "user_location_name": "chi_office",
+        "year": 2023,
+        "z_tunnel_version": "ZTUNNEL_2_0",
+        "zpa_app_segment": "ZPA_twitter_segment"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-10-11T08:15:33.000Z",
+    "agent": {
+      "ephemeral_id": "cea577a7-97a5-485c-b3a2-20d9e7d511e0",
+      "id": "0a3908d7-962b-4986-9083-a62fc60609ea",
+      "name": "elastic-agent-31586",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "provider": "zscaler.net"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.web",
+      "namespace": "77780",
+      "type": "logs"
+    },
+    "destination": {
+      "domain": "github.com",
+      "ip": "10.0.0.150"
+    },
+    "device": {
+      "id": "4567",
+      "model": {
+        "identifier": "ThinkPad X1 Carbon"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0a3908d7-962b-4986-9083-a62fc60609ea",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "cautioned",
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "zscaler_zia.web",
+      "id": "789123456",
+      "ingested": "2026-03-10T04:38:38Z",
+      "kind": "event",
+      "outcome": "unknown",
+      "reason": "Sensitive Data Upload",
+      "timezone": "GMT",
+      "type": [
+        "access"
+      ]
+    },
+    "file": {
+      "extension": [
+        "zip"
+      ],
+      "hash": {
+        "md5": "567890abcdef123456789012345678ef",
+        "sha256": "c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7"
+      },
+      "name": [
+        "source_code.zip",
+        "project_backup.zip"
+      ],
+      "type": "file"
+    },
+    "host": {
+      "hostname": "THINK01:2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C",
+      "name": "thinkpad-chen",
+      "os": {
+        "version": "Ubuntu 22.04.3 LTS"
+      },
+      "type": "Zscaler Client Connector"
+    },
+    "http": {
+      "request": {
+        "bytes": 15000,
+        "method": "PUT",
+        "referrer": "github.com/repo"
+      },
+      "response": {
+        "bytes": 1200
+      },
+      "version": [
+        "2.0",
+        "2"
+      ]
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "https"
+    },
+    "organization": {
+      "name": "DevOps Solutions"
+    },
+    "related": {
+      "hash": [
+        "abcdef0123456789abcdef0123456789",
+        "567890abcdef123456789012345678ef",
+        "c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7"
+      ],
+      "hosts": [
+        "thinkpad-chen",
+        "THINK01:2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C"
+      ],
+      "ip": [
+        "192.168.30.40",
+        "10.0.0.152",
+        "10.4.4.1",
+        "192.168.5.100",
+        "10.0.0.151",
+        "10.0.0.150"
+      ],
+      "user": [
+        "lchen",
+        "lchen@devops-solutions.dev"
+      ]
+    },
+    "rule": {
+      "name": [
+        "Code_Repo_Caution",
+        "DLP_Source_Code",
+        "Dev_Tools_Monitor"
+      ]
+    },
+    "source": {
+      "ip": "10.0.0.151",
+      "nat": {
+        "ip": "192.168.30.40"
+      },
+      "port": 43210
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-web"
+    ],
+    "threat": {
+      "indicator": {
+        "name": "567890abcdef123456789012345678ef"
+      }
+    },
+    "tls": {
+      "cipher": "TLS_AES_128_GCM_SHA256"
+    },
+    "url": {
+      "domain": "github.com",
+      "full": "https://github.com/upload",
+      "original": "https://github.com/upload",
+      "path": "/upload",
+      "scheme": "https"
+    },
+    "user": {
+      "domain": "devops-solutions.dev",
+      "email": "lchen@devops-solutions.dev",
+      "name": "lchen"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Other",
+      "original": "git/2.42.0"
+    },
+    "zscaler_zia": {
+      "web": {
+        "alpn_protocol": "HTTPS",
+        "app": {
+          "class": "Development",
+          "name": "GitHub",
+          "risk_score": "Low"
+        },
+        "bandwidth_class_name": "Developer Tools",
+        "bandwidth_rule_name": "Dev Priority",
+        "bandwidth_throttle": "No",
+        "bypassed": {
+          "time": "2023-10-19T08:15:33.000Z",
+          "traffic": "0"
+        },
+        "client": {
+          "cipher_reuse": "No",
+          "public_ip": "10.0.0.152",
+          "ssl": {
+            "fail_count": 0
+          },
+          "tls_keyex_alg": "MLKEM768",
+          "tls_keyex_hybrid_offers": 1,
+          "tls_keyex_non_pqc_offers": 0,
+          "tls_keyex_pqc_offers": 1,
+          "tls_keyex_unknown_offers": 0,
+          "tls_sig_alg": "ed25519",
+          "tls_sig_hybrid_offers": 1,
+          "tls_sig_non_pqc_offers": 1,
+          "tls_sig_pqc_offers": 0,
+          "tls_sig_unknown_offers": 0,
+          "tls_version": "TLS1.3"
+        },
+        "content_type": "application/zip",
+        "datacenter": {
+          "city": "Seattle",
+          "country": "US",
+          "name": "SEA Client Node DC"
+        },
+        "day": "Thu",
+        "day_of_month": 19,
+        "department": "Engineering",
+        "device": {
+          "appversion": "192.168.30.150",
+          "os": {
+            "type": "Linux"
+          },
+          "owner": "lchen"
+        },
+        "df": {
+          "host": {
+            "head": "github_host",
+            "name": "github_hostname"
+          }
+        },
+        "dlp": {
+          "dictionaries": {
+            "hit_count": "12",
+            "name": "Source Code"
+          },
+          "engine": "Code Protection",
+          "identifier": "9979717161172359333",
+          "md5": "abcdef0123456789abcdef0123456789"
+        },
+        "dstip_country": "United States",
+        "eedone": "Yes",
+        "epochtime": "2023-10-19T07:55:33.000Z",
+        "file": {
+          "class": "Archive Content",
+          "type": "Archive Files"
+        },
+        "flow_type": "Direct",
+        "forward_gateway": {
+          "ip": "10.4.4.1",
+          "name": "FWD_4"
+        },
+        "forward_type": "Direct",
+        "ft_rulename": "Monitor Archives",
+        "hour": 8,
+        "is_dst_cntry_risky": "No",
+        "is_src_cntry_risky": "No",
+        "is_ssl_certificate_expired": "No",
+        "is_ssl_certificate_selfsigned": "No",
+        "is_ssl_certificate_untrusted": "Pass",
+        "key_protection_type": "Software Protection",
+        "location": "Seattle Office",
+        "minute": 15,
+        "mobile": {
+          "application": {
+            "category": "Development",
+            "name": "GitHub"
+          },
+          "dev": {
+            "type": "Linux Desktop"
+          }
+        },
+        "module": "DLP",
+        "month": "Oct",
+        "month_of_year": 10,
+        "nss": {
+          "service": {
+            "ip": "192.168.5.100"
+          }
+        },
+        "obfuscated": {
+          "app_rule_label": "8633528313",
+          "bendwidth": {
+            "class_name": "43164822"
+          },
+          "client": {
+            "ip": "9534027320",
+            "public": {
+              "ip": "957388071"
+            }
+          },
+          "device": {
+            "host_name": "5501123957",
+            "name": "5508425557",
+            "owner": "43164822"
+          },
+          "dlp": {
+            "dictionaries": "43164822",
+            "engine": "7427637589",
+            "rule": {
+              "name": "10190609085"
+            }
+          },
+          "forward_gateway_name": "12127820432",
+          "login": "7427637589",
+          "rule": {
+            "name": "6732898433"
+          },
+          "url": {
+            "category": "10289740615",
+            "filter_rule_label": "7285037436"
+          },
+          "zpa_app_segment": "10981580064"
+        },
+        "policy": {
+          "reason": "Allowed"
+        },
+        "product_version": "5.2.0.300_07",
+        "prompt_req": "Caution",
+        "redirect_policy_name": "FWD_Rule_4",
+        "referer": {
+          "host": "github.com for https://github.com/repo"
+        },
+        "request": {
+          "header_size": 500,
+          "payload": 14500
+        },
+        "response": {
+          "code": "201",
+          "header_size": 350,
+          "payload": 850
+        },
+        "risk": {
+          "score": 45.0
+        },
+        "rule": {
+          "type": "DLP Control"
+        },
+        "second": 33,
+        "server": {
+          "certificate": {
+            "validation": {
+              "period": "Long"
+            }
+          },
+          "certificate_validation_chain": "Pass",
+          "certificate_validation_type": "EV (Extended Validation)",
+          "cipher": "TLS_AES_128_GCM_SHA256",
+          "cipher_reuse": "No",
+          "ocsp_result": "Good",
+          "tls_keyex_alg": "MLKEM768",
+          "tls_sig_alg": "ed25519",
+          "tls_version": "TLS1.3",
+          "wildcard_certificate": "No"
+        },
+        "srcip_country": "United States",
+        "ssl_decrypted": "Yes",
+        "ssl_rulename": "Dev SSL Policy",
+        "threat": {
+          "severity": "Medium (40\u201369)"
+        },
+        "throttle": {
+          "request_size": 0,
+          "response_size": 0
+        },
+        "timezone": "GMT",
+        "total": {
+          "size": 16200
+        },
+        "traffic_redirect_method": "DNAT (Destination Translation)",
+        "upload": {
+          "doc": {
+            "type_name": "Source Code"
+          },
+          "file": {
+            "class": "archive_class",
+            "type": "Archive Files"
+          }
+        },
+        "url": {
+          "category": {
+            "sub": "Software Development",
+            "super": "Technology"
+          },
+          "category_method": "Database A",
+          "class": "Acceptable Use"
+        },
+        "user_agent": {
+          "class": "CLI Tool",
+          "token": "git (2.x)"
+        },
+        "user_location_name": "sea_office",
+        "year": 2023,
+        "z_tunnel_version": "ZTUNNEL_2_0",
+        "zpa_app_segment": "ZPA_github_segment"
+      }
+    }
+  }
+]

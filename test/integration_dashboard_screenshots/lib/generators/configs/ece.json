@@ -1,0 +1,25 @@
+{
+  "package": "ece",
+  "dataStreams": [
+    {
+      "dataset": "ece.adminconsole",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "ece_adminconsole.log.deployment.es_api",
+        "ece_adminconsole.log.deployment.id",
+        "event.action",
+        "http.request.method",
+        "log.level",
+        "message",
+        "url.path",
+        "url.port",
+        "url.scheme",
+        "user.name",
+        "user_agent.device.name",
+        "user_agent.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

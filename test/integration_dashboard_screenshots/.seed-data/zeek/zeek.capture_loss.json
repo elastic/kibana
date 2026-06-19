@@ -1,0 +1,277 @@
+[
+  {
+    "@timestamp": "2021-03-30T00:49:00.942Z",
+    "agent": {
+      "ephemeral_id": "e1c8e32a-661d-42d5-a827-6393497050ec",
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "name": "elastic-agent-23467",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.capture_loss",
+      "namespace": "36306",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T03:14:14.792Z",
+      "dataset": "zeek.capture_loss",
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "metric",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/capture_loss.log"
+      },
+      "offset": 478
+    },
+    "tags": [
+      "forwarded",
+      "zeek-capture-loss"
+    ],
+    "zeek": {
+      "capture_loss": {
+        "acks": 62497,
+        "gaps": 55105,
+        "peer": "zeek",
+        "percent_lost": 88.17223226714883,
+        "ts_delta": 900
+      }
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T00:34:00.942Z",
+    "agent": {
+      "ephemeral_id": "e1c8e32a-661d-42d5-a827-6393497050ec",
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "name": "elastic-agent-23467",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.capture_loss",
+      "namespace": "36306",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T03:14:14.792Z",
+      "dataset": "zeek.capture_loss",
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "metric",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/capture_loss.log"
+      },
+      "offset": 351
+    },
+    "tags": [
+      "forwarded",
+      "zeek-capture-loss"
+    ],
+    "zeek": {
+      "capture_loss": {
+        "acks": 57974,
+        "gaps": 51022,
+        "peer": "zeek",
+        "percent_lost": 88.00841756649532,
+        "ts_delta": 900
+      }
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T00:19:00.942Z",
+    "agent": {
+      "ephemeral_id": "e1c8e32a-661d-42d5-a827-6393497050ec",
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "name": "elastic-agent-23467",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.capture_loss",
+      "namespace": "36306",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T03:14:14.792Z",
+      "dataset": "zeek.capture_loss",
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "metric",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/capture_loss.log"
+      },
+      "offset": 225
+    },
+    "tags": [
+      "forwarded",
+      "zeek-capture-loss"
+    ],
+    "zeek": {
+      "capture_loss": {
+        "acks": 61818,
+        "gaps": 54754,
+        "peer": "zeek",
+        "percent_lost": 88.5729075673752,
+        "ts_delta": 900
+      }
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T00:04:00.941Z",
+    "agent": {
+      "ephemeral_id": "e1c8e32a-661d-42d5-a827-6393497050ec",
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "name": "elastic-agent-23467",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.capture_loss",
+      "namespace": "36306",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T03:14:14.792Z",
+      "dataset": "zeek.capture_loss",
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "metric",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/capture_loss.log"
+      },
+      "offset": 98
+    },
+    "tags": [
+      "forwarded",
+      "zeek-capture-loss"
+    ],
+    "zeek": {
+      "capture_loss": {
+        "acks": 65665,
+        "gaps": 58475,
+        "peer": "zeek",
+        "percent_lost": 89.05048351481003,
+        "ts_delta": 900
+      }
+    }
+  },
+  {
+    "@timestamp": "2019-09-10T16:19:28.465Z",
+    "agent": {
+      "ephemeral_id": "e1c8e32a-661d-42d5-a827-6393497050ec",
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "name": "elastic-agent-23467",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.capture_loss",
+      "namespace": "36306",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "017a8c3d-f327-490b-8ba6-ff695e58cb91",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T03:14:12.806Z",
+      "dataset": "zeek.capture_loss",
+      "ingested": "2026-03-10T03:14:15Z",
+      "kind": "metric",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/capture_loss.log"
+      },
+      "offset": 0
+    },
+    "tags": [
+      "forwarded",
+      "zeek-capture-loss"
+    ],
+    "zeek": {
+      "capture_loss": {
+        "acks": 206,
+        "gaps": 0,
+        "peer": "bro",
+        "percent_lost": 0.0,
+        "ts_delta": 32
+      }
+    }
+  }
+]

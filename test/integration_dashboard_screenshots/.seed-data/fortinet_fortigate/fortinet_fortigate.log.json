@@ -1,0 +1,4175 @@
+[
+  {
+    "@timestamp": "2020-11-02T08:11:38.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.10.10.10",
+      "port": 500
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0101037127",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-11-02 time=08:11:38 devname=testfirewall devid=newrouterid logid=0101037127 type=\"event\" subtype=vpn level=notice vd=root logdesc=\"Progress IPsec phase 1\" msg=\"progress IPsec phase 1\" action=negotiate remip=67.43.156.13 locip=10.10.10.10 remport=500 locport=500 outintf=\"port1\" cookies=\"125cbf9ee8349965/0000000000000000\" user=\"N/A\" group=\"N/A\" xauthuser=\"N/A\" xauthgroup=\"N/A\" assignip=N/A vpntunnel=\"P1_Test\" status=success init=local mode=aggressive dir=outbound stage=1 role=initiator result=OK",
+      "outcome": "success",
+      "type": [
+        "connection"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "negotiate",
+        "cookies": "125cbf9ee8349965/0000000000000000",
+        "init": "local",
+        "mode": "aggressive",
+        "outintf": "port1",
+        "result": "OK",
+        "role": "initiator",
+        "stage": "1",
+        "status": "success",
+        "subtype": "vpn",
+        "type": "event",
+        "vd": "root",
+        "vpntunnel": "P1_Test"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "progress IPsec phase 1",
+    "network": {
+      "direction": "outbound"
+    },
+    "observer": {
+      "name": "testfirewall",
+      "product": "Fortigate",
+      "serial_number": "newrouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.13",
+        "10.10.10.10"
+      ]
+    },
+    "rule": {
+      "description": "Progress IPsec phase 1"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 500
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:32:48.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "code": "0102043014",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:32:48 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0102043014\" type=\"event\" subtype=\"user\" level=\"notice\" vd=\"root\" eventtime=1587231168439640874 tz=\"-0500\" logdesc=\"FSSO logon authentication status\" srcip=10.10.10.10 user=\"elasticouser\" server=\"elasticserver\" action=\"FSSO-logon\" msg=\"FSSO-logon event from FSSO_elasticserver: user elasticouser logged on 10.10.10.10\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:32:48.439Z",
+      "timezone": "-0500",
+      "type": [
+        "start"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "FSSO-logon",
+        "server": "elasticserver",
+        "subtype": "user",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "FSSO-logon event from FSSO_elasticserver: user elasticouser logged on 10.10.10.10",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.10.10.10"
+      ],
+      "user": [
+        "elasticouser"
+      ]
+    },
+    "rule": {
+      "description": "FSSO logon authentication status"
+    },
+    "source": {
+      "ip": "10.10.10.10",
+      "user": {
+        "name": "elasticouser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:32:47.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 500
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0101037124",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<187>date=2020-04-23 time=12:32:47 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0101037124\" type=\"event\" subtype=\"vpn\" level=\"error\" vd=\"root\" eventtime=1587231168339114138 tz=\"-0500\" logdesc=\"IPsec phase 1 error\" msg=\"IPsec phase 1 error\" action=\"negotiate\" remip=67.43.156.13 locip=67.43.156.13 remport=500 locport=500 outintf=\"wan2\" cookies=\"345hkjhdrs87/0000000000000000\" user=\"N/A\" group=\"N/A\" xauthuser=\"N/A\" xauthgroup=\"N/A\" assignip=N/A vpntunnel=\"N/A\" status=\"negotiate_error\" reason=\"peer SA proposal not match local policy\" peer_notif=\"NOT-APPLICABLE\"",
+      "outcome": "failure",
+      "reason": "peer SA proposal not match local policy",
+      "start": "2020-04-18T17:32:48.339Z",
+      "timezone": "-0500",
+      "type": [
+        "connection"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "negotiate",
+        "cookies": "345hkjhdrs87/0000000000000000",
+        "outintf": "wan2",
+        "peer_notif": "NOT-APPLICABLE",
+        "status": "negotiate_error",
+        "subtype": "vpn",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "error",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 187,
+        "severity": {
+          "code": 3
+        }
+      }
+    },
+    "message": "IPsec phase 1 error",
+    "network": {
+      "direction": "external"
+    },
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "description": "IPsec phase 1 error"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 500
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:32:31.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 500
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0101037127",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:32:31 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0101037127\" type=\"event\" subtype=\"vpn\" level=\"notice\" vd=\"root\" eventtime=1587231151628960857 tz=\"-0500\" logdesc=\"Progress IPsec phase 1\" msg=\"progress IPsec phase 1\" action=\"negotiate\" remip=67.43.156.13 locip=67.43.156.13 remport=500 locport=500 outintf=\"wan1\" cookies=\"df868dsg876d/0000000000000000\" user=\"N/A\" group=\"N/A\" xauthuser=\"N/A\" xauthgroup=\"N/A\" assignip=N/A vpntunnel=\"elasticvpn\" status=\"success\" init=\"local\" mode=\"main\" dir=\"outbound\" stage=1 role=\"initiator\" result=\"OK\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:32:31.628Z",
+      "timezone": "-0500",
+      "type": [
+        "connection"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "negotiate",
+        "cookies": "df868dsg876d/0000000000000000",
+        "init": "local",
+        "mode": "main",
+        "outintf": "wan1",
+        "result": "OK",
+        "role": "initiator",
+        "stage": "1",
+        "status": "success",
+        "subtype": "vpn",
+        "type": "event",
+        "vd": "root",
+        "vpntunnel": "elasticvpn"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "progress IPsec phase 1",
+    "network": {
+      "direction": "outbound"
+    },
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "description": "Progress IPsec phase 1"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 500
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:32:09.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "0100040704",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=14:32:09 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0100040704\" type=\"event\" subtype=\"system\" level=\"notice\" vd=\"root\" eventtime=1587231129938795255 tz=\"-0300\" logdesc=\"System performance statistics\" action=\"perf-stats\" cpu=0 mem=10 totalsession=23 disk=0 bandwidth=\"23/4\" setuprate=0 disklograte=0 fazlograte=0 freediskstorage=331 sysuptime=25170 msg=\"Performance statistics: average CPU: 0, memory:  23, concurrent sessions:  20, setup-rate: 0\"",
+      "start": "2020-04-18T17:32:09.938Z",
+      "timezone": "-0300",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "perf-stats",
+        "bandwidth": "23/4",
+        "cpu": 0,
+        "disk": "0",
+        "disklograte": 0,
+        "fazlograte": 0,
+        "freediskstorage": 331,
+        "mem": 10,
+        "setuprate": 0,
+        "subtype": "system",
+        "sysuptime": "25170",
+        "totalsession": 23,
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Performance statistics: average CPU: 0, memory:  23, concurrent sessions:  20, setup-rate: 0",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "System performance statistics"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:32:09.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "code": "0102043039",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:32:09 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0102043039\" type=\"event\" subtype=\"user\" level=\"notice\" vd=\"root\" eventtime=1587231130109462858 tz=\"-0500\" logdesc=\"Authentication logon\" srcip=10.10.10.10 user=\"elastiiiuser\" authserver=\"FSSO_elastiauth\" action=\"auth-logon\" status=\"logon\" msg=\"User elastiiiuser added to auth logon\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:32:10.109Z",
+      "timezone": "-0500",
+      "type": [
+        "start"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "auth-logon",
+        "authserver": "FSSO_elastiauth",
+        "status": "logon",
+        "subtype": "user",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "User elastiiiuser added to auth logon",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.10.10.10"
+      ],
+      "user": [
+        "elastiiiuser"
+      ]
+    },
+    "rule": {
+      "description": "Authentication logon"
+    },
+    "source": {
+      "ip": "10.10.10.10",
+      "user": {
+        "name": "elastiiiuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:32:00.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.14",
+      "port": 500
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0101037127",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:32:00 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0101037127\" type=\"event\" subtype=\"vpn\" level=\"notice\" vd=\"root\" eventtime=1587231120608961118 tz=\"-0500\" logdesc=\"Progress IPsec phase 1\" msg=\"progress IPsec phase 1\" action=\"negotiate\" remip=67.43.156.13 locip=67.43.156.14 remport=500 locport=500 outintf=\"wan1\" cookies=\"345khj34566/0000000000000000\" user=\"N/A\" group=\"N/A\" xauthuser=\"N/A\" xauthgroup=\"N/A\" assignip=N/A vpntunnel=\"testvpn\" status=\"success\" init=\"local\" mode=\"main\" dir=\"outbound\" stage=1 role=\"initiator\" result=\"OK\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:32:00.608Z",
+      "timezone": "-0500",
+      "type": [
+        "connection"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "negotiate",
+        "cookies": "345khj34566/0000000000000000",
+        "init": "local",
+        "mode": "main",
+        "outintf": "wan1",
+        "result": "OK",
+        "role": "initiator",
+        "stage": "1",
+        "status": "success",
+        "subtype": "vpn",
+        "type": "event",
+        "vd": "root",
+        "vpntunnel": "testvpn"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "progress IPsec phase 1",
+    "network": {
+      "direction": "outbound"
+    },
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.13",
+        "67.43.156.14"
+      ]
+    },
+    "rule": {
+      "description": "Progress IPsec phase 1"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 500
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:24:13.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0100041006",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=14:24:13 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0100041006\" type=\"event\" subtype=\"system\" level=\"notice\" vd=\"root\" eventtime=1587230655301863513 tz=\"-0300\" logdesc=\"FortiSandbox AV database updated\" version=\"1.522479\" msg=\"FortiSandbox AV database updated\"",
+      "start": "2020-04-18T17:24:15.301Z",
+      "timezone": "-0300"
+    },
+    "fortinet": {
+      "firewall": {
+        "subtype": "system",
+        "type": "event",
+        "vd": "root",
+        "version": "1.522479"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "FortiSandbox AV database updated",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "FortiSandbox AV database updated"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:23:47.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0107045057",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-04-23 time=12:23:47 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0107045057\" type=\"event\" subtype=\"endpoint\" level=\"information\" vd=\"root\" eventtime=1587230627558979735 tz=\"-0500\" logdesc=\"FortiClient connection added\" action=\"add\" status=\"success\" license_limit=\"unlimited\" used_for_type=3 connection_type=\"sslvpn\" count=2 user=\"elastico\" ip=172.16.0.2 name=\"somerouter\" fctuid=\"645234fdd01F885824F764\" msg=\"Add a FortiClient Connection.\"",
+      "start": "2020-04-18T17:23:47.558Z",
+      "timezone": "-0500"
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "add",
+        "connection_type": "sslvpn",
+        "count": 2,
+        "fctuid": "645234fdd01F885824F764",
+        "ip": "172.16.0.2",
+        "license_limit": "unlimited",
+        "name": "somerouter",
+        "status": "success",
+        "subtype": "endpoint",
+        "type": "event",
+        "used_for_type": 3,
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Add a FortiClient Connection.",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "172.16.0.2"
+      ],
+      "user": [
+        "elastico"
+      ]
+    },
+    "rule": {
+      "description": "FortiClient connection added"
+    },
+    "source": {
+      "user": {
+        "name": "elastico"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:23:47.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0101039943",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-04-23 time=12:23:47 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0101039943\" type=\"event\" subtype=\"vpn\" level=\"information\" vd=\"root\" eventtime=1587230627334405765 tz=\"-0500\" logdesc=\"SSL VPN new connection\" action=\"ssl-new-con\" tunneltype=\"ssl\" tunnelid=2 remip=67.43.156.13 user=\"N/A\" group=\"N/A\" dst_host=\"N/A\" reason=\"N/A\" msg=\"SSL new connection\"",
+      "start": "2020-04-18T17:23:47.334Z",
+      "timezone": "-0500",
+      "type": [
+        "connection"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "ssl-new-con",
+        "subtype": "vpn",
+        "tunnelid": 2,
+        "tunneltype": "ssl",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "SSL new connection",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "description": "SSL VPN new connection"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:23:47.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0101039947",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-04-23 time=12:23:47 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0101039947\" type=\"event\" subtype=\"vpn\" level=\"information\" vd=\"root\" eventtime=1587230627698970007 tz=\"-0500\" logdesc=\"SSL VPN tunnel up\" action=\"tunnel-up\" tunneltype=\"ssl-tunnel\" tunnelid=2345 remip=67.43.156.13 tunnelip=10.10.10.10 user=\"someuser\" group=\"somegroup\" dst_host=\"N/A\" reason=\"tunnel established\" msg=\"SSL tunnel established\"",
+      "reason": "tunnel established",
+      "start": "2020-04-18T17:23:47.698Z",
+      "timezone": "-0500",
+      "type": [
+        "connection"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "tunnel-up",
+        "subtype": "vpn",
+        "tunnelid": 2345,
+        "tunnelip": "10.10.10.10",
+        "tunneltype": "ssl-tunnel",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "SSL tunnel established",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.13",
+        "10.10.10.10"
+      ],
+      "user": [
+        "someuser"
+      ]
+    },
+    "rule": {
+      "description": "SSL VPN tunnel up"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "user": {
+        "group": {
+          "name": "somegroup"
+        },
+        "name": "someuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:48.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 1130,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ftgd_blk",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0316013056",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<188>date=2020-04-23 time=12:17:48 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"0316013056\" type=\"utm\" subtype=\"webfilter\" eventtype=\"ftgd_blk\" level=\"warning\" vd=\"root\" eventtime=1587230269052907555 tz=\"-0500\" policyid=100602 sessionid=1234 user=\"elasticuser\" group=\"elasticgroup\" authserver=\"elasticauth\" srcip=192.168.2.1 srcport=61930 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=443 dstintf=\"wan1\" dstintfrole=\"wan\" proto=6 service=\"HTTPS\" hostname=\"elastic.co\" profile=\"elasticruleset\" action=\"blocked\" reqtype=\"direct\" url=\"/config/\" sentbyte=1152 rcvdbyte=1130 direction=\"outgoing\" msg=\"URL belongs to a denied category in policy\" method=\"domain\" cat=76 catdesc=\"Internet Telephony\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:17:49.052Z",
+      "timezone": "-0500",
+      "type": [
+        "denied"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "blocked",
+        "authserver": "elasticauth",
+        "cat": 76,
+        "dstintfrole": "wan",
+        "method": "domain",
+        "reqtype": "direct",
+        "sessionid": 1234,
+        "srcintfrole": "lan",
+        "subtype": "webfilter",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 188,
+        "severity": {
+          "code": 4
+        }
+      }
+    },
+    "message": "URL belongs to a denied category in policy",
+    "network": {
+      "bytes": 2282,
+      "direction": "unknown",
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ],
+      "user": [
+        "elasticuser"
+      ]
+    },
+    "rule": {
+      "category": "Internet Telephony",
+      "id": "100602",
+      "ruleset": "elasticruleset"
+    },
+    "source": {
+      "bytes": 1152,
+      "ip": "192.168.2.1",
+      "port": 61930,
+      "user": {
+        "group": {
+          "name": "elasticgroup"
+        },
+        "name": "elasticuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "elastic.co",
+      "path": "/config/"
+    }
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:45.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 6812,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ftgd_allow",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0317013312",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:17:45 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"0317013312\" type=\"utm\" subtype=\"webfilter\" eventtype=\"ftgd_allow\" level=\"notice\" vd=\"root\" eventtime=1587230266314799756 tz=\"-0500\" policyid=38 sessionid=543234 user=\"elasticuser\" group=\"elasticgroup\" authserver=\"elasticauth\" srcip=192.168.2.1 srcport=65236 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=443 dstintf=\"wan1\" dstintfrole=\"wan\" proto=6 service=\"HTTPS\" hostname=\"elastic.co\" profile=\"elasticruleset\" action=\"passthrough\" reqtype=\"direct\" url=\"/\" sentbyte=3545 rcvdbyte=6812 direction=\"outgoing\" msg=\"URL belongs to an allowed category in policy\" method=\"domain\" cat=23 catdesc=\"Web-based Email\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:17:46.314Z",
+      "timezone": "-0500",
+      "type": [
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "passthrough",
+        "authserver": "elasticauth",
+        "cat": 23,
+        "dstintfrole": "wan",
+        "method": "domain",
+        "reqtype": "direct",
+        "sessionid": 543234,
+        "srcintfrole": "lan",
+        "subtype": "webfilter",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "URL belongs to an allowed category in policy",
+    "network": {
+      "bytes": 10357,
+      "direction": "unknown",
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ],
+      "user": [
+        "elasticuser"
+      ]
+    },
+    "rule": {
+      "category": "Web-based Email",
+      "id": "38",
+      "ruleset": "elasticruleset"
+    },
+    "source": {
+      "bytes": 3545,
+      "ip": "192.168.2.1",
+      "port": 65236,
+      "user": {
+        "group": {
+          "name": "elasticgroup"
+        },
+        "name": "elasticuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "elastic.co",
+      "path": "/"
+    }
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:35.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "signature",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1059028704",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-04-23 time=13:17:35 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"1059028704\" type=\"utm\" subtype=\"app-ctrl\" eventtype=\"signature\" level=\"information\" vd=\"root\" eventtime=1587230255061492894 tz=\"-0400\" appid=40568 user=\"elasticuser\" group=\"elasticgroup\" authserver=\"elasticauth\" srcip=192.168.2.1 dstip=67.43.156.13 srcport=59790 dstport=443 srcintf=\"LAN\" srcintfrole=\"lan\" dstintf=\"wan1\" dstintfrole=\"wan\" proto=6 service=\"SSL\" direction=\"outgoing\" policyid=12 sessionid=453234 applist=\"elasticruleset\" action=\"pass\" appcat=\"Web.Client\" app=\"HTTPS.BROWSER\" hostname=\"elastic.co\" incidentserialno=23465 url=\"/\" msg=\"Web.Client: HTTPS.BROWSER,\" apprisk=\"medium\" scertcname=\"test.elastic.co\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:17:35.061Z",
+      "timezone": "-0400",
+      "type": [
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "pass",
+        "appid": 40568,
+        "apprisk": "medium",
+        "authserver": "elasticauth",
+        "dstintfrole": "wan",
+        "incidentserialno": 23465,
+        "sessionid": 453234,
+        "srcintfrole": "lan",
+        "subtype": "app-ctrl",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Web.Client: HTTPS.BROWSER,",
+    "network": {
+      "application": "HTTPS.BROWSER",
+      "direction": "unknown",
+      "iana_number": "6",
+      "protocol": "ssl",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "LAN"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ],
+      "user": [
+        "elasticuser"
+      ]
+    },
+    "rule": {
+      "category": "Web-Client",
+      "id": "12",
+      "ruleset": "elasticruleset"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 59790,
+      "user": {
+        "group": {
+          "name": "elasticgroup"
+        },
+        "name": "elasticuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ],
+    "tls": {
+      "server": {
+        "x509": {
+          "subject": {
+            "common_name": [
+              "test.elastic.co"
+            ]
+          }
+        }
+      }
+    },
+    "url": {
+      "domain": "elastic.co",
+      "path": "/"
+    }
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:35.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "signature",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1059028704",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-04-23 time=13:17:35 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"1059028704\" type=\"utm\" subtype=\"app-ctrl\" eventtype=\"signature\" level=\"information\" vd=\"root\" eventtime=1591788391 tz=\"-0400\" appid=40568 user=\"elasticuser\" group=\"elasticgroup\" authserver=\"elasticauth\" srcip=192.168.2.1 dstip=67.43.156.13 srcport=59790 dstport=443 srcintf=\"LAN\" srcintfrole=\"lan\" dstintf=\"wan1\" dstintfrole=\"wan\" proto=6 service=\"SSL\" direction=\"outgoing\" policyid=12 sessionid=453234 applist=\"elasticruleset\" action=\"pass\" appcat=\"Web.Client\" app=\"HTTPS.BROWSER\" hostname=\"elastic.co\" incidentserialno=23465 url=\"/\" msg=\"Web.Client: HTTPS.BROWSER,\" apprisk=\"medium\" scertcname=\"test.elastic.co\"",
+      "outcome": "success",
+      "start": "2020-06-10T11:26:31.000Z",
+      "timezone": "-0400",
+      "type": [
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "pass",
+        "appid": 40568,
+        "apprisk": "medium",
+        "authserver": "elasticauth",
+        "dstintfrole": "wan",
+        "incidentserialno": 23465,
+        "sessionid": 453234,
+        "srcintfrole": "lan",
+        "subtype": "app-ctrl",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Web.Client: HTTPS.BROWSER,",
+    "network": {
+      "application": "HTTPS.BROWSER",
+      "direction": "unknown",
+      "iana_number": "6",
+      "protocol": "ssl",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "LAN"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ],
+      "user": [
+        "elasticuser"
+      ]
+    },
+    "rule": {
+      "category": "Web-Client",
+      "id": "12",
+      "ruleset": "elasticruleset"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 59790,
+      "user": {
+        "group": {
+          "name": "elasticgroup"
+        },
+        "name": "elasticuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ],
+    "tls": {
+      "server": {
+        "x509": {
+          "subject": {
+            "common_name": [
+              "test.elastic.co"
+            ]
+          }
+        }
+      }
+    },
+    "url": {
+      "domain": "elastic.co",
+      "path": "/"
+    }
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:29.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 53
+    },
+    "dns": {
+      "id": "2234",
+      "question": {
+        "class": "IN",
+        "name": "elastic.example.com",
+        "registered_domain": "example.com",
+        "subdomain": "elastic",
+        "top_level_domain": "com",
+        "type": "A"
+      },
+      "resolved_ip": [
+        "67.43.156.13"
+      ]
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "dns-response",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1501054802",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:17:29 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"1501054802\" type=\"utm\" subtype=\"dns\" eventtype=\"dns-response\" level=\"notice\" vd=\"root\" eventtime=1587230249360109339 tz=\"-0500\" policyid=26 sessionid=543234 srcip=192.168.2.1 srcport=53430 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=53 dstintf=\"wan1\" dstintfrole=\"wan\" proto=17 profile=\"test\" xid=2234 qname=\"elastic.example.com\" qtype=\"A\" qtypeval=1 qclass=\"IN\" ipaddr=\"67.43.156.13\" msg=\"Domain is monitored\" action=\"pass\" cat=23 catdesc=\"Web-based Email\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:17:29.360Z",
+      "timezone": "-0500",
+      "type": [
+        "info",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "pass",
+        "cat": 23,
+        "dstintfrole": "wan",
+        "qtypeval": 1,
+        "sessionid": 543234,
+        "srcintfrole": "lan",
+        "subtype": "dns",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Domain is monitored",
+    "network": {
+      "direction": "unknown",
+      "iana_number": "17",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "hosts": [
+        "elastic.example.com"
+      ],
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "category": "Web-based Email",
+      "id": "26",
+      "ruleset": "test"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 53430
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:29.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 53
+    },
+    "dns": {
+      "id": "2234",
+      "question": {
+        "class": "IN",
+        "name": "elastic.example.com",
+        "registered_domain": "example.com",
+        "subdomain": "elastic",
+        "top_level_domain": "com",
+        "type": "A"
+      },
+      "resolved_ip": [
+        "67.43.156.13",
+        "67.43.156.13"
+      ]
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "dns-response",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1501054802",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:17:29 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"1501054802\" type=\"utm\" subtype=\"dns\" eventtype=\"dns-response\" level=\"notice\" vd=\"root\" eventtime=1587230249360109339 tz=\"-0500\" policyid=26 sessionid=543234 srcip=192.168.2.1 srcport=53430 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=53 dstintf=\"wan1\" dstintfrole=\"wan\" proto=17 profile=\"test\" xid=2234 qname=\"elastic.example.com\" qtype=\"A\" qtypeval=1 qclass=\"IN\" ipaddr=\"67.43.156.13, 67.43.156.13\" msg=\"Domain is monitored\" action=\"pass\" cat=23 catdesc=\"Web-based Email\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:17:29.360Z",
+      "timezone": "-0500",
+      "type": [
+        "info",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "pass",
+        "cat": 23,
+        "dstintfrole": "wan",
+        "qtypeval": 1,
+        "sessionid": 543234,
+        "srcintfrole": "lan",
+        "subtype": "dns",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Domain is monitored",
+    "network": {
+      "direction": "unknown",
+      "iana_number": "17",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "hosts": [
+        "elastic.example.com"
+      ],
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "category": "Web-based Email",
+      "id": "26",
+      "ruleset": "test"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 53430
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:12.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 53
+    },
+    "dns": {
+      "id": "235",
+      "question": {
+        "class": "IN",
+        "name": "elastic.co",
+        "registered_domain": "elastic.co",
+        "top_level_domain": "co",
+        "type": "A"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "dns-query",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1500054000",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-04-23 time=12:17:12 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"1500054000\" type=\"utm\" subtype=\"dns\" eventtype=\"dns-query\" level=\"information\" vd=\"root\" eventtime=1587230232658642672 tz=\"-0500\" policyid=26 sessionid=543234 srcip=192.168.2.1 srcport=54788 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=53 dstintf=\"wan1\" dstintfrole=\"wan\" proto=17 profile=\"elastictest\" xid=235 qname=\"elastic.co\" qtype=\"A\" qtypeval=1 qclass=\"IN\"",
+      "start": "2020-04-18T17:17:12.658Z",
+      "timezone": "-0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "dstintfrole": "wan",
+        "qtypeval": 1,
+        "sessionid": 543234,
+        "srcintfrole": "lan",
+        "subtype": "dns",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "network": {
+      "direction": "unknown",
+      "iana_number": "17",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "hosts": [
+        "elastic.co"
+      ],
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "id": "26",
+      "ruleset": "elastictest"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 54788
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:11.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "signature",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1059028704",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2020-04-23 time=12:17:11 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"1059028704\" type=\"utm\" subtype=\"app-ctrl\" eventtype=\"signature\" level=\"information\" vd=\"root\" eventtime=1587230232148674303 tz=\"-0500\" appid=40568 user=\"elasticuser\" group=\"elasticgroup\" authserver=\"elasticauth\" srcip=192.168.2.1 dstip=67.43.156.13 srcport=63012 dstport=443 srcintf=\"port1\" srcintfrole=\"lan\" dstintf=\"wan1\" dstintfrole=\"wan\" proto=6 service=\"SSL\" direction=\"outgoing\" policyid=100602 sessionid=543234 applist=\"elasticruleset\" action=\"pass\" appcat=\"Web.Client\" app=\"HTTPS.BROWSER\" hostname=\"elastic.no\" incidentserialno=54323 url=\"/\" msg=\"Web.Client: HTTPS.BROWSER,\" apprisk=\"medium\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:17:12.148Z",
+      "timezone": "-0500",
+      "type": [
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "pass",
+        "appid": 40568,
+        "apprisk": "medium",
+        "authserver": "elasticauth",
+        "dstintfrole": "wan",
+        "incidentserialno": 54323,
+        "sessionid": 543234,
+        "srcintfrole": "lan",
+        "subtype": "app-ctrl",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Web.Client: HTTPS.BROWSER,",
+    "network": {
+      "application": "HTTPS.BROWSER",
+      "direction": "unknown",
+      "iana_number": "6",
+      "protocol": "ssl",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ],
+      "user": [
+        "elasticuser"
+      ]
+    },
+    "rule": {
+      "category": "Web-Client",
+      "id": "100602",
+      "ruleset": "elasticruleset"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 63012,
+      "user": {
+        "group": {
+          "name": "elasticgroup"
+        },
+        "name": "elasticuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "elastic.no",
+      "path": "/"
+    }
+  },
+  {
+    "@timestamp": "2020-04-23T17:17:04.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 53
+    },
+    "dns": {
+      "id": "2352",
+      "question": {
+        "class": "IN",
+        "name": "elastic.co",
+        "registered_domain": "elastic.co",
+        "top_level_domain": "co",
+        "type": "A"
+      },
+      "resolved_ip": [
+        "67.43.156.13"
+      ]
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "dns-response",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1501054802",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:17:04 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"1501054802\" type=\"utm\" subtype=\"dns\" eventtype=\"dns-response\" level=\"notice\" vd=\"root\" eventtime=1587230224712900694 tz=\"-0500\" policyid=26 sessionid=5432 srcip=192.168.2.1 srcport=54438 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=53 dstintf=\"wan1\" dstintfrole=\"wan\" proto=17 profile=\"elastictest\" xid=2352 qname=\"elastic.co\" qtype=\"A\" qtypeval=1 qclass=\"IN\" ipaddr=\"67.43.156.13\" msg=\"Domain is monitored\" action=\"pass\" cat=93 catdesc=\"Remote Access\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:17:04.712Z",
+      "timezone": "-0500",
+      "type": [
+        "info",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "pass",
+        "cat": 93,
+        "dstintfrole": "wan",
+        "qtypeval": 1,
+        "sessionid": 5432,
+        "srcintfrole": "lan",
+        "subtype": "dns",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Domain is monitored",
+    "network": {
+      "direction": "unknown",
+      "iana_number": "17",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "hosts": [
+        "elastic.co"
+      ],
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "category": "Remote Access",
+      "id": "26",
+      "ruleset": "elastictest"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 54438
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:16:42.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "code": "0102043015",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=14:16:42 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0102043015\" type=\"event\" subtype=\"user\" level=\"notice\" vd=\"root\" eventtime=1587230204674924332 tz=\"-0300\" logdesc=\"FSSO log off authentication status\" srcip=192.168.1.1 user=\"elasticadmin\" server=\"FSSO_somefssoserver\" action=\"FSSO-logoff\" msg=\"FSSO-logoff event from FSSO_somefssoserver: user elasticuser logged off 1192.168.1.1\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:16:44.674Z",
+      "timezone": "-0300",
+      "type": [
+        "end"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "FSSO-logoff",
+        "server": "FSSO_somefssoserver",
+        "subtype": "user",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "FSSO-logoff event from FSSO_somefssoserver: user elasticuser logged off 1192.168.1.1",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "elasticadmin"
+      ]
+    },
+    "rule": {
+      "description": "FSSO log off authentication status"
+    },
+    "source": {
+      "ip": "192.168.1.1",
+      "user": {
+        "name": "elasticadmin"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:16:02.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0100022915",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:16:02 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0100022915\" type=\"event\" subtype=\"system\" level=\"notice\" vd=\"root\" eventtime=1587230163121116383 tz=\"-0500\" logdesc=\"FortiCloud server connected\" server=\"67.43.156.13\" action=\"connect\" msg=\"FortiCloud 67.43.156.13 server is connected\"",
+      "start": "2020-04-18T17:16:03.121Z",
+      "timezone": "-0500"
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "connect",
+        "server": "67.43.156.13",
+        "subtype": "system",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "FortiCloud 67.43.156.13 server is connected",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "FortiCloud server connected"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:16:02.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0100022913",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:16:02 devname=\"testswitch3\" devid=\"someotherrouteridagain\" logid=\"0100022913\" type=\"event\" subtype=\"system\" level=\"notice\" vd=\"root\" eventtime=1587230163375149856 tz=\"-0500\" logdesc=\"FortiCloud server disconnected\" server=\"4.4.4.4\" action=\"disconnect\" reason=\"connection reset\" msg=\"FortiCloud 4.4.4.4 server is disconnected\"",
+      "reason": "connection reset",
+      "start": "2020-04-18T17:16:03.375Z",
+      "timezone": "-0500"
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "disconnect",
+        "server": "4.4.4.4",
+        "subtype": "system",
+        "type": "event",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "FortiCloud 4.4.4.4 server is disconnected",
+    "observer": {
+      "name": "testswitch3",
+      "product": "Fortigate",
+      "serial_number": "someotherrouteridagain",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "rule": {
+      "description": "FortiCloud server disconnected"
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:15:18.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ssl-anomalies",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1700062001",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=13:15:18 devname=\"testswitch2\" devid=\"someotherid\" logid=\"1700062001\" type=\"utm\" subtype=\"ssl\" eventtype=\"ssl-anomalies\" level=\"notice\" vd=\"root\" eventtime=1587230118838592454 tz=\"-0400\" policyid=12 sessionid=42346234 service=\"HTTPS\" user=\"elasticuser2\" group=\"elasticgroup2\" profile=\"somecerts\" srcip=192.168.2.1 srcport=59726 dstip=67.43.156.13 dstport=443 srcintf=\"LAN\" srcintfrole=\"lan\" dstintf=\"wan1\" dstintfrole=\"wan\" proto=6 action=\"passthrough\" msg=\"Server certificate passed\" reason=\"untrusted-cert\"",
+      "outcome": "success",
+      "reason": "untrusted-cert",
+      "start": "2020-04-18T17:15:18.838Z",
+      "timezone": "-0400",
+      "type": [
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "passthrough",
+        "dstintfrole": "wan",
+        "sessionid": 42346234,
+        "srcintfrole": "lan",
+        "subtype": "ssl",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "message": "Server certificate passed",
+    "network": {
+      "direction": "unknown",
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "LAN"
+        }
+      },
+      "name": "testswitch2",
+      "product": "Fortigate",
+      "serial_number": "someotherid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.2.1",
+        "67.43.156.13"
+      ],
+      "user": [
+        "elasticuser2"
+      ]
+    },
+    "rule": {
+      "id": "12",
+      "ruleset": "somecerts"
+    },
+    "source": {
+      "ip": "192.168.2.1",
+      "port": 59726,
+      "user": {
+        "group": {
+          "name": "elasticgroup2"
+        },
+        "name": "elasticuser2"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:14:39.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "192.168.100.100",
+      "port": 1235
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "ip-conn",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000011",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<188>date=2020-04-23 time=12:14:39 devname=\"firewall3\" devid=\"oldfwid\" logid=\"0000000011\" type=\"traffic\" subtype=\"forward\" level=\"warning\" vd=\"root\" eventtime=1587230079841464445 tz=\"-0500\" srcip=192.168.1.1 srcport=62493 srcintf=\"port1\" srcintfrole=\"lan\" dstip=192.168.100.100 dstport=1235 dstintf=\"newinterface\" dstintfrole=\"undefined\" sessionid=54234 proto=17 action=\"ip-conn\" policyid=49 policytype=\"policy\" poluuid=\"654cc-b6542-53467u8-e45234-1566casd35f7836\" policyname=\"oldpolicyname\" user=\"elasticsuper\" authserver=\"FSSO_newfsso\" service=\"udp/12302\" dstcountry=\"Reserved\" srccountry=\"Reserved\" appcat=\"unscanned\" crscore=5 craction=63332144 crlevel=\"low\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:14:39.841Z",
+      "timezone": "-0500",
+      "type": [
+        "connection",
+        "end",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "ip-conn",
+        "authserver": "FSSO_newfsso",
+        "craction": 63332144,
+        "crlevel": "low",
+        "crscore": 5,
+        "dstcountry": "Reserved",
+        "dstintfrole": "undefined",
+        "sessionid": 54234,
+        "srccountry": "Reserved",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "type": "traffic",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 188,
+        "severity": {
+          "code": 4
+        }
+      }
+    },
+    "network": {
+      "direction": "unknown",
+      "iana_number": "17",
+      "protocol": "udp/12302",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "newinterface"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "firewall3",
+      "product": "Fortigate",
+      "serial_number": "oldfwid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.1",
+        "192.168.100.100"
+      ],
+      "user": [
+        "elasticsuper"
+      ]
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "49",
+      "name": "oldpolicyname",
+      "ruleset": "policy",
+      "uuid": "654cc-b6542-53467u8-e45234-1566casd35f7836"
+    },
+    "source": {
+      "ip": "192.168.1.1",
+      "port": 62493,
+      "user": {
+        "name": "elasticsuper"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:14:28.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 77654,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "packets": 70,
+      "port": 442
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "close",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000013",
+      "dataset": "fortinet_fortigate.log",
+      "duration": 126000000000,
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:14:28 devname=\"firewall3\" devid=\"oldfwid\" logid=\"0000000013\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" eventtime=1587230069291463928 tz=\"-0500\" srcip=192.168.50.50 srcport=56603 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=442 dstintf=\"wan1\" dstintfrole=\"wan\" sessionid=2345 proto=6 action=\"close\" policyid=2365 policytype=\"policy\" poluuid=\"654644c-b064-fdgdf3425-f003-1234ghdf682e05f\" policyname=\"someoldpolicyname\" user=\"elasticuser\" group=\"testgroup\" authserver=\"FSSO_something\" service=\"HTTPS\" dstcountry=\"Netherlands\" srccountry=\"Reserved\" trandisp=\"snat\" transip=67.43.156.14 transport=603 appid=43540 app=\"Skype.Portals\" appcat=\"Collaboration\" apprisk=\"elevated\" applist=\"someapplist\" appact=\"detected\" duration=126 sentbyte=923 rcvdbyte=77654 sentpkt=113 rcvdpkt=70 vwlid=4 vwlquality=\"Seq_num(3), alive, selected\" wanin=1130 wanout=6671 lanin=1406 lanout=146506 utmaction=\"block\" countweb=1 countapp=1 crscore=5 craction=6144 crlevel=\"low\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:14:29.291Z",
+      "timezone": "-0500",
+      "type": [
+        "connection",
+        "end",
+        "protocol",
+        "denied"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "close",
+        "appact": "detected",
+        "appid": 43540,
+        "applist": "someapplist",
+        "apprisk": "elevated",
+        "authserver": "FSSO_something",
+        "countapp": 1,
+        "countweb": 1,
+        "craction": 6144,
+        "crlevel": "low",
+        "crscore": 5,
+        "dstcountry": "Netherlands",
+        "dstintfrole": "wan",
+        "lanin": 1406,
+        "lanout": 146506,
+        "sessionid": 2345,
+        "srccountry": "Reserved",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "snat",
+        "transip": "67.43.156.14",
+        "type": "traffic",
+        "utmaction": "block",
+        "vd": "root",
+        "vwlid": 4,
+        "vwlquality": "Seq_num(3), alive, selected",
+        "wanin": 1130,
+        "wanout": 6671
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "application": "Skype.Portals",
+      "bytes": 78577,
+      "direction": "unknown",
+      "iana_number": "6",
+      "packets": 183,
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "firewall3",
+      "product": "Fortigate",
+      "serial_number": "oldfwid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.50.50",
+        "67.43.156.13",
+        "67.43.156.14"
+      ],
+      "user": [
+        "elasticuser"
+      ]
+    },
+    "rule": {
+      "category": "Collaboration",
+      "id": "2365",
+      "name": "someoldpolicyname",
+      "ruleset": "policy",
+      "uuid": "654644c-b064-fdgdf3425-f003-1234ghdf682e05f"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 923,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "192.168.50.50",
+      "nat": {
+        "ip": "67.43.156.14",
+        "port": 603
+      },
+      "packets": 113,
+      "port": 56603,
+      "user": {
+        "group": {
+          "name": "testgroup"
+        },
+        "name": "elasticuser"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:14:09.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "dns",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000011",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<188>date=2020-04-23 time=12:14:09 devname=\"newfirewall\" devid=\"newrouterid\" logid=\"0000000011\" type=\"traffic\" subtype=\"forward\" level=\"warning\" vd=\"root\" eventtime=1587230049761513222 tz=\"-0500\" srcip=192.168.1.6 srcport=53438 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=53 dstintf=\"wan1\" dstintfrole=\"wan\" sessionid=435234 proto=17 action=\"dns\" policyid=26 policytype=\"policy\" poluuid=\"2345de-b143-52134d8-6654f-4654sdfg16f431\" policyname=\"elasticnewruleset\" service=\"DNS\" dstcountry=\"Netherlands\" srccountry=\"Reserved\" appcat=\"unscanned\" crscore=5 craction=54144 crlevel=\"low\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:14:09.761Z",
+      "timezone": "-0500",
+      "type": [
+        "connection",
+        "end",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "dns",
+        "craction": 54144,
+        "crlevel": "low",
+        "crscore": 5,
+        "dstcountry": "Netherlands",
+        "dstintfrole": "wan",
+        "sessionid": 435234,
+        "srccountry": "Reserved",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "type": "traffic",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 188,
+        "severity": {
+          "code": 4
+        }
+      }
+    },
+    "network": {
+      "direction": "unknown",
+      "iana_number": "17",
+      "protocol": "dns",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "newfirewall",
+      "product": "Fortigate",
+      "serial_number": "newrouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.6",
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "26",
+      "name": "elasticnewruleset",
+      "ruleset": "policy",
+      "uuid": "2345de-b143-52134d8-6654f-4654sdfg16f431"
+    },
+    "source": {
+      "ip": "192.168.1.6",
+      "port": 53438
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:11:51.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 65446,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "packets": 1045601,
+      "port": 6000
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000020",
+      "dataset": "fortinet_fortigate.log",
+      "duration": 5462000000000,
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:11:51 devname=\"newfirewall\" devid=\"newrouterid\" logid=\"0000000020\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"root\" eventtime=1587229911390385486 tz=\"-0500\" srcip=192.168.10.10 srcport=6000 srcintf=\"port1\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=6000 dstintf=\"wan1\" dstintfrole=\"wan\" sessionid=4352 proto=17 action=\"accept\" policyid=3426 policytype=\"policy\" poluuid=\"1765de8-5a13-765da73fdsfa1c\" policyname=\"newruleelastic\" service=\"portname\" dstcountry=\"Netherlands\" srccountry=\"Reserved\" trandisp=\"snat\" transip=67.43.156.14 transport=60964 appcat=\"unknown\" applist=\"policylist\" duration=5462 sentbyte=438650 rcvdbyte=65446 sentpkt=723417 rcvdpkt=1045601 vwlid=0 sentdelta=576 rcvddelta=728",
+      "outcome": "success",
+      "start": "2020-04-18T17:11:51.390Z",
+      "timezone": "-0500",
+      "type": [
+        "connection",
+        "end",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "accept",
+        "applist": "policylist",
+        "deltabytes": 1304,
+        "dstcountry": "Netherlands",
+        "dstintfrole": "wan",
+        "rcvddelta": 728,
+        "sentdelta": 576,
+        "sessionid": 4352,
+        "srccountry": "Reserved",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "snat",
+        "transip": "67.43.156.14",
+        "type": "traffic",
+        "vd": "root",
+        "vwlid": 0
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 504096,
+      "direction": "unknown",
+      "iana_number": "17",
+      "packets": 1769018,
+      "protocol": "portname",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "newfirewall",
+      "product": "Fortigate",
+      "serial_number": "newrouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.10.10",
+        "67.43.156.13",
+        "67.43.156.14"
+      ]
+    },
+    "rule": {
+      "category": "unknown",
+      "id": "3426",
+      "name": "newruleelastic",
+      "ruleset": "policy",
+      "uuid": "1765de8-5a13-765da73fdsfa1c"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 438650,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "192.168.10.10",
+      "nat": {
+        "ip": "67.43.156.14",
+        "port": 60964
+      },
+      "packets": 723417,
+      "port": 6000
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:11:48.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 20,
+      "geo": {
+        "continent_name": "Europe",
+        "country_iso_code": "NO",
+        "country_name": "Norway",
+        "location": {
+          "lat": 61.99999999254942,
+          "lon": 9.999999990686774
+        }
+      },
+      "ip": "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6",
+      "packets": 0
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0001000014",
+      "dataset": "fortinet_fortigate.log",
+      "duration": 42000000000,
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=12:11:48 devname=\"newfirewall\" devid=\"newrouterid\" logid=\"0001000014\" type=\"traffic\" subtype=\"local\" level=\"notice\" vd=\"root\" eventtime=1587229908751434997 tz=\"-0500\" srcip=2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6 identifier=0 srcintf=\"port1\" srcintfrole=\"lan\" dstip=2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6 dstintf=\"unknown0\" dstintfrole=\"undefined\" sessionid=6542345 proto=58 action=\"accept\" policyid=0 policytype=\"someotherpolicy\" service=\"icmp6/1/0\" trandisp=\"noop\" app=\"icmp6/25/0\" duration=42 sentbyte=3014 rcvdbyte=20 sentpkt=4 rcvdpkt=0 appcat=\"unscanned\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:11:48.751Z",
+      "timezone": "-0500",
+      "type": [
+        "connection",
+        "end",
+        "protocol",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "accept",
+        "dstintfrole": "undefined",
+        "identifier": 0,
+        "sessionid": 6542345,
+        "srcintfrole": "lan",
+        "subtype": "local",
+        "trandisp": "noop",
+        "type": "traffic",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "application": "icmp6/25/0",
+      "bytes": 3034,
+      "direction": "unknown",
+      "iana_number": "58",
+      "packets": 4,
+      "protocol": "icmp6/1/0",
+      "transport": "ipv6-icmp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "unknown0"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port1"
+        }
+      },
+      "name": "newfirewall",
+      "product": "Fortigate",
+      "serial_number": "newrouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6"
+      ]
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "0",
+      "ruleset": "someotherpolicy"
+    },
+    "source": {
+      "bytes": 3014,
+      "geo": {
+        "continent_name": "Europe",
+        "country_iso_code": "NO",
+        "country_name": "Norway",
+        "location": {
+          "lat": 61.99999999254942,
+          "lon": 9.999999990686774
+        }
+      },
+      "ip": "2a02:cf40:add:4002:91f2:a9b2:e09a:6fc6",
+      "packets": 4
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T17:10:57.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 10,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "packets": 40
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0001000014",
+      "dataset": "fortinet_fortigate.log",
+      "duration": 20000000000,
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=13:10:57 devname=\"newfirewall\" devid=\"newrouterid\" logid=\"0001000014\" type=\"traffic\" subtype=\"local\" level=\"notice\" vd=\"root\" eventtime=1587229857509058693 tz=\"-0400\" srcip=67.43.156.13 identifier=61 srcintf=\"wan1\" srcintfrole=\"wan\" dstip=67.43.156.13 dstintf=\"unknown0\" dstintfrole=\"undefined\" sessionid=123 proto=1 action=\"accept\" policyid=0 policytype=\"rulepolicy\" service=\"PING\" dstcountry=\"Norway\" srccountry=\"Netherlands\" trandisp=\"noop\" app=\"PING\" duration=20 sentbyte=0 rcvdbyte=10 sentpkt=0 rcvdpkt=40 appcat=\"unscanned\"",
+      "outcome": "success",
+      "start": "2020-04-18T17:10:57.509Z",
+      "timezone": "-0400",
+      "type": [
+        "connection",
+        "end",
+        "protocol",
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "accept",
+        "dstcountry": "Norway",
+        "dstintfrole": "undefined",
+        "identifier": 61,
+        "sessionid": 123,
+        "srccountry": "Netherlands",
+        "srcintfrole": "wan",
+        "subtype": "local",
+        "trandisp": "noop",
+        "type": "traffic",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "application": "PING",
+      "bytes": 10,
+      "direction": "unknown",
+      "iana_number": "1",
+      "packets": 40,
+      "protocol": "ping",
+      "transport": "icmp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "unknown0"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "wan1"
+        }
+      },
+      "name": "newfirewall",
+      "product": "Fortigate",
+      "serial_number": "newrouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "0",
+      "ruleset": "rulepolicy"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "packets": 0
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-04-23T01:16:08.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "bytes": 0,
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13",
+      "port": 161
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "deny",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "0000000013",
+      "dataset": "fortinet_fortigate.log",
+      "duration": 0,
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<189>date=2020-04-23 time=01:16:08 devname=\"testswitch1\" devid=\"somerouterid\" logid=\"0000000013\" type=\"traffic\" subtype=\"forward\" level=\"notice\" vd=\"OPERATIONAL\" eventtime=1592961368 srcip=10.10.10.10 srcport=60899 srcintf=\"srcintfname\" srcintfrole=\"lan\" dstip=67.43.156.13 dstport=161 dstintf=\"dstintfname\" dstintfrole=\"lan\" sessionid=155313 proto=17 action=\"deny\" policyid=0 policytype=\"policy\" service=\"SNMP\" dstcountry=\"Reserved\" srccountry=\"Reserved\" trandisp=\"noop\" duration=0 sentbyte=0 rcvdbyte=0 sentpkt=0 appcat=\"unscanned\" crscore=30 craction=131072 crlevel=\"high\"",
+      "outcome": "success",
+      "start": "2020-06-24T01:16:08.000Z",
+      "type": [
+        "connection",
+        "end",
+        "denied"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "deny",
+        "craction": 131072,
+        "crlevel": "high",
+        "crscore": 30,
+        "dstcountry": "Reserved",
+        "dstintfrole": "lan",
+        "sessionid": 155313,
+        "srccountry": "Reserved",
+        "srcintfrole": "lan",
+        "subtype": "forward",
+        "trandisp": "noop",
+        "type": "traffic",
+        "vd": "OPERATIONAL"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "notice",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 189,
+        "severity": {
+          "code": 5
+        }
+      }
+    },
+    "network": {
+      "bytes": 0,
+      "direction": "unknown",
+      "iana_number": "17",
+      "protocol": "snmp",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "dstintfname"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "srcintfname"
+        }
+      },
+      "name": "testswitch1",
+      "product": "Fortigate",
+      "serial_number": "somerouterid",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.10.10.10",
+        "67.43.156.13"
+      ]
+    },
+    "rule": {
+      "category": "unscanned",
+      "id": "0",
+      "ruleset": "policy"
+    },
+    "source": {
+      "bytes": 0,
+      "ip": "10.10.10.10",
+      "packets": 0,
+      "port": 60899
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-05-15T18:03:36.000Z",
+    "agent": {
+      "ephemeral_id": "363c550d-965f-4f1d-bfa9-cb502c967e23",
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "name": "elastic-agent-66370",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortigate.log",
+      "namespace": "99123",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.14",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "642c990a-b3ab-464f-b3f7-aa39b8dd3581",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "app-ctrl-all",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "1059028704",
+      "dataset": "fortinet_fortigate.log",
+      "ingested": "2026-03-10T04:35:29Z",
+      "kind": "event",
+      "original": "<190>date=2019-05-15 time=18:03:36 logid=\"1059028704\" type=\"utm\" subtype=\"app-ctrl\" eventtype=\"app-ctrl-all\" level=\"information\" vd=\"root\" eventtime=1557968615 appid=40568 srcip=10.1.100.22 dstip=67.43.156.14 srcport=50798 dstport=443 srcintf=\"port10\" srcintfrole=\"lan\" dstintf=\"port9\" dstintfrole=\"wan\" proto=6 service=\"HTTPS\" direction=\"outgoing\" policyid=1 sessionid=4414 applist=\"block-social.media\" appcat=\"Web.Client\" app=\"HTTPS.BROWSER\" action=\"pass\" hostname=\"www.dailymotion.com\" incidentserialno=1962906680 url=\"/\" msg=\"Web.Client: HTTPS.BROWSER,\" apprisk=\"medium\" scertcname=\"*.dailymotion.com\" scertissuer=\"DigiCert SHA2 High Assurance Server CA\"",
+      "outcome": "success",
+      "start": "2019-05-16T01:03:35.000Z",
+      "type": [
+        "allowed"
+      ]
+    },
+    "fortinet": {
+      "firewall": {
+        "action": "pass",
+        "appid": 40568,
+        "apprisk": "medium",
+        "dstintfrole": "wan",
+        "incidentserialno": 1962906680,
+        "sessionid": 4414,
+        "srcintfrole": "lan",
+        "subtype": "app-ctrl",
+        "type": "utm",
+        "vd": "root"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.19.0.3:44650"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Web.Client: HTTPS.BROWSER,",
+    "network": {
+      "application": "HTTPS.BROWSER",
+      "direction": "unknown",
+      "iana_number": "6",
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "port9"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "port10"
+        }
+      },
+      "product": "Fortigate",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.1.100.22",
+        "67.43.156.14"
+      ]
+    },
+    "rule": {
+      "category": "Web-Client",
+      "id": "1",
+      "ruleset": "block-social.media"
+    },
+    "source": {
+      "ip": "10.1.100.22",
+      "port": 50798
+    },
+    "tags": [
+      "preserve_original_event",
+      "fortinet-fortigate",
+      "fortinet-firewall",
+      "forwarded"
+    ],
+    "tls": {
+      "server": {
+        "issuer": "DigiCert SHA2 High Assurance Server CA",
+        "x509": {
+          "issuer": {
+            "common_name": [
+              "DigiCert SHA2 High Assurance Server CA"
+            ]
+          },
+          "subject": {
+            "common_name": [
+              "*.dailymotion.com"
+            ]
+          }
+        }
+      }
+    },
+    "url": {
+      "domain": "www.dailymotion.com",
+      "path": "/"
+    }
+  }
+]

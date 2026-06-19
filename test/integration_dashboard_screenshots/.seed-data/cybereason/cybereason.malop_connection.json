@@ -1,0 +1,264 @@
+[
+  {
+    "@timestamp": "2024-03-13T11:54:39.973Z",
+    "agent": {
+      "ephemeral_id": "3d72f2aa-5c4a-490a-8333-b92185b71331",
+      "id": "ab3f69d7-9e18-4798-995a-7876b7332d18",
+      "name": "elastic-agent-75086",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cybereason": {
+      "malop_connection": {
+        "element_values": {
+          "dns_query": {
+            "element_values": [
+              {
+                "name": "dim-win10",
+                "has_suspicions": false,
+                "guid": "7vCmFBCi55eyTiwX",
+                "has_malops": false,
+                "element_type": "Machine"
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 1
+          },
+          "owner_machine": {
+            "element_values": [
+              {
+                "has_suspicions": false,
+                "has_malops": false,
+                "element_type": "Machine",
+                "object": {
+                  "pole": "bye"
+                }
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 1
+          },
+          "owner_process": {
+            "element_values": [
+              {
+                "name": "backgroundtaskhost.exe",
+                "has_suspicions": false,
+                "guid": "7vCmFPstj36nuaBO",
+                "has_malops": false,
+                "element_type": "Process",
+                "object": {
+                  "user": {
+                    "guessedTotal": 0,
+                    "totalSuspicious": 0,
+                    "totalMalicious": 0,
+                    "totalValues": 1,
+                    "elementValues": [
+                      {
+                        "hasSuspicions": false,
+                        "name": "cy\\cymulator",
+                        "guid": "AAAAGGZ3xLXVm27e",
+                        "simpleValues": {
+                          "ok": "lope"
+                        },
+                        "elementType": "User",
+                        "hasMalops": false
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 1
+          },
+          "owner_process_user": {
+            "element_values": [
+              {
+                "name": "cy\\cymulator",
+                "has_suspicions": false,
+                "guid": "AAAAGGZ3xLXVm27e",
+                "has_malops": false,
+                "element_type": "User"
+              }
+            ],
+            "guessed_total": 0,
+            "total_malicious": 0,
+            "total_suspicious": 0,
+            "total_values": 1
+          }
+        },
+        "evidence_map": {
+          "evidence": "map"
+        },
+        "filter_data": {
+          "group_by_value": "81.2.69.192:50394 > 81.2.69.142:443",
+          "sort_in_group_value": "filter"
+        },
+        "is_malicious": false,
+        "labels_ids": "labelids",
+        "malicious": false,
+        "malop_priority": "MEDIUM",
+        "simple_values": {
+          "accessed_by_malware_evidence": {
+            "total_values": 1,
+            "values": [
+              false
+            ]
+          },
+          "aggregated_received_bytes_count": {
+            "total_values": 1,
+            "values": [
+              6811
+            ]
+          },
+          "aggregated_transmitted_bytes_count": {
+            "total_values": 1,
+            "values": [
+              4098
+            ]
+          },
+          "calculated_creation_time": {
+            "total_values": 1
+          },
+          "direction": {
+            "total_values": 1,
+            "values": [
+              "OUTGOING"
+            ]
+          },
+          "element_display_name": {
+            "total_values": 1,
+            "values": [
+              "81.2.69.192:50394 > 81.2.69.142:443"
+            ]
+          },
+          "end_time": {
+            "total_values": 1
+          },
+          "group": {
+            "total_values": 1,
+            "values": [
+              "72a61eac-6f79-4670-8607-a1334ddd2ff0"
+            ]
+          },
+          "local_port": {
+            "total_values": 1,
+            "values": [
+              50394
+            ]
+          },
+          "port_type": {
+            "total_values": 1,
+            "values": [
+              "SERVICE_HTTP"
+            ]
+          },
+          "remote_address_country_name": {
+            "total_values": 1,
+            "values": [
+              "United States"
+            ]
+          },
+          "remote_port": {
+            "total_values": 1,
+            "values": [
+              443
+            ]
+          },
+          "server_address": {
+            "total_values": 1
+          },
+          "server_port": {
+            "total_values": 1
+          },
+          "state": {
+            "total_values": 1,
+            "values": [
+              "CONNECTION_OPEN"
+            ]
+          },
+          "transport_protocol": {
+            "total_values": 1
+          }
+        },
+        "suspect": false,
+        "suspicion_count": 0,
+        "suspicions": {
+          "malop": "connection"
+        },
+        "suspicions_map": {
+          "suspicions": "map"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cybereason.malop_connection",
+      "namespace": "46677",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "ab3f69d7-9e18-4798-995a-7876b7332d18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "cybereason.malop_connection",
+      "end": "2024-03-13T11:55:40.803Z",
+      "id": "7vCmFD3khy-bwG9X",
+      "ingested": "2026-03-10T03:15:41Z",
+      "kind": "alert",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "network": {
+      "transport": "TCP"
+    },
+    "process": {
+      "real_user": {
+        "id": [
+          "7vCmFBCi55eyTiwX"
+        ],
+        "name": [
+          "dim-win10"
+        ]
+      }
+    },
+    "related": {
+      "ip": [
+        "0.0.0.0"
+      ],
+      "user": [
+        "7vCmFBCi55eyTiwX",
+        "dim-win10"
+      ]
+    },
+    "server": {
+      "address": [
+        "0.0.0.0"
+      ],
+      "ip": "0.0.0.0",
+      "port": 443
+    },
+    "tags": [
+      "forwarded",
+      "cybereason-malop_connection"
+    ]
+  }
+]

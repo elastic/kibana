@@ -1,0 +1,1607 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:06:15.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:16.731Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:17Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 1470
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:14.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:15.730Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:16Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 1365
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:13.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:14.729Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:15Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 1260
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:12.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 1155
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:11.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 1050
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:10.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 945
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:09.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 840
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:08.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 735
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:07.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 630
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:06.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 525
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:05.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 420
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:04.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 315
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:03.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 210
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:02.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:13.725Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 105
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:06:01.000Z",
+    "agent": {
+      "ephemeral_id": "1673b5f7-e10e-488c-8743-2f15a5204878",
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "name": "elastic-agent-50421",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "apache": {
+      "access": {
+        "remote_addresses": [
+          "127.0.0.1"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "apache.access",
+      "namespace": "57477",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "c7c578d9-c803-40a9-9a14-20558061ee58",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:06:11.744Z",
+      "dataset": "apache.access",
+      "ingested": "2026-03-10T02:06:14Z",
+      "kind": "event",
+      "outcome": "success"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-50421",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "1E-7A-0C-C7-E1-B2",
+        "5A-A7-67-8A-C1-E1"
+      ],
+      "name": "elastic-agent-50421",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 45
+        },
+        "status_code": 200
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access.log"
+      },
+      "offset": 0
+    },
+    "related": {
+      "ip": [
+        "127.0.0.1"
+      ]
+    },
+    "source": {
+      "address": "127.0.0.1",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "apache-access"
+    ],
+    "url": {
+      "original": "/",
+      "path": "/"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.64.0",
+      "version": "7.64.0"
+    }
+  }
+]

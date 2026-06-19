@@ -1,0 +1,67 @@
+{
+  "package": "lastpass",
+  "dataStreams": [
+    {
+      "dataset": "lastpass.detailed_shared_folder",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "lastpass.detailed_shared_folder.deleted",
+        "lastpass.detailed_shared_folder.name",
+        "lastpass.detailed_shared_folder.score",
+        "lastpass.detailed_shared_folder.user.can_administer",
+        "lastpass.detailed_shared_folder.user.read_only",
+        "user.email"
+      ],
+      "filterValues": {
+        "lastpass.detailed_shared_folder.deleted": [
+          "true",
+          "false"
+        ],
+        "lastpass.detailed_shared_folder.user.read_only": [
+          "true"
+        ],
+        "lastpass.detailed_shared_folder.user.can_administer": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "lastpass.event_report",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "event.action",
+        "event.type"
+      ],
+      "filterValues": {
+        "event.action": [
+          "failed login attempt",
+          "log in",
+          "login to admin console"
+        ]
+      }
+    },
+    {
+      "dataset": "lastpass.user",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "lastpass.user.master_password_strength",
+        "lastpass.user.never_logged_in",
+        "lastpass.user.password_reset_required",
+        "lastpass.user.total_score",
+        "user.email"
+      ],
+      "filterValues": {
+        "lastpass.user.never_logged_in": [
+          "true"
+        ],
+        "lastpass.user.password_reset_required": [
+          "true"
+        ]
+      }
+    }
+  ]
+}

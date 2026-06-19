@@ -1,0 +1,294 @@
+[
+  {
+    "@timestamp": "2026-03-10T01:13:17.555Z",
+    "agent": {
+      "ephemeral_id": "048f5904-b66f-46f2-8465-dc4c580b3860",
+      "id": "fcdbd815-3816-4ae1-94c8-920f864104a0",
+      "name": "elastic-agent-36967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "citrix_adc": {
+      "interface": {
+        "disabled": {
+          "count": 0.0
+        },
+        "link": {
+          "down_time": "00:00:00",
+          "up_time": "4.06:45:27"
+        },
+        "mac": {
+          "moved": {
+            "count": 0.0,
+            "rate": 0.0
+          }
+        },
+        "packets": {
+          "inbound": {
+            "dropped": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "dropped_by_hardware": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "error_free": {
+              "discarded": {
+                "count": 0.0,
+                "rate": 0.0
+              }
+            }
+          },
+          "outbound": {
+            "dropped_by_hardware": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "error_free": {
+              "discarded": {
+                "count": 0.0,
+                "rate": 0.0
+              }
+            }
+          },
+          "received": {
+            "count": 36267172.0,
+            "jumbo": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "multicast": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "rate": 100.0,
+            "tagged": {
+              "count": 0.0,
+              "rate": 0.0
+            }
+          },
+          "transmission": {
+            "dropped": {
+              "count": 0.0,
+              "rate": 0.0
+            }
+          },
+          "transmitted": {
+            "count": 71618978.0,
+            "jumbo": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "rate": 195.0,
+            "tagged": {
+              "count": 0.0,
+              "rate": 0.0
+            }
+          }
+        },
+        "received": {
+          "bytes": {
+            "rate": 14597.0,
+            "value": 5134180570.0
+          }
+        },
+        "stalled": {
+          "count": 0.0
+        },
+        "state": "UP",
+        "transmitted": {
+          "bytes": {
+            "rate": 18601.0,
+            "value": 6826375522.0
+          }
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "citrix_adc.interface",
+      "namespace": "42933",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fcdbd815-3816-4ae1-94c8-920f864104a0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T01:13:17.555Z",
+      "dataset": "citrix_adc.interface",
+      "ingested": "2026-03-10T01:13:18Z",
+      "kind": "event",
+      "module": "citrix_adc",
+      "original": "{\"curintfstate\":\"UP\",\"curlinkdowntime\":\"00:00:00\",\"curlinkstate\":\"DOWN\",\"curlinkuptime\":\"4.06:45:27\",\"errdroppedrxpkts\":\"0\",\"errdroppedrxpktsrate\":0,\"errdroppedtxpkts\":\"0\",\"errdroppedtxpktsrate\":0,\"errifindiscards\":\"0\",\"errifindiscardsrate\":0,\"errlinkhangs\":\"0\",\"errnicmuted\":\"0\",\"errpktrx\":\"0\",\"errpktrxrate\":0,\"errpkttx\":\"0\",\"errpkttxrate\":0,\"id\":\"LO/1\",\"interfacealias\":\"\",\"jumbopktsreceived\":\"0\",\"jumbopktsreceivedrate\":0,\"jumbopktstransmitted\":\"0\",\"jumbopktstransmittedrate\":0,\"linkreinits\":\"0\",\"macmovedrate\":0,\"netscalerpktsrate\":100,\"nicerrdisables\":\"0\",\"nicerrifoutdiscards\":\"0\",\"nicerrifoutdiscardsrate\":0,\"nicmulticastpktsrate\":0,\"nicrxstalls\":\"0\",\"nicstsstalls\":\"0\",\"nictotmulticastpkts\":\"0\",\"nictxstalls\":\"0\",\"rxbytesrate\":14597,\"rxcrcerrors\":\"0\",\"rxcrcerrorsrate\":0,\"rxlacpdu\":\"0\",\"rxlacpdurate\":0,\"rxpktsrate\":100,\"totmacmoved\":\"0\",\"totnetscalerpkts\":\"36267172\",\"totrxbytes\":\"5134180570\",\"totrxpkts\":\"36267172\",\"tottxbytes\":\"6826375522\",\"tottxpkts\":\"71618978\",\"trunkpktsreceived\":\"0\",\"trunkpktsreceivedrate\":0,\"trunkpktstransmitted\":\"0\",\"trunkpktstransmittedrate\":0,\"txbytesrate\":18601,\"txlacpdu\":\"0\",\"txlacpdurate\":0,\"txpktsrate\":195}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "interface": {
+      "id": "LO/1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "citrix_adc-interface",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T01:13:15.880Z",
+    "agent": {
+      "ephemeral_id": "048f5904-b66f-46f2-8465-dc4c580b3860",
+      "id": "fcdbd815-3816-4ae1-94c8-920f864104a0",
+      "name": "elastic-agent-36967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "citrix_adc": {
+      "interface": {
+        "disabled": {
+          "count": 0.0
+        },
+        "link": {
+          "down_time": "00:00:11",
+          "up_time": "4.06:45:16"
+        },
+        "mac": {
+          "moved": {
+            "count": 0.0,
+            "rate": 0.0
+          }
+        },
+        "packets": {
+          "inbound": {
+            "dropped": {
+              "count": 2797172.0,
+              "rate": 32.0
+            },
+            "dropped_by_hardware": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "error_free": {
+              "discarded": {
+                "count": 0.0,
+                "rate": 0.0
+              }
+            }
+          },
+          "outbound": {
+            "dropped_by_hardware": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "error_free": {
+              "discarded": {
+                "count": 0.0,
+                "rate": 0.0
+              }
+            }
+          },
+          "received": {
+            "count": 5396347.0,
+            "jumbo": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "multicast": {
+              "count": 278537.0,
+              "rate": 0.0
+            },
+            "rate": 38.0,
+            "tagged": {
+              "count": 0.0,
+              "rate": 0.0
+            }
+          },
+          "transmission": {
+            "dropped": {
+              "count": 0.0,
+              "rate": 0.0
+            }
+          },
+          "transmitted": {
+            "count": 2511171.0,
+            "jumbo": {
+              "count": 0.0,
+              "rate": 0.0
+            },
+            "rate": 5.0,
+            "tagged": {
+              "count": 0.0,
+              "rate": 0.0
+            }
+          }
+        },
+        "received": {
+          "bytes": {
+            "rate": 4603.0,
+            "value": 1103884064.0
+          }
+        },
+        "stalled": {
+          "count": 0.0
+        },
+        "state": "UP",
+        "transmitted": {
+          "bytes": {
+            "rate": 1924.0,
+            "value": 776571619.0
+          }
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "citrix_adc.interface",
+      "namespace": "42933",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "fcdbd815-3816-4ae1-94c8-920f864104a0",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T01:13:15.880Z",
+      "dataset": "citrix_adc.interface",
+      "ingested": "2026-03-10T01:13:18Z",
+      "kind": "event",
+      "module": "citrix_adc",
+      "original": "{\"curintfstate\":\"UP\",\"curlinkdowntime\":\"00:00:11\",\"curlinkstate\":\"DOWN\",\"curlinkuptime\":\"4.06:45:16\",\"errdroppedrxpkts\":\"2797172\",\"errdroppedrxpktsrate\":32,\"errdroppedtxpkts\":\"0\",\"errdroppedtxpktsrate\":0,\"errifindiscards\":\"0\",\"errifindiscardsrate\":0,\"errlinkhangs\":\"0\",\"errnicmuted\":\"0\",\"errpktrx\":\"0\",\"errpktrxrate\":0,\"errpkttx\":\"0\",\"errpkttxrate\":0,\"id\":\"0/1\",\"interfacealias\":\"\",\"jumbopktsreceived\":\"0\",\"jumbopktsreceivedrate\":0,\"jumbopktstransmitted\":\"0\",\"jumbopktstransmittedrate\":0,\"linkreinits\":\"0\",\"macmovedrate\":0,\"netscalerpktsrate\":6,\"nicerrdisables\":\"0\",\"nicerrifoutdiscards\":\"0\",\"nicerrifoutdiscardsrate\":0,\"nicmulticastpktsrate\":0,\"nicrxstalls\":\"0\",\"nicstsstalls\":\"0\",\"nictotmulticastpkts\":\"278537\",\"nictxstalls\":\"0\",\"rxbytesrate\":4603,\"rxcrcerrors\":\"0\",\"rxcrcerrorsrate\":0,\"rxlacpdu\":\"0\",\"rxlacpdurate\":0,\"rxpktsrate\":38,\"totmacmoved\":\"0\",\"totnetscalerpkts\":\"2493179\",\"totrxbytes\":\"1103884064\",\"totrxpkts\":\"5396347\",\"tottxbytes\":\"776571619\",\"tottxpkts\":\"2511171\",\"trunkpktsreceived\":\"0\",\"trunkpktsreceivedrate\":0,\"trunkpktstransmitted\":\"0\",\"trunkpktstransmittedrate\":0,\"txbytesrate\":1924,\"txlacpdu\":\"0\",\"txlacpdurate\":0,\"txpktsrate\":5}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "interface": {
+      "id": "0/1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "citrix_adc-interface",
+      "forwarded"
+    ]
+  }
+]

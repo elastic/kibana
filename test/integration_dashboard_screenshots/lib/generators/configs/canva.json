@@ -1,0 +1,23 @@
+{
+  "package": "canva",
+  "dataStreams": [
+    {
+      "dataset": "canva.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "canva.audit.action.approval_status",
+        "canva.audit.action.email",
+        "canva.audit.action.team.id",
+        "canva.audit.actor.type",
+        "canva.audit.target.name",
+        "event.action",
+        "event.outcome",
+        "source.ip",
+        "user.id",
+        "user.target.id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

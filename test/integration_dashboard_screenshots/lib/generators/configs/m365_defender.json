@@ -1,0 +1,151 @@
+{
+  "package": "m365_defender",
+  "dataStreams": [
+    {
+      "dataset": "m365_defender.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.provider",
+        "event.severity",
+        "host.id",
+        "m365_defender.alert.detection_source",
+        "m365_defender.alert.determination",
+        "m365_defender.alert.evidence.roles",
+        "m365_defender.alert.evidence.sender_ip",
+        "m365_defender.alert.evidence.user_account.account_name",
+        "m365_defender.alert.severity",
+        "process.command_line",
+        "threat.tactic.name",
+        "threat.technique.subtechnique.id"
+      ],
+      "filterValues": {
+        "m365_defender.alert.evidence.roles": [
+          "compromised",
+          "attacked"
+        ]
+      }
+    },
+    {
+      "dataset": "m365_defender.event",
+      "indexPattern": "logs-*",
+      "docTarget": 900,
+      "fields": [
+        "email.direction",
+        "event.action",
+        "event.provider",
+        "file.x509.issuer.common_name",
+        "host.id",
+        "host.name",
+        "host.os.name",
+        "host.os.platform",
+        "host.type",
+        "m365_defender.event.alert.categories",
+        "m365_defender.event.application",
+        "m365_defender.event.attack_techniques",
+        "m365_defender.event.category",
+        "m365_defender.event.delivery.action",
+        "m365_defender.event.delivery.location",
+        "m365_defender.event.detection.source",
+        "m365_defender.event.email.action",
+        "m365_defender.event.email.language",
+        "m365_defender.event.entity_type",
+        "m365_defender.event.evidence.role",
+        "m365_defender.event.failure_reason",
+        "m365_defender.event.logon.type",
+        "m365_defender.event.onboarding_status",
+        "m365_defender.event.severity",
+        "m365_defender.event.threat.names",
+        "m365_defender.event.threat.types",
+        "network.protocol",
+        "observer.type",
+        "user.domain",
+        "user.name"
+      ],
+      "filterValues": {
+        "m365_defender.event.category": [
+          "AdvancedHunting-AlertEvidence",
+          "AdvancedHunting-AlertInfo",
+          "AdvancedHunting-EmailAttachmentInfo",
+          "AdvancedHunting-EmailEvents",
+          "AdvancedHunting-EmailPostDeliveryEvents",
+          "AdvancedHunting-EmailUrlInfo",
+          "AdvancedHunting-UrlClickEvents",
+          "AdvancedHunting-DeviceEvents",
+          "AdvancedHunting-DeviceFileCertificateInfo",
+          "AdvancedHunting-DeviceFileEvents",
+          "AdvancedHunting-DeviceImageLoadEvents",
+          "AdvancedHunting-DeviceInfo",
+          "AdvancedHunting-DeviceLogonEvents",
+          "AdvancedHunting-DeviceNetworkEvents",
+          "AdvancedHunting-DeviceNetworkInfo",
+          "AdvancedHunting-DeviceProcessEvents",
+          "AdvancedHunting-DeviceRegistryEvents",
+          "AdvancedHunting-IdentityDirectoryEvents",
+          "AdvancedHunting-IdentityLogonEvents",
+          "AdvancedHunting-IdentityQueryEvents",
+          "AdvancedHunting-CloudAppEvents"
+        ],
+        "m365_defender.event.onboarding_status": [
+          "Onboarded"
+        ]
+      }
+    },
+    {
+      "dataset": "m365_defender.incident",
+      "indexPattern": "logs-*",
+      "docTarget": 510,
+      "fields": [
+        "event.id",
+        "event.provider",
+        "event.severity",
+        "host.id",
+        "m365_defender.incident.alert.detection_source",
+        "m365_defender.incident.alert.determination",
+        "m365_defender.incident.alert.evidence.roles",
+        "m365_defender.incident.alert.evidence.sender_ip",
+        "m365_defender.incident.alert.evidence.user_account.account_name",
+        "m365_defender.incident.alert.evidence.verdict",
+        "m365_defender.incident.alert.id",
+        "m365_defender.incident.alert.last_update_datetime",
+        "m365_defender.incident.alert.severity",
+        "m365_defender.incident.display_name",
+        "process.command_line",
+        "threat.tactic.name",
+        "threat.technique.subtechnique.id"
+      ],
+      "filterValues": {
+        "m365_defender.incident.alert.evidence.verdict": [
+          "malicious",
+          "suspicious"
+        ],
+        "m365_defender.incident.alert.evidence.roles": [
+          "compromised",
+          "attacked"
+        ]
+      }
+    },
+    {
+      "dataset": "m365_defender.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.id",
+        "host.name",
+        "host.os.platform",
+        "m365_defender.vulnerability.exploitability_level",
+        "m365_defender.vulnerability.first_seen_timestamp",
+        "m365_defender.vulnerability.last_seen_timestamp",
+        "package.name",
+        "vulnerability.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "m365_defender.vulnerability.exploitability_level": [
+          "ExploitIsVerified",
+          "ExploitIsPublic"
+        ]
+      }
+    }
+  ]
+}

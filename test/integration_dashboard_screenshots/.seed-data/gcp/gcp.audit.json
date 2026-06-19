@@ -1,0 +1,1262 @@
+[
+  {
+    "@timestamp": "2025-06-13T13:42:47.922Z",
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "example.user@example.com"
+      }
+    },
+    "cloud": {
+      "availability_zone": "global",
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "v1.compute.projects.setCommonInstanceMetadata",
+      "agent_id_status": "verified",
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "veqbqlc5a2",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "unknown",
+      "provider": "action"
+    },
+    "gcp": {
+      "audit": {
+        "access": {
+          "caller_ip_geo": {
+            "region_code": "DE"
+          },
+          "method_name": "v1.compute.projects.setCommonInstanceMetadata",
+          "principal_email": "example.user@example.com",
+          "principal_subject": "user:example.user@example.com",
+          "service_name": "compute.googleapis.com",
+          "user_agent": "google-cloud-sdk gcloud/525.0.0 command/gcloud.compute.ssh invocation-id/881a0585a52e4ff68bbaf3efb4f2da2c environment/None environment-version/None client-os/MACOSX client-os-ver/24.5.0 client-pltf-arch/arm interactive/True from-script/False python/3.13.4 term/xterm-256color (Macintosh; Intel Mac OS X 24.5.0),gzip(gfe)"
+        },
+        "action_time": "2025-06-13T13:42:47.922Z",
+        "action_type": "add_ssh_key",
+        "affected_resources": [
+          "//compute.googleapis.com/projects/10594"
+        ],
+        "learn_more_uri": "https://cloud.google.com/security-command-center/docs/concepts-sensitive-actions-overview",
+        "receive_timestamp": "2025-06-13T13:42:49.295Z",
+        "resource": {
+          "labels": {
+            "resource_container": "//compute.googleapis.com/projects/10594"
+          },
+          "type": "sensitiveaction.googleapis.com/Location"
+        },
+        "source_log_ids": [
+          {
+            "insert_id": "3czf3od3",
+            "query_uri": "https://console.cloud.google.com/logs/query;query=timestamp%3D%222025-06-13T13:42:46.293601Z%22%0AinsertId%3D%223czf3od3k16%22?project=elastic-sa",
+            "resource_container": "projects/elastic-sa",
+            "log_time": "2025-06-13T13:42:46.293Z"
+          }
+        ]
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "level": "NOTICE",
+      "logger": "projects/elastic-sa/logs/sensitiveaction.googleapis.com%2Faction"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.156"
+      ],
+      "user": [
+        "example.user@example.com"
+      ]
+    },
+    "service": {
+      "name": "compute.googleapis.com"
+    },
+    "source": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "user_agent": {
+      "device": {
+        "name": "Mac"
+      },
+      "name": "Other",
+      "original": "google-cloud-sdk gcloud/525.0.0 command/gcloud.compute.ssh invocation-id/881a0585a52e4ff68bbaf3efb4f2da2c environment/None environment-version/None client-os/MACOSX client-os-ver/24.5.0 client-pltf-arch/arm interactive/True from-script/False python/3.13.4 term/xterm-256color (Macintosh; Intel Mac OS X 24.5.0),gzip(gfe)",
+      "os": {
+        "full": "Mac OS X 24.5.0",
+        "name": "Mac OS X",
+        "version": "24.5.0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2020-08-05T21:59:26.456Z",
+    "actor": {
+      "entity": {
+        "id": [
+          "user@mycompany.com"
+        ]
+      }
+    },
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "user@mycompany.com"
+      }
+    },
+    "cloud": {
+      "project": {
+        "id": "foo"
+      },
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entity": {
+      "target": {
+        "id": [
+          "projects/foo/global/images/windows-server-2016-v20200805"
+        ]
+      }
+    },
+    "event": {
+      "action": "v1.compute.images.insert",
+      "agent_id_status": "verified",
+      "category": [
+        "session",
+        "network",
+        "configuration"
+      ],
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "v2spcwdzmc2",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "success",
+      "provider": "activity",
+      "type": [
+        "start",
+        "access",
+        "allowed"
+      ]
+    },
+    "gcp": {
+      "audit": {
+        "authorization_info": {
+          "granted": true,
+          "permission": "compute.images.create",
+          "resource_attributes": {
+            "name": "projects/foo/global/images/windows-server-2016-v20200805",
+            "service": "compute",
+            "type": "compute.images"
+          }
+        },
+        "logentry_operation": {
+          "id": "operation-1596664766354-5ac287c395484-fa3923bd-543e018e"
+        },
+        "receive_timestamp": "2020-08-05T21:59:27.822Z",
+        "request": {
+          "@type": "type.googleapis.com/compute.images.insert",
+          "family": "windows-server-2016",
+          "guestOsFeatures": {
+            "type": [
+              "VIRTIO_SCSI_MULTIQUEUE",
+              "WINDOWS"
+            ]
+          },
+          "name": "windows-server-2016-v20200805",
+          "rawDisk": {
+            "source": "https://storage.googleapis.com/storage/v1/b/foo/o/windows-server-2016-v20200805.tar.gz"
+          },
+          "sourceType": "RAW"
+        },
+        "resource": {
+          "type": "gce_image"
+        },
+        "resource_location": {
+          "current_locations": [
+            "eu"
+          ]
+        },
+        "resource_name": "projects/foo/global/images/windows-server-2016-v20200805",
+        "response": {
+          "@type": "type.googleapis.com/operation",
+          "id": "44919313",
+          "insertTime": "2020-08-05T14:59:27.259-07:00",
+          "name": "operation-1596664766354-5ac287c395484-fa3923bd-543e018e",
+          "operationType": "insert",
+          "progress": "0",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/foo/global/operations/operation-1596664766354-5ac287c395484-fa3923bd-543e018e",
+          "selfLinkWithId": "https://www.googleapis.com/compute/v1/projects/foo/global/operations/4491931805423146320",
+          "startTime": "2020-08-05T14:59:27.274-07:00",
+          "status_value": "RUNNING",
+          "targetId": "12345",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/foo/global/images/windows-server-2016-v20200805",
+          "user": "user@mycompany.com"
+        },
+        "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "level": "NOTICE",
+      "logger": "projects/foo/logs/cloudaudit.googleapis.com%2Factivity"
+    },
+    "related": {
+      "entity": [
+        "projects/foo/global/images/windows-server-2016-v20200805",
+        "user@mycompany.com"
+      ],
+      "ip": [
+        "67.43.156.13"
+      ],
+      "user": [
+        "user@mycompany.com"
+      ]
+    },
+    "service": {
+      "name": "compute.googleapis.com"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "target": {
+      "entity": {
+        "id": [
+          "projects/foo/global/images/windows-server-2016-v20200805"
+        ]
+      }
+    },
+    "user": {
+      "entity": {
+        "id": [
+          "user@mycompany.com"
+        ]
+      }
+    },
+    "user_agent": {
+      "device": {
+        "name": "Mac"
+      },
+      "name": "Other",
+      "original": "google-cloud-sdk gcloud/290.0.1 command/gcloud.compute.images.create invocation-id/032752ad0fa44b4ea951951d2deef6a3 environment/None environment-version/None interactive/True from-script/False python/2.7.17 term/xterm-256color (Macintosh; Intel Mac OS X 19.6.0),gzip(gfe)",
+      "os": {
+        "full": "Mac OS X 19.6.0",
+        "name": "Mac OS X",
+        "version": "19.6.0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2020-08-05T21:07:30.974Z",
+    "actor": {
+      "entity": {
+        "id": [
+          "system:serviceaccount:cert-manager:cert-manager-webhook"
+        ]
+      }
+    },
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "system:serviceaccount:cert-manager:cert-manager-webhook"
+      }
+    },
+    "cloud": {
+      "availability_zone": "us-central1-a",
+      "project": {
+        "id": "elastic-siem"
+      },
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entity": {
+      "id": [
+        "system:serviceaccount:cert-manager:cert-manager-webhook"
+      ]
+    },
+    "event": {
+      "action": "io.k8s.authorization.v1beta1.subjectaccessreviews.create",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "configuration"
+      ],
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "87efd529-6349-45d2-b905-fc607e6c5d3b",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "success",
+      "provider": "data_access",
+      "type": [
+        "access",
+        "allowed"
+      ]
+    },
+    "gcp": {
+      "audit": {
+        "authorization_info": {
+          "granted": true,
+          "permission": "io.k8s.authorization.v1beta1.subjectaccessreviews.create",
+          "resource": "authorization.k8s.io/v1beta1/subjectaccessreviews"
+        },
+        "labels": {
+          "authorization": {
+            "k8s": {
+              "io/decision": "allow",
+              "io/reason": "RBAC: allowed by ClusterRoleBinding \"cert-manager-webhook:auth-delegator\" of ClusterRole \"system:auth-delegator\" to ServiceAccount \"cert-manager-webhook/cert-manager\""
+            }
+          }
+        },
+        "logentry_operation": {
+          "id": "5555555-6349-45d2-b905-fc607e6c5d3b"
+        },
+        "receive_timestamp": "2020-08-05T21:07:32.157Z",
+        "request": {
+          "@type": "authorization.k8s.io/v1beta1.SubjectAccessReview",
+          "apiVersion": "authorization.k8s.io/v1beta1",
+          "kind": "SubjectAccessReview",
+          "spec": {
+            "group": [
+              "system:authenticated",
+              "system:serviceaccounts",
+              "system:serviceaccounts:kube-system"
+            ],
+            "nonResourceAttributes": {
+              "path": "/apis/webhook.cert-manager.io/v1beta1",
+              "verb": "get"
+            },
+            "user": "system:serviceaccount:kube-system:resourcequota-controller"
+          },
+          "status": {
+            "allowed": "false"
+          }
+        },
+        "resource": {
+          "type": "k8s_cluster"
+        },
+        "resource_name": "authorization.k8s.io/v1beta1/subjectaccessreviews",
+        "response": {
+          "@type": "authorization.k8s.io/v1beta1.SubjectAccessReview",
+          "apiVersion": "authorization.k8s.io/v1beta1",
+          "kind": "SubjectAccessReview",
+          "spec": {
+            "group": [
+              "system:authenticated",
+              "system:serviceaccounts",
+              "system:serviceaccounts:kube-system"
+            ],
+            "nonResourceAttributes": {
+              "path": "/apis/webhook.cert-manager.io/v1beta1",
+              "verb": "get"
+            },
+            "user": "system:serviceaccount:kube-system:resourcequota-controller"
+          },
+          "status": {
+            "allowed": "true",
+            "reason": "RBAC: allowed by ClusterRoleBinding \"system:discovery\" of ClusterRole \"system:discovery\" to Group \"system:authenticated\""
+          }
+        },
+        "status": {
+          "code": 0
+        },
+        "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "logger": "projects/foo/logs/cloudaudit.googleapis.com%2Fdata_access"
+    },
+    "orchestrator": {
+      "api_version": "v1beta1",
+      "cluster": {
+        "name": "analysis-cluster"
+      },
+      "resource": {
+        "type": "subjectaccessreviews"
+      },
+      "type": "kubernetes"
+    },
+    "related": {
+      "ip": [
+        "10.11.12.13"
+      ],
+      "user": [
+        "system:serviceaccount:cert-manager:cert-manager-webhook"
+      ]
+    },
+    "service": {
+      "name": "k8s.io"
+    },
+    "source": {
+      "ip": "10.11.12.13"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Other",
+      "original": "webhook/v0.0.0 (linux/amd64) kubernetes/$Format",
+      "os": {
+        "name": "Linux"
+      }
+    }
+  },
+  {
+    "@timestamp": "2020-08-05T16:56:40.428Z",
+    "actor": {
+      "entity": {
+        "id": [
+          "user@mycompany.com"
+        ]
+      }
+    },
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "user@mycompany.com"
+      }
+    },
+    "cloud": {
+      "instance": {
+        "id": "590261181"
+      },
+      "project": {
+        "id": "foo"
+      },
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "beta.compute.instances.stop",
+      "agent_id_status": "verified",
+      "category": [
+        "session"
+      ],
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "-c7ctxmd2zab",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "unknown",
+      "provider": "activity",
+      "type": [
+        "end"
+      ]
+    },
+    "gcp": {
+      "audit": {
+        "logentry_operation": {
+          "id": "operation-1596646123456-5ac2438b775f6-f8ca1382-e70b6831"
+        },
+        "receive_timestamp": "2020-08-05T16:56:41.315Z",
+        "request": {
+          "@type": "type.googleapis.com/compute.instances.stop"
+        },
+        "resource": {
+          "type": "gce_instance"
+        },
+        "resource_name": "projects/foo/zones/us-central1-a/instances/win10-test",
+        "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+      }
+    },
+    "host": {
+      "target": {
+        "entity": {
+          "id": [
+            "projects/foo/zones/us-central1-a/instances/win10-test"
+          ]
+        }
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "level": "NOTICE",
+      "logger": "projects/foo/logs/cloudaudit.googleapis.com%2Factivity"
+    },
+    "related": {
+      "entity": [
+        "projects/foo/zones/us-central1-a/instances/win10-test",
+        "user@mycompany.com"
+      ],
+      "ip": [
+        "67.43.156.13"
+      ],
+      "user": [
+        "user@mycompany.com"
+      ]
+    },
+    "service": {
+      "name": "compute.googleapis.com"
+    },
+    "source": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.13"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "target": {
+      "entity": {
+        "id": [
+          "projects/foo/zones/us-central1-a/instances/win10-test"
+        ]
+      }
+    },
+    "user": {
+      "entity": {
+        "id": [
+          "user@mycompany.com"
+        ]
+      }
+    },
+    "user_agent": {
+      "device": {
+        "name": "Mac"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:79.0) Gecko/20100101 Firefox/79.0,gzip(gfe),gzip(gfe)",
+      "os": {
+        "full": "Mac OS X 10.15",
+        "name": "Mac OS X",
+        "version": "10.15"
+      },
+      "version": "79.0"
+    }
+  },
+  {
+    "@timestamp": "2019-12-19T00:49:36.086Z",
+    "actor": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    },
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "xxx@xxx.xxx"
+      }
+    },
+    "cloud": {
+      "project": {
+        "id": "elastic-beats"
+      },
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entity": {
+      "target": {
+        "id": [
+          "projects/elastic-beats"
+        ]
+      }
+    },
+    "event": {
+      "action": "GetResourceBillingInfo",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "configuration"
+      ],
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "-uihnmjctwo",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "success",
+      "provider": "data_access",
+      "type": [
+        "access",
+        "allowed"
+      ]
+    },
+    "gcp": {
+      "audit": {
+        "authorization_info": {
+          "granted": true,
+          "permission": "resourcemanager.projects.get",
+          "resource": "projects/elastic-beats"
+        },
+        "receive_timestamp": "2019-12-19T00:49:36.313Z",
+        "request": {
+          "@type": "type.googleapis.com/google.internal.cloudbilling.billingaccount.v1.GetResourceBillingInfoRequest",
+          "resourceName": "projects/189716325846"
+        },
+        "resource": {
+          "type": "project"
+        },
+        "resource_name": "projects/elastic-beats",
+        "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "level": "INFO",
+      "logger": "projects/elastic-beats/logs/cloudaudit.googleapis.com%2Fdata_access"
+    },
+    "related": {
+      "entity": [
+        "projects/elastic-beats",
+        "xxx@xxx.xxx"
+      ],
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "xxx@xxx.xxx"
+      ]
+    },
+    "service": {
+      "name": "cloudbilling.googleapis.com"
+    },
+    "source": {
+      "ip": "192.168.1.1"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "target": {
+      "entity": {
+        "id": [
+          "projects/elastic-beats"
+        ]
+      }
+    },
+    "user": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    }
+  },
+  {
+    "@timestamp": "2019-12-19T00:45:51.228Z",
+    "actor": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    },
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "xxx@xxx.xxx"
+      }
+    },
+    "cloud": {
+      "availability_zone": "global",
+      "project": {
+        "id": "elastic-beats"
+      },
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "beta.compute.machineTypes.aggregatedList",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "configuration"
+      ],
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "-h6onuze1h7dg",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "failure",
+      "provider": "data_access",
+      "type": [
+        "access",
+        "denied"
+      ]
+    },
+    "gcp": {
+      "audit": {
+        "authorization_info": {
+          "granted": false,
+          "permission": "compute.machineTypes.list",
+          "resource_attributes": {
+            "name": "projects/elastic-beats",
+            "service": "resourcemanager",
+            "type": "resourcemanager.projects"
+          }
+        },
+        "num_response_items": 71,
+        "receive_timestamp": "2019-12-19T00:45:52.367Z",
+        "request": {
+          "@type": "type.googleapis.com/compute.machineTypes.aggregatedList"
+        },
+        "resource": {
+          "type": "api"
+        },
+        "resource_location": {
+          "current_locations": [
+            "global"
+          ]
+        },
+        "resource_name": "projects/elastic-beats/global/machineTypes",
+        "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "level": "INFO",
+      "logger": "projects/elastic-beats/logs/cloudaudit.googleapis.com%2Fdata_access"
+    },
+    "related": {
+      "entity": [
+        "projects/elastic-beats/global/machineTypes",
+        "xxx@xxx.xxx"
+      ],
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "xxx@xxx.xxx"
+      ]
+    },
+    "service": {
+      "name": "compute.googleapis.com",
+      "target": {
+        "entity": {
+          "id": [
+            "projects/elastic-beats/global/machineTypes"
+          ]
+        }
+      }
+    },
+    "source": {
+      "ip": "192.168.1.1"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "target": {
+      "entity": {
+        "id": [
+          "projects/elastic-beats/global/machineTypes"
+        ]
+      }
+    },
+    "user": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    },
+    "user_agent": {
+      "device": {
+        "name": "Mac"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:71.0) Gecko/20100101 Firefox/71.0,gzip(gfe),gzip(gfe)",
+      "os": {
+        "full": "Mac OS X 10.15",
+        "name": "Mac OS X",
+        "version": "10.15"
+      },
+      "version": "71.0"
+    }
+  },
+  {
+    "@timestamp": "2019-12-19T00:44:25.051Z",
+    "actor": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    },
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "xxx@xxx.xxx"
+      }
+    },
+    "cloud": {
+      "availability_zone": "global",
+      "project": {
+        "id": "elastic-beats"
+      },
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "beta.compute.instances.aggregatedList",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "configuration"
+      ],
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "yonau3dc2zi",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "failure",
+      "provider": "data_access"
+    },
+    "gcp": {
+      "audit": {
+        "authorization_info": {
+          "permission": "compute.instances.list",
+          "resource_attributes": {
+            "name": "projects/elastic-beats",
+            "service": "resourcemanager",
+            "type": "resourcemanager.projects"
+          }
+        },
+        "num_response_items": 61,
+        "receive_timestamp": "2019-12-19T00:44:25.262Z",
+        "request": {
+          "@type": "type.googleapis.com/compute.instances.aggregatedList"
+        },
+        "resource": {
+          "type": "api"
+        },
+        "resource_location": {
+          "current_locations": [
+            "global"
+          ]
+        },
+        "resource_name": "projects/elastic-beats/global/instances",
+        "status": {
+          "code": 7,
+          "message": "PERMISSION_DENIED"
+        },
+        "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+      }
+    },
+    "host": {
+      "target": {
+        "entity": {
+          "id": [
+            "projects/elastic-beats/global/instances"
+          ]
+        }
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "level": "INFO",
+      "logger": "projects/elastic-beats/logs/cloudaudit.googleapis.com%2Fdata_access"
+    },
+    "related": {
+      "entity": [
+        "projects/elastic-beats/global/instances",
+        "xxx@xxx.xxx"
+      ],
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "xxx@xxx.xxx"
+      ]
+    },
+    "service": {
+      "name": "compute.googleapis.com"
+    },
+    "source": {
+      "ip": "192.168.1.1"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "target": {
+      "entity": {
+        "id": [
+          "projects/elastic-beats/global/instances"
+        ]
+      }
+    },
+    "user": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    },
+    "user_agent": {
+      "device": {
+        "name": "Mac"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:71.0) Gecko/20100101 Firefox/71.0,gzip(gfe),gzip(gfe)",
+      "os": {
+        "full": "Mac OS X 10.15",
+        "name": "Mac OS X",
+        "version": "10.15"
+      },
+      "version": "71.0"
+    }
+  },
+  {
+    "@timestamp": "2019-12-19T00:44:25.051Z",
+    "actor": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    },
+    "agent": {
+      "ephemeral_id": "73126999-75e7-4585-a78c-fb0e3e0690d9",
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "name": "elastic-agent-83773",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "user": {
+        "email": "xxx@xxx.xxx"
+      }
+    },
+    "cloud": {
+      "availability_zone": "global",
+      "project": {
+        "id": "elastic-beats"
+      },
+      "provider": "gcp"
+    },
+    "data_stream": {
+      "dataset": "gcp.audit",
+      "namespace": "24943",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a4c380a8-05c2-4b40-bba5-994f918dc147",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "beta.compute.instances.aggregatedList",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "configuration"
+      ],
+      "created": "2026-03-10T04:39:34.099Z",
+      "dataset": "gcp.audit",
+      "id": "yonau2dg2zi",
+      "ingested": "2026-03-10T04:39:36Z",
+      "kind": "event",
+      "outcome": "success",
+      "provider": "data_access",
+      "type": [
+        "access",
+        "allowed"
+      ]
+    },
+    "gcp": {
+      "audit": {
+        "authorization_info": {
+          "granted": true,
+          "permission": "compute.instances.list",
+          "resource_attributes": {
+            "name": "projects/elastic-beats",
+            "service": "resourcemanager",
+            "type": "resourcemanager.projects"
+          }
+        },
+        "num_response_items": 61,
+        "receive_timestamp": "2019-12-19T00:44:25.262Z",
+        "request": {
+          "@type": "type.googleapis.com/compute.instances.aggregatedList"
+        },
+        "resource": {
+          "type": "api"
+        },
+        "resource_location": {
+          "current_locations": [
+            "global"
+          ]
+        },
+        "resource_name": "projects/elastic-beats/global/instances",
+        "response": {
+          "@type": "core.k8s.io/v1.Status",
+          "apiVersion": "v1",
+          "details": {
+            "group": "batch",
+            "kind": "jobs",
+            "name": "gsuite-exporter-1589294700",
+            "uid": "2beff34a-945f-11ea-bacf-42010a80007f"
+          },
+          "kind": "Status",
+          "status_value": "Success"
+        },
+        "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+      }
+    },
+    "host": {
+      "target": {
+        "entity": {
+          "id": [
+            "projects/elastic-beats/global/instances"
+          ]
+        }
+      }
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "log": {
+      "level": "INFO",
+      "logger": "projects/elastic-beats/logs/cloudaudit.googleapis.com%2Fdata_access"
+    },
+    "related": {
+      "entity": [
+        "projects/elastic-beats/global/instances",
+        "xxx@xxx.xxx"
+      ],
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "xxx@xxx.xxx"
+      ]
+    },
+    "service": {
+      "name": "compute.googleapis.com"
+    },
+    "source": {
+      "ip": "192.168.1.1"
+    },
+    "tags": [
+      "forwarded",
+      "gcp-audit"
+    ],
+    "target": {
+      "entity": {
+        "id": [
+          "projects/elastic-beats/global/instances"
+        ]
+      }
+    },
+    "user": {
+      "entity": {
+        "id": [
+          "xxx@xxx.xxx"
+        ]
+      }
+    },
+    "user_agent": {
+      "device": {
+        "name": "Mac"
+      },
+      "name": "Firefox",
+      "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:71.0) Gecko/20100101 Firefox/71.0,gzip(gfe),gzip(gfe)",
+      "os": {
+        "full": "Mac OS X 10.15",
+        "name": "Mac OS X",
+        "version": "10.15"
+      },
+      "version": "71.0"
+    }
+  }
+]

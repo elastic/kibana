@@ -1,0 +1,49 @@
+{
+  "package": "hashicorp_vault",
+  "dataStreams": [
+    {
+      "dataset": "hashicorp_vault.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.outcome",
+        "event.type",
+        "hashicorp_vault.audit.auth.policies",
+        "hashicorp_vault.audit.auth.token_policies",
+        "hashicorp_vault.audit.request.mount_type",
+        "hashicorp_vault.audit.request.operation",
+        "hashicorp_vault.audit.type",
+        "source.geo.location"
+      ],
+      "filterValues": {
+        "hashicorp_vault.audit.type": [
+          "request"
+        ],
+        "hashicorp_vault.audit.auth.policies": [
+          "root"
+        ],
+        "event.type": [
+          "denied"
+        ]
+      }
+    },
+    {
+      "dataset": "hashicorp_vault.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.id",
+        "agent.name",
+        "hashicorp_vault.log",
+        "log.level",
+        "log.logger",
+        "message"
+      ],
+      "filterValues": {
+        "log.level": [
+          "error"
+        ]
+      }
+    }
+  ]
+}

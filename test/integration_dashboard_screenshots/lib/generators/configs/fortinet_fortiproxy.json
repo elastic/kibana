@@ -1,0 +1,30 @@
+{
+  "package": "fortinet_fortiproxy",
+  "dataStreams": [
+    {
+      "dataset": "fortinet_fortiproxy.log",
+      "indexPattern": "logs-*",
+      "docTarget": 510,
+      "fields": [
+        "destination.geo.country_name",
+        "destination.geo.location",
+        "destination.ip",
+        "event.action",
+        "event.category",
+        "event.duration",
+        "fortinet.proxy.subtype",
+        "fortinet.proxy.type",
+        "log.level",
+        "network.bytes",
+        "network.protocol",
+        "network.transport",
+        "rule.category",
+        "rule.ruleset",
+        "source.geo.country_name",
+        "source.geo.location",
+        "source.ip"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

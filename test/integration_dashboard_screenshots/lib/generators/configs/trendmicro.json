@@ -1,0 +1,21 @@
+{
+  "package": "trendmicro",
+  "dataStreams": [
+    {
+      "dataset": "trendmicro.deep_security",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "event.action",
+        "event.code",
+        "event.severity",
+        "host.id",
+        "observer.hostname",
+        "source.ip",
+        "trendmicro.deep_security.event_category"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

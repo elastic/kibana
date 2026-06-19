@@ -1,0 +1,289 @@
+[
+  {
+    "@timestamp": "2007-08-17T19:31:57.579Z",
+    "agent": {
+      "ephemeral_id": "cc2c2c7f-4b71-4951-a067-eb784b4a374b",
+      "id": "e008175f-b364-428c-9098-9462ee7e8b3c",
+      "name": "elastic-agent-58065",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.ftp",
+      "namespace": "89047",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.1.231",
+      "ip": "192.168.1.231",
+      "port": 21
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e008175f-b364-428c-9098-9462ee7e8b3c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "STOR",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:32.623Z",
+      "dataset": "zeek.ftp",
+      "id": "CpQoCn3o28tke89zv9",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/ftp.log"
+      },
+      "offset": 688
+    },
+    "network": {
+      "community_id": "1:Szmpl33Czo3dQvU2V4/SrHfmBC0=",
+      "protocol": "ftp",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.182",
+        "192.168.1.231"
+      ],
+      "user": [
+        "ftp"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.182",
+      "ip": "192.168.1.182",
+      "port": 62014
+    },
+    "tags": [
+      "forwarded",
+      "zeek-ftp"
+    ],
+    "user": {
+      "name": "ftp"
+    },
+    "zeek": {
+      "ftp": {
+        "arg": "ftp://192.168.1.231/uploads/README",
+        "command": "STOR",
+        "password": "ftp",
+        "reply": {
+          "code": 226,
+          "msg": "Transfer complete."
+        },
+        "user": "ftp"
+      },
+      "session_id": "CpQoCn3o28tke89zv9"
+    }
+  },
+  {
+    "@timestamp": "2007-08-17T19:31:45.019Z",
+    "agent": {
+      "ephemeral_id": "cc2c2c7f-4b71-4951-a067-eb784b4a374b",
+      "id": "e008175f-b364-428c-9098-9462ee7e8b3c",
+      "name": "elastic-agent-58065",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.ftp",
+      "namespace": "89047",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.1.231",
+      "ip": "192.168.1.231",
+      "port": 21
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e008175f-b364-428c-9098-9462ee7e8b3c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "RETR",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:32.623Z",
+      "dataset": "zeek.ftp",
+      "id": "CpQoCn3o28tke89zv9",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "file": {
+      "size": 39424
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/ftp.log"
+      },
+      "offset": 394
+    },
+    "network": {
+      "community_id": "1:Szmpl33Czo3dQvU2V4/SrHfmBC0=",
+      "protocol": "ftp",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.182",
+        "192.168.1.231"
+      ],
+      "user": [
+        "ftp"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.182",
+      "ip": "192.168.1.182",
+      "port": 62014
+    },
+    "tags": [
+      "forwarded",
+      "zeek-ftp"
+    ],
+    "user": {
+      "name": "ftp"
+    },
+    "zeek": {
+      "ftp": {
+        "arg": "ftp://192.168.1.231/resume.doc",
+        "command": "RETR",
+        "password": "ftp",
+        "reply": {
+          "code": 226,
+          "msg": "Transfer complete."
+        },
+        "user": "ftp"
+      },
+      "session_id": "CpQoCn3o28tke89zv9"
+    }
+  },
+  {
+    "@timestamp": "2007-08-17T19:31:44.955Z",
+    "agent": {
+      "ephemeral_id": "cc2c2c7f-4b71-4951-a067-eb784b4a374b",
+      "id": "e008175f-b364-428c-9098-9462ee7e8b3c",
+      "name": "elastic-agent-58065",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.ftp",
+      "namespace": "89047",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.1.231",
+      "ip": "192.168.1.231",
+      "port": 21
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e008175f-b364-428c-9098-9462ee7e8b3c",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "EPSV",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:30.639Z",
+      "dataset": "zeek.ftp",
+      "id": "CpQoCn3o28tke89zv9",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "protocol",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/ftp.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "community_id": "1:Szmpl33Czo3dQvU2V4/SrHfmBC0=",
+      "protocol": "ftp",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.182",
+        "192.168.1.231"
+      ],
+      "user": [
+        "ftp"
+      ]
+    },
+    "source": {
+      "address": "192.168.1.182",
+      "ip": "192.168.1.182",
+      "port": 62014
+    },
+    "tags": [
+      "forwarded",
+      "zeek-ftp"
+    ],
+    "user": {
+      "name": "ftp"
+    },
+    "zeek": {
+      "ftp": {
+        "command": "EPSV",
+        "data_channel": {
+          "originating_host": "192.168.1.182",
+          "passive": true,
+          "response_host": "192.168.1.231",
+          "response_port": 37100
+        },
+        "password": "ftp",
+        "reply": {
+          "code": 229,
+          "msg": "Entering Extended Passive Mode (|||37100|)"
+        },
+        "user": "ftp"
+      },
+      "session_id": "CpQoCn3o28tke89zv9"
+    }
+  }
+]

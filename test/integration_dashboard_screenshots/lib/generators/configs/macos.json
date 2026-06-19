@@ -1,0 +1,88 @@
+{
+  "package": "macos",
+  "dataStreams": [
+    {
+      "dataset": "macos.advanced_monitoring",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "macos.process.image_path",
+        "macos.sender.image_path",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "macos.authentication",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "macos.process.image_path",
+        "macos.sender.image_path",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "macos.file_read_write",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "macos.process.image_path",
+        "macos.sender.image_path",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "macos.network_activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "macos.event.message.duration",
+        "source.ip",
+        "source.port"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "macos.process_execution_monitoring",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "macos.process.image_path",
+        "macos.sender.image_path",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "macos.system_change",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "macos.process.image_path",
+        "macos.sender.image_path",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "macos.user_and_account_management",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "macos.process.image_path",
+        "macos.sender.image_path",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

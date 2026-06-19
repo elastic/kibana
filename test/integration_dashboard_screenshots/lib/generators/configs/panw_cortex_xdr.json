@@ -1,0 +1,71 @@
+{
+  "package": "panw_cortex_xdr",
+  "dataStreams": [
+    {
+      "dataset": "panw_cortex_xdr.alerts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.severity",
+        "host.name",
+        "host.os.name",
+        "panw_cortex.xdr.alert_id",
+        "panw_cortex.xdr.category",
+        "panw_cortex.xdr.is_whitelisted",
+        "panw_cortex.xdr.source",
+        "panw_cortex.xdr.user_agent"
+      ],
+      "filterValues": {
+        "panw_cortex.xdr.is_whitelisted": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "panw_cortex_xdr.event",
+      "indexPattern": "logs-*",
+      "docTarget": 510,
+      "fields": [
+        "destination.ip",
+        "event.id",
+        "file.group",
+        "file.name",
+        "file.owner",
+        "file.type",
+        "host.name",
+        "host.os.family",
+        "network.protocol",
+        "panw_cortex.xdr.event.action.process.signature_product",
+        "panw_cortex.xdr.event.agent.os_type",
+        "process.code_signature.subject_name",
+        "process.entry_leader.attested_user.id",
+        "process.entry_leader.attested_user.name",
+        "process.pe.description",
+        "process.pid",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "panw_cortex_xdr.incidents",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "event.severity",
+        "panw_cortex.xdr.alert_categories",
+        "panw_cortex.xdr.incident_name",
+        "panw_cortex.xdr.starred",
+        "panw_cortex.xdr.status",
+        "panw_cortex.xdr.users",
+        "threat.tactic.name",
+        "threat.technique.name"
+      ],
+      "filterValues": {
+        "panw_cortex.xdr.starred": [
+          "true"
+        ]
+      }
+    }
+  ]
+}

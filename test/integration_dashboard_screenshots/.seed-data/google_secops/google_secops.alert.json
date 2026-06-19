@@ -1,0 +1,851 @@
+[
+  {
+    "@timestamp": "2025-02-01T03:23:29.000Z",
+    "agent": {
+      "ephemeral_id": "9affe09c-935a-4a08-ad42-e4da78c907b8",
+      "id": "27faa0d8-26fe-474f-8cac-50fdd52fa6db",
+      "name": "elastic-agent-62541",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "google_secops.alert",
+      "namespace": "87665",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "group": {
+          "id": [
+            "0"
+          ]
+        },
+        "id": "0",
+        "name": "root"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "27faa0d8-26fe-474f-8cac-50fdd52fa6db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2025-02-01T03:12:46.687Z",
+      "dataset": "google_secops.alert",
+      "end": "2025-02-03T03:23:29.000Z",
+      "id": "de_78051e90-81ab-8ae8-b2ba-4fcf200d17e5",
+      "ingested": "2026-03-10T04:51:03Z",
+      "kind": "alert",
+      "original": "{\"createdTime\":\"2025-02-01T03:12:46.687065Z\",\"detection\":{\"alertState\":\"NOT_ALERTING\",\"description\":\"This rule is to generate alerts when the event_type is STATUS_UPDATE\",\"outcomes\":[{\"key\":\"risk_score\",\"value\":\"60\"}],\"riskScore\":60,\"ruleId\":\"ru_39212a4a-170d-0000-a63d-0325f33ee011\",\"ruleLabels\":[{\"key\":\"author\",\"value\":\"John\"},{\"key\":\"description\",\"value\":\"This rule is to generate alerts when the event_type is STATUS_UPDATE\"},{\"key\":\"severity\",\"value\":\"Medium\"}],\"ruleName\":\"rule_to_detect_status_update\",\"ruleType\":\"SINGLE_EVENT\",\"ruleVersion\":\"ru_39212a4a-170d-0000-a63d-0325f33ee011@v_1732873302_954607000\",\"urlBackToProduct\":\"https://example.com\",\"variables\":{\"risk_score\":{\"int64Val\":\"60\",\"type\":\"OUTCOME\",\"value\":\"60\"}}},\"detectionTime\":\"2025-02-01T03:23:29Z\",\"event\":{\"about\":[{\"labels\":[{\"key\":\"header_time_milliseconds_offset\",\"value\":\"971\"}]}],\"additional\":{\"arguments_fd\":\"8\",\"event_modifier\":\"0\",\"exec_chain_thread_uuid\":\"54D5B252-34F2-4B3C-B5BA-8A5E46AA48A0\",\"header_time_milliseconds_offset\":\"971\",\"header_version\":\"11\",\"identity_cd_hash\":\"a70ddfe3eb75dd35005a9c863c4174d63148406c\",\"identity_signer_id\":\"com.apple.curl\",\"identity_signer_id_truncated\":\"false\",\"identity_signer_type\":\"1\",\"identity_team_id_truncated\":\"false\",\"key\":\"087682F2-EF9D-4E4A-A48E-5D98878C3885\",\"subject_audit_id\":\"4294967295\",\"subject_terminal_id_type\":\"4-IPv4\"},\"metadata\":{\"baseLabels\":{\"allowScopedAccess\":true,\"logTypes\":[\"JAMF_TELEMETRY\"]},\"enrichmentLabels\":{\"allowScopedAccess\":true},\"eventTimestamp\":\"2025-02-03T03:23:29Z\",\"eventType\":\"STATUS_UPDATE\",\"id\":\"TESGYUNM32/hD2MtwTXdV1OX1d90AAAAABgAAAAYAAAA=\",\"ingestedTimestamp\":\"2025-02-01T06:00:41.788616Z\",\"logType\":\"JAMF_TELEMETRY\",\"productEventType\":\"AUE_CONNECT-32\",\"productName\":\"JAMF_TELEMETRY\",\"vendorName\":\"JAMF\"},\"network\":{\"sessionId\":\"100001\"},\"principal\":{\"asset\":{\"hardware\":[{\"serialNumber\":\"TRP94G2110\"}],\"hostname\":\"TEST-TRP94G2110\",\"productObjectId\":\"45DE0BEE-8056-5B41-B09A-08E259E49317\",\"software\":[{\"version\":\"Version 15.2 (Build 24C101)\"}]},\"group\":{\"groupDisplayName\":\"wheel\"},\"hostname\":\"TEST-TRP94G2110\",\"ip\":[\"0.0.0.0\"],\"labels\":[{\"key\":\"arguments_fd\",\"value\":\"8\"}],\"process\":{\"file\":{\"fullPath\":\"/bin/bash\",\"md5\":\"b14dba7fe27186f216037a3b60599582\",\"sha1\":\"47bba82e8a43cfa14a1124a477090f9fbd0e026a\",\"sha256\":\"4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809\"},\"pid\":\"47203\"},\"processAncestors\":[{\"file\":{\"fullPath\":\"/usr/bin/curl\"},\"pid\":\"47327\"}],\"user\":{\"groupIdentifiers\":[\"0\"],\"userDisplayName\":\"root\",\"userid\":\"0\"}},\"securityResult\":[{\"description\":\"0-success\",\"detectionFields\":[{\"key\":\"return_value\",\"value\":\"0\"}]}],\"target\":{\"group\":{\"groupDisplayName\":\"wheel\"},\"user\":{\"groupIdentifiers\":[\"0\"],\"userDisplayName\":\"root\",\"userid\":\"0\"}}},\"id\":\"de_78051e90-81ab-8ae8-b2ba-4fcf200d17e5\",\"label\":\"e\",\"timeWindow\":{\"endTime\":\"2025-02-03T03:23:29Z\",\"startTime\":\"2025-02-01T03:23:29Z\"},\"type\":\"RULE_DETECTION\"}",
+      "risk_score": 60.0,
+      "start": "2025-02-01T03:23:29.000Z"
+    },
+    "google_secops": {
+      "alert": {
+        "createdTime": "2025-02-01T03:12:46.687Z",
+        "detection": {
+          "alertState": "NOT_ALERTING",
+          "description": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+          "outcomes": [
+            {
+              "value": "60",
+              "key": "risk_score"
+            }
+          ],
+          "riskScore": 60,
+          "ruleId": "ru_39212a4a-170d-0000-a63d-0325f33ee011",
+          "ruleLabels": [
+            {
+              "value": "John",
+              "key": "author"
+            },
+            {
+              "value": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+              "key": "description"
+            },
+            {
+              "value": "Medium",
+              "key": "severity"
+            }
+          ],
+          "ruleName": "rule_to_detect_status_update",
+          "ruleType": "SINGLE_EVENT",
+          "ruleVersion": "ru_39212a4a-170d-0000-a63d-0325f33ee011@v_1732873302_954607000",
+          "urlBackToProduct": "https://example.com",
+          "variables": {
+            "risk_score": {
+              "int64Val": 60,
+              "type": "OUTCOME",
+              "value": 60
+            }
+          }
+        },
+        "detectionTime": "2025-02-01T03:23:29.000Z",
+        "event": {
+          "about": [
+            {
+              "labels": [
+                {
+                  "value": "971",
+                  "key": "header_time_milliseconds_offset"
+                }
+              ]
+            }
+          ],
+          "additional": {
+            "arguments_fd": "8",
+            "event_modifier": "0",
+            "exec_chain_thread_uuid": "54D5B252-34F2-4B3C-B5BA-8A5E46AA48A0",
+            "header_time_milliseconds_offset": "971",
+            "header_version": "11",
+            "identity_cd_hash": "a70ddfe3eb75dd35005a9c863c4174d63148406c",
+            "identity_signer_id": "com.apple.curl",
+            "identity_signer_id_truncated": "false",
+            "identity_signer_type": "1",
+            "identity_team_id_truncated": "false",
+            "key": "087682F2-EF9D-4E4A-A48E-5D98878C3885",
+            "subject_audit_id": "4294967295",
+            "subject_terminal_id_type": "4-IPv4"
+          },
+          "metadata": {
+            "baseLabels": {
+              "allowScopedAccess": true,
+              "logTypes": [
+                "JAMF_TELEMETRY"
+              ]
+            },
+            "enrichmentLabels": {
+              "allowScopedAccess": true
+            },
+            "eventTimestamp": "2025-02-03T03:23:29.000Z",
+            "eventType": "STATUS_UPDATE",
+            "id": "TESGYUNM32/hD2MtwTXdV1OX1d90AAAAABgAAAAYAAAA=",
+            "ingestedTimestamp": "2025-02-01T06:00:41.788Z",
+            "logType": "JAMF_TELEMETRY",
+            "productEventType": "AUE_CONNECT-32",
+            "productName": "JAMF_TELEMETRY",
+            "vendorName": "JAMF"
+          },
+          "network": {
+            "sessionId": "100001"
+          },
+          "principal": {
+            "asset": {
+              "hardware": [
+                {
+                  "serialNumber": "TRP94G2110"
+                }
+              ],
+              "hostname": "TEST-TRP94G2110",
+              "productObjectId": "45DE0BEE-8056-5B41-B09A-08E259E49317",
+              "software": [
+                {
+                  "version": "Version 15.2 (Build 24C101)"
+                }
+              ]
+            },
+            "group": {
+              "groupDisplayName": "wheel"
+            },
+            "hostname": "TEST-TRP94G2110",
+            "ip": [
+              "0.0.0.0"
+            ],
+            "labels": [
+              {
+                "value": "8",
+                "key": "arguments_fd"
+              }
+            ],
+            "process": {
+              "file": {
+                "fullPath": "/bin/bash",
+                "md5": "b14dba7fe27186f216037a3b60599582",
+                "sha1": "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+                "sha256": "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+              },
+              "pid": 47203
+            },
+            "processAncestors": [
+              {
+                "file": {
+                  "fullPath": "/usr/bin/curl"
+                },
+                "pid": "47327"
+              }
+            ],
+            "user": {
+              "groupIdentifiers": [
+                "0"
+              ],
+              "userDisplayName": "root",
+              "userid": "0"
+            }
+          },
+          "securityResult": [
+            {
+              "detectionFields": [
+                {
+                  "value": "0",
+                  "key": "return_value"
+                }
+              ],
+              "description": "0-success"
+            }
+          ],
+          "target": {
+            "group": {
+              "groupDisplayName": "wheel"
+            },
+            "user": {
+              "groupIdentifiers": [
+                "0"
+              ],
+              "userDisplayName": "root",
+              "userid": "0"
+            }
+          }
+        },
+        "friendly_name": "rule_to_detect_status_update",
+        "id": "de_78051e90-81ab-8ae8-b2ba-4fcf200d17e5",
+        "label": "e",
+        "timeWindow": {
+          "endTime": "2025-02-03T03:23:29.000Z",
+          "startTime": "2025-02-01T03:23:29.000Z"
+        },
+        "type": "RULE_DETECTION"
+      }
+    },
+    "host": {
+      "hostname": "TEST-TRP94G2110",
+      "ip": [
+        "0.0.0.0"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "JAMF_TELEMETRY",
+      "vendor": "JAMF"
+    },
+    "process": {
+      "executable": "/bin/bash",
+      "hash": {
+        "md5": "b14dba7fe27186f216037a3b60599582",
+        "sha1": "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+        "sha256": "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+      },
+      "pid": 47203
+    },
+    "related": {
+      "hash": [
+        "b14dba7fe27186f216037a3b60599582",
+        "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+        "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+      ],
+      "hosts": [
+        "TEST-TRP94G2110"
+      ],
+      "ip": [
+        "0.0.0.0"
+      ],
+      "user": [
+        "root",
+        "0"
+      ]
+    },
+    "rule": {
+      "description": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+      "id": "ru_39212a4a-170d-0000-a63d-0325f33ee011",
+      "name": "rule_to_detect_status_update",
+      "version": "ru_39212a4a-170d-0000-a63d-0325f33ee011@v_1732873302_954607000"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "google_secops-alert"
+    ],
+    "user": {
+      "group": {
+        "id": [
+          "0"
+        ],
+        "name": "wheel"
+      },
+      "id": "0",
+      "name": "root"
+    }
+  },
+  {
+    "@timestamp": "2025-02-01T03:23:29.000Z",
+    "agent": {
+      "ephemeral_id": "9affe09c-935a-4a08-ad42-e4da78c907b8",
+      "id": "27faa0d8-26fe-474f-8cac-50fdd52fa6db",
+      "name": "elastic-agent-62541",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "google_secops.alert",
+      "namespace": "87665",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "group": {
+          "id": [
+            "0"
+          ]
+        },
+        "id": "0",
+        "name": "root"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "27faa0d8-26fe-474f-8cac-50fdd52fa6db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2025-02-01T03:12:46.687Z",
+      "dataset": "google_secops.alert",
+      "end": "2025-02-03T03:23:29.000Z",
+      "id": "de_78051e90-81ab-8ae8-b2ba-4fcf200d17e5",
+      "ingested": "2026-03-10T04:51:03Z",
+      "kind": "alert",
+      "original": "{\"createdTime\":\"2025-02-01T03:12:46.687065Z\",\"detection\":{\"alertState\":\"NOT_ALERTING\",\"description\":\"This rule is to generate alerts when the event_type is STATUS_UPDATE\",\"outcomes\":[{\"key\":\"risk_score\",\"value\":\"60\"}],\"riskScore\":60,\"ruleId\":\"ru_39212a4a-170d-0000-a63d-0325f33ee011\",\"ruleLabels\":[{\"key\":\"author\",\"value\":\"John\"},{\"key\":\"description\",\"value\":\"This rule is to generate alerts when the event_type is STATUS_UPDATE\"},{\"key\":\"severity\",\"value\":\"Medium\"}],\"ruleName\":\"rule_to_detect_status_update\",\"ruleType\":\"SINGLE_EVENT\",\"ruleVersion\":\"ru_39212a4a-170d-0000-a63d-0325f33ee011@v_1732873302_954607000\",\"urlBackToProduct\":\"https://example.com\",\"variables\":{\"risk_score\":{\"int64Val\":\"60\",\"type\":\"OUTCOME\",\"value\":\"60\"}}},\"detectionTime\":\"2025-02-01T03:23:29Z\",\"event\":{\"about\":[{\"labels\":[{\"key\":\"header_time_milliseconds_offset\",\"value\":\"971\"}]}],\"additional\":{\"arguments_fd\":\"8\",\"event_modifier\":\"0\",\"exec_chain_thread_uuid\":\"54D5B252-34F2-4B3C-B5BA-8A5E46AA48A0\",\"header_time_milliseconds_offset\":\"971\",\"header_version\":\"11\",\"identity_cd_hash\":\"a70ddfe3eb75dd35005a9c863c4174d63148406c\",\"identity_signer_id\":\"com.apple.curl\",\"identity_signer_id_truncated\":\"false\",\"identity_signer_type\":\"1\",\"identity_team_id_truncated\":\"false\",\"key\":\"087682F2-EF9D-4E4A-A48E-5D98878C3885\",\"subject_audit_id\":\"4294967295\",\"subject_terminal_id_type\":\"4-IPv4\"},\"metadata\":{\"baseLabels\":{\"allowScopedAccess\":true,\"logTypes\":[\"JAMF_TELEMETRY\"]},\"enrichmentLabels\":{\"allowScopedAccess\":true},\"eventTimestamp\":\"2025-02-01T03:23:29Z\",\"eventType\":\"STATUS_UPDATE\",\"id\":\"TESGYUNM32/hD2MtwTXdV1OX1d90AAAAABgAAAAYAAAA=\",\"ingestedTimestamp\":\"2025-02-01T06:00:41.788616Z\",\"logType\":\"JAMF_TELEMETRY\",\"productEventType\":\"AUE_CONNECT-32\",\"productName\":\"JAMF_TELEMETRY\",\"vendorName\":\"JAMF\"},\"network\":{\"sessionId\":\"100001\"},\"principal\":{\"asset\":{\"hardware\":[{\"serialNumber\":\"TRP94G2110\"}],\"hostname\":\"TEST-TRP94G2110\",\"productObjectId\":\"45DE0BEE-8056-5B41-B09A-08E259E49317\",\"software\":[{\"version\":\"Version 15.2 (Build 24C101)\"}]},\"group\":{\"groupDisplayName\":\"wheel\"},\"hostname\":\"TEST-TRP94G2110\",\"ip\":[\"0.0.0.0\"],\"labels\":[{\"key\":\"arguments_fd\",\"value\":\"8\"}],\"process\":{\"file\":{\"fullPath\":\"/bin/bash\",\"md5\":\"b14dba7fe27186f216037a3b60599582\",\"sha1\":\"47bba82e8a43cfa14a1124a477090f9fbd0e026a\",\"sha256\":\"4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809\"},\"pid\":\"47203\"},\"processAncestors\":[{\"file\":{\"fullPath\":\"/usr/bin/curl\"},\"pid\":\"47327\"}],\"user\":{\"groupIdentifiers\":[\"0\"],\"userDisplayName\":\"root\",\"userid\":\"0\"}},\"securityResult\":[{\"description\":\"0-success\",\"detectionFields\":[{\"key\":\"return_value\",\"value\":\"0\"}]}],\"target\":{\"group\":{\"groupDisplayName\":\"wheel\"},\"user\":{\"groupIdentifiers\":[\"0\"],\"userDisplayName\":\"root\",\"userid\":\"0\"}}},\"id\":\"de_78051e90-81ab-8ae8-b2ba-4fcf200d17e5\",\"label\":\"e\",\"timeWindow\":{\"endTime\":\"2025-02-03T03:23:29Z\",\"startTime\":\"2025-02-01T03:23:29Z\"},\"type\":\"RULE_DETECTION\"}",
+      "risk_score": 60.0,
+      "start": "2025-02-01T03:23:29.000Z"
+    },
+    "google_secops": {
+      "alert": {
+        "createdTime": "2025-02-01T03:12:46.687Z",
+        "detection": {
+          "alertState": "NOT_ALERTING",
+          "description": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+          "outcomes": [
+            {
+              "value": "60",
+              "key": "risk_score"
+            }
+          ],
+          "riskScore": 60,
+          "ruleId": "ru_39212a4a-170d-0000-a63d-0325f33ee011",
+          "ruleLabels": [
+            {
+              "value": "John",
+              "key": "author"
+            },
+            {
+              "value": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+              "key": "description"
+            },
+            {
+              "value": "Medium",
+              "key": "severity"
+            }
+          ],
+          "ruleName": "rule_to_detect_status_update",
+          "ruleType": "SINGLE_EVENT",
+          "ruleVersion": "ru_39212a4a-170d-0000-a63d-0325f33ee011@v_1732873302_954607000",
+          "urlBackToProduct": "https://example.com",
+          "variables": {
+            "risk_score": {
+              "int64Val": 60,
+              "type": "OUTCOME",
+              "value": 60
+            }
+          }
+        },
+        "detectionTime": "2025-02-01T03:23:29.000Z",
+        "event": {
+          "about": [
+            {
+              "labels": [
+                {
+                  "value": "971",
+                  "key": "header_time_milliseconds_offset"
+                }
+              ]
+            }
+          ],
+          "additional": {
+            "arguments_fd": "8",
+            "event_modifier": "0",
+            "exec_chain_thread_uuid": "54D5B252-34F2-4B3C-B5BA-8A5E46AA48A0",
+            "header_time_milliseconds_offset": "971",
+            "header_version": "11",
+            "identity_cd_hash": "a70ddfe3eb75dd35005a9c863c4174d63148406c",
+            "identity_signer_id": "com.apple.curl",
+            "identity_signer_id_truncated": "false",
+            "identity_signer_type": "1",
+            "identity_team_id_truncated": "false",
+            "key": "087682F2-EF9D-4E4A-A48E-5D98878C3885",
+            "subject_audit_id": "4294967295",
+            "subject_terminal_id_type": "4-IPv4"
+          },
+          "metadata": {
+            "baseLabels": {
+              "allowScopedAccess": true,
+              "logTypes": [
+                "JAMF_TELEMETRY"
+              ]
+            },
+            "enrichmentLabels": {
+              "allowScopedAccess": true
+            },
+            "eventTimestamp": "2025-02-01T03:23:29.000Z",
+            "eventType": "STATUS_UPDATE",
+            "id": "TESGYUNM32/hD2MtwTXdV1OX1d90AAAAABgAAAAYAAAA=",
+            "ingestedTimestamp": "2025-02-01T06:00:41.788Z",
+            "logType": "JAMF_TELEMETRY",
+            "productEventType": "AUE_CONNECT-32",
+            "productName": "JAMF_TELEMETRY",
+            "vendorName": "JAMF"
+          },
+          "network": {
+            "sessionId": "100001"
+          },
+          "principal": {
+            "asset": {
+              "hardware": [
+                {
+                  "serialNumber": "TRP94G2110"
+                }
+              ],
+              "hostname": "TEST-TRP94G2110",
+              "productObjectId": "45DE0BEE-8056-5B41-B09A-08E259E49317",
+              "software": [
+                {
+                  "version": "Version 15.2 (Build 24C101)"
+                }
+              ]
+            },
+            "group": {
+              "groupDisplayName": "wheel"
+            },
+            "hostname": "TEST-TRP94G2110",
+            "ip": [
+              "0.0.0.0"
+            ],
+            "labels": [
+              {
+                "value": "8",
+                "key": "arguments_fd"
+              }
+            ],
+            "process": {
+              "file": {
+                "fullPath": "/bin/bash",
+                "md5": "b14dba7fe27186f216037a3b60599582",
+                "sha1": "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+                "sha256": "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+              },
+              "pid": 47203
+            },
+            "processAncestors": [
+              {
+                "file": {
+                  "fullPath": "/usr/bin/curl"
+                },
+                "pid": "47327"
+              }
+            ],
+            "user": {
+              "groupIdentifiers": [
+                "0"
+              ],
+              "userDisplayName": "root",
+              "userid": "0"
+            }
+          },
+          "securityResult": [
+            {
+              "detectionFields": [
+                {
+                  "value": "0",
+                  "key": "return_value"
+                }
+              ],
+              "description": "0-success"
+            }
+          ],
+          "target": {
+            "group": {
+              "groupDisplayName": "wheel"
+            },
+            "user": {
+              "groupIdentifiers": [
+                "0"
+              ],
+              "userDisplayName": "root",
+              "userid": "0"
+            }
+          }
+        },
+        "friendly_name": "rule_to_detect_status_update",
+        "id": "de_78051e90-81ab-8ae8-b2ba-4fcf200d17e5",
+        "label": "e",
+        "timeWindow": {
+          "endTime": "2025-02-03T03:23:29.000Z",
+          "startTime": "2025-02-01T03:23:29.000Z"
+        },
+        "type": "RULE_DETECTION"
+      }
+    },
+    "host": {
+      "hostname": "TEST-TRP94G2110",
+      "ip": [
+        "0.0.0.0"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "JAMF_TELEMETRY",
+      "vendor": "JAMF"
+    },
+    "process": {
+      "executable": "/bin/bash",
+      "hash": {
+        "md5": "b14dba7fe27186f216037a3b60599582",
+        "sha1": "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+        "sha256": "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+      },
+      "pid": 47203
+    },
+    "related": {
+      "hash": [
+        "b14dba7fe27186f216037a3b60599582",
+        "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+        "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+      ],
+      "hosts": [
+        "TEST-TRP94G2110"
+      ],
+      "ip": [
+        "0.0.0.0"
+      ],
+      "user": [
+        "root",
+        "0"
+      ]
+    },
+    "rule": {
+      "description": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+      "id": "ru_39212a4a-170d-0000-a63d-0325f33ee011",
+      "name": "rule_to_detect_status_update",
+      "version": "ru_39212a4a-170d-0000-a63d-0325f33ee011@v_1732873302_954607000"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "google_secops-alert"
+    ],
+    "user": {
+      "group": {
+        "id": [
+          "0"
+        ],
+        "name": "wheel"
+      },
+      "id": "0",
+      "name": "root"
+    }
+  },
+  {
+    "@timestamp": "2025-02-01T03:23:28.000Z",
+    "agent": {
+      "ephemeral_id": "9affe09c-935a-4a08-ad42-e4da78c907b8",
+      "id": "27faa0d8-26fe-474f-8cac-50fdd52fa6db",
+      "name": "elastic-agent-62541",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "google_secops.alert",
+      "namespace": "87665",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "group": {
+          "id": [
+            "0"
+          ]
+        },
+        "id": "0",
+        "name": "root"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "27faa0d8-26fe-474f-8cac-50fdd52fa6db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2025-02-01T03:12:54.177Z",
+      "dataset": "google_secops.alert",
+      "end": "2025-02-03T03:23:28.000Z",
+      "id": "de_66bf2e94-f97e-2564-1a75-2fdbf8cb6403",
+      "ingested": "2026-03-10T04:51:03Z",
+      "kind": "alert",
+      "original": "{\"createdTime\":\"2025-02-01T03:12:54.177084Z\",\"detection\":{\"alertState\":\"NOT_ALERTING\",\"description\":\"This rule is to generate alerts when the event_type is STATUS_UPDATE\",\"outcomes\":[{\"key\":\"risk_score\",\"value\":\"60\"}],\"riskScore\":60,\"ruleId\":\"ru_123873a9a-170d-1234-a63d-9874f33ee011\",\"ruleLabels\":[{\"key\":\"author\",\"value\":\"John\"},{\"key\":\"description\",\"value\":\"This rule is to generate alerts when the event_type is STATUS_UPDATE\"},{\"key\":\"severity\",\"value\":\"Medium\"}],\"ruleName\":\"rule_to_detect_status_update\",\"ruleType\":\"SINGLE_EVENT\",\"ruleVersion\":\"ru_123873a9a-170d-1234-a63d-9874f33ee011@v_1732873302_954607000\",\"urlBackToProduct\":\"https://example.com\",\"variables\":{\"risk_score\":{\"int64Val\":\"60\",\"type\":\"OUTCOME\",\"value\":\"60\"}}},\"detectionTime\":\"2025-02-01T03:23:28Z\",\"event\":{\"about\":[{\"labels\":[{\"key\":\"header_time_milliseconds_offset\",\"value\":\"612\"}]}],\"additional\":{\"arguments_fd\":\"8\",\"event_modifier\":\"0\",\"exec_chain_thread_uuid\":\"5AB2623F-F6EF-4A6C-B2E4-CC7E28BEB515\",\"header_time_milliseconds_offset\":\"612\",\"header_version\":\"11\",\"identity_cd_hash\":\"a70ddfe3eb75dd35005a9c863c4174d63148406c\",\"identity_signer_id\":\"com.apple.curl\",\"identity_signer_id_truncated\":\"false\",\"identity_signer_type\":\"1\",\"identity_team_id_truncated\":\"false\",\"key\":\"6CC2ABE4-385C-4444-8BC0-FD5B618BA1C1\",\"subject_audit_id\":\"4294967295\",\"subject_terminal_id_type\":\"4-IPv4\"},\"metadata\":{\"baseLabels\":{\"allowScopedAccess\":true,\"logTypes\":[\"JAMF_TELEMETRY\"]},\"enrichmentLabels\":{\"allowScopedAccess\":true},\"eventTimestamp\":\"2025-02-03T03:23:28Z\",\"eventType\":\"STATUS_UPDATE\",\"id\":\"AAAAAByuGF66kDlZ79NglQZk0cQPPPPPBgSSSSSSSSS=\",\"ingestedTimestamp\":\"2025-02-01T06:00:42.443096Z\",\"logType\":\"JAMF_TELEMETRY\",\"productEventType\":\"AUE_CONNECT-32\",\"productName\":\"JAMF_TELEMETRY\",\"vendorName\":\"JAMF\"},\"network\":{\"sessionId\":\"100001\"},\"principal\":{\"asset\":{\"hardware\":[{\"serialNumber\":\"PPX94A9874\"}],\"hostname\":\"TEST-PPX94A9874\",\"productObjectId\":\"45DE0BEE-8056-5B41-B09A-08E259E49317\",\"software\":[{\"version\":\"Version 15.2 (Build 24C101)\"}]},\"group\":{\"groupDisplayName\":\"wheel\"},\"hostname\":\"TEST-PPX94A9874\",\"ip\":[\"0.0.0.0\"],\"labels\":[{\"key\":\"arguments_fd\",\"value\":\"8\"}],\"process\":{\"file\":{\"fullPath\":\"/bin/bash\",\"md5\":\"b14dba7fe27186f216037a3b60599582\",\"sha1\":\"47bba82e8a43cfa14a1124a477090f9fbd0e026a\",\"sha256\":\"4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809\"},\"pid\":\"47203\"},\"processAncestors\":[{\"file\":{\"fullPath\":\"/usr/bin/curl\"},\"pid\":\"47325\"}],\"user\":{\"groupIdentifiers\":[\"0\"],\"userDisplayName\":\"root\",\"userid\":\"0\"}},\"securityResult\":[{\"description\":\"0-success\",\"detectionFields\":[{\"key\":\"return_value\",\"value\":\"0\"}]}],\"target\":{\"group\":{\"groupDisplayName\":\"wheel\"},\"user\":{\"groupIdentifiers\":[\"0\"],\"userDisplayName\":\"root\",\"userid\":\"0\"}}},\"id\":\"de_66bf2e94-f97e-2564-1a75-2fdbf8cb6403\",\"label\":\"e\",\"timeWindow\":{\"endTime\":\"2025-02-03T03:23:28Z\",\"startTime\":\"2025-02-01T03:23:28Z\"},\"type\":\"RULE_DETECTION\"}",
+      "risk_score": 60.0,
+      "start": "2025-02-01T03:23:28.000Z"
+    },
+    "google_secops": {
+      "alert": {
+        "createdTime": "2025-02-01T03:12:54.177Z",
+        "detection": {
+          "alertState": "NOT_ALERTING",
+          "description": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+          "outcomes": [
+            {
+              "value": "60",
+              "key": "risk_score"
+            }
+          ],
+          "riskScore": 60,
+          "ruleId": "ru_123873a9a-170d-1234-a63d-9874f33ee011",
+          "ruleLabels": [
+            {
+              "value": "John",
+              "key": "author"
+            },
+            {
+              "value": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+              "key": "description"
+            },
+            {
+              "value": "Medium",
+              "key": "severity"
+            }
+          ],
+          "ruleName": "rule_to_detect_status_update",
+          "ruleType": "SINGLE_EVENT",
+          "ruleVersion": "ru_123873a9a-170d-1234-a63d-9874f33ee011@v_1732873302_954607000",
+          "urlBackToProduct": "https://example.com",
+          "variables": {
+            "risk_score": {
+              "int64Val": 60,
+              "type": "OUTCOME",
+              "value": 60
+            }
+          }
+        },
+        "detectionTime": "2025-02-01T03:23:28.000Z",
+        "event": {
+          "about": [
+            {
+              "labels": [
+                {
+                  "value": "612",
+                  "key": "header_time_milliseconds_offset"
+                }
+              ]
+            }
+          ],
+          "additional": {
+            "arguments_fd": "8",
+            "event_modifier": "0",
+            "exec_chain_thread_uuid": "5AB2623F-F6EF-4A6C-B2E4-CC7E28BEB515",
+            "header_time_milliseconds_offset": "612",
+            "header_version": "11",
+            "identity_cd_hash": "a70ddfe3eb75dd35005a9c863c4174d63148406c",
+            "identity_signer_id": "com.apple.curl",
+            "identity_signer_id_truncated": "false",
+            "identity_signer_type": "1",
+            "identity_team_id_truncated": "false",
+            "key": "6CC2ABE4-385C-4444-8BC0-FD5B618BA1C1",
+            "subject_audit_id": "4294967295",
+            "subject_terminal_id_type": "4-IPv4"
+          },
+          "metadata": {
+            "baseLabels": {
+              "allowScopedAccess": true,
+              "logTypes": [
+                "JAMF_TELEMETRY"
+              ]
+            },
+            "enrichmentLabels": {
+              "allowScopedAccess": true
+            },
+            "eventTimestamp": "2025-02-03T03:23:28.000Z",
+            "eventType": "STATUS_UPDATE",
+            "id": "AAAAAByuGF66kDlZ79NglQZk0cQPPPPPBgSSSSSSSSS=",
+            "ingestedTimestamp": "2025-02-01T06:00:42.443Z",
+            "logType": "JAMF_TELEMETRY",
+            "productEventType": "AUE_CONNECT-32",
+            "productName": "JAMF_TELEMETRY",
+            "vendorName": "JAMF"
+          },
+          "network": {
+            "sessionId": "100001"
+          },
+          "principal": {
+            "asset": {
+              "hardware": [
+                {
+                  "serialNumber": "PPX94A9874"
+                }
+              ],
+              "hostname": "TEST-PPX94A9874",
+              "productObjectId": "45DE0BEE-8056-5B41-B09A-08E259E49317",
+              "software": [
+                {
+                  "version": "Version 15.2 (Build 24C101)"
+                }
+              ]
+            },
+            "group": {
+              "groupDisplayName": "wheel"
+            },
+            "hostname": "TEST-PPX94A9874",
+            "ip": [
+              "0.0.0.0"
+            ],
+            "labels": [
+              {
+                "value": "8",
+                "key": "arguments_fd"
+              }
+            ],
+            "process": {
+              "file": {
+                "fullPath": "/bin/bash",
+                "md5": "b14dba7fe27186f216037a3b60599582",
+                "sha1": "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+                "sha256": "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+              },
+              "pid": 47203
+            },
+            "processAncestors": [
+              {
+                "file": {
+                  "fullPath": "/usr/bin/curl"
+                },
+                "pid": "47325"
+              }
+            ],
+            "user": {
+              "groupIdentifiers": [
+                "0"
+              ],
+              "userDisplayName": "root",
+              "userid": "0"
+            }
+          },
+          "securityResult": [
+            {
+              "detectionFields": [
+                {
+                  "value": "0",
+                  "key": "return_value"
+                }
+              ],
+              "description": "0-success"
+            }
+          ],
+          "target": {
+            "group": {
+              "groupDisplayName": "wheel"
+            },
+            "user": {
+              "groupIdentifiers": [
+                "0"
+              ],
+              "userDisplayName": "root",
+              "userid": "0"
+            }
+          }
+        },
+        "friendly_name": "rule_to_detect_status_update",
+        "id": "de_66bf2e94-f97e-2564-1a75-2fdbf8cb6403",
+        "label": "e",
+        "timeWindow": {
+          "endTime": "2025-02-03T03:23:28.000Z",
+          "startTime": "2025-02-01T03:23:28.000Z"
+        },
+        "type": "RULE_DETECTION"
+      }
+    },
+    "host": {
+      "hostname": "TEST-PPX94A9874",
+      "ip": [
+        "0.0.0.0"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "JAMF_TELEMETRY",
+      "vendor": "JAMF"
+    },
+    "process": {
+      "executable": "/bin/bash",
+      "hash": {
+        "md5": "b14dba7fe27186f216037a3b60599582",
+        "sha1": "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+        "sha256": "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+      },
+      "pid": 47203
+    },
+    "related": {
+      "hash": [
+        "b14dba7fe27186f216037a3b60599582",
+        "47bba82e8a43cfa14a1124a477090f9fbd0e026a",
+        "4d8b9a54a2077c1457410843a9842ef29e0f371fb4061097095758012c031809"
+      ],
+      "hosts": [
+        "TEST-PPX94A9874"
+      ],
+      "ip": [
+        "0.0.0.0"
+      ],
+      "user": [
+        "root",
+        "0"
+      ]
+    },
+    "rule": {
+      "description": "This rule is to generate alerts when the event_type is STATUS_UPDATE",
+      "id": "ru_123873a9a-170d-1234-a63d-9874f33ee011",
+      "name": "rule_to_detect_status_update",
+      "version": "ru_123873a9a-170d-1234-a63d-9874f33ee011@v_1732873302_954607000"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "google_secops-alert"
+    ],
+    "user": {
+      "group": {
+        "id": [
+          "0"
+        ],
+        "name": "wheel"
+      },
+      "id": "0",
+      "name": "root"
+    }
+  }
+]

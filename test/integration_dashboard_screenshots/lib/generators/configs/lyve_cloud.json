@@ -1,0 +1,15 @@
+{
+  "package": "lyve_cloud",
+  "dataStreams": [
+    {
+      "dataset": "lyve_cloud.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "lyve_cloud.audit.auditEntry.api.bucket",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

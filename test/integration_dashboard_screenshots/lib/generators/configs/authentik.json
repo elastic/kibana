@@ -1,0 +1,72 @@
+{
+  "package": "authentik",
+  "dataStreams": [
+    {
+      "dataset": "authentik.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "authentik.event.app",
+        "authentik.event.brand.name",
+        "authentik.event.context.authorized_application.name",
+        "event.action",
+        "source.geo.location",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.action": [
+          "suspicious-request",
+          "authorize-application",
+          "model-created",
+          "model-updated",
+          "model-deleted",
+          "login",
+          "login-failed",
+          "logout"
+        ]
+      }
+    },
+    {
+      "dataset": "authentik.group",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "authentik.user.is_active",
+        "authentik.user.is_superuser",
+        "authentik.user.path",
+        "authentik.user.type",
+        "group.id",
+        "user.id"
+      ],
+      "filterValues": {
+        "authentik.user.is_active": [
+          "true"
+        ],
+        "authentik.user.is_superuser": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "authentik.user",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "authentik.user.is_active",
+        "authentik.user.is_superuser",
+        "authentik.user.path",
+        "authentik.user.type",
+        "group.id",
+        "user.id"
+      ],
+      "filterValues": {
+        "authentik.user.is_active": [
+          "true"
+        ],
+        "authentik.user.is_superuser": [
+          "true"
+        ]
+      }
+    }
+  ]
+}

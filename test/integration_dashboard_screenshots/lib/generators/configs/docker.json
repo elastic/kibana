@@ -1,0 +1,55 @@
+{
+  "package": "docker",
+  "dataStreams": [
+    {
+      "dataset": "docker.container",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "agent.name",
+        "container.id",
+        "container.image.name",
+        "container.name",
+        "docker.cpu.total.pct",
+        "docker.diskio.summary.bytes",
+        "docker.info.containers.paused",
+        "docker.info.containers.running",
+        "docker.info.containers.stopped",
+        "docker.memory.rss.total",
+        "docker.memory.usage.pct"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "docker.cpu",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "container.name",
+        "docker.cpu.total.pct"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "docker.memory",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "container.name",
+        "docker.memory.usage.total"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "docker.network",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "container.name",
+        "docker.network.inbound.bytes",
+        "docker.network.outbound.bytes"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

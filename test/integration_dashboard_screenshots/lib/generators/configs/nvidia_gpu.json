@@ -1,0 +1,39 @@
+{
+  "package": "nvidia_gpu",
+  "dataStreams": [
+    {
+      "dataset": "nvidia_gpu.stats",
+      "indexPattern": "metrics-*",
+      "docTarget": 780,
+      "fields": [
+        "gpu.clock.mem_frequency",
+        "gpu.clock.streaming_multiprocessor_frequency",
+        "gpu.device.brand",
+        "gpu.device.ecc_info_rom_version",
+        "gpu.device.vbios_version",
+        "gpu.error.xid",
+        "gpu.labels.err_code",
+        "gpu.labels.hostname",
+        "gpu.labels.model_name",
+        "gpu.labels.uuid",
+        "gpu.memory.framebuffer.free_size",
+        "gpu.memory.framebuffer.used_size",
+        "gpu.pcie.replay",
+        "gpu.power.energy_consumption_total",
+        "gpu.power.usage",
+        "gpu.temperature.gpu",
+        "gpu.throttling.board_limit.us",
+        "gpu.throttling.low_utilization.us",
+        "gpu.throttling.power.us",
+        "gpu.throttling.reliability.us",
+        "gpu.throttling.sync_boost.us",
+        "gpu.throttling.thermal.us",
+        "gpu.utilization.decoder.pct",
+        "gpu.utilization.encoder.pct",
+        "gpu.utilization.gpu.pct",
+        "gpu.utilization.memory_copy.pct"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "package": "o365_metrics",
+  "dataStreams": [
+    {
+      "dataset": "o365_metrics.active_users_services_user_counts",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "o365.metrics.active.users.services.user.counts.exchange.active.count",
+        "o365.metrics.active.users.services.user.counts.exchange.inactive.count",
+        "o365.metrics.active.users.services.user.counts.office365.active.count",
+        "o365.metrics.active.users.services.user.counts.office365.inactive.count",
+        "o365.metrics.active.users.services.user.counts.onedrive.active.count",
+        "o365.metrics.active.users.services.user.counts.onedrive.inactive.count",
+        "o365.metrics.active.users.services.user.counts.report.period.day",
+        "o365.metrics.active.users.services.user.counts.report.refresh_date",
+        "o365.metrics.active.users.services.user.counts.sharepoint.active.count",
+        "o365.metrics.active.users.services.user.counts.sharepoint.inactive.count",
+        "o365.metrics.active.users.services.user.counts.teams.active.count",
+        "o365.metrics.active.users.services.user.counts.teams.inactive.count",
+        "o365.metrics.active.users.services.user.counts.yammer.active.count",
+        "o365.metrics.active.users.services.user.counts.yammer.inactive.count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "o365_metrics.app_registrations",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "o365.metrics.app_registrations.app_id",
+        "o365.metrics.app_registrations.key_credentials.display_name",
+        "o365.metrics.app_registrations.key_credentials.end_date_time",
+        "o365.metrics.app_registrations.key_credentials.key_id",
+        "o365.metrics.app_registrations.key_credentials.type",
+        "o365.metrics.app_registrations.key_credentials.usage",
+        "o365.metrics.app_registrations.password_credentials.display_name",
+        "o365.metrics.app_registrations.password_credentials.end_date_time"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "o365_metrics.entra_alerts",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "o365.metrics.entra.agent.service_members.service_member_id",
+        "o365.metrics.entra.alerts.records.alert_id",
+        "o365.metrics.entra.alerts.records.created_date",
+        "o365.metrics.entra.alerts.records.last_updated",
+        "o365.metrics.entra.alerts.records.level",
+        "o365.metrics.entra.alerts.records.monitor_role_type",
+        "o365.metrics.entra.alerts.records.resolved_date",
+        "o365.metrics.entra.alerts.records.service_id",
+        "o365.metrics.entra.alerts.records.state",
+        "o365.metrics.entra.alerts.records.tenant_id",
+        "o365.metrics.entra.alerts.service_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "o365_metrics.entra_id_users",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "o365.metrics.entra_id_users.on_premises_provisioning_errors.category",
+        "o365.metrics.entra_id_users.on_premises_provisioning_errors.occurred_date_time",
+        "o365.metrics.entra_id_users.on_premises_provisioning_errors.property_causing_error",
+        "o365.metrics.entra_id_users.on_premises_provisioning_errors.value",
+        "o365.metrics.entra_id_users.risk.event_type",
+        "o365.metrics.entra_id_users.risk.level",
+        "o365.metrics.entra_id_users.risk.state",
+        "o365.metrics.entra_id_users.user.id",
+        "o365.metrics.entra_id_users.user.type",
+        "o365.metrics.entra_id_users.user.upn"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "o365_metrics.groups_activity_group_detail",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "group.id",
+        "group.name",
+        "labels.is_transform_source",
+        "o365.metrics.groups.activity.group.detail.exchange_received_email.count",
+        "o365.metrics.groups.activity.group.detail.group_type",
+        "o365.metrics.groups.activity.group.detail.member.count",
+        "o365.metrics.groups.activity.group.detail.owner_principal_name",
+        "o365.metrics.groups.activity.group.detail.report.refresh_date",
+        "o365.metrics.groups.activity.group.detail.sharepoint_active_file.count",
+        "o365.metrics.groups.activity.group.detail.sharepoint_site_storage_used.byte",
+        "o365.metrics.groups.activity.group.detail.yammer_liked_message.count",
+        "o365.metrics.groups.activity.group.detail.yammer_posted_message.count",
+        "o365.metrics.groups.activity.group.detail.yammer_read_message.count"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "o365_metrics.onedrive_usage_account_detail",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "labels.is_transform_source",
+        "o365.metrics.onedrive.usage.account.detail.active_file.count",
+        "o365.metrics.onedrive.usage.account.detail.file.count",
+        "o365.metrics.onedrive.usage.account.detail.report.refresh_date",
+        "o365.metrics.onedrive.usage.account.detail.storage_allocated.byte",
+        "o365.metrics.onedrive.usage.account.detail.storage_used.byte",
+        "user.name"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "o365_metrics.subscriptions",
+      "indexPattern": "logs-*",
+      "docTarget": 510,
+      "fields": [
+        "o365.metrics.subscriptions.applies_to",
+        "o365.metrics.subscriptions.capability_status",
+        "o365.metrics.subscriptions.consumed_units.count",
+        "o365.metrics.subscriptions.id",
+        "o365.metrics.subscriptions.prepaid_units.enabled.count",
+        "o365.metrics.subscriptions.prepaid_units.locked_out.count",
+        "o365.metrics.subscriptions.prepaid_units.suspended.count",
+        "o365.metrics.subscriptions.prepaid_units.warning.count",
+        "o365.metrics.subscriptions.service_plans.provisioning_status",
+        "o365.metrics.subscriptions.service_plans.service_plan_name",
+        "o365.metrics.subscriptions.sku_part_number",
+        "o365.metrics.subscriptions.subscription_details.created_date_time",
+        "o365.metrics.subscriptions.subscription_details.is_trial",
+        "o365.metrics.subscriptions.subscription_details.next_lifecycle_date_time",
+        "o365.metrics.subscriptions.subscription_details.status",
+        "o365.metrics.subscriptions.subscription_details.total_licenses",
+        "o365.metrics.subscriptions.surplus_units.count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "o365_metrics.teams_user_activity_user_detail",
+      "indexPattern": "metrics-*",
+      "docTarget": 660,
+      "fields": [
+        "labels.is_transform_source",
+        "o365.metrics.teams.user.activity.user.detail.ad_hoc_meetings_attended.count",
+        "o365.metrics.teams.user.activity.user.detail.ad_hoc_meetings_organized.count",
+        "o365.metrics.teams.user.activity.user.detail.audio_duration.seconds",
+        "o365.metrics.teams.user.activity.user.detail.call.count",
+        "o365.metrics.teams.user.activity.user.detail.is_licensed",
+        "o365.metrics.teams.user.activity.user.detail.meeting.count",
+        "o365.metrics.teams.user.activity.user.detail.meetings_attended.count",
+        "o365.metrics.teams.user.activity.user.detail.meetings_organized.count",
+        "o365.metrics.teams.user.activity.user.detail.post_messages.count",
+        "o365.metrics.teams.user.activity.user.detail.private_chat_message.count",
+        "o365.metrics.teams.user.activity.user.detail.reply_messages.count",
+        "o365.metrics.teams.user.activity.user.detail.report.refresh_date",
+        "o365.metrics.teams.user.activity.user.detail.scheduled_one_time_meetings_attended.count",
+        "o365.metrics.teams.user.activity.user.detail.scheduled_one_time_meetings_organized.count",
+        "o365.metrics.teams.user.activity.user.detail.scheduled_recurring_meetings_attended.count",
+        "o365.metrics.teams.user.activity.user.detail.scheduled_recurring_meetings_organized.count",
+        "o365.metrics.teams.user.activity.user.detail.team_chat_message.count",
+        "o365.metrics.teams.user.activity.user.detail.tenant_display_name",
+        "o365.metrics.teams.user.activity.user.detail.urgent_messages.count",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "o365_metrics.viva_engage_groups_activity_group_detail",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "group.name",
+        "labels.is_transform_source",
+        "o365.metrics.viva_engage.groups.activity.group.detail.group_type",
+        "o365.metrics.viva_engage.groups.activity.group.detail.liked.count",
+        "o365.metrics.viva_engage.groups.activity.group.detail.member.count",
+        "o365.metrics.viva_engage.groups.activity.group.detail.posted.count",
+        "o365.metrics.viva_engage.groups.activity.group.detail.read.count",
+        "o365.metrics.viva_engage.groups.activity.group.detail.report.refresh_date"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

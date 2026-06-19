@@ -1,0 +1,79 @@
+{
+  "package": "symantec_endpoint_security",
+  "dataStreams": [
+    {
+      "dataset": "symantec_endpoint_security.event",
+      "indexPattern": "logs-*",
+      "docTarget": 1000,
+      "fields": [
+        "client.domain",
+        "destination.ip",
+        "device.manufacturer",
+        "email.direction",
+        "event.reason",
+        "host.hostname",
+        "host.type",
+        "ses.category_name",
+        "ses.container.image_name",
+        "ses.curr_security_level_value",
+        "ses.device_is_personal",
+        "ses.device_os_edition",
+        "ses.device_os_type_value",
+        "ses.entity.name",
+        "ses.environment_name",
+        "ses.feature_name",
+        "ses.file.type_value",
+        "ses.kernel.type_value",
+        "ses.logging_device_ip",
+        "ses.module.type_value",
+        "ses.peripheral_device.name",
+        "ses.peripheral_device.vendor",
+        "ses.product_name",
+        "ses.resolution_value",
+        "ses.restart_required",
+        "ses.scan_type_value",
+        "ses.session.auth_protocol_value",
+        "ses.session.id",
+        "ses.severity_value",
+        "ses.state_value",
+        "ses.status_value",
+        "ses.suspected_breach",
+        "ses.threat.risk_value",
+        "ses.threat.type_value",
+        "ses.type",
+        "ses.user.cloud_resource_uid",
+        "ses.verdict_value",
+        "source.ip",
+        "threat.indicator.name",
+        "user.domain",
+        "user.id",
+        "user.name",
+        "vulnerability.id"
+      ],
+      "filterValues": {
+        "ses.category_name": [
+          "Security",
+          "Audit",
+          "System Activity",
+          "Application Activity"
+        ]
+      }
+    },
+    {
+      "dataset": "symantec_endpoint_security.incident",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "event.reason",
+        "event.severity",
+        "rule.name",
+        "ses.incident.priority",
+        "ses.incident.resolution",
+        "ses.incident.state",
+        "ses.incident.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

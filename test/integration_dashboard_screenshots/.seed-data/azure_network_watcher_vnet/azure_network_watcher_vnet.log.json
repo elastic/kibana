@@ -1,0 +1,691 @@
+[
+  {
+    "@timestamp": "2022-09-14T09:00:52.562Z",
+    "agent": {
+      "ephemeral_id": "9a735ebd-c37a-4df8-a1fc-d1468e7e13fb",
+      "id": "8b1a6937-fb2b-4a53-b85c-9e508b92b2f6",
+      "name": "elastic-agent-79248",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "azure": {
+      "resource": {
+        "group": "NETWORKWATCHERRG",
+        "id": "/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/NETWORKWATCHERRG/PROVIDERS/MICROSOFT.NETWORK/NETWORKWATCHERS/NETWORKWATCHER_EASTUS2EUAP/FLOWLOGS/VNETFLOWLOG",
+        "name": "NETWORKWATCHER_EASTUS2EUAP/FLOWLOGS/VNETFLOWLOG",
+        "provider": "MICROSOFT.NETWORK/NETWORKWATCHERS"
+      },
+      "storage": {
+        "blob": {
+          "content_type": "application/json",
+          "name": "testblob"
+        },
+        "container": {
+          "name": "azure-container1"
+        }
+      },
+      "subscription_id": "00000000-0000-0000-0000-000000000000"
+    },
+    "azure_network_watcher_vnet": {
+      "log": {
+        "category": "FlowLogFlowEvent",
+        "flow_log": {
+          "guid": "abcdef01-2345-6789-0abc-def012345678",
+          "resource_id": "/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000000/RESOURCEGROUPS/NETWORKWATCHERRG/PROVIDERS/MICROSOFT.NETWORK/NETWORKWATCHERS/NETWORKWATCHER_EASTUS2EUAP/FLOWLOGS/VNETFLOWLOG",
+          "version": "4"
+        },
+        "mac_address": "00-22-48-71-C2-05",
+        "operation_name": "FlowLogFlowEvent",
+        "records": {
+          "flows": [
+            {
+              "groups": [
+                {
+                  "rule": "DefaultRule_AllowInternetOutBound",
+                  "tuples": [
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "52.239.184.180"
+                      },
+                      "source": {
+                        "port": 23956,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Begin",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T09:00:03.599Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 1580,
+                        "sent": 767
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "52.239.184.180"
+                      },
+                      "source": {
+                        "port": 23956,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "End",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 2,
+                        "sent": 3
+                      },
+                      "timestamp": "2022-09-14T09:00:03.606Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "40.74.146.17"
+                      },
+                      "source": {
+                        "port": 22730,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Begin",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T09:00:03.637Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 4569,
+                        "sent": 705
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "40.74.146.17"
+                      },
+                      "source": {
+                        "port": 22730,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "End",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 4,
+                        "sent": 3
+                      },
+                      "timestamp": "2022-09-14T09:00:03.640Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "40.74.146.17"
+                      },
+                      "source": {
+                        "port": 22732,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Begin",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T09:00:04.251Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 4569,
+                        "sent": 705
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "40.74.146.17"
+                      },
+                      "source": {
+                        "port": 22732,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "End",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 4,
+                        "sent": 3
+                      },
+                      "timestamp": "2022-09-14T09:00:04.251Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "40.74.146.17"
+                      },
+                      "source": {
+                        "port": 22734,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Begin",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T09:00:04.622Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 108,
+                        "sent": 134
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "40.74.146.17"
+                      },
+                      "source": {
+                        "port": 22734,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "End",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 1,
+                        "sent": 2
+                      },
+                      "timestamp": "2022-09-14T09:00:04.622Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "104.16.218.84"
+                      },
+                      "source": {
+                        "port": 36776,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Begin",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T09:00:17.343Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 32466,
+                        "sent": 2217
+                      },
+                      "destination": {
+                        "port": 443,
+                        "ip": "104.16.218.84"
+                      },
+                      "source": {
+                        "port": 36776,
+                        "ip": "10.0.0.6"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "End",
+                        "direction": "Outbound"
+                      },
+                      "packets": {
+                        "received": 33,
+                        "sent": 22
+                      },
+                      "timestamp": "2022-09-14T09:00:22.793Z"
+                    }
+                  ]
+                }
+              ],
+              "acl_id": "00000000-1234-abcd-ef00-c1c2c3c4c5c6"
+            },
+            {
+              "groups": [
+                {
+                  "rule": "BlockHighRiskTCPPortsFromInternet",
+                  "tuples": [
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 22,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 55188,
+                        "ip": "101.33.218.153"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T08:59:58.065Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 119,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 35276,
+                        "ip": "192.241.200.164"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T09:00:05.503Z"
+                    }
+                  ]
+                },
+                {
+                  "rule": "Internet",
+                  "tuples": [
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 44357,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 50557,
+                        "ip": "20.106.221.10"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T08:59:49.563Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 35945,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 62797,
+                        "ip": "20.55.117.81"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T08:59:49.679Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 65515,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 51961,
+                        "ip": "20.55.113.5"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T08:59:49.709Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 40129,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 40497,
+                        "ip": "13.65.224.51"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T08:59:50.049Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 30472,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 62797,
+                        "ip": "20.55.117.81"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T08:59:50.145Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 28184,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 51961,
+                        "ip": "20.55.113.5"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T08:59:50.175Z"
+                    },
+                    {
+                      "protocol": "6",
+                      "bytes": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "destination": {
+                        "port": 31244,
+                        "ip": "10.0.0.6"
+                      },
+                      "source": {
+                        "port": 50557,
+                        "ip": "20.106.221.10"
+                      },
+                      "flow": {
+                        "encryption": "NX",
+                        "state": "Deny",
+                        "direction": "Inbound"
+                      },
+                      "packets": {
+                        "received": 0,
+                        "sent": 0
+                      },
+                      "timestamp": "2022-09-14T09:00:15.545Z"
+                    }
+                  ]
+                }
+              ],
+              "acl_id": "01020304-abcd-ef00-1234-102030405060"
+            }
+          ]
+        },
+        "target_resource_id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myVNet",
+        "time": "2022-09-14T09:00:52.562Z"
+      }
+    },
+    "cloud": {
+      "provider": "azure"
+    },
+    "data_stream": {
+      "dataset": "azure_network_watcher_vnet.log",
+      "namespace": "62285",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": [
+        1580,
+        0,
+        32466,
+        108,
+        4569
+      ],
+      "ip": [
+        "52.239.184.180",
+        "104.16.218.84",
+        "40.74.146.17",
+        "10.0.0.6"
+      ],
+      "packets": [
+        33,
+        0,
+        1,
+        2,
+        4
+      ],
+      "port": [
+        22,
+        44357,
+        65515,
+        40129,
+        31244,
+        443,
+        30472,
+        119,
+        28184,
+        35945
+      ]
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8b1a6937-fb2b-4a53-b85c-9e508b92b2f6",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "azure_network_watcher_vnet.log",
+      "ingested": "2026-03-10T01:49:29Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "azure-blob-storage"
+    },
+    "log": {
+      "file": {
+        "path": "http://svc-azure-network-watcher-vnet-log:10000/devstoreaccount1/azure-container1/testblob"
+      },
+      "offset": 1
+    },
+    "network": {
+      "direction": [
+        "inbound",
+        "outbound"
+      ],
+      "iana_number": [
+        "6"
+      ]
+    },
+    "related": {
+      "ip": [
+        "52.239.184.180",
+        "104.16.218.84",
+        "40.74.146.17",
+        "10.0.0.6",
+        "13.65.224.51",
+        "20.106.221.10",
+        "20.55.113.5",
+        "192.241.200.164",
+        "20.55.117.81",
+        "101.33.218.153"
+      ]
+    },
+    "rule": {
+      "name": [
+        "DefaultRule_AllowInternetOutBound",
+        "BlockHighRiskTCPPortsFromInternet",
+        "Internet"
+      ]
+    },
+    "source": {
+      "bytes": [
+        0,
+        2217,
+        134,
+        767,
+        705
+      ],
+      "ip": [
+        "13.65.224.51",
+        "20.106.221.10",
+        "20.55.113.5",
+        "192.241.200.164",
+        "10.0.0.6",
+        "20.55.117.81",
+        "101.33.218.153"
+      ],
+      "mac": "00-22-48-71-C2-05",
+      "packets": [
+        22,
+        0,
+        2,
+        3
+      ],
+      "port": [
+        22734,
+        23956,
+        40497,
+        35276,
+        62797,
+        22730,
+        22732,
+        55188,
+        51961,
+        36776,
+        50557
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "azure_network_watcher_vnet-log"
+    ]
+  }
+]

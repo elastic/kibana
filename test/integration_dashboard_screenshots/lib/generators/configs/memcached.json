@@ -1,0 +1,22 @@
+{
+  "package": "memcached",
+  "dataStreams": [
+    {
+      "dataset": "memcached.stats",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "memcached.stats.cmd.get",
+        "memcached.stats.cmd.set",
+        "memcached.stats.connections.total",
+        "memcached.stats.current.bytes",
+        "memcached.stats.get.hits",
+        "memcached.stats.get.misses",
+        "memcached.stats.read.bytes",
+        "memcached.stats.threads",
+        "memcached.stats.written.bytes"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

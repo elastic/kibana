@@ -1,0 +1,112 @@
+{
+  "package": "iis",
+  "dataStreams": [
+    {
+      "dataset": "iis.access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "http.response.status_code",
+        "source.geo.location",
+        "url.path",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "iis.application_pool",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "iis.application_pool.name",
+        "iis.application_pool.process.cpu_usage_perc",
+        "iis.application_pool.process.handle_count",
+        "iis.application_pool.process.io_read_operations_per_sec",
+        "iis.application_pool.process.io_write_operations_per_sec",
+        "iis.application_pool.process.private_bytes",
+        "iis.application_pool.process.thread_count",
+        "iis.application_pool.process.virtual_bytes",
+        "iis.application_pool.process.working_set"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "iis.error",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "http.response.status_code",
+        "source.geo.location",
+        "url.path",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "iis.webserver",
+      "indexPattern": "metrics-*",
+      "docTarget": 870,
+      "fields": [
+        "iis.webserver.cache.current_files_cached",
+        "iis.webserver.cache.current_uris_cached",
+        "iis.webserver.cache.output_cache_current_memory_usage",
+        "iis.webserver.cache.total_files_cached",
+        "iis.webserver.cache.total_uris_cached",
+        "iis.webserver.network.bytes_received_per_sec",
+        "iis.webserver.network.bytes_sent_per_sec",
+        "iis.webserver.network.current_anonymous_users",
+        "iis.webserver.network.current_connections",
+        "iis.webserver.network.current_non_anonymous_users",
+        "iis.webserver.network.maximum_connections",
+        "iis.webserver.network.service_uptime",
+        "iis.webserver.network.total_anonymous_users",
+        "iis.webserver.network.total_bytes_received",
+        "iis.webserver.network.total_bytes_sent",
+        "iis.webserver.network.total_connection_attempts",
+        "iis.webserver.network.total_delete_requests",
+        "iis.webserver.network.total_get_requests",
+        "iis.webserver.network.total_non_anonymous_users",
+        "iis.webserver.network.total_post_requests",
+        "iis.webserver.process.cpu_usage_perc",
+        "iis.webserver.process.handle_count",
+        "iis.webserver.process.io_read_operations_per_sec",
+        "iis.webserver.process.io_write_operations_per_sec",
+        "iis.webserver.process.private_bytes",
+        "iis.webserver.process.thread_count",
+        "iis.webserver.process.virtual_bytes",
+        "iis.webserver.process.worker_process_count",
+        "iis.webserver.process.working_set"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "iis.website",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "iis.website.name",
+        "iis.website.network.bytes_received_per_sec",
+        "iis.website.network.bytes_sent_per_sec",
+        "iis.website.network.current_connections",
+        "iis.website.network.delete_requests_per_sec",
+        "iis.website.network.get_requests_per_sec",
+        "iis.website.network.maximum_connections",
+        "iis.website.network.post_requests_per_sec",
+        "iis.website.network.put_requests_per_sec",
+        "iis.website.network.service_uptime",
+        "iis.website.network.total_connection_attempts",
+        "iis.website.network.total_delete_requests",
+        "iis.website.network.total_get_requests",
+        "iis.website.network.total_post_requests",
+        "iis.website.network.total_put_requests"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

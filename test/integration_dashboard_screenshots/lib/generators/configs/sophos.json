@@ -1,0 +1,53 @@
+{
+  "package": "sophos",
+  "dataStreams": [
+    {
+      "dataset": "sophos.utm",
+      "indexPattern": "logs-*",
+      "docTarget": 720,
+      "fields": [
+        "client.ip",
+        "client.mac",
+        "destination.ip",
+        "destination.port",
+        "event.action",
+        "event.provider",
+        "event.severity",
+        "host.hostname",
+        "http.request.bytes",
+        "http.request.method",
+        "http.response.status_code",
+        "related.ip",
+        "sophos.utm.action",
+        "sophos.utm.client.hostname",
+        "sophos.utm.fullreqtime",
+        "sophos.utm.length",
+        "sophos.utm.name",
+        "sophos.utm.router.ip",
+        "sophos.utm.severity",
+        "source.geo.country_name",
+        "source.ip",
+        "source.port",
+        "url.original",
+        "user_agent.original"
+      ],
+      "filterValues": {
+        "event.provider": [
+          "http",
+          "packetfilter",
+          "dhcp"
+        ]
+      }
+    },
+    {
+      "dataset": "sophos.xg",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "package": "airflow",
+  "dataStreams": [
+    {
+      "dataset": "airflow.statsd",
+      "indexPattern": "metrics-*",
+      "docTarget": 570,
+      "fields": [
+        "airflow.dag_bag_size.value",
+        "airflow.dag_id",
+        "airflow.dag_import_errors.value",
+        "airflow.dag_schedule_delay.mean",
+        "airflow.dag_total_parse_time.value",
+        "airflow.executor_open_slots.value",
+        "airflow.executor_queued_tasks.value",
+        "airflow.executor_running_tasks.value",
+        "airflow.failed_dag_duration.mean",
+        "airflow.pool_name",
+        "airflow.pool_open_slots.value",
+        "airflow.pool_queued_slots.value",
+        "airflow.pool_running_slots.value",
+        "airflow.pool_starving_tasks.value",
+        "airflow.scheduler_heartbeat.count",
+        "airflow.success_dag_duration.mean",
+        "airflow.task_executable.value",
+        "airflow.task_starving.value",
+        "host.hostname"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

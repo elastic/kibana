@@ -1,0 +1,150 @@
+[
+  {
+    "@timestamp": "2021-12-17T07:27:54.000Z",
+    "agent": {
+      "ephemeral_id": "58ad7cc3-7901-4af2-9e23-383a27cc28bd",
+      "id": "560a72e0-1a9b-4c0e-a381-f53974e54eab",
+      "name": "elastic-agent-77100",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.firewall",
+      "namespace": "18144",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 1734,
+      "geo": {
+        "country_iso_code": "Ireland"
+      },
+      "ip": "0.0.0.0",
+      "port": [
+        443
+      ]
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "560a72e0-1a9b-4c0e-a381-f53974e54eab",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "drop",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "zscaler_zia.firewall",
+      "duration": 486000000,
+      "ingested": "2026-03-10T03:45:22Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "name": "machine9000"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.21.0.3:33688"
+      }
+    },
+    "network": {
+      "application": "http",
+      "bytes": 20786,
+      "protocol": "https",
+      "transport": "tcp"
+    },
+    "observer": {
+      "product": "ZIA",
+      "type": "firewall",
+      "vendor": "Zscaler"
+    },
+    "related": {
+      "hosts": [
+        "machine9000"
+      ],
+      "ip": [
+        "0.0.0.0"
+      ],
+      "user": [
+        "admin77",
+        "some_user",
+        "some_user@example.com"
+      ]
+    },
+    "rule": {
+      "name": [
+        "Access Blocked"
+      ]
+    },
+    "source": {
+      "bytes": 19052,
+      "ip": "0.0.0.0",
+      "nat": {
+        "ip": "0.0.0.0"
+      },
+      "port": [
+        55018,
+        0
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-firewall"
+    ],
+    "user": {
+      "domain": "example.com",
+      "email": "some_user@example.com",
+      "name": "some_user"
+    },
+    "zscaler_zia": {
+      "firewall": {
+        "aggregate": "No",
+        "client": {
+          "destination": {
+            "ip": "0.0.0.0"
+          },
+          "source": {
+            "ip": "0.0.0.0"
+          }
+        },
+        "department": "Unknown",
+        "device": {
+          "owner": "admin77"
+        },
+        "duration": {
+          "average_duration": 486,
+          "seconds": 0
+        },
+        "ip_category": "Test Name",
+        "location_name": "TestLoc DB",
+        "nat": "No",
+        "server": {
+          "destination": {
+            "ip": "0.0.0.0"
+          },
+          "source": {
+            "ip": "0.0.0.0"
+          }
+        },
+        "session": {
+          "count": 1
+        },
+        "stateful": "Yes",
+        "tunnel": {
+          "ip": "0.0.0.0",
+          "type": "ZscalerClientConnector"
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "package": "sailpoint_identity_sc",
+  "dataStreams": [
+    {
+      "dataset": "sailpoint_identity_sc.events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "host.geo.location",
+        "sailpoint_identity_sc.events.actor.name",
+        "sailpoint_identity_sc.events.created",
+        "sailpoint_identity_sc.events.id",
+        "sailpoint_identity_sc.events.ip_address",
+        "sailpoint_identity_sc.events.operation",
+        "sailpoint_identity_sc.events.status",
+        "sailpoint_identity_sc.events.technical_name",
+        "sailpoint_identity_sc.events.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

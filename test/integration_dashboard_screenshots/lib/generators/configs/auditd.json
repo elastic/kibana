@@ -1,0 +1,22 @@
+{
+  "package": "auditd",
+  "dataStreams": [
+    {
+      "dataset": "auditd.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "auditd.log.a0",
+        "event.action",
+        "event.outcome",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.action": [
+          "execve",
+          "EXECVE"
+        ]
+      }
+    }
+  ]
+}

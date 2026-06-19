@@ -1,0 +1,3213 @@
+[
+  {
+    "@timestamp": "2026-08-06T08:51:27.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "175.16.199.1"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>Aug  6 08:51:27 WatchGuard-Firebox FVE6035FD3AE3 (2024-08-06T03:31:27) firewall[10]: msg_id=\"3000-0172\" Blocked port: Traffic detected from 2a02:cf40:: to 175.16.199.1 on port 513. (Blocked Ports)",
+      "outcome": "unknown",
+      "timezone": "UTC",
+      "type": [
+        "denied"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "Blocked port: Traffic detected from 2a02:cf40:: to 175.16.199.1 on port 513.",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "175.16.199.1",
+        "2a02:cf40::"
+      ]
+    },
+    "rule": {
+      "name": [
+        "Blocked Ports"
+      ]
+    },
+    "source": {
+      "ip": "2a02:cf40::"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "175.16.199.1",
+        "log_type": "alarm",
+        "msg_id": "3000-0172",
+        "policy_name": "Blocked Ports",
+        "port": 513,
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "2a02:cf40::",
+        "syslog_timestamp": "2026-08-06T08:51:27.000Z",
+        "timestamp": "2024-08-06T03:31:27.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-20T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 176,
+      "domain": [
+        "175.16.199.1"
+      ],
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.1",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 20 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-10T11:49:17) firewall: msg_id=\"3000-0176\" Allow Trusted External tcp 10.0.1.2 175.16.199.1 37932 80 msg=\"HTTP request\" proxy_act=\"HTTP-Client.Standard.1\" op=\"GET\" dstname=\"175.16.199.1\" arg=\"/index.html\" sent_bytes=\"176\" rcvd_bytes=\"517\" elapsed_time=\"0.002265 sec(s)\" (HTTP-proxy-00)",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET"
+      }
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142
+      }
+    },
+    "network": {
+      "bytes": 693,
+      "community_id": "1:z0nZbqQNtPZec/gR2nheSL2UnPM=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "External"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox",
+        "175.16.199.1"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "175.16.199.1"
+      ]
+    },
+    "rule": {
+      "name": [
+        "HTTP-proxy-00"
+      ]
+    },
+    "source": {
+      "bytes": 517,
+      "ip": "10.0.1.2",
+      "port": 37932
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "url": {
+      "path": "/index.html"
+    },
+    "watchguard_firebox": {
+      "log": {
+        "arg": "/index.html",
+        "bytes_in": 517,
+        "bytes_out": 176,
+        "destination_ip": "175.16.199.1",
+        "destination_ip_geo": {
+          "city_name": "Changchun",
+          "continent_name": "Asia",
+          "country_iso_code": "CN",
+          "country_name": "China",
+          "location": {
+            "lat": 43.879999998025596,
+            "lon": 125.32279992476106
+          },
+          "region_iso_code": "CN-22",
+          "region_name": "Jilin Sheng"
+        },
+        "destination_name": "175.16.199.1",
+        "destination_port": 80,
+        "disposition": "Allow",
+        "elapsed_time": "0.002265 sec(s)",
+        "in_interface_name": "Trusted",
+        "log_type": "traffic",
+        "msg": "HTTP request",
+        "msg_id": "3000-0176",
+        "op": "GET",
+        "out_interface_name": "External",
+        "policy_name": "HTTP-proxy-00",
+        "proxy_act": "HTTP-Client.Standard.1",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 37932,
+        "syslog_timestamp": "2026-05-20T15:19:05.000Z",
+        "timestamp": "2024-01-10T11:49:17.000Z",
+        "transport": "tcp"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-20T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "192.168.53.82",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 20 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-10T11:49:17) firewall: msg_id=\"1AFF-0001\" Deny 1-Trusted 6-Ext-access tcp 10.0.1.2 192.168.53.82 60654 80 msg=\"ProxyDeny: HTTP server response timeout\" (HTTP-proxy-00)",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "error"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142
+      }
+    },
+    "network": {
+      "community_id": "1:E7vAHSJ+DGI4xcjOyHE4HV9ka7w=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "6-Ext-access"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "1-Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "192.168.53.82"
+      ]
+    },
+    "rule": {
+      "name": [
+        "HTTP-proxy-00"
+      ]
+    },
+    "source": {
+      "ip": "10.0.1.2",
+      "port": 60654
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "192.168.53.82",
+        "destination_port": 80,
+        "disposition": "Deny",
+        "in_interface_name": "1-Trusted",
+        "log_type": "traffic",
+        "msg": "ProxyDeny: HTTP server response timeout",
+        "msg_id": "1AFF-0001",
+        "out_interface_name": "6-Ext-access",
+        "policy_name": "HTTP-proxy-00",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 60654,
+        "syslog_timestamp": "2026-05-20T15:19:05.000Z",
+        "timestamp": "2024-01-10T11:49:17.000Z",
+        "transport": "tcp"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-20T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "192.168.130.126",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>May 20 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-10T09:49:17) firewall[10]: msg_id=\"3000-0150\" Deny 1-Trusted 0-External 1440 tcp 20 61 10.0.1.2 192.168.130.126 55810 80 offset 5 A 447868619 win 54 signature_name=\"EXPLOIT Apple QuickTime FLIC Animation file buffer overflow -1-2\" signature_cat=\"Misc\" signature_id=\"1112464\" severity=\"4\" sig_vers=\"18.124\" msg=\"IPS detected\" (HTTP-00)",
+      "outcome": "failure",
+      "severity": 4,
+      "timezone": "UTC",
+      "type": [
+        "denied"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "network": {
+      "community_id": "1:6MdWviBDXstu85+llY7vC+hrIYA=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "0-External"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "1-Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "192.168.130.126"
+      ]
+    },
+    "rule": {
+      "category": "Misc",
+      "name": [
+        "HTTP-00"
+      ]
+    },
+    "source": {
+      "ip": "10.0.1.2",
+      "port": 55810
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "192.168.130.126",
+        "destination_port": 80,
+        "disposition": "Deny",
+        "in_interface_name": "1-Trusted",
+        "ip_packet_length": 1440,
+        "iph_length": 20,
+        "log_type": "traffic",
+        "msg": "IPS detected",
+        "msg_id": "3000-0150",
+        "offset": 5,
+        "out_interface_name": "0-External",
+        "policy_name": "HTTP-00",
+        "protocol_flags": "A",
+        "sequence_number": 447868619,
+        "serial_number": "FVE6035FD3AE3",
+        "severity": 4,
+        "signature_category": "Misc",
+        "signature_id": "1112464",
+        "signature_name": "EXPLOIT Apple QuickTime FLIC Animation file buffer overflow -1-2",
+        "signature_version": "18.124",
+        "source_ip": "10.0.1.2",
+        "source_port": 55810,
+        "syslog_timestamp": "2026-05-20T15:19:05.000Z",
+        "timestamp": "2024-01-10T09:49:17.000Z",
+        "transport": "tcp",
+        "ttl": 61,
+        "window_size": 54
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-20T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 652,
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.192",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "duration": 80000000000,
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 20 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-10T09:49:17) firewall: msg_id=\"3000-0151\" Allow 1-Trusted 0-External tcp 10.0.1.2 81.2.69.192 53018 80 app_id=\"63\" app_cat_id=\"18\" app_ctl_disp=\"2\" duration=\"80\" sent_bytes=\"652\" rcvd_bytes=\"423\" (HTTP-00)",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "end"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142
+      }
+    },
+    "network": {
+      "bytes": 1075,
+      "community_id": "1:vt9IYvvCWWryAcIWEosKh5DoaSg=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "0-External"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "1-Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "81.2.69.192"
+      ]
+    },
+    "rule": {
+      "name": [
+        "HTTP-00"
+      ]
+    },
+    "source": {
+      "bytes": 423,
+      "ip": "10.0.1.2",
+      "port": 53018
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "app_cat_id": "18",
+        "app_control_disposition": "2",
+        "app_id": "63",
+        "bytes_in": 423,
+        "bytes_out": 652,
+        "destination_ip": "81.2.69.192",
+        "destination_ip_geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.514199981465936,
+            "lon": -0.0931000616401434
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "destination_port": 80,
+        "disposition": "Allow",
+        "duration": 80,
+        "in_interface_name": "1-Trusted",
+        "log_type": "traffic",
+        "msg_id": "3000-0151",
+        "out_interface_name": "0-External",
+        "policy_name": "HTTP-00",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 53018,
+        "syslog_timestamp": "2026-05-20T15:19:05.000Z",
+        "timestamp": "2024-01-10T09:49:17.000Z",
+        "transport": "tcp"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-20T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.0.0.1",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "intrusion_detection"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>May 20 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-10T09:49:17) firewall: msg_id=\"3000-0173\" Deny 0-External Firebox 52 tcp 20 127 81.2.69.192 10.0.0.1 62443 80 offset 8 S 832026162 win 8192 blocked sites (Internal Policy)",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "denied",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142
+      }
+    },
+    "network": {
+      "community_id": "1:R7xieBrkP2gRgVNlbdSCaS9zUs4=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "Firebox"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "0-External"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "81.2.69.192",
+        "10.0.0.1"
+      ]
+    },
+    "rule": {
+      "name": [
+        "Internal Policy"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.192",
+      "port": 62443
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "10.0.0.1",
+        "destination_port": 80,
+        "disposition": "Deny",
+        "in_interface_name": "0-External",
+        "ip_packet_length": 52,
+        "iph_length": 20,
+        "log_type": "traffic",
+        "msg_id": "3000-0173",
+        "offset": 8,
+        "out_interface_name": "Firebox",
+        "policy_name": "Internal Policy",
+        "protocol_flags": "S",
+        "sequence_number": 832026162,
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "81.2.69.192",
+        "source_ip_geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.514199981465936,
+            "lon": -0.0931000616401434
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "source_port": 62443,
+        "syslog_timestamp": "2026-05-20T15:19:05.000Z",
+        "timestamp": "2024-01-10T09:49:17.000Z",
+        "transport": "tcp",
+        "ttl": 127,
+        "window_size": 8192
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-20T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.1",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 20 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-10T11:49:17) firewall: msg_id=\"3000-0175\" Deny Trusted External tcp 10.0.1.2 175.16.199.1 37930 80 msg=\"ProxyDrop: HTTP Virus found\" proxy_act=\"HTTP-Client.Standard.1\" md5=\"69630e4574ec6798239b091cda43dca0\" virus=\"EICAR-Test-File (not a virus)\" host=\"175.16.199.1\" path=\"/eicar.com.txt\" (HTTP proxy-00)",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "error"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "69630e4574ec6798239b091cda43dca0"
+      },
+      "path": "/eicar.com.txt"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142
+      }
+    },
+    "network": {
+      "community_id": "1:VRwKEfUKpFNsoBY3igA6OhS0va4=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "External"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hash": [
+        "69630e4574ec6798239b091cda43dca0"
+      ],
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "175.16.199.1"
+      ]
+    },
+    "rule": {
+      "name": [
+        "HTTP proxy-00"
+      ]
+    },
+    "source": {
+      "ip": "10.0.1.2",
+      "port": 37930
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "threat": {
+      "indicator": {
+        "name": "EICAR-Test-File (not a virus)"
+      }
+    },
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "175.16.199.1",
+        "destination_ip_geo": {
+          "city_name": "Changchun",
+          "continent_name": "Asia",
+          "country_iso_code": "CN",
+          "country_name": "China",
+          "location": {
+            "lat": 43.879999998025596,
+            "lon": 125.32279992476106
+          },
+          "region_iso_code": "CN-22",
+          "region_name": "Jilin Sheng"
+        },
+        "destination_port": 80,
+        "disposition": "Deny",
+        "host_dest_ip": "175.16.199.1",
+        "in_interface_name": "Trusted",
+        "log_type": "traffic",
+        "md5": "69630e4574ec6798239b091cda43dca0",
+        "msg": "ProxyDrop: HTTP Virus found",
+        "msg_id": "3000-0175",
+        "out_interface_name": "External",
+        "path": "/eicar.com.txt",
+        "policy_name": "HTTP proxy-00",
+        "proxy_act": "HTTP-Client.Standard.1",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 37930,
+        "syslog_timestamp": "2026-05-20T15:19:05.000Z",
+        "timestamp": "2024-01-10T11:49:17.000Z",
+        "transport": "tcp",
+        "virus": "EICAR-Test-File (not a virus)"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-012C\" ARP spoofing attack detected, ip=192.168.111.10, mac=00:50:da:c7:90:5d, interface=5",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "ARP spoofing attack detected, ip=192.168.111.10, mac=00:50:da:c7:90:5d, interface=5",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "id": "5"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "192.168.111.10"
+      ]
+    },
+    "source": {
+      "ip": "192.168.111.10",
+      "mac": "00-50-DA-C7-90-5D"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "interface_id": "5",
+        "ip_address": "192.168.111.10",
+        "log_type": "event",
+        "mac_address": "00-50-DA-C7-90-5D",
+        "msg_id": "3000-012C",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "failed over",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-0174\" SD-WAN action test failed over from interface BovpnVif to Optional-1.",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "SD-WAN action test failed over from interface BovpnVif to Optional-1.",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "action_name": "test",
+        "log_type": "event",
+        "msg_id": "3000-0174",
+        "new_interface": "Optional-1",
+        "previous_interface": "BovpnVif",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z",
+        "update": "failed over"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3001-1001\" Temporarily blocking host 1.128.0.0 (reason = autoblock by policy)",
+      "outcome": "success",
+      "reason": "autoblock by policy",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "Temporarily blocking host 1.128.0.0 (reason = autoblock by policy)",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "1.128.0.0"
+      ]
+    },
+    "source": {
+      "ip": "1.128.0.0"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "ip_address": "1.128.0.0",
+        "log_type": "event",
+        "msg_id": "3001-1001",
+        "reason": "autoblock by policy",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3001-1002\" The Temporary Blocked Sites list is full (capacity=1000). The oldest entry 10.0.5.96 was removed.",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "The Temporary Blocked Sites list is full (capacity=1000). The oldest entry 10.0.5.96 was removed.",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.5.96"
+      ]
+    },
+    "source": {
+      "ip": "10.0.5.96"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "blocked_site_limit": 1000,
+        "ip_address": "10.0.5.96",
+        "log_type": "event",
+        "msg_id": "3001-1002",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"0F00-0001\" HTTPS content inspection exception list imported",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "change"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "HTTPS content inspection exception list imported",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "log_type": "event",
+        "msg_id": "0F00-0001",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "1.128.0.0",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"0F01-0015\" APT threat notified. Details='Policy Name: HTTPS-proxy-00 Reason: high APT threat detected Task_UUID: d09445005c3f4a9a9bb78c8cb34edc2a Source IP: 10.0.1.2 Source Port: 43130 Destination IP: 1.128.0.0 Destination Port: 443 Proxy Type: HTTP Proxy Host: analysis.lastline.com Path: /docs/lastlinedemo-sample.exe'",
+      "outcome": "success",
+      "reason": "high APT threat detected",
+      "timezone": "UTC",
+      "type": [
+        "indicator"
+      ]
+    },
+    "file": {
+      "path": "/docs/lastlinedemo-sample.exe"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "APT threat notified. Details='Policy Name: HTTPS-proxy-00 Reason: high APT threat detected Task_UUID: d09445005c3f4a9a9bb78c8cb34edc2a Source IP: 10.0.1.2 Source Port: 43130 Destination IP: 1.128.0.0 Destination Port: 443 Proxy Type: HTTP Proxy Host: analysis.lastline.com Path: /docs/lastlinedemo-sample.exe'",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox",
+        "analysis.lastline.com"
+      ],
+      "ip": [
+        "1.128.0.0",
+        "10.0.1.2"
+      ]
+    },
+    "rule": {
+      "name": "HTTPS-proxy-00"
+    },
+    "source": {
+      "ip": "10.0.1.2",
+      "port": 43130
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "1.128.0.0",
+        "destination_port": 443,
+        "log_type": "event",
+        "msg_id": "0F01-0015",
+        "path": "/docs/lastlinedemo-sample.exe",
+        "policy_name": "HTTPS-proxy-00",
+        "proxy_host": "analysis.lastline.com",
+        "proxy_type": "HTTP",
+        "reason": "high APT threat detected",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 43130,
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "task_uuid": "d09445005c3f4a9a9bb78c8cb34edc2a",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "1.128.0.0",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "apt safe object",
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"0F01-0016\" APT safe result from file submission. Details='Policy Name: HTTP-OUT-00 Reason: clean Message: APT safe object Task_UUID: 7a1e1500e92a410fa44d907f96b9209e MD5: d2723ba60dc88ec1ea449be9eee601cc Source IP: 10.0.1.2 Source Port: 50293 Destination IP: 1.128.0.0 Destination Port: 80 Proxy Type: HTTP Proxy Host: 1.128.0.0 Path: /test.exe'",
+      "outcome": "success",
+      "reason": "clean",
+      "timezone": "UTC",
+      "type": [
+        "indicator"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "d2723ba60dc88ec1ea449be9eee601cc"
+      },
+      "path": "/test.exe"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "APT safe result from file submission. Details='Policy Name: HTTP-OUT-00 Reason: clean Message: APT safe object Task_UUID: 7a1e1500e92a410fa44d907f96b9209e MD5: d2723ba60dc88ec1ea449be9eee601cc Source IP: 10.0.1.2 Source Port: 50293 Destination IP: 1.128.0.0 Destination Port: 80 Proxy Type: HTTP Proxy Host: 1.128.0.0 Path: /test.exe'",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hash": [
+        "d2723ba60dc88ec1ea449be9eee601cc"
+      ],
+      "hosts": [
+        "WatchGuard-Firebox",
+        "1.128.0.0"
+      ],
+      "ip": [
+        "1.128.0.0",
+        "10.0.1.2"
+      ]
+    },
+    "rule": {
+      "name": "HTTP-OUT-00"
+    },
+    "source": {
+      "ip": "10.0.1.2",
+      "port": 50293
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "1.128.0.0",
+        "destination_port": 80,
+        "log_type": "event",
+        "md5": "d2723ba60dc88ec1ea449be9eee601cc",
+        "message": "APT safe object",
+        "msg_id": "0F01-0016",
+        "path": "/test.exe",
+        "policy_name": "HTTP-OUT-00",
+        "proxy_host": "1.128.0.0",
+        "proxy_type": "HTTP",
+        "reason": "clean",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 50293,
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "task_uuid": "7a1e1500e92a410fa44d907f96b9209e",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-01-16T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 282,
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.1",
+      "port": 25
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "sender": {
+        "address": "tester@testnet.com"
+      },
+      "to": {
+        "address": [
+          "wg@localhost"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<139>Jan 16 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-19T08:48:15) firewall: msg_id=\"1BFF-000F\" Allow 1-Trusted 0-External tcp 10.0.1.2 175.16.199.1 39398 25 msg=\"SMTP request\" proxy_act=\"SMTP-Outgoing.1\" rcvd_bytes=\"272\" sent_bytes=\"282\" sender=\"tester@testnet.com\" recipients=\"wg@localhost\" server_ssl=\"ECDHE-RSA-AES256-GCMSHA384\" client_ssl=\"AES128-SHA256\" tls_profile=\"TLS-Client.Standard\" (SMTP-proxy-00)",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 139
+      }
+    },
+    "network": {
+      "bytes": 554,
+      "community_id": "1:jKtS0CPHMiYL+rYXXHskx9Y4Gig=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "0-External"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "1-Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "175.16.199.1"
+      ],
+      "user": [
+        "wg@localhost",
+        "tester@testnet.com"
+      ]
+    },
+    "rule": {
+      "name": [
+        "SMTP-proxy-00"
+      ]
+    },
+    "source": {
+      "bytes": 272,
+      "ip": "10.0.1.2",
+      "port": 39398
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "tls": {
+      "client": {
+        "supported_ciphers": [
+          "AES128-SHA256"
+        ]
+      }
+    },
+    "watchguard_firebox": {
+      "log": {
+        "bytes_in": 272,
+        "bytes_out": 282,
+        "client_ssl": "AES128-SHA256",
+        "destination_ip": "175.16.199.1",
+        "destination_ip_geo": {
+          "city_name": "Changchun",
+          "continent_name": "Asia",
+          "country_iso_code": "CN",
+          "country_name": "China",
+          "location": {
+            "lat": 43.879999998025596,
+            "lon": 125.32279992476106
+          },
+          "region_iso_code": "CN-22",
+          "region_name": "Jilin Sheng"
+        },
+        "destination_port": 25,
+        "disposition": "Allow",
+        "in_interface_name": "1-Trusted",
+        "log_type": "traffic",
+        "msg": "SMTP request",
+        "msg_id": "1BFF-000F",
+        "out_interface_name": "0-External",
+        "policy_name": "SMTP-proxy-00",
+        "proxy_act": "SMTP-Outgoing.1",
+        "recipients": "wg@localhost",
+        "sender": "tester@testnet.com",
+        "serial_number": "FVE6035FD3AE3",
+        "server_ssl": "ECDHE-RSA-AES256-GCMSHA384",
+        "source_ip": "10.0.1.2",
+        "source_port": 39398,
+        "syslog_timestamp": "2026-01-16T15:19:05.000Z",
+        "timestamp": "2024-01-19T08:48:15.000Z",
+        "tls_profile": "TLS-Client.Standard",
+        "transport": "tcp"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-01-16T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.1",
+      "port": 25
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "sender": {
+        "address": "tester@testnet.com"
+      },
+      "to": {
+        "address": [
+          "wg@localhost"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<139>Jan 16 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-19T08:48:15) firewall: msg_id=\"1BFF-0010\" Deny 1-Trusted 0-External tcp 10.0.1.2 175.16.199.1 39452 25 msg=\"ProxyDeny: SMTP message format\" proxy_act=\"SMTPOutgoing.1\" file_name=\"sm_conns.txt\" type=\"uuencode\" sender=\"tester@testnet.com\" recipients=\"wg@localhost\" (SMTP-proxy-00)",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "name": "sm_conns.txt"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 139
+      }
+    },
+    "network": {
+      "community_id": "1:2z27nPVgxsnMbaKwmuHf915RFAI=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "0-External"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "1-Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "175.16.199.1"
+      ],
+      "user": [
+        "wg@localhost",
+        "tester@testnet.com"
+      ]
+    },
+    "rule": {
+      "name": [
+        "SMTP-proxy-00"
+      ]
+    },
+    "source": {
+      "ip": "10.0.1.2",
+      "port": 39452
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "175.16.199.1",
+        "destination_ip_geo": {
+          "city_name": "Changchun",
+          "continent_name": "Asia",
+          "country_iso_code": "CN",
+          "country_name": "China",
+          "location": {
+            "lat": 43.879999998025596,
+            "lon": 125.32279992476106
+          },
+          "region_iso_code": "CN-22",
+          "region_name": "Jilin Sheng"
+        },
+        "destination_port": 25,
+        "disposition": "Deny",
+        "encoding_type": "uuencode",
+        "file_name": "sm_conns.txt",
+        "in_interface_name": "1-Trusted",
+        "log_type": "traffic",
+        "msg": "ProxyDeny: SMTP message format",
+        "msg_id": "1BFF-0010",
+        "out_interface_name": "0-External",
+        "policy_name": "SMTP-proxy-00",
+        "proxy_act": "SMTPOutgoing.1",
+        "recipients": "wg@localhost",
+        "sender": "tester@testnet.com",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 39452,
+        "syslog_timestamp": "2026-01-16T15:19:05.000Z",
+        "timestamp": "2024-01-19T08:48:15.000Z",
+        "transport": "tcp"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-01-16T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "172.16.181.2",
+      "port": 25
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<139>Jan 16 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-19T08:48:15) firewall[10]: msg_id=\"1BFF-0011\" Deny 0-External 1-Trusted tcp 172.16.180.2 172.16.181.2 1024 25 msg=\"ProxyDrop: SMTP IPS match\" proxy_act=\"SMTP-Incoming.1\" signature_id=\"1110401\" severity=\"4\" signature_name=\"EXPLOIT IBM Lotus Notes Lotus 1-2-3 Work Sheet File Viewer Buffer Overflow (CVE2007-6593)\" signature_cat=\"Buffer Over Flow\" sig_vers=\"18.001\" (SMTPproxy-00)",
+      "outcome": "failure",
+      "severity": 4,
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 139,
+        "procid": "10"
+      }
+    },
+    "network": {
+      "community_id": "1:6Kk9FKlFSIumVIuuLaNWm35ms/A=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "1-Trusted"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "0-External"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "172.16.180.2",
+        "172.16.181.2"
+      ]
+    },
+    "rule": {
+      "category": "Buffer Over Flow",
+      "name": [
+        "SMTPproxy-00"
+      ]
+    },
+    "source": {
+      "ip": "172.16.180.2",
+      "port": 1024
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "172.16.181.2",
+        "destination_port": 25,
+        "disposition": "Deny",
+        "in_interface_name": "0-External",
+        "log_type": "traffic",
+        "msg": "ProxyDrop: SMTP IPS match",
+        "msg_id": "1BFF-0011",
+        "out_interface_name": "1-Trusted",
+        "policy_name": "SMTPproxy-00",
+        "proxy_act": "SMTP-Incoming.1",
+        "serial_number": "FVE6035FD3AE3",
+        "severity": 4,
+        "signature_category": "Buffer Over Flow",
+        "signature_id": "1110401",
+        "signature_name": "EXPLOIT IBM Lotus Notes Lotus 1-2-3 Work Sheet File Viewer Buffer Overflow (CVE2007-6593)",
+        "signature_version": "18.001",
+        "source_ip": "172.16.180.2",
+        "source_port": 1024,
+        "syslog_timestamp": "2026-01-16T15:19:05.000Z",
+        "timestamp": "2024-01-19T08:48:15.000Z",
+        "transport": "tcp"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-01-16T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.1",
+      "port": 25
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<139>Jan 16 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-01-19T08:48:15) firewall[10]: msg_id=\"1BFF-0013\" Allow 1-Trusted 0-External tcp 10.0.1.2 175.16.199.1 39404 25 msg=\"ProxyDeny: too many recipients\" proxy_act=\"SMTP-Outgoing.1\" num_recipients=\"15\" (SMTP-proxy-00)",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 139,
+        "procid": "10"
+      }
+    },
+    "network": {
+      "community_id": "1:r/LC3TDoMfkwsuIjaa0AxL14tiU=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "alias": "0-External"
+        }
+      },
+      "hostname": "WatchGuard-Firebox",
+      "ingress": {
+        "interface": {
+          "alias": "1-Trusted"
+        }
+      },
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.2",
+        "175.16.199.1"
+      ]
+    },
+    "rule": {
+      "name": [
+        "SMTP-proxy-00"
+      ]
+    },
+    "source": {
+      "ip": "10.0.1.2",
+      "port": 39404
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "175.16.199.1",
+        "destination_ip_geo": {
+          "city_name": "Changchun",
+          "continent_name": "Asia",
+          "country_iso_code": "CN",
+          "country_name": "China",
+          "location": {
+            "lat": 43.879999998025596,
+            "lon": 125.32279992476106
+          },
+          "region_iso_code": "CN-22",
+          "region_name": "Jilin Sheng"
+        },
+        "destination_port": 25,
+        "disposition": "Allow",
+        "in_interface_name": "1-Trusted",
+        "log_type": "traffic",
+        "msg": "ProxyDeny: too many recipients",
+        "msg_id": "1BFF-0013",
+        "number_of_recipients": 15,
+        "out_interface_name": "0-External",
+        "policy_name": "SMTP-proxy-00",
+        "proxy_act": "SMTP-Outgoing.1",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "10.0.1.2",
+        "source_port": 39404,
+        "syslog_timestamp": "2026-01-16T15:19:05.000Z",
+        "timestamp": "2024-01-19T08:48:15.000Z",
+        "transport": "tcp"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.0.1.51"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall: msg_id=\"3000-0153\" SYN flood attack against 10.0.1.51 from 175.16.199.0 detected. 500 SYN packets dropped since last alarm. (IPS)",
+      "outcome": "unknown",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142
+      }
+    },
+    "message": "SYN flood attack against 10.0.1.51 from 175.16.199.0 detected. 500 SYN packets dropped since last alarm.",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.51",
+        "175.16.199.0"
+      ]
+    },
+    "rule": {
+      "name": [
+        "IPS"
+      ]
+    },
+    "source": {
+      "ip": "175.16.199.0"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "10.0.1.51",
+        "log_type": "alarm",
+        "msg_id": "3000-0153",
+        "packets_count": 500,
+        "policy_name": "IPS",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "175.16.199.0",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox (2024-05-10T09:49:05) firewall: msg_id=\"020B-0001\" BOVPN tunnel 'tunnel.2' local 172.16.12.81/255.255.255.255 remote 172.16.13.204/255.255.255.255 under gateway 'gateway.1' is down. (IPS)",
+      "outcome": "unknown",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142
+      }
+    },
+    "message": "BOVPN tunnel 'tunnel.2' local 172.16.12.81/255.255.255.255 remote 172.16.13.204/255.255.255.255 under gateway 'gateway.1' is down.",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ]
+    },
+    "rule": {
+      "name": [
+        "IPS"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "gateway": "gateway.1",
+        "local": "172.16.12.81/255.255.255.255",
+        "log_type": "alarm",
+        "msg_id": "020B-0001",
+        "policy_name": "IPS",
+        "remote": "172.16.13.204/255.255.255.255",
+        "status": "down",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z",
+        "tunnel_name": "tunnel.2",
+        "tunnel_type": "BOVPN"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 firewall[9]: BOVPN tunnel 'tunnel.2' local 172.16.12.81/255.255.255.255 remote 172.16.13.204/255.255.255.255 under gateway 'gateway.1' is down. (IPS)",
+      "timezone": "UTC"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "9"
+      }
+    },
+    "message": "BOVPN tunnel 'tunnel.2' local 172.16.12.81/255.255.255.255 remote 172.16.13.204/255.255.255.255 under gateway 'gateway.1' is down. (IPS)",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.0.1.51"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "intrusion_detection"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "alert",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-0154\" ICMP flood attack against 10.0.1.51 from 175.16.199.0 detected. 500 ICMP flood packets dropped since last alarm. (IPS)",
+      "outcome": "unknown",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "ICMP flood attack against 10.0.1.51 from 175.16.199.0 detected. 500 ICMP flood packets dropped since last alarm.",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "10.0.1.51",
+        "175.16.199.0"
+      ]
+    },
+    "rule": {
+      "name": [
+        "IPS"
+      ]
+    },
+    "source": {
+      "ip": "175.16.199.0"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "destination_ip": "10.0.1.51",
+        "log_type": "alarm",
+        "msg_id": "3000-0154",
+        "packets_count": 500,
+        "policy_name": "IPS",
+        "serial_number": "FVE6035FD3AE3",
+        "source_ip": "175.16.199.0",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-0028\" Firewall is shutting down",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "end",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "Firewall is shutting down",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "log_type": "diagnostic",
+        "msg_id": "3000-0028",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-0029\" IP address 192.168.111.254 will not be added to the blocked sites list because it is exempt",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "IP address 192.168.111.254 will not be added to the blocked sites list because it is exempt",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "192.168.111.254"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "ip_address": "192.168.111.254",
+        "log_type": "diagnostic",
+        "msg_id": "3000-0029",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-002A\" IP address 192.168.111.10 will not be added to the blocked sites list because it already exists.",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "IP address 192.168.111.10 will not be added to the blocked sites list because it already exists.",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "192.168.111.10"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "ip_address": "192.168.111.10",
+        "log_type": "diagnostic",
+        "msg_id": "3000-002A",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-003A\" Unable to read the feature keys, some features may be unavailable",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "Unable to read the feature keys, some features may be unavailable",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "log_type": "diagnostic",
+        "msg_id": "3000-003A",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-003C\" Route look up on HTTP redirect host 192.168.111.10 for policy \"FTP-00\" failed, local redirect may not work",
+      "outcome": "failure",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "Route look up on HTTP redirect host 192.168.111.10 for policy \"FTP-00\" failed, local redirect may not work",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "192.168.111.10"
+      ]
+    },
+    "rule": {
+      "name": "FTP-00"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "ip_address": "192.168.111.10",
+        "log_type": "diagnostic",
+        "msg_id": "3000-003C",
+        "policy_name": "FTP-00",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-0040\" Idle timeout has occurred for blocked site 192.168.111.10",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "end",
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "Idle timeout has occurred for blocked site 192.168.111.10",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox"
+      ],
+      "ip": [
+        "192.168.111.10"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "watchguard_firebox": {
+      "log": {
+        "ip_address": "192.168.111.10",
+        "log_type": "diagnostic",
+        "msg_id": "3000-0040",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2026-05-10T15:19:05.000Z",
+    "agent": {
+      "ephemeral_id": "8327acb5-cc6d-4518-b300-0c7d7875e185",
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "name": "elastic-agent-31610",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "watchguard_firebox.log",
+      "namespace": "38735",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "f3c91d6d-92d0-4d37-be0c-d3cac6c46cc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "watchguard_firebox.log",
+      "ingested": "2026-03-10T02:48:46Z",
+      "kind": "event",
+      "original": "<142>May 10 15:19:05 WatchGuard-Firebox FVE6035FD3AE3 (2024-05-10T09:49:05) firewall[10]: msg_id=\"3000-0065\" User James@Firebox-DB used 21 MB of the bandwidth quota (100 MB) and used 1 minute of the time quota (3 minutes).",
+      "outcome": "success",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "source": {
+        "address": "172.23.0.3:60172"
+      },
+      "syslog": {
+        "appname": "firewall",
+        "hostname": "WatchGuard-Firebox",
+        "priority": 142,
+        "procid": "10"
+      }
+    },
+    "message": "User James@Firebox-DB used 21 MB of the bandwidth quota (100 MB) and used 1 minute of the time quota (3 minutes).",
+    "observer": {
+      "hostname": "WatchGuard-Firebox",
+      "product": "Firebox",
+      "serial_number": "FVE6035FD3AE3",
+      "type": "firewall",
+      "vendor": "WatchGuard"
+    },
+    "related": {
+      "hosts": [
+        "WatchGuard-Firebox",
+        "Firebox-DB"
+      ],
+      "user": [
+        "James"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "watchguard_firebox-log"
+    ],
+    "user": {
+      "domain": "Firebox-DB",
+      "name": "James"
+    },
+    "watchguard_firebox": {
+      "log": {
+        "log_type": "diagnostic",
+        "msg_id": "3000-0065",
+        "quota_info": "21 MB of the bandwidth quota (100 MB) and used 1 minute of the time quota (3 minutes).",
+        "serial_number": "FVE6035FD3AE3",
+        "syslog_timestamp": "2026-05-10T15:19:05.000Z",
+        "timestamp": "2024-05-10T09:49:05.000Z",
+        "user_domain": "Firebox-DB",
+        "user_name": "James"
+      }
+    }
+  }
+]

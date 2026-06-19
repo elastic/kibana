@@ -1,0 +1,34 @@
+{
+  "package": "barracuda",
+  "dataStreams": [
+    {
+      "dataset": "barracuda.waf",
+      "indexPattern": "logs-*",
+      "docTarget": 630,
+      "fields": [
+        "barracuda.waf.action_taken",
+        "barracuda.waf.attack_description",
+        "barracuda.waf.attack_details",
+        "barracuda.waf.followup_action",
+        "barracuda.waf.log_type",
+        "barracuda.waf.module.name",
+        "barracuda.waf.profile_matched",
+        "barracuda.waf.protected",
+        "barracuda.waf.response_timetaken",
+        "barracuda.waf.response_type",
+        "barracuda.waf.severity_level",
+        "barracuda.waf.transaction_type",
+        "event.action",
+        "event.kind",
+        "http.response.bytes",
+        "network.forwarded_ip",
+        "network.protocol",
+        "rule.name",
+        "source.geo.country_name",
+        "source.ip",
+        "url.path"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

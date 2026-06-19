@@ -1,0 +1,144 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:18:32.336Z",
+    "agent": {
+      "ephemeral_id": "c841e92a-f1c6-4c5f-96e8-9b0e3c8c0d1b",
+      "id": "2d351c81-464e-4c07-b329-b507ffb2eb0d",
+      "name": "elastic-agent-16081",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trellix_epo_cloud.device",
+      "namespace": "68801",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "2d351c81-464e-4c07-b329-b507ffb2eb0d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "trellix_epo_cloud.device",
+      "ingested": "2026-03-10T02:18:35Z",
+      "kind": "event",
+      "original": "{\"attributes\":{\"agentGuid\":\"3AF594B1-00A0-AA00-87C6-005056833A00\",\"agentPlatform\":\"LINUX\",\"agentState\":0,\"agentVersion\":\"5.7.9.139\",\"computerName\":\"localhost\",\"cpuSpeed\":2100,\"cpuType\":\"Intel(R) Xeon(R) CPU E5-2620 v2 @ 2.10GHz\",\"domainName\":\"(none)\",\"excludedTags\":\"\",\"ipAddress\":\"1.128.0.0\",\"ipHostName\":\"localhost\",\"isPortable\":\"non-portable\",\"lastUpdate\":\"2023-04-17T07:38:35.563+00:00\",\"macAddress\":\"00005E005300\",\"managed\":\"1\",\"managedState\":1,\"name\":\"localhost\",\"nodeCreatedDate\":\"2023-03-29T12:06:05.877+00:00\",\"nodePath\":null,\"numOfCpu\":4,\"osBuildNumber\":0,\"osPlatform\":\"Server\",\"osType\":\"Linux\",\"osVersion\":\"3.10\",\"parentId\":123456,\"subnetAddress\":\"\",\"systemBootTime\":\"2023-03-24T16:54:27.000+00:00\",\"systemManufacturer\":\"VMware, Inc.\",\"systemModel\":\"VMware Virtual Platform\",\"systemRebootPending\":0,\"systemSerialNumber\":\"VMware-12 02 1a a1 1c 31 9c eb-0e a6 00 41 54 14 91 f5\",\"tags\":\"Deployment 2, Deployment, Server\",\"tenantId\":12345,\"totalPhysicalMemory\":12409634816,\"userName\":\"N/A\"},\"id\":\"123456\",\"links\":{\"self\":\"https://api.manage.trellix.com/epo/v2/devices/123456\"},\"relationships\":{\"installedProducts\":{\"links\":{\"related\":\"https://api.manage.trellix.com/epo/v2/devices/123456/installedProducts\",\"self\":\"https://api.manage.trellix.com/epo/v2/devices/123456/relationships/installedProducts\"}}},\"type\":\"devices\"}",
+      "reference": "https://api.manage.trellix.com/epo/v2/devices/123456",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "id": "123456",
+      "ip": [
+        "1.128.0.0"
+      ],
+      "mac": [
+        "00-00-5E-00-53-00"
+      ],
+      "name": "localhost",
+      "os": {
+        "platform": "Server",
+        "type": "linux",
+        "version": "3.10"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "serial_number": "VMware-12 02 1a a1 1c 31 9c eb-0e a6 00 41 54 14 91 f5"
+    },
+    "related": {
+      "hosts": [
+        "123456",
+        "localhost"
+      ],
+      "ip": [
+        "1.128.0.0"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trellix_epo_cloud-device"
+    ],
+    "trellix_epo_cloud": {
+      "device": {
+        "attributes": {
+          "agent": {
+            "guid": "3AF594B1-00A0-AA00-87C6-005056833A00",
+            "platform": "LINUX",
+            "state": false,
+            "version": "5.7.9.139"
+          },
+          "computer_name": "localhost",
+          "cpu": {
+            "speed": 2100,
+            "type": "Intel(R) Xeon(R) CPU E5-2620 v2 @ 2.10GHz"
+          },
+          "domain_name": "(none)",
+          "ip_address": "1.128.0.0",
+          "ip_host_name": "localhost",
+          "is_portable": "non-portable",
+          "last_update": "2023-04-17T07:38:35.563Z",
+          "mac_address": "00-00-5E-00-53-00",
+          "managed": "1",
+          "managed_state": false,
+          "name": "localhost",
+          "node": {
+            "created_date": "2023-03-29T12:06:05.877Z"
+          },
+          "num_of_cpu": 4,
+          "os": {
+            "build_number": 0,
+            "platform": "Server",
+            "type": "Linux",
+            "version": "3.10"
+          },
+          "parent": {
+            "id": "123456"
+          },
+          "system": {
+            "boot_time": "2023-03-24T16:54:27.000Z",
+            "manufacturer": "VMware, Inc.",
+            "model": "VMware Virtual Platform",
+            "reboot_pending": false,
+            "serial_number": "VMware-12 02 1a a1 1c 31 9c eb-0e a6 00 41 54 14 91 f5"
+          },
+          "tags": [
+            "Deployment 2",
+            "Deployment",
+            "Server"
+          ],
+          "tenant": {
+            "id": "12345"
+          },
+          "total_physical_memory": 12409634816,
+          "user_name": "N/A"
+        },
+        "id": "123456",
+        "links": {
+          "self": "https://api.manage.trellix.com/epo/v2/devices/123456"
+        },
+        "relationships": {
+          "installed_products": {
+            "links": {
+              "related": "https://api.manage.trellix.com/epo/v2/devices/123456/installedProducts",
+              "self": "https://api.manage.trellix.com/epo/v2/devices/123456/relationships/installedProducts"
+            }
+          }
+        }
+      },
+      "type": "devices"
+    }
+  }
+]

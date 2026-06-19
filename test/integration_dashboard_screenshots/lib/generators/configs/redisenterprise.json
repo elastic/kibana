@@ -1,0 +1,57 @@
+{
+  "package": "redisenterprise",
+  "dataStreams": [
+    {
+      "dataset": "redisenterprise.node",
+      "indexPattern": "metrics-*",
+      "docTarget": 540,
+      "fields": [
+        "redisenterprise.node.conns.value",
+        "redisenterprise.node.cpu_system.value",
+        "redisenterprise.node.cpu_user.value",
+        "redisenterprise.node.egress_bytes.value",
+        "redisenterprise.node.ephemeral_storage_free.value",
+        "redisenterprise.node.free_memory.value",
+        "redisenterprise.node.ingress_bytes.value",
+        "redisenterprise.node.labels.cluster",
+        "redisenterprise.node.labels.node",
+        "redisenterprise.node.persistent_storage_free.value",
+        "redisenterprise.node.total_req.value",
+        "redisenterprise.proxy.listener_acc_latency.counter",
+        "redisenterprise.proxy.listener_auth_cmds.counter",
+        "redisenterprise.proxy.listener_cmd_flush.counter",
+        "redisenterprise.proxy.listener_cmd_get.counter",
+        "redisenterprise.proxy.listener_cmd_set.counter",
+        "redisenterprise.proxy.listener_cmd_touch.counter",
+        "redisenterprise.proxy.listener_total_res.counter"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "redisenterprise.proxy",
+      "indexPattern": "metrics-*",
+      "docTarget": 540,
+      "fields": [
+        "redisenterprise.node.conns.value",
+        "redisenterprise.node.cpu_system.value",
+        "redisenterprise.node.cpu_user.value",
+        "redisenterprise.node.egress_bytes.value",
+        "redisenterprise.node.ephemeral_storage_free.value",
+        "redisenterprise.node.free_memory.value",
+        "redisenterprise.node.ingress_bytes.value",
+        "redisenterprise.node.labels.cluster",
+        "redisenterprise.node.labels.node",
+        "redisenterprise.node.persistent_storage_free.value",
+        "redisenterprise.node.total_req.value",
+        "redisenterprise.proxy.listener_acc_latency.counter",
+        "redisenterprise.proxy.listener_auth_cmds.counter",
+        "redisenterprise.proxy.listener_cmd_flush.counter",
+        "redisenterprise.proxy.listener_cmd_get.counter",
+        "redisenterprise.proxy.listener_cmd_set.counter",
+        "redisenterprise.proxy.listener_cmd_touch.counter",
+        "redisenterprise.proxy.listener_total_res.counter"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "package": "microsoft_defender_cloud",
+  "dataStreams": [
+    {
+      "dataset": "microsoft_defender_cloud.assessment",
+      "indexPattern": "logs-*",
+      "docTarget": 600,
+      "fields": [
+        "cloud.provider",
+        "host.os.family",
+        "microsoft_defender_cloud.event.alert_type",
+        "microsoft_defender_cloud.event.compromised_entity",
+        "microsoft_defender_cloud.event.entities.category",
+        "microsoft_defender_cloud.event.entities.location.organization",
+        "microsoft_defender_cloud.event.entities.location.organization_type",
+        "microsoft_defender_cloud.event.entities.resource_type",
+        "microsoft_defender_cloud.event.entities.threat_intelligence.name",
+        "microsoft_defender_cloud.event.entities.threat_intelligence.type",
+        "microsoft_defender_cloud.event.properties.assessment.type",
+        "microsoft_defender_cloud.event.properties.failed_resources",
+        "microsoft_defender_cloud.event.properties.healthy_resource_count",
+        "microsoft_defender_cloud.event.properties.passed_resources",
+        "microsoft_defender_cloud.event.properties.skipped_resources",
+        "microsoft_defender_cloud.event.properties.state",
+        "microsoft_defender_cloud.event.properties.unhealthy_resource_count",
+        "microsoft_defender_cloud.event.security_event_data_enrichment.action",
+        "microsoft_defender_cloud.event.severity",
+        "microsoft_defender_cloud.event.status"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_defender_cloud.event",
+      "indexPattern": "logs-*",
+      "docTarget": 600,
+      "fields": [
+        "cloud.provider",
+        "host.os.family",
+        "microsoft_defender_cloud.event.alert_type",
+        "microsoft_defender_cloud.event.compromised_entity",
+        "microsoft_defender_cloud.event.entities.category",
+        "microsoft_defender_cloud.event.entities.location.organization",
+        "microsoft_defender_cloud.event.entities.location.organization_type",
+        "microsoft_defender_cloud.event.entities.resource_type",
+        "microsoft_defender_cloud.event.entities.threat_intelligence.name",
+        "microsoft_defender_cloud.event.entities.threat_intelligence.type",
+        "microsoft_defender_cloud.event.properties.assessment.type",
+        "microsoft_defender_cloud.event.properties.failed_resources",
+        "microsoft_defender_cloud.event.properties.healthy_resource_count",
+        "microsoft_defender_cloud.event.properties.passed_resources",
+        "microsoft_defender_cloud.event.properties.skipped_resources",
+        "microsoft_defender_cloud.event.properties.state",
+        "microsoft_defender_cloud.event.properties.unhealthy_resource_count",
+        "microsoft_defender_cloud.event.security_event_data_enrichment.action",
+        "microsoft_defender_cloud.event.severity",
+        "microsoft_defender_cloud.event.status"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

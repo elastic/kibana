@@ -1,0 +1,300 @@
+[
+  {
+    "@timestamp": "2024-04-26T15:04:45.000Z",
+    "agent": {
+      "ephemeral_id": "aea2d760-d41f-4cab-bfeb-10d2a19de424",
+      "id": "5dfe62ab-c464-4345-919d-fa693259d40b",
+      "name": "elastic-agent-81942",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "airlock_digital": {
+      "execution_histories": {
+        "checkpoint": "thirdcheckpoint",
+        "commandline": "/bin/sh /tmp/Library/Airlock Digital / /",
+        "datetime": "2024-04-26T15:04:45.000Z",
+        "filename": "/tmp/PKInstallSandbox.fINk77/Scripts/com.airlock.enforcementagent.core.t6o72s/preinstall",
+        "hostname": ".local",
+        "netdomain": ".local",
+        "policyname": "Apple Mac",
+        "policyver": "v485",
+        "ppolicy": "Airlock Groups",
+        "pprocess": "sh",
+        "publisher": "Airlock Digital Pty Ltd (MXRN6N7XFL) (Mac)",
+        "sha256": "a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40",
+        "type": 3,
+        "type_value": "Untrusted Execution [OTP]",
+        "username": "devuser"
+      }
+    },
+    "data_stream": {
+      "dataset": "airlock_digital.execution_histories",
+      "namespace": "68027",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "5dfe62ab-c464-4345-919d-fa693259d40b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "airlock_digital.execution_histories",
+      "id": "thirdcheckpoint",
+      "ingested": "2026-03-10T02:02:11Z",
+      "kind": "event",
+      "original": "{\"checkpoint\":\"thirdcheckpoint\",\"commandline\":\"/bin/sh /tmp/Library/Airlock Digital / /\",\"datetime\":\"2024-04-26T15:04:45Z\",\"filename\":\"/tmp/PKInstallSandbox.fINk77/Scripts/com.airlock.enforcementagent.core.t6o72s/preinstall\",\"hostname\":\".local\",\"md5\":\"\",\"netdomain\":\".local\",\"policyname\":\"Apple Mac\",\"policyver\":\"v485\",\"ppolicy\":\"Airlock Groups\",\"pprocess\":\"sh\",\"publisher\":\"Airlock Digital Pty Ltd (MXRN6N7XFL) (Mac)\",\"sha128\":\"\",\"sha256\":\"a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40\",\"sha384\":\"\",\"sha512\":\"\",\"type\":3,\"username\":\"devuser\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "name": "preinstall",
+      "path": "/tmp/PKInstallSandbox.fINk77/Scripts/com.airlock.enforcementagent.core.t6o72s/preinstall"
+    },
+    "host": {
+      "hostname": ".local"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "command_line": "/bin/sh /tmp/Library/Airlock Digital / /",
+      "hash": {
+        "sha256": "a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40"
+      },
+      "parent": {
+        "name": "sh"
+      }
+    },
+    "related": {
+      "hash": [
+        "a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40"
+      ],
+      "hosts": [
+        ".local"
+      ],
+      "user": [
+        "devuser"
+      ]
+    },
+    "rule": {
+      "name": "Apple Mac",
+      "ruleset": "Airlock Groups",
+      "version": "v485"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "airlock_digital-execution_histories"
+    ],
+    "user": {
+      "name": "devuser"
+    }
+  },
+  {
+    "@timestamp": "2024-04-26T15:04:39.000Z",
+    "agent": {
+      "ephemeral_id": "aea2d760-d41f-4cab-bfeb-10d2a19de424",
+      "id": "5dfe62ab-c464-4345-919d-fa693259d40b",
+      "name": "elastic-agent-81942",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "airlock_digital": {
+      "execution_histories": {
+        "checkpoint": "secondcheckpoint",
+        "datetime": "2024-04-26T15:04:39.000Z",
+        "filename": "/Users/libswift_Concurrency.dylib",
+        "hostname": ".local",
+        "netdomain": ".local",
+        "policyname": "Apple Mac",
+        "policyver": "v485",
+        "ppolicy": "Airlock Groups",
+        "pprocess": "Code Helper (Renderer)",
+        "publisher": "Airlock Digital Pty Ltd (MXRN6N7XFL) (Mac)",
+        "sha256": "00138fe01658ee525ea0cdce387033dfff880985605affbf59d3843ad8a65e56",
+        "type": 2,
+        "type_value": "Untrusted Execution [Audit]",
+        "username": "antos"
+      }
+    },
+    "data_stream": {
+      "dataset": "airlock_digital.execution_histories",
+      "namespace": "68027",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "5dfe62ab-c464-4345-919d-fa693259d40b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "airlock_digital.execution_histories",
+      "id": "secondcheckpoint",
+      "ingested": "2026-03-10T02:02:11Z",
+      "kind": "event",
+      "original": "{\"checkpoint\":\"secondcheckpoint\",\"commandline\":\"\",\"datetime\":\"2024-04-26T15:04:39Z\",\"filename\":\"/Users/libswift_Concurrency.dylib\",\"hostname\":\".local\",\"md5\":\"\",\"netdomain\":\".local\",\"policyname\":\"Apple Mac\",\"policyver\":\"v485\",\"ppolicy\":\"Airlock Groups\",\"pprocess\":\"Code Helper (Renderer)\",\"publisher\":\"Airlock Digital Pty Ltd (MXRN6N7XFL) (Mac)\",\"sha128\":\"\",\"sha256\":\"00138fe01658ee525ea0cdce387033dfff880985605affbf59d3843ad8a65e56\",\"sha384\":\"\",\"sha512\":\"\",\"type\":2,\"username\":\"antos\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "name": "libswift_Concurrency.dylib",
+      "path": "/Users/libswift_Concurrency.dylib"
+    },
+    "host": {
+      "hostname": ".local"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "hash": {
+        "sha256": "00138fe01658ee525ea0cdce387033dfff880985605affbf59d3843ad8a65e56"
+      },
+      "parent": {
+        "name": "Code Helper (Renderer)"
+      }
+    },
+    "related": {
+      "hash": [
+        "00138fe01658ee525ea0cdce387033dfff880985605affbf59d3843ad8a65e56"
+      ],
+      "hosts": [
+        ".local"
+      ],
+      "user": [
+        "antos"
+      ]
+    },
+    "rule": {
+      "name": "Apple Mac",
+      "ruleset": "Airlock Groups",
+      "version": "v485"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "airlock_digital-execution_histories"
+    ],
+    "user": {
+      "name": "antos"
+    }
+  },
+  {
+    "@timestamp": "2024-04-26T14:50:56.000Z",
+    "agent": {
+      "ephemeral_id": "aea2d760-d41f-4cab-bfeb-10d2a19de424",
+      "id": "5dfe62ab-c464-4345-919d-fa693259d40b",
+      "name": "elastic-agent-81942",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "airlock_digital": {
+      "execution_histories": {
+        "checkpoint": "firstcheckpoint",
+        "commandline": "/bin/sh /tmp/PKInstallSandbox.mqvKk4/Scripts/ /Library/Airlock Digital / /",
+        "datetime": "2024-04-26T14:50:56.000Z",
+        "filename": "/tmp/PKInstallSandbox.mqvKk4/preinstall",
+        "hostname": ".local",
+        "netdomain": ".local",
+        "policyname": "Apple Mac",
+        "policyver": "v485",
+        "ppolicy": "Airlock Groups",
+        "pprocess": "sh",
+        "publisher": "Airlock Digital Pty Ltd (MXRN6N7XFL) (Mac)",
+        "sha256": "a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40",
+        "type": 1,
+        "type_value": "Blocked Execution",
+        "username": "root"
+      }
+    },
+    "data_stream": {
+      "dataset": "airlock_digital.execution_histories",
+      "namespace": "68027",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "5dfe62ab-c464-4345-919d-fa693259d40b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "airlock_digital.execution_histories",
+      "id": "firstcheckpoint",
+      "ingested": "2026-03-10T02:02:11Z",
+      "kind": "event",
+      "original": "{\"checkpoint\":\"firstcheckpoint\",\"commandline\":\"/bin/sh /tmp/PKInstallSandbox.mqvKk4/Scripts/ /Library/Airlock Digital / /\",\"datetime\":\"2024-04-26T14:50:56Z\",\"filename\":\"/tmp/PKInstallSandbox.mqvKk4/preinstall\",\"hostname\":\".local\",\"md5\":\"\",\"netdomain\":\".local\",\"policyname\":\"Apple Mac\",\"policyver\":\"v485\",\"ppolicy\":\"Airlock Groups\",\"pprocess\":\"sh\",\"publisher\":\"Airlock Digital Pty Ltd (MXRN6N7XFL) (Mac)\",\"sha128\":\"\",\"sha256\":\"a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40\",\"sha384\":\"\",\"sha512\":\"\",\"type\":1,\"username\":\"root\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "name": "preinstall",
+      "path": "/tmp/PKInstallSandbox.mqvKk4/preinstall"
+    },
+    "host": {
+      "hostname": ".local"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "process": {
+      "command_line": "/bin/sh /tmp/PKInstallSandbox.mqvKk4/Scripts/ /Library/Airlock Digital / /",
+      "hash": {
+        "sha256": "a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40"
+      },
+      "parent": {
+        "name": "sh"
+      }
+    },
+    "related": {
+      "hash": [
+        "a3f791dec1f2a40bd623a9b37604e7f2dee84eab3f6a513c6882231d89037c40"
+      ],
+      "hosts": [
+        ".local"
+      ],
+      "user": [
+        "root"
+      ]
+    },
+    "rule": {
+      "name": "Apple Mac",
+      "ruleset": "Airlock Groups",
+      "version": "v485"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "airlock_digital-execution_histories"
+    ],
+    "user": {
+      "name": "root"
+    }
+  }
+]

@@ -1,0 +1,994 @@
+[
+  {
+    "@timestamp": "2021-03-30T02:03:13.669Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.156.0.2"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:32.480Z",
+      "dataset": "zeek.files",
+      "id": "C0vua63rzjtLaiefyj",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      },
+      "mime_type": "application/x-x509-user-cert"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 3458
+    },
+    "related": {
+      "hash": [
+        "5abbc8a9137f6924861596848b7d7794",
+        "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.156.0.2"
+      ]
+    },
+    "server": {
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "X509",
+          "SHA256",
+          "SHA1",
+          "MD5"
+        ],
+        "depth": 0,
+        "duration": 0.0,
+        "fuid": "F1msmE2xRFsdvL2iI",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "mime_type": "application/x-x509-user-cert",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.156.0.2",
+        "seen_bytes": 893,
+        "session_ids": [
+          "C0vua63rzjtLaiefyj"
+        ],
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74",
+        "source": "SSL",
+        "timedout": false,
+        "tx_host": "89.160.20.156"
+      },
+      "session_id": "C0vua63rzjtLaiefyj"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T02:03:12.519Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.156.0.2"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:32.480Z",
+      "dataset": "zeek.files",
+      "id": "CgbPEj2jf5Ca7Lw0x2",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "1ab1d3a926a99ccfc25acccc5b4289b4",
+        "sha1": "1895628784b47ad8da112c699a1b21f5b49c2b80"
+      },
+      "mime_type": "text/html",
+      "size": 1609
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 2985
+    },
+    "related": {
+      "hash": [
+        "1ab1d3a926a99ccfc25acccc5b4289b4",
+        "1895628784b47ad8da112c699a1b21f5b49c2b80"
+      ],
+      "ip": [
+        "169.254.169.254",
+        "10.156.0.2"
+      ]
+    },
+    "server": {
+      "ip": "169.254.169.254"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "SHA1",
+          "MD5"
+        ],
+        "depth": 0,
+        "duration": 5.316734313964844e-05,
+        "fuid": "FSMkdM3YUSoEVpLZN4",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "1ab1d3a926a99ccfc25acccc5b4289b4",
+        "mime_type": "text/html",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.156.0.2",
+        "seen_bytes": 1609,
+        "session_ids": [
+          "CgbPEj2jf5Ca7Lw0x2"
+        ],
+        "sha1": "1895628784b47ad8da112c699a1b21f5b49c2b80",
+        "source": "HTTP",
+        "timedout": false,
+        "tx_host": "169.254.169.254"
+      },
+      "session_id": "CgbPEj2jf5Ca7Lw0x2"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T02:03:03.678Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.156.0.2"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:32.480Z",
+      "dataset": "zeek.files",
+      "id": "C0vhl91PPOI7LbrPZ8",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      },
+      "mime_type": "application/x-x509-user-cert"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 2443
+    },
+    "related": {
+      "hash": [
+        "5abbc8a9137f6924861596848b7d7794",
+        "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.156.0.2"
+      ]
+    },
+    "server": {
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "X509",
+          "SHA256",
+          "SHA1",
+          "MD5"
+        ],
+        "depth": 0,
+        "duration": 0.0,
+        "fuid": "FdGWZq2wRIvCfjvdI5",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "mime_type": "application/x-x509-user-cert",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.156.0.2",
+        "seen_bytes": 893,
+        "session_ids": [
+          "C0vhl91PPOI7LbrPZ8"
+        ],
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74",
+        "source": "SSL",
+        "timedout": false,
+        "tx_host": "89.160.20.156"
+      },
+      "session_id": "C0vhl91PPOI7LbrPZ8"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T02:02:53.678Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.156.0.2"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:32.480Z",
+      "dataset": "zeek.files",
+      "id": "CaB3fq3yLrKCbYLqr4",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      },
+      "mime_type": "application/x-x509-user-cert"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 1901
+    },
+    "related": {
+      "hash": [
+        "5abbc8a9137f6924861596848b7d7794",
+        "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.156.0.2"
+      ]
+    },
+    "server": {
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "X509",
+          "SHA256",
+          "SHA1",
+          "MD5"
+        ],
+        "depth": 0,
+        "duration": 0.0,
+        "fuid": "FYszs61e8hIUWMWgL5",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "mime_type": "application/x-x509-user-cert",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.156.0.2",
+        "seen_bytes": 893,
+        "session_ids": [
+          "CaB3fq3yLrKCbYLqr4"
+        ],
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74",
+        "source": "SSL",
+        "timedout": false,
+        "tx_host": "89.160.20.156"
+      },
+      "session_id": "CaB3fq3yLrKCbYLqr4"
+    }
+  },
+  {
+    "@timestamp": "2021-03-30T02:02:43.671Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.156.0.2"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:32.480Z",
+      "dataset": "zeek.files",
+      "id": "ClG5ErV7bkgKgOaV",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      },
+      "mime_type": "application/x-x509-user-cert"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 1361
+    },
+    "related": {
+      "hash": [
+        "5abbc8a9137f6924861596848b7d7794",
+        "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.156.0.2"
+      ]
+    },
+    "server": {
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "X509",
+          "SHA256",
+          "SHA1",
+          "MD5"
+        ],
+        "depth": 0,
+        "duration": 0.0,
+        "fuid": "Fe722V1qt2DSlqCiOa",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "5abbc8a9137f6924861596848b7d7794",
+        "mime_type": "application/x-x509-user-cert",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.156.0.2",
+        "seen_bytes": 893,
+        "session_ids": [
+          "ClG5ErV7bkgKgOaV"
+        ],
+        "sha1": "99c1daf07c8d69a8a065492dcaae43c43ff13497",
+        "sha256": "1de4074b4e38377f4367303f4a19c986a506180f22a6e53a68cc7679ea6d9c74",
+        "source": "SSL",
+        "timedout": false,
+        "tx_host": "89.160.20.156"
+      },
+      "session_id": "ClG5ErV7bkgKgOaV"
+    }
+  },
+  {
+    "@timestamp": "2019-01-17T01:33:21.566Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.178.98.102"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:32.480Z",
+      "dataset": "zeek.files",
+      "id": "C6sjVo23iNApLnlAt6",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "b9742f12eb97eff531d94f7800c6706c",
+        "sha1": "b88d13fe319d342e7a808ce3a0a1158111fc3c2a"
+      },
+      "mime_type": "application/pkix-cert"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 453
+    },
+    "related": {
+      "hash": [
+        "b9742f12eb97eff531d94f7800c6706c",
+        "b88d13fe319d342e7a808ce3a0a1158111fc3c2a"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.178.98.102"
+      ]
+    },
+    "server": {
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "X509",
+          "MD5",
+          "SHA1"
+        ],
+        "depth": 0,
+        "duration": 0.0,
+        "fuid": "FShtIS1gydeSFf8M63",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "b9742f12eb97eff531d94f7800c6706c",
+        "mime_type": "application/pkix-cert",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.178.98.102",
+        "seen_bytes": 2089,
+        "session_ids": [
+          "C6sjVo23iNApLnlAt6"
+        ],
+        "sha1": "b88d13fe319d342e7a808ce3a0a1158111fc3c2a",
+        "source": "SSL",
+        "timedout": false,
+        "tx_host": "89.160.20.156"
+      },
+      "session_id": "C6sjVo23iNApLnlAt6"
+    }
+  },
+  {
+    "@timestamp": "2019-01-17T01:33:21.566Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.178.98.102"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:32.480Z",
+      "dataset": "zeek.files",
+      "id": "C6sjVo23iNApLnlAt6",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "48f0e38385112eeca5fc9ffd402eaecd",
+        "sha1": "8e8321ca08b08e3726fe1d82996884eeb5f0d655"
+      },
+      "mime_type": "application/pkix-cert"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 907
+    },
+    "related": {
+      "hash": [
+        "48f0e38385112eeca5fc9ffd402eaecd",
+        "8e8321ca08b08e3726fe1d82996884eeb5f0d655"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.178.98.102"
+      ]
+    },
+    "server": {
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "X509",
+          "MD5",
+          "SHA1"
+        ],
+        "depth": 0,
+        "duration": 0.0,
+        "fuid": "F9ip9a3MDAq3XLBOn2",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "48f0e38385112eeca5fc9ffd402eaecd",
+        "mime_type": "application/pkix-cert",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.178.98.102",
+        "seen_bytes": 1092,
+        "session_ids": [
+          "C6sjVo23iNApLnlAt6"
+        ],
+        "sha1": "8e8321ca08b08e3726fe1d82996884eeb5f0d655",
+        "source": "SSL",
+        "timedout": false,
+        "tx_host": "89.160.20.156"
+      },
+      "session_id": "C6sjVo23iNApLnlAt6"
+    }
+  },
+  {
+    "@timestamp": "2019-01-17T01:33:16.636Z",
+    "agent": {
+      "ephemeral_id": "f4e11916-715a-45de-b61b-e83ae54797bc",
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "name": "elastic-agent-79637",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "ip": "10.178.98.102"
+    },
+    "data_stream": {
+      "dataset": "zeek.files",
+      "namespace": "77741",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "9f7ed70e-feed-47d2-a0cf-fa6b4e420899",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "file"
+      ],
+      "created": "2026-03-10T03:16:30.491Z",
+      "dataset": "zeek.files",
+      "id": "C8I0zn3r9EPbfLgta6",
+      "ingested": "2026-03-10T03:16:33Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "md5": "79e4a9840d7d3a96d7c04fe2434c892e",
+        "sha1": "a8985d3a65e5e5c4b2d7d66d40c6dd2fb19c5436"
+      },
+      "mime_type": "application/pkix-cert"
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-79637",
+      "ip": [
+        "172.24.0.2",
+        "172.18.0.11"
+      ],
+      "mac": [
+        "2A-23-C3-87-9F-FB",
+        "5E-BD-27-57-9E-6B"
+      ],
+      "name": "elastic-agent-79637",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/files.log"
+      },
+      "offset": 0
+    },
+    "related": {
+      "hash": [
+        "79e4a9840d7d3a96d7c04fe2434c892e",
+        "a8985d3a65e5e5c4b2d7d66d40c6dd2fb19c5436"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.178.98.102"
+      ]
+    },
+    "server": {
+      "ip": "89.160.20.156"
+    },
+    "tags": [
+      "zeek-files"
+    ],
+    "zeek": {
+      "files": {
+        "analyzers": [
+          "X509",
+          "MD5",
+          "SHA1"
+        ],
+        "depth": 0,
+        "duration": 0.0,
+        "fuid": "FMkioa222mEuM2RuQ9",
+        "is_orig": false,
+        "local_orig": false,
+        "md5": "79e4a9840d7d3a96d7c04fe2434c892e",
+        "mime_type": "application/pkix-cert",
+        "missing_bytes": 0,
+        "overflow_bytes": 0,
+        "rx_host": "10.178.98.102",
+        "seen_bytes": 947,
+        "session_ids": [
+          "C8I0zn3r9EPbfLgta6"
+        ],
+        "sha1": "a8985d3a65e5e5c4b2d7d66d40c6dd2fb19c5436",
+        "source": "SSL",
+        "timedout": false,
+        "tx_host": "89.160.20.156"
+      },
+      "session_id": "C8I0zn3r9EPbfLgta6"
+    }
+  }
+]

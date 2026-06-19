@@ -1,0 +1,422 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:56:17.787Z",
+    "agent": {
+      "ephemeral_id": "2f1d44b8-e184-47e5-9fe8-a42c848da388",
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "name": "elastic-agent-26311",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "create_date": "2019-10-02T18:03:07.000Z",
+      "id": "guo4a5u7YAHhjXrMK0g5",
+      "last_updated": "2019-10-02T18:03:07.000Z",
+      "name": "Example Device name 1",
+      "status": "CREATED",
+      "type": "okta_device"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_okta.device",
+      "namespace": "20707",
+      "type": "logs"
+    },
+    "device": {
+      "id": "guo4a5u7YAHhjXrMK0g5",
+      "serial_number": "XXDDRFCFRGF3M8MD6D"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entityanalytics_okta": {
+      "device": {
+        "_links": {
+          "activate": {
+            "hints": {
+              "allow": "POST"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/lifecycle/activate"
+          },
+          "self": {
+            "hints": {
+              "allow": [
+                "GET",
+                "PATCH",
+                "PUT"
+              ]
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4"
+          },
+          "users": {
+            "hints": {
+              "allow": "GET"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/users"
+          }
+        },
+        "created": "2019-10-02T18:03:07.000Z",
+        "id": "guo4a5u7YAHhjXrMK0g5",
+        "last_updated": "2019-10-02T18:03:07.000Z",
+        "profile": {
+          "disk_encryption_type": "ALL_INTERNAL_VOLUMES",
+          "display_name": "Example Device name 1",
+          "registered": true,
+          "secure_hardware_present": false,
+          "sid": "S-1-11-111"
+        },
+        "status": "CREATED"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "entityanalytics_okta.device",
+      "ingested": "2026-03-10T03:56:18Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-26311\",\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"ephemeral_id\":\"2f1d44b8-e184-47e5-9fe8-a42c848da388\",\"type\":\"filebeat\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:56:17.787Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"20707\",\"type\":\"logs\",\"dataset\":\"entityanalytics_okta.entity\"},\"elastic_agent\":{\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"version\":\"9.3.1\",\"snapshot\":false},\"okta_domain\":\"trial-xxxxxxx-admin.okta.com\",\"event\":{\"kind\":\"asset\",\"dataset\":\"entityanalytics_okta.entity\"},\"okta\":{\"resourceAlternateID\":\"\",\"lastUpdated\":\"2019-10-02T18:03:07Z\",\"resourceDisplayName\":{\"sensitive\":false,\"value\":\"Example Device name 1\"},\"resourceID\":\"guo4a5u7YAHhjXrMK0g4\",\"_links\":{\"activate\":{\"hints\":{\"allow\":[\"POST\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/lifecycle/activate\"},\"self\":{\"hints\":{\"allow\":[\"GET\",\"PATCH\",\"PUT\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4\"},\"users\":{\"hints\":{\"allow\":[\"GET\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/users\"}},\"created\":\"2019-10-02T18:03:07Z\",\"profile\":{\"serialNumber\":\"XXDDRFCFRGF3M8MD6D\",\"displayName\":\"Example Device name 1\",\"registered\":true,\"diskEncryptionType\":\"ALL_INTERNAL_VOLUMES\",\"secureHardwarePresent\":false,\"platform\":\"WINDOWS\",\"sid\":\"S-1-11-111\"},\"id\":\"guo4a5u7YAHhjXrMK0g5\",\"users\":[{\"lastUpdated\":\"0001-01-01T00:00:00Z\",\"created\":\"0001-01-01T00:00:00Z\",\"profile\":null,\"id\":\"\",\"type\":null,\"status\":\"\",\"activated\":\"0001-01-01T00:00:00Z\"}],\"resourceType\":\"UDDevice\",\"status\":\"CREATED\"},\"device\":{\"id\":\"guo4a5u7YAHhjXrMK0g5\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_okta.entity\"},\"tags\":[\"preserve_original_event\",\"preserve_duplicate_custom_fields\",\"forwarded\",\"entityanalytics_okta-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_okta.entity-20707\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "name": "trial-xxxxxxx-admin.okta.com"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_okta.entity"
+    },
+    "os": {
+      "platform": "windows"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "entityanalytics_okta-entity"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T03:56:17.787Z",
+    "agent": {
+      "ephemeral_id": "2f1d44b8-e184-47e5-9fe8-a42c848da388",
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "name": "elastic-agent-26311",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "create_date": "2023-06-21T23:24:02.000Z",
+      "id": "guo4a5u7YAHhjXrMK0g5",
+      "last_updated": "2023-06-21T23:24:02.000Z",
+      "name": "Example Device name 2",
+      "status": "ACTIVE",
+      "type": "okta_device"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_okta.device",
+      "namespace": "20707",
+      "type": "logs"
+    },
+    "device": {
+      "id": "guo4a5u7YAHhjXrMK0g5"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entityanalytics_okta": {
+      "device": {
+        "_links": {
+          "activate": {
+            "hints": {
+              "allow": "POST"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/lifecycle/activate"
+          },
+          "self": {
+            "hints": {
+              "allow": [
+                "GET",
+                "PATCH",
+                "PUT"
+              ]
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5"
+          },
+          "users": {
+            "hints": {
+              "allow": "GET"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/users"
+          }
+        },
+        "created": "2023-06-21T23:24:02.000Z",
+        "id": "guo4a5u7YAHhjXrMK0g5",
+        "last_updated": "2023-06-21T23:24:02.000Z",
+        "profile": {
+          "disk_encryption_type": "USER",
+          "display_name": "Example Device name 2",
+          "registered": true,
+          "secure_hardware_present": true
+        },
+        "status": "ACTIVE"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "entityanalytics_okta.device",
+      "ingested": "2026-03-10T03:56:18Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-26311\",\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"type\":\"filebeat\",\"ephemeral_id\":\"2f1d44b8-e184-47e5-9fe8-a42c848da388\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:56:17.787Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"20707\",\"type\":\"logs\",\"dataset\":\"entityanalytics_okta.entity\"},\"elastic_agent\":{\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"version\":\"9.3.1\",\"snapshot\":false},\"okta_domain\":\"trial-xxxxxxx-admin.okta.com\",\"event\":{\"kind\":\"asset\",\"dataset\":\"entityanalytics_okta.entity\"},\"okta\":{\"resourceAlternateID\":\"\",\"lastUpdated\":\"2023-06-21T23:24:02Z\",\"resourceDisplayName\":{\"sensitive\":false,\"value\":\"Example Device name 2\"},\"resourceID\":\"guo4a5u7YAHhjXrMK0g5\",\"_links\":{\"activate\":{\"hints\":{\"allow\":[\"POST\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/lifecycle/activate\"},\"self\":{\"hints\":{\"allow\":[\"GET\",\"PATCH\",\"PUT\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5\"},\"users\":{\"hints\":{\"allow\":[\"GET\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/users\"}},\"created\":\"2023-06-21T23:24:02Z\",\"profile\":{\"osVersion\":\"13:2023-05-05\",\"displayName\":\"Example Device name 2\",\"registered\":true,\"diskEncryptionType\":\"USER\",\"model\":\"Pixel 6\",\"secureHardwarePresent\":true,\"platform\":\"ANDROID\",\"manufacturer\":\"Google\"},\"id\":\"guo4a5u7YAHhjXrMK0g5\",\"users\":[{\"lastUpdated\":\"0001-01-01T00:00:00Z\",\"created\":\"0001-01-01T00:00:00Z\",\"profile\":null,\"id\":\"\",\"type\":null,\"status\":\"\",\"activated\":\"0001-01-01T00:00:00Z\"}],\"resourceType\":\"UDDevice\",\"status\":\"ACTIVE\"},\"device\":{\"id\":\"guo4a5u7YAHhjXrMK0g5\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_okta.entity\"},\"tags\":[\"preserve_original_event\",\"preserve_duplicate_custom_fields\",\"forwarded\",\"entityanalytics_okta-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_okta.entity-20707\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "name": "trial-xxxxxxx-admin.okta.com"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_okta.entity"
+    },
+    "os": {
+      "platform": "android"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "entityanalytics_okta-entity"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T03:56:15.550Z",
+    "agent": {
+      "ephemeral_id": "2f1d44b8-e184-47e5-9fe8-a42c848da388",
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "name": "elastic-agent-26311",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "create_date": "2023-06-21T23:24:02.000Z",
+      "id": "guo4a5u7YAHhjXrMK0g5",
+      "last_updated": "2023-06-21T23:24:02.000Z",
+      "name": "Example Device name 2",
+      "status": "ACTIVE",
+      "type": "okta_device"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_okta.device",
+      "namespace": "20707",
+      "type": "logs"
+    },
+    "device": {
+      "id": "guo4a5u7YAHhjXrMK0g5"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entityanalytics_okta": {
+      "device": {
+        "_links": {
+          "activate": {
+            "hints": {
+              "allow": "POST"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/lifecycle/activate"
+          },
+          "self": {
+            "hints": {
+              "allow": [
+                "GET",
+                "PATCH",
+                "PUT"
+              ]
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5"
+          },
+          "users": {
+            "hints": {
+              "allow": "GET"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/users"
+          }
+        },
+        "created": "2023-06-21T23:24:02.000Z",
+        "id": "guo4a5u7YAHhjXrMK0g5",
+        "last_updated": "2023-06-21T23:24:02.000Z",
+        "profile": {
+          "disk_encryption_type": "USER",
+          "display_name": "Example Device name 2",
+          "registered": true,
+          "secure_hardware_present": true
+        },
+        "status": "ACTIVE"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "entityanalytics_okta.device",
+      "ingested": "2026-03-10T03:56:16Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-26311\",\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"ephemeral_id\":\"2f1d44b8-e184-47e5-9fe8-a42c848da388\",\"type\":\"filebeat\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:56:15.550Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"20707\",\"type\":\"logs\",\"dataset\":\"entityanalytics_okta.entity\"},\"elastic_agent\":{\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"version\":\"9.3.1\",\"snapshot\":false},\"okta_domain\":\"trial-xxxxxxx-admin.okta.com\",\"event\":{\"kind\":\"asset\",\"dataset\":\"entityanalytics_okta.entity\"},\"device\":{\"id\":\"guo4a5u7YAHhjXrMK0g5\"},\"okta\":{\"resourceAlternateID\":\"\",\"lastUpdated\":\"2023-06-21T23:24:02Z\",\"resourceDisplayName\":{\"sensitive\":false,\"value\":\"Example Device name 2\"},\"resourceID\":\"guo4a5u7YAHhjXrMK0g5\",\"_links\":{\"activate\":{\"hints\":{\"allow\":[\"POST\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/lifecycle/activate\"},\"self\":{\"hints\":{\"allow\":[\"GET\",\"PATCH\",\"PUT\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5\"},\"users\":{\"hints\":{\"allow\":[\"GET\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g5/users\"}},\"created\":\"2023-06-21T23:24:02Z\",\"profile\":{\"osVersion\":\"13:2023-05-05\",\"displayName\":\"Example Device name 2\",\"registered\":true,\"model\":\"Pixel 6\",\"diskEncryptionType\":\"USER\",\"secureHardwarePresent\":true,\"platform\":\"ANDROID\",\"manufacturer\":\"Google\"},\"id\":\"guo4a5u7YAHhjXrMK0g5\",\"users\":[{\"lastUpdated\":\"0001-01-01T00:00:00Z\",\"created\":\"0001-01-01T00:00:00Z\",\"profile\":null,\"id\":\"\",\"type\":null,\"status\":\"\",\"activated\":\"0001-01-01T00:00:00Z\"}],\"resourceType\":\"UDDevice\",\"status\":\"ACTIVE\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_okta.entity\"},\"tags\":[\"preserve_original_event\",\"preserve_duplicate_custom_fields\",\"forwarded\",\"entityanalytics_okta-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_okta.entity-20707\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "name": "trial-xxxxxxx-admin.okta.com"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_okta.entity"
+    },
+    "os": {
+      "platform": "android"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "entityanalytics_okta-entity"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T03:56:15.549Z",
+    "agent": {
+      "ephemeral_id": "2f1d44b8-e184-47e5-9fe8-a42c848da388",
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "name": "elastic-agent-26311",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "create_date": "2019-10-02T18:03:07.000Z",
+      "id": "guo4a5u7YAHhjXrMK0g5",
+      "last_updated": "2019-10-02T18:03:07.000Z",
+      "name": "Example Device name 1",
+      "status": "CREATED",
+      "type": "okta_device"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_okta.device",
+      "namespace": "20707",
+      "type": "logs"
+    },
+    "device": {
+      "id": "guo4a5u7YAHhjXrMK0g5",
+      "serial_number": "XXDDRFCFRGF3M8MD6D"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8389b4f5-a920-45e7-b88c-919f38aef7db",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entityanalytics_okta": {
+      "device": {
+        "_links": {
+          "activate": {
+            "hints": {
+              "allow": "POST"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/lifecycle/activate"
+          },
+          "self": {
+            "hints": {
+              "allow": [
+                "GET",
+                "PATCH",
+                "PUT"
+              ]
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4"
+          },
+          "users": {
+            "hints": {
+              "allow": "GET"
+            },
+            "href": "https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/users"
+          }
+        },
+        "created": "2019-10-02T18:03:07.000Z",
+        "id": "guo4a5u7YAHhjXrMK0g5",
+        "last_updated": "2019-10-02T18:03:07.000Z",
+        "profile": {
+          "disk_encryption_type": "ALL_INTERNAL_VOLUMES",
+          "display_name": "Example Device name 1",
+          "registered": true,
+          "secure_hardware_present": false,
+          "sid": "S-1-11-111"
+        },
+        "status": "CREATED"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "entityanalytics_okta.device",
+      "ingested": "2026-03-10T03:56:16Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-26311\",\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"type\":\"filebeat\",\"ephemeral_id\":\"2f1d44b8-e184-47e5-9fe8-a42c848da388\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:56:15.549Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"20707\",\"type\":\"logs\",\"dataset\":\"entityanalytics_okta.entity\"},\"elastic_agent\":{\"id\":\"8389b4f5-a920-45e7-b88c-919f38aef7db\",\"version\":\"9.3.1\",\"snapshot\":false},\"okta_domain\":\"trial-xxxxxxx-admin.okta.com\",\"event\":{\"kind\":\"asset\",\"dataset\":\"entityanalytics_okta.entity\"},\"device\":{\"id\":\"guo4a5u7YAHhjXrMK0g5\"},\"okta\":{\"resourceAlternateID\":\"\",\"lastUpdated\":\"2019-10-02T18:03:07Z\",\"resourceDisplayName\":{\"sensitive\":false,\"value\":\"Example Device name 1\"},\"resourceID\":\"guo4a5u7YAHhjXrMK0g4\",\"_links\":{\"activate\":{\"hints\":{\"allow\":[\"POST\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/lifecycle/activate\"},\"self\":{\"hints\":{\"allow\":[\"GET\",\"PATCH\",\"PUT\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4\"},\"users\":{\"hints\":{\"allow\":[\"GET\"]},\"href\":\"https://{yourOktaDomain}/api/v1/devices/guo4a5u7YAHhjXrMK0g4/users\"}},\"created\":\"2019-10-02T18:03:07Z\",\"profile\":{\"serialNumber\":\"XXDDRFCFRGF3M8MD6D\",\"displayName\":\"Example Device name 1\",\"registered\":true,\"diskEncryptionType\":\"ALL_INTERNAL_VOLUMES\",\"secureHardwarePresent\":false,\"platform\":\"WINDOWS\",\"sid\":\"S-1-11-111\"},\"id\":\"guo4a5u7YAHhjXrMK0g5\",\"users\":[{\"lastUpdated\":\"0001-01-01T00:00:00Z\",\"created\":\"0001-01-01T00:00:00Z\",\"profile\":null,\"id\":\"\",\"type\":null,\"status\":\"\",\"activated\":\"0001-01-01T00:00:00Z\"}],\"resourceType\":\"UDDevice\",\"status\":\"CREATED\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_okta.entity\"},\"tags\":[\"preserve_original_event\",\"preserve_duplicate_custom_fields\",\"forwarded\",\"entityanalytics_okta-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_okta.entity-20707\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "name": "trial-xxxxxxx-admin.okta.com"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_okta.entity"
+    },
+    "os": {
+      "platform": "windows"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "entityanalytics_okta-entity"
+    ]
+  }
+]

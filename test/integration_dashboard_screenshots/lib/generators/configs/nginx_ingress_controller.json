@@ -1,0 +1,45 @@
+{
+  "package": "nginx_ingress_controller",
+  "dataStreams": [
+    {
+      "dataset": "nginx_ingress_controller.access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "http.request.method",
+        "http.response.body.bytes",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "nginx_ingress_controller.access.upstream.name",
+        "nginx_ingress_controller.access.upstream.response.length",
+        "nginx_ingress_controller.access.upstream.response.time",
+        "nginx_ingress_controller.error.source.file",
+        "source.geo.location",
+        "url.original",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nginx_ingress_controller.error",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "http.request.method",
+        "http.response.body.bytes",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "nginx_ingress_controller.error.source.file",
+        "url.original"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

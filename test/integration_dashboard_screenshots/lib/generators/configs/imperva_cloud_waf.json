@@ -1,0 +1,25 @@
+{
+  "package": "imperva_cloud_waf",
+  "dataStreams": [
+    {
+      "dataset": "imperva_cloud_waf.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.process.name",
+        "event.action",
+        "http.request.method",
+        "http.response.status_code",
+        "imperva_cloud_waf.event.extensions.device.custom_string6",
+        "imperva_cloud_waf.event.extensions.source.service_name",
+        "imperva_cloud_waf.event.name",
+        "source.geo.country_iso_code",
+        "source.ip",
+        "source.service.name",
+        "url.original",
+        "user_agent.original"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

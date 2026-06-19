@@ -1,0 +1,103 @@
+{
+  "package": "cyera",
+  "dataStreams": [
+    {
+      "dataset": "cyera.classification",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cyera.classification.context.tokenization",
+        "cyera.classification.data.category",
+        "cyera.classification.level",
+        "cyera.classification.sensitivity.value",
+        "labels.is_transform_source",
+        "user.roles"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "cyera.datastore",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.provider",
+        "cloud.region",
+        "cyera.datastore.datastore.owners.datastore_uid",
+        "cyera.datastore.datastore.owners.email",
+        "cyera.datastore.datastore.owners.owner_type",
+        "cyera.datastore.datastore.owners.source",
+        "cyera.datastore.datastore.owners.uid",
+        "cyera.datastore.ghost",
+        "cyera.datastore.issues.closed",
+        "cyera.datastore.issues.in_progress",
+        "cyera.datastore.issues.open",
+        "cyera.datastore.owner",
+        "cyera.datastore.public_accessibility_state",
+        "cyera.datastore.sensitivity.value",
+        "labels.is_transform_source",
+        "service.type"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "cyera.event",
+      "indexPattern": "metrics-*",
+      "docTarget": 570,
+      "fields": [
+        "cloud.provider",
+        "cyera.event.account.platform",
+        "cyera.event.domain_name",
+        "cyera.event.is_report.deleted",
+        "cyera.event.is_report.expired",
+        "cyera.event.original_sensitivity.value",
+        "cyera.event.policy.name",
+        "cyera.event.policy.uid",
+        "cyera.event.policy.use_cases",
+        "cyera.event.report.file_name",
+        "cyera.event.report.name",
+        "cyera.event.report.type",
+        "cyera.event.sku",
+        "cyera.event.target_sensitivity.value",
+        "cyera.event.type",
+        "cyera.event.vendor.link",
+        "cyera.event.vendor.status",
+        "cyera.event.vendor.ticket_id",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cyera.issue",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloud.provider",
+        "cloud.region",
+        "cloud.service.name",
+        "cyera.issue.owner",
+        "cyera.issue.risk.description",
+        "cyera.issue.risk.frameworks",
+        "cyera.issue.risk.policy_uid",
+        "cyera.issue.risk.use_cases",
+        "cyera.issue.risk_status",
+        "cyera.issue.severity",
+        "cyera.issue.status",
+        "event.id",
+        "labels.is_transform_source"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

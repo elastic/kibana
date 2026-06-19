@@ -1,0 +1,69 @@
+{
+  "package": "prometheus",
+  "dataStreams": [
+    {
+      "dataset": "prometheus.collector",
+      "indexPattern": "metrics-*",
+      "docTarget": 720,
+      "fields": [
+        "prometheus.labels.handler",
+        "prometheus.labels.name",
+        "prometheus.labels.quantile",
+        "prometheus.labels.scrape_job",
+        "prometheus.labels.slice",
+        "prometheus.prometheus_engine_query_duration_seconds.value",
+        "prometheus.prometheus_http_requests_total.rate",
+        "prometheus.prometheus_notifications_errors_total.counter",
+        "prometheus.prometheus_notifications_queue_capacity.value",
+        "prometheus.prometheus_notifications_queue_length.value",
+        "prometheus.prometheus_sd_discovered_targets.value",
+        "prometheus.prometheus_target_scrape_pool_sync_total.counter",
+        "prometheus.prometheus_target_scrapes_exceeded_sample_limit_total.counter",
+        "prometheus.prometheus_target_scrapes_sample_duplicate_timestamp_total.counter",
+        "prometheus.prometheus_target_scrapes_sample_out_of_bounds_total.counter",
+        "prometheus.prometheus_target_scrapes_sample_out_of_order_total.counter",
+        "prometheus.prometheus_target_sync_length_seconds.value",
+        "prometheus.prometheus_tsdb_head_chunks.value",
+        "prometheus.prometheus_tsdb_head_samples_appended_total.rate",
+        "prometheus.prometheus_tsdb_head_series.value",
+        "prometheus.prometheus_tsdb_reloads_failures_total.rate",
+        "prometheus.prometheus_tsdb_reloads_total.rate",
+        "prometheus.prometheus_tsdb_wal_corruptions_total.counter",
+        "prometheus.prometheus_tsdb_wal_truncations_failed_total.counter"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "prometheus.remote_write",
+      "indexPattern": "metrics-*",
+      "docTarget": 720,
+      "fields": [
+        "prometheus.labels.handler",
+        "prometheus.labels.name",
+        "prometheus.labels.quantile",
+        "prometheus.labels.scrape_job",
+        "prometheus.labels.slice",
+        "prometheus.prometheus_engine_query_duration_seconds.value",
+        "prometheus.prometheus_http_requests_total.rate",
+        "prometheus.prometheus_notifications_errors_total.counter",
+        "prometheus.prometheus_notifications_queue_capacity.value",
+        "prometheus.prometheus_notifications_queue_length.value",
+        "prometheus.prometheus_sd_discovered_targets.value",
+        "prometheus.prometheus_target_scrape_pool_sync_total.counter",
+        "prometheus.prometheus_target_scrapes_exceeded_sample_limit_total.counter",
+        "prometheus.prometheus_target_scrapes_sample_duplicate_timestamp_total.counter",
+        "prometheus.prometheus_target_scrapes_sample_out_of_bounds_total.counter",
+        "prometheus.prometheus_target_scrapes_sample_out_of_order_total.counter",
+        "prometheus.prometheus_target_sync_length_seconds.value",
+        "prometheus.prometheus_tsdb_head_chunks.value",
+        "prometheus.prometheus_tsdb_head_samples_appended_total.rate",
+        "prometheus.prometheus_tsdb_head_series.value",
+        "prometheus.prometheus_tsdb_reloads_failures_total.rate",
+        "prometheus.prometheus_tsdb_reloads_total.rate",
+        "prometheus.prometheus_tsdb_wal_corruptions_total.counter",
+        "prometheus.prometheus_tsdb_wal_truncations_failed_total.counter"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

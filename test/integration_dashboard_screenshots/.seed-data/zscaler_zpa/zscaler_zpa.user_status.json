@@ -1,0 +1,140 @@
+[
+  {
+    "@timestamp": "2019-05-31T17:34:48.000Z",
+    "agent": {
+      "ephemeral_id": "7730b5a7-6c08-47d8-b176-5e833c6ceeb9",
+      "id": "63c3fef0-9429-4938-b774-7c512fc612bf",
+      "name": "elastic-agent-19857",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "geo": {
+        "country_iso_code": "US",
+        "location": {
+          "lat": 45.0,
+          "lon": -119.00000003166497
+        }
+      },
+      "ip": "81.2.69.144"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zpa.user_status",
+      "namespace": "49944",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "63c3fef0-9429-4938-b774-7c512fc612bf",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "zscaler_zpa.user_status",
+      "ingested": "2026-03-10T04:52:38Z",
+      "kind": "state",
+      "original": "{\"LogTimestamp\":\"Fri May 31 17:34:48 2019\",\"Customer\":\"Customer XYZ\",\"Username\":\"ZPA LSS Client\",\"SessionID\":\"vkczUERSLl88Y+ytH8v5\",\"SessionStatus\":\"ZPN_STATUS_AUTHENTICATED\",\"Version\":\"19.12.0-36-g87dad18\",\"ZEN\":\"broker2b.pdx\",\"CertificateCN\":\"loggerz2x.pde.zpabeta.net\",\"PublicIP\":\"81.2.69.144\",\"Latitude\":45,\"Longitude\":-119,\"CountryCode\":\"US\",\"TimestampAuthentication\":\"2019-05-29T21:18:38.000Z\",\"TimestampUnAuthentication\":\"\",\"TotalBytesRx\":31274866,\"TotalBytesTx\":25424152,\"Idp\":\"IDP Config\",\"Hostname\":\"DESKTOP-99HCSJ1\",\"Platform\":\"windows\",\"ClientType\":\"zpn_client_type_zapp\",\"TrustedNetworks\":\"TN1_stc1\",\"TrustedNetworksNames\":\"145248739466696953\",\"SAMLAttributes\":\"myname:user,myemail:user@zscaler.com\",\"PosturesHit\":\"sm-posture1,sm-posture2\",\"PosturesMiss\":\"sm-posture11,sm-posture12\",\"ZENLatitude\":47,\"ZENLongitude\":-122,\"ZENCountryCode\":\"\",\"FQDNRegistered\": \"0\",\"FQDNRegisteredError\": \"CUSTOMER_NOT_ENABLED\"}",
+      "type": [
+        "info",
+        "user"
+      ]
+    },
+    "host": {
+      "hostname": "DESKTOP-99HCSJ1",
+      "os": {
+        "platform": "windows"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.21.0.3:46518"
+      }
+    },
+    "organization": {
+      "name": "Customer XYZ"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.144"
+      ],
+      "user": [
+        "ZPA LSS Client"
+      ]
+    },
+    "server": {
+      "geo": {
+        "location": {
+          "lat": 46.99999996460974,
+          "lon": -122.0000000204891
+        }
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "zscaler_zpa-user_status"
+    ],
+    "user": {
+      "name": "ZPA LSS Client"
+    },
+    "x509": {
+      "issuer": {
+        "common_name": [
+          "loggerz2x.pde.zpabeta.net"
+        ]
+      }
+    },
+    "zscaler_zpa": {
+      "user_status": {
+        "client": {
+          "type": "zpn_client_type_zapp"
+        },
+        "fqdn": {
+          "registered": false,
+          "registered_error": "CUSTOMER_NOT_ENABLED"
+        },
+        "idp": "IDP Config",
+        "postures": {
+          "hit": [
+            "sm-posture1",
+            "sm-posture2"
+          ],
+          "miss": [
+            "sm-posture11",
+            "sm-posture12"
+          ]
+        },
+        "saml_attributes": [
+          "myname:user",
+          "myemail:user@zscaler.com"
+        ],
+        "session": {
+          "id": "vkczUERSLl88Y+ytH8v5",
+          "status": "ZPN_STATUS_AUTHENTICATED"
+        },
+        "timestamp": {
+          "authentication": "2019-05-29T21:18:38.000Z"
+        },
+        "total": {
+          "bytes_rx": 31274866,
+          "bytes_tx": 25424152
+        },
+        "trusted_networks": "TN1_stc1",
+        "trusted_networks_names": "145248739466696953",
+        "version": "19.12.0-36-g87dad18",
+        "zen": {
+          "domain": "broker2b.pdx"
+        }
+      }
+    }
+  }
+]

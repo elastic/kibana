@@ -1,0 +1,33 @@
+{
+  "package": "microsoft_exchange_online_message_trace",
+  "dataStreams": [
+    {
+      "dataset": "microsoft_exchange_online_message_trace.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.as.organization.name",
+        "destination.geo.country_iso_code",
+        "email.attachments.file.size",
+        "email.direction",
+        "email.from.address",
+        "email.to.address",
+        "event.dataset",
+        "event.outcome",
+        "source.as.organization.name",
+        "source.geo.country_iso_code"
+      ],
+      "filterValues": {
+        "event.outcome": [
+          "Delivered",
+          "FilteredAsSpam",
+          "Quarantined"
+        ],
+        "email.direction": [
+          "outbound",
+          "internal"
+        ]
+      }
+    }
+  ]
+}

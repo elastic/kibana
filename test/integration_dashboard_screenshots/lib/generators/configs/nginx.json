@@ -1,0 +1,62 @@
+{
+  "package": "nginx",
+  "dataStreams": [
+    {
+      "dataset": "nginx.access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "http.request.method",
+        "http.response.body.bytes",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "source.geo.location",
+        "url.original",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nginx.error",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "http.request.method",
+        "http.response.body.bytes",
+        "http.response.status_code",
+        "log.level",
+        "message",
+        "source.geo.location",
+        "url.original",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "user_agent.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "nginx.stubstatus",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "host.hostname",
+        "nginx.stubstatus.accepts",
+        "nginx.stubstatus.active",
+        "nginx.stubstatus.dropped",
+        "nginx.stubstatus.handled",
+        "nginx.stubstatus.reading",
+        "nginx.stubstatus.requests",
+        "nginx.stubstatus.waiting",
+        "nginx.stubstatus.writing"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

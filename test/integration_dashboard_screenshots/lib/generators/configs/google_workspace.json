@@ -1,0 +1,316 @@
+{
+  "package": "google_workspace",
+  "dataStreams": [
+    {
+      "dataset": "google_workspace.access_transparency",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_workspace.access_transparency.gsuite_product_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.admin",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.admin.device.type",
+        "google_workspace.admin.domain.name",
+        "google_workspace.event.type",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.alert.data.events.device.id",
+        "google_workspace.alert.data.events.device.model",
+        "google_workspace.alert.data.events.device.type",
+        "google_workspace.alert.metadata.severity",
+        "google_workspace.alert.metadata.status",
+        "google_workspace.alert.security_investigation_tool_link",
+        "google_workspace.alert.type",
+        "organization.id",
+        "rule.name",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.calendar",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_workspace.calendar.api_kind",
+        "google_workspace.calendar.name",
+        "google_workspace.calendar.type",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.chat",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_workspace.chat.name",
+        "google_workspace.chat.report_type",
+        "google_workspace.chat.room_name",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.chrome",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "device.model.name",
+        "google_workspace.chrome.event_result",
+        "google_workspace.chrome.name",
+        "google_workspace.chrome.new_boot_mode",
+        "google_workspace.chrome.previous_boot_mode",
+        "google_workspace.chrome.server_scan_status",
+        "google_workspace.chrome.type",
+        "url.original",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.context_aware_access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.data_studio",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_workspace.data_studio.asset_type",
+        "google_workspace.data_studio.connector_type",
+        "google_workspace.data_studio.name",
+        "google_workspace.data_studio.type",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.device",
+      "indexPattern": "logs-*",
+      "docTarget": 600,
+      "fields": [
+        "event.action",
+        "google_workspace.device.account_state",
+        "google_workspace.device.action.execution_status",
+        "google_workspace.device.action.type",
+        "google_workspace.device.application.report.severity",
+        "google_workspace.device.application.state",
+        "google_workspace.device.compliance",
+        "google_workspace.device.deactivation_reason",
+        "google_workspace.device.failed_passwd_attempts",
+        "google_workspace.device.id",
+        "google_workspace.device.os.property",
+        "google_workspace.device.ownership",
+        "google_workspace.device.pha_category",
+        "google_workspace.device.policy.sync.result",
+        "google_workspace.device.policy.sync.type",
+        "google_workspace.device.property",
+        "google_workspace.device.register_privilege",
+        "google_workspace.device.security.patch_level",
+        "google_workspace.device.setting",
+        "google_workspace.device.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.drive",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "file.name",
+        "google_workspace.drive.file.type",
+        "source.geo.country_name",
+        "source.geo.location"
+      ],
+      "filterValues": {
+        "event.action": [
+          "download",
+          "upload",
+          "view"
+        ]
+      }
+    },
+    {
+      "dataset": "google_workspace.gcp",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.gmail",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "google_workspace.gmail.event_info.mail_event_type",
+        "google_workspace.gmail.message_info.action_type",
+        "google_workspace.gmail.message_info.attachment.file_extension_type",
+        "google_workspace.gmail.message_info.is_spam",
+        "google_workspace.gmail.message_info.triggered_rule_info.rule_type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.group_enterprise",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.group_enterprise.member.role",
+        "google_workspace.group_enterprise.member.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.groups",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.groups.acl_permission",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.keep",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_workspace.keep.name",
+        "google_workspace.keep.owner_email",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.login",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "source.geo.location",
+        "source.ip",
+        "user.email"
+      ],
+      "filterValues": {
+        "event.action": [
+          "login_success",
+          "login_failure"
+        ]
+      }
+    },
+    {
+      "dataset": "google_workspace.meet",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_workspace.meet.livestream.endpoint.ecdn_location",
+        "google_workspace.meet.livestream.endpoint.ecdn_network",
+        "google_workspace.meet.name",
+        "google_workspace.meet.type",
+        "host.geo.location",
+        "network.transport"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.rules",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.organization.domain",
+        "google_workspace.rules.data_source",
+        "google_workspace.rules.device.type",
+        "google_workspace.rules.matched.trigger",
+        "google_workspace.rules.resource.type",
+        "google_workspace.rules.severity",
+        "google_workspace.rules.type",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.saml",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.saml.failure_type",
+        "google_workspace.saml.initiated_by",
+        "source.geo.location"
+      ],
+      "filterValues": {
+        "event.action": [
+          "login_failure"
+        ]
+      }
+    },
+    {
+      "dataset": "google_workspace.token",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.token.api_name",
+        "google_workspace.token.app_name",
+        "google_workspace.token.client.type",
+        "google_workspace.token.method_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.user_accounts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "google_workspace.organization.domain",
+        "source.geo.location",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "google_workspace.vault",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "google_workspace.vault.additional_details.export_format",
+        "google_workspace.vault.name",
+        "google_workspace.vault.organizational_unit_name",
+        "google_workspace.vault.query.time_zone",
+        "google_workspace.vault.query.type",
+        "source.geo.location"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

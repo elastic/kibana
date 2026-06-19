@@ -1,0 +1,90 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:51:33.692Z",
+    "agent": {
+      "ephemeral_id": "aaadc04c-ef59-4ad3-9e13-9fefa9f6c280",
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "name": "elastic-agent-24055",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_entra_id.entity",
+      "namespace": "36723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "completed",
+      "agent_id_status": "verified",
+      "dataset": "entityanalytics_entra_id.entity",
+      "end": "2026-03-10T03:51:33.692Z",
+      "ingested": "2026-03-10T03:51:34Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-24055\",\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"ephemeral_id\":\"aaadc04c-ef59-4ad3-9e13-9fefa9f6c280\",\"type\":\"filebeat\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:51:33.692Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"36723\",\"type\":\"logs\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"elastic_agent\":{\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"version\":\"9.3.1\",\"snapshot\":false},\"event\":{\"action\":\"completed\",\"end\":\"2026-03-10T03:51:33.692Z\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_entra_id.entity\"},\"tags\":[\"all-entities\",\"preserve_original_event\",\"forwarded\",\"entityanalytics_entra_id-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_entra_id.entity-36723\",\"_id\":null,\"_version\":-4}"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_entra_id.entity"
+    },
+    "tags": [
+      "all-entities",
+      "preserve_original_event",
+      "forwarded",
+      "entityanalytics_entra_id-entity"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T03:51:31.723Z",
+    "agent": {
+      "ephemeral_id": "aaadc04c-ef59-4ad3-9e13-9fefa9f6c280",
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "name": "elastic-agent-24055",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_entra_id.entity",
+      "namespace": "36723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "started",
+      "agent_id_status": "verified",
+      "dataset": "entityanalytics_entra_id.entity",
+      "ingested": "2026-03-10T03:51:34Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-24055\",\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"type\":\"filebeat\",\"ephemeral_id\":\"aaadc04c-ef59-4ad3-9e13-9fefa9f6c280\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:51:31.723Z\",\"ecs\":{\"version\":\"8.11.0\"},\"data_stream\":{\"namespace\":\"36723\",\"type\":\"logs\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"elastic_agent\":{\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"version\":\"9.3.1\",\"snapshot\":false},\"event\":{\"start\":\"2026-03-10T03:51:31.723Z\",\"action\":\"started\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_entra_id.entity\"},\"tags\":[\"all-entities\",\"preserve_original_event\",\"forwarded\",\"entityanalytics_entra_id-entity\"],\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_entra_id.entity-36723\",\"_id\":null,\"_version\":-4}",
+      "start": "2026-03-10T03:51:31.723Z"
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_entra_id.entity"
+    },
+    "tags": [
+      "all-entities",
+      "preserve_original_event",
+      "forwarded",
+      "entityanalytics_entra_id-entity"
+    ]
+  }
+]

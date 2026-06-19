@@ -1,0 +1,236 @@
+[
+  {
+    "@timestamp": "2025-04-02T09:40:44.016Z",
+    "agent": {
+      "ephemeral_id": "475440e6-3450-405a-a9e6-9cee1ed57b3c",
+      "id": "160e7020-9848-44e8-8b30-40eea1d83a46",
+      "name": "elastic-agent-32540",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "armis": {
+      "alert": {
+        "activity_uuids": [
+          "ec44388f-9530-4ca3-9781-8029905776ef",
+          "0b0900f0-b118-4892-86a3-c06f42f848f3"
+        ],
+        "affected_devices_count": 2,
+        "alert_id": "71",
+        "classification": "Security - Other",
+        "description": "The Armis security platform has detected a violation of a policy and generated an alert.",
+        "device_ids": [
+          "19",
+          "469"
+        ],
+        "severity": "Critical",
+        "status": "Unhandled",
+        "status_change_time": "2025-04-02T09:40:44.016Z",
+        "time": "2025-03-29T02:50:06.124Z",
+        "title": "[Threat] Heavy Port Scan in Network",
+        "type": "System Policy Violation"
+      }
+    },
+    "data_stream": {
+      "dataset": "armis.alert",
+      "namespace": "16295",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "160e7020-9848-44e8-8b30-40eea1d83a46",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "armis.alert",
+      "id": "71",
+      "ingested": "2026-03-10T02:18:22Z",
+      "kind": "alert",
+      "original": "{\"activityUUIDs\":[\"ec44388f-9530-4ca3-9781-8029905776ef\",\"0b0900f0-b118-4892-86a3-c06f42f848f3\"],\"affectedDevicesCount\":2,\"alertId\":71,\"classification\":\"Security - Other\",\"connectionIds\":[],\"description\":\"The Armis security platform has detected a violation of a policy and generated an alert.\",\"destinationEndpoints\":[],\"deviceIds\":[19,469],\"lastAlertUpdateTime\":null,\"mitreAttackLabels\":null,\"policyId\":null,\"policyLabels\":null,\"policyTitle\":null,\"severity\":\"Critical\",\"sourceEndpoints\":[],\"status\":\"Unhandled\",\"statusChangeTime\":\"2025-04-02T09:40:44.016184+00:00\",\"time\":\"2025-03-29T02:50:06.124100+00:00\",\"title\":\"[Threat] Heavy Port Scan in Network\",\"type\":\"System Policy Violation\"}",
+      "severity": 99
+    },
+    "host": {
+      "id": [
+        "19",
+        "469"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "The Armis security platform has detected a violation of a policy and generated an alert.",
+    "observer": {
+      "product": "Asset Management and Security",
+      "vendor": "Armis"
+    },
+    "related": {
+      "hosts": [
+        "19",
+        "469"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "armis-alert"
+    ]
+  },
+  {
+    "@timestamp": "2025-03-29T02:50:06.124Z",
+    "agent": {
+      "ephemeral_id": "475440e6-3450-405a-a9e6-9cee1ed57b3c",
+      "id": "160e7020-9848-44e8-8b30-40eea1d83a46",
+      "name": "elastic-agent-32540",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "armis": {
+      "alert": {
+        "activity_uuids": [
+          "f63f0d20-5642-4631-a8a6-d8f8be63b1d4",
+          "2a76b04d-4470-4484-a3c6-6f2fbe96ba09",
+          "99a8bf84-dddb-437e-b53b-1d2eba754d24"
+        ],
+        "affected_devices_count": 1,
+        "alert_id": "70",
+        "classification": "Security - Other",
+        "description": "Mitre Tactic: Command and Control. Compromised systems will attempt to establish communication with their C2 systems. ",
+        "device_ids": [
+          "534"
+        ],
+        "severity": "Critical",
+        "status": "Unhandled",
+        "status_change_time": "2025-03-29T02:50:06.124Z",
+        "time": "2025-03-29T02:50:06.124Z",
+        "title": "Communication to a suspicious host",
+        "type": "System Policy Violation"
+      }
+    },
+    "data_stream": {
+      "dataset": "armis.alert",
+      "namespace": "16295",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "160e7020-9848-44e8-8b30-40eea1d83a46",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "armis.alert",
+      "id": "70",
+      "ingested": "2026-03-10T02:18:22Z",
+      "kind": "alert",
+      "original": "{\"activityUUIDs\":[\"f63f0d20-5642-4631-a8a6-d8f8be63b1d4\",\"2a76b04d-4470-4484-a3c6-6f2fbe96ba09\",\"99a8bf84-dddb-437e-b53b-1d2eba754d24\"],\"affectedDevicesCount\":1,\"alertId\":70,\"classification\":\"Security - Other\",\"connectionIds\":[],\"description\":\"Mitre Tactic: Command and Control. Compromised systems will attempt to establish communication with their C2 systems. \",\"destinationEndpoints\":[],\"deviceIds\":[534],\"lastAlertUpdateTime\":null,\"mitreAttackLabels\":null,\"policyId\":null,\"policyLabels\":null,\"policyTitle\":null,\"severity\":\"Critical\",\"sourceEndpoints\":[],\"status\":\"Unhandled\",\"statusChangeTime\":\"2025-03-29T02:50:06.124100+00:00\",\"time\":\"2025-03-29T02:50:06.124100+00:00\",\"title\":\"Communication to a suspicious host\",\"type\":\"System Policy Violation\"}",
+      "severity": 99
+    },
+    "host": {
+      "id": [
+        "534"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Mitre Tactic: Command and Control. Compromised systems will attempt to establish communication with their C2 systems. ",
+    "observer": {
+      "product": "Asset Management and Security",
+      "vendor": "Armis"
+    },
+    "related": {
+      "hosts": [
+        "534"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "armis-alert"
+    ]
+  },
+  {
+    "@timestamp": "2025-03-29T00:12:57.306Z",
+    "agent": {
+      "ephemeral_id": "475440e6-3450-405a-a9e6-9cee1ed57b3c",
+      "id": "160e7020-9848-44e8-8b30-40eea1d83a46",
+      "name": "elastic-agent-32540",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "armis": {
+      "alert": {
+        "activity_uuids": [
+          "6f3d6d3a-6732-44cc-9d63-10a38277fb15"
+        ],
+        "affected_devices_count": 1,
+        "alert_id": "61",
+        "classification": "Security - Other",
+        "description": "The Armis security platform has detected a violation of a policy and generated an alert.",
+        "device_ids": [
+          "854"
+        ],
+        "severity": "Critical",
+        "status": "Unhandled",
+        "status_change_time": "2025-03-29T00:12:57.306Z",
+        "time": "2025-03-29T00:12:57.306Z",
+        "title": "[Risk] Device Susceptible to Ransomware",
+        "type": "System Policy Violation"
+      }
+    },
+    "data_stream": {
+      "dataset": "armis.alert",
+      "namespace": "16295",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "160e7020-9848-44e8-8b30-40eea1d83a46",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "armis.alert",
+      "id": "61",
+      "ingested": "2026-03-10T02:18:22Z",
+      "kind": "alert",
+      "original": "{\"activityUUIDs\":[\"6f3d6d3a-6732-44cc-9d63-10a38277fb15\"],\"affectedDevicesCount\":1,\"alertId\":61,\"classification\":\"Security - Other\",\"connectionIds\":[],\"description\":\"The Armis security platform has detected a violation of a policy and generated an alert.\",\"destinationEndpoints\":[],\"deviceIds\":[854],\"lastAlertUpdateTime\":null,\"mitreAttackLabels\":null,\"policyId\":null,\"policyLabels\":null,\"policyTitle\":null,\"severity\":\"Critical\",\"sourceEndpoints\":[],\"status\":\"Unhandled\",\"statusChangeTime\":\"2025-03-29T00:12:57.306928+00:00\",\"time\":\"2025-03-29T00:12:57.306928+00:00\",\"title\":\"[Risk] Device Susceptible to Ransomware\",\"type\":\"System Policy Violation\"}",
+      "severity": 99
+    },
+    "host": {
+      "id": [
+        "854"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "The Armis security platform has detected a violation of a policy and generated an alert.",
+    "observer": {
+      "product": "Asset Management and Security",
+      "vendor": "Armis"
+    },
+    "related": {
+      "hosts": [
+        "854"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "armis-alert"
+    ]
+  }
+]

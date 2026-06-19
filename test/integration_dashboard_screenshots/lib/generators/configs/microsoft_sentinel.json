@@ -1,0 +1,50 @@
+{
+  "package": "microsoft_sentinel",
+  "dataStreams": [
+    {
+      "dataset": "microsoft_sentinel.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "microsoft_sentinel.alert.properties.confidence_level",
+        "microsoft_sentinel.alert.properties.confidence_score_status",
+        "microsoft_sentinel.alert.properties.intent",
+        "microsoft_sentinel.alert.properties.severity",
+        "microsoft_sentinel.alert.properties.status",
+        "threat.tactic.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_sentinel.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "microsoft_sentinel.event.alert.severity",
+        "microsoft_sentinel.event.compromised_entity",
+        "microsoft_sentinel.event.status",
+        "threat.indicator.confidence",
+        "threat.tactic.name",
+        "threat.technique.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_sentinel.incident",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "microsoft_sentinel.incident.properties.classification",
+        "microsoft_sentinel.incident.properties.classification_reason",
+        "microsoft_sentinel.incident.properties.severity",
+        "microsoft_sentinel.incident.properties.status",
+        "threat.tactic.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

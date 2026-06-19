@@ -1,0 +1,87 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:51:33.692Z",
+    "agent": {
+      "ephemeral_id": "aaadc04c-ef59-4ad3-9e13-9fefa9f6c280",
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "name": "elastic-agent-24055",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "asset": {
+      "category": "entity",
+      "id": "c9d9f9b3-0c91-4080-b392-78f775903b3a",
+      "name": "Test device",
+      "status": "disabled",
+      "type": "microsoft_entra_id_device"
+    },
+    "data_stream": {
+      "dataset": "entityanalytics_entra_id.device",
+      "namespace": "36723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "c9d9f9b3-0c91-4080-b392-78f775903b3a"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "3bde0b17-c5d6-4958-b6a0-d7f8d0339886",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "entityanalytics_entra_id": {
+      "device": {
+        "account_enabled": false,
+        "alternative_security_ids": [
+          {
+            "type": 2,
+            "key": "base64Y3YxN2E1MWFlYw=="
+          }
+        ],
+        "created_date_time": "2022-05-05T20:56:06Z",
+        "d_id": "4c299165-6e8f-4b45-a5ba-c5d250a707ff"
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "entityanalytics_entra_id.device",
+      "ingested": "2026-03-10T03:51:34Z",
+      "kind": "asset",
+      "original": "{\"input\":{\"type\":\"entity-analytics\"},\"agent\":{\"name\":\"elastic-agent-24055\",\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"type\":\"filebeat\",\"ephemeral_id\":\"aaadc04c-ef59-4ad3-9e13-9fefa9f6c280\",\"version\":\"9.3.1\"},\"@timestamp\":\"2026-03-10T03:51:33.692Z\",\"ecs\":{\"version\":\"8.11.0\"},\"azure_ad\":{\"operatingSystemVersion\":\"1\",\"displayName\":\"Test device\",\"createdDateTime\":\"2022-05-05T20:56:06Z\",\"alternativeSecurityIds\":[{\"type\":2,\"key\":\"base64Y3YxN2E1MWFlYw==\"}],\"operatingSystem\":\"linux\",\"deviceId\":\"4c299165-6e8f-4b45-a5ba-c5d250a707ff\",\"accountEnabled\":false},\"data_stream\":{\"namespace\":\"36723\",\"type\":\"logs\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"elastic_agent\":{\"id\":\"3bde0b17-c5d6-4958-b6a0-d7f8d0339886\",\"version\":\"9.3.1\",\"snapshot\":false},\"event\":{\"action\":\"device-discovered\",\"dataset\":\"entityanalytics_entra_id.entity\"},\"device\":{\"id\":\"c9d9f9b3-0c91-4080-b392-78f775903b3a\"},\"tags\":[\"all-entities\",\"preserve_original_event\",\"forwarded\",\"entityanalytics_entra_id-entity\"],\"labels\":{\"identity_source\":\"entity-analytics-entityanalytics_entra_id.entity\"},\"_version_type\":\"internal\",\"_index\":\"logs-entityanalytics_entra_id.entity-36723\",\"_id\":null,\"_version\":-4}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "id": "c9d9f9b3-0c91-4080-b392-78f775903b3a",
+      "name": "Test device",
+      "os": {
+        "type": "linux",
+        "version": "1"
+      }
+    },
+    "input": {
+      "type": "entity-analytics"
+    },
+    "labels": {
+      "identity_source": "entity-analytics-entityanalytics_entra_id.entity"
+    },
+    "related": {
+      "hosts": [
+        "Test device",
+        "c9d9f9b3-0c91-4080-b392-78f775903b3a"
+      ]
+    },
+    "tags": [
+      "all-entities",
+      "preserve_original_event",
+      "forwarded",
+      "entityanalytics_entra_id-entity"
+    ]
+  }
+]

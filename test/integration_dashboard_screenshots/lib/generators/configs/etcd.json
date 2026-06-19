@@ -1,0 +1,26 @@
+{
+  "package": "etcd",
+  "dataStreams": [
+    {
+      "dataset": "etcd.metrics",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "etcd.network.client_grpc_received.bytes",
+        "etcd.network.client_grpc_sent.bytes",
+        "etcd.server.grpc_handled.count",
+        "etcd.server.grpc_started.count",
+        "etcd.server.proposals_applied_total",
+        "etcd.server.proposals_committed.count",
+        "etcd.server.proposals_failed.count",
+        "etcd.server.proposals_pending.count",
+        "etcd.store.expires_total",
+        "etcd.store.reads_total",
+        "etcd.store.watchers",
+        "etcd.store.writes_total",
+        "host.hostname"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

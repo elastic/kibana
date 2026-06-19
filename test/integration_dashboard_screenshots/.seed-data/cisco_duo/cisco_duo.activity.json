@@ -1,0 +1,257 @@
+[
+  {
+    "@timestamp": "2023-03-22T15:51:22.591Z",
+    "agent": {
+      "ephemeral_id": "1e67a327-529c-4653-8400-8527c89ac99f",
+      "id": "a7227088-20b5-43a1-9cc5-03673dfc6a4a",
+      "name": "elastic-agent-57600",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_duo": {
+      "activity": {
+        "access_device": {
+          "browser": "Firefox",
+          "browser_version": "109.0.1",
+          "epkey": "EP987654321098765432",
+          "ip": {
+            "address": "192.168.1.23"
+          },
+          "location": {
+            "city": "Seattle",
+            "country": "United States",
+            "state": "Washington"
+          },
+          "os": "Windows",
+          "os_version": "11"
+        },
+        "action": {
+          "name": "password_change"
+        },
+        "actor": {
+          "details": {
+            "created": "2015-09-25T23:17:40.000000+00:00",
+            "groups": {
+              "key": [
+                "DGAZ172QBWDM26AK8ITK",
+                "DGK3B7XTSIP00LKHK1RD",
+                "DGKZWSBCDADEVFGFK5NR"
+              ],
+              "name": [
+                "CorpHQ_Users",
+                "ITAdmins",
+                "yee"
+              ]
+            },
+            "last_login": "2023-03-21T19:51:09.000000+00:00",
+            "status": "Active"
+          },
+          "key": "DU89LKJPJ0SHNWKO3MLJX",
+          "name": "jdoe",
+          "type": "user"
+        },
+        "akey": "DAAR9HG0V3QWZR7GOSY4",
+        "application": {
+          "key": "DIMARKVNG3421BHGDA57",
+          "name": "Example App",
+          "type": "websdk"
+        },
+        "id": "a123b456-789c-01de-f234-567890abcdef",
+        "outcome": "SUCCESS",
+        "target": {
+          "details": {
+            "authenticator_type": "Password",
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0"
+          },
+          "key": "WAPW8TDFNEK00JKLKY4KN",
+          "name": "WAPW8TDFNEK00JSLKY3KN",
+          "type": "password_auth"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_duo.activity",
+      "namespace": "47582",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a7227088-20b5-43a1-9cc5-03673dfc6a4a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "password_change",
+      "agent_id_status": "verified",
+      "dataset": "cisco_duo.activity",
+      "id": "a123b456-789c-01de-f234-567890abcdef",
+      "ingested": "2026-03-10T02:54:00Z",
+      "kind": "event",
+      "original": "{\"access_device\":{\"browser\":\"Firefox\",\"browser_version\":\"109.0.1\",\"epkey\":\"EP987654321098765432\",\"ip\":{\"address\":\"192.168.1.23\"},\"location\":{\"city\":\"Seattle\",\"country\":\"United States\",\"state\":\"Washington\"},\"os\":\"Windows\",\"os_version\":\"11\"},\"action\":{\"details\":null,\"name\":\"password_change\"},\"activity_id\":\"a123b456-789c-01de-f234-567890abcdef\",\"actor\":{\"details\":\"{\\\"created\\\": \\\"2015-09-25T23:17:40.000000+00:00\\\", \\\"last_login\\\": \\\"2023-03-21T19:51:09.000000+00:00\\\", \\\"status\\\": \\\"Active\\\", \\\"groups\\\": [{\\\"name\\\": \\\"CorpHQ_Users\\\", \\\"key\\\": \\\"DGAZ172QBWDM26AK8ITK\\\"}, {\\\"name\\\": \\\"ITAdmins\\\", \\\"key\\\": \\\"DGK3B7XTSIP00LKHK1RD\\\"}, {\\\"name\\\": \\\"yee\\\", \\\"key\\\": \\\"DGKZWSBCDADEVFGFK5NR\\\"}]}\",\"key\":\"DU89LKJPJ0SHNWKO3MLJX\",\"name\":\"jdoe\",\"type\":\"user\"},\"akey\":\"DAAR9HG0V3QWZR7GOSY4\",\"application\":{\"key\":\"DIMARKVNG3421BHGDA57\",\"name\":\"Example App\",\"type\":\"websdk\"},\"old_target\":null,\"outcome\":{\"result\":\"SUCCESS\"},\"target\":{\"details\":\"{\\\"authenticator_type\\\": \\\"Password\\\", \\\"user_agent\\\": \\\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0\\\"}\",\"key\":\"WAPW8TDFNEK00JKLKY4KN\",\"name\":\"WAPW8TDFNEK00JSLKY3KN\",\"type\":\"password_auth\"},\"ts\":\"2023-03-22T15:51:22.591015+00:00\"}",
+      "outcome": "success"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.23"
+      ],
+      "user": [
+        "jdoe"
+      ]
+    },
+    "source": {
+      "ip": "192.168.1.23"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "cisco_duo-activity"
+    ],
+    "user": {
+      "name": "jdoe"
+    },
+    "user_agent": {
+      "name": "Firefox",
+      "os": {
+        "name": "Windows",
+        "version": "11"
+      },
+      "version": "109.0.1"
+    }
+  },
+  {
+    "@timestamp": "2023-03-21T15:51:22.591Z",
+    "agent": {
+      "ephemeral_id": "1e67a327-529c-4653-8400-8527c89ac99f",
+      "id": "a7227088-20b5-43a1-9cc5-03673dfc6a4a",
+      "name": "elastic-agent-57600",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_duo": {
+      "activity": {
+        "access_device": {
+          "browser": "Chrome",
+          "browser_version": "111.0.0.0",
+          "epkey": "EP123456789012345678",
+          "ip": {
+            "address": "172.34.40.116"
+          },
+          "location": {
+            "city": "Ann Arbor",
+            "country": "United States",
+            "state": "Michigan"
+          },
+          "os": "Mac OS X",
+          "os_version": "10.15.7"
+        },
+        "action": {
+          "name": "webauthncredential_create"
+        },
+        "actor": {
+          "details": {
+            "created": "2015-09-25T23:17:40.000000+00:00",
+            "groups": {
+              "key": [
+                "DGAZ172QBWDM26AK8ITK",
+                "DGK3B7XTSIP00LKHK1RD",
+                "DGKZWSBCDADEVFGFK5NR"
+              ],
+              "name": [
+                "CorpHQ_Users",
+                "ITAdmins",
+                "yee"
+              ]
+            },
+            "last_login": "2023-03-21T19:51:09.000000+00:00",
+            "status": "Active"
+          },
+          "key": "DU64TKJPJ0SHFWKO2LNBC",
+          "name": "sogilby",
+          "type": "user"
+        },
+        "akey": "DAAR5FO0OZ4VYZA0WOB2",
+        "application": {
+          "key": "DILSVDEYH66TBHKIXGR9",
+          "name": "Acme Corp",
+          "type": "websdk"
+        },
+        "id": "720b8360-078b-47c4-adc7-7968df1caef0",
+        "outcome": "FAILURE",
+        "target": {
+          "details": {
+            "authenticator_type": "Security key",
+            "browser": "Chrome",
+            "browser_version": "111.0.0.0",
+            "credential_name": "Security key",
+            "os": "Mac OS X",
+            "os_version": "10.15.7",
+            "passwordless_authorized": "false",
+            "transport_types": "usb",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+          },
+          "key": "WAUKH0IMTGP00L90LT4KM",
+          "name": "WAUKH0IMTG3EDD4DT4KM",
+          "type": "webauthn_credential"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_duo.activity",
+      "namespace": "47582",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a7227088-20b5-43a1-9cc5-03673dfc6a4a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "webauthncredential_create",
+      "agent_id_status": "verified",
+      "dataset": "cisco_duo.activity",
+      "id": "720b8360-078b-47c4-adc7-7968df1caef0",
+      "ingested": "2026-03-10T02:54:00Z",
+      "kind": "event",
+      "original": "{\"access_device\":{\"browser\":\"Chrome\",\"browser_version\":\"111.0.0.0\",\"epkey\":\"EP123456789012345678\",\"ip\":{\"address\":\"172.34.40.116\"},\"location\":{\"city\":\"Ann Arbor\",\"country\":\"United States\",\"state\":\"Michigan\"},\"os\":\"Mac OS X\",\"os_version\":\"10.15.7\"},\"action\":{\"details\":null,\"name\":\"webauthncredential_create\"},\"activity_id\":\"720b8360-078b-47c4-adc7-7968df1caef0\",\"actor\":{\"details\":\"{\\\"created\\\": \\\"2015-09-25T23:17:40.000000+00:00\\\",\\\"last_login\\\": \\\"2023-03-21T19:51:09.000000+00:00\\\",\\\"status\\\": \\\"Active\\\",\\\"groups\\\": [{\\\"name\\\": \\\"CorpHQ_Users\\\",\\\"key\\\": \\\"DGAZ172QBWDM26AK8ITK\\\"},{\\\"name\\\": \\\"ITAdmins\\\",\\\"key\\\": \\\"DGK3B7XTSIP00LKHK1RD\\\"},{\\\"name\\\": \\\"yee\\\",\\\"key\\\": \\\"DGKZWSBCDADEVFGFK5NR\\\"}]}\",\"key\":\"DU64TKJPJ0SHFWKO2LNBC\",\"name\":\"sogilby\",\"type\":\"user\"},\"akey\":\"DAAR5FO0OZ4VYZA0WOB2\",\"application\":{\"key\":\"DILSVDEYH66TBHKIXGR9\",\"name\":\"Acme Corp\",\"type\":\"websdk\"},\"old_target\":null,\"outcome\":{\"result\":\"FAILURE\"},\"target\":{\"details\":\"{\\\"authenticator_type\\\": \\\"Security key\\\",\\\"transport_types\\\": \\\"usb\\\",\\\"passwordless_authorized\\\": false,\\\"browser\\\": \\\"Chrome\\\",\\\"browser_version\\\": \\\"111.0.0.0\\\",\\\"os\\\": \\\"Mac OS X\\\",\\\"os_version\\\": \\\"10.15.7\\\",\\\"user_agent\\\": \\\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36\\\",\\\"credential_name\\\": \\\"Security key\\\"}\",\"key\":\"WAUKH0IMTGP00L90LT4KM\",\"name\":\"WAUKH0IMTG3EDD4DT4KM\",\"type\":\"webauthn_credential\"},\"ts\":\"2023-03-21T15:51:22.591015+00:00\"}",
+      "outcome": "failure"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "related": {
+      "ip": [
+        "172.34.40.116"
+      ],
+      "user": [
+        "sogilby"
+      ]
+    },
+    "source": {
+      "ip": "172.34.40.116"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "cisco_duo-activity"
+    ],
+    "user": {
+      "name": "sogilby"
+    },
+    "user_agent": {
+      "name": "Chrome",
+      "os": {
+        "name": "Mac OS X",
+        "version": "10.15.7"
+      },
+      "version": "111.0.0.0"
+    }
+  }
+]

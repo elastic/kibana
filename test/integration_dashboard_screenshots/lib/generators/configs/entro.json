@@ -1,0 +1,17 @@
+{
+  "package": "entro",
+  "dataStreams": [
+    {
+      "dataset": "entro.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "vulnerability.category",
+        "vulnerability.description",
+        "vulnerability.value"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

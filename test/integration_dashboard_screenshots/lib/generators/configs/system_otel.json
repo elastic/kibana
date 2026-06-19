@@ -1,0 +1,33 @@
+{
+  "package": "system_otel",
+  "dataStreams": [
+    {
+      "dataset": "hostmetricsreceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 600,
+      "fields": [
+        "attributes.device",
+        "attributes.direction",
+        "attributes.state",
+        "host.name",
+        "metrics.system.cpu.load_average.1m",
+        "metrics.system.cpu.logical.count",
+        "metrics.system.cpu.utilization",
+        "metrics.system.disk.io",
+        "metrics.system.disk.io_time",
+        "metrics.system.disk.operations",
+        "metrics.system.memory.usage",
+        "metrics.system.memory.utilization",
+        "metrics.system.network.dropped",
+        "metrics.system.network.errors",
+        "metrics.system.network.io",
+        "metrics.system.network.packets",
+        "metrics.system.processes.created",
+        "resource.attributes.host.name",
+        "resource.attributes.os.type",
+        "state"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "package": "netflow",
+  "dataStreams": [
+    {
+      "dataset": "netflow.log",
+      "indexPattern": "logs-*",
+      "docTarget": 630,
+      "fields": [
+        "agent.name",
+        "destination.as.organization.name",
+        "destination.geo.city_name",
+        "destination.geo.country_name",
+        "destination.ip",
+        "destination.port",
+        "event.end",
+        "netflow.egress_interface",
+        "netflow.exporter.version",
+        "netflow.ingress_interface",
+        "netflow.ip_class_of_service",
+        "netflow.tcp_control_bits",
+        "netflow.vlan_id",
+        "network.bytes",
+        "network.direction",
+        "network.packets",
+        "network.transport",
+        "network.type",
+        "source.as.organization.name",
+        "source.ip",
+        "source.port"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

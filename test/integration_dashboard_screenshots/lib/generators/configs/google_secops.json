@@ -1,0 +1,19 @@
+{
+  "package": "google_secops",
+  "dataStreams": [
+    {
+      "dataset": "google_secops.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "event.id",
+        "google_secops.alert.detection.alertState",
+        "google_secops.alert.detection.ruleType",
+        "host.ip",
+        "source.ip"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

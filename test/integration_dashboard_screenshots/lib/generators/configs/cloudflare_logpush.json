@@ -1,0 +1,308 @@
+{
+  "package": "cloudflare_logpush",
+  "dataStreams": [
+    {
+      "dataset": "cloudflare_logpush.access_request",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.ip",
+        "event.action",
+        "event.type",
+        "url.domain",
+        "user.email"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.audit.resource.type",
+        "event.action",
+        "user.email"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.casb",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.casb.asset.name",
+        "cloudflare_logpush.casb.finding.type.name",
+        "event.id",
+        "event.severity"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.device_posture",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.device_posture.host.model",
+        "event.outcome",
+        "host.os.family"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.dlp_forensic_copies",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "dns.question.name",
+        "event.outcome",
+        "event.type",
+        "host.name",
+        "related.ip",
+        "source.geo.location",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.dns",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "cloudflare_logpush.dns.edns.subnet",
+        "cloudflare_logpush.dns.query.type",
+        "cloudflare_logpush.dns.response.code",
+        "dns.question.name",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.dns_firewall",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.dns_firewall.cluster_id",
+        "cloudflare_logpush.dns_firewall.question.size",
+        "dns.question.name",
+        "dns.response_code",
+        "source.geo.country_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.email_security_alerts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "dns.question.name",
+        "event.outcome",
+        "event.type",
+        "host.name",
+        "related.ip",
+        "source.geo.location",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.firewall_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "cloudflare_logpush.firewall_event.client.asn.description",
+        "cloudflare_logpush.firewall_event.client.ip_class",
+        "cloudflare_logpush.firewall_event.client.referer.host",
+        "cloudflare_logpush.firewall_event.client.request.host",
+        "cloudflare_logpush.firewall_event.client.request.protocol",
+        "event.action",
+        "http.request.method",
+        "source.as.number",
+        "source.geo.country_iso_code",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.gateway_dns",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.gateway_dns.policy.name",
+        "cloudflare_logpush.gateway_dns.question.category.names",
+        "cloudflare_logpush.gateway_dns.resolver_decision",
+        "dns.question.name",
+        "event.outcome",
+        "source.geo.country_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.gateway_http",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.gateway_http.account_id",
+        "event.action",
+        "event.type",
+        "http.request.method",
+        "source.geo.country_name",
+        "url.domain",
+        "user_agent.original"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.gateway_network",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.gateway_network.policy.name",
+        "event.action",
+        "source.geo.country_name",
+        "tls.client.server_name",
+        "user.email"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.http_request",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "cloudflare_logpush.http_request.client.device.type",
+        "cloudflare_logpush.http_request.client.ip_class",
+        "cloudflare_logpush.http_request.client.mtls.auth.status",
+        "cloudflare_logpush.http_request.edge.rate.limit.action",
+        "cloudflare_logpush.http_request.waf.profile",
+        "http.request.method",
+        "source.geo.country_iso_code"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.magic_ids",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.magic_ids.signature.id",
+        "cloudflare_logpush.magic_ids.signature.message",
+        "destination.ip",
+        "destination.port",
+        "event.action",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.nel_report",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "cloudflare_logpush.nel_report.client.ip.asn.description",
+        "cloudflare_logpush.nel_report.client.ip.asn.value",
+        "error.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.network_analytics",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "cloudflare_logpush.network_analytics.destination.country",
+        "cloudflare_logpush.network_analytics.mitigation.reason",
+        "cloudflare_logpush.network_analytics.mitigation.scope",
+        "cloudflare_logpush.network_analytics.mitigation.system",
+        "cloudflare_logpush.network_analytics.protocol_state",
+        "cloudflare_logpush.network_analytics.source.country",
+        "destination.ip",
+        "event.outcome",
+        "network.direction",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.network_session",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.network_session.rule_evaluation.time_ms",
+        "cloudflare_logpush.network_session.tcp.client.handshake_time_ms",
+        "cloudflare_logpush.network_session.tls.client.handshake_time_ms",
+        "cloudflare_logpush.network_session.tls.server.handshake_time_ms",
+        "destination.bytes",
+        "source.bytes",
+        "source.geo.country_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.page_shield_events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "dns.question.name",
+        "event.outcome",
+        "event.type",
+        "host.name",
+        "related.ip",
+        "source.geo.location",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.sinkhole_http",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.sinkhole_http.account_id",
+        "http.request.body.bytes",
+        "http.request.method",
+        "source.geo.country_name",
+        "url.domain",
+        "user_agent.original"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.spectrum_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "cloudflare_logpush.spectrum_event.client.matched_ip_firewall",
+        "cloudflare_logpush.spectrum_event.client.tls.status",
+        "cloudflare_logpush.spectrum_event.origin.tls.protocol",
+        "cloudflare_logpush.spectrum_event.origin.tls.status",
+        "event.action",
+        "source.geo.country_iso_code",
+        "tls.version",
+        "tls.version_protocol"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cloudflare_logpush.workers_trace",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cloudflare_logpush.workers_trace.script.name",
+        "event.outcome",
+        "http.request.method",
+        "http.response.status_code",
+        "url.domain"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

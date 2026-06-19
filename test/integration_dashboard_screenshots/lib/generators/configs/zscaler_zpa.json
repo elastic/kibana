@@ -1,0 +1,80 @@
+{
+  "package": "zscaler_zpa",
+  "dataStreams": [
+    {
+      "dataset": "zscaler_zpa.app_connector_status",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.cpu.usage",
+        "observer.geo.location",
+        "observer.os.platform",
+        "zscaler_zpa.app_connector_status.connector.group",
+        "zscaler_zpa.app_connector_status.connector.name",
+        "zscaler_zpa.app_connector_status.memory.utilization",
+        "zscaler_zpa.app_connector_status.session.status",
+        "zscaler_zpa.app_connector_status.session.type",
+        "zscaler_zpa.app_connector_status.zen"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zscaler_zpa.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "user.name",
+        "zscaler_zpa.audit.object.name",
+        "zscaler_zpa.audit.object.type",
+        "zscaler_zpa.audit.operation_type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zscaler_zpa.browser_access",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "user_agent.name",
+        "user_agent.os.name",
+        "user_agent.os.version",
+        "zscaler_zpa.browser_access.exporter"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "zscaler_zpa.user_activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "client.ip",
+        "user.name",
+        "zscaler_zpa.user_activity.app_group",
+        "zscaler_zpa.user_activity.application",
+        "zscaler_zpa.user_activity.connection.setup_time",
+        "zscaler_zpa.user_activity.connection.status",
+        "zscaler_zpa.user_activity.connector_zen_setup_time",
+        "zscaler_zpa.user_activity.server_setup_time"
+      ],
+      "filterValues": {
+        "zscaler_zpa.user_activity.connection.status": [
+          "active"
+        ]
+      }
+    },
+    {
+      "dataset": "zscaler_zpa.user_status",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.country_iso_code",
+        "client.geo.location",
+        "zscaler_zpa.user_status.client.type",
+        "zscaler_zpa.user_status.session.status"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "package": "ti_mandiant_advantage",
+  "dataStreams": [
+    {
+      "dataset": "ti_mandiant_advantage.threat_intelligence",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "mandiant.threat_intelligence.ioc.categories",
+        "mandiant.threat_intelligence.ioc.value",
+        "threat.group.name",
+        "threat.indicator.confidence",
+        "threat.indicator.type",
+        "threat.software.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

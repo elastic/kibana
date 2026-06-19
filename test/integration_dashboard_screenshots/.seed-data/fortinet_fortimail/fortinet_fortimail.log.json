@@ -1,0 +1,3027 @@
+[
+  {
+    "@timestamp": "2023-02-14T10:55:31.392Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001766",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-14,time=10:55:31.392,device_id=FEVM02TM23000064,log_id=0700001766,type=kevent,subtype=config,pri=information, user=admin,ui=http(89.160.20.128),module=unknown,submodule=unknown,msg=\"Modified 'AV_OutBound' on 'profile antivirus-action' : subject-tagging-status[enable->disable]subject-tagging-text[Virus->]action[none ->discard ]replace-infected-status[enable->disable] (user: admin, from: http(89.160.20.128))\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-14",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001766",
+        "message": "Modified 'AV_OutBound' on 'profile antivirus-action' : subject-tagging-status[enable->disable]subject-tagging-text[Virus->]action[none ->discard ]replace-infected-status[enable->disable] (user: admin, from: http(89.160.20.128))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "10:55:31.392",
+        "type": "kevent",
+        "ui": "http(89.160.20.128)",
+        "ui_ip": "89.160.20.128",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Modified 'AV_OutBound' on 'profile antivirus-action' : subject-tagging-status[enable->disable]subject-tagging-text[Virus->]action[none ->discard ]replace-infected-status[enable->disable] (user: admin, from: http(89.160.20.128))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.128"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-14T10:54:07.089Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001766",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-14,time=10:54:07.089,device_id=FEVM02TM23000064,log_id=0700001766,type=kevent,subtype=config,pri=information, user=admin,ui=http(89.160.20.128),module=unknown,submodule=unknown,msg=\"Modified '2' on 'policy recipient' : status[disable->enable] (user: admin, from: http(89.160.20.128))\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-14",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001766",
+        "message": "Modified '2' on 'policy recipient' : status[disable->enable] (user: admin, from: http(89.160.20.128))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "10:54:07.089",
+        "type": "kevent",
+        "ui": "http(89.160.20.128)",
+        "ui_ip": "89.160.20.128",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Modified '2' on 'policy recipient' : status[disable->enable] (user: admin, from: http(89.160.20.128))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.128"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-08T23:28:33.214Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "0702001905",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<191>date=2023-02-08,time=23:28:33.214,device_id=FEVM02TM23000064,log_id=0702001905,type=kevent,subtype=system,pri=debug, user=ntpd,ui=ntpd,action=none,status=none,msg=\"ntpd: system clock updated\"",
+      "outcome": "unknown",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-08",
+        "device_id": "FEVM02TM23000064",
+        "id": "0702001905",
+        "message": "ntpd: system clock updated",
+        "priority": "debug",
+        "priority_number": 191,
+        "status": "none",
+        "sub_type": "system",
+        "time": "23:28:33.214",
+        "type": "kevent",
+        "ui": "ntpd",
+        "user": [
+          "ntpd"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "debug",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 191,
+        "severity": {
+          "code": 7
+        }
+      }
+    },
+    "message": "ntpd: system clock updated",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "user": [
+        "ntpd"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "ntpd"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-08T15:20:16.509Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "code": "0702001936",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<191>date=2023-02-08,time=15:20:16.509,device_id=FEVM02TM23000064,log_id=0702001936,type=kevent,subtype=system,pri=debug, user=,ui=,action=none,status=none,msg=\"ldapcached: clear connections\"",
+      "outcome": "unknown",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-08",
+        "device_id": "FEVM02TM23000064",
+        "id": "0702001936",
+        "message": "ldapcached: clear connections",
+        "priority": "debug",
+        "priority_number": 191,
+        "status": "none",
+        "sub_type": "system",
+        "time": "15:20:16.509",
+        "type": "kevent"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "debug",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 191,
+        "severity": {
+          "code": 7
+        }
+      }
+    },
+    "message": "ldapcached: clear connections",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-08T15:20:16.506Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001767",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-08,time=15:20:16.506,device_id=FEVM02TM23000064,log_id=0700001767,type=kevent,subtype=config,pri=information, user=admin,ui=http(89.160.20.128),module=unknown,submodule=unknown,msg=\"Modified 'port1' on 'system interface' : ip[10.50.2.225/20->10.50.2.226/20] (user: admin, from: http(89.160.20.128))\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-08",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001767",
+        "message": "Modified 'port1' on 'system interface' : ip[10.50.2.225/20->10.50.2.226/20] (user: admin, from: http(89.160.20.128))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "15:20:16.506",
+        "type": "kevent",
+        "ui": "http(89.160.20.128)",
+        "ui_ip": "89.160.20.128",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Modified 'port1' on 'system interface' : ip[10.50.2.225/20->10.50.2.226/20] (user: admin, from: http(89.160.20.128))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.128"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-07T15:24:50.526Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "code": "0702001888",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<191>date=2023-02-07,time=15:24:50.526,device_id=FEVM02TM23000064,log_id=0702001888,type=kevent,subtype=system,pri=debug, user=,ui=,action=none,status=none,msg=\"FTGD connection [12.34.97.18:53] last 136 seconds; req sent: 2, resp rcvd: 1, 200: 1, 400: 0, 404: 0, xxx: 0, last error: failed to recv response: Connection timed out\"",
+      "outcome": "unknown",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0702001888",
+        "message": "FTGD connection [12.34.97.18:53] last 136 seconds; req sent: 2, resp rcvd: 1, 200: 1, 400: 0, 404: 0, xxx: 0, last error: failed to recv response: Connection timed out",
+        "priority": "debug",
+        "priority_number": 191,
+        "status": "none",
+        "sub_type": "system",
+        "time": "15:24:50.526",
+        "type": "kevent"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "debug",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 191,
+        "severity": {
+          "code": 7
+        }
+      }
+    },
+    "message": "FTGD connection [12.34.97.18:53] last 136 seconds; req sent: 2, resp rcvd: 1, 200: 1, 400: 0, 404: 0, xxx: 0, last error: failed to recv response: Connection timed out",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-07T14:38:16.642Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0704001887",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-07,time=14:38:16.642,device_id=FEVM02TM23000064,log_id=0704001887,type=kevent,subtype=update,pri=information,,msg=\"Internet service DB update succeeded\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0704001887",
+        "message": "Internet service DB update succeeded",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_type": "update",
+        "time": "14:38:16.642",
+        "type": "kevent"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Internet service DB update succeeded",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-07T12:34:55.214Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "code": "0701002231",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-07,time=12:34:55.214,device_id=FEVM02TM23000064,log_id=0701002231,type=kevent,subtype=admin,pri=information, user=admin,ui=http(89.160.20.132),action=none,status=none,reason=unknown,msg=\"History logs accessed (user: admin, from: http(89.160.20.132))\"",
+      "outcome": "unknown"
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0701002231",
+        "message": "History logs accessed (user: admin, from: http(89.160.20.132))",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "reason": "unknown",
+        "status": "none",
+        "sub_type": "admin",
+        "time": "12:34:55.214",
+        "type": "kevent",
+        "ui": "http(89.160.20.132)",
+        "ui_ip": "89.160.20.132",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "History logs accessed (user: admin, from: http(89.160.20.132))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.132"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.132"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-07T09:27:19.984Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "0702002220",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<187>date=2023-02-07,time=09:27:19.984,device_id=FEVM02TM23000064,log_id=0702002220,type=kevent,subtype=system,pri=error, user=ntpd,ui=ntpd,action=none,status=none,msg=\"ntpd: system clock updated with errors: Error resolving id.pools.ntp.org: No address associated with hostname (-5)  7 Feb 09:27:11 ntpdate[4584]: Can't find host id.pools.ntp.org: No address associated with hostname (-5)  7 Feb 09:27:19 ntpdate[4584]: adjust time server 208.91.112.62 offset +0.0\"",
+      "outcome": "unknown",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0702002220",
+        "message": "ntpd: system clock updated with errors: Error resolving id.pools.ntp.org: No address associated with hostname (-5)  7 Feb 09:27:11 ntpdate[4584]: Can't find host id.pools.ntp.org: No address associated with hostname (-5)  7 Feb 09:27:19 ntpdate[4584]: adjust time server 208.91.112.62 offset +0.0",
+        "priority": "error",
+        "priority_number": 187,
+        "status": "none",
+        "sub_type": "system",
+        "time": "09:27:19.984",
+        "type": "kevent",
+        "ui": "ntpd",
+        "user": [
+          "ntpd"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "error",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 187,
+        "severity": {
+          "code": 3
+        }
+      }
+    },
+    "message": "ntpd: system clock updated with errors: Error resolving id.pools.ntp.org: No address associated with hostname (-5)  7 Feb 09:27:11 ntpdate[4584]: Can't find host id.pools.ntp.org: No address associated with hostname (-5)  7 Feb 09:27:19 ntpdate[4584]: adjust time server 208.91.112.62 offset +0.0",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "user": [
+        "ntpd"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "ntpd"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-07T09:09:17.129Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001767",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-07,time=09:09:17.129,device_id=FEVM02TM23000064,log_id=0700001767,type=kevent,subtype=config,pri=information, user=admin,ui=http(10.212.128.9),module=unknown,submodule=unknown,msg=\"Modified 'Test' on 'log setting remote' : syslog-mode[tcp->udp]port[9589->9590] (user: admin, from: http(10.212.128.9))\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001767",
+        "message": "Modified 'Test' on 'log setting remote' : syslog-mode[tcp->udp]port[9589->9590] (user: admin, from: http(10.212.128.9))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "09:09:17.129",
+        "type": "kevent",
+        "ui": "http(10.212.128.9)",
+        "ui_ip": "10.212.128.9",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Modified 'Test' on 'log setting remote' : syslog-mode[tcp->udp]port[9589->9590] (user: admin, from: http(10.212.128.9))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.212.128.9"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "ip": "10.212.128.9"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-07T09:08:21.402Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001767",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-07,time=09:08:21.402,device_id=FEVM02TM23000064,log_id=0700001767,type=kevent,subtype=config,pri=information, user=admin,ui=http(10.212.128.9),module=unknown,submodule=unknown,msg=\"Modified 'Test' on 'log setting remote' : comma-separated-value[enable->disable] (user: admin, from: http(10.212.128.9))\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001767",
+        "message": "Modified 'Test' on 'log setting remote' : comma-separated-value[enable->disable] (user: admin, from: http(10.212.128.9))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "09:08:21.402",
+        "type": "kevent",
+        "ui": "http(10.212.128.9)",
+        "ui_ip": "10.212.128.9",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Modified 'Test' on 'log setting remote' : comma-separated-value[enable->disable] (user: admin, from: http(10.212.128.9))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.212.128.9"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "ip": "10.212.128.9"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-07T09:05:02.414Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001767",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-07,time=09:05:02.414,device_id=FEVM02TM23000064,log_id=0700001767,type=kevent,subtype=config,pri=information, user=admin,ui=http(10.212.128.9),module=unknown,submodule=unknown,msg=\"Modified 'Test' on 'log setting remote' : port[9026->9589] (user: admin, from: http(10.212.128.9))\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001767",
+        "message": "Modified 'Test' on 'log setting remote' : port[9026->9589] (user: admin, from: http(10.212.128.9))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "09:05:02.414",
+        "type": "kevent",
+        "ui": "http(10.212.128.9)",
+        "ui_ip": "10.212.128.9",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Modified 'Test' on 'log setting remote' : port[9026->9589] (user: admin, from: http(10.212.128.9))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.212.128.9"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "ip": "10.212.128.9"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-07T09:01:43.129Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001767",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-07,time=09:01:43.129,device_id=FEVM02TM23000064,log_id=0700001767,type=kevent,subtype=config,pri=information, user=admin,ui=http(10.212.128.9),module=unknown,submodule=unknown,msg=\"Deleted 'Test_copy' from 'profile url-filter' : category[child-abuse drug-abuse adult-materials nudity-risque pornograph..] (user: admin, from: http(10.212.128.9))\"",
+      "outcome": "unknown",
+      "type": [
+        "deletion"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-07",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001767",
+        "message": "Deleted 'Test_copy' from 'profile url-filter' : category[child-abuse drug-abuse adult-materials nudity-risque pornograph..] (user: admin, from: http(10.212.128.9))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "09:01:43.129",
+        "type": "kevent",
+        "ui": "http(10.212.128.9)",
+        "ui_ip": "10.212.128.9",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Deleted 'Test_copy' from 'profile url-filter' : category[child-abuse drug-abuse adult-materials nudity-risque pornograph..] (user: admin, from: http(10.212.128.9))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.212.128.9"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "ip": "10.212.128.9"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-06T19:35:20.068Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0704001887",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-06,time=19:35:20.068,device_id=FEVM02TM23000064,log_id=0704001887,type=kevent,subtype=update,pri=information,,msg=\"Update result: virus db:yes, virus engine:no, spam db:no, spam engine:no\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0704001887",
+        "message": "Update result: virus db:yes, virus engine:no, spam db:no, spam engine:no",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_type": "update",
+        "time": "19:35:20.068",
+        "type": "kevent"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Update result: virus db:yes, virus engine:no, spam db:no, spam engine:no",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-06T19:35:20.062Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0704003868",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-06,time=19:35:20.062,device_id=FEVM02TM23000064,log_id=0704003868,type=kevent,subtype=update,pri=information,,msg=\"Loaded avdb 91.00325(02/06/0023 05:39) using av engine 6.283\"",
+      "outcome": "unknown"
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0704003868",
+        "message": "Loaded avdb 91.00325(02/06/0023 05:39) using av engine 6.283",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_type": "update",
+        "time": "19:35:20.062",
+        "type": "kevent"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Loaded avdb 91.00325(02/06/0023 05:39) using av engine 6.283",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-06T19:10:00.391Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "0700001767",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-06,time=19:10:00.391,device_id=FEVM02TM23000064,log_id=0700001767,type=kevent,subtype=config,pri=information, user=admin,ui=http(10.212.128.19),module=unknown,submodule=unknown,msg=\"Added 'Test_copy' to 'profile url-filter' : category[child-abuse drug-abuse adult-materials nudity-risque pornograph..] (user: admin, from: http(10.212.128.19))\"",
+      "outcome": "unknown",
+      "type": [
+        "change"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0700001767",
+        "message": "Added 'Test_copy' to 'profile url-filter' : category[child-abuse drug-abuse adult-materials nudity-risque pornograph..] (user: admin, from: http(10.212.128.19))",
+        "module": "unknown",
+        "network": "http",
+        "priority": "information",
+        "priority_number": 190,
+        "sub_module": "unknown",
+        "sub_type": "config",
+        "time": "19:10:00.391",
+        "type": "kevent",
+        "ui": "http(10.212.128.19)",
+        "ui_ip": "10.212.128.19",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Added 'Test_copy' to 'profile url-filter' : category[child-abuse drug-abuse adult-materials nudity-risque pornograph..] (user: admin, from: http(10.212.128.19))",
+    "network": {
+      "protocol": "http"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.212.128.19"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "ip": "10.212.128.19"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-06T19:00:25.566Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "code": "0702001987",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<187>date=2023-02-06,time=19:00:25.566,device_id=FEVM02TM23000064,log_id=0702001987,type=kevent,subtype=system,pri=error, user=,ui=,action=none,status=none,msg=\"FortiSandbox server is not available at the moment. Connection block time: 300 seconds\"",
+      "outcome": "unknown",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0702001987",
+        "message": "FortiSandbox server is not available at the moment. Connection block time: 300 seconds",
+        "priority": "error",
+        "priority_number": 187,
+        "status": "none",
+        "sub_type": "system",
+        "time": "19:00:25.566",
+        "type": "kevent"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "error",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 187,
+        "severity": {
+          "code": 3
+        }
+      }
+    },
+    "message": "FortiSandbox server is not available at the moment. Connection block time: 300 seconds",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-06T18:49:59.807Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "login",
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "code": "0701002231",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-06,time=18:49:59.807,device_id=FEVM02TM23000064,log_id=0701002231,type=kevent,subtype=admin,pri=information, user=admin,ui=GUI(10.212.128.19),action=login,status=success,reason=none,msg=\"User admin login successfully from GUI(10.212.128.19)\"",
+      "outcome": "success",
+      "type": [
+        "end",
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "login",
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0701002231",
+        "ip": "10.212.128.19",
+        "message": "User admin login successfully from GUI(10.212.128.19)",
+        "priority": "information",
+        "priority_number": 190,
+        "reason": "none",
+        "status": "success",
+        "sub_type": "admin",
+        "time": "18:49:59.807",
+        "type": "kevent",
+        "ui": "GUI(10.212.128.19)",
+        "ui_ip": "10.212.128.19",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "User admin login successfully from GUI(10.212.128.19)",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.212.128.19"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "ip": "10.212.128.19"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-06T18:28:49.954Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "code": "0002003307",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<191>date=2023-02-06,time=18:28:49.954,device_id=FEVM02TM23000064,log_id=0002003307,type=event,subtype=imap,pri=debug, user=mail,ui=mail,action=none,status=success,session_id='q6OL7fsQ018870-q6OL7fsR018870',msg=\"mailbox dead.letter[/var/spool/dead/dead.letter] is updated\"",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0002003307",
+        "message": "mailbox dead.letter[/var/spool/dead/dead.letter] is updated",
+        "priority": "debug",
+        "priority_number": 191,
+        "session_id": "q6OL7fsQ018870-q6OL7fsR018870",
+        "status": "success",
+        "sub_type": "imap",
+        "time": "18:28:49.954",
+        "type": "event",
+        "ui": "mail",
+        "user": [
+          "mail"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "debug",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 191,
+        "severity": {
+          "code": 7
+        }
+      }
+    },
+    "message": "mailbox dead.letter[/var/spool/dead/dead.letter] is updated",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "user": [
+        "mail"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "mail"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-06T18:06:10.119Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "none",
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "code": "0002002810",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<191>date=2023-02-06,time=18:06:10.119,device_id=FEVM02TM23000064,log_id=0002002810,type=event,subtype=imap,pri=debug, user=mail,ui=mail,action=none,status=success,session_id='q6OL7fsQ018870-q6OL7fsR018870',msg=\"mailbox Inbox[/var/spool/home/internalsmtp.example.local/timesheet~internalsmtp.example.local/mail/Inbox] is updated\"",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "none",
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0002002810",
+        "message": "mailbox Inbox[/var/spool/home/internalsmtp.example.local/timesheet~internalsmtp.example.local/mail/Inbox] is updated",
+        "priority": "debug",
+        "priority_number": 191,
+        "session_id": "q6OL7fsQ018870-q6OL7fsR018870",
+        "status": "success",
+        "sub_type": "imap",
+        "time": "18:06:10.119",
+        "type": "event",
+        "ui": "mail",
+        "user": [
+          "mail"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "debug",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 191,
+        "severity": {
+          "code": 7
+        }
+      }
+    },
+    "message": "mailbox Inbox[/var/spool/home/internalsmtp.example.local/timesheet~internalsmtp.example.local/mail/Inbox] is updated",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "user": [
+        "mail"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "mail"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-06T18:05:49.266Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "logout",
+      "agent_id_status": "verified",
+      "code": "0701002124",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-02-06,time=18:05:49.266,device_id=FEVM02TM23000064,log_id=0701002124,type=kevent,subtype=admin,pri=information, user=admin,ui=ssh(89.160.20.128),action=logout,status=success,reason=unknown,msg=\"User admin time out on ssh(89.160.20.128).\"",
+      "outcome": "success"
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "logout",
+        "date": "2023-02-06",
+        "device_id": "FEVM02TM23000064",
+        "id": "0701002124",
+        "ip": "89.160.20.128",
+        "message": "User admin time out on ssh(89.160.20.128).",
+        "network": "ssh",
+        "priority": "information",
+        "priority_number": 190,
+        "reason": "unknown",
+        "status": "success",
+        "sub_type": "admin",
+        "time": "18:05:49.266",
+        "type": "kevent",
+        "ui": "ssh(89.160.20.128)",
+        "ui_ip": "89.160.20.128",
+        "user": [
+          "admin"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "User admin time out on ssh(89.160.20.128).",
+    "network": {
+      "protocol": "ssh"
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.128"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.128"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-02-01T14:42:35.521Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "unknown",
+      "agent_id_status": "verified",
+      "category": [
+        "email",
+        "authentication"
+      ],
+      "code": "0000004943",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<182>date=2023-02-01,time=14:42:35.521,device_id=FEVM02TM23000064,log_id=0000004943,type=event,subtype=webmail,pri=information, user=webmail,ui=webmail,action=unknown,status=failure,msg=\"WebMail: Login for 'timesheet@internalsmtp.example.local' from 10.212.128.53 failed\"",
+      "outcome": "failure",
+      "type": [
+        "info",
+        "end"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "unknown",
+        "date": "2023-02-01",
+        "device_id": "FEVM02TM23000064",
+        "id": "0000004943",
+        "ip": "10.212.128.53",
+        "message": "WebMail: Login for 'timesheet@internalsmtp.example.local' from 10.212.128.53 failed",
+        "priority": "information",
+        "priority_number": 182,
+        "status": "failure",
+        "sub_type": "webmail",
+        "time": "14:42:35.521",
+        "type": "event",
+        "ui": "webmail",
+        "user": [
+          "webmail",
+          "timesheet@internalsmtp.example.local"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 22
+        },
+        "priority": 182,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "WebMail: Login for 'timesheet@internalsmtp.example.local' from 10.212.128.53 failed",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "10.212.128.53"
+      ],
+      "user": [
+        "webmail",
+        "timesheet@internalsmtp.example.local"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "webmail",
+        "timesheet@internalsmtp.example.local"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-01-30T16:09:16.825Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.50.2.225"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "user1@example.com"
+        ]
+      },
+      "subject": "Test1516",
+      "to": {
+        "address": [
+          "user2@example.com"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0300003065",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-01-30,time=16:09:16.825,device_id=FEVM02TM23000064,log_id=0300003065,type=spam,subtype=default,pri=information,session_id=\"q6OL7fsQ018870-q6OL7fsR018870\",client_name=\"\",client_ip=\"192.168.100.1\",dst_ip=\"10.50.2.225\",from=\"user1@example.com\",to=\"user2@example.com\",subject=\"Test1516\",msg=\"mailfilterd: Starting\""
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "client": {
+          "ip": "192.168.100.1"
+        },
+        "date": "2023-01-30",
+        "destination_ip": "10.50.2.225",
+        "device_id": "FEVM02TM23000064",
+        "from": "user1@example.com",
+        "id": "0300003065",
+        "message": "mailfilterd: Starting",
+        "priority": "information",
+        "priority_number": 190,
+        "session_id": "q6OL7fsQ018870-q6OL7fsR018870",
+        "sub_type": "default",
+        "subject": "Test1516",
+        "time": "16:09:16.825",
+        "to": "user2@example.com",
+        "type": "spam"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "mailfilterd: Starting",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "192.168.100.1",
+        "10.50.2.225"
+      ],
+      "user": [
+        "user1@example.com",
+        "user2@example.com"
+      ]
+    },
+    "source": {
+      "ip": "192.168.100.1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-01-30T16:09:15.246Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "syntax@www.ca"
+        ]
+      },
+      "to": {
+        "address": [
+          "user2@1.ca"
+        ]
+      }
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0400003064",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-01-30,time=16:09:15.246,device_id=FEVM02TM23000064,log_id=0400003064,type=virus,subtype=infected,pri=information,from=\"syntax@www.ca\",to=\"user2@1.ca\",src=67.43.156.28,session_id=\"q6OL7fsQ018870-q6OL7fsR018870\",msg=\"The file inline16-69.dat is infected with EICAR_TEST_FILE.\""
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-01-30",
+        "device_id": "FEVM02TM23000064",
+        "from": "syntax@www.ca",
+        "id": "0400003064",
+        "message": "The file inline16-69.dat is infected with EICAR_TEST_FILE.",
+        "priority": "information",
+        "priority_number": 190,
+        "session_id": "q6OL7fsQ018870-q6OL7fsR018870",
+        "source": {
+          "ip": "67.43.156.28"
+        },
+        "sub_type": "infected",
+        "time": "16:09:15.246",
+        "to": "user2@1.ca",
+        "type": "virus"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "The file inline16-69.dat is infected with EICAR_TEST_FILE.",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.28"
+      ],
+      "user": [
+        "syntax@www.ca",
+        "user2@1.ca"
+      ]
+    },
+    "source": {
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.28"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-01-30T16:09:15.246Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0400003064",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-01-30,time=16:09:15.246,device_id=FEVM02TM23000064,log_id=0400003064,type=encrypt,pri=information,session_id=\"q6OL7fsQ018870-q6OL7fsR018870\",msg=\"Starting cryptod\""
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-01-30",
+        "device_id": "FEVM02TM23000064",
+        "id": "0400003064",
+        "message": "Starting cryptod",
+        "priority": "information",
+        "priority_number": 190,
+        "session_id": "q6OL7fsQ018870-q6OL7fsR018870",
+        "time": "16:09:15.246",
+        "type": "encrypt"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "Starting cryptod",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-01-30T16:09:15.246Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "from": {
+        "address": [
+          "user2@2.ca"
+        ]
+      },
+      "subject": [
+        "ppt file"
+      ]
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0400003064",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<142>date=2023-01-30,time=16:09:15.246,device_id=FEVM02TM23000064,log_id=0400003064,type=encrypt,pri=information,session_id=\"q6OL7fsQ018870-q6OL7fsR018870\",msg=\"User user1@1.ca read secure message, id:'q79EiV8S007017-q79EiV8T0070170001474', sent from: 'user2@2.ca', subject: 'ppt file'\""
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "date": "2023-01-30",
+        "device_id": "FEVM02TM23000064",
+        "id": "0400003064",
+        "message": "User user1@1.ca read secure message, id:'q79EiV8S007017-q79EiV8T0070170001474', sent from: 'user2@2.ca', subject: 'ppt file'",
+        "priority": "information",
+        "priority_number": 142,
+        "sent_from": "user2@2.ca",
+        "session_id": "q6OL7fsQ018870-q6OL7fsR018870",
+        "subject": [
+          "ppt file"
+        ],
+        "time": "16:09:15.246",
+        "type": "encrypt",
+        "user": [
+          "user1@1.ca"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 17
+        },
+        "priority": 142,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "User user1@1.ca read secure message, id:'q79EiV8S007017-q79EiV8T0070170001474', sent from: 'user2@2.ca', subject: 'ppt file'",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "user": [
+        "user1@1.ca",
+        "user2@2.ca"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "user1@1.ca"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-01-30T16:06:24.345Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "NONE",
+      "agent_id_status": "verified",
+      "category": [
+        "email"
+      ],
+      "code": "0003002428",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<190>date=2023-01-30,time=16:06:24.345,device_id=FEVM02TM23000064,log_id=0003002428,type=event,subtype=smtp,pri=information, user=mail,ui=mail,action=NONE,status=N/A,session_id='q6OL7fsQ018870-q6OL7fsR018870',msg=\"starting daemon: persistent-queueing@00:05:00\"",
+      "type": [
+        "info"
+      ]
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "action": "NONE",
+        "date": "2023-01-30",
+        "device_id": "FEVM02TM23000064",
+        "id": "0003002428",
+        "message": "starting daemon: persistent-queueing@00:05:00",
+        "priority": "information",
+        "priority_number": 190,
+        "session_id": "q6OL7fsQ018870-q6OL7fsR018870",
+        "status": "N/A",
+        "sub_type": "smtp",
+        "time": "16:06:24.345",
+        "type": "event",
+        "ui": "mail",
+        "user": [
+          "mail"
+        ]
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 23
+        },
+        "priority": 190,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "message": "starting daemon: persistent-queueing@00:05:00",
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM23000064",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "user": [
+        "mail"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ],
+    "user": {
+      "name": [
+        "mail"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2023-01-16T15:56:24.983Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "81.2.69.192"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "direction": "in",
+      "from": {
+        "address": [
+          "mnlght23@protonmail.com"
+        ]
+      },
+      "subject": "Test 2 BAT",
+      "to": {
+        "address": [
+          "aytan.kh@cyberpoint.az"
+        ]
+      },
+      "x_mailer": "mta"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0200007961",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<187>date=2023-01-16,time=15:56:24.983,device_id=FEVM02TM22000650,log_id=0200007961,type=statistics,pri=information,session_id=\"30GBYxmi007660-30GBYxmk007660\",client_name=\"mail-40140.protonmail.ch\",client_ip=\"81.2.69.193\",client_cc=\"DE\",dst_ip=\"81.2.69.192\",from=\"mnlght23@protonmail.com\",hfrom=\"mnlght23@protonmail.com\",to=\"aytan.kh@cyberpoint.az\",polid=\"0:1:1:SYSTEM\",domain=\"www.example.co\",mailer=\"mta\",resolved=\"OK\",src_type=\"ext\",direction=\"in\",virus=\"\",disposition=\"System Quarantine;Notification;Defer Disposition\",classifier=\"Attachment Filter\",detail='Content',message_length=\"5384\",subject=\"Test 2 BAT\",message_id=\"1AWJEux58Mipu6R59d9pkk1KgEfGRxMRjueDQpXDlSCejzr-sROl0BZqXfu5V6-fyiNeH2ePEh5NAmFB3a8OezyXTsMQ5e3-omnNQBbNnIg=@protonmail.com\",recv_time=\"\",notif_delay=\"0\",scan_time=\"0.644852\",xfer_time=\"0.001047\",srcfolder=\"\",read_status=\"\"",
+      "outcome": "success"
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "classifier": "Attachment Filter",
+        "client": {
+          "cc": "DE",
+          "ip": "81.2.69.193",
+          "name": "mail-40140.protonmail.ch"
+        },
+        "date": "2023-01-16",
+        "destination_ip": "81.2.69.192",
+        "detail": "Content",
+        "device_id": "FEVM02TM22000650",
+        "direction": "in",
+        "disposition": "System Quarantine;Notification;Defer Disposition",
+        "domain": "www.example.co",
+        "from": "mnlght23@protonmail.com",
+        "hfrom": "mnlght23@protonmail.com",
+        "id": "0200007961",
+        "mailer": "mta",
+        "message_id": "1AWJEux58Mipu6R59d9pkk1KgEfGRxMRjueDQpXDlSCejzr-sROl0BZqXfu5V6-fyiNeH2ePEh5NAmFB3a8OezyXTsMQ5e3-omnNQBbNnIg=@protonmail.com",
+        "message_length": 5384,
+        "notif_delay": "0",
+        "policy_id": "0:1:1:SYSTEM",
+        "priority": "information",
+        "priority_number": 187,
+        "resolved": "OK",
+        "scan_time": 0.644852,
+        "session_id": "30GBYxmi007660-30GBYxmk007660",
+        "source": {
+          "type": "ext"
+        },
+        "subject": "Test 2 BAT",
+        "time": "15:56:24.983",
+        "to": "aytan.kh@cyberpoint.az",
+        "type": "statistics",
+        "xfer_time": 0.001047
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 22
+        },
+        "priority": 187,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FEVM02TM22000650",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.193",
+        "81.2.69.192"
+      ],
+      "user": [
+        "mail-40140.protonmail.ch",
+        "mnlght23@protonmail.com",
+        "aytan.kh@cyberpoint.az"
+      ]
+    },
+    "server": {
+      "domain": "www.example.co",
+      "registered_domain": "example.co",
+      "subdomain": "www",
+      "top_level_domain": "co"
+    },
+    "source": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.193",
+      "user": {
+        "name": "mail-40140.protonmail.ch"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  },
+  {
+    "@timestamp": "2013-02-25T07:01:34.000Z",
+    "agent": {
+      "ephemeral_id": "852bbb8e-7c08-47e1-ab41-b28fb60e7732",
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "name": "elastic-agent-48976",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimail.log",
+      "namespace": "88338",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "81.2.69.194"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "a9fb24cf-c092-45f6-aaca-32736533462a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "email": {
+      "direction": "unknown",
+      "from": {
+        "address": [
+          "aaa@bbb.com"
+        ]
+      },
+      "subject": "Test12345",
+      "to": {
+        "address": [
+          "user1@example.com"
+        ]
+      },
+      "x_mailer": "proxy"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0200025843",
+      "dataset": "fortinet_fortimail.log",
+      "ingested": "2026-03-10T04:38:40Z",
+      "kind": "event",
+      "original": "<187>date=2013-02-25,time=07:01:34,device_id=FE100C3909600504,log_id=0200025843,type=statistics,pri=information,session_id=\"r1PF1YTh025836-r1PF1YTh025836\",client_name=\"user\",dst_ip=\"81.2.69.194\",endpoint=\"\",from=\"aaa@bbb.com\",to=\"user1@example.com\",polid=\"0:1:0\",domain=\"example.com\",subject=\"Test12345\",mailer=\"proxy\",resolved=\"FAIL\",direction=\"unknown\",virus=\"\",disposition=\"Delay\",classifier=\"Session Limits\",message_length=\"199986\"",
+      "outcome": "failure"
+    },
+    "fortinet_fortimail": {
+      "log": {
+        "classifier": "Session Limits",
+        "client": {
+          "name": "user"
+        },
+        "date": "2013-02-25",
+        "destination_ip": "81.2.69.194",
+        "device_id": "FE100C3909600504",
+        "direction": "unknown",
+        "disposition": "Delay",
+        "domain": "example.com",
+        "from": "aaa@bbb.com",
+        "id": "0200025843",
+        "mailer": "proxy",
+        "message_length": 199986,
+        "policy_id": "0:1:0",
+        "priority": "information",
+        "priority_number": 187,
+        "resolved": "FAIL",
+        "session_id": "r1PF1YTh025836-r1PF1YTh025836",
+        "subject": "Test12345",
+        "time": "07:01:34",
+        "to": "user1@example.com",
+        "type": "statistics"
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "information",
+      "source": {
+        "address": "172.20.0.3:38094"
+      },
+      "syslog": {
+        "facility": {
+          "code": 22
+        },
+        "priority": 187,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "observer": {
+      "product": "FortiMail",
+      "serial_number": "FE100C3909600504",
+      "type": "firewall",
+      "vendor": "Fortinet"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.194"
+      ],
+      "user": [
+        "user",
+        "aaa@bbb.com",
+        "user1@example.com"
+      ]
+    },
+    "server": {
+      "domain": "example.com",
+      "registered_domain": "example.com",
+      "top_level_domain": "com"
+    },
+    "source": {
+      "user": {
+        "name": "user"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimail-log"
+    ]
+  }
+]

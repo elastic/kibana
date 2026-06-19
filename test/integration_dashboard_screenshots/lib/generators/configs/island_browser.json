@@ -1,0 +1,114 @@
+{
+  "package": "island_browser",
+  "dataStreams": [
+    {
+      "dataset": "island_browser.admin_actions",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "island_browser.admin_actions.action_domain",
+        "island_browser.admin_actions.action_status",
+        "island_browser.admin_actions.entity_name",
+        "organization.id",
+        "source.ip"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "island_browser.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "host.os.platform",
+        "island_browser.audit.compatibility_mode",
+        "island_browser.audit.type",
+        "island_browser.audit.verdict",
+        "island_browser.audit.verdict_reason",
+        "rule.name",
+        "source.geo.country_iso_code",
+        "source.ip",
+        "user.email"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "island_browser.compromised_credential",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "island_browser.compromised_credential.breach_source",
+        "island_browser.compromised_credential.status",
+        "labels.is_transform_source",
+        "source.registered_domain",
+        "user.email"
+      ],
+      "filterValues": {
+        "island_browser.compromised_credential.status": [
+          "Unresolved"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "island_browser.device",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.os.platform",
+        "host.type",
+        "island_browser.device.browser_update_status",
+        "island_browser.device.is_archived",
+        "island_browser.device.is_jailbroken",
+        "island_browser.device.mdm_provider",
+        "island_browser.device.policy_update_time",
+        "island_browser.device.status",
+        "island_browser.device.windows_license_status",
+        "labels.is_transform_source"
+      ],
+      "filterValues": {
+        "island_browser.device.status": [
+          "Active"
+        ],
+        "island_browser.device.is_archived": [
+          "true"
+        ],
+        "island_browser.device.is_jailbroken": [
+          "true"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "island_browser.user",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "island_browser.user.email_verified",
+        "island_browser.user.last_login",
+        "island_browser.user.user_source",
+        "island_browser.user.user_status",
+        "island_browser.user.user_type",
+        "labels.is_transform_source",
+        "user.email",
+        "user.group.name"
+      ],
+      "filterValues": {
+        "island_browser.user.user_status": [
+          "Active"
+        ],
+        "island_browser.user.email_verified": [
+          "true"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

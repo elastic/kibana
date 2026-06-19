@@ -1,0 +1,89 @@
+{
+  "package": "claroty_ctd",
+  "dataStreams": [
+    {
+      "dataset": "claroty_ctd.asset",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "claroty_ctd.asset.asset_types.name",
+        "claroty_ctd.asset.risk_level",
+        "claroty_ctd.asset.site_name",
+        "claroty_ctd.asset.virtual_zone.name",
+        "claroty_ctd.event.category",
+        "claroty_ctd.event.class_id",
+        "device.manufacturer",
+        "event.severity",
+        "host.id"
+      ],
+      "filterValues": {
+        "claroty_ctd.event.class_id": [
+          "Event",
+          "Alert"
+        ]
+      }
+    },
+    {
+      "dataset": "claroty_ctd.baseline",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "claroty_ctd.baseline.destination.entity.asset_name",
+        "claroty_ctd.baseline.site_id",
+        "claroty_ctd.baseline.source.entity.asset_name",
+        "claroty_ctd.baseline.valid",
+        "claroty_ctd.event.category",
+        "claroty_ctd.event.class_id",
+        "event.severity",
+        "network.protocol"
+      ],
+      "filterValues": {
+        "claroty_ctd.event.class_id": [
+          "Event",
+          "Alert"
+        ]
+      }
+    },
+    {
+      "dataset": "claroty_ctd.event",
+      "indexPattern": "logs-*",
+      "docTarget": 750,
+      "fields": [
+        "claroty_ctd.event.action.status",
+        "claroty_ctd.event.alert.status",
+        "claroty_ctd.event.category",
+        "claroty_ctd.event.class_id",
+        "claroty_ctd.event.device_external_id",
+        "claroty_ctd.event.is_ghost",
+        "claroty_ctd.event.log_type",
+        "claroty_ctd.event.memory",
+        "claroty_ctd.event.name",
+        "claroty_ctd.event.resolved.as",
+        "claroty_ctd.event.source.zone",
+        "claroty_ctd.event.unhandled_events",
+        "claroty_ctd.event.used.opt_icsranger",
+        "claroty_ctd.event.used.tmp",
+        "claroty_ctd.event.used.var",
+        "destination.ip",
+        "event.action",
+        "event.risk_score",
+        "event.severity",
+        "host.cpu.usage",
+        "host.os.name",
+        "network.protocol",
+        "observer.hostname",
+        "source.ip",
+        "user.name"
+      ],
+      "filterValues": {
+        "claroty_ctd.event.class_id": [
+          "ActivityLog",
+          "Event",
+          "Alert",
+          "HealthCheck",
+          "Insight"
+        ]
+      }
+    }
+  ]
+}

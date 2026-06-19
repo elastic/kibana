@@ -1,0 +1,673 @@
+[
+  {
+    "@timestamp": "2020-01-02T11:33:20.000Z",
+    "agent": {
+      "ephemeral_id": "a4e1dbee-bd6b-440e-bbe2-1fb1bc76f1a2",
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "name": "elastic-agent-54580",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "asa": {
+        "destination_interface": "wan",
+        "full_message": "Dynamic filter dropped greylisted TCP traffic from eth0:10.10.10.1/1234 (source.example.net/11234) to wan:172.24.177.3/80 (www.example.org/80), destination malicious address resolved from dynamic list: example.org, threat-level: high, category: malware",
+        "mapped_destination_host": "www.example.org",
+        "mapped_destination_port": 80,
+        "mapped_source_host": "source.example.net",
+        "mapped_source_port": 11234,
+        "rule_name": "dynamic",
+        "source_interface": "eth0",
+        "threat_category": "malware",
+        "threat_level": "high"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_asa.log",
+      "namespace": "96442",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "172.24.177.3",
+      "domain": "example.org",
+      "ip": "172.24.177.3",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "dynamic-filter",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "338204",
+      "dataset": "cisco_asa.log",
+      "ingested": "2026-03-10T02:57:33Z",
+      "kind": "event",
+      "original": "Jan  2 2020 11:33:20 localhost : %ASA-4-338204: Dynamic filter dropped greylisted TCP traffic from eth0:10.10.10.1/1234 (source.example.net/11234) to wan:172.24.177.3/80 (www.example.org/80), destination malicious address resolved from dynamic list: example.org, threat-level: high, category: malware",
+      "outcome": "failure",
+      "severity": 4,
+      "timezone": "UTC",
+      "type": [
+        "connection",
+        "denied"
+      ]
+    },
+    "host": {
+      "hostname": "localhost"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.22.0.3:54363"
+      }
+    },
+    "network": {
+      "community_id": "1:d9RGgqBro5rzu16MqJQFehDRaKY=",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "wan"
+        }
+      },
+      "hostname": "localhost",
+      "ingress": {
+        "interface": {
+          "name": "eth0"
+        }
+      },
+      "product": "asa",
+      "type": "firewall",
+      "vendor": "Cisco"
+    },
+    "related": {
+      "hosts": [
+        "localhost",
+        "example.org"
+      ],
+      "ip": [
+        "10.10.10.1",
+        "172.24.177.3"
+      ]
+    },
+    "server": {
+      "domain": "example.org"
+    },
+    "source": {
+      "address": "10.10.10.1",
+      "ip": "10.10.10.1",
+      "nat": {
+        "port": 11234
+      },
+      "port": 1234
+    },
+    "tags": [
+      "preserve_original_event",
+      "keep_message",
+      "cisco-asa",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-10-20T15:42:54.000Z",
+    "agent": {
+      "ephemeral_id": "a4e1dbee-bd6b-440e-bbe2-1fb1bc76f1a2",
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "name": "elastic-agent-54580",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "asa": {
+        "destination_interface": "inside",
+        "full_message": "access-list incoming permitted udp dmz2/127.2.3.4(56575)(LOCAL\\\\username) -> inside/127.3.4.5(53) hit-cnt 1 first hit [0x93d0e533, 0x578ef52f]",
+        "rule_name": "incoming",
+        "source_interface": "dmz2"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_asa.log",
+      "namespace": "96442",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "127.3.4.5",
+      "ip": "127.3.4.5",
+      "port": 53
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "firewall-rule",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "106100",
+      "dataset": "cisco_asa.log",
+      "ingested": "2026-03-10T02:57:33Z",
+      "kind": "event",
+      "original": "Oct 20 2019 15:42:54: %ASA-6-106100: access-list incoming permitted udp dmz2/127.2.3.4(56575)(LOCAL\\\\username) -> inside/127.3.4.5(53) hit-cnt 1 first hit [0x93d0e533, 0x578ef52f]",
+      "outcome": "success",
+      "severity": 6,
+      "timezone": "UTC",
+      "type": [
+        "connection",
+        "allowed"
+      ]
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "informational",
+      "source": {
+        "address": "172.22.0.3:54363"
+      }
+    },
+    "network": {
+      "community_id": "1:F0lY+M777B6QL2SDSKa9RfuUJ7s=",
+      "iana_number": "17",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "inside"
+        }
+      },
+      "ingress": {
+        "interface": {
+          "name": "dmz2"
+        }
+      },
+      "product": "asa",
+      "type": "firewall",
+      "vendor": "Cisco"
+    },
+    "related": {
+      "ip": [
+        "127.2.3.4",
+        "127.3.4.5"
+      ]
+    },
+    "source": {
+      "address": "127.2.3.4",
+      "ip": "127.2.3.4",
+      "port": 56575
+    },
+    "tags": [
+      "preserve_original_event",
+      "keep_message",
+      "cisco-asa",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-10-10T12:34:56.000Z",
+    "agent": {
+      "ephemeral_id": "a4e1dbee-bd6b-440e-bbe2-1fb1bc76f1a2",
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "name": "elastic-agent-54580",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "asa": {
+        "destination_interface": "outside",
+        "full_message": "Built dynamic TCP translation from inside:172.31.98.44/1772 to outside:192.168.98.44/8256",
+        "source_interface": "inside"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_asa.log",
+      "namespace": "96442",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.98.44",
+      "ip": "192.168.98.44",
+      "port": 8256
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "nat-slot",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "configuration"
+      ],
+      "code": "305011",
+      "dataset": "cisco_asa.log",
+      "ingested": "2026-03-10T02:57:33Z",
+      "kind": "event",
+      "original": "Oct 10 2018 12:34:56 localhost CiscoASA[999]: %ASA-6-305011: Built dynamic TCP translation from inside:172.31.98.44/1772 to outside:192.168.98.44/8256",
+      "outcome": "success",
+      "severity": 6,
+      "timezone": "UTC",
+      "type": [
+        "creation"
+      ]
+    },
+    "host": {
+      "hostname": "localhost"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "informational",
+      "source": {
+        "address": "172.22.0.3:54363"
+      }
+    },
+    "network": {
+      "community_id": "1:5fapvb2/9FPSvoCspfD2WiW0NdQ=",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "outside"
+        }
+      },
+      "hostname": "localhost",
+      "ingress": {
+        "interface": {
+          "name": "inside"
+        }
+      },
+      "product": "asa",
+      "type": "firewall",
+      "vendor": "Cisco"
+    },
+    "process": {
+      "name": "CiscoASA",
+      "pid": 999
+    },
+    "related": {
+      "hosts": [
+        "localhost"
+      ],
+      "ip": [
+        "172.31.98.44",
+        "192.168.98.44"
+      ]
+    },
+    "source": {
+      "address": "172.31.98.44",
+      "ip": "172.31.98.44",
+      "port": 1772
+    },
+    "tags": [
+      "preserve_original_event",
+      "keep_message",
+      "cisco-asa",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-10-10T12:34:56.000Z",
+    "agent": {
+      "ephemeral_id": "a4e1dbee-bd6b-440e-bbe2-1fb1bc76f1a2",
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "name": "elastic-agent-54580",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "asa": {
+        "connection_id": "11758",
+        "destination_interface": "inside",
+        "full_message": "Teardown UDP connection 11758 for outside:192.168.80.32/53 to inside:172.31.98.44/56132 duration 0:00:00 bytes 148",
+        "source_interface": "outside"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_asa.log",
+      "namespace": "96442",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "172.31.98.44",
+      "ip": "172.31.98.44",
+      "port": 56132
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "flow-expiration",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "302016",
+      "dataset": "cisco_asa.log",
+      "duration": 0,
+      "end": "2018-10-10T12:34:56.000Z",
+      "ingested": "2026-03-10T02:57:33Z",
+      "kind": "event",
+      "original": "Oct 10 2018 12:34:56 localhost CiscoASA[999]: %ASA-6-302016: Teardown UDP connection 11758 for outside:192.168.80.32/53 to inside:172.31.98.44/56132 duration 0:00:00 bytes 148",
+      "outcome": "success",
+      "severity": 6,
+      "start": "2018-10-10T12:34:56.000Z",
+      "timezone": "UTC",
+      "type": [
+        "connection",
+        "end"
+      ]
+    },
+    "host": {
+      "hostname": "localhost"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "informational",
+      "source": {
+        "address": "172.22.0.3:54363"
+      }
+    },
+    "network": {
+      "bytes": 148,
+      "community_id": "1:EW3nYv2EsVNyWwVZ/8O8io4jVfA=",
+      "iana_number": "17",
+      "transport": "udp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "inside"
+        }
+      },
+      "hostname": "localhost",
+      "ingress": {
+        "interface": {
+          "name": "outside"
+        }
+      },
+      "product": "asa",
+      "type": "firewall",
+      "vendor": "Cisco"
+    },
+    "process": {
+      "name": "CiscoASA",
+      "pid": 999
+    },
+    "related": {
+      "hosts": [
+        "localhost"
+      ],
+      "ip": [
+        "192.168.80.32",
+        "172.31.98.44"
+      ]
+    },
+    "source": {
+      "address": "192.168.80.32",
+      "ip": "192.168.80.32",
+      "port": 53
+    },
+    "tags": [
+      "preserve_original_event",
+      "keep_message",
+      "cisco-asa",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-10-10T12:34:56.000Z",
+    "agent": {
+      "ephemeral_id": "a4e1dbee-bd6b-440e-bbe2-1fb1bc76f1a2",
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "name": "elastic-agent-54580",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "asa": {
+        "full_message": "Group VPN_USERS User example.user IP 67.43.156.14 AnyConnect parent session started."
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_asa.log",
+      "namespace": "96442",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "client-vpn-connected",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "session"
+      ],
+      "code": "113039",
+      "dataset": "cisco_asa.log",
+      "ingested": "2026-03-10T02:57:33Z",
+      "kind": "event",
+      "original": "Oct 10 2018 12:34:56 localhost CiscoASA[999]: %ASA-6-113039: Group VPN_USERS User example.user IP 67.43.156.14 AnyConnect parent session started.",
+      "outcome": "success",
+      "severity": 6,
+      "timezone": "UTC",
+      "type": [
+        "connection",
+        "start"
+      ]
+    },
+    "host": {
+      "hostname": "localhost"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "informational",
+      "source": {
+        "address": "172.22.0.3:54363"
+      }
+    },
+    "observer": {
+      "hostname": "localhost",
+      "product": "asa",
+      "type": "firewall",
+      "vendor": "Cisco"
+    },
+    "process": {
+      "name": "CiscoASA",
+      "pid": 999
+    },
+    "related": {
+      "hosts": [
+        "localhost"
+      ],
+      "ip": [
+        "67.43.156.14"
+      ],
+      "user": [
+        "example.user"
+      ]
+    },
+    "source": {
+      "address": "67.43.156.14",
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.14",
+      "user": {
+        "group": {
+          "name": "VPN_USERS"
+        },
+        "name": "example.user"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "keep_message",
+      "cisco-asa",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-10-10T12:34:56.000Z",
+    "agent": {
+      "ephemeral_id": "a4e1dbee-bd6b-440e-bbe2-1fb1bc76f1a2",
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "name": "elastic-agent-54580",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "asa": {
+        "destination_interface": "inside",
+        "full_message": "Deny tcp src outside:192.168.19.254/80 dst inside:172.31.98.44/8277 by access-group \"inbound\" [0x0, 0x0]",
+        "rule_name": "inbound",
+        "source_interface": "outside"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_asa.log",
+      "namespace": "96442",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "172.31.98.44",
+      "ip": "172.31.98.44",
+      "port": 8277
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "e108da18-2f9b-4430-9e3a-427323671c39",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "firewall-rule",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "106023",
+      "dataset": "cisco_asa.log",
+      "ingested": "2026-03-10T02:57:33Z",
+      "kind": "event",
+      "original": "Oct 10 2018 12:34:56 localhost CiscoASA[999]: %ASA-4-106023: Deny tcp src outside:192.168.19.254/80 dst inside:172.31.98.44/8277 by access-group \"inbound\" [0x0, 0x0]",
+      "outcome": "failure",
+      "severity": 4,
+      "timezone": "UTC",
+      "type": [
+        "connection",
+        "denied"
+      ]
+    },
+    "host": {
+      "hostname": "localhost"
+    },
+    "input": {
+      "type": "udp"
+    },
+    "log": {
+      "level": "warning",
+      "source": {
+        "address": "172.22.0.3:54363"
+      }
+    },
+    "network": {
+      "community_id": "1:eDGYCCim2x79ieqSncevN5rke9U=",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "inside"
+        }
+      },
+      "hostname": "localhost",
+      "ingress": {
+        "interface": {
+          "name": "outside"
+        }
+      },
+      "product": "asa",
+      "type": "firewall",
+      "vendor": "Cisco"
+    },
+    "process": {
+      "name": "CiscoASA",
+      "pid": 999
+    },
+    "related": {
+      "hosts": [
+        "localhost"
+      ],
+      "ip": [
+        "192.168.19.254",
+        "172.31.98.44"
+      ]
+    },
+    "source": {
+      "address": "192.168.19.254",
+      "ip": "192.168.19.254",
+      "port": 80
+    },
+    "tags": [
+      "preserve_original_event",
+      "keep_message",
+      "cisco-asa",
+      "forwarded"
+    ]
+  }
+]

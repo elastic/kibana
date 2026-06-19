@@ -1,0 +1,61 @@
+{
+  "package": "infoblox_threat_defense",
+  "dataStreams": [
+    {
+      "dataset": "infoblox_threat_defense.event",
+      "indexPattern": "logs-*",
+      "docTarget": 1000,
+      "fields": [
+        "client.geo.region_name",
+        "destination.ip",
+        "dns.question.class",
+        "dns.question.type",
+        "dns.response_code",
+        "event.action",
+        "event.code",
+        "event.id",
+        "event.severity",
+        "host.hostname",
+        "host.id",
+        "infoblox_threat_defense.event.application_protocol",
+        "infoblox_threat_defense.event.device.event_category",
+        "infoblox_threat_defense.event.infoblox.b1.connection_type",
+        "infoblox_threat_defense.event.infoblox.b1.feed.name",
+        "infoblox_threat_defense.event.infoblox.b1.feed.type",
+        "infoblox_threat_defense.event.infoblox.b1.policy.action",
+        "infoblox_threat_defense.event.infoblox.b1.policy.name",
+        "infoblox_threat_defense.event.infoblox.b1.region",
+        "infoblox_threat_defense.event.infoblox.dns_q.flags",
+        "infoblox_threat_defense.event.infoblox.fingerprint",
+        "infoblox_threat_defense.event.infoblox.insight.feed_source",
+        "infoblox_threat_defense.event.infoblox.insight.status",
+        "infoblox_threat_defense.event.infoblox.insight.threat_type",
+        "infoblox_threat_defense.event.infoblox.notification.sub_type",
+        "infoblox_threat_defense.event.infoblox.ns_count",
+        "infoblox_threat_defense.event.infoblox.resource.type",
+        "infoblox_threat_defense.event.infoblox.subnet",
+        "infoblox_threat_defense.event.infoblox.threat.class",
+        "infoblox_threat_defense.event.infoblox.threat.family",
+        "infoblox_threat_defense.event.outcome",
+        "infoblox_threat_defense.event.status",
+        "infoblox_threat_defense.event.transport_protocol",
+        "network.application",
+        "network.transport",
+        "rule.name",
+        "source.ip",
+        "source.mac",
+        "source.port",
+        "source.user.name",
+        "threat.indicator.id",
+        "threat.indicator.reference"
+      ],
+      "filterValues": {
+        "event.code": [
+          "BloxOne-InsightsNotification-Log",
+          "DNS Response",
+          "BloxOne-Audit-Log"
+        ]
+      }
+    }
+  ]
+}

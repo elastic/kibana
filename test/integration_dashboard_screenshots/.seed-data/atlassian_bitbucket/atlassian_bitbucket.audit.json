@@ -1,0 +1,862 @@
+[
+  {
+    "@timestamp": "2021-11-27T18:14:18.395Z",
+    "agent": {
+      "ephemeral_id": "9068384c-3ef3-48c7-a2ab-9acb5ddfb2d9",
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "name": "elastic-agent-72967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitbucket": {
+      "audit": {
+        "extra_attributes": [
+          {
+            "name": "Authentication method",
+            "nameI18nKey": "bitbucket.service.user.audit.attribute.authentication.authmethod",
+            "value": "basic"
+          },
+          {
+            "name": "target",
+            "nameI18nKey": "bitbucket.audit.attribute.legacy.target",
+            "value": "admin"
+          }
+        ],
+        "method": "Browser",
+        "type": {
+          "action": "User logged in",
+          "actionI18nKey": "bitbucket.service.user.audit.action.authenticationsuccess",
+          "area": "SECURITY",
+          "category": "Authentication",
+          "categoryI18nKey": "bitbucket.service.audit.category.authentication",
+          "level": "FULL"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_bitbucket.audit",
+      "namespace": "91287",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "bitbucket.service.user.audit.action.authenticationsuccess",
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "atlassian_bitbucket.audit",
+      "ingested": "2026-03-10T02:23:14Z",
+      "kind": "event",
+      "original": "{\"affectedObjects\":[],\"auditType\":{\"action\":\"User logged in\",\"actionI18nKey\":\"bitbucket.service.user.audit.action.authenticationsuccess\",\"area\":\"SECURITY\",\"category\":\"Authentication\",\"categoryI18nKey\":\"bitbucket.service.audit.category.authentication\",\"level\":\"FULL\"},\"author\":{\"id\":\"2\",\"name\":\"admin\",\"type\":\"NORMAL\"},\"changedValues\":[],\"extraAttributes\":[{\"name\":\"Authentication method\",\"nameI18nKey\":\"bitbucket.service.user.audit.attribute.authentication.authmethod\",\"value\":\"basic\"},{\"name\":\"target\",\"nameI18nKey\":\"bitbucket.audit.attribute.legacy.target\",\"value\":\"admin\"}],\"method\":\"Browser\",\"node\":\"8767044c-1b98-4d64-82db-ef29af8c3792\",\"source\":\"10.100.100.2\",\"system\":\"http://bitbucket.internal:7990\",\"timestamp\":{\"epochSecond\":1638036858,\"nano\":395000000},\"version\":\"1.0\"}",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-72967",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "2A-81-DD-7B-5E-CB",
+        "3A-9A-BA-9F-01-A7"
+      ],
+      "name": "elastic-agent-72967",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/test-audit.log"
+      },
+      "offset": 5027
+    },
+    "related": {
+      "hosts": [
+        "bitbucket.internal"
+      ],
+      "ip": [
+        "10.100.100.2"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "service": {
+      "address": "http://bitbucket.internal:7990"
+    },
+    "source": {
+      "address": "10.100.100.2",
+      "ip": "10.100.100.2"
+    },
+    "tags": [
+      "preserve_original_event",
+      "bitbucket-audit"
+    ],
+    "user": {
+      "id": "2",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2021-11-27T18:14:14.978Z",
+    "agent": {
+      "ephemeral_id": "9068384c-3ef3-48c7-a2ab-9acb5ddfb2d9",
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "name": "elastic-agent-72967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitbucket": {
+      "audit": {
+        "affected_objects": [
+          {
+            "name": "TEST",
+            "id": "2",
+            "type": "PROJECT"
+          }
+        ],
+        "changed_values": [
+          {
+            "i18nKey": "bitbucket.service.project.audit.changedvalue.projectmodified.name",
+            "from": "Test",
+            "to": "Test1",
+            "key": "Name"
+          },
+          {
+            "i18nKey": "bitbucket.service.project.audit.changedvalue.projectmodified.description",
+            "to": "sdasdfasdf",
+            "key": "Description"
+          }
+        ],
+        "extra_attributes": [
+          {
+            "name": "target",
+            "nameI18nKey": "bitbucket.audit.attribute.legacy.target",
+            "value": "TEST"
+          },
+          {
+            "name": "details",
+            "nameI18nKey": "bitbucket.audit.attribute.legacy.details",
+            "value": "{\"old.name\":\"Test\",\"new.name\":\"Test1\",\"old.description\":null,\"new.description\":\"sdasdfasdf\"}"
+          }
+        ],
+        "method": "Browser",
+        "type": {
+          "action": "Project settings changed",
+          "actionI18nKey": "bitbucket.service.project.audit.action.projectmodified",
+          "area": "LOCAL_CONFIG_AND_ADMINISTRATION",
+          "category": "Projects",
+          "categoryI18nKey": "bitbucket.service.audit.category.projects",
+          "level": "BASE"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_bitbucket.audit",
+      "namespace": "91287",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "bitbucket.service.project.audit.action.projectmodified",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "atlassian_bitbucket.audit",
+      "ingested": "2026-03-10T02:23:14Z",
+      "kind": "event",
+      "original": "{\"affectedObjects\":[{\"id\":\"2\",\"name\":\"TEST\",\"type\":\"PROJECT\"}],\"auditType\":{\"action\":\"Project settings changed\",\"actionI18nKey\":\"bitbucket.service.project.audit.action.projectmodified\",\"area\":\"LOCAL_CONFIG_AND_ADMINISTRATION\",\"category\":\"Projects\",\"categoryI18nKey\":\"bitbucket.service.audit.category.projects\",\"level\":\"BASE\"},\"author\":{\"id\":\"2\",\"name\":\"admin\",\"type\":\"NORMAL\"},\"changedValues\":[{\"from\":\"Test\",\"i18nKey\":\"bitbucket.service.project.audit.changedvalue.projectmodified.name\",\"key\":\"Name\",\"to\":\"Test1\"},{\"i18nKey\":\"bitbucket.service.project.audit.changedvalue.projectmodified.description\",\"key\":\"Description\",\"to\":\"sdasdfasdf\"}],\"extraAttributes\":[{\"name\":\"target\",\"nameI18nKey\":\"bitbucket.audit.attribute.legacy.target\",\"value\":\"TEST\"},{\"name\":\"details\",\"nameI18nKey\":\"bitbucket.audit.attribute.legacy.details\",\"value\":\"{\\\"old.name\\\":\\\"Test\\\",\\\"new.name\\\":\\\"Test1\\\",\\\"old.description\\\":null,\\\"new.description\\\":\\\"sdasdfasdf\\\"}\"}],\"method\":\"Browser\",\"node\":\"8767044c-1b98-4d64-82db-ef29af8c3792\",\"source\":\"10.100.100.2\",\"system\":\"http://bitbucket.internal:7990\",\"timestamp\":{\"epochSecond\":1638036854,\"nano\":978000000},\"version\":\"1.0\"}",
+      "type": [
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-72967",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "2A-81-DD-7B-5E-CB",
+        "3A-9A-BA-9F-01-A7"
+      ],
+      "name": "elastic-agent-72967",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/test-audit.log"
+      },
+      "offset": 3881
+    },
+    "related": {
+      "hosts": [
+        "bitbucket.internal"
+      ],
+      "ip": [
+        "10.100.100.2"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "service": {
+      "address": "http://bitbucket.internal:7990"
+    },
+    "source": {
+      "address": "10.100.100.2",
+      "ip": "10.100.100.2"
+    },
+    "tags": [
+      "preserve_original_event",
+      "bitbucket-audit"
+    ],
+    "user": {
+      "id": "2",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2021-11-27T18:14:14.900Z",
+    "agent": {
+      "ephemeral_id": "9068384c-3ef3-48c7-a2ab-9acb5ddfb2d9",
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "name": "elastic-agent-72967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitbucket": {
+      "audit": {
+        "affected_objects": [
+          {
+            "name": "TEST",
+            "id": "2",
+            "type": "PROJECT"
+          }
+        ],
+        "extra_attributes": [
+          {
+            "name": "target",
+            "nameI18nKey": "bitbucket.audit.attribute.legacy.target",
+            "value": "TEST"
+          }
+        ],
+        "method": "Browser",
+        "type": {
+          "action": "Project settings change requested",
+          "actionI18nKey": "bitbucket.service.project.audit.action.projectmodificationrequested",
+          "area": "LOCAL_CONFIG_AND_ADMINISTRATION",
+          "category": "Projects",
+          "categoryI18nKey": "bitbucket.service.audit.category.projects",
+          "level": "BASE"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_bitbucket.audit",
+      "namespace": "91287",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "bitbucket.service.project.audit.action.projectmodificationrequested",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "atlassian_bitbucket.audit",
+      "ingested": "2026-03-10T02:23:14Z",
+      "kind": "event",
+      "original": "{\"affectedObjects\":[{\"id\":\"2\",\"name\":\"TEST\",\"type\":\"PROJECT\"}],\"auditType\":{\"action\":\"Project settings change requested\",\"actionI18nKey\":\"bitbucket.service.project.audit.action.projectmodificationrequested\",\"area\":\"LOCAL_CONFIG_AND_ADMINISTRATION\",\"category\":\"Projects\",\"categoryI18nKey\":\"bitbucket.service.audit.category.projects\",\"level\":\"BASE\"},\"author\":{\"id\":\"2\",\"name\":\"admin\",\"type\":\"NORMAL\"},\"changedValues\":[],\"extraAttributes\":[{\"name\":\"target\",\"nameI18nKey\":\"bitbucket.audit.attribute.legacy.target\",\"value\":\"TEST\"}],\"method\":\"Browser\",\"node\":\"8767044c-1b98-4d64-82db-ef29af8c3792\",\"source\":\"10.100.100.2\",\"system\":\"http://bitbucket.internal:7990\",\"timestamp\":{\"epochSecond\":1638036854,\"nano\":900000000},\"version\":\"1.0\"}",
+      "type": [
+        "change"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-72967",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "2A-81-DD-7B-5E-CB",
+        "3A-9A-BA-9F-01-A7"
+      ],
+      "name": "elastic-agent-72967",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/test-audit.log"
+      },
+      "offset": 3150
+    },
+    "related": {
+      "hosts": [
+        "bitbucket.internal"
+      ],
+      "ip": [
+        "10.100.100.2"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "service": {
+      "address": "http://bitbucket.internal:7990"
+    },
+    "source": {
+      "address": "10.100.100.2",
+      "ip": "10.100.100.2"
+    },
+    "tags": [
+      "preserve_original_event",
+      "bitbucket-audit"
+    ],
+    "user": {
+      "id": "2",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2021-11-27T18:13:24.428Z",
+    "agent": {
+      "ephemeral_id": "9068384c-3ef3-48c7-a2ab-9acb5ddfb2d9",
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "name": "elastic-agent-72967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitbucket": {
+      "audit": {
+        "extra_attributes": [
+          {
+            "name": "Query",
+            "nameI18nKey": "atlassian.audit.event.attribute.query"
+          },
+          {
+            "name": "Results returned",
+            "nameI18nKey": "atlassian.audit.event.attribute.results",
+            "value": "200"
+          },
+          {
+            "name": "ID Range",
+            "nameI18nKey": "atlassian.audit.event.attribute.id",
+            "value": "47 - 246"
+          },
+          {
+            "name": "Timestamp Range",
+            "nameI18nKey": "atlassian.audit.event.attribute.timestamp",
+            "value": "2021-11-27T17:29:10.643Z - 2021-11-27T18:13:24.368Z"
+          }
+        ],
+        "method": "Browser",
+        "type": {
+          "action": "Audit Log search performed",
+          "actionI18nKey": "atlassian.audit.event.action.audit.search",
+          "area": "AUDIT_LOG",
+          "category": "Auditing",
+          "categoryI18nKey": "atlassian.audit.event.category.audit",
+          "level": "BASE"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_bitbucket.audit",
+      "namespace": "91287",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "atlassian.audit.event.action.audit.search",
+      "agent_id_status": "verified",
+      "dataset": "atlassian_bitbucket.audit",
+      "ingested": "2026-03-10T02:23:14Z",
+      "kind": "event",
+      "original": "{\"affectedObjects\":[],\"auditType\":{\"action\":\"Audit Log search performed\",\"actionI18nKey\":\"atlassian.audit.event.action.audit.search\",\"area\":\"AUDIT_LOG\",\"category\":\"Auditing\",\"categoryI18nKey\":\"atlassian.audit.event.category.audit\",\"level\":\"BASE\"},\"author\":{\"id\":\"2\",\"name\":\"admin\",\"type\":\"NORMAL\"},\"changedValues\":[],\"extraAttributes\":[{\"name\":\"Query\",\"nameI18nKey\":\"atlassian.audit.event.attribute.query\",\"value\":\"\"},{\"name\":\"Results returned\",\"nameI18nKey\":\"atlassian.audit.event.attribute.results\",\"value\":\"200\"},{\"name\":\"ID Range\",\"nameI18nKey\":\"atlassian.audit.event.attribute.id\",\"value\":\"47 - 246\"},{\"name\":\"Timestamp Range\",\"nameI18nKey\":\"atlassian.audit.event.attribute.timestamp\",\"value\":\"2021-11-27T17:29:10.643Z - 2021-11-27T18:13:24.368Z\"}],\"method\":\"Browser\",\"node\":\"8767044c-1b98-4d64-82db-ef29af8c3792\",\"source\":\"10.100.100.2\",\"system\":\"http://bitbucket.internal:7990\",\"timestamp\":{\"epochSecond\":1638036804,\"nano\":428000000},\"version\":\"1.0\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-72967",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "2A-81-DD-7B-5E-CB",
+        "3A-9A-BA-9F-01-A7"
+      ],
+      "name": "elastic-agent-72967",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/test-audit.log"
+      },
+      "offset": 2192
+    },
+    "related": {
+      "hosts": [
+        "bitbucket.internal"
+      ],
+      "ip": [
+        "10.100.100.2"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "service": {
+      "address": "http://bitbucket.internal:7990"
+    },
+    "source": {
+      "address": "10.100.100.2",
+      "ip": "10.100.100.2"
+    },
+    "tags": [
+      "preserve_original_event",
+      "bitbucket-audit"
+    ],
+    "user": {
+      "id": "2",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2021-11-27T18:13:24.368Z",
+    "agent": {
+      "ephemeral_id": "9068384c-3ef3-48c7-a2ab-9acb5ddfb2d9",
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "name": "elastic-agent-72967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitbucket": {
+      "audit": {
+        "extra_attributes": [
+          {
+            "name": "Authentication method",
+            "nameI18nKey": "bitbucket.service.user.audit.attribute.authentication.authmethod",
+            "value": "basic"
+          },
+          {
+            "name": "target",
+            "nameI18nKey": "bitbucket.audit.attribute.legacy.target",
+            "value": "admin"
+          }
+        ],
+        "method": "Browser",
+        "type": {
+          "action": "User logged in",
+          "actionI18nKey": "bitbucket.service.user.audit.action.authenticationsuccess",
+          "area": "SECURITY",
+          "category": "Authentication",
+          "categoryI18nKey": "bitbucket.service.audit.category.authentication",
+          "level": "FULL"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_bitbucket.audit",
+      "namespace": "91287",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "bitbucket.service.user.audit.action.authenticationsuccess",
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "dataset": "atlassian_bitbucket.audit",
+      "ingested": "2026-03-10T02:23:14Z",
+      "kind": "event",
+      "original": "{\"affectedObjects\":[],\"auditType\":{\"action\":\"User logged in\",\"actionI18nKey\":\"bitbucket.service.user.audit.action.authenticationsuccess\",\"area\":\"SECURITY\",\"category\":\"Authentication\",\"categoryI18nKey\":\"bitbucket.service.audit.category.authentication\",\"level\":\"FULL\"},\"author\":{\"id\":\"2\",\"name\":\"admin\",\"type\":\"NORMAL\"},\"changedValues\":[],\"extraAttributes\":[{\"name\":\"Authentication method\",\"nameI18nKey\":\"bitbucket.service.user.audit.attribute.authentication.authmethod\",\"value\":\"basic\"},{\"name\":\"target\",\"nameI18nKey\":\"bitbucket.audit.attribute.legacy.target\",\"value\":\"admin\"}],\"method\":\"Browser\",\"node\":\"8767044c-1b98-4d64-82db-ef29af8c3792\",\"source\":\"10.100.100.2\",\"system\":\"http://bitbucket.internal:7990\",\"timestamp\":{\"epochSecond\":1638036804,\"nano\":368000000},\"version\":\"1.0\"}",
+      "outcome": "success",
+      "type": [
+        "start"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-72967",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "2A-81-DD-7B-5E-CB",
+        "3A-9A-BA-9F-01-A7"
+      ],
+      "name": "elastic-agent-72967",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/test-audit.log"
+      },
+      "offset": 1411
+    },
+    "related": {
+      "hosts": [
+        "bitbucket.internal"
+      ],
+      "ip": [
+        "10.100.100.2"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "service": {
+      "address": "http://bitbucket.internal:7990"
+    },
+    "source": {
+      "address": "10.100.100.2",
+      "ip": "10.100.100.2"
+    },
+    "tags": [
+      "preserve_original_event",
+      "bitbucket-audit"
+    ],
+    "user": {
+      "id": "2",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2021-11-27T18:13:19.960Z",
+    "agent": {
+      "ephemeral_id": "9068384c-3ef3-48c7-a2ab-9acb5ddfb2d9",
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "name": "elastic-agent-72967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitbucket": {
+      "audit": {
+        "affected_objects": [
+          {
+            "name": "AT",
+            "id": "3",
+            "type": "PROJECT"
+          }
+        ],
+        "extra_attributes": [
+          {
+            "name": "target",
+            "nameI18nKey": "bitbucket.audit.attribute.legacy.target",
+            "value": "AT"
+          }
+        ],
+        "method": "Browser",
+        "type": {
+          "action": "Project deleted",
+          "actionI18nKey": "bitbucket.service.project.audit.action.projectdeleted",
+          "area": "LOCAL_CONFIG_AND_ADMINISTRATION",
+          "category": "Projects",
+          "categoryI18nKey": "bitbucket.service.audit.category.projects",
+          "level": "BASE"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_bitbucket.audit",
+      "namespace": "91287",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "bitbucket.service.project.audit.action.projectdeleted",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "atlassian_bitbucket.audit",
+      "ingested": "2026-03-10T02:23:14Z",
+      "kind": "event",
+      "original": "{\"affectedObjects\":[{\"id\":\"3\",\"name\":\"AT\",\"type\":\"PROJECT\"}],\"auditType\":{\"action\":\"Project deleted\",\"actionI18nKey\":\"bitbucket.service.project.audit.action.projectdeleted\",\"area\":\"LOCAL_CONFIG_AND_ADMINISTRATION\",\"category\":\"Projects\",\"categoryI18nKey\":\"bitbucket.service.audit.category.projects\",\"level\":\"BASE\"},\"author\":{\"id\":\"2\",\"name\":\"admin\",\"type\":\"NORMAL\"},\"changedValues\":[],\"extraAttributes\":[{\"name\":\"target\",\"nameI18nKey\":\"bitbucket.audit.attribute.legacy.target\",\"value\":\"AT\"}],\"method\":\"Browser\",\"node\":\"8767044c-1b98-4d64-82db-ef29af8c3792\",\"source\":\"10.100.100.2\",\"system\":\"http://bitbucket.internal:7990\",\"timestamp\":{\"epochSecond\":1638036799,\"nano\":960000000},\"version\":\"1.0\"}",
+      "type": [
+        "deletion"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-72967",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "2A-81-DD-7B-5E-CB",
+        "3A-9A-BA-9F-01-A7"
+      ],
+      "name": "elastic-agent-72967",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/test-audit.log"
+      },
+      "offset": 716
+    },
+    "related": {
+      "hosts": [
+        "bitbucket.internal"
+      ],
+      "ip": [
+        "10.100.100.2"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "service": {
+      "address": "http://bitbucket.internal:7990"
+    },
+    "source": {
+      "address": "10.100.100.2",
+      "ip": "10.100.100.2"
+    },
+    "tags": [
+      "preserve_original_event",
+      "bitbucket-audit"
+    ],
+    "user": {
+      "id": "2",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2021-11-27T18:13:19.888Z",
+    "agent": {
+      "ephemeral_id": "9068384c-3ef3-48c7-a2ab-9acb5ddfb2d9",
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "name": "elastic-agent-72967",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitbucket": {
+      "audit": {
+        "affected_objects": [
+          {
+            "name": "AT",
+            "id": "3",
+            "type": "PROJECT"
+          }
+        ],
+        "extra_attributes": [
+          {
+            "name": "target",
+            "nameI18nKey": "bitbucket.audit.attribute.legacy.target",
+            "value": "AT"
+          }
+        ],
+        "method": "Browser",
+        "type": {
+          "action": "Project deletion requested",
+          "actionI18nKey": "bitbucket.service.project.audit.action.projectdeletionrequested",
+          "area": "LOCAL_CONFIG_AND_ADMINISTRATION",
+          "category": "Projects",
+          "categoryI18nKey": "bitbucket.service.audit.category.projects",
+          "level": "BASE"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_bitbucket.audit",
+      "namespace": "91287",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "db270510-d667-4870-b84f-9baf91f80750",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "bitbucket.service.project.audit.action.projectdeletionrequested",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "atlassian_bitbucket.audit",
+      "ingested": "2026-03-10T02:23:14Z",
+      "kind": "event",
+      "original": "{\"affectedObjects\":[{\"id\":\"3\",\"name\":\"AT\",\"type\":\"PROJECT\"}],\"auditType\":{\"action\":\"Project deletion requested\",\"actionI18nKey\":\"bitbucket.service.project.audit.action.projectdeletionrequested\",\"area\":\"LOCAL_CONFIG_AND_ADMINISTRATION\",\"category\":\"Projects\",\"categoryI18nKey\":\"bitbucket.service.audit.category.projects\",\"level\":\"BASE\"},\"author\":{\"id\":\"2\",\"name\":\"admin\",\"type\":\"NORMAL\"},\"changedValues\":[],\"extraAttributes\":[{\"name\":\"target\",\"nameI18nKey\":\"bitbucket.audit.attribute.legacy.target\",\"value\":\"AT\"}],\"method\":\"Browser\",\"node\":\"8767044c-1b98-4d64-82db-ef29af8c3792\",\"source\":\"10.100.100.2\",\"system\":\"http://bitbucket.internal:7990\",\"timestamp\":{\"epochSecond\":1638036799,\"nano\":888000000},\"version\":\"1.0\"}",
+      "type": [
+        "deletion"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-72967",
+      "ip": [
+        "172.21.0.2",
+        "172.18.0.5"
+      ],
+      "mac": [
+        "2A-81-DD-7B-5E-CB",
+        "3A-9A-BA-9F-01-A7"
+      ],
+      "name": "elastic-agent-72967",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/test-audit.log"
+      },
+      "offset": 0
+    },
+    "related": {
+      "hosts": [
+        "bitbucket.internal"
+      ],
+      "ip": [
+        "10.100.100.2"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "service": {
+      "address": "http://bitbucket.internal:7990"
+    },
+    "source": {
+      "address": "10.100.100.2",
+      "ip": "10.100.100.2"
+    },
+    "tags": [
+      "preserve_original_event",
+      "bitbucket-audit"
+    ],
+    "user": {
+      "id": "2",
+      "name": "admin"
+    }
+  }
+]

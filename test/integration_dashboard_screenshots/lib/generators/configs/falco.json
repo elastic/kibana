@@ -1,0 +1,20 @@
+{
+  "package": "falco",
+  "dataStreams": [
+    {
+      "dataset": "falco.alerts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.original",
+        "event.severity",
+        "falco.priority",
+        "host.name",
+        "orchestrator.resource.name",
+        "process.name",
+        "rule.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

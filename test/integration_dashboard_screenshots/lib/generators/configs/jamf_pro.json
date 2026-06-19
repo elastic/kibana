@@ -1,0 +1,65 @@
+{
+  "package": "jamf_pro",
+  "dataStreams": [
+    {
+      "dataset": "jamf_pro.events",
+      "indexPattern": "logs-*",
+      "docTarget": 660,
+      "fields": [
+        "event.dataset",
+        "jamf_pro.events.webhook.id",
+        "jamf_pro.events.webhook.webhook_event",
+        "jamf_pro.inventory.general.enrolled_via_automated_device_enrollment",
+        "jamf_pro.inventory.general.jamf_binary_version",
+        "jamf_pro.inventory.general.last_contact_time",
+        "jamf_pro.inventory.general.last_enrolled_date",
+        "jamf_pro.inventory.general.last_ip_address",
+        "jamf_pro.inventory.general.last_ip_address_geo.location",
+        "jamf_pro.inventory.general.last_reported_ip",
+        "jamf_pro.inventory.general.mdm_capable.capable",
+        "jamf_pro.inventory.general.name",
+        "jamf_pro.inventory.general.remote_management.managed",
+        "jamf_pro.inventory.general.supervised",
+        "jamf_pro.inventory.hardware.core_count",
+        "jamf_pro.inventory.hardware.mac_address",
+        "jamf_pro.inventory.hardware.make",
+        "jamf_pro.inventory.hardware.model",
+        "jamf_pro.inventory.hardware.processor_type",
+        "jamf_pro.inventory.hardware.serial_number",
+        "jamf_pro.inventory.operating_system.name",
+        "jamf_pro.inventory.operating_system.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "jamf_pro.inventory",
+      "indexPattern": "logs-*",
+      "docTarget": 660,
+      "fields": [
+        "event.dataset",
+        "jamf_pro.events.webhook.id",
+        "jamf_pro.events.webhook.webhook_event",
+        "jamf_pro.inventory.general.enrolled_via_automated_device_enrollment",
+        "jamf_pro.inventory.general.jamf_binary_version",
+        "jamf_pro.inventory.general.last_contact_time",
+        "jamf_pro.inventory.general.last_enrolled_date",
+        "jamf_pro.inventory.general.last_ip_address",
+        "jamf_pro.inventory.general.last_ip_address_geo.location",
+        "jamf_pro.inventory.general.last_reported_ip",
+        "jamf_pro.inventory.general.mdm_capable.capable",
+        "jamf_pro.inventory.general.name",
+        "jamf_pro.inventory.general.remote_management.managed",
+        "jamf_pro.inventory.general.supervised",
+        "jamf_pro.inventory.hardware.core_count",
+        "jamf_pro.inventory.hardware.mac_address",
+        "jamf_pro.inventory.hardware.make",
+        "jamf_pro.inventory.hardware.model",
+        "jamf_pro.inventory.hardware.processor_type",
+        "jamf_pro.inventory.hardware.serial_number",
+        "jamf_pro.inventory.operating_system.name",
+        "jamf_pro.inventory.operating_system.version"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

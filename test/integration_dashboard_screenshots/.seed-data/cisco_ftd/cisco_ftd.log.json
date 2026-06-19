@@ -1,0 +1,301 @@
+[
+  {
+    "@timestamp": "2023-05-09T10:50:47.000Z",
+    "agent": {
+      "ephemeral_id": "144c9429-0f40-4828-bb7f-92c8e856225b",
+      "id": "6db0e653-8dc0-44fd-a7e3-f352cbba7a05",
+      "name": "elastic-agent-67602",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "ftd": {
+        "connection_id": "154498453",
+        "destination_interface": "Outside",
+        "mapped_destination_ip": "89.160.20.131",
+        "mapped_destination_port": 443,
+        "mapped_source_ip": "175.16.199.6",
+        "mapped_source_port": 40846,
+        "source_interface": "Inside1"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_ftd.log",
+      "namespace": "41563",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "89.160.20.131",
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.131",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "6db0e653-8dc0-44fd-a7e3-f352cbba7a05",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "firewall-rule",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "302013",
+      "dataset": "cisco_ftd.log",
+      "ingested": "2026-03-10T02:59:21Z",
+      "kind": "event",
+      "original": "<166>May 09 2023 15:50:47 fw-bld1-1 : %FTD-6-302013: Built inbound TCP connection 154498453 for Inside1:10.0.1.50/5248 (175.16.199.6/40846) to Outside:89.160.20.131/443 (89.160.20.131/443)",
+      "severity": 6,
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "hostname": "fw-bld1-1"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "informational",
+      "source": {
+        "address": "172.19.0.3:49010"
+      },
+      "syslog": {
+        "facility": {
+          "code": 20
+        },
+        "priority": 166,
+        "severity": {
+          "code": 6
+        }
+      }
+    },
+    "network": {
+      "community_id": "1:3W4wan8g9ISYpx9IpbIc54Q1o/w=",
+      "direction": "outbound",
+      "iana_number": "6",
+      "transport": "tcp"
+    },
+    "observer": {
+      "egress": {
+        "interface": {
+          "name": "Outside"
+        }
+      },
+      "hostname": "fw-bld1-1",
+      "ingress": {
+        "interface": {
+          "name": "Inside1"
+        }
+      },
+      "product": "ftd",
+      "type": "idps",
+      "vendor": "Cisco"
+    },
+    "related": {
+      "hosts": [
+        "fw-bld1-1"
+      ],
+      "ip": [
+        "10.0.1.50",
+        "175.16.199.6",
+        "89.160.20.131"
+      ]
+    },
+    "source": {
+      "address": "10.0.1.50",
+      "ip": "10.0.1.50",
+      "nat": {
+        "ip": "175.16.199.6",
+        "port": 40846
+      },
+      "port": 5248
+    },
+    "tags": [
+      "preserve_original_event",
+      "private_is_internal",
+      "cisco-ftd",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2019-08-16T09:39:02.000Z",
+    "agent": {
+      "ephemeral_id": "144c9429-0f40-4828-bb7f-92c8e856225b",
+      "id": "6db0e653-8dc0-44fd-a7e3-f352cbba7a05",
+      "name": "elastic-agent-67602",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco": {
+      "ftd": {
+        "rule_name": "malware-and-file-policy",
+        "security": {
+          "file_storage_status": "Not Stored (Disposition Was Pending)",
+          "threat_name": "Win.Ransomware.Eicar::95.sbx.tg"
+        },
+        "security_event": {
+          "application_protocol": "HTTP",
+          "client": "cURL",
+          "dst_ip": "81.2.69.144",
+          "dst_port": 80,
+          "file_action": "Malware Cloud Lookup",
+          "file_direction": "Download",
+          "file_name": "eicar_com.zip",
+          "file_policy": "malware-and-file-policy",
+          "file_sandbox_status": "File Size Is Too Small",
+          "file_sha256": "2546dcffc5ad854d4ddc64fbf056871cd5a00f2471cb7a5bfd4ac23b6e9eedad",
+          "file_size": 184,
+          "file_type": "ZIP",
+          "first_packet_second": "2019-08-16T09:39:02.000Z",
+          "protocol": "tcp",
+          "sha_disposition": "Unavailable",
+          "spero_disposition": "Spero detection not performed on file",
+          "src_ip": "10.0.1.20",
+          "src_port": 46004,
+          "uri": "http://www.eicar.org/download/eicar_com.zip",
+          "user": "No Authentication Required"
+        },
+        "threat_category": "Win.Ransomware.Eicar::95.sbx.tg"
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_ftd.log",
+      "namespace": "41563",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "81.2.69.144",
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.144",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "6db0e653-8dc0-44fd-a7e3-f352cbba7a05",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "malware-detected",
+      "agent_id_status": "verified",
+      "category": [
+        "malware",
+        "file"
+      ],
+      "code": "430005",
+      "dataset": "cisco_ftd.log",
+      "ingested": "2026-03-10T02:59:21Z",
+      "kind": "event",
+      "original": "2019-08-16T09:39:03Z firepower  %FTD-1-430005: SrcIP: 10.0.1.20, DstIP: 81.2.69.144, SrcPort: 46004, DstPort: 80, Protocol: tcp, FileDirection: Download, FileAction: Malware Cloud Lookup, FileSHA256: 2546dcffc5ad854d4ddc64fbf056871cd5a00f2471cb7a5bfd4ac23b6e9eedad, SHA_Disposition: Unavailable, SperoDisposition: Spero detection not performed on file, ThreatName: Win.Ransomware.Eicar::95.sbx.tg, FileName: eicar_com.zip, FileType: ZIP, FileSize: 184, ApplicationProtocol: HTTP, Client: cURL, User: No Authentication Required, FirstPacketSecond: 2019-08-16T09:39:02Z, FilePolicy: malware-and-file-policy, FileStorageStatus: Not Stored (Disposition Was Pending), FileSandboxStatus: File Size Is Too Small, URI: http://www.eicar.org/download/eicar_com.zip",
+      "severity": 1,
+      "start": "2019-08-16T09:39:02.000Z",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "file": {
+      "hash": {
+        "sha256": "2546dcffc5ad854d4ddc64fbf056871cd5a00f2471cb7a5bfd4ac23b6e9eedad"
+      },
+      "name": "eicar_com.zip",
+      "size": 184
+    },
+    "host": {
+      "hostname": "firepower"
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "level": "alert",
+      "source": {
+        "address": "172.19.0.3:49010"
+      }
+    },
+    "network": {
+      "application": "curl",
+      "community_id": "1:jk2uwniJ2oCG0t73HeZ9w8gtA8E=",
+      "direction": "outbound",
+      "iana_number": "6",
+      "protocol": "http",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "firepower",
+      "product": "ftd",
+      "type": "idps",
+      "vendor": "Cisco"
+    },
+    "related": {
+      "hash": [
+        "2546dcffc5ad854d4ddc64fbf056871cd5a00f2471cb7a5bfd4ac23b6e9eedad"
+      ],
+      "hosts": [
+        "firepower"
+      ],
+      "ip": [
+        "10.0.1.20",
+        "81.2.69.144"
+      ]
+    },
+    "rule": {
+      "ruleset": "malware-and-file-policy"
+    },
+    "source": {
+      "address": "10.0.1.20",
+      "ip": "10.0.1.20",
+      "port": 46004
+    },
+    "tags": [
+      "preserve_original_event",
+      "private_is_internal",
+      "cisco-ftd",
+      "forwarded"
+    ],
+    "url": {
+      "domain": "www.eicar.org",
+      "extension": "zip",
+      "original": "http://www.eicar.org/download/eicar_com.zip",
+      "path": "/download/eicar_com.zip",
+      "scheme": "http"
+    }
+  }
+]

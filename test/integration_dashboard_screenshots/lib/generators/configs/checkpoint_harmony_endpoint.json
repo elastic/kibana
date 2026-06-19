@@ -1,0 +1,117 @@
+{
+  "package": "checkpoint_harmony_endpoint",
+  "dataStreams": [
+    {
+      "dataset": "checkpoint_harmony_endpoint.antibot",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_harmony_endpoint.urlfiltering.matched_category",
+        "destination.geo.country_name",
+        "destination.ip",
+        "event.dataset",
+        "event.module",
+        "host.hostname",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "checkpoint_harmony_endpoint.antimalware",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_harmony_endpoint.urlfiltering.matched_category",
+        "destination.geo.country_name",
+        "destination.ip",
+        "event.dataset",
+        "event.module",
+        "host.hostname",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "checkpoint_harmony_endpoint.forensics",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_harmony_endpoint.urlfiltering.matched_category",
+        "destination.geo.country_name",
+        "destination.ip",
+        "event.dataset",
+        "event.module",
+        "host.hostname",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "checkpoint_harmony_endpoint.threatemulation",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_harmony_endpoint.urlfiltering.matched_category",
+        "destination.geo.country_name",
+        "destination.ip",
+        "event.dataset",
+        "event.module",
+        "host.hostname",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "checkpoint_harmony_endpoint.threatextraction",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_harmony_endpoint.urlfiltering.matched_category",
+        "destination.geo.country_name",
+        "destination.ip",
+        "event.dataset",
+        "event.module",
+        "host.hostname",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "checkpoint_harmony_endpoint.urlfiltering",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_harmony_endpoint.urlfiltering.matched_category",
+        "destination.geo.country_name",
+        "destination.ip",
+        "event.dataset",
+        "event.module",
+        "host.hostname",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "checkpoint_harmony_endpoint.zerophishing",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "checkpoint_harmony_endpoint.urlfiltering.matched_category",
+        "destination.geo.country_name",
+        "destination.ip",
+        "event.dataset",
+        "event.module",
+        "host.hostname",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

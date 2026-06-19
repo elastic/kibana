@@ -1,0 +1,797 @@
+[
+  {
+    "@timestamp": "2025-07-08T01:08:04.441Z",
+    "agent": {
+      "ephemeral_id": "9f106a3e-3e66-41f8-9f07-82f6f450e8b9",
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "name": "elastic-agent-67070",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "extrahop.detection",
+      "namespace": "53864",
+      "type": "logs"
+    },
+    "destination": {
+      "port": 443
+    },
+    "device": {
+      "id": "4"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-07-07T23:53:35.459Z",
+      "dataset": "extrahop.detection",
+      "id": "17179860713-1751936884441",
+      "ingested": "2026-03-10T04:03:25Z",
+      "kind": "event",
+      "original": "{\"appliance_id\":4,\"assignee\":null,\"categories\":[\"sec\",\"sec.caution\",\"sec.attack\"],\"create_time\":1751932415459,\"description\":\"[Device john@extrahop\\\\.com](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/d5fb171e10ef435bbb77a9c7b3d46362.pankajp%40extrahop.com/overview?from=1751932396\\u0026interval_type=DT\\u0026until=1751933051) connected to a domain associated with a known hacking tool such as Kali Linux. Certain hacking tools might be prohibited on your network because they can enable malicious activity. Investigate to determine if this activity is expected, or if a user is attempting to gain access to unauthorized hacking tools.\\n\\nHacking tool linked to this detection:\\n* Kali Linux\",\"end_time\":1751933051000,\"id\":17179860713,\"is_user_created\":false,\"mitre_tactics\":[],\"mitre_techniques\":[],\"mod_time\":1751936884441,\"participants\":[{\"endpoint\":\"client\",\"external\":false,\"id\":8026,\"object_id\":17179869303,\"object_type\":\"device\",\"object_value\":\"67.43.156.0\",\"role\":\"offender\",\"scanner_service\":null,\"username\":null},{\"endpoint\":\"server\",\"external\":true,\"hostname\":\"www.kali.org\",\"id\":6170,\"object_id\":17179869185,\"object_type\":\"ipaddr\",\"object_value\":\"89.160.20.112\",\"role\":\"victim\",\"scanner_service\":null,\"username\":null},{\"endpoint\":\"server\",\"external\":true,\"hostname\":\"cdimage.kali.org\",\"id\":8028,\"object_id\":17179869185,\"object_type\":\"ipaddr\",\"object_value\":\"81.2.69.192\",\"role\":\"victim\",\"scanner_service\":null,\"username\":null},{\"endpoint\":\"server\",\"external\":true,\"hostname\":\"kali.download\",\"id\":8029,\"object_id\":17179869185,\"object_type\":\"ipaddr\",\"object_value\":\"81.2.69.144\",\"role\":\"victim\",\"scanner_service\":null,\"username\":null}],\"properties\":{\"client_port\":63855,\"hacking_tool_name\":\"Kali Linux\",\"server_port\":443},\"recommended\":false,\"recommended_factors\":[],\"resolution\":null,\"risk_score\":78,\"start_time\":1751932396000,\"status\":null,\"ticket_id\":null,\"title\":\"Hacking Tool Domain Access\",\"type\":\"hacking_tools\",\"update_time\":1751933051000,\"url\":\"https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/17179860713/?from=1751931496\\u0026until=1751933951\\u0026interval_type=DT\"}",
+      "risk_score": 78.0,
+      "start": "2025-07-07T23:53:16.000Z",
+      "type": [
+        "indicator"
+      ],
+      "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/17179860713/?from=1751931496&until=1751933951&interval_type=DT"
+    },
+    "extrahop": {
+      "detection": {
+        "appliance_id": "4",
+        "categories": [
+          "sec",
+          "sec.caution",
+          "sec.attack"
+        ],
+        "create_time": "2025-07-07T23:53:35.459Z",
+        "description": "[Device john@extrahop\\.com](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/d5fb171e10ef435bbb77a9c7b3d46362.pankajp%40extrahop.com/overview?from=1751932396&interval_type=DT&until=1751933051) connected to a domain associated with a known hacking tool such as Kali Linux. Certain hacking tools might be prohibited on your network because they can enable malicious activity. Investigate to determine if this activity is expected, or if a user is attempting to gain access to unauthorized hacking tools.\n\nHacking tool linked to this detection:\n* Kali Linux",
+        "id": "17179860713",
+        "is_user_created": false,
+        "mod_time": "2025-07-08T01:08:04.441Z",
+        "participants": [
+          {
+            "endpoint": "client",
+            "external": false,
+            "role": "offender",
+            "object_type": "device",
+            "object_value": "67.43.156.0",
+            "id": "8026",
+            "object_id": "17179869303"
+          },
+          {
+            "endpoint": "server",
+            "external": true,
+            "hostname": "www.kali.org",
+            "role": "victim",
+            "object_type": "ipaddr",
+            "object_value": "89.160.20.112",
+            "id": "6170",
+            "object_id": "17179869185"
+          },
+          {
+            "endpoint": "server",
+            "external": true,
+            "hostname": "cdimage.kali.org",
+            "role": "victim",
+            "object_type": "ipaddr",
+            "object_value": "81.2.69.192",
+            "id": "8028",
+            "object_id": "17179869185"
+          },
+          {
+            "endpoint": "server",
+            "external": true,
+            "hostname": "kali.download",
+            "role": "victim",
+            "object_type": "ipaddr",
+            "object_value": "81.2.69.144",
+            "id": "8029",
+            "object_id": "17179869185"
+          }
+        ],
+        "properties": {
+          "client_port": 63855,
+          "hacking_tool_name": "Kali Linux",
+          "server_port": 443
+        },
+        "recommended": false,
+        "risk_score": 78.0,
+        "start_time": "2025-07-07T23:53:16.000Z",
+        "title": "Hacking Tool Domain Access",
+        "type": "hacking_tools",
+        "update_time": "2025-07-08T00:04:11.000Z",
+        "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/17179860713/?from=1751931496&until=1751933951&interval_type=DT"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Hacking Tool Domain Access",
+    "related": {
+      "hosts": [
+        "www.kali.org",
+        "cdimage.kali.org",
+        "kali.download"
+      ],
+      "ip": [
+        "67.43.156.0",
+        "89.160.20.112",
+        "81.2.69.192",
+        "81.2.69.144"
+      ]
+    },
+    "source": {
+      "port": 63855
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "extrahop-detection"
+    ],
+    "threat": {
+      "indicator": {
+        "description": "[Device john@extrahop\\.com](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/d5fb171e10ef435bbb77a9c7b3d46362.pankajp%40extrahop.com/overview?from=1751932396&interval_type=DT&until=1751933051) connected to a domain associated with a known hacking tool such as Kali Linux. Certain hacking tools might be prohibited on your network because they can enable malicious activity. Investigate to determine if this activity is expected, or if a user is attempting to gain access to unauthorized hacking tools.\n\nHacking tool linked to this detection:\n* Kali Linux",
+        "modified_at": "2025-07-08T01:08:04.441Z"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-07-08T01:08:04.441Z",
+    "agent": {
+      "ephemeral_id": "9f106a3e-3e66-41f8-9f07-82f6f450e8b9",
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "name": "elastic-agent-67070",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "extrahop.detection",
+      "namespace": "53864",
+      "type": "logs"
+    },
+    "destination": {
+      "port": 443
+    },
+    "device": {
+      "id": "4"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-07-07T23:53:35.459Z",
+      "dataset": "extrahop.detection",
+      "id": "25769804215-1751936884441",
+      "ingested": "2026-03-10T04:03:25Z",
+      "kind": "event",
+      "original": "{\"appliance_id\":4,\"assignee\":\"tom.latham\",\"categories\":[\"sec\",\"sec.caution\",\"sec.attack\"],\"create_time\":1751932415459,\"description\":\"[Device john@extrahop\\\\.com](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/d5fb171e10ef435bbb77a9c7b3d46362.pankajp%40extrahop.com/overview?from=1751932396\\u0026interval_type=DT\\u0026until=1751933051) connected to a domain associated with a known hacking tool such as Kali Linux. Certain hacking tools might be prohibited on your network because they can enable malicious activity. Investigate to determine if this activity is expected, or if a user is attempting to gain access to unauthorized hacking tools.\\n\\nHacking tool linked to this detection:\\n* Kali Linux\",\"end_time\":1751933051000,\"id\":25769804215,\"is_user_created\":false,\"mitre_tactics\":[],\"mitre_techniques\":[],\"mod_time\":1751936884441,\"participants\":[{\"endpoint\":\"client\",\"external\":false,\"id\":8026,\"object_id\":17179869303,\"object_type\":\"device\",\"object_value\":\"67.43.156.0\",\"role\":\"offender\",\"scanner_service\":null,\"username\":null},{\"endpoint\":\"server\",\"external\":true,\"hostname\":\"www.kali.org\",\"id\":6170,\"object_id\":17179869185,\"object_type\":\"ipaddr\",\"object_value\":\"89.160.20.112\",\"role\":\"victim\",\"scanner_service\":null,\"username\":null},{\"endpoint\":\"server\",\"external\":true,\"hostname\":\"cdimage.kali.org\",\"id\":8028,\"object_id\":17179869185,\"object_type\":\"ipaddr\",\"object_value\":\"81.2.69.192\",\"role\":\"victim\",\"scanner_service\":null,\"username\":null},{\"endpoint\":\"server\",\"external\":true,\"hostname\":\"kali.download\",\"id\":8029,\"object_id\":17179869185,\"object_type\":\"ipaddr\",\"object_value\":\"81.2.69.144\",\"role\":\"victim\",\"scanner_service\":null,\"username\":null}],\"properties\":{\"client_port\":63855,\"hacking_tool_name\":\"Kali Linux\",\"server_port\":443},\"recommended\":false,\"recommended_factors\":[],\"resolution\":\"action_taken\",\"risk_score\":78,\"start_time\":1751932396000,\"status\":\"new\",\"ticket_id\":null,\"title\":\"Hacking Tool Domain Access\",\"type\":\"hacking_tools\",\"update_time\":1751933051000,\"url\":\"https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769804215/?from=1751931496\\u0026until=1751933951\\u0026interval_type=DT\"}",
+      "risk_score": 78.0,
+      "start": "2025-07-07T23:53:16.000Z",
+      "type": [
+        "indicator"
+      ],
+      "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769804215/?from=1751931496&until=1751933951&interval_type=DT"
+    },
+    "extrahop": {
+      "detection": {
+        "appliance_id": "4",
+        "assignee": "tom.latham",
+        "categories": [
+          "sec",
+          "sec.caution",
+          "sec.attack"
+        ],
+        "create_time": "2025-07-07T23:53:35.459Z",
+        "description": "[Device john@extrahop\\.com](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/d5fb171e10ef435bbb77a9c7b3d46362.pankajp%40extrahop.com/overview?from=1751932396&interval_type=DT&until=1751933051) connected to a domain associated with a known hacking tool such as Kali Linux. Certain hacking tools might be prohibited on your network because they can enable malicious activity. Investigate to determine if this activity is expected, or if a user is attempting to gain access to unauthorized hacking tools.\n\nHacking tool linked to this detection:\n* Kali Linux",
+        "id": "25769804215",
+        "is_user_created": false,
+        "mod_time": "2025-07-08T01:08:04.441Z",
+        "participants": [
+          {
+            "endpoint": "client",
+            "external": false,
+            "role": "offender",
+            "object_type": "device",
+            "object_value": "67.43.156.0",
+            "id": "8026",
+            "object_id": "17179869303"
+          },
+          {
+            "endpoint": "server",
+            "external": true,
+            "hostname": "www.kali.org",
+            "role": "victim",
+            "object_type": "ipaddr",
+            "object_value": "89.160.20.112",
+            "id": "6170",
+            "object_id": "17179869185"
+          },
+          {
+            "endpoint": "server",
+            "external": true,
+            "hostname": "cdimage.kali.org",
+            "role": "victim",
+            "object_type": "ipaddr",
+            "object_value": "81.2.69.192",
+            "id": "8028",
+            "object_id": "17179869185"
+          },
+          {
+            "endpoint": "server",
+            "external": true,
+            "hostname": "kali.download",
+            "role": "victim",
+            "object_type": "ipaddr",
+            "object_value": "81.2.69.144",
+            "id": "8029",
+            "object_id": "17179869185"
+          }
+        ],
+        "properties": {
+          "client_port": 63855,
+          "hacking_tool_name": "Kali Linux",
+          "server_port": 443
+        },
+        "recommended": false,
+        "resolution": "action_taken",
+        "risk_score": 78.0,
+        "start_time": "2025-07-07T23:53:16.000Z",
+        "status": "new",
+        "title": "Hacking Tool Domain Access",
+        "type": "hacking_tools",
+        "update_time": "2025-07-08T00:04:11.000Z",
+        "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769804215/?from=1751931496&until=1751933951&interval_type=DT"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Hacking Tool Domain Access",
+    "related": {
+      "hosts": [
+        "www.kali.org",
+        "cdimage.kali.org",
+        "kali.download"
+      ],
+      "ip": [
+        "67.43.156.0",
+        "89.160.20.112",
+        "81.2.69.192",
+        "81.2.69.144"
+      ],
+      "user": [
+        "tom.latham"
+      ]
+    },
+    "source": {
+      "port": 63855
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "extrahop-detection"
+    ],
+    "threat": {
+      "indicator": {
+        "description": "[Device john@extrahop\\.com](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/d5fb171e10ef435bbb77a9c7b3d46362.pankajp%40extrahop.com/overview?from=1751932396&interval_type=DT&until=1751933051) connected to a domain associated with a known hacking tool such as Kali Linux. Certain hacking tools might be prohibited on your network because they can enable malicious activity. Investigate to determine if this activity is expected, or if a user is attempting to gain access to unauthorized hacking tools.\n\nHacking tool linked to this detection:\n* Kali Linux",
+        "modified_at": "2025-07-08T01:08:04.441Z"
+      }
+    },
+    "user": {
+      "name": "tom.latham"
+    }
+  },
+  {
+    "@timestamp": "2025-06-26T10:58:55.971Z",
+    "agent": {
+      "ephemeral_id": "9f106a3e-3e66-41f8-9f07-82f6f450e8b9",
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "name": "elastic-agent-67070",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "extrahop.detection",
+      "namespace": "53864",
+      "type": "logs"
+    },
+    "device": {
+      "id": "6"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-06-26T10:57:46.182Z",
+      "dataset": "extrahop.detection",
+      "id": "25769805037-1750935535971",
+      "ingested": "2026-03-10T04:03:25Z",
+      "kind": "event",
+      "original": "{\"appliance_id\":6,\"assignee\":\"john.doe\",\"categories\":[\"sec\",\"sec.hardening\"],\"create_time\":1750935466182,\"description\":\"[dc1\\\\.i\\\\.rx\\\\.tours](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e9442d930570000/overview?from=1750935450\\u0026interval_type=DT\\u0026until=1751347650) served an SSL/TLS certificate scheduled to expire soon. Many web browsers and tools will not accept expired certificates. Renew certificates before they expire to ensure the availability of all services.\",\"id\":25769805037,\"is_user_created\":false,\"mitre_tactics\":[{\"id\":\"TA0007\",\"name\":\"Discovery\",\"url\":\"https://attack.mitre.org/tactics/TA0007\"}],\"mitre_techniques\":[{\"id\":\"T1087\",\"legacy_ids\":[\"T1087\"],\"name\":\"Account Discovery\",\"url\":\"https://attack.mitre.org/techniques/T1087\"}],\"mod_time\":1750935535971,\"participants\":[{\"endpoint\":\"server\",\"external\":false,\"hostname\":\"dc1.i.rx.tours\",\"id\":7121,\"object_id\":25769803777,\"object_type\":\"device\",\"object_value\":\"1.128.0.0\",\"role\":\"offender\",\"scanner_service\":\"revealX-test\",\"username\":\"administrator@ATTACK.LOCAL\"}],\"properties\":{\"certificate\":\"dc1.attack.local:RSA_2048:3e426a1a3b2c2cae4cb51ec46b6c8a88\"},\"recommended\":false,\"recommended_factors\":[\"top_offender\"],\"resolution\":\"no_action_taken\",\"risk_score\":15,\"start_time\":1750935450304,\"status\":\"open\",\"ticket_id\":3041,\"title\":\"Expiring SSL/TLS Server Certificate\",\"type\":\"expiring_cert_individual\",\"update_time\":1751347620747,\"url\":\"https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769805037/?from=1750934550\\u0026until=1751348520\\u0026interval_type=DT\"}",
+      "risk_score": 15.0,
+      "start": "2025-06-26T10:57:30.304Z",
+      "type": [
+        "indicator"
+      ],
+      "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769805037/?from=1750934550&until=1751348520&interval_type=DT"
+    },
+    "extrahop": {
+      "detection": {
+        "appliance_id": "6",
+        "assignee": "john.doe",
+        "categories": [
+          "sec",
+          "sec.hardening"
+        ],
+        "create_time": "2025-06-26T10:57:46.182Z",
+        "description": "[dc1\\.i\\.rx\\.tours](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e9442d930570000/overview?from=1750935450&interval_type=DT&until=1751347650) served an SSL/TLS certificate scheduled to expire soon. Many web browsers and tools will not accept expired certificates. Renew certificates before they expire to ensure the availability of all services.",
+        "id": "25769805037",
+        "is_user_created": false,
+        "mitre_tactics": [
+          {
+            "name": "Discovery",
+            "id": "TA0007",
+            "url": "https://attack.mitre.org/tactics/TA0007"
+          }
+        ],
+        "mitre_techniques": [
+          {
+            "legacy_ids": [
+              "T1087"
+            ],
+            "name": "Account Discovery",
+            "id": "T1087",
+            "url": "https://attack.mitre.org/techniques/T1087"
+          }
+        ],
+        "mod_time": "2025-06-26T10:58:55.971Z",
+        "participants": [
+          {
+            "endpoint": "server",
+            "external": false,
+            "hostname": "dc1.i.rx.tours",
+            "role": "offender",
+            "object_type": "device",
+            "object_value": "1.128.0.0",
+            "id": "7121",
+            "object_id": "25769803777",
+            "scanner_service": "revealX-test",
+            "username": "administrator@ATTACK.LOCAL"
+          }
+        ],
+        "properties": {
+          "certificate": "dc1.attack.local:RSA_2048:3e426a1a3b2c2cae4cb51ec46b6c8a88"
+        },
+        "recommended": false,
+        "recommended_factors": [
+          "top_offender"
+        ],
+        "resolution": "no_action_taken",
+        "risk_score": 15.0,
+        "start_time": "2025-06-26T10:57:30.304Z",
+        "status": "open",
+        "ticket_id": "3041",
+        "title": "Expiring SSL/TLS Server Certificate",
+        "type": "expiring_cert_individual",
+        "update_time": "2025-07-01T05:27:00.747Z",
+        "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769805037/?from=1750934550&until=1751348520&interval_type=DT"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Expiring SSL/TLS Server Certificate",
+    "related": {
+      "hosts": [
+        "dc1.i.rx.tours"
+      ],
+      "ip": [
+        "1.128.0.0"
+      ],
+      "user": [
+        "john.doe",
+        "administrator@ATTACK.LOCAL"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "extrahop-detection"
+    ],
+    "threat": {
+      "indicator": {
+        "description": "[dc1\\.i\\.rx\\.tours](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e9442d930570000/overview?from=1750935450&interval_type=DT&until=1751347650) served an SSL/TLS certificate scheduled to expire soon. Many web browsers and tools will not accept expired certificates. Renew certificates before they expire to ensure the availability of all services.",
+        "modified_at": "2025-06-26T10:58:55.971Z"
+      },
+      "tactic": {
+        "id": [
+          "TA0007"
+        ],
+        "name": [
+          "Discovery"
+        ],
+        "reference": [
+          "https://attack.mitre.org/tactics/TA0007"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1087"
+        ],
+        "name": [
+          "Account Discovery"
+        ],
+        "reference": [
+          "https://attack.mitre.org/techniques/T1087"
+        ]
+      }
+    },
+    "user": {
+      "name": "john.doe"
+    }
+  },
+  {
+    "@timestamp": "2025-06-26T10:58:55.971Z",
+    "agent": {
+      "ephemeral_id": "9f106a3e-3e66-41f8-9f07-82f6f450e8b9",
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "name": "elastic-agent-67070",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "extrahop.detection",
+      "namespace": "53864",
+      "type": "logs"
+    },
+    "device": {
+      "id": "6"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-06-26T10:57:46.182Z",
+      "dataset": "extrahop.detection",
+      "id": "25769804127-1750935535971",
+      "ingested": "2026-03-10T04:03:25Z",
+      "kind": "event",
+      "original": "{\"appliance_id\":6,\"assignee\":\"tom.doe\",\"categories\":[\"sec\",\"sec.hardening\"],\"create_time\":1750935466182,\"description\":\"[dc1\\\\.i\\\\.rx\\\\.tours](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e9442d930570000/overview?from=1750935450\\u0026interval_type=DT\\u0026until=1751347650) served an SSL/TLS certificate scheduled to expire soon. Many web browsers and tools will not accept expired certificates. Renew certificates before they expire to ensure the availability of all services.\",\"id\":25769804127,\"is_user_created\":false,\"mitre_tactics\":[{\"id\":\"TA0007\",\"name\":\"Discovery\",\"url\":\"https://attack.mitre.org/tactics/TA0007\"}],\"mitre_techniques\":[{\"id\":\"T1087\",\"legacy_ids\":[\"T1087\"],\"name\":\"Account Discovery\",\"url\":\"https://attack.mitre.org/techniques/T1087\"}],\"mod_time\":1750935535971,\"participants\":[{\"endpoint\":\"server\",\"external\":true,\"hostname\":\"dc1.i.rx.tours\",\"id\":7121,\"object_id\":25769803777,\"object_type\":\"device\",\"object_value\":\"1.128.0.0\",\"role\":\"offender\",\"scanner_service\":\"revealX-test\",\"username\":\"administrator@ATTACK.LOCAL\"}],\"properties\":{\"certificate\":\"dc1.attack.local:RSA_2048:3e426a1a3b2c2cae4cb51ec46b6c8a88\"},\"recommended\":true,\"recommended_factors\":[\"top_offender\"],\"resolution\":\"action_taken\",\"risk_score\":11,\"start_time\":1750935450304,\"status\":\"new\",\"ticket_id\":3041,\"title\":\"SSL/TLS Server Certificate\",\"type\":\"cert_individual\",\"update_time\":1751347620747,\"url\":\"https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769804127/?from=1750934550\\u0026until=1751348520\\u0026interval_type=DT\"}",
+      "risk_score": 11.0,
+      "start": "2025-06-26T10:57:30.304Z",
+      "type": [
+        "indicator"
+      ],
+      "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769804127/?from=1750934550&until=1751348520&interval_type=DT"
+    },
+    "extrahop": {
+      "detection": {
+        "appliance_id": "6",
+        "assignee": "tom.doe",
+        "categories": [
+          "sec",
+          "sec.hardening"
+        ],
+        "create_time": "2025-06-26T10:57:46.182Z",
+        "description": "[dc1\\.i\\.rx\\.tours](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e9442d930570000/overview?from=1750935450&interval_type=DT&until=1751347650) served an SSL/TLS certificate scheduled to expire soon. Many web browsers and tools will not accept expired certificates. Renew certificates before they expire to ensure the availability of all services.",
+        "id": "25769804127",
+        "is_user_created": false,
+        "mitre_tactics": [
+          {
+            "name": "Discovery",
+            "id": "TA0007",
+            "url": "https://attack.mitre.org/tactics/TA0007"
+          }
+        ],
+        "mitre_techniques": [
+          {
+            "legacy_ids": [
+              "T1087"
+            ],
+            "name": "Account Discovery",
+            "id": "T1087",
+            "url": "https://attack.mitre.org/techniques/T1087"
+          }
+        ],
+        "mod_time": "2025-06-26T10:58:55.971Z",
+        "participants": [
+          {
+            "endpoint": "server",
+            "external": true,
+            "hostname": "dc1.i.rx.tours",
+            "role": "offender",
+            "object_type": "device",
+            "object_value": "1.128.0.0",
+            "id": "7121",
+            "object_id": "25769803777",
+            "scanner_service": "revealX-test",
+            "username": "administrator@ATTACK.LOCAL"
+          }
+        ],
+        "properties": {
+          "certificate": "dc1.attack.local:RSA_2048:3e426a1a3b2c2cae4cb51ec46b6c8a88"
+        },
+        "recommended": true,
+        "recommended_factors": [
+          "top_offender"
+        ],
+        "resolution": "action_taken",
+        "risk_score": 11.0,
+        "start_time": "2025-06-26T10:57:30.304Z",
+        "status": "new",
+        "ticket_id": "3041",
+        "title": "SSL/TLS Server Certificate",
+        "type": "cert_individual",
+        "update_time": "2025-07-01T05:27:00.747Z",
+        "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769804127/?from=1750934550&until=1751348520&interval_type=DT"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "SSL/TLS Server Certificate",
+    "related": {
+      "hosts": [
+        "dc1.i.rx.tours"
+      ],
+      "ip": [
+        "1.128.0.0"
+      ],
+      "user": [
+        "tom.doe",
+        "administrator@ATTACK.LOCAL"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "extrahop-detection"
+    ],
+    "threat": {
+      "indicator": {
+        "description": "[dc1\\.i\\.rx\\.tours](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e9442d930570000/overview?from=1750935450&interval_type=DT&until=1751347650) served an SSL/TLS certificate scheduled to expire soon. Many web browsers and tools will not accept expired certificates. Renew certificates before they expire to ensure the availability of all services.",
+        "modified_at": "2025-06-26T10:58:55.971Z"
+      },
+      "tactic": {
+        "id": [
+          "TA0007"
+        ],
+        "name": [
+          "Discovery"
+        ],
+        "reference": [
+          "https://attack.mitre.org/tactics/TA0007"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1087"
+        ],
+        "name": [
+          "Account Discovery"
+        ],
+        "reference": [
+          "https://attack.mitre.org/techniques/T1087"
+        ]
+      }
+    },
+    "user": {
+      "name": "tom.doe"
+    }
+  },
+  {
+    "@timestamp": "2025-02-19T16:25:42.927Z",
+    "agent": {
+      "ephemeral_id": "9f106a3e-3e66-41f8-9f07-82f6f450e8b9",
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "name": "elastic-agent-67070",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "extrahop.detection",
+      "namespace": "53864",
+      "type": "logs"
+    },
+    "device": {
+      "id": "6"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "69311f0d-2cb6-409b-b66b-4824ba287c16",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "created": "2025-02-19T16:24:44.047Z",
+      "dataset": "extrahop.detection",
+      "id": "25769803828-1739982342927",
+      "ingested": "2026-03-10T04:03:25Z",
+      "kind": "event",
+      "original": "{\"appliance_id\":6,\"assignee\":\"sam.joe\",\"categories\":[\"sec\",\"sec.command\",\"sec.attack\"],\"create_time\":1739982284047,\"description\":\"[Device 0e8398d29d3b0000](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e8398d29d3b0000/overview?from=1739982210\\u0026interval_type=DT\\u0026until=1739982300) sent ICMP requests that contain unique payloads to an external IP address. The number of requests was unusually high compared to past activity for this device. Check for unexpected or unauthorized activity, such as hidden information within ping packets.\\n\\nThis device sent approximately 13000 ICMP requests with unique payloads to external hosts.\",\"end_time\":1739982300000,\"id\":25769803828,\"is_user_created\":false,\"mitre_tactics\":[{\"id\":\"TA0011\",\"name\":\"Command and Control\",\"url\":\"https://attack.mitre.org/tactics/TA0011\"}],\"mitre_techniques\":[{\"id\":\"T1095\",\"legacy_ids\":[\"T1094\",\"T1095\"],\"name\":\"Non-Application Layer Protocol\",\"url\":\"https://attack.mitre.org/techniques/T1095\"},{\"id\":\"T1572\",\"name\":\"Protocol Tunneling\",\"url\":\"https://attack.mitre.org/techniques/T1572\"}],\"mod_time\":1739982342927,\"participants\":[{\"endpoint\":\"receiver\",\"external\":true,\"hostname\":\"09i2TY0xVtw7DPECOJQte01i7IK8B9FV.rx.tours\",\"id\":7189,\"object_id\":25769803780,\"object_type\":\"ipaddr\",\"object_value\":\"175.16.199.0\",\"role\":\"offender\",\"scanner_service\":null,\"username\":null},{\"endpoint\":\"sender\",\"external\":false,\"id\":7167,\"object_id\":25769803807,\"object_type\":\"device\",\"object_value\":\"81.2.69.142\",\"role\":\"victim\",\"scanner_service\":null,\"username\":null}],\"properties\":{},\"recommended\":true,\"recommended_factors\":[\"rare_type\",\"top_offender\"],\"resolution\":\"action_taken\",\"risk_score\":61,\"start_time\":1739982210001,\"status\":\"open\",\"ticket_id\":\"2996\",\"title\":\"ICMP Tunnel\",\"type\":\"icmp_tunnel\",\"update_time\":1739982300000,\"url\":\"https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769803828/?from=1739981310\\u0026until=1739983200\\u0026interval_type=DT\"}",
+      "risk_score": 61.0,
+      "start": "2025-02-19T16:23:30.001Z",
+      "type": [
+        "indicator"
+      ],
+      "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769803828/?from=1739981310&until=1739983200&interval_type=DT"
+    },
+    "extrahop": {
+      "detection": {
+        "appliance_id": "6",
+        "assignee": "sam.joe",
+        "categories": [
+          "sec",
+          "sec.command",
+          "sec.attack"
+        ],
+        "create_time": "2025-02-19T16:24:44.047Z",
+        "description": "[Device 0e8398d29d3b0000](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e8398d29d3b0000/overview?from=1739982210&interval_type=DT&until=1739982300) sent ICMP requests that contain unique payloads to an external IP address. The number of requests was unusually high compared to past activity for this device. Check for unexpected or unauthorized activity, such as hidden information within ping packets.\n\nThis device sent approximately 13000 ICMP requests with unique payloads to external hosts.",
+        "id": "25769803828",
+        "is_user_created": false,
+        "mitre_tactics": [
+          {
+            "name": "Command and Control",
+            "id": "TA0011",
+            "url": "https://attack.mitre.org/tactics/TA0011"
+          }
+        ],
+        "mitre_techniques": [
+          {
+            "legacy_ids": [
+              "T1094",
+              "T1095"
+            ],
+            "name": "Non-Application Layer Protocol",
+            "id": "T1095",
+            "url": "https://attack.mitre.org/techniques/T1095"
+          },
+          {
+            "name": "Protocol Tunneling",
+            "id": "T1572",
+            "url": "https://attack.mitre.org/techniques/T1572"
+          }
+        ],
+        "mod_time": "2025-02-19T16:25:42.927Z",
+        "participants": [
+          {
+            "endpoint": "receiver",
+            "external": true,
+            "hostname": "09i2TY0xVtw7DPECOJQte01i7IK8B9FV.rx.tours",
+            "role": "offender",
+            "object_type": "ipaddr",
+            "object_value": "175.16.199.0",
+            "id": "7189",
+            "object_id": "25769803780"
+          },
+          {
+            "endpoint": "sender",
+            "external": false,
+            "role": "victim",
+            "object_type": "device",
+            "object_value": "81.2.69.142",
+            "id": "7167",
+            "object_id": "25769803807"
+          }
+        ],
+        "recommended": true,
+        "recommended_factors": [
+          "rare_type",
+          "top_offender"
+        ],
+        "resolution": "action_taken",
+        "risk_score": 61.0,
+        "start_time": "2025-02-19T16:23:30.001Z",
+        "status": "open",
+        "ticket_id": "2996",
+        "title": "ICMP Tunnel",
+        "type": "icmp_tunnel",
+        "update_time": "2025-02-19T16:25:00.000Z",
+        "url": "https://extrahop-bd.cloud.extrahop.com/extrahop/#/detections/detail/25769803828/?from=1739981310&until=1739983200&interval_type=DT"
+      }
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "ICMP Tunnel",
+    "related": {
+      "hosts": [
+        "09i2TY0xVtw7DPECOJQte01i7IK8B9FV.rx.tours"
+      ],
+      "ip": [
+        "175.16.199.0",
+        "81.2.69.142"
+      ],
+      "user": [
+        "sam.joe"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "extrahop-detection"
+    ],
+    "threat": {
+      "indicator": {
+        "description": "[Device 0e8398d29d3b0000](https://extrahop-bd.cloud.extrahop.com#/metrics/devices/71c6ffe3ae8548bbbb9bf279c912d3ae.0e8398d29d3b0000/overview?from=1739982210&interval_type=DT&until=1739982300) sent ICMP requests that contain unique payloads to an external IP address. The number of requests was unusually high compared to past activity for this device. Check for unexpected or unauthorized activity, such as hidden information within ping packets.\n\nThis device sent approximately 13000 ICMP requests with unique payloads to external hosts.",
+        "modified_at": "2025-02-19T16:25:42.927Z"
+      },
+      "tactic": {
+        "id": [
+          "TA0011"
+        ],
+        "name": [
+          "Command and Control"
+        ],
+        "reference": [
+          "https://attack.mitre.org/tactics/TA0011"
+        ]
+      },
+      "technique": {
+        "id": [
+          "T1095",
+          "T1572"
+        ],
+        "name": [
+          "Non-Application Layer Protocol",
+          "Protocol Tunneling"
+        ],
+        "reference": [
+          "https://attack.mitre.org/techniques/T1095",
+          "https://attack.mitre.org/techniques/T1572"
+        ]
+      }
+    },
+    "user": {
+      "name": "sam.joe"
+    }
+  }
+]

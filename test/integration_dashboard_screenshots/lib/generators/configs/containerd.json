@@ -1,0 +1,43 @@
+{
+  "package": "containerd",
+  "dataStreams": [
+    {
+      "dataset": "containerd.blkio",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "container.id",
+        "containerd.blkio.read.bytes",
+        "containerd.blkio.summary.ops",
+        "containerd.blkio.write.ops",
+        "containerd.cpu.usage.total.pct",
+        "containerd.memory.usage.pct"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "containerd.cpu",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "container.id",
+        "containerd.blkio.summary.ops",
+        "containerd.cpu.usage.total.pct",
+        "containerd.memory.usage.pct"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "containerd.memory",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "container.id",
+        "containerd.blkio.summary.ops",
+        "containerd.cpu.usage.total.pct",
+        "containerd.memory.usage.pct"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

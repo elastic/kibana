@@ -1,0 +1,45 @@
+{
+  "package": "sentinel_one_cloud_funnel",
+  "dataStreams": [
+    {
+      "dataset": "sentinel_one_cloud_funnel.event",
+      "indexPattern": "logs-*",
+      "docTarget": 960,
+      "fields": [
+        "destination.ip",
+        "destination.port",
+        "event.category",
+        "event.id",
+        "event.outcome",
+        "host.os.platform",
+        "host.type",
+        "network.direction",
+        "registry.value",
+        "sentinel_one_cloud_funnel.event.category",
+        "sentinel_one_cloud_funnel.event.login.failure_reason",
+        "sentinel_one_cloud_funnel.event.login.is_administrator_equivalent",
+        "sentinel_one_cloud_funnel.event.login.is_successful",
+        "sentinel_one_cloud_funnel.event.login.type",
+        "sentinel_one_cloud_funnel.event.registry.old_value.detail",
+        "sentinel_one_cloud_funnel.event.registry.old_value.full_size",
+        "sentinel_one_cloud_funnel.event.registry.old_value.type",
+        "sentinel_one_cloud_funnel.event.registry.value.full_size",
+        "sentinel_one_cloud_funnel.event.registry.value.type",
+        "sentinel_one_cloud_funnel.event.src.process.integrity_level",
+        "sentinel_one_cloud_funnel.event.src.process.publisher",
+        "sentinel_one_cloud_funnel.event.tgt.process.subsystem",
+        "sentinel_one_cloud_funnel.event.ti_indicator.added_by",
+        "sentinel_one_cloud_funnel.event.ti_indicator.name",
+        "sentinel_one_cloud_funnel.event.ti_indicator.source",
+        "sentinel_one_cloud_funnel.event.ti_indicator.type",
+        "sentinel_one_cloud_funnel.event.ti_indicator.value",
+        "sentinel_one_cloud_funnel.event.url.action",
+        "source.ip",
+        "source.port",
+        "url.original",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

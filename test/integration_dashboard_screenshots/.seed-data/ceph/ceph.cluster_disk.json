@@ -1,0 +1,64 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:43:16.463Z",
+    "agent": {
+      "ephemeral_id": "4dab98d0-6d9e-49ac-8423-021e3d022965",
+      "id": "8b798ea8-b81c-42db-a2a7-9fa0c4df605f",
+      "name": "elastic-agent-24194",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "ceph": {
+      "cluster_disk": {
+        "available": {
+          "bytes": 81199562752
+        },
+        "total": {
+          "bytes": 85882568704
+        },
+        "used": {
+          "bytes": 388038656,
+          "raw": {
+            "bytes": 4683005952
+          }
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "ceph.cluster_disk",
+      "namespace": "78377",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8b798ea8-b81c-42db-a2a7-9fa0c4df605f",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T02:43:16.463Z",
+      "dataset": "ceph.cluster_disk",
+      "ingested": "2026-03-10T02:43:19Z",
+      "kind": "metric",
+      "module": "ceph",
+      "original": "{\"command\":\"df format=json\",\"outb\":{\"pools\":[{\"id\":1,\"name\":\"device_health_metrics\",\"stats\":{\"bytes_used\":6488064,\"kb_used\":6336,\"max_avail\":25633505280,\"objects\":4,\"percent_used\":0.0000843624584376812,\"stored\":2142673}},{\"id\":4,\"name\":\"elk\",\"stats\":{\"bytes_used\":3735552,\"kb_used\":3648,\"max_avail\":25633505280,\"objects\":3,\"percent_used\":0.000048574063839623705,\"stored\":1176572}},{\"id\":9,\"name\":\"elastic\",\"stats\":{\"bytes_used\":4325376,\"kb_used\":4224,\"max_avail\":25633505280,\"objects\":5,\"percent_used\":0.00005624322147923522,\"stored\":1349210}}],\"stats\":{\"num_osds\":4,\"num_per_pool_omap_osds\":4,\"num_per_pool_osds\":4,\"total_avail_bytes\":81199562752,\"total_bytes\":85882568704,\"total_used_bytes\":388038656,\"total_used_raw_bytes\":4683005952,\"total_used_raw_ratio\":0.05452801287174225},\"stats_by_class\":{\"hdd\":{\"total_avail_bytes\":81199562752,\"total_bytes\":85882568704,\"total_used_bytes\":388038656,\"total_used_raw_bytes\":4683005952,\"total_used_raw_ratio\":0.05452801287174225}}},\"outs\":\"\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "service": {
+      "address": "http://svc-ceph:8080"
+    },
+    "tags": [
+      "preserve_original_event",
+      "ceph-cluster_disk",
+      "forwarded"
+    ]
+  }
+]

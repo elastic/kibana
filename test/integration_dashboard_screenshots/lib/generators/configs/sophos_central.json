@@ -1,0 +1,39 @@
+{
+  "package": "sophos_central",
+  "dataStreams": [
+    {
+      "dataset": "sophos_central.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.id",
+        "sophos_central.alert.data.endpoint.platform",
+        "sophos_central.alert.data.endpoint.type",
+        "sophos_central.alert.location",
+        "sophos_central.alert.severity",
+        "sophos_central.alert.threat.cleanable"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sophos_central.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.created",
+        "event.id",
+        "organization.id",
+        "sophos_central.event.endpoint.type",
+        "sophos_central.event.group",
+        "sophos_central.event.location",
+        "sophos_central.event.severity",
+        "sophos_central.event.type",
+        "threat.feed.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

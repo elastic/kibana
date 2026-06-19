@@ -1,0 +1,17 @@
+{
+  "package": "pps",
+  "dataStreams": [
+    {
+      "dataset": "pps.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.ip",
+        "event.outcome",
+        "host.hostname",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

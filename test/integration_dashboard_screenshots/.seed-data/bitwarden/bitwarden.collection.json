@@ -1,0 +1,54 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:20:43.318Z",
+    "agent": {
+      "ephemeral_id": "ff0f2043-71ba-4eb9-9944-debae52868e6",
+      "id": "6944de4d-d8cd-4507-b1d5-8161b6d7dcc8",
+      "name": "elastic-agent-15737",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitwarden": {
+      "collection": {
+        "external": {
+          "id": "external_id_123456"
+        },
+        "id": "539a36c5-e0d2-4cf9-979e-51ecf5cf6593"
+      },
+      "object": "collection"
+    },
+    "data_stream": {
+      "dataset": "bitwarden.collection",
+      "namespace": "87390",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "6944de4d-d8cd-4507-b1d5-8161b6d7dcc8",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T02:20:43.318Z",
+      "dataset": "bitwarden.collection",
+      "ingested": "2026-03-10T02:20:46Z",
+      "kind": "event",
+      "original": "{\"externalId\":\"external_id_123456\",\"groups\":null,\"id\":\"539a36c5-e0d2-4cf9-979e-51ecf5cf6593\",\"object\":\"collection\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "bitwarden-collection"
+    ]
+  }
+]

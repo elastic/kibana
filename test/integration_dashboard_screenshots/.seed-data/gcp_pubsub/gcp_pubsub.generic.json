@@ -1,0 +1,76 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:29:33.096Z",
+    "agent": {
+      "ephemeral_id": "ab32436e-c9b3-4217-acbb-c9eac1460c0d",
+      "id": "8af45a8c-7715-4739-8359-fc938d34ca23",
+      "name": "elastic-agent-28325",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gcp_pubsub.generic",
+      "namespace": "56661",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "8af45a8c-7715-4739-8359-fc938d34ca23",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T03:29:34.644Z",
+      "dataset": "gcp_pubsub.generic",
+      "id": "df6c1d47df-2",
+      "ingested": "2026-03-10T03:29:37Z"
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "message": "{\"insertId\":\"ut8lbrffooxzb\",\"jsonPayload\":{\"bytes_sent\":\"173663\",\"connection\":{\"dest_ip\":\"10.87.40.76\",\"dest_port\":33970,\"protocol\":6,\"src_ip\":\"67.43.156.14\",\"src_port\":9200},\"dest_instance\":{\"project_id\":\"my-sample-project\",\"region\":\"us-east1\",\"vm_name\":\"kibana\",\"zone\":\"us-east1-b\"},\"dest_vpc\":{\"project_id\":\"my-sample-project\",\"subnetwork_name\":\"default\",\"vpc_name\":\"default\"},\"end_time\":\"2019-06-14T03:49:51.821302149Z\",\"packets_sent\":\"68\",\"reporter\":\"DEST\",\"rtt_msec\":\"1\",\"src_instance\":{\"project_id\":\"my-sample-project\",\"region\":\"us-east1\",\"vm_name\":\"elasticsearch\",\"zone\":\"us-east1-b\"},\"src_location\":{\"asn\":15169,\"continent\":\"America\",\"country\":\"usa\"},\"src_vpc\":{\"project_id\":\"my-sample-project\",\"subnetwork_name\":\"default\",\"vpc_name\":\"default\"},\"start_time\":\"2019-06-14T03:40:08.466657665Z\"},\"logName\":\"projects/my-sample-project/logs/compute.googleapis.com%2Fvpc_flows\",\"receiveTimestamp\":\"2019-06-14T03:50:10.845445834Z\",\"resource\":{\"labels\":{\"location\":\"us-east1-b\",\"project_id\":\"my-sample-project\",\"subnetwork_id\":\"758019854043528829\",\"subnetwork_name\":\"default\"},\"type\":\"gce_subnetwork\"},\"timestamp\":\"2019-06-14T03:50:10.845445834Z\"}",
+    "tags": [
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:33.076Z",
+    "agent": {
+      "ephemeral_id": "ab32436e-c9b3-4217-acbb-c9eac1460c0d",
+      "id": "8af45a8c-7715-4739-8359-fc938d34ca23",
+      "name": "elastic-agent-28325",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gcp_pubsub.generic",
+      "namespace": "56661",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "8af45a8c-7715-4739-8359-fc938d34ca23",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "created": "2026-03-10T03:29:34.644Z",
+      "dataset": "gcp_pubsub.generic",
+      "id": "df6c1d47df-1",
+      "ingested": "2026-03-10T03:29:37Z"
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "message": "{\"insertId\":\"ut8lbrffooxyw\",\"jsonPayload\":{\"bytes_sent\":\"1776\",\"connection\":{\"dest_ip\":\"67.43.156.13\",\"dest_port\":33478,\"protocol\":6,\"src_ip\":\"10.87.40.76\",\"src_port\":5601},\"dest_location\":{\"asn\":15169,\"continent\":\"America\",\"country\":\"usa\"},\"end_time\":\"2019-06-14T03:45:37.301953198Z\",\"packets_sent\":\"7\",\"reporter\":\"SRC\",\"rtt_msec\":\"36\",\"src_instance\":{\"project_id\":\"my-sample-project\",\"region\":\"us-east1\",\"vm_name\":\"kibana\",\"zone\":\"us-east1-b\"},\"src_vpc\":{\"project_id\":\"my-sample-project\",\"subnetwork_name\":\"default\",\"vpc_name\":\"default\"},\"start_time\":\"2019-06-14T03:45:37.186193305Z\"},\"logName\":\"projects/my-sample-project/logs/compute.googleapis.com%2Fvpc_flows\",\"receiveTimestamp\":\"2019-06-14T03:50:10.845445834Z\",\"resource\":{\"labels\":{\"location\":\"us-east1-b\",\"project_id\":\"my-sample-project\",\"subnetwork_id\":\"758019854043528829\",\"subnetwork_name\":\"default\"},\"type\":\"gce_subnetwork\"},\"timestamp\":\"2019-06-14T03:50:10.845445834Z\"}",
+    "tags": [
+      "forwarded"
+    ]
+  }
+]

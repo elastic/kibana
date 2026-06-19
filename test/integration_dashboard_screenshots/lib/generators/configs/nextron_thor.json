@@ -1,0 +1,21 @@
+{
+  "package": "nextron_thor",
+  "dataStreams": [
+    {
+      "dataset": "nextron_thor_apt_scanner.thor_forwarding",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.module",
+        "host.name",
+        "thor.alerts",
+        "thor.errors",
+        "thor.notices",
+        "thor.scan_id",
+        "thor.warnings",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

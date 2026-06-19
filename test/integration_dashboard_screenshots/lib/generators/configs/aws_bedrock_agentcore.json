@@ -1,0 +1,65 @@
+{
+  "package": "aws_bedrock_agentcore",
+  "dataStreams": [
+    {
+      "dataset": "aws_bedrock_agentcore.metrics",
+      "indexPattern": "metrics-*",
+      "docTarget": 990,
+      "fields": [
+        "aws.bedrock_agentcore.metrics.ApiKeyFetchFailures.sum",
+        "aws.bedrock_agentcore.metrics.ApiKeyFetchSuccess.sum",
+        "aws.bedrock_agentcore.metrics.ApiKeyFetchThrottles.sum",
+        "aws.bedrock_agentcore.metrics.CreationCount.sum",
+        "aws.bedrock_agentcore.metrics.Duration.avg",
+        "aws.bedrock_agentcore.metrics.Errors.sum",
+        "aws.bedrock_agentcore.metrics.Invocations.sum",
+        "aws.bedrock_agentcore.metrics.Latency.avg",
+        "aws.bedrock_agentcore.metrics.ResourceAccessTokenFetchFailures.sum",
+        "aws.bedrock_agentcore.metrics.ResourceAccessTokenFetchSuccess.sum",
+        "aws.bedrock_agentcore.metrics.Sessions.sum",
+        "aws.bedrock_agentcore.metrics.SystemErrors.sum",
+        "aws.bedrock_agentcore.metrics.TargetExecutionTime.avg",
+        "aws.bedrock_agentcore.metrics.TargetType_LAMBDA.sum",
+        "aws.bedrock_agentcore.metrics.TargetType_MCP.sum",
+        "aws.bedrock_agentcore.metrics.Throttles.sum",
+        "aws.bedrock_agentcore.metrics.UserErrors.sum",
+        "aws.bedrock_agentcore.metrics.WorkloadAccessTokenFetchFailures.sum",
+        "aws.bedrock_agentcore.metrics.WorkloadAccessTokenFetchSuccess.sum",
+        "aws.bedrock_agentcore.metrics.WorkloadAccessTokenFetchThrottles.sum",
+        "aws.dimensions.ItemType",
+        "aws.dimensions.Method",
+        "aws.dimensions.Name",
+        "aws.dimensions.Operation",
+        "aws.dimensions.Protocol",
+        "aws.dimensions.ProviderName",
+        "aws.dimensions.Resource",
+        "aws.dimensions.StrategyId",
+        "aws.dimensions.StrategyType",
+        "aws.dimensions.WorkloadIdentity",
+        "aws.dimensions.WorkloadIdentityDirectory",
+        "cloud.account.id",
+        "cloud.region"
+      ],
+      "filterValues": {
+        "aws.dimensions.Operation": [
+          "InvokeCodeInterpreter",
+          "StartCodeInterpreterSession",
+          "CodeInterpreterSession",
+          "StopCodeInterpreterSession",
+          "ListCodeInterpreterSessions",
+          "BrowserSession",
+          "BrowserUserTakeOver",
+          "ConnectBrowserAutomationStream",
+          "ConnectBrowserLiveViewStream",
+          "GetBrowserSession",
+          "ListBrowserSessions",
+          "StartBrowserSession",
+          "StopBrowserSession",
+          "UpdateBrowserStream",
+          "BrowserUserTakeOverRelease",
+          "InvokeGateway"
+        ]
+      }
+    }
+  ]
+}

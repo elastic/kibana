@@ -1,0 +1,39 @@
+{
+  "package": "fortinet_fortimanager",
+  "dataStreams": [
+    {
+      "dataset": "fortinet_fortimanager.log",
+      "indexPattern": "logs-*",
+      "docTarget": 780,
+      "fields": [
+        "device.id",
+        "event.action",
+        "event.id",
+        "fortimanager.log.changes",
+        "fortimanager.log.dev.grps",
+        "fortimanager.log.function",
+        "fortimanager.log.intfname",
+        "fortimanager.log.offline_stat",
+        "fortimanager.log.performed_on",
+        "fortimanager.log.prof_name",
+        "fortimanager.log.rate_limit",
+        "fortimanager.log.rate_peak",
+        "fortimanager.log.rate_value",
+        "fortimanager.log.result",
+        "fortimanager.log.setup",
+        "fortimanager.log.status",
+        "fortimanager.log.subtype",
+        "fortimanager.log.user.from",
+        "fortimanager.log.user.type",
+        "fortimanager.log.vdoms",
+        "host.hostname",
+        "log.level",
+        "source.ip",
+        "user.domain",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "package": "digital_guardian",
+  "dataStreams": [
+    {
+      "dataset": "digital_guardian.arc",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "digital_guardian.arc.dg_tenant",
+        "digital_guardian.arc.dg_utype",
+        "digital_guardian.arc.inc_id",
+        "digital_guardian.arc.inc_state",
+        "event.severity",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.severity": [
+          "1",
+          "2",
+          "4",
+          "5",
+          "6"
+        ],
+        "digital_guardian.arc.inc_state": [
+          "Escalated"
+        ]
+      }
+    }
+  ]
+}

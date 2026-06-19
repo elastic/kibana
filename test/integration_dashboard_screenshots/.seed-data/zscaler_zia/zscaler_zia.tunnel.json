@@ -1,0 +1,80 @@
+[
+  {
+    "@timestamp": "2021-12-31T08:08:08.000Z",
+    "agent": {
+      "ephemeral_id": "0a35604f-7746-4591-bfc4-aec45629af49",
+      "id": "5fa9f3d6-1898-4789-9d67-4dde3437d481",
+      "name": "elastic-agent-29383",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zscaler_zia.tunnel",
+      "namespace": "72715",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "ip": "0.0.0.0"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "5fa9f3d6-1898-4789-9d67-4dde3437d481",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "zscaler_zia.tunnel",
+      "id": "7083020000000007968",
+      "ingested": "2026-03-10T04:24:13Z",
+      "kind": "event",
+      "timezone": "UTC",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "community_id": "1:y8Yi03w0LBfVdMLE1UG7vvaUt5w=",
+      "iana_number": "47",
+      "transport": "gre"
+    },
+    "related": {
+      "ip": [
+        "0.0.0.0"
+      ],
+      "user": [
+        "Unknown"
+      ]
+    },
+    "source": {
+      "bytes": 0,
+      "ip": "0.0.0.0",
+      "port": 0
+    },
+    "tags": [
+      "forwarded",
+      "zscaler_zia-tunnel"
+    ],
+    "user": {
+      "email": "Unknown"
+    },
+    "zscaler_zia": {
+      "tunnel": {
+        "action": {
+          "type": "Tunnel Samples"
+        },
+        "dpd_packets": 0,
+        "type": "GRE"
+      }
+    }
+  }
+]

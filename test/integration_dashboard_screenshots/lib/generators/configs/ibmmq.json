@@ -1,0 +1,63 @@
+{
+  "package": "ibmmq",
+  "dataStreams": [
+    {
+      "dataset": "ibmmq.errorlog",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "ibmmq.errorlog.error.action",
+        "ibmmq.errorlog.error.code",
+        "ibmmq.errorlog.error.description",
+        "ibmmq.errorlog.error.explanation",
+        "ibmmq.errorlog.queue_manager"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ibmmq.qmgr",
+      "indexPattern": "metrics-*",
+      "docTarget": 1000,
+      "fields": [
+        "ibmmq.labels.qmgr",
+        "ibmmq.qmgr.calls.failed.callback.count",
+        "ibmmq.qmgr.calls.failed.close.count",
+        "ibmmq.qmgr.calls.failed.connections.count",
+        "ibmmq.qmgr.calls.failed.inquire.count",
+        "ibmmq.qmgr.calls.failed.open.count",
+        "ibmmq.qmgr.calls.failed.set.count",
+        "ibmmq.qmgr.calls.failed.subscription_request.count",
+        "ibmmq.qmgr.calls.succeeded.callback.count",
+        "ibmmq.qmgr.calls.succeeded.close.count",
+        "ibmmq.qmgr.calls.succeeded.connections.count",
+        "ibmmq.qmgr.calls.succeeded.control.count",
+        "ibmmq.qmgr.calls.succeeded.disconnect.count",
+        "ibmmq.qmgr.calls.succeeded.inquire.count",
+        "ibmmq.qmgr.calls.succeeded.open.count",
+        "ibmmq.qmgr.calls.succeeded.set.count",
+        "ibmmq.qmgr.calls.succeeded.status.count",
+        "ibmmq.qmgr.calls.succeeded.subscription_request.count",
+        "ibmmq.qmgr.messages.commit.count",
+        "ibmmq.qmgr.messages.expired.count",
+        "ibmmq.qmgr.messages.failed.browse.count",
+        "ibmmq.qmgr.messages.non_persistent.browse.count",
+        "ibmmq.qmgr.messages.non_persistent.destructive.get.count",
+        "ibmmq.qmgr.messages.non_persistent.mq.put.count",
+        "ibmmq.qmgr.messages.non_persistent.mq.put1.count",
+        "ibmmq.qmgr.messages.persistent.browse.count",
+        "ibmmq.qmgr.messages.persistent.destructive.get.count",
+        "ibmmq.qmgr.messages.persistent.mq.put.count",
+        "ibmmq.qmgr.messages.persistent.mq.put1.count",
+        "ibmmq.qmgr.messages.purged.queue.count",
+        "ibmmq.qmgr.subscription.durable.alter.count",
+        "ibmmq.qmgr.subscription.durable.create.count",
+        "ibmmq.qmgr.subscription.durable.delete.count",
+        "ibmmq.qmgr.subscription.durable.resume.count",
+        "ibmmq.qmgr.subscription.failed.create_alter_resume.count",
+        "ibmmq.qmgr.subscription.non_durable.delete.count"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,907 @@
+[
+  {
+    "@timestamp": "2023-12-13T15:25:26.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "ip": "224.0.0.251",
+      "mac": "01-00-5E-00-00-FB",
+      "packets": 0,
+      "port": 5353
+    },
+    "dns": {
+      "answers": {
+        "ttl": 4499
+      },
+      "question": {
+        "name": "HCT_6011-181e00a30af6._tcn_eqaHCT._tcp.local",
+        "registered_domain": "_tcn_eqaHCT._tcp.local",
+        "subdomain": "HCT_6011-181e00a30af6._tcn_eqaHCT",
+        "top_level_domain": "local",
+        "type": "TXT"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "end": "2023-12-13T15:25:11.789Z",
+      "id": "679408454713073671",
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"app_id\":\"32\",\"app_name\":\"dns\",\"device_inbound_interface\":\"0\",\"dns_ancount\":\"4\",\"dns_class\":\"1\",\"dns_flags\":\"0\",\"dns_host\":\"HCT_6011-181e00a30af6._tcn_eqaHCT._tcp.local\",\"dns_host_class\":\"1\",\"dns_host_raw\":\"4843545f363031312d3138316530306133306166362e5f74636e5f6571614843542e5f7463702e6c6f63616c\",\"dns_host_type\":\"PTR\",\"dns_name\":\"_tcn_eqaHCT._tcp.local\",\"dns_opcode\":\"0\",\"dns_qdcount\":\"2\",\"dns_query\":\"HCT_6011-181e00a30af6._tcn_eqaHCT._tcp.local\",\"dns_query_type\":\"16\",\"dns_transaction_id\":\"0\",\"dns_ttl\":\"4499\",\"dst_bytes\":\"0\",\"dst_ip\":\"224.0.0.251\",\"dst_mac\":\"01:00:5e:00:00:fb\",\"dst_packets\":\"0\",\"dst_port\":\"5353\",\"egress_intf_id\":\"0\",\"end_reason\":\"1\",\"end_time\":\"2023:12:13 15:25:11.789\",\"generator\":\"gs_apps_appInst16_423722da-33ec-1556-b24b-cda2e74a53f6\",\"id\":\"679408454713073671\",\"intf_name\":\"0\",\"ip_version\":\"4\",\"protocol\":\"17\",\"seq_num\":\"657\",\"src_bytes\":\"324\",\"src_ip\":\"10.115.80.208\",\"src_mac\":\"00:1d:ac:45:34:00\",\"src_packets\":\"2\",\"src_port\":\"5353\",\"start_time\":\"2023:12:13 15:25:10.797\",\"sys_up_time_first\":\"1349806091\",\"sys_up_time_last\":\"813197323\",\"ts\":\"Wed Dec 13 15:25:26 2023\",\"vendor\":\"Gigamon\",\"version\":\"6.5.00\"}",
+      "start": "2023-12-13T15:25:10.797Z",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "app_id": "32",
+        "app_name": "dns",
+        "device_inbound_interface": "0",
+        "dns_ancount": 4,
+        "dns_class": "1",
+        "dns_flags": "0",
+        "dns_host": "HCT_6011-181e00a30af6._tcn_eqaHCT._tcp.local",
+        "dns_host_class": "1",
+        "dns_host_raw": "4843545f363031312d3138316530306133306166362e5f74636e5f6571614843542e5f7463702e6c6f63616c",
+        "dns_host_type": "PTR",
+        "dns_name": "_tcn_eqaHCT._tcp.local",
+        "dns_opcode": "0",
+        "dns_qdcount": 2,
+        "dns_query": "HCT_6011-181e00a30af6._tcn_eqaHCT._tcp.local",
+        "dns_query_type": "16",
+        "dns_query_type_value": "TXT",
+        "dns_transaction_id": 0,
+        "dns_ttl": 4499,
+        "dst_bytes": 0,
+        "dst_ip": "224.0.0.251",
+        "dst_mac": "01:00:5e:00:00:fb",
+        "dst_packets": 0,
+        "dst_port": 5353,
+        "egress_intf_id": "0",
+        "end_reason": "1",
+        "end_reason_value": "Idle Timeout",
+        "end_time": "2023-12-13T15:25:11.789Z",
+        "generator": "gs_apps_appInst16_423722da-33ec-1556-b24b-cda2e74a53f6",
+        "id": "679408454713073671",
+        "intf_name": "0",
+        "ip_version": "4",
+        "protocol": "17",
+        "seq_num": 657,
+        "src_bytes": 324,
+        "src_ip": "10.115.80.208",
+        "src_mac": "00:1d:ac:45:34:00",
+        "src_packets": 2,
+        "src_port": 5353,
+        "start_time": "2023-12-13T15:25:10.797Z",
+        "sys_up_time_first": 1349806091,
+        "sys_up_time_last": 813197323,
+        "ts": "2023-12-13T15:25:26.000Z",
+        "vendor": "Gigamon",
+        "version": "6.5.00"
+      }
+    },
+    "host": {
+      "name": "HCT_6011-181e00a30af6._tcn_eqaHCT._tcp.local",
+      "type": "PTR"
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "dns"
+    },
+    "service": {
+      "id": "32"
+    },
+    "source": {
+      "bytes": 324,
+      "ip": "10.115.80.208",
+      "mac": "00-1D-AC-45-34-00",
+      "packets": 2,
+      "port": 5353
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ]
+  },
+  {
+    "@timestamp": "2023-05-16T15:25:25.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "ip": "224.0.0.251",
+      "mac": "01-00-5E-00-00-FB",
+      "packets": 0,
+      "port": 5353
+    },
+    "dns": {
+      "answers": {
+        "ttl": 120
+      },
+      "question": {
+        "name": "f.7.5.2.e.7.6.2.4.c.1.c.4.c.6.1.0.8.0.2.1.0.0.0.0.0.0.0.b.a.c.f. ip6.arpa",
+        "registered_domain": "a.b.2.b.9.6.c.2.3.9.3.d.6.2.6.a.0.8.0.2.1.0.0.0.0.0.0.0.b.a.c.f. i:p6.arpa",
+        "subdomain": "f.7.5.2.e.7.6.2.4.c.1.c.4.c.6.1.0.8.0.2.1.0.0.0.0.0.0.0.b.a.c.f",
+        "top_level_domain": "arpa",
+        "type": "*"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "end": "2023-12-13T15:25:11.181Z",
+      "id": "679408454713072647",
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"app_id\":\"32\",\"app_name\":\"dns\",\"device_inbound_interface\":\"0\",\"dns_class\":\"1\",\"dns_flags\":\"0\",\"dns_host\":\"pnstrex-83816.local\",\"dns_host_addr\":\"10.114.82.101\",\"dns_host_class\":\"1\",\"dns_host_raw\":\"706e73747265782d38333831362e6c6f63616c\",\"dns_host_type\":\"PTR\",\"dns_name\":\"a.b.2.b.9.6.c.2.3.9.3.d.6.2.6.a.0.8.0.2.1.0.0.0.0.0.0.0.b.a.c.f. i:p6.arpa\",\"dns_opcode\":\"0\",\"dns_qdcount\":\"4\",\"dns_query\":\"f.7.5.2.e.7.6.2.4.c.1.c.4.c.6.1.0.8.0.2.1.0.0.0.0.0.0.0.b.a.c.f. ip6.arpa\",\"dns_query_type\":\"255\",\"dns_transaction_id\":\"0\",\"dns_ttl\":\"120\",\"dst_bytes\":\"0\",\"dst_ip\":\"224.0.0.251\",\"dst_mac\":\"01:00:5e:00:00:fb\",\"dst_packets\":\"0\",\"dst_port\":\"5353\",\"egress_intf_id\":\"0\",\"end_reason\":\"1\",\"end_time\":\"2023:12:13 15:25:11.181\",\"generator\":\"gs_apps_appInst16_423722da-33ec-1556-b24b-cda2e74a53f6\",\"id\":\"679408454713072647\",\"intf_name\":\"0\",\"ip_version\":\"4\",\"protocol\":\"17\",\"seq_num\":\"656\",\"src_bytes\":\"337\",\"src_ip\":\"10.114.82.101\",\"src_mac\":\"00:50:56:8d:89:41\",\"src_packets\":\"1\",\"src_port\":\"5353\",\"start_time\":\"2023:12:13 15:25:11.181\",\"sys_up_time_first\":\"3497355275\",\"sys_up_time_last\":\"3497355275\",\"ts\":\"Thu May 16 15:25:25 2023\",\"vendor\":\"Gigamon\",\"version\":\"6.5.00\"}",
+      "start": "2023-12-13T15:25:11.181Z",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "app_id": "32",
+        "app_name": "dns",
+        "device_inbound_interface": "0",
+        "dns_class": "1",
+        "dns_flags": "0",
+        "dns_host": "pnstrex-83816.local",
+        "dns_host_addr": "10.114.82.101",
+        "dns_host_class": "1",
+        "dns_host_raw": "706e73747265782d38333831362e6c6f63616c",
+        "dns_host_type": "PTR",
+        "dns_name": "a.b.2.b.9.6.c.2.3.9.3.d.6.2.6.a.0.8.0.2.1.0.0.0.0.0.0.0.b.a.c.f. i:p6.arpa",
+        "dns_opcode": "0",
+        "dns_qdcount": 4,
+        "dns_query": "f.7.5.2.e.7.6.2.4.c.1.c.4.c.6.1.0.8.0.2.1.0.0.0.0.0.0.0.b.a.c.f. ip6.arpa",
+        "dns_query_type": "255",
+        "dns_query_type_value": "*",
+        "dns_transaction_id": 0,
+        "dns_ttl": 120,
+        "dst_bytes": 0,
+        "dst_ip": "224.0.0.251",
+        "dst_mac": "01:00:5e:00:00:fb",
+        "dst_packets": 0,
+        "dst_port": 5353,
+        "egress_intf_id": "0",
+        "end_reason": "1",
+        "end_reason_value": "Idle Timeout",
+        "end_time": "2023-12-13T15:25:11.181Z",
+        "generator": "gs_apps_appInst16_423722da-33ec-1556-b24b-cda2e74a53f6",
+        "id": "679408454713072647",
+        "intf_name": "0",
+        "ip_version": "4",
+        "protocol": "17",
+        "seq_num": 656,
+        "src_bytes": 337,
+        "src_ip": "10.114.82.101",
+        "src_mac": "00:50:56:8d:89:41",
+        "src_packets": 1,
+        "src_port": 5353,
+        "start_time": "2023-12-13T15:25:11.181Z",
+        "sys_up_time_first": 3497355275,
+        "sys_up_time_last": 3497355275,
+        "ts": "2023-05-16T15:25:25.000Z",
+        "vendor": "Gigamon",
+        "version": "6.5.00"
+      }
+    },
+    "host": {
+      "ip": [
+        "10.114.82.101"
+      ],
+      "name": "pnstrex-83816.local",
+      "type": "PTR"
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "dns"
+    },
+    "service": {
+      "id": "32"
+    },
+    "source": {
+      "bytes": 337,
+      "ip": "10.114.82.101",
+      "mac": "00-50-56-8D-89-41",
+      "packets": 1,
+      "port": 5353
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ]
+  },
+  {
+    "@timestamp": "2023-12-13T15:25:27.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "dns": {
+      "answers": {
+        "ttl": 120
+      },
+      "question": {
+        "registered_domain": "systest-virtual-machine-557152.local"
+      },
+      "response_code": "No Error"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "duration": 3412379100.0,
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"dns_ancount\":\"9\",\"dns_flags\":\"33792\",\"dns_host\":\"systest-virtual-machine-557152.local\",\"dns_host_addr\":\"10.115.84.167\",\"dns_host_type\":\"A\",\"dns_name\":\"systest-virtual-machine-557152.local\",\"dns_opcode\":\"\",\"dns_qdcount\":\"0\",\"dns_reply_code\":\"0\",\"dns_response_time\":\"3.412379\",\"dns_transaction_id\":\"0\",\"dns_ttl\":\"120\",\"generator\":\"gs_apps_appInst16_423722da-33ec-1556-b24b-cda2e74a53f6\",\"ts\":\"Wed Dec 13 15:25:27 2023\",\"vendor\":\"Gigamon\",\"version\":\"6.5.00\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "dns_ancount": 9,
+        "dns_flags": "33792",
+        "dns_host": "systest-virtual-machine-557152.local",
+        "dns_host_addr": "10.115.84.167",
+        "dns_host_type": "A",
+        "dns_name": "systest-virtual-machine-557152.local",
+        "dns_qdcount": 0,
+        "dns_reply_code": "0",
+        "dns_reply_code_value": "No Error",
+        "dns_response_time": 3.412379,
+        "dns_transaction_id": 0,
+        "dns_ttl": 120,
+        "generator": "gs_apps_appInst16_423722da-33ec-1556-b24b-cda2e74a53f6",
+        "ts": "2023-12-13T15:25:27.000Z",
+        "vendor": "Gigamon",
+        "version": "6.5.00"
+      }
+    },
+    "host": {
+      "ip": [
+        "10.115.84.167"
+      ],
+      "name": "systest-virtual-machine-557152.local",
+      "type": "A"
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-16T11:23:13.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 342,
+      "ip": "192.118.1.1",
+      "mac": "00-50-56-B7-64-0C",
+      "packets": 1,
+      "port": 67
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "end": "2024-03-23T11:23:13.360Z",
+      "id": "2661760802582691841",
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"app_id\":\"29\",\"app_name\":\"dhcp\",\"device_inbound_interface\":\"0\",\"dst_bytes\":\"342\",\"dst_ip\":\"192.118.1.1\",\"dst_mac\":\"00:50:56:b7:64:0c\",\"dst_packets\":\"1\",\"dst_port\":\"67\",\"egress_intf_id\":\"0\",\"end_reason\":\"2\",\"end_time\":\"2024:03:23 11:23:13.360\",\"generator\":\"gs_apps_appInst7_42375229-0c78-3d69-007d-f772de272c51\",\"id\":\"2661760802582691841\",\"intf_name\":\"0\",\"ip_version\":\"4\",\"protocol\":\"17\",\"seq_num\":\"8701\",\"src_bytes\":\"337\",\"src_ip\":\"192.118.1.30\",\"src_mac\":\"00:50:56:b7:1b:b0\",\"src_packets\":\"1\",\"src_port\":\"68\",\"start_time\":\"2024:03:23 11:23:13.360\",\"sys_up_time_first\":\"944648320\",\"sys_up_time_last\":\"944648320\",\"ts\":\"Thu May 16 11:23:13 2024\",\"vendor\":\"Gigamon\",\"version\":\"6.6.00\"}",
+      "start": "2024-03-23T11:23:13.360Z",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "app_id": "29",
+        "app_name": "dhcp",
+        "device_inbound_interface": "0",
+        "dst_bytes": 342,
+        "dst_ip": "192.118.1.1",
+        "dst_mac": "00:50:56:b7:64:0c",
+        "dst_packets": 1,
+        "dst_port": 67,
+        "egress_intf_id": "0",
+        "end_reason": "2",
+        "end_reason_value": "Active Timeout",
+        "end_time": "2024-03-23T11:23:13.360Z",
+        "generator": "gs_apps_appInst7_42375229-0c78-3d69-007d-f772de272c51",
+        "id": "2661760802582691841",
+        "intf_name": "0",
+        "ip_version": "4",
+        "protocol": "17",
+        "seq_num": 8701,
+        "src_bytes": 337,
+        "src_ip": "192.118.1.30",
+        "src_mac": "00:50:56:b7:1b:b0",
+        "src_packets": 1,
+        "src_port": 68,
+        "start_time": "2024-03-23T11:23:13.360Z",
+        "sys_up_time_first": 944648320,
+        "sys_up_time_last": 944648320,
+        "ts": "2024-05-16T11:23:13.000Z",
+        "vendor": "Gigamon",
+        "version": "6.6.00"
+      }
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "dhcp"
+    },
+    "service": {
+      "id": "29"
+    },
+    "source": {
+      "bytes": 337,
+      "ip": "192.118.1.30",
+      "mac": "00-50-56-B7-1B-B0",
+      "packets": 1,
+      "port": 68
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-16T10:58:39.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 63026,
+      "ip": "11.1.0.2",
+      "mac": "02-01-93-9C-99-4B",
+      "packets": 153,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "end": "2023-03-09T10:57:01.797Z",
+      "id": "2325896706092000771",
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"app_id\":\"68\",\"app_name\":\"https\",\"dst_bytes\":\"63026\",\"dst_ip\":\"11.1.0.2\",\"dst_mac\":\"02:01:93:9c:99:4b\",\"dst_packets\":\"153\",\"dst_port\":\"443\",\"end_reason\":\"2\",\"end_time\":\"2023:03:09 10:57:01.797\",\"generator\":\"gs_apps_FmAuto-App_Intelligence-appmetadata-465de222-d147-4001-8516-c56f29bdcfcb_ec22ba36-c257-93a4-bd84-91126b667cbc\",\"id\":\"2325896706092000771\",\"ip_version\":\"4\",\"protocol\":\"6\",\"seq_num\":\"64754890\",\"src_bytes\":\"29560\",\"src_ip\":\"10.1.0.2\",\"src_mac\":\"02:01:93:9c:98:37\",\"src_packets\":\"131\",\"src_port\":\"34028\",\"ssl_cert_ext_authority_key_id\":\"c8d57206ca0eee1b026e53d66668e947a156026a\",\"ssl_cert_ext_subject_key_id\":\"c8d57206ca0eee1b026e53d66668e947a156026a\",\"ssl_cert_extension_oid\":\"2.5.29.14\",\"ssl_certif_md5\":\"100000003d0aeba0db3af776145c3f9b2941b795\",\"ssl_certif_sha1\":\"14000000dc8804aad47a9fecf23495e33c4a6f6aaa01aa44\",\"ssl_certificate_dn_issuer\":\"C=US,ST=California,L=San Jose,O=\\u003cSpirent\\u003e,OU=\\u003cAppSec\\u003e,CN=www.spi rent.com\",\"ssl_certificate_dn_subject\":\"C=US,ST=California,L=San Jose,O=\\u003cSpirent\\u003e,OU=\\u003cAppSec\\u003e,CN=www.spi rent.com\",\"ssl_certificate_issuer_c\":\"US\",\"ssl_certificate_issuer_cn\":\"www.spirent.com\",\"ssl_certificate_issuer_l\":\"San Jose\",\"ssl_certificate_issuer_o\":\"Spirent\",\"ssl_certificate_issuer_ou\":\"AppSec\",\"ssl_certificate_issuer_st\":\"California\",\"ssl_certificate_subject_c\":\"US\",\"ssl_certificate_subject_cn\":\"www.spirent.com\",\"ssl_certificate_subject_key_algo_oid\":\"1.2.840.113549.1.1.1\",\"ssl_certificate_subject_key_size\":\"74\",\"ssl_certificate_subject_l\":\"San Jose\",\"ssl_certificate_subject_o\":\"Spirent\",\"ssl_certificate_subject_ou\":\"AppSec\",\"ssl_certificate_subject_st\":\"California\",\"ssl_cipher_suite_id\":\"156\",\"ssl_cipher_suite_list\":\"009c00ff\",\"ssl_client_hello_extension_len\":\"32\",\"ssl_client_hello_extension_type\":\"13\",\"ssl_common_name\":\"www.spirent.com\",\"ssl_compression_method\":\"0\",\"ssl_content_type\":\"22\",\"ssl_declassify_override\":\"0\",\"ssl_ext_sig_algorithm_hash\":\"6\",\"ssl_ext_sig_algorithm_scheme\":\"1537\",\"ssl_ext_sig_algorithm_sig\":\"2\",\"ssl_ext_sig_algorithms_len\":\"30\",\"ssl_fingerprint_ja3\":\"b92a3c873c2139b5ee5fa0a03023b6ce\",\"ssl_fingerprint_ja3s\":\"ccd5709d4a9027ec272e98b9924c36f7\",\"ssl_handshake_type\":\"1\",\"ssl_index\":\"1\",\"ssl_issuer\":\"www.spirent.com\",\"ssl_nb_compression_methods\":\"1\",\"ssl_organization_name\":\"Spirent\",\"ssl_protocol_version\":\"771\",\"ssl_request_size\":\"1791\",\"ssl_serial_number\":\"0090ad88e8aefe748b\",\"ssl_server_hello_extension_len\":\"1\",\"ssl_server_hello_extension_type\":\"65281\",\"ssl_session_id\":\"a87bfd1ed4d7b8f415bb1e0d3981b172714a4dcb6e481ec27b463570df6b7b74\",\"ssl_signalization_override\":\"0\",\"ssl_validity_not_after\":\"2028-08-18 15:41:02\",\"ssl_validity_not_before\":\"2018-08-21 15:41:02\",\"start_time\":\"2023:03:09 10:57:00.797\",\"tcp_flags\":\"2\",\"ts\":\"Thu May 16 10:58:39 2024\",\"vendor\":\"Gigamon\",\"version\":\"2.7.0\"}",
+      "start": "2023-03-09T10:57:00.797Z",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "app_id": "68",
+        "app_name": "https",
+        "dst_bytes": 63026,
+        "dst_ip": "11.1.0.2",
+        "dst_mac": "02:01:93:9c:99:4b",
+        "dst_packets": 153,
+        "dst_port": 443,
+        "end_reason": "2",
+        "end_reason_value": "Active Timeout",
+        "end_time": "2023-03-09T10:57:01.797Z",
+        "generator": "gs_apps_FmAuto-App_Intelligence-appmetadata-465de222-d147-4001-8516-c56f29bdcfcb_ec22ba36-c257-93a4-bd84-91126b667cbc",
+        "id": "2325896706092000771",
+        "ip_version": "4",
+        "protocol": "6",
+        "seq_num": 64754890,
+        "src_bytes": 29560,
+        "src_ip": "10.1.0.2",
+        "src_mac": "02:01:93:9c:98:37",
+        "src_packets": 131,
+        "src_port": 34028,
+        "ssl_cert_ext_authority_key_id": "c8d57206ca0eee1b026e53d66668e947a156026a",
+        "ssl_cert_ext_subject_key_id": "c8d57206ca0eee1b026e53d66668e947a156026a",
+        "ssl_cert_extension_oid": "2.5.29.14",
+        "ssl_certif_md5": "100000003d0aeba0db3af776145c3f9b2941b795",
+        "ssl_certif_sha1": "14000000dc8804aad47a9fecf23495e33c4a6f6aaa01aa44",
+        "ssl_certificate_dn_issuer": "C=US,ST=California,L=San Jose,O=<Spirent>,OU=<AppSec>,CN=www.spi rent.com",
+        "ssl_certificate_dn_subject": "C=US,ST=California,L=San Jose,O=<Spirent>,OU=<AppSec>,CN=www.spi rent.com",
+        "ssl_certificate_issuer_c": "US",
+        "ssl_certificate_issuer_cn": "www.spirent.com",
+        "ssl_certificate_issuer_l": "San Jose",
+        "ssl_certificate_issuer_o": "Spirent",
+        "ssl_certificate_issuer_ou": "AppSec",
+        "ssl_certificate_issuer_st": "California",
+        "ssl_certificate_subject_c": "US",
+        "ssl_certificate_subject_cn": "www.spirent.com",
+        "ssl_certificate_subject_key_algo_oid": "1.2.840.113549.1.1.1",
+        "ssl_certificate_subject_key_size": 74,
+        "ssl_certificate_subject_l": "San Jose",
+        "ssl_certificate_subject_o": "Spirent",
+        "ssl_certificate_subject_ou": "AppSec",
+        "ssl_certificate_subject_st": "California",
+        "ssl_cipher_suite_id": "156",
+        "ssl_cipher_suite_id_value": "TLS_RSA_WITH_AES_256_CBC_SHA",
+        "ssl_cipher_suite_list": "009c00ff",
+        "ssl_client_hello_extension_len": 32,
+        "ssl_client_hello_extension_type": "13",
+        "ssl_common_name": "www.spirent.com",
+        "ssl_compression_method": "0",
+        "ssl_content_type": "22",
+        "ssl_declassify_override": "0",
+        "ssl_ext_sig_algorithm_hash": "6",
+        "ssl_ext_sig_algorithm_hash_value": "SHA512",
+        "ssl_ext_sig_algorithm_scheme": "1537",
+        "ssl_ext_sig_algorithm_scheme_value": "rsa_pkcs1_sha512",
+        "ssl_ext_sig_algorithm_sig": "2",
+        "ssl_ext_sig_algorithms_len": 30,
+        "ssl_fingerprint_ja3": "b92a3c873c2139b5ee5fa0a03023b6ce",
+        "ssl_fingerprint_ja3s": "ccd5709d4a9027ec272e98b9924c36f7",
+        "ssl_handshake_type": "1",
+        "ssl_index": "1",
+        "ssl_issuer": "www.spirent.com",
+        "ssl_nb_compression_methods": "1",
+        "ssl_organization_name": "Spirent",
+        "ssl_protocol_version": "771",
+        "ssl_protocol_version_value": "TLS_1_2",
+        "ssl_request_size": 1791,
+        "ssl_serial_number": "0090ad88e8aefe748b",
+        "ssl_server_hello_extension_len": 1,
+        "ssl_server_hello_extension_type": "65281",
+        "ssl_session_id": "a87bfd1ed4d7b8f415bb1e0d3981b172714a4dcb6e481ec27b463570df6b7b74",
+        "ssl_signalization_override": "0",
+        "ssl_validity_not_after": "2028-08-18T15:41:02.000Z",
+        "ssl_validity_not_before": "2018-08-21T15:41:02.000Z",
+        "start_time": "2023-03-09T10:57:00.797Z",
+        "tcp_flags": "2",
+        "ts": "2024-05-16T10:58:39.000Z",
+        "vendor": "Gigamon",
+        "version": "2.7.0"
+      }
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "https"
+    },
+    "service": {
+      "id": "68"
+    },
+    "source": {
+      "bytes": 29560,
+      "ip": "10.1.0.2",
+      "mac": "02-01-93-9C-98-37",
+      "packets": 131,
+      "port": 34028
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ],
+    "tls": {
+      "cipher": "TLS_RSA_WITH_AES_256_CBC_SHA",
+      "client": {
+        "issuer": "www.spirent.com",
+        "not_after": "2028-08-18T15:41:02.000Z",
+        "not_before": "2018-08-21T15:41:02.000Z",
+        "server_name": "www.spirent.com",
+        "subject": "www.spirent.com"
+      },
+      "version_protocol": "TLS_1_2"
+    }
+  },
+  {
+    "@timestamp": "2024-05-16T06:27:07.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "ip": "10.115.82.138",
+      "mac": "00-50-56-A0-FE-6A",
+      "packets": 0,
+      "port": 60922
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "end": "2024-05-16T06:27:07.344Z",
+      "id": "2662004089650413569",
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"app_id\":\"4968\",\"app_name\":\"Unknown tcp\",\"device_inbound_interface\":\"0\",\"dst_bytes\":\"0\",\"dst_ip\":\"10.115.82.138\",\"dst_mac\":\"00:50:56:a0:fe:6a\",\"dst_packets\":\"0\",\"dst_port\":\"60922\",\"egress_intf_id\":\"0\",\"end_reason\":\"5\",\"end_time\":\"2024:05:16 06:27:07.344\",\"generator\":\"gs_apps_appInst7_42375229-0c78-3d69-007d-f772de272c51\",\"id\":\"2662004089650413569\",\"intf_name\":\"0\",\"ip_version\":\"4\",\"protocol\":\"6\",\"seq_num\":\"10977963\",\"src_bytes\":\"1514\",\"src_ip\":\"10.116.2.100\",\"src_mac\":\"5c:31:92:40:19:7f\",\"src_packets\":\"1\",\"src_port\":\"80\",\"start_time\":\"2024:05:16 06:27:07.344\",\"sys_up_time_first\":\"1297515008\",\"sys_up_time_last\":\"1297515008\",\"ts\":\"Thu May 16 06:27:07 2024\",\"vendor\":\"Gigamon\",\"version\":\"6.6.00\"}",
+      "start": "2024-05-16T06:27:07.344Z",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "app_id": "4968",
+        "app_name": "Unknown tcp",
+        "device_inbound_interface": "0",
+        "dst_bytes": 0,
+        "dst_ip": "10.115.82.138",
+        "dst_mac": "00:50:56:a0:fe:6a",
+        "dst_packets": 0,
+        "dst_port": 60922,
+        "egress_intf_id": "0",
+        "end_reason": "5",
+        "end_time": "2024-05-16T06:27:07.344Z",
+        "generator": "gs_apps_appInst7_42375229-0c78-3d69-007d-f772de272c51",
+        "id": "2662004089650413569",
+        "intf_name": "0",
+        "ip_version": "4",
+        "protocol": "6",
+        "seq_num": 10977963,
+        "src_bytes": 1514,
+        "src_ip": "10.116.2.100",
+        "src_mac": "5c:31:92:40:19:7f",
+        "src_packets": 1,
+        "src_port": 80,
+        "start_time": "2024-05-16T06:27:07.344Z",
+        "sys_up_time_first": 1297515008,
+        "sys_up_time_last": 1297515008,
+        "ts": "2024-05-16T06:27:07.000Z",
+        "vendor": "Gigamon",
+        "version": "6.6.00"
+      }
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "Unknown tcp"
+    },
+    "service": {
+      "id": "4968"
+    },
+    "source": {
+      "bytes": 1514,
+      "ip": "10.116.2.100",
+      "mac": "5C-31-92-40-19-7F",
+      "packets": 1,
+      "port": 80
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-16T06:27:07.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 0,
+      "ip": "10.115.82.138",
+      "mac": "00-50-56-A0-FE-6A",
+      "packets": 0,
+      "port": 60922
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "end": "2024-05-16T06:27:07.344Z",
+      "id": "2662004089665093633",
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"app_id\":\"4968\",\"app_name\":\"Unknown tcp\",\"device_inbound_interface\":\"0\",\"dst_bytes\":\"0\",\"dst_ip\":\"10.115.82.138\",\"dst_mac\":\"00:50:56:a0:fe:6a\",\"dst_packets\":\"0\",\"dst_port\":\"60922\",\"egress_intf_id\":\"0\",\"end_reason\":\"5\",\"end_time\":\"2024:05:16 06:27:07.344\",\"generator\":\"gs_apps_appInst7_42375229-0c78-3d69-007d-f772de272c51\",\"id\":\"2662004089665093633\",\"intf_name\":\"0\",\"ip_version\":\"4\",\"protocol\":\"6\",\"seq_num\":\"10977963\",\"src_bytes\":\"1514\",\"src_ip\":\"10.116.2.100\",\"src_mac\":\"5c:31:92:40:19:7f\",\"src_packets\":\"1\",\"src_port\":\"80\",\"start_time\":\"2024:05:16 06:27:07.344\",\"sys_up_time_first\":\"1297515008\",\"sys_up_time_last\":\"1297515008\",\"ts\":\"Thu May 16 06:27:07 2024\",\"vendor\":\"Gigamon\",\"version\":\"6.6.00\"}",
+      "start": "2024-05-16T06:27:07.344Z",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "app_id": "4968",
+        "app_name": "Unknown tcp",
+        "device_inbound_interface": "0",
+        "dst_bytes": 0,
+        "dst_ip": "10.115.82.138",
+        "dst_mac": "00:50:56:a0:fe:6a",
+        "dst_packets": 0,
+        "dst_port": 60922,
+        "egress_intf_id": "0",
+        "end_reason": "5",
+        "end_time": "2024-05-16T06:27:07.344Z",
+        "generator": "gs_apps_appInst7_42375229-0c78-3d69-007d-f772de272c51",
+        "id": "2662004089665093633",
+        "intf_name": "0",
+        "ip_version": "4",
+        "protocol": "6",
+        "seq_num": 10977963,
+        "src_bytes": 1514,
+        "src_ip": "10.116.2.100",
+        "src_mac": "5c:31:92:40:19:7f",
+        "src_packets": 1,
+        "src_port": 80,
+        "start_time": "2024-05-16T06:27:07.344Z",
+        "sys_up_time_first": 1297515008,
+        "sys_up_time_last": 1297515008,
+        "ts": "2024-05-16T06:27:07.000Z",
+        "vendor": "Gigamon",
+        "version": "6.6.00"
+      }
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "Unknown tcp"
+    },
+    "service": {
+      "id": "4968"
+    },
+    "source": {
+      "bytes": 1514,
+      "ip": "10.116.2.100",
+      "mac": "5C-31-92-40-19-7F",
+      "packets": 1,
+      "port": 80
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ]
+  },
+  {
+    "@timestamp": "2024-05-16T04:24:46.000Z",
+    "agent": {
+      "ephemeral_id": "4cb631e8-2d5f-404a-a18e-94d01d1dcdc6",
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "name": "elastic-agent-51428",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "gigamon.ami",
+      "namespace": "43016",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 62421,
+      "ip": "10.115.81.118",
+      "mac": "0C-C4-7A-F8-0D-C4",
+      "packets": 48,
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "gigamon.ami",
+      "end": "2024-03-18T04:24:32.176Z",
+      "id": "11038398651553546241",
+      "ingested": "2026-03-10T03:32:10Z",
+      "kind": "event",
+      "original": "{\"app_id\":\"68\",\"app_name\":\"https\",\"device_inbound_interface\":\"0\",\"dst_bytes\":\"62421\",\"dst_ip\":\"10.115.81.118\",\"dst_mac\":\"0c:c4:7a:f8:0d:c4\",\"dst_packets\":\"48\",\"dst_port\":\"443\",\"egress_intf_id\":\"0\",\"end_reason\":\"1\",\"end_time\":\"2024:03:18 04:24:32.176\",\"eventType\":\"2\",\"generator\":\"gs_apps_appInst0_42375229-0c78-3d69-007d-f772de272c51\",\"id\":\"11038398651553546241\",\"intf_name\":\"0\",\"ip_version\":\"4\",\"protocol\":\"6\",\"seq_num\":\"584615\",\"src_bytes\":\"8591\",\"src_ip\":\"10.115.83.4\",\"src_mac\":\"00:50:56:9f:7f:ff\",\"src_packets\":\"49\",\"src_port\":\"58194\",\"start_time\":\"2024:03:18 04:24:25.232\",\"sys_up_time_first\":\"487520192\",\"sys_up_time_last\":\"487527136\",\"ts\":\"Thu May 16 04:24:46 2024\",\"vendor\":\"Gigamon\",\"version\":\"6.6.00\"}",
+      "start": "2024-03-18T04:24:25.232Z",
+      "type": [
+        "info"
+      ]
+    },
+    "gigamon": {
+      "ami": {
+        "app_id": "68",
+        "app_name": "https",
+        "device_inbound_interface": "0",
+        "dst_bytes": 62421,
+        "dst_ip": "10.115.81.118",
+        "dst_mac": "0c:c4:7a:f8:0d:c4",
+        "dst_packets": 48,
+        "dst_port": 443,
+        "egress_intf_id": "0",
+        "end_reason": "1",
+        "end_reason_value": "Idle Timeout",
+        "end_time": "2024-03-18T04:24:32.176Z",
+        "eventType": "2",
+        "generator": "gs_apps_appInst0_42375229-0c78-3d69-007d-f772de272c51",
+        "id": "11038398651553546241",
+        "intf_name": "0",
+        "ip_version": "4",
+        "protocol": "6",
+        "seq_num": 584615,
+        "src_bytes": 8591,
+        "src_ip": "10.115.83.4",
+        "src_mac": "00:50:56:9f:7f:ff",
+        "src_packets": 49,
+        "src_port": 58194,
+        "start_time": "2024-03-18T04:24:25.232Z",
+        "sys_up_time_first": 487520192,
+        "sys_up_time_last": 487527136,
+        "ts": "2024-05-16T04:24:46.000Z",
+        "vendor": "Gigamon",
+        "version": "6.6.00"
+      }
+    },
+    "input": {
+      "type": "http_endpoint"
+    },
+    "network": {
+      "protocol": "https"
+    },
+    "service": {
+      "id": "68"
+    },
+    "source": {
+      "bytes": 8591,
+      "ip": "10.115.83.4",
+      "mac": "00-50-56-9F-7F-FF",
+      "packets": 49,
+      "port": 58194
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "gigamon-ami"
+    ]
+  }
+]

@@ -1,0 +1,64 @@
+{
+  "package": "arista_ngfw",
+  "dataStreams": [
+    {
+      "dataset": "arista_ngfw.log",
+      "indexPattern": "logs-*",
+      "docTarget": 1000,
+      "fields": [
+        "arista.bypassed",
+        "arista.cpu.load.15",
+        "arista.cpu.total.pct",
+        "arista.disk.used.pct",
+        "arista.entitled",
+        "arista.flagged",
+        "arista.hosts.active",
+        "arista.interface.id",
+        "arista.memory.swap.used.pct",
+        "arista.memory.used.pct",
+        "arista.received.bytes",
+        "arista.received.rate",
+        "arista.transmitted.bytes",
+        "arista.transmitted.rate",
+        "destination.as.organization.name",
+        "destination.bytes",
+        "destination.geo.country_name",
+        "destination.geo.region_name",
+        "destination.ip",
+        "destination.port",
+        "event.id",
+        "event.outcome",
+        "event.provider",
+        "event.type",
+        "log.syslog.hostname",
+        "network.bytes",
+        "network.direction",
+        "rule.category",
+        "rule.name",
+        "rule.ruleset",
+        "source.as.organization.name",
+        "source.bytes",
+        "source.geo.country_name",
+        "source.geo.region_name",
+        "source.ip",
+        "source.port",
+        "url.domain",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.provider": [
+          "session_stats",
+          "intrusion_prevention",
+          "admin_login",
+          "system_stats",
+          "interface_stats",
+          "web_filter"
+        ],
+        "arista.interface.id": [
+          "1",
+          "2"
+        ]
+      }
+    }
+  ]
+}

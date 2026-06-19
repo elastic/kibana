@@ -1,0 +1,101 @@
+{
+  "package": "panw_metrics",
+  "dataStreams": [
+    {
+      "dataset": "panw_metrics.interfaces",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "panw.interfaces.ha.running_sync",
+        "panw.interfaces.ipsec_tunnel.life.sec",
+        "panw.interfaces.ipsec_tunnel.name",
+        "panw.interfaces.logical.name",
+        "panw.interfaces.logical.zone",
+        "panw.interfaces.physical.name",
+        "panw.interfaces.physical.state"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "panw_metrics.routing",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "panw.routing.bgp.established_counts",
+        "panw.routing.bgp.holdtime",
+        "panw.routing.bgp.holdtime_config",
+        "panw.routing.bgp.keepalive_config",
+        "panw.routing.bgp.last_update_age",
+        "panw.routing.bgp.msg_total_in",
+        "panw.routing.bgp.msg_total_out",
+        "panw.routing.bgp.msg_update_in",
+        "panw.routing.bgp.msg_update_out",
+        "panw.routing.bgp.peer_group",
+        "panw.routing.bgp.peer_name",
+        "panw.routing.bgp.status",
+        "panw.routing.bgp.status_duration"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "panw_metrics.system",
+      "indexPattern": "metrics-*",
+      "docTarget": 900,
+      "fields": [
+        "panw.system.cpu.hi",
+        "panw.system.cpu.idle",
+        "panw.system.cpu.nice",
+        "panw.system.cpu.steal",
+        "panw.system.cpu.system",
+        "panw.system.cpu.system_int",
+        "panw.system.cpu.user",
+        "panw.system.cpu.wait",
+        "panw.system.fan.description",
+        "panw.system.fan.rpm",
+        "panw.system.filesystem.available",
+        "panw.system.filesystem.name",
+        "panw.system.filesystem.used",
+        "panw.system.load_average.15m",
+        "panw.system.load_average.1m",
+        "panw.system.load_average.5m",
+        "panw.system.memory.buffer_cache",
+        "panw.system.memory.free",
+        "panw.system.memory.used",
+        "panw.system.swap.available",
+        "panw.system.swap.free",
+        "panw.system.swap.used",
+        "panw.system.tasks.running",
+        "panw.system.tasks.sleeping",
+        "panw.system.tasks.stopped",
+        "panw.system.tasks.zombie",
+        "panw.system.thermal.degress_celsius",
+        "panw.system.thermal.slot_number",
+        "panw.system.uptime.days",
+        "panw.system.user_count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "panw_metrics.vpn",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "panw.vpn.globalprotect.gateway.current_users",
+        "panw.vpn.globalprotect.gateway.name",
+        "panw.vpn.globalprotect.session.client_ip",
+        "panw.vpn.globalprotect.session.computer",
+        "panw.vpn.globalprotect.session.domain",
+        "panw.vpn.globalprotect.session.host_id",
+        "panw.vpn.globalprotect.session.is_local",
+        "panw.vpn.globalprotect.session.lifetime",
+        "panw.vpn.globalprotect.session.source_region",
+        "panw.vpn.globalprotect.session.tunnel_type",
+        "panw.vpn.globalprotect.session.username",
+        "panw.vpn.globalprotect.session.vpn_type",
+        "panw.vpn.globalprotect.total_current_users",
+        "panw.vpn.globalprotect.total_previous_users"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "package": "forcepoint_web",
+  "dataStreams": [
+    {
+      "dataset": "forcepoint_web.logs",
+      "indexPattern": "security-solution-default",
+      "docTarget": 500,
+      "fields": [
+        "destination.as.organization.name",
+        "destination.geo.location",
+        "destination.ip",
+        "event.action",
+        "http.request.method",
+        "http.response.status_code",
+        "source.ip",
+        "url.domain",
+        "url.original",
+        "url.path",
+        "user.name",
+        "user_agent.original"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

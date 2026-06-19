@@ -1,0 +1,16 @@
+{
+  "package": "cisco_nexus",
+  "dataStreams": [
+    {
+      "dataset": "cisco_nexus.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_nexus.log.facility",
+        "event.code",
+        "log.level"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

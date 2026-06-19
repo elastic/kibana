@@ -1,0 +1,36 @@
+{
+  "package": "ironscales",
+  "dataStreams": [
+    {
+      "dataset": "ironscales.incident",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address",
+        "event.created",
+        "event.id",
+        "ironscales.incident.affected_mailboxes_count",
+        "ironscales.incident.classification",
+        "ironscales.incident.incident_type",
+        "ironscales.incident.recipient_name",
+        "ironscales.incident.reported_by",
+        "ironscales.incident.resolved_by",
+        "ironscales.incident.sender_is_internal",
+        "ironscales.incident.sender_name",
+        "ironscales.incident.sender_reputation",
+        "labels.is_transform_source",
+        "user.name"
+      ],
+      "filterValues": {
+        "ironscales.incident.sender_is_internal": [
+          "true",
+          "false"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

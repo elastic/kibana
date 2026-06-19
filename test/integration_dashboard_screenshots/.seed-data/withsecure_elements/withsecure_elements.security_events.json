@@ -1,0 +1,257 @@
+[
+  {
+    "@timestamp": "2025-11-26T21:26:40.489Z",
+    "agent": {
+      "ephemeral_id": "44a070e9-abde-4586-abf5-c87988aab5c2",
+      "id": "53987181-c482-4539-9efe-92fe6a585993",
+      "name": "elastic-agent-98975",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "withsecure_elements.security_events",
+      "namespace": "77774",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "53987181-c482-4539-9efe-92fe6a585993",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "quarantined",
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "withsecure_elements.security_events",
+      "id": "7b6f4h39-9b18-5de8-a72d-g21g77562gd4_2",
+      "ingested": "2026-03-10T03:16:16Z",
+      "kind": "event",
+      "module": "withsecure_elements",
+      "original": "{\"acknowledged\":false,\"action\":\"quarantined\",\"clientTimestamp\":\"2025-11-26T21:26:38.185Z\",\"description\":\"DataGuard Protection event\",\"details\":{\"filePath\":\"/Users/testuser3/Documents/sensitive-data.pdf\",\"initiatorHash\":\"b4e75e1dfc321dc71d2391380995726502g49h93\",\"targetData\":\"confidential\",\"vaultId\":\"vault-12345\"},\"device\":{\"id\":\"c3d4e5f6-a7b8-9012-cdef-345678901234\",\"name\":\"TEST-DESKTOP-03\"},\"engine\":\"dataGuard\",\"eventTransactionId\":\"0000-9gf1d4482dc069ag\",\"id\":\"7b6f4h39-9b18-5de8-a72d-g21g77562gd4_2\",\"message\":\"Sensitive data access attempt detected and file quarantined\",\"organization\":{\"id\":\"777f240c-752d-4eb5-8422-94c5336e3005\",\"name\":\"FR IT-Sec\"},\"persistenceTimestamp\":\"2025-11-26T21:26:41.166Z\",\"serverTimestamp\":\"2025-11-26T21:26:40.489Z\",\"severity\":\"critical\",\"target\":{\"id\":\"c3d4e5f6-a7b8-9012-cdef-345678901234\",\"name\":\"TEST-DESKTOP-03\"},\"userName\":\"testuser3\"}",
+      "provider": "withsecure_elements",
+      "severity": 99,
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "withsecure_elements": {
+      "security_events": {
+        "acknowledged": false,
+        "action": "quarantined",
+        "client_timestamp": "2025-11-26T21:26:38.185Z",
+        "description": "DataGuard Protection event",
+        "details": {
+          "filePath": "/Users/testuser3/Documents/sensitive-data.pdf",
+          "initiatorHash": "b4e75e1dfc321dc71d2391380995726502g49h93",
+          "targetData": "confidential",
+          "vaultId": "vault-12345"
+        },
+        "device": {
+          "id": "c3d4e5f6-a7b8-9012-cdef-345678901234",
+          "name": "TEST-DESKTOP-03"
+        },
+        "engine": "dataGuard",
+        "eventTransactionId": "0000-9gf1d4482dc069ag",
+        "id": "7b6f4h39-9b18-5de8-a72d-g21g77562gd4_2",
+        "message": "Sensitive data access attempt detected and file quarantined",
+        "organization": {
+          "id": "777f240c-752d-4eb5-8422-94c5336e3005",
+          "name": "FR IT-Sec"
+        },
+        "persistence_timestamp": "2025-11-26T21:26:41.166Z",
+        "severity": "critical",
+        "target": {
+          "id": "c3d4e5f6-a7b8-9012-cdef-345678901234",
+          "name": "TEST-DESKTOP-03"
+        },
+        "userName": "testuser3"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-11-26T20:25:30.388Z",
+    "agent": {
+      "ephemeral_id": "44a070e9-abde-4586-abf5-c87988aab5c2",
+      "id": "53987181-c482-4539-9efe-92fe6a585993",
+      "name": "elastic-agent-98975",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "withsecure_elements.security_events",
+      "namespace": "77774",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "53987181-c482-4539-9efe-92fe6a585993",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "blocked",
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "withsecure_elements.security_events",
+      "id": "6a5e3g28-8a07-4cd7-961c-f10f66451fc3_1",
+      "ingested": "2026-03-10T03:16:16Z",
+      "kind": "event",
+      "module": "withsecure_elements",
+      "original": "{\"acknowledged\":false,\"action\":\"blocked\",\"clientTimestamp\":\"2025-11-26T20:25:28.084Z\",\"description\":\"EDR Detection event\",\"details\":{\"categories\":[\"SUSPICIOUS_PROCESS\"],\"incidentId\":\"test-incident-123\",\"incidentPublicId\":\"2532078-23323\",\"resolution\":\"investigating\",\"risk\":\"high\"},\"device\":{\"id\":\"b2c3d4e5-f6a7-8901-bcde-f23456789012\",\"name\":\"TEST-DESKTOP-02\"},\"engine\":\"edr\",\"eventTransactionId\":\"0000-8fe0c3371cb9589f\",\"id\":\"6a5e3g28-8a07-4cd7-961c-f10f66451fc3_1\",\"message\":\"Suspicious process execution detected and blocked\",\"organization\":{\"id\":\"777f240c-752d-4eb5-8422-94c5336e3005\",\"name\":\"FR IT-Sec\"},\"persistenceTimestamp\":\"2025-11-26T20:25:31.065Z\",\"serverTimestamp\":\"2025-11-26T20:25:30.388Z\",\"severity\":\"high\",\"target\":{\"id\":\"b2c3d4e5-f6a7-8901-bcde-f23456789012\",\"name\":\"TEST-DESKTOP-02\"},\"userName\":\"testuser2\"}",
+      "provider": "withsecure_elements",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "withsecure_elements": {
+      "security_events": {
+        "acknowledged": false,
+        "action": "blocked",
+        "client_timestamp": "2025-11-26T20:25:28.084Z",
+        "description": "EDR Detection event",
+        "details": {
+          "categories": [
+            "SUSPICIOUS_PROCESS"
+          ],
+          "incidentId": "test-incident-123",
+          "incidentPublicId": "2532078-23323",
+          "resolution": "investigating",
+          "risk": "high"
+        },
+        "device": {
+          "id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+          "name": "TEST-DESKTOP-02"
+        },
+        "engine": "edr",
+        "eventTransactionId": "0000-8fe0c3371cb9589f",
+        "id": "6a5e3g28-8a07-4cd7-961c-f10f66451fc3_1",
+        "message": "Suspicious process execution detected and blocked",
+        "organization": {
+          "id": "777f240c-752d-4eb5-8422-94c5336e3005",
+          "name": "FR IT-Sec"
+        },
+        "persistence_timestamp": "2025-11-26T20:25:31.065Z",
+        "severity": "high",
+        "target": {
+          "id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+          "name": "TEST-DESKTOP-02"
+        },
+        "userName": "testuser2"
+      }
+    }
+  },
+  {
+    "@timestamp": "2025-11-26T19:24:29.287Z",
+    "agent": {
+      "ephemeral_id": "44a070e9-abde-4586-abf5-c87988aab5c2",
+      "id": "53987181-c482-4539-9efe-92fe6a585993",
+      "name": "elastic-agent-98975",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "withsecure_elements.security_events",
+      "namespace": "77774",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "53987181-c482-4539-9efe-92fe6a585993",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "trashed",
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "withsecure_elements.security_events",
+      "id": "594d2f17-79f6-3bc6-850b-e09e55340eb2_0",
+      "ingested": "2026-03-10T03:16:16Z",
+      "kind": "event",
+      "module": "withsecure_elements",
+      "original": "{\"acknowledged\":false,\"action\":\"trashed\",\"clientTimestamp\":\"2025-11-26T19:24:27.983Z\",\"description\":\"File Scanning event\",\"details\":{\"alertSource\":\"sp.evt.oas.alert\",\"alertType\":\"file\",\"clientTimestamp\":\"1764185067983\",\"filePath\":\"/Users/testuser/Documents/test-file.emlx\",\"fileScanningType\":\"fileInfection\",\"name\":\"Heuristic.HEUR/HTML.Agent.QT\",\"profileId\":\"118181\",\"profileName\":\"Elastic-WithSecure\",\"profileVersion\":\"1649230230\",\"sha1\":\"a3e65d0ceb320cb60d1281360994615491f38c82\",\"userName\":\"testuser\"},\"device\":{\"id\":\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\"name\":\"TEST-DESKTOP-01\"},\"engine\":\"fileScanning\",\"eventTransactionId\":\"0000-7edfb2260ba8479e\",\"id\":\"594d2f17-79f6-3bc6-850b-e09e55340eb2_0\",\"message\":\"\\\"Heuristic.HEUR/HTML.Agent.QT\\\" was detected on accessing \\\"113873.emlx\\\" and it was trashed\",\"organization\":{\"id\":\"777f240c-752d-4eb5-8422-94c5336e3005\",\"name\":\"FR IT-Sec\"},\"persistenceTimestamp\":\"2025-11-26T19:24:30.964Z\",\"serverTimestamp\":\"2025-11-26T19:24:29.287Z\",\"severity\":\"warning\",\"target\":{\"id\":\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\"name\":\"TEST-DESKTOP-01\"},\"userName\":\"testuser\"}",
+      "provider": "withsecure_elements",
+      "severity": 47,
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "withsecure_elements": {
+      "security_events": {
+        "acknowledged": false,
+        "action": "trashed",
+        "client_timestamp": "2025-11-26T19:24:27.983Z",
+        "description": "File Scanning event",
+        "details": {
+          "alertSource": "sp.evt.oas.alert",
+          "alertType": "file",
+          "clientTimestamp": "1764185067983",
+          "filePath": "/Users/testuser/Documents/test-file.emlx",
+          "fileScanningType": "fileInfection",
+          "name": "Heuristic.HEUR/HTML.Agent.QT",
+          "profileId": "118181",
+          "profileName": "Elastic-WithSecure",
+          "profileVersion": "1649230230",
+          "sha1": "a3e65d0ceb320cb60d1281360994615491f38c82",
+          "userName": "testuser"
+        },
+        "device": {
+          "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "name": "TEST-DESKTOP-01"
+        },
+        "engine": "fileScanning",
+        "eventTransactionId": "0000-7edfb2260ba8479e",
+        "id": "594d2f17-79f6-3bc6-850b-e09e55340eb2_0",
+        "message": "\"Heuristic.HEUR/HTML.Agent.QT\" was detected on accessing \"113873.emlx\" and it was trashed",
+        "organization": {
+          "id": "777f240c-752d-4eb5-8422-94c5336e3005",
+          "name": "FR IT-Sec"
+        },
+        "persistence_timestamp": "2025-11-26T19:24:30.964Z",
+        "severity": "warning",
+        "target": {
+          "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "name": "TEST-DESKTOP-01"
+        },
+        "userName": "testuser"
+      }
+    }
+  }
+]

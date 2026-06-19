@@ -1,0 +1,17 @@
+{
+  "package": "qnap_nas",
+  "dataStreams": [
+    {
+      "dataset": "qnap_nas.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.dataset",
+        "file.path",
+        "qnap.nas.connection_type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

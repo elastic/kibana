@@ -1,0 +1,94 @@
+{
+  "package": "abnormal_security",
+  "dataStreams": [
+    {
+      "dataset": "abnormal_security.ai_security_mailbox",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "abnormal_security.ai_security_mailbox.judgement_status",
+        "email.from.address",
+        "email.to.address",
+        "event.id",
+        "threat.tactic.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "abnormal_security.ai_security_mailbox_not_analyzed",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "abnormal_security.ai_security_mailbox_not_analyzed.reporter.address",
+        "email.subject",
+        "email.to.address",
+        "event.id",
+        "event.reason"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "abnormal_security.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "abnormal_security.audit.category",
+        "cloud.account.name",
+        "event.action",
+        "event.outcome",
+        "source.ip",
+        "user.email"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "abnormal_security.case",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "abnormal_security.case.affected_employee",
+        "abnormal_security.case.remediation_status",
+        "abnormal_security.case.severity",
+        "abnormal_security.case.severity_level",
+        "abnormal_security.case.status",
+        "event.action",
+        "event.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "abnormal_security.threat",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "abnormal_security.threat.attack.vector",
+        "abnormal_security.threat.attacked_party",
+        "abnormal_security.threat.id",
+        "abnormal_security.threat.recipient_address",
+        "abnormal_security.threat.remediation_status",
+        "abnormal_security.threat.urls",
+        "email.from.address",
+        "event.id",
+        "source.domain",
+        "source.geo.country_iso_code",
+        "threat.technique.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "abnormal_security.vendor_case",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "abnormal_security.vendor_case.domain",
+        "abnormal_security.vendor_case.insights.highlight",
+        "abnormal_security.vendor_case.timeline.event_timestamp",
+        "abnormal_security.vendor_case.timeline.marked_as",
+        "abnormal_security.vendor_case.timeline.sender_address",
+        "abnormal_security.vendor_case.timeline.threat_id",
+        "event.id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,522 @@
+[
+  {
+    "@timestamp": "2022-08-12T00:14:31.000Z",
+    "agent": {
+      "ephemeral_id": "ab2f81e8-aa3c-4b15-8de0-c277994b2ef0",
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "name": "elastic-agent-10344",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.entity_event",
+      "namespace": "15341",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "vectra_rux.entity_event",
+      "id": "105",
+      "ingested": "2026-03-10T02:39:28Z",
+      "kind": "event",
+      "original": "{\"active_detection_types\":[\"hidden_https_tunnel_cnc\"],\"attack_rating\":0,\"breadth_contrib\":0,\"category\":\"HOST_SCORING\",\"entity_id\":105,\"event_timestamp\":\"2022-08-12T00:14:31Z\",\"id\":5,\"importance\":0,\"is_prioritized\":false,\"last_detection\":{\"id\":103,\"type\":\"hidden_https_tunnel_cnc\",\"url\":\"https://200888808432.uw2.devportal.vectra.ai/detections/103\"},\"name\":\"Windows10_Jump\",\"severity\":\"Low\",\"type\":\"host\",\"urgency_reason\":\"Ransomware: This entity was prioritized because it was implicated in an active ransomware detection\",\"urgency_score\":0,\"url\":\"https://200888808432.uw2.devportal.vectra.ai/accounts/8\",\"velocity_contrib\":0}",
+      "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "severity": 33,
+      "type": [
+        "info"
+      ],
+      "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8"
+    },
+    "host": {
+      "id": "105",
+      "name": "Windows10_Jump"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "105",
+        "Windows10_Jump"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-entity_event",
+      "vectra_rux-entity_event-host"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+      }
+    },
+    "url": {
+      "domain": "200888808432.uw2.devportal.vectra.ai",
+      "original": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "path": "/detections/103",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "entity_event": {
+        "active_detection_types": [
+          "hidden_https_tunnel_cnc"
+        ],
+        "attack_rating": 0,
+        "breadth_contrib": 0,
+        "category": "HOST_SCORING",
+        "entity_id": "105",
+        "event_timestamp": "2022-08-12T00:14:31.000Z",
+        "id": "5",
+        "importance": 0,
+        "is_prioritized": false,
+        "last_detection": {
+          "id": "103",
+          "type": "hidden_https_tunnel_cnc",
+          "url": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+        },
+        "name": "Windows10_Jump",
+        "severity": "Low",
+        "type": "host",
+        "urgency": {
+          "reason": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+          "score": 0
+        },
+        "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8",
+        "velocity_contrib": 0
+      }
+    }
+  },
+  {
+    "@timestamp": "2022-07-10T00:14:31.000Z",
+    "agent": {
+      "ephemeral_id": "ab2f81e8-aa3c-4b15-8de0-c277994b2ef0",
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "name": "elastic-agent-10344",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.entity_event",
+      "namespace": "15341",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "vectra_rux.entity_event",
+      "id": "104",
+      "ingested": "2026-03-10T02:39:28Z",
+      "kind": "event",
+      "original": "{\"active_detection_types\":[\"hidden_https_tunnel_cnc\"],\"attack_rating\":0,\"breadth_contrib\":0,\"category\":\"HOST_SCORING\",\"entity_id\":104,\"event_timestamp\":\"2022-07-10T00:14:31Z\",\"id\":4,\"importance\":0,\"is_prioritized\":false,\"last_detection\":{\"id\":103,\"type\":\"hidden_https_tunnel_cnc\",\"url\":\"https://200888808432.uw2.devportal.vectra.ai/detections/103\"},\"name\":\"piper-desktop\",\"severity\":\"Low\",\"type\":\"host\",\"urgency_reason\":\"Ransomware: This entity was prioritized because it was implicated in an active ransomware detection\",\"urgency_score\":0,\"url\":\"https://200888808432.uw2.devportal.vectra.ai/accounts/8\",\"velocity_contrib\":0}",
+      "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "severity": 33,
+      "type": [
+        "info"
+      ],
+      "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8"
+    },
+    "host": {
+      "id": "104",
+      "name": "piper-desktop"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "104",
+        "piper-desktop"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-entity_event",
+      "vectra_rux-entity_event-host"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+      }
+    },
+    "url": {
+      "domain": "200888808432.uw2.devportal.vectra.ai",
+      "original": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "path": "/detections/103",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "entity_event": {
+        "active_detection_types": [
+          "hidden_https_tunnel_cnc"
+        ],
+        "attack_rating": 0,
+        "breadth_contrib": 0,
+        "category": "HOST_SCORING",
+        "entity_id": "104",
+        "event_timestamp": "2022-07-10T00:14:31.000Z",
+        "id": "4",
+        "importance": 0,
+        "is_prioritized": false,
+        "last_detection": {
+          "id": "103",
+          "type": "hidden_https_tunnel_cnc",
+          "url": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+        },
+        "name": "piper-desktop",
+        "severity": "Low",
+        "type": "host",
+        "urgency": {
+          "reason": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+          "score": 0
+        },
+        "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8",
+        "velocity_contrib": 0
+      }
+    }
+  },
+  {
+    "@timestamp": "2022-07-09T00:14:31.000Z",
+    "agent": {
+      "ephemeral_id": "ab2f81e8-aa3c-4b15-8de0-c277994b2ef0",
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "name": "elastic-agent-10344",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.entity_event",
+      "namespace": "15341",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "vectra_rux.entity_event",
+      "id": "103",
+      "ingested": "2026-03-10T02:39:28Z",
+      "kind": "event",
+      "original": "{\"active_detection_types\":[\"hidden_https_tunnel_cnc\"],\"attack_rating\":0,\"breadth_contrib\":0,\"category\":\"HOST_SCORING\",\"entity_id\":103,\"event_timestamp\":\"2022-07-09T00:14:31Z\",\"id\":3,\"importance\":0,\"is_prioritized\":false,\"last_detection\":{\"id\":103,\"type\":\"hidden_https_tunnel_cnc\",\"url\":\"https://200888808432.uw2.devportal.vectra.ai/detections/103\"},\"name\":\"piper-desktop\",\"severity\":\"Low\",\"type\":\"host\",\"urgency_reason\":\"Ransomware: This entity was prioritized because it was implicated in an active ransomware detection\",\"urgency_score\":0,\"url\":\"https://200888808432.uw2.devportal.vectra.ai/accounts/8\",\"velocity_contrib\":0}",
+      "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "severity": 33,
+      "type": [
+        "info"
+      ],
+      "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8"
+    },
+    "host": {
+      "id": "103",
+      "name": "piper-desktop"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "103",
+        "piper-desktop"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-entity_event",
+      "vectra_rux-entity_event-host"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+      }
+    },
+    "url": {
+      "domain": "200888808432.uw2.devportal.vectra.ai",
+      "original": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "path": "/detections/103",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "entity_event": {
+        "active_detection_types": [
+          "hidden_https_tunnel_cnc"
+        ],
+        "attack_rating": 0,
+        "breadth_contrib": 0,
+        "category": "HOST_SCORING",
+        "entity_id": "103",
+        "event_timestamp": "2022-07-09T00:14:31.000Z",
+        "id": "3",
+        "importance": 0,
+        "is_prioritized": false,
+        "last_detection": {
+          "id": "103",
+          "type": "hidden_https_tunnel_cnc",
+          "url": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+        },
+        "name": "piper-desktop",
+        "severity": "Low",
+        "type": "host",
+        "urgency": {
+          "reason": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+          "score": 0
+        },
+        "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8",
+        "velocity_contrib": 0
+      }
+    }
+  },
+  {
+    "@timestamp": "2022-07-08T00:14:31.000Z",
+    "agent": {
+      "ephemeral_id": "ab2f81e8-aa3c-4b15-8de0-c277994b2ef0",
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "name": "elastic-agent-10344",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.entity_event",
+      "namespace": "15341",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "vectra_rux.entity_event",
+      "id": "101",
+      "ingested": "2026-03-10T02:39:28Z",
+      "kind": "event",
+      "original": "{\"active_detection_types\":[\"hidden_https_tunnel_cnc\"],\"attack_rating\":0,\"breadth_contrib\":0,\"category\":\"HOST_SCORING\",\"entity_id\":101,\"event_timestamp\":\"2022-07-08T00:14:31Z\",\"id\":2,\"importance\":0,\"is_prioritized\":false,\"last_detection\":{\"id\":103,\"type\":\"hidden_https_tunnel_cnc\",\"url\":\"https://200888808432.uw2.devportal.vectra.ai/detections/103\"},\"name\":\"piper-desktop\",\"severity\":\"Low\",\"type\":\"host\",\"urgency_reason\":\"Ransomware: This entity was prioritized because it was implicated in an active ransomware detection\",\"urgency_score\":0,\"url\":\"https://200888808432.uw2.devportal.vectra.ai/accounts/8\",\"velocity_contrib\":0}",
+      "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "severity": 33,
+      "type": [
+        "info"
+      ],
+      "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8"
+    },
+    "host": {
+      "id": "101",
+      "name": "piper-desktop"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "101",
+        "piper-desktop"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-entity_event",
+      "vectra_rux-entity_event-host"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+      }
+    },
+    "url": {
+      "domain": "200888808432.uw2.devportal.vectra.ai",
+      "original": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "path": "/detections/103",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "entity_event": {
+        "active_detection_types": [
+          "hidden_https_tunnel_cnc"
+        ],
+        "attack_rating": 0,
+        "breadth_contrib": 0,
+        "category": "HOST_SCORING",
+        "entity_id": "101",
+        "event_timestamp": "2022-07-08T00:14:31.000Z",
+        "id": "2",
+        "importance": 0,
+        "is_prioritized": false,
+        "last_detection": {
+          "id": "103",
+          "type": "hidden_https_tunnel_cnc",
+          "url": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+        },
+        "name": "piper-desktop",
+        "severity": "Low",
+        "type": "host",
+        "urgency": {
+          "reason": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+          "score": 0
+        },
+        "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8",
+        "velocity_contrib": 0
+      }
+    }
+  },
+  {
+    "@timestamp": "2022-07-07T00:14:31.000Z",
+    "agent": {
+      "ephemeral_id": "ab2f81e8-aa3c-4b15-8de0-c277994b2ef0",
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "name": "elastic-agent-10344",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.entity_event",
+      "namespace": "15341",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "ec59910b-5d56-433e-8698-a778eb593262",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "vectra_rux.entity_event",
+      "id": "100",
+      "ingested": "2026-03-10T02:39:28Z",
+      "kind": "event",
+      "original": "{\"active_detection_types\":[\"hidden_https_tunnel_cnc\"],\"attack_rating\":0,\"breadth_contrib\":0,\"category\":\"HOST_SCORING\",\"entity_id\":100,\"event_timestamp\":\"2022-07-07T00:14:31Z\",\"id\":1,\"importance\":0,\"is_prioritized\":false,\"last_detection\":{\"id\":103,\"type\":\"hidden_https_tunnel_cnc\",\"url\":\"https://200888808432.uw2.devportal.vectra.ai/detections/103\"},\"name\":\"piper-desktop\",\"severity\":\"Low\",\"type\":\"host\",\"urgency_reason\":\"Ransomware: This entity was prioritized because it was implicated in an active ransomware detection\",\"urgency_score\":0,\"url\":\"https://200888808432.uw2.devportal.vectra.ai/accounts/8\",\"velocity_contrib\":0}",
+      "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "severity": 33,
+      "type": [
+        "info"
+      ],
+      "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8"
+    },
+    "host": {
+      "id": "100",
+      "name": "piper-desktop"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "100",
+        "piper-desktop"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-entity_event",
+      "vectra_rux-entity_event-host"
+    ],
+    "threat": {
+      "indicator": {
+        "reference": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+      }
+    },
+    "url": {
+      "domain": "200888808432.uw2.devportal.vectra.ai",
+      "original": "https://200888808432.uw2.devportal.vectra.ai/detections/103",
+      "path": "/detections/103",
+      "scheme": "https"
+    },
+    "vectra_rux": {
+      "entity_event": {
+        "active_detection_types": [
+          "hidden_https_tunnel_cnc"
+        ],
+        "attack_rating": 0,
+        "breadth_contrib": 0,
+        "category": "HOST_SCORING",
+        "entity_id": "100",
+        "event_timestamp": "2022-07-07T00:14:31.000Z",
+        "id": "1",
+        "importance": 0,
+        "is_prioritized": false,
+        "last_detection": {
+          "id": "103",
+          "type": "hidden_https_tunnel_cnc",
+          "url": "https://200888808432.uw2.devportal.vectra.ai/detections/103"
+        },
+        "name": "piper-desktop",
+        "severity": "Low",
+        "type": "host",
+        "urgency": {
+          "reason": "Ransomware: This entity was prioritized because it was implicated in an active ransomware detection",
+          "score": 0
+        },
+        "url": "https://200888808432.uw2.devportal.vectra.ai/accounts/8",
+        "velocity_contrib": 0
+      }
+    }
+  }
+]

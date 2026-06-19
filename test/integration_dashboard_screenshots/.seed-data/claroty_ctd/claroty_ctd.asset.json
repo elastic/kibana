@@ -1,0 +1,281 @@
+[
+  {
+    "@timestamp": "2024-08-20T09:08:29.000Z",
+    "agent": {
+      "ephemeral_id": "f4224a3d-317b-44cd-87d1-d5d187f61cb6",
+      "id": "50b0d464-9888-44ea-ac89-b781d4f72763",
+      "name": "elastic-agent-32019",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "claroty_ctd": {
+      "asset": {
+        "approved": true,
+        "asset_types": {
+          "name": "eEndpoint",
+          "number": 2
+        },
+        "class_type": "IT",
+        "criticalities": {
+          "name": "eLow",
+          "value": 0
+        },
+        "first_seen": "2024-08-20T05:33:48.000Z",
+        "ghost": false,
+        "id": "1",
+        "insight_names": [
+          "Unsecured Protocols"
+        ],
+        "installed_programs_count": 0,
+        "ipv4": [
+          "1.128.0.0"
+        ],
+        "last_entity_seen": "2024-08-20T05:34:21.000Z",
+        "last_seen": "2024-08-20T05:34:21.000Z",
+        "last_updated": "2024-08-20T09:08:29.000Z",
+        "mac": [
+          "00:19:BB:4F:4C:D8"
+        ],
+        "name": "1.128.0.0",
+        "network": {
+          "id": "1",
+          "name": "Default",
+          "resource_id": "1-1",
+          "site_id": "1"
+        },
+        "network_id": "1",
+        "num_alerts": 6,
+        "parsed": false,
+        "patch_count": 0,
+        "protocol": [
+          "SMB"
+        ],
+        "purdue_level": 3.0,
+        "resource_id": "1-1",
+        "risk_level": 1,
+        "site_id": "1",
+        "site_name": "site-10-0-4-241",
+        "special_hints": {
+          "name": "eUnicast",
+          "value": 0
+        },
+        "subnet_id": "4",
+        "timestamp": "2024-08-20T05:33:48.000Z",
+        "usb_devices_count": 0,
+        "valid": true,
+        "vendor": "Hewlett Packard",
+        "virtual_zone": {
+          "id": "3",
+          "name": "Endpoint: Other"
+        },
+        "vlan": [
+          "0"
+        ]
+      }
+    },
+    "data_stream": {
+      "dataset": "claroty_ctd.asset",
+      "namespace": "60590",
+      "type": "logs"
+    },
+    "device": {
+      "manufacturer": "Hewlett Packard"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "50b0d464-9888-44ea-ac89-b781d4f72763",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "claroty_ctd.asset",
+      "ingested": "2026-03-10T03:13:41Z",
+      "kind": "event",
+      "original": "{\"active_queries_names\":[],\"active_tasks_names\":[],\"approved\":true,\"asset_type\":2,\"asset_type__\":\"eEndpoint\",\"children\":[],\"class_type\":\"IT\",\"code_sections\":[],\"criticality\":0,\"criticality__\":\"eLow\",\"custom_attributes\":[],\"custom_informations\":[],\"default_gateway\":null,\"display_name\":null,\"domain_workgroup\":null,\"edge_id\":null,\"edge_last_run\":null,\"first_seen\":\"2024-08-20T05:33:48+00:00\",\"ghost\":false,\"id\":1,\"insight_names\":[\"Unsecured Protocols\"],\"installed_antivirus\":null,\"installed_programs_count\":0,\"ipv4\":[\"1.128.0.0\"],\"last_entity_seen\":\"2024-08-20T05:34:21+00:00\",\"last_seen\":\"2024-08-20T05:34:21+00:00\",\"last_updated\":\"2024-08-20T09:08:29+00:00\",\"mac\":[\"00:19:BB:4F:4C:D8\"],\"name\":\"1.128.0.0\",\"network\":{\"id\":1,\"name\":\"Default\",\"resource_id\":\"1-1\",\"site_id\":1},\"network_id\":1,\"num_alerts\":6,\"os_architecture\":null,\"os_build\":null,\"os_revision\":null,\"os_service_pack\":null,\"parsed\":false,\"patch_count\":0,\"project_parsed\":null,\"protocol\":[\"SMB\"],\"purdue_level\":3,\"resource_id\":\"1-1\",\"risk_level\":1,\"site_id\":1,\"site_name\":\"site-10-0-4-241\",\"special_hint\":0,\"special_hint__\":\"eUnicast\",\"state\":null,\"subnet\":{\"name\":\"1.128.0.0\"},\"subnet_id\":4,\"subnet_type\":0,\"timestamp\":\"2024-08-20T05:33:48+00:00\",\"usb_devices_count\":0,\"valid\":true,\"vendor\":\"Hewlett Packard\",\"virtual_zone_id\":3,\"virtual_zone_name\":\"Endpoint: Other\",\"vlan\":[\"0\"]}",
+      "severity": 0,
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "id": "1",
+      "mac": [
+        "00-19-BB-4F-4C-D8"
+      ],
+      "name": "1.128.0.0"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "network": {
+      "name": "Default",
+      "protocol": [
+        "smb"
+      ],
+      "vlan": {
+        "id": [
+          "0"
+        ]
+      }
+    },
+    "related": {
+      "ip": [
+        "1.128.0.0"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "claroty_ctd-asset"
+    ]
+  },
+  {
+    "@timestamp": "2024-07-24T15:09:48.000Z",
+    "agent": {
+      "ephemeral_id": "f4224a3d-317b-44cd-87d1-d5d187f61cb6",
+      "id": "50b0d464-9888-44ea-ac89-b781d4f72763",
+      "name": "elastic-agent-32019",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "claroty_ctd": {
+      "asset": {
+        "approved": true,
+        "asset_types": {
+          "name": "eHMI",
+          "number": 1
+        },
+        "class_type": "OT",
+        "criticalities": {
+          "name": "eLow",
+          "value": 0
+        },
+        "custom_attributes": [
+          {
+            "site_id": "1",
+            "resource_id": "1-1",
+            "asset_id": "1",
+            "id": "1",
+            "category": {
+              "name": "Some Asset",
+              "site_id": "1",
+              "description": "sdfas",
+              "resource_id": "1-1",
+              "id": "1"
+            },
+            "value": "some value"
+          }
+        ],
+        "first_seen": "2023-04-17T07:30:15.000Z",
+        "ghost": false,
+        "id": "1",
+        "insight_names": [
+          "Managed PLCs (by Rockwell users)",
+          "Privileged Operations (Operated PLCs)"
+        ],
+        "installed_programs_count": 0,
+        "ipv4": [
+          "1.128.0.0"
+        ],
+        "last_entity_seen": "2023-04-17T07:36:30.000Z",
+        "last_seen": "2023-04-17T07:36:30.000Z",
+        "last_updated": "2024-07-24T15:09:48.000Z",
+        "name": "1.128.0.0",
+        "network": {
+          "id": "1",
+          "name": "Default",
+          "resource_id": "1-1",
+          "site_id": "1"
+        },
+        "network_id": "1",
+        "num_alerts": 0,
+        "parsed": false,
+        "patch_count": 0,
+        "protocol": [
+          "CIP",
+          "ENIP",
+          "PCCC",
+          "TCP"
+        ],
+        "purdue_level": 2.0,
+        "resource_id": "1-1",
+        "risk_level": 0,
+        "site_id": "1",
+        "site_name": "site-10-0-11-136",
+        "special_hints": {
+          "name": "eUnicast",
+          "value": 0
+        },
+        "subnet_id": "1",
+        "timestamp": "2023-04-17T07:30:15.000Z",
+        "usb_devices_count": 0,
+        "valid": true,
+        "virtual_zone": {
+          "id": "2",
+          "name": "HMI: Rockwell"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "claroty_ctd.asset",
+      "namespace": "60590",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "50b0d464-9888-44ea-ac89-b781d4f72763",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "claroty_ctd.asset",
+      "ingested": "2026-03-10T03:13:41Z",
+      "kind": "event",
+      "original": "{\"active_queries_names\":[],\"active_tasks_names\":[],\"approved\":true,\"asset_type\":1,\"asset_type__\":\"eHMI\",\"children\":[],\"class_type\":\"OT\",\"code_sections\":[],\"criticality\":0,\"criticality__\":\"eLow\",\"custom_attributes\":[{\"asset_id\":1,\"category\":{\"description\":\"sdfas\",\"id\":1,\"name\":\"Some Asset\",\"resource_id\":\"1-1\",\"site_id\":1},\"id\":1,\"resource_id\":\"1-1\",\"site_id\":1,\"value\":\"some value\"}],\"custom_informations\":[],\"default_gateway\":null,\"display_name\":null,\"domain_workgroup\":null,\"edge_id\":null,\"edge_last_run\":null,\"first_seen\":\"2023-04-17T07:30:15+00:00\",\"ghost\":false,\"id\":1,\"insight_names\":[\"Managed PLCs (by Rockwell users)\",\"Privileged Operations (Operated PLCs)\"],\"installed_antivirus\":null,\"installed_programs_count\":0,\"ipv4\":[\"1.128.0.0\"],\"last_entity_seen\":\"2023-04-17T07:36:30+00:00\",\"last_seen\":\"2023-04-17T07:36:30+00:00\",\"last_updated\":\"2024-07-24T15:09:48+00:00\",\"name\":\"1.128.0.0\",\"network\":{\"id\":1,\"name\":\"Default\",\"resource_id\":\"1-1\",\"site_id\":1},\"network_id\":1,\"num_alerts\":0,\"os_architecture\":null,\"os_build\":null,\"os_revision\":null,\"os_service_pack\":null,\"parsed\":false,\"patch_count\":0,\"project_parsed\":null,\"protocol\":[\"CIP\",\"ENIP\",\"PCCC\",\"TCP\"],\"purdue_level\":2,\"resource_id\":\"1-1\",\"risk_level\":0,\"site_id\":1,\"site_name\":\"site-10-0-11-136\",\"special_hint\":0,\"special_hint__\":\"eUnicast\",\"state\":null,\"subnet\":{\"name\":\"1.128.0.0\"},\"subnet_id\":1,\"subnet_type\":0,\"timestamp\":\"2023-04-17T07:30:15+00:00\",\"usb_devices_count\":0,\"valid\":true,\"virtual_zone_id\":2,\"virtual_zone_name\":\"HMI: Rockwell\"}",
+      "severity": 0,
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "id": "1",
+      "name": "1.128.0.0"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "network": {
+      "name": "Default",
+      "protocol": [
+        "cip",
+        "enip",
+        "pccc",
+        "tcp"
+      ]
+    },
+    "related": {
+      "ip": [
+        "1.128.0.0"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "claroty_ctd-asset"
+    ]
+  }
+]

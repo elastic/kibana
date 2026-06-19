@@ -1,0 +1,20 @@
+{
+  "package": "zookeeper",
+  "dataStreams": [
+    {
+      "dataset": "zookeeper.mntr",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "zookeeper.mntr.approximate_data_size",
+        "zookeeper.mntr.latency.avg",
+        "zookeeper.mntr.max_file_descriptor_count",
+        "zookeeper.mntr.num_alive_connections",
+        "zookeeper.mntr.open_file_descriptor_count",
+        "zookeeper.mntr.packets.received",
+        "zookeeper.mntr.packets.sent"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

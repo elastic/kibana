@@ -1,0 +1,25 @@
+{
+  "package": "proofpoint_itm",
+  "dataStreams": [
+    {
+      "dataset": "proofpoint_itm.report",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.ip",
+        "host.name",
+        "host.os.type",
+        "proofpoint_itm.report.accessed.site_name",
+        "proofpoint_itm.report.application_name",
+        "proofpoint_itm.report.severity",
+        "rule.category",
+        "rule.description",
+        "rule.name",
+        "source.domain",
+        "url.full",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

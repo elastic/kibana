@@ -1,0 +1,30 @@
+{
+  "package": "ti_crowdstrike",
+  "dataStreams": [
+    {
+      "dataset": "ti_crowdstrike.intel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "threat.indicator.confidence",
+        "threat.indicator.type",
+        "ti_crowdstrike.intel.malware_families"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ti_crowdstrike.ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.id",
+        "threat.indicator.type",
+        "ti_crowdstrike.ioc.platforms",
+        "ti_crowdstrike.ioc.severity"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

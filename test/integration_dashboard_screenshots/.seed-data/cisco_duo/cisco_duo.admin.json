@@ -1,0 +1,139 @@
+[
+  {
+    "@timestamp": "2021-07-20T11:44:37.000Z",
+    "agent": {
+      "ephemeral_id": "1a7bbcb1-6a4b-4c95-ad9d-5df739465070",
+      "id": "8714c476-0e62-4a15-9013-b445f82dcdd2",
+      "name": "elastic-agent-31885",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_duo": {
+      "admin": {
+        "action": "admin_self_activate",
+        "action_performed_on": "jsmith",
+        "flattened": {
+          "email": "narroway@example.com",
+          "is_temporary_password": "false",
+          "name": "narroway",
+          "phone": "+12345678901",
+          "restricted_by_admin_units": "false",
+          "role": "Owner",
+          "status": "Pending Activation"
+        },
+        "status": "Pending Activation",
+        "user": {
+          "name": "narroway"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_duo.admin",
+      "namespace": "86487",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8714c476-0e62-4a15-9013-b445f82dcdd2",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "admin_self_activate",
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2026-03-10T02:56:18.189Z",
+      "dataset": "cisco_duo.admin",
+      "ingested": "2026-03-10T02:56:21Z",
+      "kind": "event",
+      "original": "{\"action\":\"admin_self_activate\",\"description\":\"{\\\"name\\\": \\\"narroway\\\", \\\"phone\\\": \\\"+12345678901\\\", \\\"is_temporary_password\\\": false, \\\"email\\\": \\\"narroway@example.com\\\", \\\"hardtoken\\\": null, \\\"role\\\": \\\"Owner\\\", \\\"status\\\": \\\"Pending Activation\\\", \\\"restricted_by_admin_units\\\": false, \\\"administrative_units\\\": \\\"\\\"}\",\"isotimestamp\":\"2021-07-20T11:44:37+00:00\",\"object\":\"jsmith\",\"timestamp\":1626781477,\"username\":\"narroway\"}",
+      "outcome": "success",
+      "type": [
+        "admin"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "narroway"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "cisco_duo-admin"
+    ],
+    "user": {
+      "email": "narroway@example.com",
+      "name": "narroway",
+      "target": {
+        "name": "jsmith"
+      }
+    }
+  },
+  {
+    "@timestamp": "2021-07-20T11:41:31.000Z",
+    "agent": {
+      "ephemeral_id": "1a7bbcb1-6a4b-4c95-ad9d-5df739465070",
+      "id": "8714c476-0e62-4a15-9013-b445f82dcdd2",
+      "name": "elastic-agent-31885",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cisco_duo": {
+      "admin": {
+        "action": "activation_begin",
+        "user": {
+          "name": "narroway"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cisco_duo.admin",
+      "namespace": "86487",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "8714c476-0e62-4a15-9013-b445f82dcdd2",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "activation_begin",
+      "agent_id_status": "verified",
+      "created": "2026-03-10T02:56:20.162Z",
+      "dataset": "cisco_duo.admin",
+      "ingested": "2026-03-10T02:56:21Z",
+      "kind": "event",
+      "original": "{\"action\":\"activation_begin\",\"description\":\"Starting activation process\",\"isotimestamp\":\"2021-07-20T11: 41: 31+00: 00\",\"object\":null,\"timestamp\":1626781291,\"username\":\"narroway\"}",
+      "outcome": "success",
+      "reason": "Starting activation process"
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "message": "Starting activation process",
+    "related": {
+      "user": [
+        "narroway"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "cisco_duo-admin"
+    ],
+    "user": {
+      "name": "narroway"
+    }
+  }
+]

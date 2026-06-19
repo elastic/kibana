@@ -1,0 +1,46 @@
+{
+  "package": "sublime_security",
+  "dataStreams": [
+    {
+      "dataset": "sublime_security.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "source.ip",
+        "sublime_security.audit.data.request.authentication_method",
+        "sublime_security.audit.type",
+        "user.email",
+        "user.roles"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sublime_security.email_message",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.domain",
+        "email.direction",
+        "email.from.address",
+        "email.to.address",
+        "source.domain",
+        "source.ip",
+        "sublime_security.email_message.headers.auth_summary.dmarc.details.disposition",
+        "sublime_security.email_message.headers.hops.authentication_results.dmarc_details.verdict",
+        "sublime_security.email_message.headers.hops.spf_details.verdict",
+        "sublime_security.email_message.type.outbound"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "sublime_security.message_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.from.address",
+        "email.to.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

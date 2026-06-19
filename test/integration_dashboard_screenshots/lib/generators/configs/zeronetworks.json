@@ -1,0 +1,22 @@
+{
+  "package": "zeronetworks",
+  "dataStreams": [
+    {
+      "dataset": "zeronetworks.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "json.destinationEntitiesList.name",
+        "tags",
+        "user.full_name",
+        "zeronetworks.audit.destinationEntitiesList.name",
+        "zeronetworks.audit.details.rp.state",
+        "zeronetworks.audit.details.rule.state",
+        "zeronetworks.audit.enforcementSource",
+        "zeronetworks.audit.userRole"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

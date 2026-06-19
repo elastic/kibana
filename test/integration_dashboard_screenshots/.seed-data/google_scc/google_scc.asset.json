@@ -1,0 +1,110 @@
+[
+  {
+    "@timestamp": "2026-03-10T04:49:21.348Z",
+    "agent": {
+      "ephemeral_id": "24288cae-dddc-4b71-8a17-855d9b3c884e",
+      "id": "2666bf19-7b55-4f2c-971e-ba467436cb66",
+      "name": "elastic-agent-72884",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "google_scc.asset",
+      "namespace": "70722",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "2666bf19-7b55-4f2c-971e-ba467436cb66",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "created": "2026-03-10T04:49:23.880Z",
+      "dataset": "google_scc.asset",
+      "id": "f14c38ac40-5",
+      "ingested": "2026-03-10T04:49:26Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "google_scc": {
+      "asset": {
+        "ancestors": [
+          "projects/123456987522",
+          "folders/123456987520",
+          "organizations/523456987520"
+        ],
+        "prior": {
+          "ancestors": [
+            "projects/123456987522",
+            "folders/123456987520",
+            "organizations/523456987520"
+          ],
+          "name": "//logging.googleapis.com/projects/123456987522/locations/global/buckets/_Default",
+          "resource": {
+            "data": {
+              "analyticsEnabled": "true",
+              "description": "Default bucket",
+              "lifecycleState": "ACTIVE",
+              "name": "projects/123456987522/locations/global/buckets/_Default",
+              "retentionDays": "30"
+            },
+            "discovery": {
+              "document_uri": "https://logging.googleapis.com/$discovery/rest",
+              "name": "LogBucket"
+            },
+            "location": "global",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/123456987522",
+            "version": "v2"
+          },
+          "type": "logging.googleapis.com/LogBucket",
+          "update_time": "2023-05-27T18:53:48.843Z"
+        },
+        "prior_asset_state": "PRESENT",
+        "resource": {
+          "data": {
+            "description": "Default bucket",
+            "lifecycleState": "ACTIVE",
+            "name": "projects/123456987522/locations/global/buckets/_Default",
+            "retentionDays": "30"
+          },
+          "discovery": {
+            "document_uri": "https://logging.googleapis.com/$discovery/rest",
+            "name": "LogBucket"
+          },
+          "location": "global",
+          "parent": "//cloudresourcemanager.googleapis.com/projects/123456987522",
+          "version": "v2"
+        },
+        "update_time": "2023-05-28T06:59:48.052Z",
+        "window": {
+          "start_time": "2023-05-28T06:59:48.052Z"
+        }
+      }
+    },
+    "host": {
+      "name": "//logging.googleapis.com/projects/123456987522/locations/global/buckets/_Default",
+      "type": "logging.googleapis.com/LogBucket"
+    },
+    "input": {
+      "type": "gcp-pubsub"
+    },
+    "related": {
+      "hosts": [
+        "//logging.googleapis.com/projects/123456987522/locations/global/buckets/_Default"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "google_scc-asset"
+    ]
+  }
+]

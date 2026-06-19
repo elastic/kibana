@@ -1,0 +1,60 @@
+{
+  "package": "cyberark_epm",
+  "dataStreams": [
+    {
+      "dataset": "cyberark_epm.admin_audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cyberark_epm.admin_audit.description",
+        "cyberark_epm.admin_audit.feature",
+        "cyberark_epm.admin_audit.set_name",
+        "source.ip",
+        "user.name",
+        "user.roles"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cyberark_epm.policyaudit_raw_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cyberark_epm.policyaudit_raw_event.access_target_name",
+        "cyberark_epm.policyaudit_raw_event.access_target_type",
+        "cyberark_epm.policyaudit_raw_event.agent_id",
+        "cyberark_epm.policyaudit_raw_event.operating_system_type",
+        "cyberark_epm.policyaudit_raw_event.product_name",
+        "cyberark_epm.policyaudit_raw_event.source_type",
+        "cyberark_epm.policyaudit_raw_event.type",
+        "file.name",
+        "host.name",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cyberark_epm.raw_event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cyberark_epm.raw_event.access_target_name",
+        "cyberark_epm.raw_event.access_target_type",
+        "cyberark_epm.raw_event.agent_id",
+        "cyberark_epm.raw_event.logon_attempt_value",
+        "cyberark_epm.raw_event.logon_status_value",
+        "cyberark_epm.raw_event.operating_system_type",
+        "cyberark_epm.raw_event.product_name",
+        "cyberark_epm.raw_event.source_type",
+        "cyberark_epm.raw_event.type",
+        "event.action",
+        "file.name",
+        "host.name",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

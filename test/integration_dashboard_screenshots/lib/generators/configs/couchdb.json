@@ -1,0 +1,39 @@
+{
+  "package": "couchdb",
+  "dataStreams": [
+    {
+      "dataset": "couchdb.server",
+      "indexPattern": "metrics-*",
+      "docTarget": 780,
+      "fields": [
+        "couchdb.server.auth_cache.hits",
+        "couchdb.server.auth_cache.misses",
+        "couchdb.server.database.open",
+        "couchdb.server.database.reads",
+        "couchdb.server.database.writes",
+        "couchdb.server.httpd.request_methods.copy",
+        "couchdb.server.httpd.request_methods.delete",
+        "couchdb.server.httpd.request_methods.get",
+        "couchdb.server.httpd.request_methods.head",
+        "couchdb.server.httpd.request_methods.post",
+        "couchdb.server.httpd.request_methods.put",
+        "couchdb.server.httpd.requests.bulk",
+        "couchdb.server.httpd.requests.count",
+        "couchdb.server.httpd.status_codes.200",
+        "couchdb.server.httpd.status_codes.201",
+        "couchdb.server.httpd.status_codes.202",
+        "couchdb.server.httpd.status_codes.400",
+        "couchdb.server.httpd.status_codes.401",
+        "couchdb.server.httpd.status_codes.403",
+        "couchdb.server.httpd.status_codes.404",
+        "couchdb.server.httpd.status_codes.405",
+        "couchdb.server.httpd.status_codes.409",
+        "couchdb.server.httpd.status_codes.500",
+        "couchdb.server.httpd.view_reads.count",
+        "couchdb.server.httpd.view_reads.temporary",
+        "service.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

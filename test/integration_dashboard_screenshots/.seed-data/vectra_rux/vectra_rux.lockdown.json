@@ -1,0 +1,80 @@
+[
+  {
+    "@timestamp": "2023-03-06T22:30:06.000Z",
+    "agent": {
+      "ephemeral_id": "6217080a-c879-47eb-9aea-2dc0f3491180",
+      "id": "03f53e04-fd82-4fbb-8e2f-5a5def4b3e90",
+      "name": "elastic-agent-35343",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.lockdown",
+      "namespace": "63890",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "03f53e04-fd82-4fbb-8e2f-5a5def4b3e90",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "dataset": "vectra_rux.lockdown",
+      "end": "2023-04-07T23:50:00.000Z",
+      "ingested": "2026-03-10T02:44:08Z",
+      "kind": "event",
+      "original": "{\"certainty\":0,\"entity_id\":1184,\"entity_name\":\"Windows10_Jump\",\"id\":1,\"lock_event_timestamp\":\"2023-03-06T22:30:06Z\",\"locked_by\":\"vadmin\",\"type\":\"host\",\"unlock_event_timestamp\":\"2023-04-07T23:50:00Z\"}",
+      "start": "2023-03-06T22:30:06.000Z",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "id": "1184",
+      "name": "Windows10_Jump"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "observer": {
+      "product": "Vectra RUX"
+    },
+    "related": {
+      "hosts": [
+        "1184",
+        "Windows10_Jump"
+      ],
+      "user": [
+        "vadmin"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-lockdown"
+    ],
+    "user": {
+      "name": "vadmin"
+    },
+    "vectra_rux": {
+      "lockdown": {
+        "certainty": 0,
+        "entity_id": "1184",
+        "entity_name": "Windows10_Jump",
+        "id": "1",
+        "lock_event_timestamp": "2023-03-06T22:30:06.000Z",
+        "locked_by": "vadmin",
+        "type": "host",
+        "unlock_event_timestamp": "2023-04-07T23:50:00.000Z"
+      }
+    }
+  }
+]

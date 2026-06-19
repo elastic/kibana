@@ -1,0 +1,313 @@
+[
+  {
+    "@timestamp": "2025-04-15T09:39:45.146Z",
+    "agent": {
+      "ephemeral_id": "6d87476a-af42-423f-93f2-1619942942ee",
+      "id": "bbbc2751-28e2-4e12-a162-2d8f5aa1da51",
+      "name": "elastic-agent-46342",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "vectra_rux.health",
+      "namespace": "56206",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "bbbc2751-28e2-4e12-a162-2d8f5aa1da51",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "vectra_rux.health",
+      "ingested": "2026-03-10T02:41:49Z",
+      "kind": "event",
+      "original": "{\"connectivity\":{\"sensors\":[{\"affected_metadata_hours\":[\"2025-04-18T00:00:00Z\",\"2025-04-18T01:00:00Z\"],\"error\":\"metadata replication seems fine\",\"ip_address\":\"216.160.83.56\",\"luid\":\"w4ftj0a8\",\"name\":\"EDR Sensor\",\"serial_number\":\"V421353ef386550fb2f9a959fa3f52aee\",\"status\":\"OK\"},{\"affected_metadata_hours\":[\"2025-04-18T00:00:00Z\",\"2025-04-18T01:00:00Z\"],\"error\":\"metadata replication seems fine\",\"ip_address\":\"81.2.69.142\",\"luid\":\"w4ftj0a8\",\"name\":\"XDR Sensor\",\"serial_number\":\"V423ef386550fb2f9a959fa3f52aee\",\"status\":\"OK\"}],\"updated_at\":\"2025-04-18 07:17:35+00:00\"},\"cpu\":{\"idle_percent\":43.9,\"nice_percent\":0,\"system_percent\":24.9,\"updated_at\":\"2025-04-18 07:17:35+00:00\",\"user_percent\":30},\"detection\":{\"detection_type\":\"AWS\",\"message\":\"This is detection message\",\"name\":\"Detection 1\",\"status\":\"OK\",\"updated_at\":\"2025-04-18 07:17:33+00:00\"},\"disk\":{\"degraded_raid_volume\":{\"error\":\"error\",\"output\":\"output\",\"status\":\"OK\"},\"disk_raid\":{\"error\":\"error\",\"output\":\"output\",\"status\":\"OK\"},\"disk_utilization\":{\"free_bytes\":10000109,\"total_bytes\":67444477952,\"usage_percent\":47,\"used_bytes\":33078743040},\"raid_disks_missing\":{\"error\":\"error\",\"output\":\"output\",\"status\":\"OK\"},\"updated_at\":\"2025-04-18 07:17:34+00:00\"},\"event_timestamp\":\"2025-04-15T09:39:45.146Z\",\"hostid\":{\"artifact_counts\":{\"TestEDR\":0,\"arsenic\":0,\"carbon_black\":0,\"cb_cloud\":0,\"clear_state\":0,\"cookie\":0,\"crowdstrike\":0,\"cybereason\":0,\"dhcp\":6606,\"dns\":27818,\"end_time\":0,\"fireeye\":0,\"generic_edr\":0,\"idle_end\":27818,\"idle_start\":27936,\"invalid\":0,\"kerberos\":209,\"kerberos_user\":0,\"mdns\":18575,\"netbios\":15596,\"proxy_ip\":0,\"rdns\":0,\"sentinelone\":0,\"split\":0,\"src_port\":0,\"static_ip\":0,\"total\":134681,\"uagent\":10122,\"vmachine_info\":0,\"windows_defender\":1,\"zpa_user\":0},\"ip_always_percent\":18.52,\"ip_never_percent\":79.01,\"ip_sometimes_percent\":2.47,\"updated_at\":\"2025-04-18 07:17:35+00:00\"},\"memory\":{\"free_bytes\":5597118464,\"total_bytes\":67444477952,\"updated_at\":\"2025-04-18 07:17:35+00:00\",\"usage_percent\":47,\"used_bytes\":33078743040},\"network\":{\"updated_at\":\"2025-04-18 07:17:34+00:00\",\"vlans\":{\"count\":1,\"vlan_ids\":[\"7\",\"8\"]}},\"power\":{\"error\":\"Power check for this device is not supported\",\"status\":\"SKIP\",\"updated_at\":\"2025-04-18 07:17:35+00:00\"},\"sensors\":[{\"headend_uri\":\"175.16.199.24\",\"id\":3,\"ip_address\":\"175.16.199.0\",\"last_seen\":\"2025-04-18T07:15:37.685Z\",\"location\":\"hyp-2-37\",\"luid\":\"w4ftj0a8\",\"mode\":\"sensor\",\"name\":\"EDR Sensor\",\"original_version\":\"7.9.0-17-38\",\"product_name\":\"DCS\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1y0zv2goBjkol/8TggJJ\\nMgP03tIZ6B6w9PVpF/bK8KTT0/hinX8PHP/MdDS58sVE6DuAqAkkELqN55f35AhB\\nOqztY9xWDH8bO7Y0P0kbBIQ9+/abyfNpaxbiQe5Yk8oClyEgtXH4GKJCNxkGgbIb\\n-----END PUBLIC KEY-----\\n\",\"serial_number\":\"V421353ef386550fb2f9a959fa3f52aee\",\"ssh_tunnel_port\":\"38113\",\"status\":\"paired\",\"update_count\":0,\"version\":\"9.0.3-1-62\"},{\"headend_uri\":\"175.16.199.24\",\"id\":2,\"ip_address\":\"175.16.199.0\",\"last_seen\":\"2025-04-18T07:15:37.685Z\",\"location\":\"hyp-2-35\",\"luid\":\"w4ftj0a8\",\"mode\":\"sensor\",\"name\":\"XDR Sensor\",\"original_version\":\"7.9.0-17-38\",\"product_name\":\"DCS\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1y0zv2goBjkol/8TggJJ\\nMgP03tIZ6B6w9PVpF/bK8KTT0/hinX8PHP/MdDS58sVE6DuAqAkkELqN55f35AhB\\nOqztY9xWDH8bO7Y0P0kbBIQ9+/abyfNpaxbiQe5Yk8oClyEgtXH4GKJCNxkGgbIb\\n-----END PUBLIC KEY-----\\n\",\"serial_number\":\"12421353ef386550fb2f9a959fa3f52aee\",\"ssh_tunnel_port\":\"38113\",\"status\":\"paired\",\"update_count\":0,\"version\":\"9.0.3-1-62\"},{\"headend_uri\":\"http://headend_uri/\",\"id\":1,\"ip_address\":\"175.16.199.0\",\"last_seen\":\"2025-04-18T07:15:37.685Z\",\"location\":\"hyp-2-30\",\"luid\":\"w4ftj0a8\",\"mode\":\"sensor\",\"name\":\"DR Sensor\",\"original_version\":\"7.9.0-17-38\",\"product_name\":\"DCS\",\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1y0zv2goBjkol/8TggJJ\\nMgP03tIZ6B6w9PVpF/bK8KTT0/hinX8PHP/MdDS58sVE6DuAqAkkELqN55f35AhB\\nOqztY9xWDH8bO7Y0P0kbBIQ9+/abyfNpaxbiQe5Yk8oClyEgtXH4GKJCNxkGgbIb\\n-----END PUBLIC KEY-----\\n\",\"serial_number\":\"V4121353ef386550fb2f9a959fa3f52aee\",\"ssh_tunnel_port\":\"38113\",\"status\":\"paired\",\"update_count\":0,\"version\":\"9.0.3-1-62\"}],\"system\":{\"serial_number\":\"VHE66258a5e8dafe76d9a5dd741abd94ee8\",\"updated_at\":\"2025-04-18 07:17:33+00:00\",\"uptime\":\"261 days, 13 hours, 33 minutes\",\"version\":{\"cloud_bridge\":true,\"gmt\":\"2025-04-18T07:14:09.593927Z\",\"last_update\":\"Wed Apr  9 02:03:16 2025\",\"last_update_utc\":\"2025-04-09T02:03:16+00:00\",\"mode\":\"brain\",\"model\":\"VHE\",\"vectra_instance_type\":\"medium\",\"vectra_version\":\"9.0.3-2-62\",\"vm_type\":\"vmware\"}},\"trafficdrop\":{\"sensors\":[{\"error\":\"All interfaces have traffic volume within range\",\"ip_address\":\"1.128.0.0\",\"luid\":\"w4ftj0a8\",\"name\":\"EDR Sensor\",\"serial_number\":\"V421353ef386550fb2f9a959fa3f52aee\",\"status\":\"OK\"},{\"error\":\"Interface have traffic volume within range\",\"ip_address\":\"1.128.0.11\",\"luid\":\"w4ftj0a8\",\"name\":\"XDR Sensor\",\"serial_number\":\"1421353ef386550fb2f9a959fa3f52aee\",\"status\":\"OK\"}],\"updated_at\":\"2025-04-18 07:17:35+00:00\"}}"
+    },
+    "host": {
+      "cpu": {
+        "usage": 30.0
+      },
+      "id": "VHE66258a5e8dafe76d9a5dd741abd94ee8",
+      "type": "vmware"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "This is detection message",
+    "network": {
+      "vlan": {
+        "id": [
+          "7",
+          "8"
+        ]
+      }
+    },
+    "observer": {
+      "ip": [
+        "175.16.199.0"
+      ],
+      "name": [
+        "EDR Sensor",
+        "XDR Sensor",
+        "DR Sensor"
+      ],
+      "product": "Vectra RUX",
+      "serial_number": [
+        "V421353ef386550fb2f9a959fa3f52aee",
+        "12421353ef386550fb2f9a959fa3f52aee",
+        "V4121353ef386550fb2f9a959fa3f52aee"
+      ],
+      "version": [
+        "9.0.3-1-62"
+      ]
+    },
+    "related": {
+      "ip": [
+        "216.160.83.56",
+        "81.2.69.142",
+        "175.16.199.0",
+        "175.16.199.24",
+        "1.128.0.0",
+        "1.128.0.11"
+      ]
+    },
+    "rule": {
+      "name": "Detection 1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "vectra_rux-health"
+    ],
+    "threat": {
+      "indicator": {
+        "description": "This is detection message"
+      }
+    },
+    "vectra_rux": {
+      "health": {
+        "connectivity": {
+          "sensors": [
+            {
+              "luid": "w4ftj0a8",
+              "affected_metadata_hours": [
+                "2025-04-18T00:00:00Z",
+                "2025-04-18T01:00:00Z"
+              ],
+              "name": "EDR Sensor",
+              "serial_number": "V421353ef386550fb2f9a959fa3f52aee",
+              "ip_address": "216.160.83.56",
+              "error": "metadata replication seems fine",
+              "status": "OK"
+            },
+            {
+              "luid": "w4ftj0a8",
+              "affected_metadata_hours": [
+                "2025-04-18T00:00:00Z",
+                "2025-04-18T01:00:00Z"
+              ],
+              "name": "XDR Sensor",
+              "serial_number": "V423ef386550fb2f9a959fa3f52aee",
+              "ip_address": "81.2.69.142",
+              "error": "metadata replication seems fine",
+              "status": "OK"
+            }
+          ]
+        },
+        "cpu": {
+          "idle_percent": 43.9,
+          "nice_percent": 0.0,
+          "system_percent": 24.9,
+          "updated_at": "2025-04-18T07:17:35.000Z",
+          "user_percent": 30.0
+        },
+        "detection": {
+          "detection_type": "AWS",
+          "message": "This is detection message",
+          "name": "Detection 1",
+          "status": "OK",
+          "updated_at": "2025-04-18T07:17:33.000Z"
+        },
+        "disk": {
+          "degraded_raid_volume": {
+            "error": "error",
+            "output": "output",
+            "status": "OK"
+          },
+          "disk_raid": {
+            "error": "error",
+            "output": "output",
+            "status": "OK"
+          },
+          "disk_utilization": {
+            "free_bytes": 10000109,
+            "total_bytes": 67444477952,
+            "usage_percent": 47.0,
+            "used_bytes": 33078743040
+          },
+          "raid_disks_missing": {
+            "error": "error",
+            "output": "output",
+            "status": "OK"
+          },
+          "updated_at": "2025-04-18T07:17:34.000Z"
+        },
+        "event_timestamp": "2025-04-15T09:39:45.146Z",
+        "hostid": {
+          "artifact_counts": {
+            "TestEDR": 0,
+            "arsenic": 0,
+            "carbon_black": 0,
+            "cb_cloud": 0,
+            "clear_state": 0,
+            "cookie": 0,
+            "crowdstrike": 0,
+            "cybereason": 0,
+            "dhcp": 6606,
+            "dns": 27818,
+            "end_time": 0,
+            "fireeye": 0,
+            "generic_edr": 0,
+            "idle_end": 27818,
+            "idle_start": 27936,
+            "invalid": 0,
+            "kerberos": 209,
+            "kerberos_user": 0,
+            "mdns": 18575,
+            "netbios": 15596,
+            "proxy_ip": 0,
+            "rdns": 0,
+            "sentinelone": 0,
+            "split": 0,
+            "src_port": 0,
+            "static_ip": 0,
+            "total": 134681,
+            "uagent": 10122,
+            "vmachine_info": 0,
+            "windows_defender": 1,
+            "zpa_user": 0
+          },
+          "ip_always_percent": 18.52,
+          "ip_never_percent": 2.47,
+          "ip_sometimes_percent": 79.01,
+          "updated_at": "2025-04-18T07:17:35.000Z"
+        },
+        "memory": {
+          "free_bytes": 5597118464,
+          "total_bytes": 67444477952,
+          "updated_at": "2025-04-18T07:17:35.000Z",
+          "usage_percent": 47.0,
+          "used_bytes": 33078743040
+        },
+        "network": {
+          "updated_at": "2025-04-18T07:17:34.000Z",
+          "vlans": {
+            "count": 1,
+            "vlan_ids": [
+              "7",
+              "8"
+            ]
+          }
+        },
+        "power": {
+          "error": "Power check for this device is not supported",
+          "status": "SKIP",
+          "updated_at": "2025-04-18T07:17:35.000Z"
+        },
+        "sensors": [
+          {
+            "public_key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1y0zv2goBjkol/8TggJJ\nMgP03tIZ6B6w9PVpF/bK8KTT0/hinX8PHP/MdDS58sVE6DuAqAkkELqN55f35AhB\nOqztY9xWDH8bO7Y0P0kbBIQ9+/abyfNpaxbiQe5Yk8oClyEgtXH4GKJCNxkGgbIb\n-----END PUBLIC KEY-----\n",
+            "ssh_tunnel_port": "38113",
+            "headend_ip": "175.16.199.24",
+            "update_count": 0,
+            "serial_number": "V421353ef386550fb2f9a959fa3f52aee",
+            "product_name": "DCS",
+            "version": "9.0.3-1-62",
+            "mode": "sensor",
+            "luid": "w4ftj0a8",
+            "original_version": "7.9.0-17-38",
+            "name": "EDR Sensor",
+            "location": "hyp-2-37",
+            "id": "3",
+            "status": "paired"
+          },
+          {
+            "public_key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1y0zv2goBjkol/8TggJJ\nMgP03tIZ6B6w9PVpF/bK8KTT0/hinX8PHP/MdDS58sVE6DuAqAkkELqN55f35AhB\nOqztY9xWDH8bO7Y0P0kbBIQ9+/abyfNpaxbiQe5Yk8oClyEgtXH4GKJCNxkGgbIb\n-----END PUBLIC KEY-----\n",
+            "ssh_tunnel_port": "38113",
+            "headend_ip": "175.16.199.24",
+            "update_count": 0,
+            "serial_number": "12421353ef386550fb2f9a959fa3f52aee",
+            "product_name": "DCS",
+            "version": "9.0.3-1-62",
+            "mode": "sensor",
+            "luid": "w4ftj0a8",
+            "original_version": "7.9.0-17-38",
+            "name": "XDR Sensor",
+            "location": "hyp-2-35",
+            "id": "2",
+            "status": "paired"
+          },
+          {
+            "public_key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1y0zv2goBjkol/8TggJJ\nMgP03tIZ6B6w9PVpF/bK8KTT0/hinX8PHP/MdDS58sVE6DuAqAkkELqN55f35AhB\nOqztY9xWDH8bO7Y0P0kbBIQ9+/abyfNpaxbiQe5Yk8oClyEgtXH4GKJCNxkGgbIb\n-----END PUBLIC KEY-----\n",
+            "ssh_tunnel_port": "38113",
+            "update_count": 0,
+            "serial_number": "V4121353ef386550fb2f9a959fa3f52aee",
+            "product_name": "DCS",
+            "version": "9.0.3-1-62",
+            "mode": "sensor",
+            "headend_url": "http://headend_uri/",
+            "luid": "w4ftj0a8",
+            "original_version": "7.9.0-17-38",
+            "name": "DR Sensor",
+            "location": "hyp-2-30",
+            "id": "1",
+            "status": "paired"
+          }
+        ],
+        "system": {
+          "serial_number": "VHE66258a5e8dafe76d9a5dd741abd94ee8",
+          "updated_at": "2025-04-18T07:17:33.000Z",
+          "uptime": "261 days, 13 hours, 33 minutes",
+          "version": {
+            "cloud_bridge": true,
+            "gmt": "2025-04-18T07:14:09.593Z",
+            "last_update": "2025-04-09T02:03:16.000Z",
+            "last_update_utc": "2025-04-09T02:03:16.000Z",
+            "mode": "brain",
+            "model": "VHE",
+            "vectra_instance_type": "medium",
+            "vectra_version": "9.0.3-2-62",
+            "vm_type": "vmware"
+          }
+        },
+        "trafficdrop": {
+          "sensors": [
+            {
+              "luid": "w4ftj0a8",
+              "name": "EDR Sensor",
+              "serial_number": "V421353ef386550fb2f9a959fa3f52aee",
+              "ip_address": "1.128.0.0",
+              "error": "All interfaces have traffic volume within range",
+              "status": "OK"
+            },
+            {
+              "luid": "w4ftj0a8",
+              "name": "XDR Sensor",
+              "serial_number": "1421353ef386550fb2f9a959fa3f52aee",
+              "ip_address": "1.128.0.11",
+              "error": "Interface have traffic volume within range",
+              "status": "OK"
+            }
+          ],
+          "updated_at": "2025-04-18T07:17:35.000Z"
+        }
+      }
+    }
+  }
+]

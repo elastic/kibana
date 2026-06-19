@@ -1,0 +1,41 @@
+{
+  "package": "php_fpm",
+  "dataStreams": [
+    {
+      "dataset": "php_fpm.pool",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "php_fpm.pool.connections.accepted",
+        "php_fpm.pool.connections.listen_queue.max_size",
+        "php_fpm.pool.connections.queued",
+        "php_fpm.pool.processes.active.count",
+        "php_fpm.pool.processes.count",
+        "php_fpm.pool.processes.idle",
+        "php_fpm.pool.slow_requests",
+        "service.address"
+      ],
+      "filterValues": {
+        "php_fpm.pool.connections.listen_queue.max_size": [
+          "0"
+        ]
+      }
+    },
+    {
+      "dataset": "php_fpm.process",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "http.request.body.bytes",
+        "php_fpm.process.request.count",
+        "php_fpm.process.request.duration",
+        "php_fpm.process.request.last.memory",
+        "php_fpm.process.state",
+        "process.pid",
+        "service.address",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+[
+  {
+    "@timestamp": "2019-07-03T05:12:25.000Z",
+    "agent": {
+      "ephemeral_id": "4f9018c1-1647-41c0-a6b4-a75d73508ec4",
+      "id": "d7d706f2-6e7a-456a-bc12-050a4ae2a49f",
+      "name": "elastic-agent-10499",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "client": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.144",
+      "port": 60006
+    },
+    "data_stream": {
+      "dataset": "zscaler_zpa.browser_access",
+      "namespace": "59285",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "d7d706f2-6e7a-456a-bc12-050a4ae2a49f",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "session"
+      ],
+      "dataset": "zscaler_zpa.browser_access",
+      "ingested": "2026-03-10T04:48:21Z",
+      "kind": "event",
+      "original": "{\"LogTimestamp\":\"Wed Jul 3 05:12:25 2019\",\"ConnectionID\":\"\",\"Exporter\":\"unset\",\"TimestampRequestReceiveStart\":\"2019-07-03T05:12:25.723Z\",\"TimestampRequestReceiveHeaderFinish\":\"2019-07-03T05:12:25.723Z\",\"TimestampRequestReceiveFinish\":\"2019-07-03T05:12:25.723Z\",\"TimestampRequestTransmitStart\":\"2019-07-03T05:12:25.790Z\",\"TimestampRequestTransmitFinish\":\"2019-07-03T05:12:25.790Z\",\"TimestampResponseReceiveStart\":\"2019-07-03T05:12:25.791Z\",\"TimestampResponseReceiveFinish\":\"2019-07-03T05:12:25.791Z\",\"TimestampResponseTransmitStart\":\"2019-07-03T05:12:25.791Z\",\"TimestampResponseTransmitFinish\":\"2019-07-03T05:12:25.791Z\",\"TotalTimeRequestReceive\":127,\"TotalTimeRequestTransmit\":21,\"TotalTimeResponseReceive\":73,\"TotalTimeResponseTransmit\":13,\"TotalTimeConnectionSetup\":66995,\"TotalTimeServerResponse\":1349,\"Method\":\"GET\",\"Protocol\":\"HTTPS\",\"Host\":\"portal.beta.zdemo.net\",\"URL\":\"/media/Regular.woff\",\"UserAgent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15\",\"XFF\":\"\",\"NameID\":\"admin@zdemo.net\",\"StatusCode\":304,\"RequestSize\":615,\"ResponseSize\":331,\"ApplicationPort\":443,\"ClientPublicIp\":\"81.2.69.144\",\"ClientPublicPort\":60006,\"ClientPrivateIp\":\"81.2.69.193\",\"Customer\":\"ANZ Team/zdemo in beta\",\"ConnectionStatus\":\"\",\"ConnectionReason\":\"\"}",
+      "type": [
+        "connection"
+      ]
+    },
+    "http": {
+      "request": {
+        "body": {
+          "bytes": 615
+        },
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "bytes": 331
+        },
+        "status_code": 304
+      }
+    },
+    "input": {
+      "type": "tcp"
+    },
+    "log": {
+      "source": {
+        "address": "172.21.0.3:33328"
+      }
+    },
+    "organization": {
+      "name": "ANZ Team/zdemo in beta"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.144",
+        "81.2.69.193"
+      ],
+      "user": [
+        "admin",
+        "admin@zdemo.net"
+      ]
+    },
+    "server": {
+      "address": "portal.beta.zdemo.net",
+      "port": 443
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "zscaler_zpa-browser_access"
+    ],
+    "url": {
+      "domain": "portal.beta.zdemo.net",
+      "extension": "woff",
+      "original": "https://portal.beta.zdemo.net/media/regular.woff",
+      "path": "/media/regular.woff",
+      "scheme": "https"
+    },
+    "user": {
+      "domain": "zdemo.net",
+      "email": "admin@zdemo.net",
+      "name": "admin"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Mac"
+      },
+      "name": "Safari",
+      "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15",
+      "os": {
+        "full": "Mac OS X 10.14.5",
+        "name": "Mac OS X",
+        "version": "10.14.5"
+      },
+      "version": "12.1.1"
+    },
+    "zscaler_zpa": {
+      "browser_access": {
+        "client_private_ip": "81.2.69.193",
+        "exporter": "unset",
+        "timestamp": {
+          "request": {
+            "receive": {
+              "finish": "2019-07-03T05:12:25.723Z",
+              "header_finish": "2019-07-03T05:12:25.723Z",
+              "start": "2019-07-03T05:12:25.723Z"
+            },
+            "transmit": {
+              "finish": "2019-07-03T05:12:25.790Z",
+              "start": "2019-07-03T05:12:25.790Z"
+            }
+          },
+          "response": {
+            "receive": {
+              "finish": "2019-07-03T05:12:25.791Z",
+              "start": "2019-07-03T05:12:25.791Z"
+            },
+            "transmit": {
+              "finish": "2019-07-03T05:12:25.791Z",
+              "start": "2019-07-03T05:12:25.791Z"
+            }
+          }
+        },
+        "total_time": {
+          "connection": {
+            "setup": 66995
+          },
+          "request": {
+            "receive": 127,
+            "transmit": 21
+          },
+          "response": {
+            "receive": 73,
+            "transmit": 13
+          },
+          "server": {
+            "response": 1349
+          }
+        }
+      }
+    }
+  }
+]

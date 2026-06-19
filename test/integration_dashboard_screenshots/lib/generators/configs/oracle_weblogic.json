@@ -1,0 +1,128 @@
+{
+  "package": "oracle_weblogic",
+  "dataStreams": [
+    {
+      "dataset": "oracle_weblogic.access",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "http.request.method",
+        "http.request.referrer",
+        "http.response.bytes",
+        "http.response.status_code",
+        "message",
+        "oracle_weblogic.access.host_address",
+        "oracle_weblogic.admin_server.machine_name",
+        "oracle_weblogic.admin_server.message_id",
+        "oracle_weblogic.admin_server.server_name",
+        "oracle_weblogic.admin_server.subsystem",
+        "oracle_weblogic.domain.machine_name",
+        "oracle_weblogic.domain.message_id",
+        "oracle_weblogic.domain.server_name",
+        "oracle_weblogic.domain.subsystem",
+        "oracle_weblogic.managed_server.machine_name",
+        "oracle_weblogic.managed_server.message_id",
+        "oracle_weblogic.managed_server.server_name",
+        "oracle_weblogic.managed_server.subsystem"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "oracle_weblogic.admin_server",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "message",
+        "oracle_weblogic.admin_server.machine_name",
+        "oracle_weblogic.admin_server.message_id",
+        "oracle_weblogic.admin_server.server_name",
+        "oracle_weblogic.admin_server.subsystem",
+        "oracle_weblogic.domain.machine_name",
+        "oracle_weblogic.domain.message_id",
+        "oracle_weblogic.domain.server_name",
+        "oracle_weblogic.domain.subsystem",
+        "oracle_weblogic.managed_server.machine_name",
+        "oracle_weblogic.managed_server.message_id",
+        "oracle_weblogic.managed_server.server_name",
+        "oracle_weblogic.managed_server.subsystem"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "oracle_weblogic.deployed_application",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "oracle_weblogic.deployed_application.deployment.state.name",
+        "oracle_weblogic.deployed_application.session_timeout",
+        "oracle_weblogic.deployed_application.sessions.open.current",
+        "oracle_weblogic.deployed_application.sessions.open.high",
+        "oracle_weblogic.deployed_application.sessions.open.total",
+        "oracle_weblogic.deployed_application.source_info",
+        "service.address"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "oracle_weblogic.domain",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "message",
+        "oracle_weblogic.admin_server.machine_name",
+        "oracle_weblogic.admin_server.message_id",
+        "oracle_weblogic.admin_server.server_name",
+        "oracle_weblogic.admin_server.subsystem",
+        "oracle_weblogic.domain.machine_name",
+        "oracle_weblogic.domain.message_id",
+        "oracle_weblogic.domain.server_name",
+        "oracle_weblogic.domain.subsystem",
+        "oracle_weblogic.managed_server.machine_name",
+        "oracle_weblogic.managed_server.message_id",
+        "oracle_weblogic.managed_server.server_name",
+        "oracle_weblogic.managed_server.subsystem"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "oracle_weblogic.managed_server",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "message",
+        "oracle_weblogic.admin_server.machine_name",
+        "oracle_weblogic.admin_server.message_id",
+        "oracle_weblogic.admin_server.server_name",
+        "oracle_weblogic.admin_server.subsystem",
+        "oracle_weblogic.domain.machine_name",
+        "oracle_weblogic.domain.message_id",
+        "oracle_weblogic.domain.server_name",
+        "oracle_weblogic.domain.subsystem",
+        "oracle_weblogic.managed_server.machine_name",
+        "oracle_weblogic.managed_server.message_id",
+        "oracle_weblogic.managed_server.server_name",
+        "oracle_weblogic.managed_server.subsystem"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "oracle_weblogic.threadpool",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "oracle_weblogic.threadpool.requests.completed",
+        "oracle_weblogic.threadpool.requests.overload.rejected",
+        "oracle_weblogic.threadpool.requests.pending",
+        "oracle_weblogic.threadpool.threads.daemon",
+        "oracle_weblogic.threadpool.threads.execute.idle",
+        "oracle_weblogic.threadpool.threads.execute.total",
+        "oracle_weblogic.threadpool.threads.standby",
+        "oracle_weblogic.threadpool.threads.total",
+        "oracle_weblogic.threadpool.throughput",
+        "oracle_weblogic.threadpool.work_manager.capacity.shared",
+        "service.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

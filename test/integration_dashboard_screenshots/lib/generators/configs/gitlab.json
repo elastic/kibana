@@ -1,0 +1,101 @@
+{
+  "package": "gitlab",
+  "dataStreams": [
+    {
+      "dataset": "gitlab.api",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.provider",
+        "source.ip",
+        "url.path",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "gitlab.application",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.category",
+        "event.outcome",
+        "gitlab.application.mergeability.merge_request_id",
+        "gitlab.application.message",
+        "gitlab.application.project_name",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.outcome": [
+          "failure",
+          "success"
+        ],
+        "event.category": [
+          "authentication"
+        ]
+      }
+    },
+    {
+      "dataset": "gitlab.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "event.duration",
+        "event.provider"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "gitlab.auth",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "gitlab.auth.env",
+        "gitlab.auth.matched",
+        "gitlab.auth.message",
+        "http.request.method",
+        "source.ip",
+        "url.path",
+        "user.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "gitlab.pages",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "event.duration",
+        "event.provider"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "gitlab.production",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.provider",
+        "source.ip",
+        "url.path",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "gitlab.sidekiq",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.dataset",
+        "event.duration",
+        "event.provider"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "package": "azure_functions",
+  "dataStreams": [
+    {
+      "dataset": "azure.function",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.functions.average_memory_working_set.avg",
+        "azure.functions.bytes_received.total",
+        "azure.functions.bytes_sent.total",
+        "azure.functions.function_execution_count.total",
+        "azure.functions.health_check_status.avg",
+        "azure.functions.http2xx.total",
+        "azure.functions.http4xx.total",
+        "azure.functions.http5xx.total",
+        "azure.functions.http_response_time.avg",
+        "azure.functions.io_read_bytes_per_second.total",
+        "azure.functions.io_read_operations_per_second.total",
+        "azure.functions.io_write_bytes_per_second.total",
+        "azure.functions.io_write_operations_per_second.total",
+        "azure.functions.requests.total",
+        "azure.resource.group",
+        "azure.resource.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

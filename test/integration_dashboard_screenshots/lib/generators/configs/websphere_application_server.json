@@ -1,0 +1,65 @@
+{
+  "package": "websphere_application_server",
+  "dataStreams": [
+    {
+      "dataset": "websphere_application_server.jdbc",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "websphere_application_server.jdbc.connection.allocated",
+        "websphere_application_server.jdbc.connection.closed",
+        "websphere_application_server.jdbc.connection.created",
+        "websphere_application_server.jdbc.connection.free",
+        "websphere_application_server.jdbc.connection.returned",
+        "websphere_application_server.jdbc.connection.total.in_use",
+        "websphere_application_server.jdbc.connection.total.operations_calls",
+        "websphere_application_server.jdbc.data_source"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "websphere_application_server.servlet",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "websphere_application_server.servlet.app_name",
+        "websphere_application_server.servlet.errors",
+        "websphere_application_server.servlet.loaded",
+        "websphere_application_server.servlet.reloaded",
+        "websphere_application_server.servlet.requests.processed",
+        "websphere_application_server.servlet.responses.processed"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "websphere_application_server.session_manager",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "websphere_application_server.session_manager.app_name",
+        "websphere_application_server.session_manager.persistent_stores.data_read",
+        "websphere_application_server.session_manager.persistent_stores.data_written",
+        "websphere_application_server.session_manager.sessions.active",
+        "websphere_application_server.session_manager.sessions.created",
+        "websphere_application_server.session_manager.sessions.invalidated.by_timeouts"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "websphere_application_server.threadpool",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "server.address",
+        "websphere_application_server.threadpool.name",
+        "websphere_application_server.threadpool.threads.active",
+        "websphere_application_server.threadpool.threads.cleared",
+        "websphere_application_server.threadpool.threads.stopped.declared",
+        "websphere_application_server.threadpool.threads.total",
+        "websphere_application_server.threadpool.total.created",
+        "websphere_application_server.threadpool.total.destroyed"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

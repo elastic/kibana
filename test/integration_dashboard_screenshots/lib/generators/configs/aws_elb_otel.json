@@ -1,0 +1,14 @@
+{
+  "package": "aws_elb_otel",
+  "dataStreams": [
+    {
+      "dataset": "aws.elbaccess.otel",
+      "indexPattern": "77dd912b-c766-4941-ad21-3f87867c3964",
+      "docTarget": 500,
+      "fields": [
+        "cloud.resource_id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

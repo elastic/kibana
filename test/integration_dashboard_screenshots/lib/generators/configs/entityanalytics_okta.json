@@ -1,0 +1,20 @@
+{
+  "package": "entityanalytics_okta",
+  "dataStreams": [
+    {
+      "dataset": "entityanalytics_okta.user",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "asset.status",
+        "entityanalytics_okta.user.profile.division",
+        "user.id",
+        "user.organization.name",
+        "user.profile.department",
+        "user.profile.job_title",
+        "user.profile.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

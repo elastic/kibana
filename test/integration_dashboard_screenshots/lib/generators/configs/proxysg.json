@@ -1,0 +1,19 @@
+{
+  "package": "proxysg",
+  "dataStreams": [
+    {
+      "dataset": "proxysg.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.ip",
+        "proxysg.client_to_server.categories",
+        "proxysg.client_to_server.host",
+        "proxysg.server.action",
+        "proxysg.server_to_client.status",
+        "server.ip"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

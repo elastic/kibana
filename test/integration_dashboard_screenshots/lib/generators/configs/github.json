@@ -1,0 +1,138 @@
+{
+  "package": "github",
+  "dataStreams": [
+    {
+      "dataset": "github.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "github.org",
+        "github.repo",
+        "user.name",
+        "user.target.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "github.code_scanning",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "github.code_scanning.dismissed_by.login",
+        "github.code_scanning.most_recent_instance.location.path",
+        "github.code_scanning.rule.security_severity_level",
+        "github.code_scanning.rule.severity",
+        "github.code_scanning.state",
+        "github.code_scanning.time_to_resolution.sec",
+        "github.code_scanning.tool.name",
+        "labels.is_transform_source",
+        "rule.name"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "github.dependabot",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.duration",
+        "github.dependabot.dismisser.login",
+        "github.dependabot.state",
+        "github.dependabot.vulnerable_manifest_path",
+        "labels.is_transform_source",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "github.issues",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "github.issues.assignee.login",
+        "github.issues.closed_at",
+        "github.issues.closed_by.login",
+        "github.issues.labels.name",
+        "github.issues.state",
+        "github.issues.time_to_close.sec",
+        "github.issues.user.login",
+        "labels.is_transform_source"
+      ],
+      "filterValues": {
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "github.secret_scanning",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "github.repository.name",
+        "github.repository.owner.login",
+        "github.secret_scanning.secret_type_display_name",
+        "github.secret_scanning.state",
+        "github.secret_scanning.time_to_resolution.sec",
+        "labels.is_transform_source"
+      ],
+      "filterValues": {
+        "github.secret_scanning.state": [
+          "open",
+          "resolved"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    },
+    {
+      "dataset": "github.security_advisories",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "github.code_scanning.most_recent_instance.commit_sha",
+        "github.code_scanning.state",
+        "github.dependabot.state",
+        "github.issues.state",
+        "github.repository.name",
+        "github.repository.owner.login",
+        "github.secret_scanning.number",
+        "github.secret_scanning.resolution",
+        "github.secret_scanning.resolved_by.login",
+        "github.secret_scanning.secret",
+        "github.secret_scanning.secret_type_display_name",
+        "github.secret_scanning.state",
+        "github.secret_scanning.time_to_resolution.sec",
+        "github.secret_scanning.url",
+        "labels.is_transform_source",
+        "vulnerability.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "github*",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "github.code_scanning.rule.security_severity_level",
+        "github.code_scanning.state",
+        "github.dependabot.state",
+        "github.repository.name",
+        "github.repository.owner.login",
+        "github.secret_scanning.state",
+        "vulnerability.severity"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

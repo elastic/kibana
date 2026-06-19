@@ -1,0 +1,341 @@
+[
+  {
+    "@timestamp": "2022-01-25T07:51:51.962Z",
+    "agent": {
+      "ephemeral_id": "321e8ef0-14d2-468d-a61b-780ce09c596d",
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "name": "elastic-agent-28843",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "confluence": {
+      "audit": {
+        "affected_objects": [
+          {
+            "name": "Service Catalogue",
+            "type": "Space"
+          }
+        ],
+        "external_collaborator": false,
+        "type": {
+          "action": "Space logo uploaded",
+          "category": "Spaces"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_confluence.audit",
+      "namespace": "44740",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Space logo uploaded",
+      "agent_id_status": "verified",
+      "created": "2026-03-10T02:23:59.790Z",
+      "dataset": "atlassian_confluence.audit",
+      "ingested": "2026-03-10T02:24:02Z",
+      "kind": "event",
+      "original": "{\"affectedObject\":{\"name\":\"Service Catalogue\",\"objectType\":\"Space\"},\"associatedObjects\":[],\"author\":{\"accountId\":\"df856b17d84fcf010f11fcfcc6be4267\",\"accountType\":\"\",\"displayName\":\"John Jacobs\",\"externalCollaborator\":false,\"isExternalCollaborator\":false,\"operations\":null,\"publicName\":\"Unknown user\",\"type\":\"user\",\"userKey\":\"26971c016361d1f6a3eb8f62461f1e4e\",\"username\":\"df856b17d84fcf010f11fcfcc6be4267\"},\"category\":\"Spaces\",\"changedValues\":[],\"creationDate\":1643097111962,\"description\":\"\",\"remoteAddress\":\"81.2.69.143\",\"summary\":\"Space logo uploaded\",\"superAdmin\":false,\"sysAdmin\":false}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.143"
+      ]
+    },
+    "source": {
+      "address": "81.2.69.143",
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.143"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "confluence-audit"
+    ],
+    "user": {
+      "full_name": "John Jacobs",
+      "id": "df856b17d84fcf010f11fcfcc6be4267"
+    }
+  },
+  {
+    "@timestamp": "2022-01-25T07:51:34.621Z",
+    "agent": {
+      "ephemeral_id": "321e8ef0-14d2-468d-a61b-780ce09c596d",
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "name": "elastic-agent-28843",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "confluence": {
+      "audit": {
+        "affected_objects": [
+          {
+            "name": "Service Catalogue",
+            "type": "Space"
+          }
+        ],
+        "external_collaborator": false,
+        "type": {
+          "action": "Space logo uploaded",
+          "category": "Spaces"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_confluence.audit",
+      "namespace": "44740",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Space logo uploaded",
+      "agent_id_status": "verified",
+      "created": "2026-03-10T02:24:01.770Z",
+      "dataset": "atlassian_confluence.audit",
+      "ingested": "2026-03-10T02:24:02Z",
+      "kind": "event",
+      "original": "{\"affectedObject\":{\"name\":\"Service Catalogue\",\"objectType\":\"Space\"},\"associatedObjects\":[],\"author\":{\"accountId\":\"df856b17d84fcf010f11fcfcc6be4267\",\"accountType\":\"\",\"displayName\":\"John Jacobs\",\"externalCollaborator\":false,\"isExternalCollaborator\":false,\"operations\":null,\"publicName\":\"Unknown user\",\"type\":\"user\",\"userKey\":\"26971c016361d1f6a3eb8f62461f1e4e\",\"username\":\"df856b17d84fcf010f11fcfcc6be4267\"},\"category\":\"Spaces\",\"changedValues\":[],\"creationDate\":1643097094621,\"description\":\"\",\"remoteAddress\":\"81.2.69.143\",\"summary\":\"Space logo uploaded\",\"superAdmin\":false,\"sysAdmin\":false}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.143"
+      ]
+    },
+    "source": {
+      "address": "81.2.69.143",
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.143"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "confluence-audit"
+    ],
+    "user": {
+      "full_name": "John Jacobs",
+      "id": "df856b17d84fcf010f11fcfcc6be4267"
+    }
+  },
+  {
+    "@timestamp": "2021-11-16T09:25:56.738Z",
+    "agent": {
+      "ephemeral_id": "321e8ef0-14d2-468d-a61b-780ce09c596d",
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "name": "elastic-agent-28843",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "confluence": {
+      "audit": {
+        "affected_objects": [
+          {
+            "name": "John Doe (Deactivated)",
+            "type": "User"
+          }
+        ],
+        "changed_values": [
+          {
+            "i18nKey": "Active",
+            "from": "Yes",
+            "to": "No",
+            "key": "Active"
+          }
+        ],
+        "external_collaborator": false,
+        "type": {
+          "action": "User details updated",
+          "category": "Users and groups"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_confluence.audit",
+      "namespace": "44740",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "User details updated",
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2026-03-10T02:24:01.772Z",
+      "dataset": "atlassian_confluence.audit",
+      "ingested": "2026-03-10T02:24:02Z",
+      "kind": "event",
+      "original": "{\"affectedObject\":{\"name\":\"John Doe (Deactivated)\",\"objectType\":\"User\"},\"associatedObjects\":[],\"author\":{\"accountType\":\"\",\"displayName\":\"System\",\"externalCollaborator\":false,\"isExternalCollaborator\":false,\"operations\":null,\"publicName\":\"Unknown user\",\"type\":\"user\"},\"category\":\"Users and groups\",\"changedValues\":[{\"hiddenNewValue\":\"\",\"hiddenOldValue\":\"\",\"name\":\"Active\",\"newValue\":\"No\",\"oldValue\":\"Yes\"}],\"creationDate\":1637054756738,\"description\":\"\",\"remoteAddress\":\"81.2.69.143\",\"summary\":\"User details updated\",\"superAdmin\":false,\"sysAdmin\":false}",
+      "type": [
+        "user",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.143"
+      ]
+    },
+    "source": {
+      "address": "81.2.69.143",
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.143"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "confluence-audit"
+    ],
+    "user": {
+      "full_name": "System",
+      "target": {
+        "full_name": "John Doe (Deactivated)"
+      }
+    }
+  },
+  {
+    "@timestamp": "2021-11-16T09:25:56.666Z",
+    "agent": {
+      "ephemeral_id": "321e8ef0-14d2-468d-a61b-780ce09c596d",
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "name": "elastic-agent-28843",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "confluence": {
+      "audit": {
+        "external_collaborator": false,
+        "type": {
+          "action": "User deactivated",
+          "category": "Users and groups"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "atlassian_confluence.audit",
+      "namespace": "44740",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "2495898a-853d-41f2-9fb7-d0c4a19bd65d",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "User deactivated",
+      "agent_id_status": "verified",
+      "created": "2026-03-10T02:24:01.772Z",
+      "dataset": "atlassian_confluence.audit",
+      "ingested": "2026-03-10T02:24:02Z",
+      "kind": "event",
+      "original": "{\"affectedObject\":{\"name\":\"\",\"objectType\":\"\"},\"associatedObjects\":[],\"author\":{\"accountType\":\"\",\"displayName\":\"System\",\"externalCollaborator\":false,\"isExternalCollaborator\":false,\"operations\":null,\"publicName\":\"Unknown user\",\"type\":\"user\"},\"category\":\"Users and groups\",\"changedValues\":[],\"creationDate\":1637054756666,\"description\":\"\",\"remoteAddress\":\"81.2.69.143\",\"summary\":\"User deactivated\",\"superAdmin\":false,\"sysAdmin\":false}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "81.2.69.143"
+      ]
+    },
+    "source": {
+      "address": "81.2.69.143",
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.143"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded",
+      "confluence-audit"
+    ],
+    "user": {
+      "full_name": "System"
+    }
+  }
+]

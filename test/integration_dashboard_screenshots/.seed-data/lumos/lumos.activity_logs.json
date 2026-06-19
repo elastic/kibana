@@ -1,0 +1,81 @@
+[
+  {
+    "@timestamp": "2026-03-10T01:13:23.825Z",
+    "agent": {
+      "ephemeral_id": "4bcd4fd0-0200-485e-beef-13f4cbe96380",
+      "id": "0b573922-9f79-477a-94e7-208849391500",
+      "name": "elastic-agent-40822",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "lumos.activity_logs",
+      "namespace": "24666",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "0b573922-9f79-477a-94e7-208849391500",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "SOD_POLICY_DELETED",
+      "agent_id_status": "verified",
+      "created": "2026-03-10T01:13:23.825Z",
+      "dataset": "lumos.activity_logs",
+      "id": "630b90cedc35a8a5f43361534099bee51e032f42dd442085fc76ef094d228f543c78fbe59c132df992cf71a6b8496504e8ebbc6020fbae1f34206676985412e7",
+      "ingested": "2026-03-10T01:13:26Z",
+      "kind": "event",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-40822",
+      "ip": [
+        "172.21.0.2",
+        "172.24.0.24"
+      ],
+      "mac": [
+        "46-19-A1-12-27-98",
+        "86-BD-10-65-9D-7E"
+      ],
+      "name": "elastic-agent-40822",
+      "os": {
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "lumos": {
+      "activity_logs": {
+        "actor": {
+          "actor_type": "Lumos user",
+          "email": "wile.e.coyote@lumos.com",
+          "family_name": "Wile",
+          "given_name": "Coyote"
+        },
+        "event_began_at": "2024-03-12T16:09:14",
+        "event_type_user_friendly": "A user deleted a SOD Policy",
+        "targets": [
+          {
+            "name": "Untitled Rule",
+            "target_type": "SOD Policy"
+          }
+        ]
+      }
+    },
+    "message": "{\"actor\":{\"actor_type\":\"Lumos user\",\"email\":\"wile.e.coyote@lumos.com\",\"family_name\":\"Wile\",\"given_name\":\"Coyote\"},\"event_began_at\":\"2024-03-12T16:09:14\",\"event_hash\":\"630b90cedc35a8a5f43361534099bee51e032f42dd442085fc76ef094d228f543c78fbe59c132df992cf71a6b8496504e8ebbc6020fbae1f34206676985412e7\",\"event_metadata\":{},\"event_type\":\"SOD_POLICY_DELETED\",\"event_type_user_friendly\":\"A user deleted a SOD Policy\",\"outcome\":\"Succeeded\",\"targets\":[{\"name\":\"Untitled Rule\",\"target_type\":\"SOD Policy\"}]}"
+  }
+]

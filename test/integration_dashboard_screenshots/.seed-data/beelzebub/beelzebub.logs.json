@@ -1,0 +1,413 @@
+[
+  {
+    "@timestamp": "2025-07-02T12:23:19.000Z",
+    "agent.ephemeral_id": "a0a1742c-9f5d-4ce3-bfeb-2e2f14ee2e1c",
+    "agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "agent.name": "elastic-agent-31510",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "beelzebub.event.Cookies": "CF_AppSession=thingahCF_Authorization=asdfaccess_token=1234refresh_token=blahconnect.sid=test1234cf_clearance=thingo",
+    "beelzebub.event.DateTime": "2025-07-02T12:23:19.000Z",
+    "beelzebub.event.Description": "Wordpress 6.0",
+    "beelzebub.event.HTTPMethod": "GET",
+    "beelzebub.event.Headers.accept": [
+      "application/graphql-response+json, application/graphql+json, application/json, text/event-stream, multipart/mixed"
+    ],
+    "beelzebub.event.Headers.accept-encoding": [
+      "gzip, deflate, br, zstd"
+    ],
+    "beelzebub.event.Headers.accept-language": [
+      "en-GB,en-US;q=0.9,en;q=0.8"
+    ],
+    "beelzebub.event.Headers.cache-control": [
+      "no-cache"
+    ],
+    "beelzebub.event.Headers.cookie": [
+      "CF_AppSession=thingah; CF_Authorization=asdf; access_token=1234; refresh_token=blah; connect.sid=test1234; cf_clearance=thingo"
+    ],
+    "beelzebub.event.Headers.origin": [
+      "https://some.site.tld"
+    ],
+    "beelzebub.event.Headers.pragma": [
+      "no-cache"
+    ],
+    "beelzebub.event.Headers.priority": [
+      "u=1, i"
+    ],
+    "beelzebub.event.Headers.referer": [
+      "https://some.site.tld/bad-recipes"
+    ],
+    "beelzebub.event.Headers.sec-ch-ua": [
+      "\"Wavebox\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\""
+    ],
+    "beelzebub.event.Headers.sec-ch-ua-mobile": [
+      "?0"
+    ],
+    "beelzebub.event.Headers.sec-fetch-dest": [
+      "empty"
+    ],
+    "beelzebub.event.Headers.sec-fetch-mode": [
+      "cors"
+    ],
+    "beelzebub.event.Headers.sec-fetch-site": [
+      "same-origin"
+    ],
+    "beelzebub.event.Headers.user-agent": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+    ],
+    "beelzebub.event.HeadersText": "[Key: Sec-Fetch-Site, values: same-origin],[Key: User-Agent, values: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36],[Key: Accept, values: application/graphql-response+json, application/graphql+json, application/json, text/event-stream, multipart/mixed],[Key: Accept-Encoding, values: gzip, deflate, br, zstd],[Key: Accept-Language, values: en-GB,en-US;q=0.9,en;q=0.8],[Key: Cache-Control, values: no-cache],[Key: Cookie, values: CF_AppSession=thingah; CF_Authorization=asdf; access_token=1234; refresh_token=blah; connect.sid=test1234; cf_clearance=thingo],[Key: Pragma, values: no-cache],[Key: Referer, values: https://some.site.tld/bad-recipes],[Key: Sec-Ch-Ua, values: \"Wavebox\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"],[Key: Origin, values: https://some.site.tld],[Key: Priority, values: u=1, i],[Key: Sec-Ch-Ua-Mobile, values: ?0],[Key: Sec-Fetch-Dest, values: empty],[Key: Sec-Fetch-Mode, values: cors],",
+    "beelzebub.event.HostHTTPRequest": "localhost",
+    "beelzebub.event.ID": "3e2089d4-4a6d-40e6-8657-3307c04d5704",
+    "beelzebub.event.Msg": "HTTP New request",
+    "beelzebub.event.Protocol": "HTTP",
+    "beelzebub.event.RemoteAddr": "127.0.0.1:39342",
+    "beelzebub.event.RequestURI": "/blog/whats-for-dinner-mum",
+    "beelzebub.event.SourceIp": "127.0.0.1",
+    "beelzebub.event.SourcePort": "39342",
+    "beelzebub.event.Status": "Stateless",
+    "beelzebub.event.UserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "beelzebub.level": "info",
+    "beelzebub.msg": "New Event",
+    "beelzebub.status": "Stateless",
+    "beelzebub.time": "2025-07-02T12:23:19.000Z",
+    "data_stream.dataset": "beelzebub.logs",
+    "data_stream.namespace": "46324",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "network"
+    ],
+    "event.dataset": "beelzebub.logs",
+    "event.id": "3e2089d4-4a6d-40e6-8657-3307c04d5704",
+    "event.ingested": "2026-03-10T02:08:37Z",
+    "event.kind": "event",
+    "event.original": "{\"event\":{\"Body\":\"\",\"Client\":\"\",\"Command\":\"\",\"CommandOutput\":\"\",\"Cookies\":\"CF_AppSession=thingahCF_Authorization=asdfaccess_token=1234refresh_token=blahconnect.sid=test1234cf_clearance=thingo\",\"DateTime\":\"2025-07-02T12:23:19Z\",\"Description\":\"Wordpress 6.0\",\"Environ\":\"\",\"HTTPMethod\":\"GET\",\"Handler\":\"\",\"Headers\":\"[Key: Sec-Fetch-Site, values: same-origin],[Key: User-Agent, values: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36],[Key: Accept, values: application/graphql-response+json, application/graphql+json, application/json, text/event-stream, multipart/mixed],[Key: Accept-Encoding, values: gzip, deflate, br, zstd],[Key: Accept-Language, values: en-GB,en-US;q=0.9,en;q=0.8],[Key: Cache-Control, values: no-cache],[Key: Cookie, values: CF_AppSession=thingah; CF_Authorization=asdf; access_token=1234; refresh_token=blah; connect.sid=test1234; cf_clearance=thingo],[Key: Pragma, values: no-cache],[Key: Referer, values: https://some.site.tld/bad-recipes],[Key: Sec-Ch-Ua, values: \\\"Wavebox\\\";v=\\\"137\\\", \\\"Chromium\\\";v=\\\"137\\\", \\\"Not/A)Brand\\\";v=\\\"24\\\"],[Key: Origin, values: https://some.site.tld],[Key: Priority, values: u=1, i],[Key: Sec-Ch-Ua-Mobile, values: ?0],[Key: Sec-Fetch-Dest, values: empty],[Key: Sec-Fetch-Mode, values: cors],\",\"HeadersMap\":{\"Accept\":[\"application/graphql-response+json, application/graphql+json, application/json, text/event-stream, multipart/mixed\"],\"Accept-Encoding\":[\"gzip, deflate, br, zstd\"],\"Accept-Language\":[\"en-GB,en-US;q=0.9,en;q=0.8\"],\"Cache-Control\":[\"no-cache\"],\"Cookie\":[\"CF_AppSession=thingah; CF_Authorization=asdf; access_token=1234; refresh_token=blah; connect.sid=test1234; cf_clearance=thingo\"],\"Origin\":[\"https://some.site.tld\"],\"Pragma\":[\"no-cache\"],\"Priority\":[\"u=1, i\"],\"Referer\":[\"https://some.site.tld/bad-recipes\"],\"Sec-Ch-Ua\":[\"\\\"Wavebox\\\";v=\\\"137\\\", \\\"Chromium\\\";v=\\\"137\\\", \\\"Not/A)Brand\\\";v=\\\"24\\\"\"],\"Sec-Ch-Ua-Mobile\":[\"?0\"],\"Sec-Fetch-Dest\":[\"empty\"],\"Sec-Fetch-Mode\":[\"cors\"],\"Sec-Fetch-Site\":[\"same-origin\"],\"User-Agent\":[\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36\"]},\"HostHTTPRequest\":\"localhost\",\"ID\":\"3e2089d4-4a6d-40e6-8657-3307c04d5704\",\"Msg\":\"HTTP New request\",\"Password\":\"\",\"Protocol\":\"HTTP\",\"RemoteAddr\":\"127.0.0.1:39342\",\"RequestURI\":\"/blog/whats-for-dinner-mum\",\"SourceIp\":\"127.0.0.1\",\"SourcePort\":\"39342\",\"Status\":\"Stateless\",\"TLSServerName\":\"\",\"User\":\"\",\"UserAgent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36\"},\"level\":\"info\",\"msg\":\"New Event\",\"status\":\"Stateless\",\"time\":\"2025-07-02T12:23:19Z\"}",
+    "event.reason": "New Event",
+    "event.type": [
+      "info"
+    ],
+    "http.request.method": "GET",
+    "http.request.referrer": [
+      "https://some.site.tld/bad-recipes"
+    ],
+    "input.type": "http_endpoint",
+    "related.ip": [
+      "127.0.0.1"
+    ],
+    "source.ip": "127.0.0.1",
+    "source.port": 39342,
+    "tags": [
+      "preserve_original_event",
+      "redact_passwords",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "url.domain": "localhost",
+    "url.original": "/blog/whats-for-dinner-mum",
+    "url.path": "/blog/whats-for-dinner-mum",
+    "user_agent.device.name": "Mac",
+    "user_agent.device.type": "Desktop",
+    "user_agent.name": "Chrome",
+    "user_agent.original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "user_agent.os.full": "Mac OS X 10.15.7",
+    "user_agent.os.name": "Mac OS X",
+    "user_agent.os.version": "10.15.7",
+    "user_agent.version": "137.0.0.0"
+  },
+  {
+    "@timestamp": "2025-02-27T00:03:02.000Z",
+    "agent.ephemeral_id": "a0a1742c-9f5d-4ce3-bfeb-2e2f14ee2e1c",
+    "agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "agent.name": "elastic-agent-31510",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "beelzebub.event.DateTime": "2025-02-27T00:03:02.000Z",
+    "beelzebub.event.Description": "Wordpress 6.0",
+    "beelzebub.event.HTTPMethod": "GET",
+    "beelzebub.event.Headers.accept": "*/*",
+    "beelzebub.event.Headers.accept-encoding": [
+      "gzip, deflate",
+      "gzip, deflate"
+    ],
+    "beelzebub.event.Headers.accept-language": "en US,en;q=0.9,sv;q=0.8",
+    "beelzebub.event.Headers.connection": "keep-alive",
+    "beelzebub.event.Headers.content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "beelzebub.event.Headers.user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46",
+    "beelzebub.event.Headers.x-requested-with": "XMLHttpRequest",
+    "beelzebub.event.HeadersText": "[Key: User-Agent, values: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46],[Key: Accept-Encoding, values: gzip, deflate],[Key: Accept-Encoding, values: gzip, deflate],[Key: Connection, values: keep-alive],[Key: X-Requested-With, values: XMLHttpRequest],[Key: Content-Type, values: application/x-www-form-urlencoded; charset=UTF-8],[Key: Accept-Language, values: en US,en;q=0.9,sv;q=0.8],[Key: Accept, values: */*],",
+    "beelzebub.event.HostHTTPRequest": "1.128.0.16:80",
+    "beelzebub.event.ID": "4df41014-e1e8-45c1-8868-11c750ffd2bc",
+    "beelzebub.event.Msg": "HTTP New request",
+    "beelzebub.event.Protocol": "HTTP",
+    "beelzebub.event.RemoteAddr": "1.128.0.215:55264",
+    "beelzebub.event.RequestURI": "/",
+    "beelzebub.event.SourceIp": "1.128.0.215",
+    "beelzebub.event.SourcePort": "55264",
+    "beelzebub.event.Status": "Stateless",
+    "beelzebub.event.UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46",
+    "beelzebub.level": "info",
+    "beelzebub.msg": "New Event",
+    "beelzebub.status": "Stateless",
+    "beelzebub.time": "2025-02-27T00:03:02.000Z",
+    "data_stream.dataset": "beelzebub.logs",
+    "data_stream.namespace": "46324",
+    "data_stream.type": "logs",
+    "destination.as.number": 1221,
+    "destination.as.organization.name": "Telstra Pty Ltd",
+    "destination.ip": "1.128.0.16",
+    "destination.port": 80,
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "network"
+    ],
+    "event.dataset": "beelzebub.logs",
+    "event.id": "4df41014-e1e8-45c1-8868-11c750ffd2bc",
+    "event.ingested": "2026-03-10T02:08:36Z",
+    "event.kind": "event",
+    "event.original": "{\"event\":{\"Body\":\"\",\"Client\":\"\",\"Command\":\"\",\"CommandOutput\":\"\",\"Cookies\":\"\",\"DateTime\":\"2025-02-27T00:03:02Z\",\"Description\":\"Wordpress 6.0\",\"Environ\":\"\",\"HTTPMethod\":\"GET\",\"Headers\":\"[Key: User-Agent, values: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46],[Key: Accept-Encoding, values: gzip, deflate],[Key: Accept-Encoding, values: gzip, deflate],[Key: Connection, values: keep-alive],[Key: X-Requested-With, values: XMLHttpRequest],[Key: Content-Type, values: application/x-www-form-urlencoded; charset=UTF-8],[Key: Accept-Language, values: en US,en;q=0.9,sv;q=0.8],[Key: Accept, values: */*],\",\"HostHTTPRequest\":\"1.128.0.16:80\",\"ID\":\"4df41014-e1e8-45c1-8868-11c750ffd2bc\",\"Msg\":\"HTTP New request\",\"Password\":\"\",\"Protocol\":\"HTTP\",\"RemoteAddr\":\"1.128.0.215:55264\",\"RequestURI\":\"/\",\"SourceIp\":\"1.128.0.215\",\"SourcePort\":\"55264\",\"Status\":\"Stateless\",\"User\":\"\",\"UserAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46\"},\"level\":\"info\",\"msg\":\"New Event\",\"status\":\"Stateless\",\"time\":\"2025-02-27T00:03:02Z\"}",
+    "event.reason": "New Event",
+    "event.type": [
+      "info"
+    ],
+    "http.request.method": "GET",
+    "input.type": "http_endpoint",
+    "related.ip": [
+      "1.128.0.215"
+    ],
+    "source.as.number": 1221,
+    "source.as.organization.name": "Telstra Pty Ltd",
+    "source.ip": "1.128.0.215",
+    "source.port": 55264,
+    "tags": [
+      "preserve_original_event",
+      "redact_passwords",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "url.domain": "1.128.0.16",
+    "url.original": "/",
+    "url.path": "/",
+    "url.port": 80,
+    "user_agent.device.name": "Other",
+    "user_agent.device.type": "Desktop",
+    "user_agent.name": "Edge",
+    "user_agent.original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46",
+    "user_agent.os.full": "Windows 10",
+    "user_agent.os.name": "Windows",
+    "user_agent.os.version": "10",
+    "user_agent.version": "90.0.818.46"
+  },
+  {
+    "@timestamp": "2025-02-19T07:48:34.000Z",
+    "agent.ephemeral_id": "a0a1742c-9f5d-4ce3-bfeb-2e2f14ee2e1c",
+    "agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "agent.name": "elastic-agent-31510",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "beelzebub.event.Body": "<!DOCTYPE xxe [\n<!ELEMENT name ANY >\n<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>\n<Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\">\n<Request>\n<EMailAddress>aaaaa</EMailAddress>\n<AcceptableResponseSchema>&xxe;</AcceptableResponseSchema>\n</Request>\n</Autodiscover>",
+    "beelzebub.event.DateTime": "2025-02-19T07:48:34.000Z",
+    "beelzebub.event.Description": "Wordpress 6.0",
+    "beelzebub.event.HTTPMethod": "POST",
+    "beelzebub.event.Headers.accept-encoding": "gzip",
+    "beelzebub.event.Headers.connection": "close",
+    "beelzebub.event.Headers.content-length": "314",
+    "beelzebub.event.Headers.content-type": "application/xml",
+    "beelzebub.event.Headers.user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36",
+    "beelzebub.event.HeadersText": "[Key: User-Agent, values: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36],[Key: Content-Length, values: 314],[Key: Content-Type, values: application/xml],[Key: Accept-Encoding, values: gzip],[Key: Connection, values: close],",
+    "beelzebub.event.HostHTTPRequest": "1.128.0.16:80",
+    "beelzebub.event.ID": "1d4373f6-6dde-4b96-8f09-3ffb472de389",
+    "beelzebub.event.Msg": "HTTP New request",
+    "beelzebub.event.Protocol": "HTTP",
+    "beelzebub.event.RemoteAddr": "1.128.0.58:41654",
+    "beelzebub.event.RequestURI": "/Autodiscover/Autodiscover.xml",
+    "beelzebub.event.SourceIp": "1.128.0.58",
+    "beelzebub.event.SourcePort": "41654",
+    "beelzebub.event.Status": "Stateless",
+    "beelzebub.event.UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36",
+    "beelzebub.level": "info",
+    "beelzebub.msg": "New Event",
+    "beelzebub.status": "Stateless",
+    "beelzebub.time": "2025-02-19T07:48:34.000Z",
+    "data_stream.dataset": "beelzebub.logs",
+    "data_stream.namespace": "46324",
+    "data_stream.type": "logs",
+    "destination.as.number": 1221,
+    "destination.as.organization.name": "Telstra Pty Ltd",
+    "destination.ip": "1.128.0.16",
+    "destination.port": 80,
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "network"
+    ],
+    "event.dataset": "beelzebub.logs",
+    "event.id": "1d4373f6-6dde-4b96-8f09-3ffb472de389",
+    "event.ingested": "2026-03-10T02:08:37Z",
+    "event.kind": "event",
+    "event.original": "{\"event\":{\"Body\":\"\\u003c!DOCTYPE xxe [\\n\\u003c!ELEMENT name ANY \\u003e\\n\\u003c!ENTITY xxe SYSTEM \\\"file:///etc/passwd\\\"\\u003e]\\u003e\\n\\u003cAutodiscover xmlns=\\\"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\\\"\\u003e\\n\\u003cRequest\\u003e\\n\\u003cEMailAddress\\u003eaaaaa\\u003c/EMailAddress\\u003e\\n\\u003cAcceptableResponseSchema\\u003e\\u0026xxe;\\u003c/AcceptableResponseSchema\\u003e\\n\\u003c/Request\\u003e\\n\\u003c/Autodiscover\\u003e\",\"Client\":\"\",\"Command\":\"\",\"CommandOutput\":\"\",\"Cookies\":\"\",\"DateTime\":\"2025-02-19T07:48:34Z\",\"Description\":\"Wordpress 6.0\",\"Environ\":\"\",\"HTTPMethod\":\"POST\",\"Headers\":\"[Key: User-Agent, values: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36],[Key: Content-Length, values: 314],[Key: Content-Type, values: application/xml],[Key: Accept-Encoding, values: gzip],[Key: Connection, values: close],\",\"HostHTTPRequest\":\"1.128.0.16:80\",\"ID\":\"1d4373f6-6dde-4b96-8f09-3ffb472de389\",\"Msg\":\"HTTP New request\",\"Password\":\"\",\"Protocol\":\"HTTP\",\"RemoteAddr\":\"1.128.0.58:41654\",\"RequestURI\":\"/Autodiscover/Autodiscover.xml\",\"SourceIp\":\"1.128.0.58\",\"SourcePort\":\"41654\",\"Status\":\"Stateless\",\"User\":\"\",\"UserAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36\"},\"level\":\"info\",\"msg\":\"New Event\",\"status\":\"Stateless\",\"time\":\"2025-02-19T07:48:34Z\"}",
+    "event.reason": "New Event",
+    "event.type": [
+      "info"
+    ],
+    "http.request.body.bytes": 314,
+    "http.request.body.content": "<!DOCTYPE xxe [\n<!ELEMENT name ANY >\n<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>\n<Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a\">\n<Request>\n<EMailAddress>aaaaa</EMailAddress>\n<AcceptableResponseSchema>&xxe;</AcceptableResponseSchema>\n</Request>\n</Autodiscover>",
+    "http.request.method": "POST",
+    "input.type": "http_endpoint",
+    "related.ip": [
+      "1.128.0.58"
+    ],
+    "source.as.number": 1221,
+    "source.as.organization.name": "Telstra Pty Ltd",
+    "source.ip": "1.128.0.58",
+    "source.port": 41654,
+    "tags": [
+      "preserve_original_event",
+      "redact_passwords",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "url.domain": "1.128.0.16",
+    "url.extension": "xml",
+    "url.original": "/Autodiscover/Autodiscover.xml",
+    "url.path": "/Autodiscover/Autodiscover.xml",
+    "url.port": 80,
+    "user_agent.device.name": "Other",
+    "user_agent.device.type": "Desktop",
+    "user_agent.name": "Chrome",
+    "user_agent.original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36",
+    "user_agent.os.full": "Windows 10",
+    "user_agent.os.name": "Windows",
+    "user_agent.os.version": "10",
+    "user_agent.version": "78.0.3904.108"
+  },
+  {
+    "@timestamp": "2025-02-13T01:08:34.000Z",
+    "agent.ephemeral_id": "a0a1742c-9f5d-4ce3-bfeb-2e2f14ee2e1c",
+    "agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "agent.name": "elastic-agent-31510",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "beelzebub.event.Command": "ps w",
+    "beelzebub.event.CommandOutput": "```\n    PID TTY      STAT   TIME COMMAND\n   2042 pts/0    Ss     0:00 bash\n   2106 pts/0    R+     0:00 ps w\n```",
+    "beelzebub.event.DateTime": "2025-02-13T01:08:34.000Z",
+    "beelzebub.event.Description": "SSH interactive ChatGPT",
+    "beelzebub.event.ID": "1c18ad80-60bb-48f6-8e47-05e707ac93eb",
+    "beelzebub.event.Msg": "New SSH Terminal Session",
+    "beelzebub.event.Protocol": "SSH",
+    "beelzebub.event.RemoteAddr": "1.128.0.133:60748",
+    "beelzebub.event.SourceIp": "1.128.0.133",
+    "beelzebub.event.SourcePort": "60748",
+    "beelzebub.event.Status": "Interaction",
+    "beelzebub.level": "info",
+    "beelzebub.msg": "New Event",
+    "beelzebub.status": "Interaction",
+    "beelzebub.time": "2025-02-13T01:08:34.000Z",
+    "data_stream.dataset": "beelzebub.logs",
+    "data_stream.namespace": "46324",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "network"
+    ],
+    "event.dataset": "beelzebub.logs",
+    "event.id": "1c18ad80-60bb-48f6-8e47-05e707ac93eb",
+    "event.ingested": "2026-03-10T02:08:36Z",
+    "event.kind": "event",
+    "event.original": "{\"event\":{\"Body\":\"\",\"Client\":\"\",\"Command\":\"ps w\",\"CommandOutput\":\"```\\n    PID TTY      STAT   TIME COMMAND\\n   2042 pts/0    Ss     0:00 bash\\n   2106 pts/0    R+     0:00 ps w\\n```\",\"Cookies\":\"\",\"DateTime\":\"2025-02-13T01:08:34Z\",\"Description\":\"SSH interactive ChatGPT\",\"Environ\":\"\",\"HTTPMethod\":\"\",\"Headers\":\"\",\"HostHTTPRequest\":\"\",\"ID\":\"1c18ad80-60bb-48f6-8e47-05e707ac93eb\",\"Msg\":\"New SSH Terminal Session\",\"Password\":\"\",\"Protocol\":\"SSH\",\"RemoteAddr\":\"1.128.0.133:60748\",\"RequestURI\":\"\",\"SourceIp\":\"1.128.0.133\",\"SourcePort\":\"60748\",\"Status\":\"Interaction\",\"User\":\"\",\"UserAgent\":\"\"},\"level\":\"info\",\"msg\":\"New Event\",\"status\":\"Interaction\",\"time\":\"2025-02-13T01:08:34Z\"}",
+    "event.reason": "New Event",
+    "event.type": [
+      "info"
+    ],
+    "input.type": "http_endpoint",
+    "related.ip": [
+      "1.128.0.133"
+    ],
+    "source.as.number": 1221,
+    "source.as.organization.name": "Telstra Pty Ltd",
+    "source.ip": "1.128.0.133",
+    "source.port": 60748,
+    "tags": [
+      "preserve_original_event",
+      "redact_passwords",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2025-02-13T01:08:26.000Z",
+    "agent.ephemeral_id": "a0a1742c-9f5d-4ce3-bfeb-2e2f14ee2e1c",
+    "agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "agent.name": "elastic-agent-31510",
+    "agent.type": "filebeat",
+    "agent.version": "9.3.1",
+    "beelzebub.event.Client": "SSH-2.0-dropbear",
+    "beelzebub.event.DateTime": "2025-02-13T01:08:26.000Z",
+    "beelzebub.event.Description": "SSH interactive ChatGPT",
+    "beelzebub.event.ID": "1974e109-d6f8-4bb1-934c-180a163e1cb8",
+    "beelzebub.event.Msg": "New SSH attempt",
+    "beelzebub.event.Password": "<REDACTED>",
+    "beelzebub.event.Protocol": "SSH",
+    "beelzebub.event.RemoteAddr": "1.128.0.133:60748",
+    "beelzebub.event.SourceIp": "1.128.0.133",
+    "beelzebub.event.SourcePort": "60748",
+    "beelzebub.event.Status": "Stateless",
+    "beelzebub.event.User": "root",
+    "beelzebub.level": "info",
+    "beelzebub.msg": "New Event",
+    "beelzebub.status": "Stateless",
+    "beelzebub.time": "2025-02-13T01:08:26.000Z",
+    "data_stream.dataset": "beelzebub.logs",
+    "data_stream.namespace": "46324",
+    "data_stream.type": "logs",
+    "ecs.version": "8.17.0",
+    "elastic_agent.id": "66babfbb-1a24-44fd-ad21-506c951b22d6",
+    "elastic_agent.snapshot": false,
+    "elastic_agent.version": "9.3.1",
+    "event.agent_id_status": "verified",
+    "event.category": [
+      "network"
+    ],
+    "event.dataset": "beelzebub.logs",
+    "event.id": "1974e109-d6f8-4bb1-934c-180a163e1cb8",
+    "event.ingested": "2026-03-10T02:08:36Z",
+    "event.kind": "event",
+    "event.original": "{\"event\":{\"Body\":\"\",\"Client\":\"SSH-2.0-dropbear\",\"Command\":\"\",\"CommandOutput\":\"\",\"Cookies\":\"\",\"DateTime\":\"2025-02-13T01:08:26Z\",\"Description\":\"SSH interactive ChatGPT\",\"Environ\":\"\",\"HTTPMethod\":\"\",\"Headers\":\"\",\"HostHTTPRequest\":\"\",\"ID\":\"1974e109-d6f8-4bb1-934c-180a163e1cb8\",\"Msg\":\"New SSH attempt\",\"Password\":\"<REDACTED>\",\"Protocol\":\"SSH\",\"RemoteAddr\":\"1.128.0.133:60748\",\"RequestURI\":\"\",\"SourceIp\":\"1.128.0.133\",\"SourcePort\":\"60748\",\"Status\":\"Stateless\",\"User\":\"root\",\"UserAgent\":\"\"},\"level\":\"info\",\"msg\":\"New Event\",\"status\":\"Stateless\",\"time\":\"2025-02-13T01:08:26Z\"}",
+    "event.reason": "New Event",
+    "event.type": [
+      "info"
+    ],
+    "input.type": "http_endpoint",
+    "related.ip": [
+      "1.128.0.133"
+    ],
+    "related.user": [
+      "root"
+    ],
+    "source.as.number": 1221,
+    "source.as.organization.name": "Telstra Pty Ltd",
+    "source.ip": "1.128.0.133",
+    "source.port": 60748,
+    "tags": [
+      "preserve_original_event",
+      "redact_passwords",
+      "preserve_duplicate_custom_fields",
+      "forwarded"
+    ],
+    "user.name": "root"
+  }
+]

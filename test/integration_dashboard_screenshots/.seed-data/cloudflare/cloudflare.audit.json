@@ -1,0 +1,445 @@
+[
+  {
+    "@timestamp": "2021-12-30T13:42:17.000Z",
+    "agent": {
+      "ephemeral_id": "dc83a73a-5241-4a3b-bf08-1040eb8209dd",
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "name": "elastic-agent-26192",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "aaabbbccc"
+      },
+      "provider": "cloudflare"
+    },
+    "cloudflare": {
+      "audit": {
+        "actor": {
+          "type": "user"
+        },
+        "owner": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+        },
+        "resource": {
+          "id": "enrqj9du8rnx2swwd9l32qots7l54t9s",
+          "type": "user"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cloudflare.audit",
+      "namespace": "77156",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "api_key_view",
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2026-03-10T01:28:27.038Z",
+      "dataset": "cloudflare.audit",
+      "id": "atdc0b470f-17b0-4bff-9113-a4fba3bf052c",
+      "ingested": "2026-03-10T01:28:28Z",
+      "kind": "event",
+      "original": "{\"action\":{\"result\":true,\"type\":\"API_key_view\"},\"actor\":{\"email\":\"user@example.com\",\"id\":\"enrqenl3j9du8rnx2swwd9l32qots7l54t9s\",\"ip\":\"175.16.199.0\",\"type\":\"user\"},\"id\":\"atdc0b470f-17b0-4bff-9113-a4fba3bf052c\",\"interface\":\"\",\"metadata\":{},\"newValue\":\"\",\"oldValue\":\"\",\"owner\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\"},\"resource\":{\"id\":\"enrqj9du8rnx2swwd9l32qots7l54t9s\",\"type\":\"user\"},\"when\":\"2021-12-30T13:42:17Z\"}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "175.16.199.0"
+      ],
+      "user": [
+        "enrqenl3j9du8rnx2swwd9l32qots7l54t9s",
+        "enrqj9du8rnx2swwd9l32qots7l54t9s"
+      ]
+    },
+    "source": {
+      "address": "175.16.199.0",
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.0"
+    },
+    "tags": [
+      "forwarded",
+      "cloudflare-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "email": "user@example.com",
+      "id": "enrqenl3j9du8rnx2swwd9l32qots7l54t9s"
+    }
+  },
+  {
+    "@timestamp": "2021-11-30T20:19:48.000Z",
+    "agent": {
+      "ephemeral_id": "dc83a73a-5241-4a3b-bf08-1040eb8209dd",
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "name": "elastic-agent-26192",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "aaabbbccc"
+      },
+      "provider": "cloudflare"
+    },
+    "cloudflare": {
+      "audit": {
+        "actor": {
+          "type": "user"
+        },
+        "metadata": {
+          "token_name": "test",
+          "token_tag": "b7261c49a793a82678d12285f0bc1401"
+        },
+        "owner": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+        },
+        "resource": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s",
+          "type": "account"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cloudflare.audit",
+      "namespace": "77156",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "token_create",
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2026-03-10T01:28:25.083Z",
+      "dataset": "cloudflare.audit",
+      "id": "73fd39ed-5aab-4a2a-b93c-c9a4abf0c425",
+      "ingested": "2026-03-10T01:28:28Z",
+      "kind": "event",
+      "original": "{\"action\":{\"result\":true,\"type\":\"token_create\"},\"actor\":{\"email\":\"user@example.com\",\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"ip\":\"52.91.36.10\",\"type\":\"user\"},\"id\":\"73fd39ed-5aab-4a2a-b93c-c9a4abf0c425\",\"interface\":\"\",\"metadata\":{\"token_name\":\"test\",\"token_tag\":\"b7261c49a793a82678d12285f0bc1401\"},\"newValue\":\"\",\"oldValue\":\"\",\"owner\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\"},\"resource\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"type\":\"account\"},\"when\":\"2021-11-30T20:19:48Z\"}",
+      "outcome": "success",
+      "type": [
+        "creation"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "52.91.36.10"
+      ],
+      "user": [
+        "enl3j9du8rnx2swwd9l32qots7l54t9s"
+      ]
+    },
+    "source": {
+      "address": "52.91.36.10",
+      "ip": "52.91.36.10"
+    },
+    "tags": [
+      "forwarded",
+      "cloudflare-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "email": "user@example.com",
+      "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+    }
+  },
+  {
+    "@timestamp": "2021-11-30T20:19:27.000Z",
+    "agent": {
+      "ephemeral_id": "dc83a73a-5241-4a3b-bf08-1040eb8209dd",
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "name": "elastic-agent-26192",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "aaabbbccc"
+      },
+      "provider": "cloudflare"
+    },
+    "cloudflare": {
+      "audit": {
+        "actor": {
+          "type": "user"
+        },
+        "metadata": {
+          "new_token_status": "deleted",
+          "old_token_status": "active",
+          "token_name": "test",
+          "token_tag": "70b6abc4efe977131126486cdd1c00c5"
+        },
+        "owner": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+        },
+        "resource": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s",
+          "type": "account"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cloudflare.audit",
+      "namespace": "77156",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "token_revoke",
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2026-03-10T01:28:27.032Z",
+      "dataset": "cloudflare.audit",
+      "id": "9929d149-1c4e-4524-87b5-bb81e83b5c84",
+      "ingested": "2026-03-10T01:28:28Z",
+      "kind": "event",
+      "original": "{\"action\":{\"result\":true,\"type\":\"token_revoke\"},\"actor\":{\"email\":\"user@example.com\",\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"ip\":\"52.91.36.10\",\"type\":\"user\"},\"id\":\"9929d149-1c4e-4524-87b5-bb81e83b5c84\",\"interface\":\"\",\"metadata\":{\"new_token_status\":\"deleted\",\"old_token_status\":\"active\",\"token_name\":\"test\",\"token_tag\":\"70b6abc4efe977131126486cdd1c00c5\"},\"newValue\":\"\",\"oldValue\":\"\",\"owner\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\"},\"resource\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"type\":\"account\"},\"when\":\"2021-11-30T20:19:27Z\"}",
+      "outcome": "success",
+      "type": [
+        "deletion"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "52.91.36.10"
+      ],
+      "user": [
+        "enl3j9du8rnx2swwd9l32qots7l54t9s"
+      ]
+    },
+    "source": {
+      "address": "52.91.36.10",
+      "ip": "52.91.36.10"
+    },
+    "tags": [
+      "forwarded",
+      "cloudflare-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "email": "user@example.com",
+      "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+    }
+  },
+  {
+    "@timestamp": "2021-11-30T13:42:17.000Z",
+    "agent": {
+      "ephemeral_id": "dc83a73a-5241-4a3b-bf08-1040eb8209dd",
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "name": "elastic-agent-26192",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "aaabbbccc"
+      },
+      "provider": "cloudflare"
+    },
+    "cloudflare": {
+      "audit": {
+        "actor": {
+          "type": "user"
+        },
+        "owner": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+        },
+        "resource": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s",
+          "type": "user"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cloudflare.audit",
+      "namespace": "77156",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "api_key_view",
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2026-03-10T01:28:27.035Z",
+      "dataset": "cloudflare.audit",
+      "id": "dc0b470f-17b0-4bff-9113-a4fba3bf052c",
+      "ingested": "2026-03-10T01:28:28Z",
+      "kind": "event",
+      "original": "{\"action\":{\"result\":true,\"type\":\"API_key_view\"},\"actor\":{\"email\":\"user@example.com\",\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"ip\":\"52.91.36.10\",\"type\":\"user\"},\"id\":\"dc0b470f-17b0-4bff-9113-a4fba3bf052c\",\"interface\":\"\",\"metadata\":{},\"newValue\":\"\",\"oldValue\":\"\",\"owner\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\"},\"resource\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"type\":\"user\"},\"when\":\"2021-11-30T13:42:17Z\"}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "52.91.36.10"
+      ],
+      "user": [
+        "enl3j9du8rnx2swwd9l32qots7l54t9s"
+      ]
+    },
+    "source": {
+      "address": "52.91.36.10",
+      "ip": "52.91.36.10"
+    },
+    "tags": [
+      "forwarded",
+      "cloudflare-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "email": "user@example.com",
+      "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+    }
+  },
+  {
+    "@timestamp": "2021-11-30T13:42:04.000Z",
+    "agent": {
+      "ephemeral_id": "dc83a73a-5241-4a3b-bf08-1040eb8209dd",
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "name": "elastic-agent-26192",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cloud": {
+      "account": {
+        "id": "aaabbbccc"
+      },
+      "provider": "cloudflare"
+    },
+    "cloudflare": {
+      "audit": {
+        "actor": {
+          "type": "user"
+        },
+        "owner": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+        },
+        "resource": {
+          "id": "enl3j9du8rnx2swwd9l32qots7l54t9s",
+          "type": "account"
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cloudflare.audit",
+      "namespace": "77156",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "086483e2-de59-4efb-96c4-6fa0cb44d926",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "rotate_api_key",
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "created": "2026-03-10T01:28:27.036Z",
+      "dataset": "cloudflare.audit",
+      "id": "8d3396e8-c903-5a66-9421-00fc34570550",
+      "ingested": "2026-03-10T01:28:28Z",
+      "kind": "event",
+      "original": "{\"action\":{\"info\":\"key digest: c6b5d100d7ce492d24c5b13160fce1cc0092ce7e8d8430e9f5cf5468868be6f6\",\"result\":true,\"type\":\"rotate_API_key\"},\"actor\":{\"email\":\"user@example.com\",\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"ip\":\"52.91.36.10\",\"type\":\"user\"},\"id\":\"8d3396e8-c903-5a66-9421-00fc34570550\",\"interface\":\"\",\"metadata\":{},\"newValue\":\"\",\"oldValue\":\"\",\"owner\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\"},\"resource\":{\"id\":\"enl3j9du8rnx2swwd9l32qots7l54t9s\",\"type\":\"account\"},\"when\":\"2021-11-30T13:42:04Z\"}",
+      "outcome": "success",
+      "type": [
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "52.91.36.10"
+      ],
+      "user": [
+        "enl3j9du8rnx2swwd9l32qots7l54t9s"
+      ]
+    },
+    "source": {
+      "address": "52.91.36.10",
+      "ip": "52.91.36.10"
+    },
+    "tags": [
+      "forwarded",
+      "cloudflare-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "email": "user@example.com",
+      "id": "enl3j9du8rnx2swwd9l32qots7l54t9s"
+    }
+  }
+]

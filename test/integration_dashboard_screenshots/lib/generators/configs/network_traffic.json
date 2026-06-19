@@ -1,0 +1,301 @@
+{
+  "package": "network_traffic",
+  "dataStreams": [
+    {
+      "dataset": "network_traffic.amqp",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "event.duration",
+        "method",
+        "network.protocol",
+        "network_traffic.status",
+        "network_traffic.thrift.method",
+        "status",
+        "type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.cassandra",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "cassandra.request.headers.op",
+        "cassandra.response.headers.op",
+        "cassandra.response.result.type",
+        "event.duration",
+        "network_traffic.cassandra.request.headers.op",
+        "network_traffic.cassandra.response.headers.op",
+        "network_traffic.cassandra.response.result.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.dhcpv4",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "client.bytes",
+        "dhcpv4.client_mac",
+        "dhcpv4.op_code",
+        "dhcpv4.option.message_type",
+        "dhcpv4.transaction_id",
+        "network_traffic.dhcpv4.client_mac",
+        "network_traffic.dhcpv4.op_code",
+        "network_traffic.dhcpv4.option.message_type",
+        "network_traffic.dhcpv4.transaction_id",
+        "server.bytes"
+      ],
+      "filterValues": {
+        "dhcpv4.option.message_type": [
+          "decline",
+          "nak"
+        ]
+      }
+    },
+    {
+      "dataset": "network_traffic.dns",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "client.bytes",
+        "dns.op_code",
+        "dns.question.class",
+        "dns.question.name",
+        "dns.question.type",
+        "dns.response_code",
+        "event.duration",
+        "server.bytes"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.flow",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "destination.bytes",
+        "destination.ip",
+        "flow.final",
+        "flow.id",
+        "source.bytes",
+        "source.ip"
+      ],
+      "filterValues": {
+        "flow.final": [
+          "true"
+        ]
+      }
+    },
+    {
+      "dataset": "network_traffic.http",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "http.response.status_code",
+        "url.full"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.icmp",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "event.duration",
+        "method",
+        "network.protocol",
+        "network_traffic.status",
+        "network_traffic.thrift.method",
+        "status",
+        "type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.memcached",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "event.duration",
+        "method",
+        "network.protocol",
+        "network_traffic.status",
+        "network_traffic.thrift.method",
+        "status",
+        "type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.mongodb",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "destination.bytes",
+        "event.duration",
+        "method",
+        "network_traffic.mongodb.method",
+        "network_traffic.mongodb.query",
+        "network_traffic.mongodb.resource",
+        "query",
+        "resource",
+        "source.bytes",
+        "status"
+      ],
+      "filterValues": {
+        "status": [
+          "OK"
+        ]
+      }
+    },
+    {
+      "dataset": "network_traffic.mysql",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "destination.bytes",
+        "event.duration",
+        "method",
+        "network_traffic.mysql.method",
+        "network_traffic.mysql.query",
+        "query",
+        "source.bytes",
+        "status"
+      ],
+      "filterValues": {
+        "status": [
+          "OK"
+        ],
+        "method": [
+          "DELETE",
+          "UPDATE",
+          "INSERT",
+          "SELECT"
+        ]
+      }
+    },
+    {
+      "dataset": "network_traffic.nfs",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "event.duration",
+        "network_traffic.nfs.opcode",
+        "network_traffic.nfs.rpc.cred.gid",
+        "network_traffic.nfs.rpc.cred.machinename",
+        "network_traffic.nfs.rpc.cred.uid",
+        "network_traffic.nfs.status",
+        "nfs.opcode",
+        "nfs.status",
+        "rpc.cred.gid",
+        "rpc.cred.machinename",
+        "rpc.cred.uid"
+      ],
+      "filterValues": {
+        "nfs.status": [
+          "NFSERR_NOENT",
+          "NFS_OK"
+        ]
+      }
+    },
+    {
+      "dataset": "network_traffic.pgsql",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "destination.bytes",
+        "event.duration",
+        "method",
+        "network_traffic.pgsql.method",
+        "network_traffic.pgsql.query",
+        "query",
+        "source.bytes",
+        "status"
+      ],
+      "filterValues": {
+        "status": [
+          "OK"
+        ],
+        "method": [
+          "DELETE",
+          "UPDATE",
+          "INSERT",
+          "SELECT"
+        ]
+      }
+    },
+    {
+      "dataset": "network_traffic.redis",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "event.duration",
+        "method",
+        "network.protocol",
+        "network_traffic.status",
+        "network_traffic.thrift.method",
+        "status",
+        "type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.sip",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.location",
+        "event.duration",
+        "method",
+        "network.protocol",
+        "network_traffic.status",
+        "network_traffic.thrift.method",
+        "status",
+        "type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "network_traffic.thrift",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "event.duration",
+        "method",
+        "network_traffic.thrift.method",
+        "status"
+      ],
+      "filterValues": {
+        "status": [
+          "OK"
+        ]
+      }
+    },
+    {
+      "dataset": "network_traffic.tls",
+      "indexPattern": "f92a3031-6c42-4b41-851e-22792543101a",
+      "docTarget": 500,
+      "fields": [
+        "event.duration",
+        "tls.cipher",
+        "tls.client.ja3",
+        "tls.client.x509.signature_algorithm",
+        "tls.client.x509.subject.common_name",
+        "tls.detailed.alert_types",
+        "tls.detailed.resumption_method",
+        "tls.detailed.version",
+        "tls.established",
+        "tls.server.x509.public_key_size",
+        "tls.server.x509.subject.common_name",
+        "tls.server.x509.subject.organization"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "package": "kubernetes_otel",
+  "dataStreams": [
+    {
+      "dataset": "k8sclusterreceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 840,
+      "fields": [
+        "daemonset-not-ready",
+        "daemonset-ready",
+        "deployment-not-ready",
+        "deployment-ready",
+        "failed",
+        "metrics.k8s.container.cpu_limit",
+        "metrics.k8s.container.cpu_request",
+        "metrics.k8s.container.memory_limit",
+        "metrics.k8s.container.memory_request",
+        "metrics.k8s.node.allocatable_cpu",
+        "metrics.k8s.node.allocatable_memory",
+        "metrics.k8s.node.condition_ready",
+        "metrics.k8s.pod.phase",
+        "pending",
+        "replicaset-not-ready",
+        "replicaset-ready",
+        "resource.attributes.container.id",
+        "resource.attributes.k8s.daemonset.name",
+        "resource.attributes.k8s.deployment.name",
+        "resource.attributes.k8s.namespace.name",
+        "resource.attributes.k8s.node.name",
+        "resource.attributes.k8s.pod.name",
+        "resource.attributes.k8s.replicaset.name",
+        "resource.attributes.k8s.statefulset.name",
+        "running",
+        "statefulset-not-ready",
+        "statefulset-ready",
+        "succeeded"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "k8seventsreceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "k8s.object.kind",
+        "severity_text"
+      ],
+      "filterValues": {
+        "severity_text": [
+          "Warning"
+        ]
+      }
+    }
+  ]
+}

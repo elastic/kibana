@@ -1,0 +1,75 @@
+{
+  "package": "f5_bigip",
+  "dataStreams": [
+    {
+      "dataset": "f5_bigip.log",
+      "indexPattern": "logs-*",
+      "docTarget": 1000,
+      "fields": [
+        "Records",
+        "client.ip",
+        "destination.ip",
+        "device.id",
+        "dns.question.name",
+        "dns.question.type",
+        "event.action",
+        "event.severity",
+        "f5_bigip.log.access.policy_result",
+        "f5_bigip.log.acl.policy.type",
+        "f5_bigip.log.acl.rule.name",
+        "f5_bigip.log.attack.mitigation_name",
+        "f5_bigip.log.attack.trigger_name",
+        "f5_bigip.log.attack.type",
+        "f5_bigip.log.attack.vector_name",
+        "f5_bigip.log.browser_name",
+        "f5_bigip.log.cpu_value",
+        "f5_bigip.log.drop_reason",
+        "f5_bigip.log.errdefs.msg_name",
+        "f5_bigip.log.http.host",
+        "f5_bigip.log.http.status",
+        "f5_bigip.log.node",
+        "f5_bigip.log.previous.initiated_action.status",
+        "f5_bigip.log.request.status",
+        "f5_bigip.log.response.code",
+        "f5_bigip.log.sub_violations",
+        "f5_bigip.log.sync_status",
+        "f5_bigip.log.telemetry.event.category",
+        "f5_bigip.log.transaction_outcome",
+        "f5_bigip.log.virus_name",
+        "host.geo.country_iso_code",
+        "host.hostname",
+        "host.ip",
+        "host.name",
+        "host.os.name",
+        "host.os.version",
+        "log.level",
+        "network.application",
+        "network.protocol",
+        "rule.name",
+        "source.ip",
+        "user.name",
+        "user_agent.os.name",
+        "vulnerability.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {
+        "f5_bigip.log.telemetry.event.category": [
+          "ihealthInfo",
+          "AFM",
+          "AVR",
+          "LTM",
+          "ASM",
+          "systemInfo",
+          "APM"
+        ],
+        "event.action": [
+          "Reject",
+          "Blocked"
+        ],
+        "user.name": [
+          "N/A"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "package": "mysql_otel",
+  "dataStreams": [
+    {
+      "dataset": "mysqlreceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 810,
+      "fields": [
+        "attributes.error",
+        "attributes.kind",
+        "attributes.schema",
+        "attributes.table",
+        "kind",
+        "mysql.buffer_pool.data_pages",
+        "mysql.buffer_pool.limit",
+        "mysql.buffer_pool.pages",
+        "mysql.buffer_pool.usage",
+        "mysql.client.network.io",
+        "mysql.connection.errors",
+        "mysql.double_writes",
+        "mysql.handlers",
+        "mysql.instance.endpoint",
+        "mysql.locks",
+        "mysql.log_operations",
+        "mysql.max_used_connections",
+        "mysql.page_operations",
+        "mysql.replica.sql_delay",
+        "mysql.replica.time_behind_source",
+        "mysql.row_locks",
+        "mysql.row_operations",
+        "mysql.table.io.wait.count",
+        "mysql.table.io.wait.time",
+        "mysql.threads",
+        "operation",
+        "status"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

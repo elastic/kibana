@@ -1,0 +1,105 @@
+[
+  {
+    "@timestamp": "2023-02-22T09:00:21.728Z",
+    "agent": {
+      "ephemeral_id": "fa1c6ec3-3a0b-44b4-848f-806f84d48c96",
+      "id": "910ade4d-aa22-4427-a5f5-b904b8ddebd8",
+      "name": "elastic-agent-96937",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "bitwarden": {
+      "event": {
+        "acting_user": {
+          "id": "a2549f79-a71f-4eb9-9234-eb7247333f94"
+        },
+        "collection": {
+          "id": "bce212a4-25f3-4888-8a0a-4c5736d851e0"
+        },
+        "date": "2023-02-22T09:00:21.728Z",
+        "device": {
+          "name": "Android",
+          "value": "0"
+        },
+        "group": {
+          "id": "f29a2515-91d2-4452-b49b-5e8040e6b0f4"
+        },
+        "ip_address": "172.16.254.1",
+        "item": {
+          "id": "3767a302-8208-4dc6-b842-030428a1cfad"
+        },
+        "member": {
+          "id": "e68b8629-85eb-4929-92c0-b84464976ba4"
+        },
+        "policy": {
+          "id": "f29a2515-91d2-4452-b49b-5e8040e6b0f4"
+        },
+        "type": {
+          "name": "User_LoggedIn",
+          "value": "1000"
+        }
+      },
+      "object": "event"
+    },
+    "data_stream": {
+      "dataset": "bitwarden.event",
+      "namespace": "39091",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "910ade4d-aa22-4427-a5f5-b904b8ddebd8",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam",
+        "authentication"
+      ],
+      "created": "2026-03-10T02:23:05.134Z",
+      "dataset": "bitwarden.event",
+      "ingested": "2026-03-10T02:23:08Z",
+      "kind": "event",
+      "original": "{\"actingUserId\":\"a2549f79-a71f-4eb9-9234-eb7247333f94\",\"collectionId\":\"bce212a4-25f3-4888-8a0a-4c5736d851e0\",\"date\":\"2023-02-22T09:00:21.728Z\",\"device\":0,\"groupId\":\"f29a2515-91d2-4452-b49b-5e8040e6b0f4\",\"ipAddress\":\"172.16.254.1\",\"itemId\":\"3767a302-8208-4dc6-b842-030428a1cfad\",\"memberId\":\"e68b8629-85eb-4929-92c0-b84464976ba4\",\"object\":\"event\",\"policyId\":\"f29a2515-91d2-4452-b49b-5e8040e6b0f4\",\"type\":1000}",
+      "outcome": "success",
+      "type": [
+        "user",
+        "start"
+      ]
+    },
+    "group": {
+      "id": "f29a2515-91d2-4452-b49b-5e8040e6b0f4"
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "ip": [
+        "172.16.254.1"
+      ],
+      "user": [
+        "e68b8629-85eb-4929-92c0-b84464976ba4",
+        "a2549f79-a71f-4eb9-9234-eb7247333f94"
+      ]
+    },
+    "source": {
+      "ip": "172.16.254.1",
+      "user": {
+        "id": "a2549f79-a71f-4eb9-9234-eb7247333f94"
+      }
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "bitwarden-event"
+    ],
+    "user": {
+      "id": "e68b8629-85eb-4929-92c0-b84464976ba4"
+    }
+  }
+]

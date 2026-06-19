@@ -1,0 +1,30 @@
+{
+  "package": "apache_otel",
+  "dataStreams": [
+    {
+      "dataset": "apachereceiver.otel",
+      "indexPattern": "metrics-*",
+      "docTarget": 510,
+      "fields": [
+        "attributes.level",
+        "attributes.mode",
+        "attributes.state",
+        "host.hostname",
+        "metrics.apache.cpu.load",
+        "metrics.apache.cpu.time",
+        "metrics.apache.current_connections",
+        "metrics.apache.load.1",
+        "metrics.apache.load.15",
+        "metrics.apache.load.5",
+        "metrics.apache.requests",
+        "metrics.apache.scoreboard",
+        "metrics.apache.traffic",
+        "metrics.apache.uptime",
+        "metrics.apache.workers",
+        "resource.attributes.apache.server.name",
+        "resource.attributes.host.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

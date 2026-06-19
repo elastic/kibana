@@ -1,0 +1,324 @@
+{
+  "package": "ti_google_threat_intelligence",
+  "dataStreams": [
+    {
+      "dataset": "ti_google_threat_intelligence.domain_ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.categories",
+        "gti.threat.indicator.attributes.gti_assessment.severity",
+        "gti.threat.indicator.attributes.gti_assessment.threat_score",
+        "gti.threat.indicator.attributes.gti_assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.top_level_domain",
+        "gti.threat.indicator.attributes.type_tags",
+        "gti.threat.indicator.id",
+        "threat.feed.name",
+        "threat.indicator.as.number",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.domain_ioc_stream",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.assessment.severity",
+        "gti.threat.indicator.attributes.assessment.threat_score",
+        "gti.threat.indicator.attributes.assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.type_tags",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.id",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.enriched_ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 780,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.categories",
+        "gti.threat.indicator.attributes.gti_assessment.severity",
+        "gti.threat.indicator.attributes.gti_assessment.threat_score",
+        "gti.threat.indicator.attributes.gti_assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.top_level_domain",
+        "gti.threat.indicator.attributes.type_tags",
+        "gti.threat.indicator.matched.dataset",
+        "gti.threat.indicator.matched.module",
+        "gti.threat.indicator.relationships.campaigns.id",
+        "gti.threat.indicator.relationships.collections.id",
+        "gti.threat.indicator.relationships.malware_families.id",
+        "gti.threat.indicator.relationships.reports.id",
+        "gti.threat.indicator.relationships.software_toolkits.id",
+        "gti.threat.indicator.relationships.vulnerabilities.id",
+        "threat.feed.name",
+        "threat.indicator.as.number",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.id",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "ipv4-addr",
+          "url",
+          "file",
+          "domain-name"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.enriched_ioc_stream",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.assessment.severity",
+        "gti.threat.indicator.attributes.assessment.threat_score",
+        "gti.threat.indicator.attributes.assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.type_tags",
+        "gti.threat.indicator.id",
+        "gti.threat.indicator.matched.dataset",
+        "gti.threat.indicator.matched.module",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "ipv4-addr",
+          "file",
+          "url",
+          "domain-name"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.file_ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.categories",
+        "gti.threat.indicator.attributes.gti_assessment.severity",
+        "gti.threat.indicator.attributes.gti_assessment.threat_score",
+        "gti.threat.indicator.attributes.gti_assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.top_level_domain",
+        "gti.threat.indicator.attributes.type_tags",
+        "gti.threat.indicator.id",
+        "threat.feed.name",
+        "threat.indicator.as.number",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.file_ioc_stream",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.assessment.severity",
+        "gti.threat.indicator.attributes.assessment.threat_score",
+        "gti.threat.indicator.attributes.assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.type_tags",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.id",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.ip_ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.categories",
+        "gti.threat.indicator.attributes.gti_assessment.severity",
+        "gti.threat.indicator.attributes.gti_assessment.threat_score",
+        "gti.threat.indicator.attributes.gti_assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.top_level_domain",
+        "gti.threat.indicator.attributes.type_tags",
+        "gti.threat.indicator.id",
+        "threat.feed.name",
+        "threat.indicator.as.number",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.ip_ioc_stream",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.assessment.severity",
+        "gti.threat.indicator.attributes.assessment.threat_score",
+        "gti.threat.indicator.attributes.assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.type_tags",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.id",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.url_ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 540,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.categories",
+        "gti.threat.indicator.attributes.gti_assessment.severity",
+        "gti.threat.indicator.attributes.gti_assessment.threat_score",
+        "gti.threat.indicator.attributes.gti_assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.top_level_domain",
+        "gti.threat.indicator.attributes.type_tags",
+        "gti.threat.indicator.id",
+        "threat.feed.name",
+        "threat.indicator.as.number",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_google_threat_intelligence.url_ioc_stream",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "gti.threat.indicator.attributes.as_owner",
+        "gti.threat.indicator.attributes.assessment.severity",
+        "gti.threat.indicator.attributes.assessment.threat_score",
+        "gti.threat.indicator.attributes.assessment.verdict",
+        "gti.threat.indicator.attributes.last_analysis_stats.malicious",
+        "gti.threat.indicator.attributes.network",
+        "gti.threat.indicator.attributes.regional_internet_registry",
+        "gti.threat.indicator.attributes.tags",
+        "gti.threat.indicator.attributes.type_tags",
+        "threat.indicator.file.hash.sha256",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.id",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "domain-name",
+          "ipv4-addr",
+          "url",
+          "file"
+        ]
+      }
+    }
+  ]
+}

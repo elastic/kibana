@@ -1,0 +1,18 @@
+{
+  "package": "blacklens",
+  "dataStreams": [
+    {
+      "dataset": "blacklens.alerts",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "blacklens.alert.id",
+        "blacklens.alert.severity",
+        "blacklens.alert.type",
+        "event.dataset",
+        "event.module"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

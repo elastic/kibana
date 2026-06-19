@@ -1,0 +1,119 @@
+[
+  {
+    "@timestamp": "2023-05-23T17:18:33.000Z",
+    "agent": {
+      "ephemeral_id": "67e1facf-beef-402f-abcc-4b74bf781da4",
+      "id": "a76abee0-3ac3-4397-862f-66ae323f705a",
+      "name": "elastic-agent-88448",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "azure": {
+      "storage": {
+        "blob": {
+          "content_type": "application/octet-stream",
+          "name": "access_request.log"
+        },
+        "container": {
+          "name": "test-container"
+        }
+      }
+    },
+    "client": {
+      "as": {
+        "number": 35908
+      },
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.93"
+    },
+    "cloud": {
+      "provider": "azure"
+    },
+    "cloudflare_logpush": {
+      "access_request": {
+        "app": {
+          "uuid": "123e4567-e89b-12d3-a456-426614174000"
+        },
+        "connection": "onetimepin",
+        "request": {
+          "prompt": "Please provide your reason for accessing the application.",
+          "response": "I need to access the application for work purposes."
+        },
+        "temp_access": {
+          "approvers": [
+            "approver1@example.com",
+            "approver2@example.com"
+          ],
+          "duration": 7200
+        }
+      }
+    },
+    "data_stream": {
+      "dataset": "cloudflare_logpush.access_request",
+      "namespace": "72017",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "a76abee0-3ac3-4397-862f-66ae323f705a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "login",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "dataset": "cloudflare_logpush.access_request",
+      "id": "00c0ffeeabc12345",
+      "ingested": "2026-03-10T01:39:10Z",
+      "kind": "event",
+      "type": [
+        "access",
+        "allowed"
+      ]
+    },
+    "input": {
+      "type": "azure-blob-storage"
+    },
+    "log": {
+      "file": {
+        "path": "http://svc-azure-blob-storage-emulator:10000/devstoreaccount1/test-container/access_request.log"
+      },
+      "offset": 0
+    },
+    "related": {
+      "ip": [
+        "67.43.156.93"
+      ],
+      "user": [
+        "166befbb-00e3-5e20-bd6e-27245333949f",
+        "user@example.com",
+        "approver1@example.com",
+        "approver2@example.com"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "cloudflare_logpush-access_request"
+    ],
+    "url": {
+      "domain": "partner-zt-logs.cloudflareaccess.com/warp"
+    },
+    "user": {
+      "email": "user@example.com",
+      "id": "166befbb-00e3-5e20-bd6e-27245333949f"
+    }
+  }
+]

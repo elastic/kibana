@@ -1,0 +1,17 @@
+{
+  "package": "azure_network_watcher_nsg",
+  "dataStreams": [
+    {
+      "dataset": "azure_network_watcher_nsg.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "azure_network_watcher_nsg.log.properties.flows.flows.tuples.flow_state",
+        "azure_network_watcher_nsg.log.properties.flows.flows.tuples.traffic.decision",
+        "network.direction",
+        "rule.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

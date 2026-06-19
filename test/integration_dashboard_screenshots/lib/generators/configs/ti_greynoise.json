@@ -1,0 +1,69 @@
+{
+  "package": "ti_greynoise",
+  "dataStreams": [
+    {
+      "dataset": "ti_greynoise.enriched_ioc",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "greynoise.ip.business_service_intelligence.category",
+        "greynoise.ip.business_service_intelligence.trust_level",
+        "greynoise.ip.internet_scanner_intelligence.actor",
+        "greynoise.ip.internet_scanner_intelligence.classification",
+        "greynoise.ip.internet_scanner_intelligence.metadata.asn",
+        "greynoise.ip.internet_scanner_intelligence.metadata.organization",
+        "greynoise.ip.internet_scanner_intelligence.tag.names",
+        "threat.indicator.geo.city_name",
+        "threat.indicator.geo.country_iso_code",
+        "threat.indicator.geo.country_name",
+        "threat.indicator.ip",
+        "threat.indicator.matched.dataset",
+        "threat.indicator.matched.module"
+      ],
+      "filterValues": {
+        "greynoise.ip.internet_scanner_intelligence.classification": [
+          "benign",
+          "malicious",
+          "suspicious",
+          "unknown"
+        ],
+        "greynoise.ip.internet_scanner_intelligence.actor": [
+          "unknown"
+        ],
+        "greynoise.ip.internet_scanner_intelligence.metadata.organization": [
+          "unknown"
+        ],
+        "greynoise.ip.business_service_intelligence.category": [
+          "unknown"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_greynoise.ip",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "greynoise.ip.business_service_intelligence.category",
+        "greynoise.ip.business_service_intelligence.trust_level",
+        "greynoise.ip.internet_scanner_intelligence.actor",
+        "greynoise.ip.internet_scanner_intelligence.classification",
+        "greynoise.ip.internet_scanner_intelligence.metadata.asn",
+        "labels.is_transform_source",
+        "threat.indicator.geo.country_name",
+        "threat.indicator.ip",
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "greynoise.ip.internet_scanner_intelligence.actor": [
+          "unknown"
+        ],
+        "threat.indicator.type": [
+          "ipv4-addr"
+        ],
+        "labels.is_transform_source": [
+          "false"
+        ]
+      }
+    }
+  ]
+}

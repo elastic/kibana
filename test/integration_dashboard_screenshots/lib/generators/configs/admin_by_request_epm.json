@@ -1,0 +1,59 @@
+{
+  "package": "admin_by_request_epm",
+  "dataStreams": [
+    {
+      "dataset": "admin_by_request_epm.auditlog",
+      "indexPattern": "logs-*",
+      "docTarget": 570,
+      "fields": [
+        "admin_by_request_epm.auditlog.application.scan_result",
+        "admin_by_request_epm.auditlog.computer.platform",
+        "admin_by_request_epm.auditlog.id",
+        "admin_by_request_epm.auditlog.installs.application",
+        "admin_by_request_epm.auditlog.installs.vendor",
+        "admin_by_request_epm.auditlog.request_time_utc",
+        "admin_by_request_epm.auditlog.response_time_in_seconds",
+        "admin_by_request_epm.auditlog.scan_results.scan_result",
+        "admin_by_request_epm.auditlog.status",
+        "admin_by_request_epm.auditlog.type",
+        "admin_by_request_epm.auditlog.user.account",
+        "admin_by_request_epm.auditlog.user.full_name",
+        "admin_by_request_epm.events.computer_name",
+        "admin_by_request_epm.events.event_code",
+        "admin_by_request_epm.events.event_level",
+        "admin_by_request_epm.events.event_time_utc",
+        "admin_by_request_epm.events.id",
+        "admin_by_request_epm.events.user_name",
+        "event.dataset"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "admin_by_request_epm.events",
+      "indexPattern": "logs-*",
+      "docTarget": 570,
+      "fields": [
+        "admin_by_request_epm.auditlog.application.scan_result",
+        "admin_by_request_epm.auditlog.computer.platform",
+        "admin_by_request_epm.auditlog.id",
+        "admin_by_request_epm.auditlog.installs.application",
+        "admin_by_request_epm.auditlog.installs.vendor",
+        "admin_by_request_epm.auditlog.request_time_utc",
+        "admin_by_request_epm.auditlog.response_time_in_seconds",
+        "admin_by_request_epm.auditlog.scan_results.scan_result",
+        "admin_by_request_epm.auditlog.status",
+        "admin_by_request_epm.auditlog.type",
+        "admin_by_request_epm.auditlog.user.account",
+        "admin_by_request_epm.auditlog.user.full_name",
+        "admin_by_request_epm.events.computer_name",
+        "admin_by_request_epm.events.event_code",
+        "admin_by_request_epm.events.event_level",
+        "admin_by_request_epm.events.event_time_utc",
+        "admin_by_request_epm.events.id",
+        "admin_by_request_epm.events.user_name",
+        "event.dataset"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

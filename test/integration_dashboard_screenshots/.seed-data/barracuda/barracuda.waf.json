@@ -1,0 +1,1456 @@
+[
+  {
+    "@timestamp": "2023-03-30T01:11:07.915Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "SYS",
+        "module": {
+          "event_id": 19034,
+          "event_message": "Num clients to walk : 0",
+          "name": "APS"
+        },
+        "severity_level": "INFO",
+        "unit_name": "barracuda"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "created": "2023-03-30T01:11:07.915Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 2304
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-30T01:02:21.053Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "SYS",
+        "module": {
+          "event_id": 19034,
+          "event_message": "Adding the Fingerprint:[g_448b2101c2af40186876949d97713f2f] to the Lockout Table",
+          "name": "APS"
+        },
+        "severity_level": "NOTI",
+        "unit_name": "barracuda"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "created": "2023-03-30T01:02:21.053Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 2393
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-30T01:00:56.251Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "SYS",
+        "module": {
+          "event_id": 62001,
+          "event_message": "Advanced Bot Protection Service [Provisioning] timed out. Error: Timed out while waiting for socket to become ready for reading",
+          "name": "ABP_SVC"
+        },
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "created": "2023-03-30T01:00:56.251Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "alert",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 2539
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-30T01:00:56.251Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "SYS",
+        "module": {
+          "event_id": 62004,
+          "event_message": "Failed to receive Symmetric key for Supply Chain. Error: HASH(0xce04b10)",
+          "name": "ABP_SVC"
+        },
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "created": "2023-03-30T01:00:56.251Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "alert",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 2736
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-30T01:00:49.732Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "SYS",
+        "module": {
+          "event_id": 19034,
+          "event_message": "Adding the Fingerprint:[g_6ddfd29093fc8264ddd87bcf7eeda6db] to the Lockout Table",
+          "name": "APS"
+        },
+        "severity_level": "NOTI",
+        "unit_name": "barracuda"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "created": "2023-03-30T01:00:49.732Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 2878
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-30T00:53:07.902Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "SYS",
+        "module": {
+          "event_id": 19032,
+          "event_message": "[10.9.0.4:443] OnDDOSProtectionReqH: No entry found for the IP in the captcha tables, checking if its verified or making one",
+          "name": "APS"
+        },
+        "severity_level": "INFO",
+        "unit_name": "barracuda"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "created": "2023-03-30T00:53:07.902Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 3024
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-29T14:26:13.484Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "client_type": "GUI",
+        "command_name": "login",
+        "log_type": "AUDIT",
+        "object_type": "global",
+        "transaction_id": 0,
+        "transaction_type": "LOGIN",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "31.208.15.130",
+      "port": 64197,
+      "user": {
+        "name": "elastic"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "authentication",
+        "configuration"
+      ],
+      "created": "2023-03-29T14:26:13.484Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "access"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 3214
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "31.208.15.130"
+      ],
+      "user": [
+        "elastic"
+      ]
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-29T14:23:51.998Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "client_type": "GUI",
+        "command_name": "logout",
+        "log_type": "AUDIT",
+        "object_type": "global",
+        "transaction_id": 0,
+        "transaction_type": "LOGOUT",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "31.208.15.130",
+      "port": 63685,
+      "user": {
+        "name": "elastic"
+      }
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "authentication",
+        "configuration"
+      ],
+      "created": "2023-03-29T14:23:51.998Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "access"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 3333
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "31.208.15.130"
+      ],
+      "user": [
+        "elastic"
+      ]
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-20T16:23:03.264Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "cache_hit": 0,
+        "log_type": "TR",
+        "profile_matched": "DEFAULT",
+        "protected": "PROTECTED",
+        "proxy": {
+          "ip": "216.160.83.56",
+          "port": 11610
+        },
+        "response_timetaken": 1,
+        "response_type": "INTERNAL",
+        "server_time": 0,
+        "unit_name": "barracuda",
+        "wf_matched": "INVALID"
+      }
+    },
+    "client": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.112",
+      "port": 11610
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.144",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2023-03-20T16:23:03.264Z",
+      "dataset": "barracuda.waf",
+      "id": "186ffd4d35f-e2c1ae09",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "access",
+        "connection"
+      ]
+    },
+    "host": {
+      "ip": [
+        "67.43.156.2"
+      ]
+    },
+    "http": {
+      "request": {
+        "bytes": 322,
+        "method": "POST"
+      },
+      "response": {
+        "bytes": 791,
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 764
+    },
+    "network": {
+      "protocol": "TLSv1.2"
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.112",
+        "81.2.69.144",
+        "216.160.83.56",
+        "1.128.0.1"
+      ]
+    },
+    "server": {
+      "ip": "1.128.0.1",
+      "port": 443
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.112",
+      "port": 11610
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ],
+    "url": {
+      "path": "/aws.env"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
+      "os": {
+        "name": "Linux"
+      },
+      "version": "81.0.4044.129"
+    }
+  },
+  {
+    "@timestamp": "2023-03-20T16:22:36.102Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "cache_hit": 0,
+        "log_type": "TR",
+        "profile_matched": "DEFAULT",
+        "protected": "PROTECTED",
+        "proxy": {
+          "ip": "216.160.83.56",
+          "port": 65483
+        },
+        "response_timetaken": 0,
+        "response_type": "INTERNAL",
+        "server_time": 0,
+        "unit_name": "barracuda",
+        "wf_matched": "INVALID"
+      }
+    },
+    "client": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.112",
+      "port": 65483
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "geo": {
+        "city_name": "London",
+        "continent_name": "Europe",
+        "country_iso_code": "GB",
+        "country_name": "United Kingdom",
+        "location": {
+          "lat": 51.514199981465936,
+          "lon": -0.0931000616401434
+        },
+        "region_iso_code": "GB-ENG",
+        "region_name": "England"
+      },
+      "ip": "81.2.69.144",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2023-03-20T16:22:36.102Z",
+      "dataset": "barracuda.waf",
+      "id": "186ffd46946-e5bacdd0",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event",
+      "type": [
+        "access",
+        "connection"
+      ]
+    },
+    "host": {
+      "ip": [
+        "67.43.156.2"
+      ]
+    },
+    "http": {
+      "request": {
+        "bytes": 240,
+        "method": "GET"
+      },
+      "response": {
+        "bytes": 791,
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 1763
+    },
+    "network": {
+      "protocol": "TLSv1.2"
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.112",
+        "81.2.69.144",
+        "216.160.83.56",
+        "1.128.0.1"
+      ]
+    },
+    "server": {
+      "ip": "1.128.0.1",
+      "port": 443
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.112",
+      "port": 65483
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ],
+    "url": {
+      "path": "/sendgrid.env"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "Chrome",
+      "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
+      "os": {
+        "name": "Linux"
+      },
+      "version": "81.0.4044.129"
+    }
+  },
+  {
+    "@timestamp": "2023-03-09T12:56:18.404Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "NF",
+        "policy": "DENY",
+        "protocol": "TCP",
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "172.105.128.11",
+      "port": 57296
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DENY",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2023-03-09T12:56:18.404Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "alert",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 1612
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "rule": {
+      "category": "Network ACL",
+      "description": "Network traffic passing through the interfaces (WAN, LAN, and MGMT) that matches the configured Network ACL rule",
+      "name": "SSH_ATTACK_SOURCES"
+    },
+    "server": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "source": {
+      "ip": "172.105.128.11",
+      "port": 57296
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-09T12:32:49.219Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "NF",
+        "policy": "DENY",
+        "protocol": "TCP",
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "107.150.105.183",
+      "port": 33905
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DENY",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2023-03-09T12:32:49.219Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "alert",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 459
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "rule": {
+      "category": "Network ACL",
+      "description": "Network traffic passing through the interfaces (WAN, LAN, and MGMT) that matches the configured Network ACL rule",
+      "name": "SSH_ATTACK_SOURCES"
+    },
+    "server": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "source": {
+      "ip": "107.150.105.183",
+      "port": 33905
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-09T12:22:20.996Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "NF",
+        "policy": "DENY",
+        "protocol": "TCP",
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "134.122.135.178",
+      "port": 44534
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DENY",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2023-03-09T12:22:20.996Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "alert",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 611
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "rule": {
+      "category": "Network ACL",
+      "description": "Network traffic passing through the interfaces (WAN, LAN, and MGMT) that matches the configured Network ACL rule",
+      "name": "HTTP_ATTACK_SOURCES"
+    },
+    "server": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "source": {
+      "ip": "134.122.135.178",
+      "port": 44534
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-09T12:22:20.996Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "log_type": "NF",
+        "policy": "DENY",
+        "protocol": "TCP",
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "134.122.135.178",
+      "port": 44534
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "DENY",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2023-03-09T12:22:20.996Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "alert",
+      "type": [
+        "connection"
+      ]
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 2151
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "rule": {
+      "category": "Network ACL",
+      "description": "Network traffic passing through the interfaces (WAN, LAN, and MGMT) that matches the configured Network ACL rule",
+      "name": "HTTP_ATTACK_SOURCES"
+    },
+    "server": {
+      "ip": "10.9.0.4",
+      "port": 80
+    },
+    "source": {
+      "ip": "134.122.135.178",
+      "port": 44534
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2023-03-01T13:54:44.502Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "action_taken": "LOG",
+        "attack_description": "NO_PARAM_PROFILE_MATCH",
+        "attack_details": "Parameter\\=\"0x\\\\[\\\\]\" value\\=\"androxgh0st\"",
+        "followup_action": "NONE",
+        "log_type": "WF",
+        "protocol": "TLSv1.2",
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "193.56.29.26",
+      "port": 61507
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.9.0.4",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LOG",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "intrusion_detection"
+      ],
+      "created": "2023-03-01T13:54:44.502Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event"
+    },
+    "http": {
+      "request": {
+        "method": "POST"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "forwarded_ip": "20.88.228.79"
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "rule": {
+      "category": "URL_PROFILE",
+      "name": "Hackazon:adaptive_url_42099b4af021e53fd8fd"
+    },
+    "server": {
+      "ip": "10.9.0.4",
+      "port": 443
+    },
+    "source": {
+      "ip": "193.56.29.26",
+      "port": 61507
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ],
+    "url": {
+      "path": "/"
+    },
+    "user": {
+      "id": "1869d743696-dfcf8d96"
+    },
+    "user_agent": {
+      "device": {
+        "name": "XiaoMi HM NOTE 1W"
+      },
+      "name": "UC Browser",
+      "original": "Mozilla/5.0 (Linux; U; Android 4.4.2; en-US; HM NOTE 1W Build/KOT49H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 UCBrowser/11.0.5.850 U3/0.8.0 Mobile Safari/534.30",
+      "os": {
+        "full": "Android 4.4.2",
+        "name": "Android",
+        "version": "4.4.2"
+      },
+      "version": "11.0.5"
+    }
+  },
+  {
+    "@timestamp": "2023-03-01T13:54:44.502Z",
+    "agent": {
+      "ephemeral_id": "3e31fab4-0656-4319-83c0-e869678ccebb",
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "name": "elastic-agent-53583",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "barracuda": {
+      "waf": {
+        "action_taken": "LOG",
+        "attack_description": "UNKNOWN_CONTENT_TYPE",
+        "attack_details": "Content-type\\=\"application/x-www-form-urlencoded\"",
+        "followup_action": "NONE",
+        "log_type": "WF",
+        "protocol": "TLSv1.2",
+        "severity_level": "ALER",
+        "unit_name": "barracuda"
+      }
+    },
+    "client": {
+      "ip": "193.56.29.26",
+      "port": 61507
+    },
+    "data_stream": {
+      "dataset": "barracuda.waf",
+      "namespace": "65673",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.9.0.4",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "62479b8c-33f1-4054-8d0e-c4069e5518ce",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "LOG",
+      "agent_id_status": "verified",
+      "category": [
+        "network",
+        "intrusion_detection"
+      ],
+      "created": "2023-03-01T13:54:44.502Z",
+      "dataset": "barracuda.waf",
+      "ingested": "2026-03-10T01:52:21Z",
+      "kind": "event"
+    },
+    "http": {
+      "request": {
+        "method": "POST"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/barracuda.log"
+      },
+      "offset": 1148
+    },
+    "network": {
+      "forwarded_ip": "20.88.228.79"
+    },
+    "observer": {
+      "product": "Web",
+      "type": "WAF",
+      "vendor": "Barracuda"
+    },
+    "rule": {
+      "category": "URL_PROFILE",
+      "name": "Hackazon:adaptive_url_42099b4af021e53fd8fd"
+    },
+    "server": {
+      "ip": "10.9.0.4",
+      "port": 443
+    },
+    "source": {
+      "ip": "193.56.29.26",
+      "port": 61507
+    },
+    "tags": [
+      "barracuda-waf",
+      "forwarded"
+    ],
+    "url": {
+      "path": "/"
+    },
+    "user": {
+      "id": "1869d743696-dfcf8d96"
+    },
+    "user_agent": {
+      "device": {
+        "name": "XiaoMi HM NOTE 1W"
+      },
+      "name": "UC Browser",
+      "original": "Mozilla/5.0 (Linux; U; Android 4.4.2; en-US; HM NOTE 1W Build/KOT49H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 UCBrowser/11.0.5.850 U3/0.8.0 Mobile Safari/534.30",
+      "os": {
+        "full": "Android 4.4.2",
+        "name": "Android",
+        "version": "4.4.2"
+      },
+      "version": "11.0.5"
+    }
+  }
+]

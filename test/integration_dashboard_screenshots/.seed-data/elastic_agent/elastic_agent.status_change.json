@@ -1,0 +1,1060 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "56670fe2-126b-4bac-9f12-0e9dbfece6a1"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-89137",
+    "policy_id": "ac347751-526d-45fb-ab42-05d7563732ef",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "b3a5eb44-b040-44fe-b919-f4f3e3f66da2"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-45639",
+    "policy_id": "340f30f6-517c-4135-95bb-90ae3f563cb1",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "4a37ff15-d29e-4300-bd68-75381823c54b"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-72013",
+    "policy_id": "41f3a862-58b9-498f-b4d8-cc50b2080e3d",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "eca684dc-b627-4219-9604-817d0793bef3"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-16239",
+    "policy_id": "f3cb6676-954b-490d-b738-4c10e8876f6e",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "10e21e81-19ae-4291-b126-7712fd922d96"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "offline",
+    "hostname": "elastic-agent-13222",
+    "policy_id": "adaa3597-df4d-47c7-b4ef-a735b6c676e3",
+    "space_id": [
+      "default"
+    ],
+    "status": "offline"
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "35c6d450-93a6-4e3f-aeee-6899365efe9e"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "offline",
+    "hostname": "elastic-agent-48068",
+    "policy_id": "57969535-f89e-49be-9de8-2de719d1d7b7",
+    "space_id": [
+      "default"
+    ],
+    "status": "offline"
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "ae8a0607-9bb2-4764-9937-471177dd43c7"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "offline",
+    "hostname": "elastic-agent-57829",
+    "policy_id": "6bd306bd-9258-4d5a-9246-e28cf320bd56",
+    "space_id": [
+      "default"
+    ],
+    "status": "offline"
+  },
+  {
+    "@timestamp": "2026-03-10T03:35:52.031Z",
+    "agent": {
+      "id": "55c9ee5d-ffb8-44b3-bcc2-1ae8c3c6e658"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:35:52Z"
+    },
+    "health_status": "offline",
+    "hostname": "elastic-agent-90220",
+    "policy_id": "3068ccc3-b60b-4337-a530-21379f8d49d2",
+    "space_id": [
+      "default"
+    ],
+    "status": "offline"
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:52.024Z",
+    "agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:34:52Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-51428",
+    "policy_id": "593d68a5-1e34-4d69-aac4-10c378664868",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:51.995Z",
+    "agent": {
+      "id": "4a37ff15-d29e-4300-bd68-75381823c54b"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:33:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-72013",
+    "policy_id": "37f4ff4c-6fc0-4a6d-ba7a-4babdf6771fc",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:51.995Z",
+    "agent": {
+      "id": "eca684dc-b627-4219-9604-817d0793bef3"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:33:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-16239",
+    "policy_id": "f3cb6676-954b-490d-b738-4c10e8876f6e",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:51.995Z",
+    "agent": {
+      "id": "491ab884-04a2-47be-a7ce-993587bceb36"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:33:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-10356",
+    "policy_id": "47c09e39-ec78-4d4a-8aae-9155ce2ad2be",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:51.925Z",
+    "agent": {
+      "id": "71dcd6b0-f529-4986-a3b8-6274a168858c"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:32:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-42799",
+    "policy_id": "cb3d1452-2a87-4730-9ec6-8e8113287d75",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:51.925Z",
+    "agent": {
+      "id": "f641ade1-2b32-47f9-80d8-db2ef5f6ceb9"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:32:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-61956",
+    "policy_id": "24f62457-d3f6-4dac-8557-fae49f4ac03a",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:52.378Z",
+    "agent": {
+      "id": "04e016b1-1d62-4b47-888b-33dd3577d888"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:31:52Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-51428",
+    "policy_id": "b407df47-0f51-4360-853a-503aa79d4be3",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:52.378Z",
+    "agent": {
+      "id": "71dcd6b0-f529-4986-a3b8-6274a168858c"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:31:52Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-42799",
+    "policy_id": "cb3d1452-2a87-4730-9ec6-8e8113287d75",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:52.378Z",
+    "agent": {
+      "id": "8af45a8c-7715-4739-8359-fc938d34ca23"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:31:52Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-28325",
+    "policy_id": "e2d22f76-64b3-4d5e-8ba5-b034da11336a",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "491ab884-04a2-47be-a7ce-993587bceb36"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-10356",
+    "policy_id": "3160467c-151a-445d-bad3-95acf82c50c5",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "71dcd6b0-f529-4986-a3b8-6274a168858c"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "updating",
+    "hostname": "elastic-agent-42799",
+    "policy_id": "cb3d1452-2a87-4730-9ec6-8e8113287d75",
+    "space_id": [
+      "default"
+    ],
+    "status": "updating"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "10e21e81-19ae-4291-b126-7712fd922d96"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-13222",
+    "policy_id": "adaa3597-df4d-47c7-b4ef-a735b6c676e3",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "35c6d450-93a6-4e3f-aeee-6899365efe9e"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-48068",
+    "policy_id": "57969535-f89e-49be-9de8-2de719d1d7b7",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "ae8a0607-9bb2-4764-9937-471177dd43c7"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-57829",
+    "policy_id": "6bd306bd-9258-4d5a-9246-e28cf320bd56",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "f641ade1-2b32-47f9-80d8-db2ef5f6ceb9"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-61956",
+    "policy_id": "24f62457-d3f6-4dac-8557-fae49f4ac03a",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "55c9ee5d-ffb8-44b3-bcc2-1ae8c3c6e658"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-90220",
+    "policy_id": "3068ccc3-b60b-4337-a530-21379f8d49d2",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "b5d7b96a-ecf2-45a7-bbdf-86157f913dd0"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-59564",
+    "policy_id": "17c07f4f-ccb5-424e-9933-6691f827071a",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:51.715Z",
+    "agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:30:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-57010",
+    "policy_id": "36654dff-41bd-4ffc-a365-9f9079437716",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.715Z",
+    "agent": {
+      "id": "ffd1d934-3cd8-4312-b604-7f106c93a103"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-20373",
+    "policy_id": "d6d9379f-bd43-4a5b-9903-913cc892d8af",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.715Z",
+    "agent": {
+      "id": "d2d60b46-d2f9-4575-9eaa-212d746a338a"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-20754",
+    "policy_id": "8b8d598d-f040-4dfa-8b16-f01be74189ae",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.715Z",
+    "agent": {
+      "id": "86db92f0-3fbe-48c8-9ccc-ab34866bcaf8"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-59325",
+    "policy_id": "b37ba50d-49ee-43a2-8ad3-9368c86d914e",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.715Z",
+    "agent": {
+      "id": "f036e8f7-8ccf-452d-93cd-69296ba2faa9"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-24822",
+    "policy_id": "a6d14c47-cfb8-4807-959c-ef7f2bab0940",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.715Z",
+    "agent": {
+      "id": "9f4c2b29-1bc2-48f8-8793-0c5fff91b0ca"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-33933",
+    "policy_id": "8f115629-e048-4e26-95c8-2f5741fe0150",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.715Z",
+    "agent": {
+      "id": "b7a9c09e-f742-42cd-b4b9-ea6a135c6326"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "health_status": "unenrolled",
+    "hostname": "elastic-agent-36526",
+    "policy_id": "450b99ac-46d2-4929-941b-72c6590cad46",
+    "space_id": [
+      "default"
+    ],
+    "status": "unenrolled"
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:51.714Z",
+    "agent": {
+      "id": "8af45a8c-7715-4739-8359-fc938d34ca23"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:29:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-28325",
+    "policy_id": "e2d22f76-64b3-4d5e-8ba5-b034da11336a",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:51.662Z",
+    "agent": {
+      "id": "b5d7b96a-ecf2-45a7-bbdf-86157f913dd0"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:28:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-59564",
+    "policy_id": "17c07f4f-ccb5-424e-9933-6691f827071a",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:51.662Z",
+    "agent": {
+      "id": "ef1a566b-0264-42ac-9674-1f17af776ca1"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:28:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-57010",
+    "policy_id": "36654dff-41bd-4ffc-a365-9f9079437716",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:51.662Z",
+    "agent": {
+      "id": "ffd1d934-3cd8-4312-b604-7f106c93a103"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:28:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-20373",
+    "policy_id": "d6d9379f-bd43-4a5b-9903-913cc892d8af",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:51.662Z",
+    "agent": {
+      "id": "d2d60b46-d2f9-4575-9eaa-212d746a338a"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:28:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-20754",
+    "policy_id": "8b8d598d-f040-4dfa-8b16-f01be74189ae",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:51.662Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:28:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "docker-fleet-server",
+    "policy_id": "fleet-server-policy",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "ffd1d934-3cd8-4312-b604-7f106c93a103"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "updating",
+    "hostname": "elastic-agent-20373",
+    "policy_id": "aa8cb4b4-7e66-4d24-be54-a0a024d2c241",
+    "space_id": [
+      "default"
+    ],
+    "status": "updating"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "d2d60b46-d2f9-4575-9eaa-212d746a338a"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "updating",
+    "hostname": "elastic-agent-20754",
+    "policy_id": "e87863a4-0f3a-4896-a014-3fd6f511ce5d",
+    "space_id": [
+      "default"
+    ],
+    "status": "updating"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "4322a82f-eb39-4a6f-88df-ea9f78c9b1ed"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "docker-fleet-agent",
+    "policy_id": "elastic-agent-managed-ep",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "86db92f0-3fbe-48c8-9ccc-ab34866bcaf8"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-59325",
+    "policy_id": "50e4edc6-e7df-4c99-95e9-4ac634b97076",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "f036e8f7-8ccf-452d-93cd-69296ba2faa9"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-24822",
+    "policy_id": "0eccdde5-c61e-4e99-8b11-305dc6073fcb",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "9f4c2b29-1bc2-48f8-8793-0c5fff91b0ca"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-33933",
+    "policy_id": "eaafb2d7-0e0e-4613-bad9-64dfb522c17d",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "b7a9c09e-f742-42cd-b4b9-ea6a135c6326"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "healthy",
+    "hostname": "elastic-agent-36526",
+    "policy_id": "154a7b15-c341-4007-8cac-5c62244af7fa",
+    "space_id": [
+      "default"
+    ],
+    "status": "online"
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:51.604Z",
+    "agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295"
+    },
+    "agentless": false,
+    "data_stream": {
+      "dataset": "elastic_agent.status_change",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event": {
+      "agent_id_status": "auth_metadata_missing",
+      "ingested": "2026-03-10T03:27:51Z"
+    },
+    "health_status": "unhealthy",
+    "hostname": "docker-fleet-server",
+    "policy_id": "fleet-server-policy",
+    "space_id": [
+      "default"
+    ],
+    "status": "degraded"
+  }
+]

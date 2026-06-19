@@ -1,0 +1,28 @@
+{
+  "package": "auth0",
+  "dataStreams": [
+    {
+      "dataset": "auth0.logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "auth0.logs.data.classification",
+        "auth0.logs.data.type",
+        "event.category",
+        "event.type",
+        "source.ip"
+      ],
+      "filterValues": {
+        "auth0.logs.data.classification": [
+          "Login - Failure",
+          "Login - Success",
+          "Signup - Failure",
+          "Other"
+        ],
+        "auth0.logs.data.type": [
+          "Success Signup"
+        ]
+      }
+    }
+  ]
+}

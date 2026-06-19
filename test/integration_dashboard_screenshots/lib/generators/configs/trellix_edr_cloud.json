@@ -1,0 +1,20 @@
+{
+  "package": "trellix_edr_cloud",
+  "dataStreams": [
+    {
+      "dataset": "trellix_edr_cloud.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "trellix_edr_cloud.event.integrity_level",
+        "trellix_edr_cloud.event.type",
+        "trellix_edr_cloud.event.version_info.vendor_name",
+        "user.domain",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

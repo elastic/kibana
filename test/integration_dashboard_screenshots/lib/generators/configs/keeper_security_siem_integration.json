@@ -1,0 +1,17 @@
+{
+  "package": "keeper_security_siem_integration",
+  "dataStreams": [
+    {
+      "dataset": "keeper_security_siem_integration.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "audit_event",
+        "category",
+        "source.geo.location",
+        "username"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

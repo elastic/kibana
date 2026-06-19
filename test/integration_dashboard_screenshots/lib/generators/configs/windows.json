@@ -1,0 +1,237 @@
+{
+  "package": "windows",
+  "dataStreams": [
+    {
+      "dataset": "windows.applocker_exe_and_dll",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.applocker_msi_and_script",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.applocker_packaged_app_deployment",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.applocker_packaged_app_execution",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.forwarded",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.perfmon",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.powershell",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "host.name",
+        "log.level",
+        "powershell.command.invocation_details",
+        "powershell.command.invocation_details.type",
+        "powershell.command.name",
+        "powershell.connected_user.name",
+        "powershell.engine.version",
+        "powershell.file.script_block_text",
+        "powershell.provider.name",
+        "powershell.runspace_id",
+        "process.args",
+        "process.title",
+        "related.user",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.code": [
+          "400",
+          "4105"
+        ],
+        "process.title": [
+          "ServerRemoteHost"
+        ],
+        "powershell.command.invocation_details.type": [
+          "CommandInvocation"
+        ]
+      }
+    },
+    {
+      "dataset": "windows.powershell_operational",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "powershell.command.invocation_details",
+        "powershell.engine.version",
+        "powershell.file.script_block_text",
+        "powershell.runspace_id",
+        "process.args"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.service",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "metricset.name",
+        "timestamp",
+        "windows.service.display_name",
+        "windows.service.exit_code",
+        "windows.service.id",
+        "windows.service.start_type",
+        "windows.service.state"
+      ],
+      "filterValues": {
+        "metricset.name": [
+          "service"
+        ],
+        "windows.service.exit_code": [
+          "0",
+          "ERROR_SERVICE_NEVER_STARTED"
+        ]
+      }
+    },
+    {
+      "dataset": "windows.sysmon_operational",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "windows.windows_defender",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.code",
+        "event.provider",
+        "file.hash.sha256",
+        "file.name",
+        "file.pe.product",
+        "file.x509.subject.country",
+        "file.x509.subject.organization",
+        "host.name",
+        "user.name",
+        "winlog.user_data.Fqbn",
+        "winlog.user_data.PolicyName",
+        "winlog.user_data.RuleName"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

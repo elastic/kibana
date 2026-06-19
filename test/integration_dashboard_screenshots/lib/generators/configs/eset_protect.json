@@ -1,0 +1,51 @@
+{
+  "package": "eset_protect",
+  "dataStreams": [
+    {
+      "dataset": "eset_protect.detection",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "eset_protect.detection.context.circumstances",
+        "eset_protect.detection.context.user_name",
+        "eset_protect.detection.object_type_name",
+        "eset_protect.detection.severity_level",
+        "eset_protect.detection.uuid",
+        "process.executable",
+        "rule.category",
+        "source.ip",
+        "threat.technique.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "eset_protect.device_task",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "eset_protect.device_task.uuid",
+        "event.action",
+        "host.id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "eset_protect.event",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "eset_protect.event.domain",
+        "eset_protect.event.severity",
+        "eset_protect.event.threat_type",
+        "eset_protect.event.username",
+        "process.executable",
+        "rule.name",
+        "source.ip",
+        "threat.indicator.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

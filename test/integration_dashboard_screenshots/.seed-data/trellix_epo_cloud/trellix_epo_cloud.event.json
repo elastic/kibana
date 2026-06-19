@@ -1,0 +1,154 @@
+[
+  {
+    "@timestamp": "2023-04-06T23:36:14.041Z",
+    "agent": {
+      "ephemeral_id": "7698e946-4f75-416e-b070-1bcfa2e730c8",
+      "id": "780571a5-5087-4494-894d-da461d827801",
+      "name": "elastic-agent-62790",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "trellix_epo_cloud.event",
+      "namespace": "53979",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": [
+        "89.160.20.115",
+        "2a02:cf40::3"
+      ],
+      "mac": "00-00-5E-00-53-00",
+      "user": {
+        "name": "root"
+      }
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "780571a5-5087-4494-894d-da461d827801",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "threat"
+      ],
+      "dataset": "trellix_epo_cloud.event",
+      "id": "0102be3a-41db-448c-9a68-bce7c480d443",
+      "ingested": "2026-03-10T02:21:02Z",
+      "kind": "alert",
+      "original": "{\"attributes\":{\"agentguid\":\"8630b925-cbd2-ed11-1234-abcdefghijklmn\",\"analyzer\":\"ENDP_AM_1070LYNX\",\"analyzerdatversion\":\"5298.0\",\"analyzerdetectionmethod\":\"quick scan\",\"analyzerengineversion\":\"6600.9927\",\"analyzerhostname\":\"ub20\",\"analyzeripv4\":\"81.2.69.142\",\"analyzeripv6\":\"/2a02:cf40::1\",\"analyzermac\":\"00005E005300\",\"analyzername\":\"Trellix Endpoint Security\",\"analyzerversion\":\"10.7.14.38\",\"autoguid\":\"9fcf439b-82d7-425c-1234-abcdefghijklmn\",\"detectedutc\":\"1680823939000\",\"nodepath\":\"1\\\\854691\\\\901751\",\"receivedutc\":\"1680824174041\",\"sourcefilepath\":null,\"sourcehostname\":null,\"sourceipv4\":\"89.160.20.112\",\"sourceipv6\":\"/2a02:cf40::2\",\"sourcemac\":\"00005E005300\",\"sourceprocesshash\":null,\"sourceprocessname\":null,\"sourceprocesssigned\":null,\"sourceprocesssigner\":null,\"sourceurl\":\"https://example.com\",\"sourceusername\":null,\"targetfilename\":\"/var/log/secure\",\"targethash\":null,\"targethostname\":null,\"targetipv4\":\"89.160.20.115\",\"targetipv6\":\"/2a02:cf40::3\",\"targetmac\":\"00005E005300\",\"targetport\":null,\"targetprocessname\":\"/usr/sbin/logrotate\",\"targetprotocol\":null,\"targetusername\":\"root\",\"threatactiontaken\":\"IDS_ALERT_ACT_TAK_DEN\",\"threatcategory\":\"ops.update.end\",\"threateventid\":1119,\"threathandled\":true,\"threatname\":\"None\",\"threatseverity\":\"6\",\"threattype\":\"IDS_ALERT_DET_TYP_NOT\",\"timestamp\":\"2023-04-06T23:36:14.041Z\"},\"id\":\"0102be3a-41db-448c-9a68-bce7c480d443\",\"links\":{\"self\":\"/epo/v2/events/0102be3a-41db-448c-9a68-bce7c480d443\"},\"type\":\"MVEvents\"}",
+      "reference": "/epo/v2/events/0102be3a-41db-448c-9a68-bce7c480d443",
+      "severity": 6,
+      "type": [
+        "indicator"
+      ]
+    },
+    "file": {
+      "name": "/var/log/secure"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "related": {
+      "hosts": [
+        "https://example.com",
+        "ub20"
+      ],
+      "ip": [
+        "89.160.20.115",
+        "2a02:cf40::3",
+        "89.160.20.112",
+        "2a02:cf40::2",
+        "81.2.69.142",
+        "2a02:cf40::1"
+      ],
+      "user": [
+        "root"
+      ]
+    },
+    "source": {
+      "address": "https://example.com",
+      "domain": "https://example.com",
+      "ip": [
+        "89.160.20.112",
+        "2a02:cf40::2"
+      ],
+      "mac": "00-00-5E-00-53-00",
+      "registered_domain": "https://example.com",
+      "top_level_domain": "com"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "trellix_epo_cloud-event"
+    ],
+    "threat": {
+      "indicator": {
+        "description": "IDS_ALERT_ACT_TAK_DEN"
+      }
+    },
+    "trellix_epo_cloud": {
+      "event": {
+        "attributes": {
+          "agent": {
+            "guid": "8630b925-cbd2-ed11-1234-abcdefghijklmn"
+          },
+          "analyzer": {
+            "dat_version": "5298.0",
+            "detection_method": "quick scan",
+            "engine_version": "6600.9927",
+            "hostname": "ub20",
+            "ipv4": "81.2.69.142",
+            "ipv6": "2a02:cf40::1",
+            "mac": "00-00-5E-00-53-00",
+            "name": "Trellix Endpoint Security",
+            "value": "ENDP_AM_1070LYNX",
+            "version": "10.7.14.38"
+          },
+          "auto_guid": "9fcf439b-82d7-425c-1234-abcdefghijklmn",
+          "detected_utc": "2023-04-06T23:32:19.000Z",
+          "node": {
+            "path": "1\\854691\\901751"
+          },
+          "received_utc": "2023-04-06T23:36:14.041Z",
+          "source": {
+            "ipv4": "89.160.20.112",
+            "ipv6": "2a02:cf40::2",
+            "mac": "00-00-5E-00-53-00",
+            "url": "https://example.com"
+          },
+          "target": {
+            "file_name": "/var/log/secure",
+            "ipv4": "89.160.20.115",
+            "ipv6": "2a02:cf40::3",
+            "mac": "00-00-5E-00-53-00",
+            "process_name": "/usr/sbin/logrotate",
+            "user_name": "root"
+          },
+          "threat": {
+            "action_taken": "IDS_ALERT_ACT_TAK_DEN",
+            "category": "ops.update.end",
+            "event": {
+              "id": "1119"
+            },
+            "handled": true,
+            "name": "None",
+            "severity": 6,
+            "type": "IDS_ALERT_DET_TYP_NOT"
+          },
+          "timestamp": "2023-04-06T23:36:14.041Z"
+        },
+        "id": "0102be3a-41db-448c-9a68-bce7c480d443",
+        "links": {
+          "self": "/epo/v2/events/0102be3a-41db-448c-9a68-bce7c480d443"
+        }
+      },
+      "type": "MVEvents"
+    }
+  }
+]

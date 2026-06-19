@@ -1,0 +1,19 @@
+{
+  "package": "cisa_kevs",
+  "dataStreams": [
+    {
+      "dataset": "cisa_kevs.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisa_kev.vulnerability.date_added",
+        "cisa_kev.vulnerability.product",
+        "cisa_kev.vulnerability.vendor_project",
+        "event.dataset",
+        "vulnerability.description",
+        "vulnerability.id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

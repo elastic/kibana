@@ -1,0 +1,23 @@
+{
+  "package": "azure_billing",
+  "dataStreams": [
+    {
+      "dataset": "azure.billing",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "azure.billing.account_name",
+        "azure.billing.actual_cost",
+        "azure.billing.department_name",
+        "azure.billing.forecast_cost",
+        "azure.billing.pretax_cost",
+        "azure.billing.usage_date",
+        "azure.billing.usage_start",
+        "azure.resource.group",
+        "azure.resource.name",
+        "azure.subscription_id"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

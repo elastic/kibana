@@ -1,0 +1,60 @@
+{
+  "package": "spycloud",
+  "dataStreams": [
+    {
+      "dataset": "spycloud.breach_catalog",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "spycloud.breach_catalog.main_category",
+        "spycloud.breach_catalog.num_records",
+        "spycloud.breach_catalog.title",
+        "spycloud.breach_catalog.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "spycloud.breach_record",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.subdomain",
+        "event.severity",
+        "host.hostname",
+        "host.ip",
+        "host.os.full",
+        "spycloud.breach_record.email.domain",
+        "spycloud.breach_record.infected.time",
+        "spycloud.breach_record.log_id",
+        "spycloud.breach_record.password.plaintext",
+        "spycloud.breach_record.spycloud_publish_date",
+        "user.email",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.severity": [
+          "25"
+        ]
+      }
+    },
+    {
+      "dataset": "spycloud.compass",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.subdomain",
+        "event.severity",
+        "host.ip",
+        "host.os.full",
+        "spycloud.compass.infected.time",
+        "user.email",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.severity": [
+          "25"
+        ]
+      }
+    }
+  ]
+}

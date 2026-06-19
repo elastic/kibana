@@ -1,0 +1,1910 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:09:20.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:20.601Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:21Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:20 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 18 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1861
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 18,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:19.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:19.600Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:20Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:19 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 17 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1751
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 17,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:18.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:18.598Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:19Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:18 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 16 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1641
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 16,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:17.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:17.597Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:18Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:17 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 15 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1531
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 15,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:15.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:16.595Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:17Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:15 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 14 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1421
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 14,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:14.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.590Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:14 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 13 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1311
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 13,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:13.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.590Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:13 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 12 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1201
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 12,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:12.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.590Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:12 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 11 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 1091
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 11,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:11.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.590Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:11 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 10 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 981
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 10,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:10.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.590Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:10 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 9 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 872
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 9,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:09.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.590Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:09 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 8 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 763
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 8,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:08.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.590Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:08 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 7 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 654
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 7,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:07.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.589Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:07 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 6 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 545
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 6,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:06.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.589Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:06 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 5 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 436
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 5,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:05.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.589Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:05 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 4 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 327
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 4,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:04.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.589Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:04 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 3 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 218
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 3,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:03.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:15.589Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:03 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 2 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 109
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 2,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:09:02.000Z",
+    "agent": {
+      "ephemeral_id": "2d237eea-c009-4281-ac0e-e633f1189249",
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "name": "elastic-agent-71925",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "traefik.access",
+      "namespace": "12673",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "/"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "66bd0c78-0955-4a49-9d67-992c7059984b",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "web"
+      ],
+      "created": "2026-03-10T02:09:13.609Z",
+      "dataset": "traefik.access",
+      "duration": 0,
+      "ingested": "2026-03-10T02:09:16Z",
+      "kind": "event",
+      "original": "::1 - - [10/Mar/2026:02:09:02 +0000] \"GET / HTTP/1.1\" 404 19 \"-\" \"curl/7.61.1\" 1 \"backend not found\" \"/\" 0ms",
+      "outcome": "failure",
+      "type": [
+        "access"
+      ]
+    },
+    "http": {
+      "request": {
+        "method": "GET",
+        "referrer": "-"
+      },
+      "response": {
+        "body": {
+          "bytes": 19
+        },
+        "status_code": 404
+      },
+      "version": "1.1"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/access-common.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "::1"
+      ]
+    },
+    "source": {
+      "address": "::1",
+      "ip": "::1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "forwarded"
+    ],
+    "traefik": {
+      "access": {
+        "request_count": 1,
+        "router": {
+          "name": "backend not found"
+        },
+        "service": {
+          "address": "/"
+        },
+        "user_identifier": "-"
+      }
+    },
+    "url": {
+      "original": "/"
+    },
+    "user": {
+      "name": "-"
+    },
+    "user_agent": {
+      "device": {
+        "name": "Other"
+      },
+      "name": "curl",
+      "original": "curl/7.61.1",
+      "version": "7.61.1"
+    }
+  }
+]

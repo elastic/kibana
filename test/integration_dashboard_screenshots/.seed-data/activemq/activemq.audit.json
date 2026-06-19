@@ -1,0 +1,120 @@
+[
+  {
+    "@timestamp": "2026-03-10T01:49:17.210Z",
+    "activemq": {
+      "audit": {
+        "thread": "RMI TCP Connection(1)-127.0.0.1"
+      }
+    },
+    "agent": {
+      "ephemeral_id": "54099081-e42e-423d-91bc-fe0ed57ede0e",
+      "id": "9429b8f0-9f4e-4757-bf89-f32011d7fe56",
+      "name": "elastic-agent-72789",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "activemq.audit",
+      "namespace": "72994",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9429b8f0-9f4e-4757-bf89-f32011d7fe56",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "activemq.audit",
+      "ingested": "2026-03-10T01:49:18Z",
+      "kind": "event",
+      "module": "activemq",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "name": "elastic-agent-72789"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "level": "INFO",
+      "offset": 157
+    },
+    "message": "called org.apache.activemq.broker.jmx.BrokerView.terminateJVM[0] on localhost at 24-06-2022 13:10:34,747",
+    "tags": [
+      "forwarded",
+      "activemq-audit"
+    ],
+    "user": {
+      "name": "anonymous"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T01:49:15.261Z",
+    "activemq": {
+      "audit": {
+        "thread": "RMI TCP Connection(1)-127.0.0.1"
+      }
+    },
+    "agent": {
+      "ephemeral_id": "54099081-e42e-423d-91bc-fe0ed57ede0e",
+      "id": "9429b8f0-9f4e-4757-bf89-f32011d7fe56",
+      "name": "elastic-agent-72789",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "activemq.audit",
+      "namespace": "72994",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "9429b8f0-9f4e-4757-bf89-f32011d7fe56",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "activemq.audit",
+      "ingested": "2026-03-10T01:49:18Z",
+      "kind": "event",
+      "module": "activemq",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "name": "elastic-agent-72789"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/audit.log"
+      },
+      "level": "INFO",
+      "offset": 0
+    },
+    "message": "called org.apache.activemq.broker.jmx.BrokerView.terminateJVM[0] on localhost at 24-06-2022 13:09:43,996",
+    "tags": [
+      "forwarded",
+      "activemq-audit"
+    ],
+    "user": {
+      "name": "anonymous"
+    }
+  }
+]

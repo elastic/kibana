@@ -1,0 +1,26 @@
+{
+  "package": "thycotic_ss",
+  "dataStreams": [
+    {
+      "dataset": "thycotic_ss.logs",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.provider",
+        "host.name",
+        "observer.version",
+        "thycotic_ss.event.secret.folder",
+        "thycotic_ss.event.secret.name",
+        "user.full_name",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.provider": [
+          "secret"
+        ]
+      }
+    }
+  ]
+}

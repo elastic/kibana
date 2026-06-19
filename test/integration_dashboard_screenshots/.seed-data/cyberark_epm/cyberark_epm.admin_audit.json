@@ -1,0 +1,287 @@
+[
+  {
+    "@timestamp": "2024-11-25T05:43:18.180Z",
+    "agent": {
+      "ephemeral_id": "caf88278-4898-4347-b34c-b9296858fdef",
+      "id": "1cca5c93-d8d6-4bb0-a2c2-63bf6c692b1f",
+      "name": "elastic-agent-40672",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cyberark_epm": {
+      "admin_audit": {
+        "administrator": "james@example.com",
+        "description": "Get agent installation package URL: https://epm-downloads.s3.us-east-2.amazonaws.com/latest/Windows/VFAgentSetupX64.msi",
+        "event_time": "2024-11-25T05:43:18.180Z",
+        "feature": "My Computers",
+        "internal_session_id": "876",
+        "logged_at": "2024-11-25T05:25:13.167Z",
+        "logged_from": "67.43.156.0",
+        "permission_description": "View Download Agent Installation",
+        "role": "SetAdmin",
+        "set_name": "Elastic/test"
+      }
+    },
+    "data_stream": {
+      "dataset": "cyberark_epm.admin_audit",
+      "namespace": "20479",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "1cca5c93-d8d6-4bb0-a2c2-63bf6c692b1f",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "cyberark_epm.admin_audit",
+      "ingested": "2026-03-10T02:12:50Z",
+      "kind": "event",
+      "original": "{\"Administrator\":\"james@example.com\",\"Description\":\"Get agent installation package URL: https://epm-downloads.s3.us-east-2.amazonaws.com/latest/Windows/VFAgentSetupX64.msi\",\"EventTime\":\"2024-11-25T05:43:18.18Z\",\"Feature\":\"My Computers\",\"InternalSessionId\":876,\"LoggedAt\":\"2024-11-25T05:25:13.167Z\",\"LoggedFrom\":\"67.43.156.0\",\"PermissionDescription\":\"View Download Agent Installation\",\"Role\":\"SetAdmin\",\"SetName\":\"Elastic/test\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Get agent installation package URL: https://epm-downloads.s3.us-east-2.amazonaws.com/latest/Windows/VFAgentSetupX64.msi",
+    "observer": {
+      "product": "Endpoint Privilege Manager",
+      "vendor": "CyberArk"
+    },
+    "related": {
+      "ip": [
+        "67.43.156.0"
+      ],
+      "user": [
+        "james",
+        "james@example.com"
+      ]
+    },
+    "source": {
+      "geo": {
+        "continent_name": "Asia",
+        "country_iso_code": "BT",
+        "country_name": "Bhutan",
+        "location": {
+          "lat": 27.499999995343387,
+          "lon": 90.49999997019768
+        }
+      },
+      "ip": "67.43.156.0"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "cyberark_epm-admin_audit"
+    ],
+    "user": {
+      "domain": "example.com",
+      "email": "james@example.com",
+      "name": "james",
+      "roles": [
+        "SetAdmin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-11-25T05:37:28.373Z",
+    "agent": {
+      "ephemeral_id": "caf88278-4898-4347-b34c-b9296858fdef",
+      "id": "1cca5c93-d8d6-4bb0-a2c2-63bf6c692b1f",
+      "name": "elastic-agent-40672",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cyberark_epm": {
+      "admin_audit": {
+        "administrator": "bob@example.com",
+        "description": "Enter Set Elastic/test",
+        "event_time": "2024-11-25T05:37:28.373Z",
+        "feature": "Sets",
+        "internal_session_id": "876",
+        "logged_at": "2024-11-25T05:25:13.167Z",
+        "logged_from": "175.16.199.1",
+        "permission_description": "None",
+        "role": "SetAdmin",
+        "set_name": "Elastic/test"
+      }
+    },
+    "data_stream": {
+      "dataset": "cyberark_epm.admin_audit",
+      "namespace": "20479",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "1cca5c93-d8d6-4bb0-a2c2-63bf6c692b1f",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "iam"
+      ],
+      "dataset": "cyberark_epm.admin_audit",
+      "ingested": "2026-03-10T02:12:49Z",
+      "kind": "event",
+      "original": "{\"Administrator\":\"bob@example.com\",\"Description\":\"Enter Set Elastic/test\",\"EventTime\":\"2024-11-25T05:37:28.373Z\",\"Feature\":\"Sets\",\"InternalSessionId\":876,\"LoggedAt\":\"2024-11-25T05:25:13.167Z\",\"LoggedFrom\":\"175.16.199.1\",\"PermissionDescription\":\"None\",\"Role\":\"SetAdmin\",\"SetName\":\"Elastic/test\"}",
+      "type": [
+        "admin"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Enter Set Elastic/test",
+    "observer": {
+      "product": "Endpoint Privilege Manager",
+      "vendor": "CyberArk"
+    },
+    "related": {
+      "ip": [
+        "175.16.199.1"
+      ],
+      "user": [
+        "bob",
+        "bob@example.com"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "Changchun",
+        "continent_name": "Asia",
+        "country_iso_code": "CN",
+        "country_name": "China",
+        "location": {
+          "lat": 43.879999998025596,
+          "lon": 125.32279992476106
+        },
+        "region_iso_code": "CN-22",
+        "region_name": "Jilin Sheng"
+      },
+      "ip": "175.16.199.1"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "cyberark_epm-admin_audit"
+    ],
+    "user": {
+      "domain": "example.com",
+      "email": "bob@example.com",
+      "name": "bob",
+      "roles": [
+        "SetAdmin"
+      ]
+    }
+  },
+  {
+    "@timestamp": "2024-11-25T05:38:39.130Z",
+    "agent": {
+      "ephemeral_id": "caf88278-4898-4347-b34c-b9296858fdef",
+      "id": "1cca5c93-d8d6-4bb0-a2c2-63bf6c692b1f",
+      "name": "elastic-agent-40672",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cyberark_epm": {
+      "admin_audit": {
+        "administrator": "rhodes@example.com",
+        "description": "Read \"General configuration\" Agent Configuration policy",
+        "event_time": "2024-11-25T05:38:39.130Z",
+        "feature": "Agent Config",
+        "internal_session_id": "876",
+        "logged_at": "2024-11-25T05:25:13.167Z",
+        "logged_from": "89.160.20.128",
+        "permission_description": "View all policies and application groups. Read and export policy and application group",
+        "role": "SetAdmin",
+        "set_name": "Elastic/test"
+      }
+    },
+    "data_stream": {
+      "dataset": "cyberark_epm.admin_audit",
+      "namespace": "20479",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "1cca5c93-d8d6-4bb0-a2c2-63bf6c692b1f",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "cyberark_epm.admin_audit",
+      "ingested": "2026-03-10T02:13:02Z",
+      "kind": "event",
+      "original": "{\"Administrator\":\"rhodes@example.com\",\"Description\":\"Read \\\"General configuration\\\" Agent Configuration policy\",\"EventTime\":\"2024-11-25T05:38:39.13Z\",\"Feature\":\"Agent Config\",\"InternalSessionId\":876,\"LoggedAt\":\"2024-11-25T05:25:13.167Z\",\"LoggedFrom\":\"89.160.20.128\",\"PermissionDescription\":\"View all policies and application groups. Read and export policy and application group\",\"Role\":\"SetAdmin\",\"SetName\":\"Elastic/test\"}",
+      "type": [
+        "access"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "message": "Read \"General configuration\" Agent Configuration policy",
+    "observer": {
+      "product": "Endpoint Privilege Manager",
+      "vendor": "CyberArk"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.128"
+      ],
+      "user": [
+        "rhodes",
+        "rhodes@example.com"
+      ]
+    },
+    "source": {
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.128"
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "cyberark_epm-admin_audit"
+    ],
+    "user": {
+      "domain": "example.com",
+      "email": "rhodes@example.com",
+      "name": "rhodes",
+      "roles": [
+        "SetAdmin"
+      ]
+    }
+  }
+]

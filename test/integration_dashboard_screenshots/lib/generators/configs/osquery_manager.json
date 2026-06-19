@@ -1,0 +1,39 @@
+{
+  "package": "osquery_manager",
+  "dataStreams": [
+    {
+      "dataset": "osquery_manager.action_responses",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "action_id",
+        "agent.name",
+        "event.module",
+        "host.hostname",
+        "osquery.name",
+        "osquery.path",
+        "osquery.platform_like",
+        "osquery.type",
+        "osquery.version"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "osquery_manager.result",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "action_id",
+        "agent.name",
+        "event.module",
+        "host.hostname",
+        "osquery.name",
+        "osquery.path",
+        "osquery.platform_like",
+        "osquery.type",
+        "osquery.version"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

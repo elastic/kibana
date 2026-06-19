@@ -1,0 +1,82 @@
+{
+  "package": "activemq",
+  "dataStreams": [
+    {
+      "dataset": "activemq.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "log.level",
+        "message",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "activemq.broker",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "activemq.broker.connections.count",
+        "activemq.broker.consumers.count",
+        "activemq.broker.memory.broker.pct",
+        "activemq.broker.memory.store.pct",
+        "activemq.broker.memory.temp.pct",
+        "activemq.broker.messages.dequeue.count",
+        "activemq.broker.messages.enqueue.count",
+        "activemq.broker.producers.count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "activemq.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "activemq.log.caller",
+        "activemq.log.thread",
+        "log.level",
+        "message"
+      ],
+      "filterValues": {
+        "log.level": [
+          "ERROR"
+        ]
+      }
+    },
+    {
+      "dataset": "activemq.queue",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "activemq.queue.consumers.count",
+        "activemq.queue.messages.dequeue.count",
+        "activemq.queue.messages.dispatch.count",
+        "activemq.queue.messages.enqueue.count",
+        "activemq.queue.messages.enqueue.time.avg",
+        "activemq.queue.messages.expired.count",
+        "activemq.queue.messages.inflight.count",
+        "activemq.queue.name",
+        "activemq.queue.producers.count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "activemq.topic",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "activemq.topic.consumers.count",
+        "activemq.topic.messages.dequeue.count",
+        "activemq.topic.messages.dispatch.count",
+        "activemq.topic.messages.enqueue.count",
+        "activemq.topic.messages.enqueue.time.avg",
+        "activemq.topic.messages.expired.count",
+        "activemq.topic.messages.inflight.count",
+        "activemq.topic.name",
+        "activemq.topic.producers.count"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

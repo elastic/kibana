@@ -1,0 +1,23 @@
+{
+  "package": "akamai",
+  "dataStreams": [
+    {
+      "dataset": "akamai.siem",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "akamai.siem.bot.score",
+        "akamai.siem.rule_actions",
+        "akamai.siem.rule_tags",
+        "akamai.siem.rules.ruleActions",
+        "akamai.siem.rules.ruleTags",
+        "akamai.siem.user_risk.score",
+        "akamai.siem.user_risk.status",
+        "http.response.bytes",
+        "source.geo.country_iso_code",
+        "url.domain"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

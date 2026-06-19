@@ -1,0 +1,24 @@
+{
+  "package": "pulse_connect_secure",
+  "dataStreams": [
+    {
+      "dataset": "pulse_connect_secure.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "client.geo.country_iso_code",
+        "event.outcome",
+        "pulse_secure.session.id",
+        "source.ip",
+        "user.name",
+        "user_agent.os.name"
+      ],
+      "filterValues": {
+        "event.outcome": [
+          "failure",
+          "success"
+        ]
+      }
+    }
+  ]
+}

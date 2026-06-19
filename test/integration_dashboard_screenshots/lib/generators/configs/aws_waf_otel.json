@@ -1,0 +1,14 @@
+{
+  "package": "aws_waf_otel",
+  "dataStreams": [
+    {
+      "dataset": "aws.waf.otel",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "server.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

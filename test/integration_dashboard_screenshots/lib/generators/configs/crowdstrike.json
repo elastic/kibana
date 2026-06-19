@@ -1,0 +1,90 @@
+{
+  "package": "crowdstrike",
+  "dataStreams": [
+    {
+      "dataset": "crowdstrike.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "crowdstrike.alert.confidence",
+        "crowdstrike.alert.ioc_source",
+        "crowdstrike.alert.ioc_type",
+        "crowdstrike.alert.status",
+        "destination.user.domain",
+        "device.id",
+        "event.id",
+        "event.severity",
+        "host.hostname",
+        "host.ip",
+        "host.os.full",
+        "host.os.platform",
+        "source.ip",
+        "source.user.domain",
+        "user.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "crowdstrike.falcon",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "crowdstrike.event.SeverityName",
+        "event.action",
+        "event.category",
+        "host.hostname",
+        "host.name",
+        "observer.address",
+        "threat.tactic.name",
+        "threat.technique.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "crowdstrike.fdr",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.kind",
+        "file.name",
+        "host.hostname",
+        "observer.address",
+        "observer.geo.location",
+        "user.name"
+      ],
+      "filterValues": {
+        "event.kind": [
+          "alert"
+        ]
+      }
+    },
+    {
+      "dataset": "crowdstrike.host",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "device.id",
+        "host.hostname",
+        "host.ip",
+        "host.os.platform"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "crowdstrike.vulnerability",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "crowdstrike.vulnerability.confidence",
+        "crowdstrike.vulnerability.status",
+        "host.name",
+        "vulnerability.id",
+        "vulnerability.severity"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

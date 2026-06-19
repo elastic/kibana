@@ -1,0 +1,26 @@
+{
+  "package": "osquery",
+  "dataStreams": [
+    {
+      "dataset": "osquery.result",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "osquery.result.columns.name",
+        "osquery.result.columns.path",
+        "osquery.result.columns.platform_like",
+        "osquery.result.columns.type",
+        "osquery.result.columns.version",
+        "osquery.result.host_identifier",
+        "osquery.result.name"
+      ],
+      "filterValues": {
+        "osquery.result.name": [
+          "pack_it-compliance_mounts",
+          "pack_it-compliance_os_version",
+          "pack_it-compliance_kernel_integrations"
+        ]
+      }
+    }
+  ]
+}

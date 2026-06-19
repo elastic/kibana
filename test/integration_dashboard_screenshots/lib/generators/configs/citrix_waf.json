@@ -1,0 +1,24 @@
+{
+  "package": "citrix_waf",
+  "dataStreams": [
+    {
+      "dataset": "citrix_waf.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "citrix.facility",
+        "citrix.severity",
+        "client.geo.country_name",
+        "client.geo.location",
+        "event.action",
+        "event.severity",
+        "source.geo.country_name",
+        "source.geo.location",
+        "url.domain",
+        "url.path",
+        "url.query"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

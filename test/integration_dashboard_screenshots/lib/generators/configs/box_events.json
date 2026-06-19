@@ -1,0 +1,37 @@
+{
+  "package": "box_events",
+  "dataStreams": [
+    {
+      "dataset": "box_events.events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "Records",
+        "box.additional_details.shield_alert.alert_id",
+        "box.additional_details.shield_alert.alert_summary.download_delta_percent",
+        "box.additional_details.shield_alert.malware_info.categories",
+        "box.created_by.login",
+        "event.action",
+        "file.name",
+        "file.size",
+        "related.indicator_type",
+        "related.ip",
+        "rule.category"
+      ],
+      "filterValues": {
+        "event.action": [
+          "ITEM_UPLOAD",
+          "ITEM_DOWNLOAD",
+          "ITEM_TRASH",
+          "FAILED_LOGIN"
+        ],
+        "rule.category": [
+          "Anomalous Download",
+          "Malicious Content",
+          "Suspicious Locations",
+          "Suspicious Sessions"
+        ]
+      }
+    }
+  ]
+}

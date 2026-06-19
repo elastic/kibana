@@ -1,0 +1,176 @@
+{
+  "package": "mongodb_atlas",
+  "dataStreams": [
+    {
+      "dataset": "mongodb_atlas.alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "mongodb_atlas.alert.event_type.name",
+        "mongodb_atlas.alert.host_name_and_port",
+        "mongodb_atlas.alert.metric.name",
+        "mongodb_atlas.alert.status",
+        "mongodb_atlas.alert.updated.time",
+        "source.address"
+      ],
+      "filterValues": {
+        "mongodb_atlas.alert.status": [
+          "OPEN",
+          "CLOSED"
+        ]
+      }
+    },
+    {
+      "dataset": "mongodb_atlas.disk",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "mongodb_atlas.disk.read.iops.max.throughput",
+        "mongodb_atlas.disk.read.iops.throughput",
+        "mongodb_atlas.disk.read.latency.max.ms",
+        "mongodb_atlas.disk.read.latency.ms",
+        "mongodb_atlas.disk.space.free.pct",
+        "mongodb_atlas.disk.space.used.pct",
+        "mongodb_atlas.disk.total.iops.max.throughput",
+        "mongodb_atlas.disk.total.iops.throughput",
+        "mongodb_atlas.disk.write.iops.max.throughput",
+        "mongodb_atlas.disk.write.iops.throughput",
+        "mongodb_atlas.disk.write.latency.max.ms",
+        "mongodb_atlas.disk.write.latency.ms",
+        "mongodb_atlas.partition_name",
+        "mongodb_atlas.process_id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mongodb_atlas.hardware",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "mongodb_atlas.hardware.fts.process.cpu.kernel.pct",
+        "mongodb_atlas.hardware.fts.process.cpu.user.pct",
+        "mongodb_atlas.hardware.fts.process.memory.resident.bytes",
+        "mongodb_atlas.hardware.fts.process.memory.shared.bytes",
+        "mongodb_atlas.hardware.fts.process.memory.virtual.bytes",
+        "mongodb_atlas.hardware.fts.process.normalized.cpu.kernel.pct",
+        "mongodb_atlas.hardware.fts.process.normalized.cpu.user.pct",
+        "mongodb_atlas.hardware.status.jvm.memory.heap.available.mb",
+        "mongodb_atlas.hardware.status.jvm.memory.heap.used.mb",
+        "mongodb_atlas.hardware.status.page_faults",
+        "mongodb_atlas.process_id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mongodb_atlas.mongod_audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "mongodb_atlas.mongod_audit.hostname",
+        "mongodb_atlas.mongod_audit.local.ip",
+        "mongodb_atlas.mongod_audit.remote.ip",
+        "mongodb_atlas.mongod_audit.result",
+        "mongodb_atlas.mongod_audit.user.names.user",
+        "mongodb_atlas.mongod_audit.user.roles.role"
+      ],
+      "filterValues": {
+        "mongodb_atlas.mongod_audit.result": [
+          "Success"
+        ]
+      }
+    },
+    {
+      "dataset": "mongodb_atlas.mongod_database",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "log.level",
+        "mongodb_atlas.mongod_database.component",
+        "mongodb_atlas.mongod_database.hostname",
+        "mongodb_atlas.mongod_database.thread.name"
+      ],
+      "filterValues": {
+        "log.level": [
+          "informational",
+          "error",
+          "warning"
+        ]
+      }
+    },
+    {
+      "dataset": "mongodb_atlas.organization",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "mongodb_atlas.organization.cluster.name",
+        "mongodb_atlas.organization.event_type.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mongodb_atlas.process",
+      "indexPattern": "logs-*",
+      "docTarget": 1000,
+      "fields": [
+        "mongodb_atlas.process.assert.msg",
+        "mongodb_atlas.process.assert.regular",
+        "mongodb_atlas.process.assert.user",
+        "mongodb_atlas.process.assert.warning",
+        "mongodb_atlas.process.cache.dirty.bytes",
+        "mongodb_atlas.process.cache.read.bytes",
+        "mongodb_atlas.process.cache.used.total.bytes",
+        "mongodb_atlas.process.cache.write.bytes",
+        "mongodb_atlas.process.connections",
+        "mongodb_atlas.process.cpu.children.kernel.pct",
+        "mongodb_atlas.process.cpu.children.user.pct",
+        "mongodb_atlas.process.cpu.kernel.pct",
+        "mongodb_atlas.process.cpu.normalized.children.kernel.pct",
+        "mongodb_atlas.process.cpu.normalized.kernel.pct",
+        "mongodb_atlas.process.cpu.normalized.user.pct",
+        "mongodb_atlas.process.cpu.user.pct",
+        "mongodb_atlas.process.database.size.total.bytes",
+        "mongodb_atlas.process.document.deleted",
+        "mongodb_atlas.process.document.inserted",
+        "mongodb_atlas.process.document.returned",
+        "mongodb_atlas.process.document.updated",
+        "mongodb_atlas.process.global.lock.current_queue.reader.count",
+        "mongodb_atlas.process.global.lock.current_queue.writer.count",
+        "mongodb_atlas.process.index.btree.access.count",
+        "mongodb_atlas.process.index.btree.hits.count",
+        "mongodb_atlas.process.index.btree.miss.count",
+        "mongodb_atlas.process.memory.mapped.mb",
+        "mongodb_atlas.process.memory.resident.mb",
+        "mongodb_atlas.process.memory.virtual.mb",
+        "mongodb_atlas.process.network.in",
+        "mongodb_atlas.process.network.out",
+        "mongodb_atlas.process.opcounter.cmd",
+        "mongodb_atlas.process.opcounter.delete",
+        "mongodb_atlas.process.opcounter.getmore",
+        "mongodb_atlas.process.opcounter.insert",
+        "mongodb_atlas.process.swap.usage.total.free",
+        "mongodb_atlas.process.swap.usage.total.used",
+        "mongodb_atlas.process_id"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "mongodb_atlas.project",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "mongodb_atlas.project.application.id",
+        "mongodb_atlas.project.cluster.name",
+        "mongodb_atlas.project.database.name",
+        "mongodb_atlas.project.event_type.name",
+        "mongodb_atlas.project.host.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

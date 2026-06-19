@@ -1,0 +1,68 @@
+{
+  "package": "watchguard_firebox",
+  "dataStreams": [
+    {
+      "dataset": "watchguard_firebox.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.bytes",
+        "destination.ip",
+        "event.outcome",
+        "event.severity",
+        "network.bytes",
+        "observer.egress.interface.alias",
+        "observer.ingress.interface.alias",
+        "observer.serial_number",
+        "rule.name",
+        "source.bytes",
+        "source.ip",
+        "user.name",
+        "watchguard_firebox.log.disposition",
+        "watchguard_firebox.log.log_type",
+        "watchguard_firebox.log.msg_id",
+        "watchguard_firebox.log.packets_count"
+      ],
+      "filterValues": {
+        "watchguard_firebox.log.msg_id": [
+          "3E00-0002",
+          "2500-0000",
+          "3000-0148",
+          "3000-0149",
+          "3000-0150",
+          "3000-0151",
+          "3000-0173",
+          "2CFF-0008",
+          "1AFF-0024",
+          "21FF-000A",
+          "1DFF-000F",
+          "1CFF-000C",
+          "2AFF-0001",
+          "2CFF-0000",
+          "28FF-0004",
+          "1BFF-000F",
+          "2DFF-0000",
+          "3000-0152",
+          "3000-0153",
+          "3000-0154",
+          "3000-0155",
+          "3000-0156",
+          "3000-0157",
+          "3000-0158",
+          "3000-0159",
+          "3000-0160",
+          "3000-0161",
+          "3000-0162",
+          "3000-0163",
+          "3000-0164",
+          "3000-0165",
+          "3000-0166"
+        ],
+        "watchguard_firebox.log.log_type": [
+          "traffic",
+          "alarm"
+        ]
+      }
+    }
+  ]
+}

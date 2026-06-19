@@ -1,0 +1,178 @@
+[
+  {
+    "@timestamp": "2026-03-10T02:45:00.076Z",
+    "agent": {
+      "ephemeral_id": "02c91050-f6ac-44c8-a199-d654314c7d60",
+      "id": "305e93eb-af81-4baa-a778-fbfda087edc3",
+      "name": "elastic-agent-99846",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "eset_protect.device_task",
+      "namespace": "62600",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "305e93eb-af81-4baa-a778-fbfda087edc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "eset_protect": {
+      "device_task": {
+        "action": {
+          "name": "Product Activation",
+          "params": {
+            "@type": "type.googleapis.com/Era.Common.DataDefinition.Task.ESS.OnDemandScan",
+            "cleaning_enabled": true,
+            "custom_profile_name": "DefaultProfile",
+            "scan_profile": "InDepth",
+            "scan_targets": [
+              "eset://AllTargets"
+            ]
+          }
+        },
+        "description": "Automatically created via ESET LiveGuard",
+        "display_name": "Product activation - via ESET LiveGuard",
+        "targets": {
+          "devices_uuids": [
+            "0205321e-XXXX-1234-5678-feeb35010ea7"
+          ]
+        },
+        "triggers": [
+          {
+            "manual": {
+              "expire_time": "2023-12-01T01:30:00.000Z"
+            }
+          }
+        ],
+        "uuid": "c93070e0-1234-1234-5678-c48f0e5e0b7e",
+        "version_id": "1511"
+      }
+    },
+    "event": {
+      "action": "Product Activation",
+      "agent_id_status": "verified",
+      "dataset": "eset_protect.device_task",
+      "ingested": "2026-03-10T02:45:01Z",
+      "kind": "event",
+      "original": "{\"action\":{\"name\":\"Product Activation\",\"params\":{\"@type\":\"type.googleapis.com/Era.Common.DataDefinition.Task.ESS.OnDemandScan\",\"cleaningEnabled\":true,\"customProfileName\":\"DefaultProfile\",\"scanProfile\":\"InDepth\",\"scanTargets\":[\"eset://AllTargets\"]}},\"description\":\"Automatically created via ESET LiveGuard\",\"displayName\":\"Product activation - via ESET LiveGuard\",\"targets\":{\"devicesUuids\":[\"0205321e-XXXX-1234-5678-feeb35010ea7\"]},\"triggers\":[{\"manual\":{\"expireTime\":\"2023-12-01T01:30:00Z\"}}],\"uuid\":\"c93070e0-1234-1234-5678-c48f0e5e0b7e\",\"versionId\":\"1511\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "id": [
+        "0205321e-XXXX-1234-5678-feeb35010ea7"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "related": {
+      "hosts": [
+        "0205321e-XXXX-1234-5678-feeb35010ea7"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "eset_protect-device_task"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:44:58.099Z",
+    "agent": {
+      "ephemeral_id": "02c91050-f6ac-44c8-a199-d654314c7d60",
+      "id": "305e93eb-af81-4baa-a778-fbfda087edc3",
+      "name": "elastic-agent-99846",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "eset_protect.device_task",
+      "namespace": "62600",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "305e93eb-af81-4baa-a778-fbfda087edc3",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "eset_protect": {
+      "device_task": {
+        "action": {
+          "name": "Shutdown computer",
+          "params": {
+            "@type": "type.googleapis.com/Era.Common.DataDefinition.Task.ESS.OnDemandScan",
+            "cleaning_enabled": true,
+            "custom_profile_name": "DefaultProfile",
+            "scan_profile": "InDepth",
+            "scan_targets": [
+              "eset://AllTargets"
+            ]
+          }
+        },
+        "description": "Automatically created via context menu",
+        "display_name": "Reboot Computer - via context menu",
+        "targets": {
+          "devices_uuids": [
+            "0205321e-XXXX-XXXX-1234-feeb35010ea7",
+            "0205321e-XXXX-XXXX-5678-feeb35010ea7",
+            "0205321e-XXXX-1234-5678-feeb35010ea7"
+          ]
+        },
+        "triggers": [
+          {
+            "manual": {
+              "expire_time": "2023-12-01T01:30:00.000Z"
+            }
+          }
+        ],
+        "uuid": "c93070e0-XXXX-1234-5678-c48f0e5e0b7e",
+        "version_id": "1511"
+      }
+    },
+    "event": {
+      "action": "Shutdown computer",
+      "agent_id_status": "verified",
+      "dataset": "eset_protect.device_task",
+      "ingested": "2026-03-10T02:45:01Z",
+      "kind": "event",
+      "original": "{\"action\":{\"name\":\"Shutdown computer\",\"params\":{\"@type\":\"type.googleapis.com/Era.Common.DataDefinition.Task.ESS.OnDemandScan\",\"cleaningEnabled\":true,\"customProfileName\":\"DefaultProfile\",\"scanProfile\":\"InDepth\",\"scanTargets\":[\"eset://AllTargets\"]}},\"description\":\"Automatically created via context menu\",\"displayName\":\"Reboot Computer - via context menu\",\"targets\":{\"devicesUuids\":[\"0205321e-XXXX-XXXX-1234-feeb35010ea7\",\"0205321e-XXXX-XXXX-5678-feeb35010ea7\",\"0205321e-XXXX-1234-5678-feeb35010ea7\"]},\"triggers\":[{\"manual\":{\"expireTime\":\"2023-12-01T01:30:00Z\"}}],\"uuid\":\"c93070e0-XXXX-1234-5678-c48f0e5e0b7e\",\"versionId\":\"1511\"}",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "id": [
+        "0205321e-XXXX-XXXX-1234-feeb35010ea7",
+        "0205321e-XXXX-XXXX-5678-feeb35010ea7",
+        "0205321e-XXXX-1234-5678-feeb35010ea7"
+      ]
+    },
+    "input": {
+      "type": "cel"
+    },
+    "related": {
+      "hosts": [
+        "0205321e-XXXX-XXXX-1234-feeb35010ea7",
+        "0205321e-XXXX-XXXX-5678-feeb35010ea7",
+        "0205321e-XXXX-1234-5678-feeb35010ea7"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "eset_protect-device_task"
+    ]
+  }
+]

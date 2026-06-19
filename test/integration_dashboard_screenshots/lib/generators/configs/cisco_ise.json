@@ -1,0 +1,73 @@
+{
+  "package": "cisco_ise",
+  "dataStreams": [
+    {
+      "dataset": "cisco_ise.log",
+      "indexPattern": "logs-*",
+      "docTarget": 1000,
+      "fields": [
+        "cisco_ise.log.acct.terminate_cause",
+        "cisco_ise.log.ad.hostname",
+        "cisco_ise.log.ad.ip",
+        "cisco_ise.log.adapter_instance.name",
+        "cisco_ise.log.admin.interface",
+        "cisco_ise.log.authentication.identity_store",
+        "cisco_ise.log.authentication.method",
+        "cisco_ise.log.category.name",
+        "cisco_ise.log.connectivity",
+        "cisco_ise.log.currentid.store_name",
+        "cisco_ise.log.device.name",
+        "cisco_ise.log.eap.authentication",
+        "cisco_ise.log.eap.tunnel",
+        "cisco_ise.log.failure.flag",
+        "cisco_ise.log.guest.user.name",
+        "cisco_ise.log.logger.name",
+        "cisco_ise.log.model.name",
+        "cisco_ise.log.nas.ip",
+        "cisco_ise.log.nas.port.type",
+        "cisco_ise.log.network.device.name",
+        "cisco_ise.log.network.device.profile",
+        "cisco_ise.log.network.device.profile_name",
+        "cisco_ise.log.object.type",
+        "cisco_ise.log.operation.status",
+        "cisco_ise.log.operation.type",
+        "cisco_ise.log.policy.type",
+        "cisco_ise.log.portal.name",
+        "cisco_ise.log.radius_packet.type",
+        "cisco_ise.log.selected.access.service",
+        "cisco_ise.log.service.name",
+        "cisco_ise.log.status",
+        "cisco_ise.log.sysstats.utilization.cpu",
+        "cisco_ise.log.sysstats.utilization.disk.io",
+        "cisco_ise.log.sysstats.utilization.load_avg",
+        "cisco_ise.log.sysstats.utilization.memory",
+        "cisco_ise.log.user.type",
+        "client.ip",
+        "client.user.name",
+        "network.protocol",
+        "source.ip",
+        "user.name"
+      ],
+      "filterValues": {
+        "cisco_ise.log.category.name": [
+          "CISE_Posture_and_Client_Provisioning_Audit",
+          "CISE_Authentication_Flow_Diagnostics",
+          "CISE_Guest",
+          "CISE_MyDevices",
+          "CISE_Identity_Stores_Diagnostics",
+          "CISE_Policy_Diagnostics",
+          "CISE_RADIUS_Diagnostics",
+          "CISE_AD_Connector",
+          "CISE_System_Statistics",
+          "CISE_RADIUS_Accounting",
+          "CISE_TACACS_Accounting",
+          "CISE_Administrative_and_Operational_Audit",
+          "CISE_Internal_Operations_Diagnostics",
+          "CISE_Threat_Centric_NAC",
+          "CISE_Failed_Attempts",
+          "CISE_Passed_Authentications"
+        ]
+      }
+    }
+  ]
+}

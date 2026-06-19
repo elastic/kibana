@@ -1,0 +1,3296 @@
+[
+  {
+    "@timestamp": "2024-04-01T20:02:24.641Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "20",
+      "created": "2026-03-10T03:21:50.979Z",
+      "dataset": "zeronetworks.audit",
+      "id": "c9RjandfejqUejHvepa+siZ+DqY=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":20,\"destinationEntitiesList\":[{\"id\":\"a:a:9ebab20f\",\"name\":\"SHARE\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:9ebab20f\\\",\\\"name\\\":\\\"SHARE\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:tWeK4vqH\\\",\\\"name\\\":\\\"NICHOLAS-LAPTOP\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1712016144610,\\\"description\\\":\\\"Privileged port\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:ZMLGbhRk\\\",\\\"name\\\":\\\"Nicholas DiCola\\\"},\\\"enforcementSource\\\":1,\\\"createdAt\\\":1712001744616,\\\"usedMfaMethod\\\":3,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1712001744616,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":null,\\\"ruleClass\\\":3}}\",\"enforcementSource\":1,\"isoTimestamp\":\"2024-04-01T20:02:24.641Z\",\"parentObjectId\":\"0112ba43-3bc4-4017-b3f7-dcbec45ead91\",\"performedBy\":{\"id\":\"u:a:ZMLGbhRk\",\"name\":\"Nicholas DiCola\"},\"reportedObjectGeneration\":15201848,\"reportedObjectId\":\"0f1fcb87-226d-4b1c-b243-439f160c292d\",\"timestamp\":1712001744641,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:ZMLGbhRk",
+        "Nicholas DiCola"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Nicholas DiCola",
+      "id": "u:a:ZMLGbhRk"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:9ebab20f",
+          "name": "SHARE"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T20:02:24.616Z",
+            "created_by": {
+              "id": "u:a:ZMLGbhRk",
+              "name": "Nicholas DiCola"
+            },
+            "description": "Privileged port",
+            "enforcementSource": 1,
+            "expiration": "2024-04-02T00:02:24.610Z",
+            "localEntityNames": {
+              "id": "a:a:9ebab20f",
+              "name": "SHARE"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "NICHOLAS-LAPTOP",
+                "id": "a:a:tWeK4vqH"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T20:02:24.616Z",
+            "usedMfaMethod": 3
+          }
+        },
+        "enforcementSource": 1,
+        "parentObjectId": "0112ba43-3bc4-4017-b3f7-dcbec45ead91",
+        "reportedObjectGeneration": 15201848,
+        "reportedObjectId": "0f1fcb87-226d-4b1c-b243-439f160c292d",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T20:02:18.793Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "20",
+      "created": "2026-03-10T03:21:52.933Z",
+      "dataset": "zeronetworks.audit",
+      "id": "gWLjPvJo2EpKscNseZBwye93RCY=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":20,\"destinationEntitiesList\":[{\"id\":\"a:a:3e8c791b\",\"name\":\"DC16\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:3e8c791b\\\",\\\"name\\\":\\\"DC16\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:tWeK4vqH\\\",\\\"name\\\":\\\"NICHOLAS-LAPTOP\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1712016138767,\\\"description\\\":\\\"Privileged port\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:ZMLGbhRk\\\",\\\"name\\\":\\\"Nicholas DiCola\\\"},\\\"enforcementSource\\\":1,\\\"createdAt\\\":1712001738772,\\\"usedMfaMethod\\\":3,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1712001738772,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":null,\\\"ruleClass\\\":3}}\",\"enforcementSource\":1,\"isoTimestamp\":\"2024-04-01T20:02:18.793Z\",\"parentObjectId\":\"0112ba43-3bc4-4017-b3f7-dcbec45ead91\",\"performedBy\":{\"id\":\"u:a:ZMLGbhRk\",\"name\":\"Nicholas DiCola\"},\"reportedObjectGeneration\":15201847,\"reportedObjectId\":\"ed6b681b-22b2-4ee1-b28e-db31881fc54f\",\"timestamp\":1712001738793,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:ZMLGbhRk",
+        "Nicholas DiCola"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Nicholas DiCola",
+      "id": "u:a:ZMLGbhRk"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:3e8c791b",
+          "name": "DC16"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T20:02:18.772Z",
+            "created_by": {
+              "id": "u:a:ZMLGbhRk",
+              "name": "Nicholas DiCola"
+            },
+            "description": "Privileged port",
+            "enforcementSource": 1,
+            "expiration": "2024-04-02T00:02:18.767Z",
+            "localEntityNames": {
+              "id": "a:a:3e8c791b",
+              "name": "DC16"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "NICHOLAS-LAPTOP",
+                "id": "a:a:tWeK4vqH"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T20:02:18.772Z",
+            "usedMfaMethod": 3
+          }
+        },
+        "enforcementSource": 1,
+        "parentObjectId": "0112ba43-3bc4-4017-b3f7-dcbec45ead91",
+        "reportedObjectGeneration": 15201847,
+        "reportedObjectId": "ed6b681b-22b2-4ee1-b28e-db31881fc54f",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T19:59:27.459Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset added to learning",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "7",
+      "created": "2026-03-10T03:21:52.933Z",
+      "dataset": "zeronetworks.audit",
+      "id": "WwOkI3UilYSxulaUzR+4QrFgAwQ=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":7,\"destinationEntitiesList\":[{\"id\":\"a:w:tOUovcIQ\",\"name\":\"awsWEB\"}],\"details\":\"{\\\"learningDuration\\\":30,\\\"protectionDate\\\":\\\"01 May 24 20:00 UTC\\\"}\",\"enforcementSource\":5,\"isoTimestamp\":\"2024-04-01T19:59:27.459Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"timestamp\":1712001567459,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:w:tOUovcIQ",
+          "name": "awsWEB"
+        },
+        "details": {
+          "learningDuration": 30,
+          "protectionDate": "01 May 24 20:00 UTC"
+        },
+        "enforcementSource": 5,
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T19:59:23.604Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset removed from learning",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "8",
+      "created": "2026-03-10T03:21:52.933Z",
+      "dataset": "zeronetworks.audit",
+      "id": "c9QyjAqg/25Ap4Pg97+BTmWqgaI=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":8,\"destinationEntitiesList\":[{\"id\":\"a:w:tOUovcIQ\",\"name\":\"awsWEB\"}],\"details\":\"\",\"enforcementSource\":5,\"isoTimestamp\":\"2024-04-01T19:59:23.604Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"timestamp\":1712001563604,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:w:tOUovcIQ",
+          "name": "awsWEB"
+        },
+        "enforcementSource": 5,
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T19:38:00.099Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Outbound block rule expired",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "31",
+      "created": "2026-03-10T03:21:52.933Z",
+      "dataset": "zeronetworks.audit",
+      "id": "xKzUh73mHA+yRYl46YjHazLD+d4=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":31,\"destinationEntitiesList\":[{\"id\":\"b:17cisco.com\",\"name\":\"cisco.com\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"b:110002\\\",\\\"name\\\":\\\"All segmented assets\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:17cisco.com\\\",\\\"name\\\":\\\"cisco.com\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":256}],\\\"expiration\\\":1712000280000,\\\"description\\\":\\\"demo\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"enforcementSource\\\":2,\\\"createdAt\\\":1711996683625,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711996683625,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":6}}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T19:38:00.099Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectGeneration\":15201838,\"reportedObjectId\":\"0bc8e97e-ccd3-4b7f-aafd-456d0d6e9458\",\"timestamp\":1712000280099,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "b:17cisco.com",
+          "name": "cisco.com"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T18:38:03.625Z",
+            "created_by": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "description": "demo",
+            "enforcementSource": 2,
+            "expiration": "2024-04-01T19:38:00.000Z",
+            "localEntityNames": {
+              "id": "b:110002",
+              "name": "All segmented assets"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 256
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "cisco.com",
+                "id": "b:17cisco.com"
+              }
+            ],
+            "ruleClass": 6,
+            "state": 1,
+            "updatedAt": "2024-04-01T18:38:03.625Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 2,
+        "reportedObjectGeneration": 15201838,
+        "reportedObjectId": "0bc8e97e-ccd3-4b7f-aafd-456d0d6e9458",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T19:27:09.353Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Connect session logout",
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "99",
+      "created": "2026-03-10T03:21:52.936Z",
+      "dataset": "zeronetworks.audit",
+      "id": "miIZ4UaYlRX7GM5MhpGuC19AWF4=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":99,\"destinationEntitiesList\":[{\"id\":\"a:a:Y5UYoaWk\",\"name\":\"SURFACE\"}],\"details\":\"{\\\"sourceAsset\\\":\\\"SURFACE\\\",\\\"connectServer\\\":\\\"tlv-connect-1\\\",\\\"connectedSince\\\":0,\\\"externalIP\\\":\\\"93.43.83.34\\\",\\\"user\\\":\\\"Benny Lakunishok\\\",\\\"uacId\\\":\\\"v:a:0LcsYWXx\\\",\\\"uacName\\\":\\\"Benny demo\\\",\\\"idp\\\":0,\\\"expiresAt\\\":\\\"01 Apr 24 19:48 UTC\\\"}\",\"enforcementSource\":8,\"isoTimestamp\":\"2024-04-01T19:27:09.353Z\",\"performedBy\":{\"id\":\"u:a:OOdYqjWI\",\"name\":\"Benny Lakunishok\"},\"reportedObjectId\":\"a:a:Y5UYoaWk\",\"timestamp\":1711999629353}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:OOdYqjWI",
+        "Benny Lakunishok"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Benny Lakunishok",
+      "id": "u:a:OOdYqjWI"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:Y5UYoaWk",
+          "name": "SURFACE"
+        },
+        "details": {
+          "connectServer": "tlv-connect-1",
+          "connectedSince": "1970-01-01T00:00:00.000Z",
+          "expiresAt": "01 Apr 24 19:48 UTC",
+          "externalIP": "93.43.83.34",
+          "idp": 0,
+          "sourceAsset": "SURFACE",
+          "uacId": "v:a:0LcsYWXx",
+          "uacName": "Benny demo",
+          "user": "Benny Lakunishok"
+        },
+        "enforcementSource": 8,
+        "reportedObjectId": "a:a:Y5UYoaWk"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T18:45:42.093Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Outbound JIT rule expired",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "63",
+      "created": "2026-03-10T03:21:52.937Z",
+      "dataset": "zeronetworks.audit",
+      "id": "y6wywaTSleLb4aylinhnWuXNdM4=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":63,\"destinationEntitiesList\":[{\"id\":\"a:t:YbCftTzp\",\"name\":\"camera\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:0RwcondJ\\\",\\\"name\\\":\\\"KEN-DESKTOP02\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:t:YbCftTzp\\\",\\\"name\\\":\\\"camera\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":256}],\\\"expiration\\\":1711997142045,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:wI1pICre\\\",\\\"name\\\":\\\"Ken Ward\\\"},\\\"enforcementSource\\\":2,\\\"createdAt\\\":1711982742049,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711982742049,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":3}}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T18:45:42.093Z\",\"parentObjectId\":\"34ae5001-8c33-40c8-be25-b39079de73c8\",\"performedBy\":{\"id\":\"u:a:wI1pICre\",\"name\":\"Ken Ward\"},\"reportedObjectGeneration\":15201822,\"reportedObjectId\":\"684b5b8f-22ef-4dda-b675-8faf8d80a8b3\",\"timestamp\":1711997142093,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:wI1pICre",
+        "Ken Ward"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Ken Ward",
+      "id": "u:a:wI1pICre"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:t:YbCftTzp",
+          "name": "camera"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:45:42.049Z",
+            "created_by": {
+              "id": "u:a:wI1pICre",
+              "name": "Ken Ward"
+            },
+            "enforcementSource": 2,
+            "expiration": "2024-04-01T18:45:42.045Z",
+            "localEntityNames": {
+              "id": "a:a:0RwcondJ",
+              "name": "KEN-DESKTOP02"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 256
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "camera",
+                "id": "a:t:YbCftTzp"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:45:42.049Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 2,
+        "parentObjectId": "34ae5001-8c33-40c8-be25-b39079de73c8",
+        "reportedObjectGeneration": 15201822,
+        "reportedObjectId": "684b5b8f-22ef-4dda-b675-8faf8d80a8b3",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T18:43:36.897Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule expired",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "22",
+      "created": "2026-03-10T03:21:52.937Z",
+      "dataset": "zeronetworks.audit",
+      "id": "umTX2haqt+6DEjg0U7mEF9yd+Ew=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":22,\"destinationEntitiesList\":[{\"id\":\"a:a:3e8c791b\",\"name\":\"DC16\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:3e8c791b\\\",\\\"name\\\":\\\"DC16\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:0RwcondJ\\\",\\\"name\\\":\\\"KEN-DESKTOP02\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1711997016829,\\\"description\\\":\\\"RDP/WinRM MFA\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:wI1pICre\\\",\\\"name\\\":\\\"Ken Ward\\\"},\\\"enforcementSource\\\":2,\\\"createdAt\\\":1711982616833,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711982616833,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":3}}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T18:43:36.897Z\",\"parentObjectId\":\"75bde6e6-83d6-401b-b63b-c2ed062e80fb\",\"performedBy\":{\"id\":\"u:a:wI1pICre\",\"name\":\"Ken Ward\"},\"reportedObjectGeneration\":15201821,\"reportedObjectId\":\"dbb8b0f0-d983-402d-bd8a-ae710a5db812\",\"timestamp\":1711997016897,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:wI1pICre",
+        "Ken Ward"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Ken Ward",
+      "id": "u:a:wI1pICre"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:3e8c791b",
+          "name": "DC16"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:43:36.833Z",
+            "created_by": {
+              "id": "u:a:wI1pICre",
+              "name": "Ken Ward"
+            },
+            "description": "RDP/WinRM MFA",
+            "enforcementSource": 2,
+            "expiration": "2024-04-01T18:43:36.829Z",
+            "localEntityNames": {
+              "id": "a:a:3e8c791b",
+              "name": "DC16"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "KEN-DESKTOP02",
+                "id": "a:a:0RwcondJ"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:43:36.833Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 2,
+        "parentObjectId": "75bde6e6-83d6-401b-b63b-c2ed062e80fb",
+        "reportedObjectGeneration": 15201821,
+        "reportedObjectId": "dbb8b0f0-d983-402d-bd8a-ae710a5db812",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T18:43:10.675Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Connect session created",
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "96",
+      "created": "2026-03-10T03:21:52.937Z",
+      "dataset": "zeronetworks.audit",
+      "id": "HXfE07PTzjFSxG4kDTnrdup/7HU=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":96,\"destinationEntitiesList\":[{\"id\":\"a:a:9kGi4Os0\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"sourceAsset\\\":\\\"LAPTOP\\\",\\\"connectServer\\\":\\\"\\\",\\\"connectedSince\\\":0,\\\"externalIP\\\":\\\"87.70.29.168\\\",\\\"user\\\":\\\"Polina Blinchevsky\\\",\\\"uacId\\\":\\\"v:a:0PJPxvov\\\",\\\"uacName\\\":\\\"Employees\\\",\\\"idp\\\":2,\\\"expiresAt\\\":\\\"09 Apr 24 18:43 UTC\\\"}\",\"enforcementSource\":8,\"isoTimestamp\":\"2024-04-01T18:43:10.675Z\",\"performedBy\":{\"id\":\"u:a:f9KNkzvT\",\"name\":\"Polina Blinchevsky\"},\"reportedObjectId\":\"a:a:9kGi4Os0\",\"timestamp\":1711996990675}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:f9KNkzvT",
+        "Polina Blinchevsky"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Polina Blinchevsky",
+      "id": "u:a:f9KNkzvT"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:9kGi4Os0",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "connectedSince": "1970-01-01T00:00:00.000Z",
+          "expiresAt": "09 Apr 24 18:43 UTC",
+          "externalIP": "87.70.29.168",
+          "idp": 2,
+          "sourceAsset": "LAPTOP",
+          "uacId": "v:a:0PJPxvov",
+          "uacName": "Employees",
+          "user": "Polina Blinchevsky"
+        },
+        "enforcementSource": 8,
+        "reportedObjectId": "a:a:9kGi4Os0"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T18:38:03.743Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Outbound block rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "29",
+      "created": "2026-03-10T03:21:52.937Z",
+      "dataset": "zeronetworks.audit",
+      "id": "YxeEKU8Fv029EdVpNZRfgOJln1E=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":29,\"destinationEntitiesList\":[{\"id\":\"b:17cisco.com\",\"name\":\"cisco.com\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"b:110002\\\",\\\"name\\\":\\\"All segmented assets\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:17cisco.com\\\",\\\"name\\\":\\\"cisco.com\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":256}],\\\"expiration\\\":1712000280000,\\\"description\\\":\\\"demo\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"enforcementSource\\\":5,\\\"createdAt\\\":1711996683625,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711996683625,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":6}}\",\"enforcementSource\":5,\"isoTimestamp\":\"2024-04-01T18:38:03.743Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectGeneration\":15201814,\"reportedObjectId\":\"0bc8e97e-ccd3-4b7f-aafd-456d0d6e9458\",\"timestamp\":1711996683743,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "b:17cisco.com",
+          "name": "cisco.com"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T18:38:03.625Z",
+            "created_by": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "description": "demo",
+            "enforcementSource": 5,
+            "expiration": "2024-04-01T19:38:00.000Z",
+            "localEntityNames": {
+              "id": "b:110002",
+              "name": "All segmented assets"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 256
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "cisco.com",
+                "id": "b:17cisco.com"
+              }
+            ],
+            "ruleClass": 6,
+            "state": 1,
+            "updatedAt": "2024-04-01T18:38:03.625Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 5,
+        "reportedObjectGeneration": 15201814,
+        "reportedObjectId": "0bc8e97e-ccd3-4b7f-aafd-456d0d6e9458",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T17:45:17.170Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "20",
+      "created": "2026-03-10T03:21:52.939Z",
+      "dataset": "zeronetworks.audit",
+      "id": "7YmF4uSo0DreEcBsbG9Q4XEbiEQ=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":20,\"destinationEntitiesList\":[{\"id\":\"a:d:gQpCcomp\",\"name\":\"aadvm\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:d:gQpCcomp\\\",\\\"name\\\":\\\"aadvm\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:tWeK4vqH\\\",\\\"name\\\":\\\"NICHOLAS-LAPTOP\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1712036717000,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:ZMLGbhRk\\\",\\\"name\\\":\\\"Nicholas DiCola\\\"},\\\"enforcementSource\\\":3,\\\"createdAt\\\":1711993517131,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711993517131,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":3}}\",\"enforcementSource\":3,\"isoTimestamp\":\"2024-04-01T17:45:17.170Z\",\"performedBy\":{\"id\":\"u:a:ZMLGbhRk\",\"name\":\"Nicholas DiCola\"},\"reportedObjectGeneration\":15201799,\"reportedObjectId\":\"9cd8d3a1-f795-4ceb-8154-4c333c5179db\",\"timestamp\":1711993517170,\"userRole\":3}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:ZMLGbhRk",
+        "Nicholas DiCola"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Nicholas DiCola",
+      "id": "u:a:ZMLGbhRk"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:gQpCcomp",
+          "name": "aadvm"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T17:45:17.131Z",
+            "created_by": {
+              "id": "u:a:ZMLGbhRk",
+              "name": "Nicholas DiCola"
+            },
+            "enforcementSource": 3,
+            "expiration": "2024-04-02T05:45:17.000Z",
+            "localEntityNames": {
+              "id": "a:d:gQpCcomp",
+              "name": "aadvm"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "NICHOLAS-LAPTOP",
+                "id": "a:a:tWeK4vqH"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T17:45:17.131Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 3,
+        "reportedObjectGeneration": 15201799,
+        "reportedObjectId": "9cd8d3a1-f795-4ceb-8154-4c333c5179db",
+        "userRole": 3
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T16:06:50.678Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Connect session expired",
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "97",
+      "created": "2026-03-10T03:21:52.939Z",
+      "dataset": "zeronetworks.audit",
+      "id": "6Ltd0Ov89gBZD04zGDuWy7KV41g=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":97,\"destinationEntitiesList\":[{\"id\":\"a:p:oG38bfNx\",\"name\":\"MacBook-Pro.local\"}],\"details\":\"{\\\"sourceAsset\\\":\\\"MacBook-Pro.local\\\",\\\"connectServer\\\":\\\"tlv-connect-1\\\",\\\"connectedSince\\\":1711987541100,\\\"externalIP\\\":\\\"93.172.48.59\\\",\\\"user\\\":\\\"Elior Shriki\\\",\\\"uacId\\\":\\\"v:a:0PJPxvov\\\",\\\"uacName\\\":\\\"Employees\\\",\\\"idp\\\":0,\\\"expiresAt\\\":\\\"01 Apr 24 16:06 UTC\\\"}\",\"enforcementSource\":8,\"isoTimestamp\":\"2024-04-01T16:06:50.678Z\",\"performedBy\":{\"id\":\"u:a:KhIsKX4F\",\"name\":\"Elior Shriki\"},\"reportedObjectId\":\"a:p:oG38bfNx\",\"timestamp\":1711987610678}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:KhIsKX4F",
+        "Elior Shriki"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Elior Shriki",
+      "id": "u:a:KhIsKX4F"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:p:oG38bfNx",
+          "name": "MacBook-Pro.local"
+        },
+        "details": {
+          "connectServer": "tlv-connect-1",
+          "connectedSince": "2024-04-01T16:05:41.100Z",
+          "expiresAt": "01 Apr 24 16:06 UTC",
+          "externalIP": "93.172.48.59",
+          "idp": 0,
+          "sourceAsset": "MacBook-Pro.local",
+          "uacId": "v:a:0PJPxvov",
+          "uacName": "Employees",
+          "user": "Elior Shriki"
+        },
+        "enforcementSource": 8,
+        "reportedObjectId": "a:p:oG38bfNx"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T15:25:33.997Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound allow rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "9",
+      "created": "2026-03-10T03:21:52.940Z",
+      "dataset": "zeronetworks.audit",
+      "id": "gHFsYsHr5s5L/Y+7OVZT6adfqbg=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":9,\"destinationEntitiesList\":[{\"id\":\"a:a:9ebab20f\",\"name\":\"SHARE\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:9ebab20f\\\",\\\"name\\\":\\\"SHARE\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:12ac00000d20\\\",\\\"name\\\":\\\"172.0.0.13\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":256}],\\\"expiration\\\":0,\\\"description\\\":\\\"Created from activity\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8002\\\",\\\"name\\\":\\\"Dev\\\"},\\\"enforcementSource\\\":4,\\\"createdAt\\\":1711985133972,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711985133972,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":3}}\",\"enforcementSource\":4,\"isoTimestamp\":\"2024-04-01T15:25:33.997Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8002\",\"name\":\"Dev\"},\"reportedObjectGeneration\":15201735,\"reportedObjectId\":\"69e61aad-f7c9-468e-8b01-f5472aecc1a7\",\"timestamp\":1711985133997,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8002",
+        "Dev"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Dev",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8002"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:9ebab20f",
+          "name": "SHARE"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T15:25:33.972Z",
+            "created_by": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8002",
+              "name": "Dev"
+            },
+            "description": "Created from activity",
+            "enforcementSource": 4,
+            "expiration": "1970-01-01T00:00:00.000Z",
+            "localEntityNames": {
+              "id": "a:a:9ebab20f",
+              "name": "SHARE"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 256
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "172.0.0.13",
+                "id": "b:12ac00000d20"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T15:25:33.972Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 4,
+        "reportedObjectGeneration": 15201735,
+        "reportedObjectId": "69e61aad-f7c9-468e-8b01-f5472aecc1a7",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T15:23:44.397Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Connect session expired",
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "97",
+      "created": "2026-03-10T03:21:52.940Z",
+      "dataset": "zeronetworks.audit",
+      "id": "k/CKnSsz4WQ/1bH0+iOtLzHDRkE=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":97,\"destinationEntitiesList\":[{\"id\":\"a:d:uwC75vLo\",\"name\":\"ANTLPT8822393FB\"}],\"details\":\"{\\\"sourceAsset\\\":\\\"ANTLPT8822393FB\\\",\\\"connectServer\\\":\\\"tlv-connect-1\\\",\\\"connectedSince\\\":0,\\\"externalIP\\\":\\\"46.117.206.112\\\",\\\"user\\\":\\\"Yaara Licht\\\",\\\"uacId\\\":\\\"v:a:0PJPxvov\\\",\\\"uacName\\\":\\\"Employees\\\",\\\"idp\\\":0,\\\"expiresAt\\\":\\\"01 Apr 24 15:23 UTC\\\"}\",\"enforcementSource\":8,\"isoTimestamp\":\"2024-04-01T15:23:44.397Z\",\"performedBy\":{\"id\":\"u:a:006xgGNA\",\"name\":\"Yaara Licht\"},\"reportedObjectId\":\"a:d:uwC75vLo\",\"timestamp\":1711985024397}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:006xgGNA",
+        "Yaara Licht"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Yaara Licht",
+      "id": "u:a:006xgGNA"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:uwC75vLo",
+          "name": "ANTLPT8822393FB"
+        },
+        "details": {
+          "connectServer": "tlv-connect-1",
+          "connectedSince": "1970-01-01T00:00:00.000Z",
+          "expiresAt": "01 Apr 24 15:23 UTC",
+          "externalIP": "46.117.206.112",
+          "idp": 0,
+          "sourceAsset": "ANTLPT8822393FB",
+          "uacId": "v:a:0PJPxvov",
+          "uacName": "Employees",
+          "user": "Yaara Licht"
+        },
+        "enforcementSource": 8,
+        "reportedObjectId": "a:d:uwC75vLo"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:45:42.078Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Outbound JIT rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "61",
+      "created": "2026-03-10T03:21:52.940Z",
+      "dataset": "zeronetworks.audit",
+      "id": "d3mwMeWaO4ZS2PX7+MvnF741J/Y=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":61,\"destinationEntitiesList\":[{\"id\":\"a:t:YbCftTzp\",\"name\":\"camera\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:0RwcondJ\\\",\\\"name\\\":\\\"KEN-DESKTOP02\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:t:YbCftTzp\\\",\\\"name\\\":\\\"camera\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":256}],\\\"expiration\\\":1711997142045,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:wI1pICre\\\",\\\"name\\\":\\\"Ken Ward\\\"},\\\"enforcementSource\\\":1,\\\"createdAt\\\":1711982742049,\\\"usedMfaMethod\\\":3,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711982742049,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":null,\\\"ruleClass\\\":3}}\",\"enforcementSource\":1,\"isoTimestamp\":\"2024-04-01T14:45:42.078Z\",\"parentObjectId\":\"34ae5001-8c33-40c8-be25-b39079de73c8\",\"performedBy\":{\"id\":\"u:a:wI1pICre\",\"name\":\"Ken Ward\"},\"reportedObjectGeneration\":15201698,\"reportedObjectId\":\"684b5b8f-22ef-4dda-b675-8faf8d80a8b3\",\"timestamp\":1711982742078,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:wI1pICre",
+        "Ken Ward"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Ken Ward",
+      "id": "u:a:wI1pICre"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:t:YbCftTzp",
+          "name": "camera"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:45:42.049Z",
+            "created_by": {
+              "id": "u:a:wI1pICre",
+              "name": "Ken Ward"
+            },
+            "enforcementSource": 1,
+            "expiration": "2024-04-01T18:45:42.045Z",
+            "localEntityNames": {
+              "id": "a:a:0RwcondJ",
+              "name": "KEN-DESKTOP02"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 256
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "camera",
+                "id": "a:t:YbCftTzp"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:45:42.049Z",
+            "usedMfaMethod": 3
+          }
+        },
+        "enforcementSource": 1,
+        "parentObjectId": "34ae5001-8c33-40c8-be25-b39079de73c8",
+        "reportedObjectGeneration": 15201698,
+        "reportedObjectId": "684b5b8f-22ef-4dda-b675-8faf8d80a8b3",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:43:36.846Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "20",
+      "created": "2026-03-10T03:21:52.941Z",
+      "dataset": "zeronetworks.audit",
+      "id": "9RHrIqjYPcq1zZyfRJoccJ8RRNo=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":20,\"destinationEntitiesList\":[{\"id\":\"a:a:3e8c791b\",\"name\":\"DC16\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:3e8c791b\\\",\\\"name\\\":\\\"DC16\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:0RwcondJ\\\",\\\"name\\\":\\\"KEN-DESKTOP02\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1711997016829,\\\"description\\\":\\\"RDP/WinRM MFA\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:wI1pICre\\\",\\\"name\\\":\\\"Ken Ward\\\"},\\\"enforcementSource\\\":1,\\\"createdAt\\\":1711982616833,\\\"usedMfaMethod\\\":3,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711982616833,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":null,\\\"ruleClass\\\":3}}\",\"enforcementSource\":1,\"isoTimestamp\":\"2024-04-01T14:43:36.846Z\",\"parentObjectId\":\"75bde6e6-83d6-401b-b63b-c2ed062e80fb\",\"performedBy\":{\"id\":\"u:a:wI1pICre\",\"name\":\"Ken Ward\"},\"reportedObjectGeneration\":15201697,\"reportedObjectId\":\"dbb8b0f0-d983-402d-bd8a-ae710a5db812\",\"timestamp\":1711982616846,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:wI1pICre",
+        "Ken Ward"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Ken Ward",
+      "id": "u:a:wI1pICre"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:3e8c791b",
+          "name": "DC16"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:43:36.833Z",
+            "created_by": {
+              "id": "u:a:wI1pICre",
+              "name": "Ken Ward"
+            },
+            "description": "RDP/WinRM MFA",
+            "enforcementSource": 1,
+            "expiration": "2024-04-01T18:43:36.829Z",
+            "localEntityNames": {
+              "id": "a:a:3e8c791b",
+              "name": "DC16"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "KEN-DESKTOP02",
+                "id": "a:a:0RwcondJ"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:43:36.833Z",
+            "usedMfaMethod": 3
+          }
+        },
+        "enforcementSource": 1,
+        "parentObjectId": "75bde6e6-83d6-401b-b63b-c2ed062e80fb",
+        "reportedObjectGeneration": 15201697,
+        "reportedObjectId": "dbb8b0f0-d983-402d-bd8a-ae710a5db812",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:40:21.246Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Outbound block rule deleted",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "30",
+      "created": "2026-03-10T03:21:52.942Z",
+      "dataset": "zeronetworks.audit",
+      "id": "tgPp4uBGLDBzmRE22/FmUSvc7+A=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":30,\"destinationEntitiesList\":[{\"id\":\"b:17nytimes.com\",\"name\":\"nytimes.com\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"b:110002\\\",\\\"name\\\":\\\"All segmented assets\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:17nytimes.com\\\",\\\"name\\\":\\\"nytimes.com\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":256}],\\\"expiration\\\":0,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"34217835-33b0-4adc-b3c6-0a14f0eec8b7\\\",\\\"name\\\":\\\"Ken Ward\\\"},\\\"enforcementSource\\\":4,\\\"createdAt\\\":1711982385171,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711982385171,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":6}}\",\"enforcementSource\":4,\"isoTimestamp\":\"2024-04-01T14:40:21.246Z\",\"performedBy\":{\"id\":\"34217835-33b0-4adc-b3c6-0a14f0eec8b7\",\"name\":\"Ken Ward\"},\"reportedObjectGeneration\":15201692,\"reportedObjectId\":\"77129771-ef41-4b9a-9c2e-e8dee505e414\",\"timestamp\":1711982421246,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "34217835-33b0-4adc-b3c6-0a14f0eec8b7",
+        "Ken Ward"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Ken Ward",
+      "id": "34217835-33b0-4adc-b3c6-0a14f0eec8b7"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "b:17nytimes.com",
+          "name": "nytimes.com"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:39:45.171Z",
+            "created_by": {
+              "id": "34217835-33b0-4adc-b3c6-0a14f0eec8b7",
+              "name": "Ken Ward"
+            },
+            "enforcementSource": 4,
+            "expiration": "1970-01-01T00:00:00.000Z",
+            "localEntityNames": {
+              "id": "b:110002",
+              "name": "All segmented assets"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 256
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "nytimes.com",
+                "id": "b:17nytimes.com"
+              }
+            ],
+            "ruleClass": 6,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:39:45.171Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 4,
+        "reportedObjectGeneration": 15201692,
+        "reportedObjectId": "77129771-ef41-4b9a-9c2e-e8dee505e414",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:39:45.286Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Outbound block rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "29",
+      "created": "2026-03-10T03:21:52.942Z",
+      "dataset": "zeronetworks.audit",
+      "id": "FolreHJxqanjHCdp37e507OQtWY=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":29,\"destinationEntitiesList\":[{\"id\":\"b:17nytimes.com\",\"name\":\"nytimes.com\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"b:110002\\\",\\\"name\\\":\\\"All segmented assets\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:17nytimes.com\\\",\\\"name\\\":\\\"nytimes.com\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":256}],\\\"expiration\\\":0,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"34217835-33b0-4adc-b3c6-0a14f0eec8b7\\\",\\\"name\\\":\\\"Ken Ward\\\"},\\\"enforcementSource\\\":4,\\\"createdAt\\\":1711982385171,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711982385171,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":6}}\",\"enforcementSource\":4,\"isoTimestamp\":\"2024-04-01T14:39:45.286Z\",\"performedBy\":{\"id\":\"34217835-33b0-4adc-b3c6-0a14f0eec8b7\",\"name\":\"Ken Ward\"},\"reportedObjectGeneration\":15201691,\"reportedObjectId\":\"77129771-ef41-4b9a-9c2e-e8dee505e414\",\"timestamp\":1711982385286,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "34217835-33b0-4adc-b3c6-0a14f0eec8b7",
+        "Ken Ward"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Ken Ward",
+      "id": "34217835-33b0-4adc-b3c6-0a14f0eec8b7"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "b:17nytimes.com",
+          "name": "nytimes.com"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:39:45.171Z",
+            "created_by": {
+              "id": "34217835-33b0-4adc-b3c6-0a14f0eec8b7",
+              "name": "Ken Ward"
+            },
+            "enforcementSource": 4,
+            "expiration": "1970-01-01T00:00:00.000Z",
+            "localEntityNames": {
+              "id": "b:110002",
+              "name": "All segmented assets"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 256
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "nytimes.com",
+                "id": "b:17nytimes.com"
+              }
+            ],
+            "ruleClass": 6,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:39:45.171Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 4,
+        "reportedObjectGeneration": 15201691,
+        "reportedObjectId": "77129771-ef41-4b9a-9c2e-e8dee505e414",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:37:29.942Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Admin portal logon",
+      "agent_id_status": "verified",
+      "category": [
+        "authentication"
+      ],
+      "code": "73",
+      "created": "2026-03-10T03:21:52.942Z",
+      "dataset": "zeronetworks.audit",
+      "id": "gCjvTv+Rpsv174ZmkiYHdOIxg7c=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":73,\"destinationEntitiesList\":[{\"id\":\"34217835-33b0-4adc-b3c6-0a14f0eec8b7\",\"name\":\"Ken Ward\"}],\"details\":\"{\\\"publicIp\\\":\\\"100.16.166.26\\\",\\\"tokenTtl\\\":\\\"2024-04-08T14:37:29.000Z\\\",\\\"idp\\\":1,\\\"role\\\":1}\",\"enforcementSource\":4,\"isoTimestamp\":\"2024-04-01T14:37:29.942Z\",\"parentObjectId\":\"\",\"performedBy\":{\"id\":\"34217835-33b0-4adc-b3c6-0a14f0eec8b7\",\"name\":\"Ken Ward\"},\"reportedObjectId\":\"\",\"timestamp\":1711982249942,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "34217835-33b0-4adc-b3c6-0a14f0eec8b7",
+        "Ken Ward"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Ken Ward",
+      "id": "34217835-33b0-4adc-b3c6-0a14f0eec8b7"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "34217835-33b0-4adc-b3c6-0a14f0eec8b7",
+          "name": "Ken Ward"
+        },
+        "details": {
+          "idp": 1,
+          "publicIp": "100.16.166.26",
+          "role": 1,
+          "tokenTtl": "2024-04-08T14:37:29.000Z"
+        },
+        "enforcementSource": 4,
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:33:08.896Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Connect session expired",
+      "agent_id_status": "verified",
+      "category": [
+        "host"
+      ],
+      "code": "97",
+      "created": "2026-03-10T03:21:52.942Z",
+      "dataset": "zeronetworks.audit",
+      "id": "xgIAQp9EoDv4mxTajPYIHyP5lSo=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":97,\"destinationEntitiesList\":[{\"id\":\"a:d:YSlAFowu\",\"name\":\"WIN11\"}],\"details\":\"{\\\"sourceAsset\\\":\\\"WIN11\\\",\\\"connectServer\\\":\\\"tlv-connect-1\\\",\\\"connectedSince\\\":0,\\\"externalIP\\\":\\\"93.39.156.71\\\",\\\"user\\\":\\\"Emanuele Bianchi\\\",\\\"uacId\\\":\\\"v:a:0hOMhSOg\\\",\\\"uacName\\\":\\\"Ema demo\\\",\\\"idp\\\":0,\\\"expiresAt\\\":\\\"01 Apr 24 14:33 UTC\\\"}\",\"enforcementSource\":8,\"isoTimestamp\":\"2024-04-01T14:33:08.896Z\",\"performedBy\":{\"id\":\"u:a:Jl8kZSiQ\",\"name\":\"Emanuele Bianchi\"},\"reportedObjectId\":\"a:d:YSlAFowu\",\"timestamp\":1711981988896}",
+      "outcome": "success",
+      "type": [
+        "info"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:Jl8kZSiQ",
+        "Emanuele Bianchi"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Emanuele Bianchi",
+      "id": "u:a:Jl8kZSiQ"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:YSlAFowu",
+          "name": "WIN11"
+        },
+        "details": {
+          "connectServer": "tlv-connect-1",
+          "connectedSince": "1970-01-01T00:00:00.000Z",
+          "expiresAt": "01 Apr 24 14:33 UTC",
+          "externalIP": "93.39.156.71",
+          "idp": 0,
+          "sourceAsset": "WIN11",
+          "uacId": "v:a:0hOMhSOg",
+          "uacName": "Ema demo",
+          "user": "Emanuele Bianchi"
+        },
+        "enforcementSource": 8,
+        "reportedObjectId": "a:d:YSlAFowu"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:08:24.516Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound allow rule deleted",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "10",
+      "created": "2026-03-10T03:21:52.945Z",
+      "dataset": "zeronetworks.audit",
+      "id": "mqY6B+zCsSCYbO5ubVElwRt/QsY=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":10,\"destinationEntitiesList\":[{\"id\":\"a:d:0MH4fLgC\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:d:0MH4fLgC\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:120505050520\\\",\\\"name\\\":\\\"5.5.5.5\\\"},{\\\"id\\\":\\\"b:120606060620\\\",\\\"name\\\":\\\"6.6.6.6\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":1}],\\\"expiration\\\":0,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"enforcementSource\\\":5,\\\"createdAt\\\":1711980423949,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711980442528,\\\"updatedBy\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":1}}\",\"enforcementSource\":5,\"isoTimestamp\":\"2024-04-01T14:08:24.516Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectGeneration\":15201647,\"reportedObjectId\":\"7e934eeb-6d34-4f24-ba84-2a9ed1ec7209\",\"timestamp\":1711980504516,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:0MH4fLgC",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:07:03.949Z",
+            "created_by": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "enforcementSource": 5,
+            "expiration": "1970-01-01T00:00:00.000Z",
+            "localEntityNames": {
+              "id": "a:d:0MH4fLgC",
+              "name": "LAPTOP"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 1
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "5.5.5.5",
+                "id": "b:120505050520"
+              },
+              {
+                "name": "6.6.6.6",
+                "id": "b:120606060620"
+              }
+            ],
+            "ruleClass": 1,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:07:22.528Z",
+            "updatedBy": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 5,
+        "reportedObjectGeneration": 15201647,
+        "reportedObjectId": "7e934eeb-6d34-4f24-ba84-2a9ed1ec7209",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:07:22.571Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound allow rule edited",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "12",
+      "created": "2026-03-10T03:21:52.945Z",
+      "dataset": "zeronetworks.audit",
+      "id": "sTMiJgfh9IDdsY9To/fZxuQIStQ=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":12,\"destinationEntitiesList\":[{\"id\":\"a:d:0MH4fLgC\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:d:0MH4fLgC\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:120505050520\\\",\\\"name\\\":\\\"5.5.5.5\\\"},{\\\"id\\\":\\\"b:120606060620\\\",\\\"name\\\":\\\"6.6.6.6\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":1}],\\\"expiration\\\":0,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"enforcementSource\\\":5,\\\"createdAt\\\":1711980423949,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711980442528,\\\"updatedBy\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":1},\\\"prevRule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:d:0MH4fLgC\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:120606060620\\\",\\\"name\\\":\\\"6.6.6.6\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":1}],\\\"expiration\\\":0,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"enforcementSource\\\":5,\\\"createdAt\\\":1711980423949,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711980423949,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":1}}\",\"enforcementSource\":5,\"isoTimestamp\":\"2024-04-01T14:07:22.571Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectGeneration\":15201644,\"reportedObjectId\":\"7e934eeb-6d34-4f24-ba84-2a9ed1ec7209\",\"timestamp\":1711980442571,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:0MH4fLgC",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "prevRule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:07:03.949Z",
+            "created_by": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "enforcementSource": 5,
+            "expiration": "1970-01-01T00:00:00.000Z",
+            "localEntityNames": {
+              "id": "a:d:0MH4fLgC",
+              "name": "LAPTOP"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 1
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "6.6.6.6",
+                "id": "b:120606060620"
+              }
+            ],
+            "ruleClass": 1,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:07:03.949Z",
+            "usedMfaMethod": 0
+          },
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:07:03.949Z",
+            "created_by": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "enforcementSource": 5,
+            "expiration": "1970-01-01T00:00:00.000Z",
+            "localEntityNames": {
+              "id": "a:d:0MH4fLgC",
+              "name": "LAPTOP"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 1
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "5.5.5.5",
+                "id": "b:120505050520"
+              },
+              {
+                "name": "6.6.6.6",
+                "id": "b:120606060620"
+              }
+            ],
+            "ruleClass": 1,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:07:22.528Z",
+            "updatedBy": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 5,
+        "reportedObjectGeneration": 15201644,
+        "reportedObjectId": "7e934eeb-6d34-4f24-ba84-2a9ed1ec7209",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T14:07:03.977Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound allow rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "9",
+      "created": "2026-03-10T03:21:52.946Z",
+      "dataset": "zeronetworks.audit",
+      "id": "ccKlGhotCwHyDJcChg+w6jccaSU=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":9,\"destinationEntitiesList\":[{\"id\":\"a:d:0MH4fLgC\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:d:0MH4fLgC\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"b:120606060620\\\",\\\"name\\\":\\\"6.6.6.6\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":1}],\\\"expiration\\\":0,\\\"description\\\":\\\"\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"1f352ed0-86f1-454f-90a5-592c197c8000\\\",\\\"name\\\":\\\"Zero Networks\\\"},\\\"enforcementSource\\\":5,\\\"createdAt\\\":1711980423949,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711980423949,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":1}}\",\"enforcementSource\":5,\"isoTimestamp\":\"2024-04-01T14:07:03.977Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectGeneration\":15201641,\"reportedObjectId\":\"7e934eeb-6d34-4f24-ba84-2a9ed1ec7209\",\"timestamp\":1711980423977,\"userRole\":1}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:0MH4fLgC",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T14:07:03.949Z",
+            "created_by": {
+              "id": "1f352ed0-86f1-454f-90a5-592c197c8000",
+              "name": "Zero Networks"
+            },
+            "enforcementSource": 5,
+            "expiration": "1970-01-01T00:00:00.000Z",
+            "localEntityNames": {
+              "id": "a:d:0MH4fLgC",
+              "name": "LAPTOP"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 1
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "6.6.6.6",
+                "id": "b:120606060620"
+              }
+            ],
+            "ruleClass": 1,
+            "state": 1,
+            "updatedAt": "2024-04-01T14:07:03.949Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 5,
+        "reportedObjectGeneration": 15201641,
+        "reportedObjectId": "7e934eeb-6d34-4f24-ba84-2a9ed1ec7209",
+        "userRole": 1
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T13:50:26.176Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as active by repo revive",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "125",
+      "created": "2026-03-10T03:21:52.947Z",
+      "dataset": "zeronetworks.audit",
+      "id": "mTi6H4MGaSxj8+1VfNdIQOQH7dw=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":125,\"destinationEntitiesList\":[{\"id\":\"a:d:vGwPw3mE\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"prevInactiveReason\\\":1,\\\"currInactiveReason\\\":3}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T13:50:26.176Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:vGwPw3mE\",\"timestamp\":1711979426176}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:vGwPw3mE",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "currInactiveReason": 3,
+          "prevInactiveReason": 1
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:vGwPw3mE"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T13:50:26.175Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as inactive by repo delete",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "124",
+      "created": "2026-03-10T03:21:52.947Z",
+      "dataset": "zeronetworks.audit",
+      "id": "bLsRewz3l5rRHZ7WaZTcPfkHfG0=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":124,\"destinationEntitiesList\":[{\"id\":\"a:d:YGNfOnmY\",\"name\":\"LAPTOP (inactive)\"}],\"details\":\"{\\\"newAsset\\\":{\\\"id\\\":\\\"a:d:vGwPw3mE\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"prevInactiveReason\\\":3,\\\"currInactiveReason\\\":1}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T13:50:26.175Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:YGNfOnmY\",\"timestamp\":1711979426175}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:YGNfOnmY",
+          "name": "LAPTOP (inactive)"
+        },
+        "details": {
+          "currInactiveReason": 1,
+          "newAsset": {
+            "id": "a:d:vGwPw3mE",
+            "name": "LAPTOP"
+          },
+          "prevInactiveReason": 3
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:YGNfOnmY"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T13:50:26.145Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as active by repo revive",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "125",
+      "created": "2026-03-10T03:21:52.951Z",
+      "dataset": "zeronetworks.audit",
+      "id": "/V/tN1fLv1tGuXGlIv0nbQpRGU4=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":125,\"destinationEntitiesList\":[{\"id\":\"a:d:YGNfOnmY\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"prevInactiveReason\\\":1,\\\"currInactiveReason\\\":3}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T13:50:26.145Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:YGNfOnmY\",\"timestamp\":1711979426145}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:YGNfOnmY",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "currInactiveReason": 3,
+          "prevInactiveReason": 1
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:YGNfOnmY"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T13:50:26.142Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as inactive by repo delete",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "124",
+      "created": "2026-03-10T03:21:52.951Z",
+      "dataset": "zeronetworks.audit",
+      "id": "KJiBceZfchJ447gI6NLpGgzs9Yw=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":124,\"destinationEntitiesList\":[{\"id\":\"a:d:vGwPw3mE\",\"name\":\"LAPTOP (inactive)\"}],\"details\":\"{\\\"newAsset\\\":{\\\"id\\\":\\\"a:d:YGNfOnmY\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"prevInactiveReason\\\":3,\\\"currInactiveReason\\\":1}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T13:50:26.142Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:vGwPw3mE\",\"timestamp\":1711979426142}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:vGwPw3mE",
+          "name": "LAPTOP (inactive)"
+        },
+        "details": {
+          "currInactiveReason": 1,
+          "newAsset": {
+            "id": "a:d:YGNfOnmY",
+            "name": "LAPTOP"
+          },
+          "prevInactiveReason": 3
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:vGwPw3mE"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T12:30:36.501Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule expired",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "22",
+      "created": "2026-03-10T03:21:52.951Z",
+      "dataset": "zeronetworks.audit",
+      "id": "z1yg2Iv82VA5AGYyAFbTGBvoYRo=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":22,\"destinationEntitiesList\":[{\"id\":\"a:a:9ebab20f\",\"name\":\"SHARE\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:9ebab20f\\\",\\\"name\\\":\\\"SHARE\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:Y5UYoaWk\\\",\\\"name\\\":\\\"SURFACE\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1711974636423,\\\"description\\\":\\\"RDP/WinRM MFA\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:OOdYqjWI\\\",\\\"name\\\":\\\"Benny Lakunishok\\\"},\\\"enforcementSource\\\":2,\\\"createdAt\\\":1711960236426,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711960236426,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":3}}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T12:30:36.501Z\",\"parentObjectId\":\"75bde6e6-83d6-401b-b63b-c2ed062e80fb\",\"performedBy\":{\"id\":\"u:a:OOdYqjWI\",\"name\":\"Benny Lakunishok\"},\"reportedObjectGeneration\":15201534,\"reportedObjectId\":\"21cbb13b-848a-49f0-8fe1-1dc369987403\",\"timestamp\":1711974636501,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:OOdYqjWI",
+        "Benny Lakunishok"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Benny Lakunishok",
+      "id": "u:a:OOdYqjWI"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:9ebab20f",
+          "name": "SHARE"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T08:30:36.426Z",
+            "created_by": {
+              "id": "u:a:OOdYqjWI",
+              "name": "Benny Lakunishok"
+            },
+            "description": "RDP/WinRM MFA",
+            "enforcementSource": 2,
+            "expiration": "2024-04-01T12:30:36.423Z",
+            "localEntityNames": {
+              "id": "a:a:9ebab20f",
+              "name": "SHARE"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "SURFACE",
+                "id": "a:a:Y5UYoaWk"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T08:30:36.426Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 2,
+        "parentObjectId": "75bde6e6-83d6-401b-b63b-c2ed062e80fb",
+        "reportedObjectGeneration": 15201534,
+        "reportedObjectId": "21cbb13b-848a-49f0-8fe1-1dc369987403",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T12:07:58.237Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule expired",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "22",
+      "created": "2026-03-10T03:21:52.951Z",
+      "dataset": "zeronetworks.audit",
+      "id": "tB5lMInAcRIWgCpaXJzuL2wKqVI=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":22,\"destinationEntitiesList\":[{\"id\":\"a:a:3e8c791b\",\"name\":\"DC16\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:3e8c791b\\\",\\\"name\\\":\\\"DC16\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:Y5UYoaWk\\\",\\\"name\\\":\\\"SURFACE\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1711973278128,\\\"description\\\":\\\"RDP/WinRM MFA\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:OOdYqjWI\\\",\\\"name\\\":\\\"Benny Lakunishok\\\"},\\\"enforcementSource\\\":2,\\\"createdAt\\\":1711958878131,\\\"usedMfaMethod\\\":0,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711958878131,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":{},\\\"ruleClass\\\":3}}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T12:07:58.237Z\",\"parentObjectId\":\"75bde6e6-83d6-401b-b63b-c2ed062e80fb\",\"performedBy\":{\"id\":\"u:a:OOdYqjWI\",\"name\":\"Benny Lakunishok\"},\"reportedObjectGeneration\":15201521,\"reportedObjectId\":\"5d416ff0-011e-41de-86df-bbf267d4ad41\",\"timestamp\":1711973278237,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:OOdYqjWI",
+        "Benny Lakunishok"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Benny Lakunishok",
+      "id": "u:a:OOdYqjWI"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:3e8c791b",
+          "name": "DC16"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T08:07:58.131Z",
+            "created_by": {
+              "id": "u:a:OOdYqjWI",
+              "name": "Benny Lakunishok"
+            },
+            "description": "RDP/WinRM MFA",
+            "enforcementSource": 2,
+            "expiration": "2024-04-01T12:07:58.128Z",
+            "localEntityNames": {
+              "id": "a:a:3e8c791b",
+              "name": "DC16"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "SURFACE",
+                "id": "a:a:Y5UYoaWk"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T08:07:58.131Z",
+            "usedMfaMethod": 0
+          }
+        },
+        "enforcementSource": 2,
+        "parentObjectId": "75bde6e6-83d6-401b-b63b-c2ed062e80fb",
+        "reportedObjectGeneration": 15201521,
+        "reportedObjectId": "5d416ff0-011e-41de-86df-bbf267d4ad41",
+        "userRole": 6
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T11:23:22.940Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as active by repo revive",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "125",
+      "created": "2026-03-10T03:21:52.951Z",
+      "dataset": "zeronetworks.audit",
+      "id": "XrGP9L9NzgX6y70xuLfAtAg23Cw=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":125,\"destinationEntitiesList\":[{\"id\":\"a:d:vGwPw3mE\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"prevInactiveReason\\\":1,\\\"currInactiveReason\\\":3}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T11:23:22.940Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:vGwPw3mE\",\"timestamp\":1711970602940}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:vGwPw3mE",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "currInactiveReason": 3,
+          "prevInactiveReason": 1
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:vGwPw3mE"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T11:23:22.939Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as inactive by repo delete",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "124",
+      "created": "2026-03-10T03:21:52.953Z",
+      "dataset": "zeronetworks.audit",
+      "id": "dP5p3MspcbkUVp+O8qEzqWdhYHA=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":124,\"destinationEntitiesList\":[{\"id\":\"a:d:YGNfOnmY\",\"name\":\"LAPTOP (inactive)\"}],\"details\":\"{\\\"newAsset\\\":{\\\"id\\\":\\\"a:d:vGwPw3mE\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"prevInactiveReason\\\":3,\\\"currInactiveReason\\\":1}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T11:23:22.939Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:YGNfOnmY\",\"timestamp\":1711970602939}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:YGNfOnmY",
+          "name": "LAPTOP (inactive)"
+        },
+        "details": {
+          "currInactiveReason": 1,
+          "newAsset": {
+            "id": "a:d:vGwPw3mE",
+            "name": "LAPTOP"
+          },
+          "prevInactiveReason": 3
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:YGNfOnmY"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T11:23:22.899Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as active by repo revive",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "125",
+      "created": "2026-03-10T03:21:52.953Z",
+      "dataset": "zeronetworks.audit",
+      "id": "j+CxDLNSXkX7F6VnRGqDRGK8Jqk=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":125,\"destinationEntitiesList\":[{\"id\":\"a:d:YGNfOnmY\",\"name\":\"LAPTOP\"}],\"details\":\"{\\\"prevInactiveReason\\\":1,\\\"currInactiveReason\\\":3}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T11:23:22.899Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:YGNfOnmY\",\"timestamp\":1711970602899}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:YGNfOnmY",
+          "name": "LAPTOP"
+        },
+        "details": {
+          "currInactiveReason": 3,
+          "prevInactiveReason": 1
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:YGNfOnmY"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T11:23:22.898Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as inactive by repo delete",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "124",
+      "created": "2026-03-10T03:21:52.953Z",
+      "dataset": "zeronetworks.audit",
+      "id": "yb872YGoWiGPcnsqEWS0ZRH2Qto=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":124,\"destinationEntitiesList\":[{\"id\":\"a:d:vGwPw3mE\",\"name\":\"LAPTOP (inactive)\"}],\"details\":\"{\\\"newAsset\\\":{\\\"id\\\":\\\"a:d:YGNfOnmY\\\",\\\"name\\\":\\\"LAPTOP\\\"},\\\"prevInactiveReason\\\":3,\\\"currInactiveReason\\\":1}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T11:23:22.898Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:d:vGwPw3mE\",\"timestamp\":1711970602898}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:d:vGwPw3mE",
+          "name": "LAPTOP (inactive)"
+        },
+        "details": {
+          "currInactiveReason": 1,
+          "newAsset": {
+            "id": "a:d:YGNfOnmY",
+            "name": "LAPTOP"
+          },
+          "prevInactiveReason": 3
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:d:vGwPw3mE"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T09:08:30.929Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Asset marked as inactive by repo delete",
+      "agent_id_status": "verified",
+      "category": [
+        "host",
+        "configuration"
+      ],
+      "code": "124",
+      "created": "2026-03-10T03:21:52.953Z",
+      "dataset": "zeronetworks.audit",
+      "id": "dfqi2xbVl7sNAa1INYxbMZWvJQ0=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":124,\"destinationEntitiesList\":[{\"id\":\"a:a:3d2e1de5\",\"name\":\"MONSO-LAP (inactive)\"}],\"details\":\"{\\\"prevInactiveReason\\\":3,\\\"currInactiveReason\\\":4}\",\"enforcementSource\":2,\"isoTimestamp\":\"2024-04-01T09:08:30.929Z\",\"performedBy\":{\"id\":\"1f352ed0-86f1-454f-90a5-592c197c8000\",\"name\":\"Zero Networks\"},\"reportedObjectId\":\"a:a:3d2e1de5\",\"timestamp\":1711962510929}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "1f352ed0-86f1-454f-90a5-592c197c8000",
+        "Zero Networks"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Zero Networks",
+      "id": "1f352ed0-86f1-454f-90a5-592c197c8000"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:3d2e1de5",
+          "name": "MONSO-LAP (inactive)"
+        },
+        "details": {
+          "currInactiveReason": 4,
+          "prevInactiveReason": 3
+        },
+        "enforcementSource": 2,
+        "reportedObjectId": "a:a:3d2e1de5"
+      }
+    }
+  },
+  {
+    "@timestamp": "2024-04-01T08:30:36.440Z",
+    "agent": {
+      "ephemeral_id": "5534871e-59d2-4537-a9f9-10e2969f8ec8",
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "name": "elastic-agent-75726",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeronetworks.audit",
+      "namespace": "54830",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "0389e969-5b61-4728-8489-7ebe9a919372",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Inbound JIT rule created",
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "code": "20",
+      "created": "2026-03-10T03:21:52.953Z",
+      "dataset": "zeronetworks.audit",
+      "id": "ccwxT6c+5Wje/n/lKFLui+RZwD8=",
+      "ingested": "2026-03-10T03:21:53Z",
+      "kind": "event",
+      "original": "{\"auditType\":20,\"destinationEntitiesList\":[{\"id\":\"a:a:9ebab20f\",\"name\":\"SHARE\"}],\"details\":\"{\\\"rule\\\":{\\\"localEntityNames\\\":{\\\"id\\\":\\\"a:a:9ebab20f\\\",\\\"name\\\":\\\"SHARE\\\"},\\\"remoteEntityNames\\\":[{\\\"id\\\":\\\"a:a:Y5UYoaWk\\\",\\\"name\\\":\\\"SURFACE\\\"}],\\\"ports\\\":[{\\\"protocol_type\\\":6,\\\"ports\\\":\\\"3389\\\"}],\\\"expiration\\\":1711974636423,\\\"description\\\":\\\"RDP/WinRM MFA\\\",\\\"localProcesses\\\":[\\\"*\\\"],\\\"created_by\\\":{\\\"id\\\":\\\"u:a:OOdYqjWI\\\",\\\"name\\\":\\\"Benny Lakunishok\\\"},\\\"enforcementSource\\\":1,\\\"createdAt\\\":1711960236426,\\\"usedMfaMethod\\\":3,\\\"excludedLocalEntityNames\\\":[],\\\"state\\\":1,\\\"updatedAt\\\":1711960236426,\\\"updatedBy\\\":{},\\\"approvedAt\\\":0,\\\"approvedBy\\\":null,\\\"ruleClass\\\":3}}\",\"enforcementSource\":1,\"isoTimestamp\":\"2024-04-01T08:30:36.440Z\",\"parentObjectId\":\"75bde6e6-83d6-401b-b63b-c2ed062e80fb\",\"performedBy\":{\"id\":\"u:a:OOdYqjWI\",\"name\":\"Benny Lakunishok\"},\"reportedObjectGeneration\":15201363,\"reportedObjectId\":\"21cbb13b-848a-49f0-8fe1-1dc369987403\",\"timestamp\":1711960236440,\"userRole\":6}",
+      "outcome": "success",
+      "type": [
+        "info",
+        "change"
+      ]
+    },
+    "input": {
+      "type": "httpjson"
+    },
+    "related": {
+      "user": [
+        "u:a:OOdYqjWI",
+        "Benny Lakunishok"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "zeronetworks-audit",
+      "preserve_original_event"
+    ],
+    "user": {
+      "full_name": "Benny Lakunishok",
+      "id": "u:a:OOdYqjWI"
+    },
+    "zeronetworks": {
+      "audit": {
+        "destinationEntitiesList": {
+          "id": "a:a:9ebab20f",
+          "name": "SHARE"
+        },
+        "details": {
+          "rule": {
+            "approvedAt": "1970-01-01T00:00:00.000Z",
+            "createdAt": "2024-04-01T08:30:36.426Z",
+            "created_by": {
+              "id": "u:a:OOdYqjWI",
+              "name": "Benny Lakunishok"
+            },
+            "description": "RDP/WinRM MFA",
+            "enforcementSource": 1,
+            "expiration": "2024-04-01T12:30:36.423Z",
+            "localEntityNames": {
+              "id": "a:a:9ebab20f",
+              "name": "SHARE"
+            },
+            "localProcesses": [
+              "*"
+            ],
+            "ports": [
+              {
+                "protocol_type": 6,
+                "ports": "3389"
+              }
+            ],
+            "remoteEntityNames": [
+              {
+                "name": "SURFACE",
+                "id": "a:a:Y5UYoaWk"
+              }
+            ],
+            "ruleClass": 3,
+            "state": 1,
+            "updatedAt": "2024-04-01T08:30:36.426Z",
+            "usedMfaMethod": 3
+          }
+        },
+        "enforcementSource": 1,
+        "parentObjectId": "75bde6e6-83d6-401b-b63b-c2ed062e80fb",
+        "reportedObjectGeneration": 15201363,
+        "reportedObjectId": "21cbb13b-848a-49f0-8fe1-1dc369987403",
+        "userRole": 6
+      }
+    }
+  }
+]

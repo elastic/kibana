@@ -1,0 +1,33 @@
+{
+  "package": "ping_federate",
+  "dataStreams": [
+    {
+      "dataset": "ping_federate.admin",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "ping_federate.admin.component",
+        "source.geo.country_iso_code",
+        "user.name",
+        "user.roles"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ping_federate.audit",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.action",
+        "event.outcome",
+        "observer.hostname",
+        "ping_federate.audit.connection_id",
+        "source.ip",
+        "user.name",
+        "user.roles"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

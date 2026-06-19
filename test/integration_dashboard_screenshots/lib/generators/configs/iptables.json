@@ -1,0 +1,23 @@
+{
+  "package": "iptables",
+  "dataStreams": [
+    {
+      "dataset": "iptables.log",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.geo.location",
+        "destination.port",
+        "event.outcome",
+        "iptables.length",
+        "iptables.ubiquiti.rule_set",
+        "network.transport",
+        "network.type",
+        "source.geo.country_iso_code",
+        "source.geo.location",
+        "source.ip"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

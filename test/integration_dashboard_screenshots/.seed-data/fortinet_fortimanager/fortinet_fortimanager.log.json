@@ -1,0 +1,2594 @@
+[
+  {
+    "@timestamp": "2023-02-23T17:49:29.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=22:49:29 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0001010018 type=event subtype=system pri=information desc=\"User login/logout successful\" user=\"__docker_fortiportal\" userfrom=\"JSON(169.254.255.50)\" msg=\"user '__docker_fortiportal' with profile 'Super_User' login accepted from JSON(169.254.255.50)\" adom=\"\" adom_oid=0 session_id=11203 operation=\"login\" performed_on=\"JSON(169.254.255.50)\" changes=\"user '__docker_fortiportal' with profile 'Super_User' login accepted from JSON(169.254.255.50)\" adminprof=\"Super_User\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "admin_prof": "Super_User",
+        "adom": {
+          "oid": "0"
+        },
+        "changes": "user '__docker_fortiportal' with profile 'Super_User' login accepted from JSON(169.254.255.50)",
+        "date": "2023-02-23T17:49:29.000Z",
+        "desc": "User login/logout successful",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0001010018",
+        "msg": "user '__docker_fortiportal' with profile 'Super_User' login accepted from JSON(169.254.255.50)",
+        "operation": "login",
+        "performed_on": "JSON(169.254.255.50)",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "session_id": "11203",
+        "subtype": "system",
+        "type": "event",
+        "user": {
+          "from": "JSON(169.254.255.50)",
+          "name": "__docker_fortiportal"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 0
+    },
+    "message": "user '__docker_fortiportal' with profile 'Super_User' login accepted from JSON(169.254.255.50)",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "__docker_fortiportal"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "__docker_fortiportal"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T17:49:29.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=22:49:29 tz=\"+0500\" bid=52396 dvid=1040 itime=1676379957 euid=1 epid=1 dsteuid=1 dstepid=1 log_id=\"0008017006\" subtype=\"scply\" type=\"event\" level=\"information\" adom=\"root\" user=\"admin\" msg=\"FGVM02TM22028028[root] policy package 'FGVM02TM22028028' status updated to MODIFIED\" ppkgname=\"FGVM02TM22028028\" desc=\"Security console global policy assignment status\" operation=\"package/template status\" performed_on=\"FGVM02TM22028028\" changes=\"FGVM02TM22028028[root] policy package 'FGVM02TM22028028' status updated to MODIFIED\" devid=\"FMGVMSTM23000100\" devname=\"Crest-Elastic-FMG-VM64\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "adom": {
+          "name": "root"
+        },
+        "bid": "52396",
+        "changes": "FGVM02TM22028028[root] policy package 'FGVM02TM22028028' status updated to MODIFIED",
+        "date": "2023-02-23T17:49:29.000Z",
+        "desc": "Security console global policy assignment status",
+        "dev": {
+          "id": "FMGVMSTM23000100",
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "dste": {
+          "pid": "1",
+          "uid": "1"
+        },
+        "dvid": "1040",
+        "epid": "1",
+        "euid": "1",
+        "id": "0008017006",
+        "itime": "1970-01-20T09:39:39.957Z",
+        "level": "information",
+        "msg": "FGVM02TM22028028[root] policy package 'FGVM02TM22028028' status updated to MODIFIED",
+        "operation": "package/template status",
+        "performed_on": "FGVM02TM22028028",
+        "pkg": {
+          "gname": "FGVM02TM22028028"
+        },
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "scply",
+        "type": "event",
+        "user": {
+          "name": "admin"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "level": "information",
+      "offset": 10122
+    },
+    "message": "FGVM02TM22028028[root] policy package 'FGVM02TM22028028' status updated to MODIFIED",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "admin",
+        "root"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "root",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T17:46:45.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=22:46:45 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0017026009 type=event subtype=fgd pri=information desc=\"Package update response from FortiGuard server received\" msg=\"Receive an update package from fds(00091.00846-2302231637): 07000000FVDB14000(Forticlient AVDB), version:00091.00846-2302231637\" operation=\"Update Response\" performed_on=\"208.184.237.75\" changes=\"Receive an update package from fds(00091.00846-2302231637): 07000000FVDB14000(Forticlient AVDB), version:00091.00846-2302231637\" package_type=\"07000000\" user=\"update_manager\" package_desc=\"FVDB14000\" version=\"Forticlient AVDB\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "changes": "Receive an update package from fds(00091.00846-2302231637): 07000000FVDB14000(Forticlient AVDB), version:00091.00846-2302231637",
+        "date": "2023-02-23T17:46:45.000Z",
+        "desc": "Package update response from FortiGuard server received",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0017026009",
+        "msg": "Receive an update package from fds(00091.00846-2302231637): 07000000FVDB14000(Forticlient AVDB), version:00091.00846-2302231637",
+        "operation": "Update Response",
+        "package": {
+          "desc": "FVDB14000",
+          "type": "07000000"
+        },
+        "performed_on": "208.184.237.75",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "fgd",
+        "type": "event",
+        "user": {
+          "name": "update_manager"
+        },
+        "version": "Forticlient AVDB"
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 579
+    },
+    "message": "Receive an update package from fds(00091.00846-2302231637): 07000000FVDB14000(Forticlient AVDB), version:00091.00846-2302231637",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "update_manager"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "update_manager"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T17:35:52.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=22:35:52 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0017026009 type=event subtype=fgd pri=information desc=\"Package update response from FortiGuard server received\" msg=\"Receive an update package from fds(00007.03068-2302231514): 06002000FFDB00306(Internet Service DB), version:00007.03068-2302231514\" operation=\"Update Response\" performed_on=\"173.243.138.69\" changes=\"Receive an update package from fds(00007.03068-2302231514): 06002000FFDB00306(Internet Service DB), version:00007.03068-2302231514\" package_type=\"06002000\" user=\"update_manager\" package_desc=\"FFDB00306\" version=\"Internet Service DB\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "changes": "Receive an update package from fds(00007.03068-2302231514): 06002000FFDB00306(Internet Service DB), version:00007.03068-2302231514",
+        "date": "2023-02-23T17:35:52.000Z",
+        "desc": "Package update response from FortiGuard server received",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0017026009",
+        "msg": "Receive an update package from fds(00007.03068-2302231514): 06002000FFDB00306(Internet Service DB), version:00007.03068-2302231514",
+        "operation": "Update Response",
+        "package": {
+          "desc": "FFDB00306",
+          "type": "06002000"
+        },
+        "performed_on": "173.243.138.69",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "fgd",
+        "type": "event",
+        "user": {
+          "name": "update_manager"
+        },
+        "version": "Internet Service DB"
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 5890
+    },
+    "message": "Receive an update package from fds(00007.03068-2302231514): 06002000FFDB00306(Internet Service DB), version:00007.03068-2302231514",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "update_manager"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "update_manager"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T17:35:36.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=22:35:36 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0001010018 type=event subtype=system pri=information desc=\"User login/logout successful\" user=\"__docker_fortiportal\" userfrom=\"JSON(169.254.255.50)\" msg=\"user '__docker_fortiportal' with profile 'Super_User' logout from JSON(169.254.255.50)\" adom=\"\" adom_oid=0 session_id=7772 operation=\"logout\" performed_on=\"JSON(169.254.255.50)\" changes=\"user '__docker_fortiportal' with profile 'Super_User' logout from JSON(169.254.255.50)\" adminprof=\"Super_User\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "admin_prof": "Super_User",
+        "adom": {
+          "oid": "0"
+        },
+        "changes": "user '__docker_fortiportal' with profile 'Super_User' logout from JSON(169.254.255.50)",
+        "date": "2023-02-23T17:35:36.000Z",
+        "desc": "User login/logout successful",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0001010018",
+        "msg": "user '__docker_fortiportal' with profile 'Super_User' logout from JSON(169.254.255.50)",
+        "operation": "logout",
+        "performed_on": "JSON(169.254.255.50)",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "session_id": "7772",
+        "subtype": "system",
+        "type": "event",
+        "user": {
+          "from": "JSON(169.254.255.50)",
+          "name": "__docker_fortiportal"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 5327
+    },
+    "message": "user '__docker_fortiportal' with profile 'Super_User' logout from JSON(169.254.255.50)",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "__docker_fortiportal"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "__docker_fortiportal"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T17:29:39.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "update",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=22:29:39 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0028037018 type=event subtype=fazsys pri=information desc=\"Update meta data\" user=\"system\" userfrom=\"system\" msg=\"fazcfgd update webfilter categories files: status='get https://productapi.fortinet.com/v1/fgd/wfcategories successfully'.\" operation=\"Update metadata\" performed_on=\"\" changes=\"Update webfilter categories files.\" action=\"update\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "update",
+        "changes": "Update webfilter categories files.",
+        "date": "2023-02-23T17:29:39.000Z",
+        "desc": "Update meta data",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0028037018",
+        "msg": "fazcfgd update webfilter categories files: status='get https://productapi.fortinet.com/v1/fgd/wfcategories successfully'.",
+        "operation": "Update metadata",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "subtype": "fazsys",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 1231
+    },
+    "message": "fazcfgd update webfilter categories files: status='get https://productapi.fortinet.com/v1/fgd/wfcategories successfully'.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T17:29:38.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "update",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=22:29:38 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0028037018 type=event subtype=fazsys pri=information desc=\"Update meta data\" user=\"system\" userfrom=\"system\" msg=\"fazcfgd update link prefixes file: status='get https://productapi.fortinet.com/v1/fgd/prefixlinks successfully'.\" operation=\"Update metadata\" performed_on=\"\" changes=\"Update link prefixes file.\" action=\"update\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "update",
+        "changes": "Update link prefixes file.",
+        "date": "2023-02-23T17:29:38.000Z",
+        "desc": "Update meta data",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0028037018",
+        "msg": "fazcfgd update link prefixes file: status='get https://productapi.fortinet.com/v1/fgd/prefixlinks successfully'.",
+        "operation": "Update metadata",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "subtype": "fazsys",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 6551
+    },
+    "message": "fazcfgd update link prefixes file: status='get https://productapi.fortinet.com/v1/fgd/prefixlinks successfully'.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T16:22:15.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=21:22:15 tz=\"+0500\" bid=50153 dvid=1040 itime=1676356531 euid=1 epid=1 dsteuid=1 dstepid=1 log_id=\"0021030002\" subtype=\"objcfg\" type=\"event\" level=\"notice\" adom=\"root\" user=\"admin\" userfrom=\"GUI(89.160.20.128)\" desc=\"cdb event log for object changed\" session_id=12580 operation=\"add\" performed_on=\"dev=global,adom=root\" changes=\"type=fw_vip,key=TEST-Elastic,uuid=c7417b36-ac31-51ed-7c99-0be9e9d6e18c,add-nat46-route=enable,arp-reply=enable,color=0,dns-mapping-ttl=0,extintf=any,extip=89.160.20.128,extport=3389,gratuitous-arp-interval=0,http-cookie-age=60,http-cookie-domain-from-host=disable,http-cookie-generation=0,http-cookie-share=same-ip,http-ip-header=disable,http-multiplex=disable,http-multiplex-max-request=0,http-multiplex-ttl=15,http-redirect=disable,http-supported-max-version=http2,https-cookie-secure=disable,id=0,ipv6-mappedip=::,ldb-method=static,mappedip=89.160.20.128,mappedport=3389,max-embryonic-connections=1000,name=TEST-Elastic,nat-source-vip=disable,nat44=enable,nat46=disable,outlook-web-access=disable,persistence=none,portforward=enable,portmapping-type=1-to-1,protocol=tcp,ssl-accept-ffdhe-groups=enable,ssl-client-fallback=enable,ssl-client-rekey-count=0,ssl-client-renegotiation=secure,ssl-client-session-state-max=1000,ssl-client-session-state-timeout=30,ssl-client-session-state-type=both,ssl-dh-bits=2048,ssl-hpkp=disable,ssl\" devid=\"FMGVMSTM23000100\" devname=\"Crest-Elastic-FMG-VM64\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "adom": {
+          "name": "root"
+        },
+        "bid": "50153",
+        "changes": "type=fw_vip,key=TEST-Elastic,uuid=c7417b36-ac31-51ed-7c99-0be9e9d6e18c,add-nat46-route=enable,arp-reply=enable,color=0,dns-mapping-ttl=0,extintf=any,extip=89.160.20.128,extport=3389,gratuitous-arp-interval=0,http-cookie-age=60,http-cookie-domain-from-host=disable,http-cookie-generation=0,http-cookie-share=same-ip,http-ip-header=disable,http-multiplex=disable,http-multiplex-max-request=0,http-multiplex-ttl=15,http-redirect=disable,http-supported-max-version=http2,https-cookie-secure=disable,id=0,ipv6-mappedip=::,ldb-method=static,mappedip=89.160.20.128,mappedport=3389,max-embryonic-connections=1000,name=TEST-Elastic,nat-source-vip=disable,nat44=enable,nat46=disable,outlook-web-access=disable,persistence=none,portforward=enable,portmapping-type=1-to-1,protocol=tcp,ssl-accept-ffdhe-groups=enable,ssl-client-fallback=enable,ssl-client-rekey-count=0,ssl-client-renegotiation=secure,ssl-client-session-state-max=1000,ssl-client-session-state-timeout=30,ssl-client-session-state-type=both,ssl-dh-bits=2048,ssl-hpkp=disable,ssl",
+        "date": "2023-02-23T16:22:15.000Z",
+        "desc": "cdb event log for object changed",
+        "dev": {
+          "id": "FMGVMSTM23000100",
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "dste": {
+          "pid": "1",
+          "uid": "1"
+        },
+        "dvid": "1040",
+        "epid": "1",
+        "euid": "1",
+        "id": "0021030002",
+        "itime": "1970-01-20T09:39:16.531Z",
+        "level": "notice",
+        "operation": "add",
+        "performed_on": "dev=global,adom=root",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "session_id": "12580",
+        "subtype": "objcfg",
+        "type": "event",
+        "user": {
+          "from": "GUI(89.160.20.128)",
+          "name": "admin"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "level": "notice",
+      "offset": 11526
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "admin",
+        "root"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "root",
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T09:28:56.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<132>date=2023-02-23 time=14:28:56 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0029038009 type=event subtype=logdev pri=warning desc=\"Device offline\" user=\"system\" userfrom=\"system\" msg=\"Did not receive any log from device FGVM02TM22028028[FGVM02TM22028028] in last 8646 minutes.\" logdev_name=\"FGVM02TM22028028\" logdev_id=\"FGVM02TM22028028\" adom=\"root\" operation=\"Device offline\" performed_on=\"\" changes=\"Did not receive any log from device.\" logdev_offline_duration=8646 logdev_last_logging=0",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "adom": {
+          "name": "root"
+        },
+        "changes": "Did not receive any log from device.",
+        "date": "2023-02-23T09:28:56.000Z",
+        "desc": "Device offline",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "device_log": {
+          "id": "FGVM02TM22028028",
+          "last_logging": "0",
+          "name": "FGVM02TM22028028",
+          "offline_duration": "8646"
+        },
+        "id": "0029038009",
+        "msg": "Did not receive any log from device FGVM02TM22028028[FGVM02TM22028028] in last 8646 minutes.",
+        "operation": "Device offline",
+        "pri": "warning",
+        "priority_number": 132,
+        "product": "fortianalyzer",
+        "subtype": "logdev",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 1684
+    },
+    "message": "Did not receive any log from device FGVM02TM22028028[FGVM02TM22028028] in last 8646 minutes.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system",
+        "root"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "root",
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T09:24:46.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "delete",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<132>date=2023-02-23 time=14:24:46 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0034043006 type=event subtype=logdb pri=warning desc=\"Trim local db\" user=\"system\" userfrom=\"system\" msg=\"Requested to trim database tables older than 60 days to enforce the retention policy of Adom FortiAnalyzer.\" adom=\"FortiAnalyzer\" adom_oid=0 operation=\"Trim database\" performed_on=\"\" changes=\"Trim old database tables.\" action=\"delete\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "delete",
+        "adom": {
+          "name": "FortiAnalyzer",
+          "oid": "0"
+        },
+        "changes": "Trim old database tables.",
+        "date": "2023-02-23T09:24:46.000Z",
+        "desc": "Trim local db",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0034043006",
+        "msg": "Requested to trim database tables older than 60 days to enforce the retention policy of Adom FortiAnalyzer.",
+        "operation": "Trim database",
+        "pri": "warning",
+        "priority_number": 132,
+        "product": "fortianalyzer",
+        "subtype": "logdb",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 6987
+    },
+    "message": "Requested to trim database tables older than 60 days to enforce the retention policy of Adom FortiAnalyzer.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system",
+        "FortiAnalyzer"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "FortiAnalyzer",
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-23T09:24:44.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "delete",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<132>date=2023-02-23 time=14:24:44 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0034043006 type=event subtype=logdb pri=warning desc=\"Trim local db\" user=\"system\" userfrom=\"system\" msg=\"Requested to trim database tables older than 60 days to enforce the retention policy of Adom FortiWeb.\" adom=\"FortiWeb\" adom_oid=0 operation=\"Trim database\" performed_on=\"\" changes=\"Trim old database tables.\" action=\"delete\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "delete",
+        "adom": {
+          "name": "FortiWeb",
+          "oid": "0"
+        },
+        "changes": "Trim old database tables.",
+        "date": "2023-02-23T09:24:44.000Z",
+        "desc": "Trim local db",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0034043006",
+        "msg": "Requested to trim database tables older than 60 days to enforce the retention policy of Adom FortiWeb.",
+        "operation": "Trim database",
+        "pri": "warning",
+        "priority_number": 132,
+        "product": "fortianalyzer",
+        "subtype": "logdb",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 2210
+    },
+    "message": "Requested to trim database tables older than 60 days to enforce the retention policy of Adom FortiWeb.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system",
+        "FortiWeb"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "FortiWeb",
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:59:29.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<133>date=2023-02-23 time=03:59:29 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0022031009 type=event subtype=dvm pri=notice desc=\"Device Manager dvm log at notice level\" user=\"System\" userfrom=\"\" msg=\"\" adom=\"root\" session_id=0 operation=\"Modify device\" performed_on=\"FGVM02TM22028028\" changes=\"Edited device settings (SN FGVM02TM22028028)\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "adom": {
+          "name": "root"
+        },
+        "changes": "Edited device settings (SN FGVM02TM22028028)",
+        "date": "2023-02-22T22:59:29.000Z",
+        "desc": "Device Manager dvm log at notice level",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0022031009",
+        "operation": "Modify device",
+        "performed_on": "FGVM02TM22028028",
+        "pri": "notice",
+        "priority_number": 133,
+        "product": "fortimanager",
+        "session_id": "0",
+        "subtype": "dvm",
+        "type": "event",
+        "user": {
+          "name": "System"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 2652
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "System",
+        "root"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "root",
+      "name": "System"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:59:19.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=03:59:19 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0012021018 type=event subtype=dm pri=information desc=\"Device state updates\" msg=\"Device FGVM02TM22028028 config status changed to IN_SYNC, devdb NOT_MODIFIED\" device=\"FGVM02TM22028028\" operation=\"Update device state\" performed_on=\"FGVM02TM22028028\" changes=\"Device FGVM02TM22028028 config status changed to IN_SYNC, devdb NOT_MODIFIED\" dbstatus=\"insync\" confstatus=\"insync\" condition=\"unknown\" dmstate=\"none\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "changes": "Device FGVM02TM22028028 config status changed to IN_SYNC, devdb NOT_MODIFIED",
+        "condition": "unknown",
+        "conf_status": "insync",
+        "date": "2023-02-22T22:59:19.000Z",
+        "db": {
+          "status": "insync"
+        },
+        "desc": "Device state updates",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100",
+          "name": "FGVM02TM22028028"
+        },
+        "dm_state": "none",
+        "id": "0012021018",
+        "msg": "Device FGVM02TM22028028 config status changed to IN_SYNC, devdb NOT_MODIFIED",
+        "operation": "Update device state",
+        "performed_on": "FGVM02TM22028028",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "dm",
+        "type": "event"
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 7852
+    },
+    "message": "Device FGVM02TM22028028 config status changed to IN_SYNC, devdb NOT_MODIFIED",
+    "observer": {
+      "name": "FGVM02TM22028028"
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-22T22:59:09.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=03:59:09 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0002011002 type=event subtype=fgfm pri=information desc=\"fgfm connection up\" msg=\"fgfm connection to device FGVM02TM22028028 is up\" operation=\"update dev info\" performed_on=\"dev=FGVM02TM22028028\" changes=\"fgfm connection to device FGVM02TM22028028 is up\" user=\"fgfm\" device=\"FGVM02TM22028028\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "changes": "fgfm connection to device FGVM02TM22028028 is up",
+        "date": "2023-02-22T22:59:09.000Z",
+        "desc": "fgfm connection up",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100",
+          "name": "FGVM02TM22028028"
+        },
+        "id": "0002011002",
+        "msg": "fgfm connection to device FGVM02TM22028028 is up",
+        "operation": "update dev info",
+        "performed_on": "dev=FGVM02TM22028028",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "fgfm",
+        "type": "event",
+        "user": {
+          "name": "fgfm"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 9718
+    },
+    "message": "fgfm connection to device FGVM02TM22028028 is up",
+    "observer": {
+      "name": "FGVM02TM22028028"
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "fgfm"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "fgfm"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:58:58.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<135>date=2023-02-23 time=03:58:58 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0022031011 type=event subtype=dvm pri=debug desc=\"Device Manager dvm log at debug level\" user=\"System\" userfrom=\"\" msg=\"\" adom=\"root\" session_id=0 operation=\"Modify device\" performed_on=\"FGVM02TM22028028\" changes=\"Device attribute(s) changed: tunnel_ip '169.254.0.2' to '', conn_status 'up' to 'down'\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "adom": {
+          "name": "root"
+        },
+        "changes": "Device attribute(s) changed: tunnel_ip '169.254.0.2' to '', conn_status 'up' to 'down'",
+        "date": "2023-02-22T22:58:58.000Z",
+        "desc": "Device Manager dvm log at debug level",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0022031011",
+        "operation": "Modify device",
+        "performed_on": "FGVM02TM22028028",
+        "pri": "debug",
+        "priority_number": 135,
+        "product": "fortimanager",
+        "session_id": "0",
+        "subtype": "dvm",
+        "type": "event",
+        "user": {
+          "name": "System"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 7439
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "System",
+        "root"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "root",
+      "name": "System"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:58:56.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=03:58:56 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0012021018 type=event subtype=dm pri=information desc=\"Device state updates\" msg=\"Device FGVM02TM22028028 config status changed to OUT_OF_SYNC, devdb NOT_MODIFIED\" device=\"FGVM02TM22028028\" operation=\"Update device state\" performed_on=\"FGVM02TM22028028\" changes=\"Device FGVM02TM22028028 config status changed to OUT_OF_SYNC, devdb NOT_MODIFIED\" dbstatus=\"insync\" confstatus=\"outofsync\" condition=\"unknown\" dmstate=\"none\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "changes": "Device FGVM02TM22028028 config status changed to OUT_OF_SYNC, devdb NOT_MODIFIED",
+        "condition": "unknown",
+        "conf_status": "outofsync",
+        "date": "2023-02-22T22:58:56.000Z",
+        "db": {
+          "status": "insync"
+        },
+        "desc": "Device state updates",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100",
+          "name": "FGVM02TM22028028"
+        },
+        "dm_state": "none",
+        "id": "0012021018",
+        "msg": "Device FGVM02TM22028028 config status changed to OUT_OF_SYNC, devdb NOT_MODIFIED",
+        "operation": "Update device state",
+        "performed_on": "FGVM02TM22028028",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "dm",
+        "type": "event"
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 3025
+    },
+    "message": "Device FGVM02TM22028028 config status changed to OUT_OF_SYNC, devdb NOT_MODIFIED",
+    "observer": {
+      "name": "FGVM02TM22028028"
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-22T22:58:56.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<132>date=2023-02-23 time=03:58:56 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0002011003 type=event subtype=fgfm pri=warning desc=\"fgfm connection down\" msg=\"fgfm connection to device FGVM02TM22028028 is down\" operation=\"cleanup fgfm session\" performed_on=\"dev=FGVM02TM22028028\" changes=\"fgfm connection to device FGVM02TM22028028 is down\" user=\"fgfm\" device=\"FGVM02TM22028028\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "changes": "fgfm connection to device FGVM02TM22028028 is down",
+        "date": "2023-02-22T22:58:56.000Z",
+        "desc": "fgfm connection down",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100",
+          "name": "FGVM02TM22028028"
+        },
+        "id": "0002011003",
+        "msg": "fgfm connection to device FGVM02TM22028028 is down",
+        "operation": "cleanup fgfm session",
+        "performed_on": "dev=FGVM02TM22028028",
+        "pri": "warning",
+        "priority_number": 132,
+        "product": "fortimanager",
+        "subtype": "fgfm",
+        "type": "event",
+        "user": {
+          "name": "fgfm"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 4916
+    },
+    "message": "fgfm connection to device FGVM02TM22028028 is down",
+    "observer": {
+      "name": "FGVM02TM22028028"
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "fgfm"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "fgfm"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:51:42.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=03:51:42 tz=\"+0500\" bid=10275 dvid=1041 itime=1675336737 euid=1 epid=1 dsteuid=1 dstepid=1 log_id=\"0005014002\" subtype=\"scrmgr\" type=\"event\" level=\"information\" user=\"admin\" msg=\"Update CLI script 'Configuratin Change' in adom 'root' by user 'admin'\" userfrom=\"admin\" desc=\"Script manager operation\" devid=\"FMGVMSTM23000100\" devname=\"Crest-Elastic-FMG-VM64\" devgrps=\"{NULL}\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "bid": "10275",
+        "date": "2023-02-22T22:51:42.000Z",
+        "desc": "Script manager operation",
+        "dev": {
+          "grps": "{NULL}",
+          "id": "FMGVMSTM23000100",
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "dste": {
+          "pid": "1",
+          "uid": "1"
+        },
+        "dvid": "1041",
+        "epid": "1",
+        "euid": "1",
+        "id": "0005014002",
+        "itime": "1970-01-20T09:22:16.737Z",
+        "level": "information",
+        "msg": "Update CLI script 'Configuratin Change' in adom 'root' by user 'admin'",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "scrmgr",
+        "type": "event",
+        "user": {
+          "from": "admin",
+          "name": "admin"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "level": "information",
+      "offset": 12971
+    },
+    "message": "Update CLI script 'Configuratin Change' in adom 'root' by user 'admin'",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:12:51.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=03:12:51 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0020029002 type=event subtype=iolog pri=debug desc=\"System keymsg debug\" user=\"admin\" userfrom=\"GUI(89.160.20.128)\" operation=\"debug\" performed_on=\"iolog\" changes=\"source[dvm/cmd:dvm/cmd/promote/dev-list ...] Could not get syntax:version=0, branch_pt=0.\" pid=10025 function=\"cdb_load_dev_cli\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "changes": "source[dvm/cmd:dvm/cmd/promote/dev-list ...] Could not get syntax:version=0, branch_pt=0.",
+        "date": "2023-02-22T22:12:51.000Z",
+        "desc": "System keymsg debug",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "function": "cdb_load_dev_cli",
+        "id": "0020029002",
+        "operation": "debug",
+        "performed_on": "iolog",
+        "pid": 10025,
+        "pri": "debug",
+        "priority_number": 134,
+        "product": "fortimanager",
+        "subtype": "iolog",
+        "type": "event",
+        "user": {
+          "from": "GUI(89.160.20.128)",
+          "name": "admin"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 11122
+    },
+    "process": {
+      "pid": 10025
+    },
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "admin"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:10:49.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<136>date=2023-02-23 time=03:10:49 tz=\"+0500\" bid=50001 dvid=1040 itime=1676354928 euid=1 epid=1 dsteuid=1 dstepid=1 log_id=\"0025035003\" subtype=\"logd\" type=\"event\" level=\"notice\" msg=\"Log service started\" desc=\"Status of the log daemon changed\" operation=\"Log daemon start\" performed_on=\"FMGVMSTM23000100\" changes=\"Log service started\" devid=\"FMGVMSTM23000100\" devname=\"Crest-Elastic-FMG-VM64\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "bid": "50001",
+        "changes": "Log service started",
+        "date": "2023-02-22T22:10:49.000Z",
+        "desc": "Status of the log daemon changed",
+        "dev": {
+          "id": "FMGVMSTM23000100",
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "dste": {
+          "pid": "1",
+          "uid": "1"
+        },
+        "dvid": "1040",
+        "epid": "1",
+        "euid": "1",
+        "id": "0025035003",
+        "itime": "1970-01-20T09:39:14.928Z",
+        "level": "notice",
+        "msg": "Log service started",
+        "operation": "Log daemon start",
+        "performed_on": "FMGVMSTM23000100",
+        "priority_number": 136,
+        "product": "fortimanager",
+        "subtype": "logd",
+        "type": "event"
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "level": "notice",
+      "offset": 10727
+    },
+    "message": "Log service started",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ]
+  },
+  {
+    "@timestamp": "2023-02-22T22:00:03.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "run",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=03:00:03 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0032041002 type=event subtype=report pri=information desc=\"Run report\" user=\"system\" userfrom=\"system\" msg=\"Report [S-10042_t10042-Daily Summary Report-2023-02-23-0300_ae543078-90dc-48b6-a93c-617196322586_25] finished at Thu (4) 2023-02-23 03:00:03, adom=FortiCarrier.\" operation=\"Run report from regular report\" performed_on=\"\" changes=\"Report finished successfully.\" action=\"run\" runfrom=\"regular report\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "run",
+        "changes": "Report finished successfully.",
+        "date": "2023-02-22T22:00:03.000Z",
+        "desc": "Run report",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0032041002",
+        "msg": "Report [S-10042_t10042-Daily Summary Report-2023-02-23-0300_ae543078-90dc-48b6-a93c-617196322586_25] finished at Thu (4) 2023-02-23 03:00:03, adom=FortiCarrier.",
+        "operation": "Run report from regular report",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "run_from": "regular report",
+        "subtype": "report",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 8373
+    },
+    "message": "Report [S-10042_t10042-Daily Summary Report-2023-02-23-0300_ae543078-90dc-48b6-a93c-617196322586_25] finished at Thu (4) 2023-02-23 03:00:03, adom=FortiCarrier.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T22:00:01.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "run",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=03:00:01 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0032041002 type=event subtype=report pri=information desc=\"Run report\" user=\"system\" userfrom=\"system\" msg=\"Start generating SQL report [S-10042_t10042-Daily Summary Report-2023-02-23-0300_ae543078-90dc-48b6-a93c-617196322586_25] at Thu (4) 2023-02-23 03:00:01, adom=FortiCarrier.\" operation=\"Run report from regular report\" performed_on=\"\" changes=\"Successfully Started generating SQL report.\" action=\"run\" runfrom=\"regular report\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "run",
+        "changes": "Successfully Started generating SQL report.",
+        "date": "2023-02-22T22:00:01.000Z",
+        "desc": "Run report",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0032041002",
+        "msg": "Start generating SQL report [S-10042_t10042-Daily Summary Report-2023-02-23-0300_ae543078-90dc-48b6-a93c-617196322586_25] at Thu (4) 2023-02-23 03:00:01, adom=FortiCarrier.",
+        "operation": "Run report from regular report",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "run_from": "regular report",
+        "subtype": "report",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 3557
+    },
+    "message": "Start generating SQL report [S-10042_t10042-Daily Summary Report-2023-02-23-0300_ae543078-90dc-48b6-a93c-617196322586_25] at Thu (4) 2023-02-23 03:00:01, adom=FortiCarrier.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T19:00:35.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "diagnose",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=00:00:35 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0030039004 type=event subtype=logging pri=information desc=\"Diagnose device logging\" user=\"system\" userfrom=\"system\" msg=\"Log volume of ADOM root on Feb 22, 2023: 447 B, 6 days average: 446 B\" adom=\"root\" operation=\"Logging diag\" performed_on=\"\" changes=\"Show log volume of ADOM.\" action=\"diagnose\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "diagnose",
+        "adom": {
+          "name": "root"
+        },
+        "changes": "Show log volume of ADOM.",
+        "date": "2023-02-22T19:00:35.000Z",
+        "desc": "Diagnose device logging",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0030039004",
+        "msg": "Log volume of ADOM root on Feb 22, 2023: 447 B, 6 days average: 446 B",
+        "operation": "Logging diag",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "subtype": "logging",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 4101
+    },
+    "message": "Log volume of ADOM root on Feb 22, 2023: 447 B, 6 days average: 446 B",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system",
+        "root"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "root",
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T19:00:35.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "diagnose",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-23 time=00:00:35 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0030039004 type=event subtype=logging pri=information desc=\"Diagnose device logging\" user=\"system\" userfrom=\"system\" msg=\"Log volume of ADOM FortiSandbox on Feb 22, 2023: 0 B, 6 days average: 0 B\" adom=\"FortiSandbox\" operation=\"Logging diag\" performed_on=\"\" changes=\"Show log volume of ADOM.\" action=\"diagnose\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "diagnose",
+        "adom": {
+          "name": "FortiSandbox"
+        },
+        "changes": "Show log volume of ADOM.",
+        "date": "2023-02-22T19:00:35.000Z",
+        "desc": "Diagnose device logging",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0030039004",
+        "msg": "Log volume of ADOM FortiSandbox on Feb 22, 2023: 0 B, 6 days average: 0 B",
+        "operation": "Logging diag",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "subtype": "logging",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 8891
+    },
+    "message": "Log volume of ADOM FortiSandbox on Feb 22, 2023: 0 B, 6 days average: 0 B",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system",
+        "FortiSandbox"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "domain": "FortiSandbox",
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-22T05:10:37.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "roll",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-22 time=10:10:37 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0031040026 type=event subtype=logfile pri=information desc=\"Rolling disk log file\" user=\"system\" userfrom=\"system\" msg=\"Rolled log file glog.1676942302.log of device SYSLOG-0A32041A [SYSLOG-0A32041A] vdom root.\" operation=\"Roll logfile\" performed_on=\"\" changes=\"Rolled log file.\" action=\"roll\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "roll",
+        "changes": "Rolled log file.",
+        "date": "2023-02-22T05:10:37.000Z",
+        "desc": "Rolling disk log file",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0031040026",
+        "msg": "Rolled log file glog.1676942302.log of device SYSLOG-0A32041A [SYSLOG-0A32041A] vdom root.",
+        "operation": "Roll logfile",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "subtype": "logfile",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 4511
+    },
+    "message": "Rolled log file glog.1676942302.log of device SYSLOG-0A32041A [SYSLOG-0A32041A] vdom root.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "system"
+    }
+  },
+  {
+    "@timestamp": "2023-02-19T22:20:11.000Z",
+    "agent": {
+      "ephemeral_id": "6898e2bb-9ec8-45bb-a580-87110d7ed840",
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "name": "elastic-agent-19273",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "fortinet_fortimanager.log",
+      "namespace": "51723",
+      "type": "logs"
+    },
+    "device": {
+      "id": "FMGVMSTM23000100"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "1a8a366c-6c47-42f0-9a46-78e1206ab97a",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "roll",
+      "agent_id_status": "verified",
+      "dataset": "fortinet_fortimanager.log",
+      "ingested": "2026-03-10T03:13:30Z",
+      "kind": "event",
+      "original": "<134>date=2023-02-20 time=03:20:11 tz=\"+0500\" devname=Crest-Elastic-FMG-VM64 device_id=FMGVMSTM23000100 log_id=0031040026 type=event subtype=logfile pri=information desc=\"Rolling disk log file\" user=\"system\" userfrom=\"system\" msg=\"Rolled log file glog.1676746501.log of device SYSLOG-0A32041A [SYSLOG-0A32041A] vdom root.\" operation=\"Roll logfile\" performed_on=\"\" changes=\"Rolled log file.\" action=\"roll\"",
+      "timezone": "+0500",
+      "type": [
+        "info"
+      ]
+    },
+    "fortimanager": {
+      "log": {
+        "action": "roll",
+        "changes": "Rolled log file.",
+        "date": "2023-02-19T22:20:11.000Z",
+        "desc": "Rolling disk log file",
+        "dev": {
+          "name": "Crest-Elastic-FMG-VM64"
+        },
+        "device": {
+          "id": "FMGVMSTM23000100"
+        },
+        "id": "0031040026",
+        "msg": "Rolled log file glog.1676746501.log of device SYSLOG-0A32041A [SYSLOG-0A32041A] vdom root.",
+        "operation": "Roll logfile",
+        "pri": "information",
+        "priority_number": 134,
+        "product": "fortianalyzer",
+        "subtype": "logfile",
+        "type": "event",
+        "user": {
+          "from": "system",
+          "name": "system"
+        }
+      }
+    },
+    "host": {
+      "hostname": "Crest-Elastic-FMG-VM64"
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "log": {
+      "file": {
+        "device_id": "43",
+        "fingerprint": "356762e68c0a7845f597a6349638be2a9d77f63daf9ae6b36f012b99b211f5aa",
+        "inode": "1401",
+        "path": "/tmp/service_logs/fortinet-fortimanager.log"
+      },
+      "offset": 9313
+    },
+    "message": "Rolled log file glog.1676746501.log of device SYSLOG-0A32041A [SYSLOG-0A32041A] vdom root.",
+    "related": {
+      "hosts": [
+        "Crest-Elastic-FMG-VM64"
+      ],
+      "user": [
+        "system"
+      ]
+    },
+    "tags": [
+      "preserve_original_event",
+      "preserve_duplicate_custom_fields",
+      "forwarded",
+      "fortinet_fortimanager-log"
+    ],
+    "user": {
+      "name": "system"
+    }
+  }
+]

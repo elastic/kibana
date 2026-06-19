@@ -1,0 +1,48 @@
+{
+  "package": "prisma_access",
+  "dataStreams": [
+    {
+      "dataset": "prisma_access.event",
+      "indexPattern": "logs-*",
+      "docTarget": 900,
+      "fields": [
+        "destination.packets",
+        "destination.user.name",
+        "event.action",
+        "event.reason",
+        "host.hostname",
+        "host.name",
+        "log.level",
+        "network.packets",
+        "prisma_access.event.auth.method",
+        "prisma_access.event.class_id",
+        "prisma_access.event.connection.error.value",
+        "prisma_access.event.data.result",
+        "prisma_access.event.gateway.selection_type",
+        "prisma_access.event.global_protect.gateway_location",
+        "prisma_access.event.mapping.data_source.subtype",
+        "prisma_access.event.mapping.data_source.type",
+        "prisma_access.event.mapping.data_source.value",
+        "prisma_access.event.mapping.timeout",
+        "prisma_access.event.name",
+        "prisma_access.event.quarantine_reason",
+        "prisma_access.event.sctp.event_type",
+        "prisma_access.event.source.device.os.family",
+        "prisma_access.event.ssl.response_time",
+        "prisma_access.event.tunnel.event.type",
+        "prisma_access.event.url.category.value",
+        "rule.name",
+        "rule.uuid",
+        "source.domain",
+        "source.packets",
+        "source.user.name"
+      ],
+      "filterValues": {
+        "prisma_access.event.class_id": [
+          "USERID",
+          "SYSTEM"
+        ]
+      }
+    }
+  ]
+}

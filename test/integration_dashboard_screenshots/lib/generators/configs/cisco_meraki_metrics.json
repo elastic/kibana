@@ -1,0 +1,29 @@
+{
+  "package": "cisco_meraki_metrics",
+  "dataStreams": [
+    {
+      "dataset": "cisco_meraki_metrics.device_health",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "meraki.device.channel_utilization.wifi0.utilization_total",
+        "meraki.device.channel_utilization.wifi1.utilization_total",
+        "meraki.device.location",
+        "meraki.device.model",
+        "meraki.device.name",
+        "meraki.device.performance_score",
+        "meraki.device.serial",
+        "meraki.device.status.value",
+        "meraki.organization_id",
+        "meraki.switch.port.status.client_count",
+        "meraki.switch.port.status.power_usage_in_wh",
+        "meraki.switch.port.status.throughput.recv",
+        "meraki.switch.port.status.throughput.sent",
+        "meraki.uplink.latency.ms",
+        "meraki.uplink.rsrp",
+        "meraki.uplink.rsrq"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

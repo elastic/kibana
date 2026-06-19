@@ -1,0 +1,108 @@
+{
+  "package": "cisco_duo",
+  "dataStreams": [
+    {
+      "dataset": "cisco_duo.activity",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_duo.activity.actor.name",
+        "cisco_duo.activity.application.name",
+        "cisco_duo.activity.target.name",
+        "event.action",
+        "event.outcome",
+        "source.geo.country_iso_code",
+        "source.geo.country_name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cisco_duo.admin",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_duo.admin.action",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cisco_duo.auth",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_duo.auth.access_device.is_encryption_enabled",
+        "cisco_duo.auth.access_device.is_firewall_enabled",
+        "cisco_duo.auth.access_device.is_password_set",
+        "cisco_duo.auth.application.name",
+        "cisco_duo.auth.factor",
+        "event.outcome",
+        "event.reason",
+        "source.geo.location",
+        "source.ip",
+        "user.name",
+        "user_agent.os.name",
+        "user_agent.os.version"
+      ],
+      "filterValues": {
+        "event.outcome": [
+          "failure",
+          "success"
+        ]
+      }
+    },
+    {
+      "dataset": "cisco_duo.offline_enrollment",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_duo.offline_enrollment.action",
+        "cisco_duo.offline_enrollment.description.factor",
+        "cisco_duo.offline_enrollment.description.hostname",
+        "cisco_duo.offline_enrollment.object",
+        "cisco_duo.offline_enrollment.user.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cisco_duo.summary",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_duo.summary.admin_count",
+        "cisco_duo.summary.integration_count",
+        "cisco_duo.summary.telephony_credits_remaining",
+        "cisco_duo.summary.user_count"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cisco_duo.telephony_v2",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_duo.telephony_v2.credits",
+        "cisco_duo.telephony_v2.event_type",
+        "cisco_duo.telephony_v2.phone_number",
+        "cisco_duo.telephony_v2.type"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "cisco_duo.trust_monitor",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "cisco_duo.trust_monitor.enabled_by.name",
+        "cisco_duo.trust_monitor.enabled_for.name",
+        "cisco_duo.trust_monitor.explanations.type",
+        "cisco_duo.trust_monitor.priority_event",
+        "cisco_duo.trust_monitor.triage_event_uri",
+        "cisco_duo.trust_monitor.triaged_as_interesting",
+        "cisco_duo.trust_monitor.type"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

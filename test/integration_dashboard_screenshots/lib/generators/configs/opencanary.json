@@ -1,0 +1,24 @@
+{
+  "package": "opencanary",
+  "dataStreams": [
+    {
+      "dataset": "opencanary.events",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "destination.ip",
+        "destination.port",
+        "event.provider",
+        "host.domain",
+        "host.name",
+        "log.logger",
+        "opencanary.honeycred",
+        "opencanary.logdata.password",
+        "source.ip",
+        "source.port",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

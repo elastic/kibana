@@ -1,0 +1,47 @@
+{
+  "package": "ti_recordedfuture",
+  "dataStreams": [
+    {
+      "dataset": "ti_recordedfuture.playbook_alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.risk_score",
+        "host.os.full",
+        "recordedfuture.playbook_alert.panel_status.priority",
+        "rule.id",
+        "threat.indicator.id",
+        "user.name"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "ti_recordedfuture.threat",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "threat.indicator.type"
+      ],
+      "filterValues": {
+        "threat.indicator.type": [
+          "file",
+          "ipv4-addr",
+          "ipv6-addr",
+          "url",
+          "domain-name"
+        ]
+      }
+    },
+    {
+      "dataset": "ti_recordedfuture.triggered_alert",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "recordedfuture.triggered_alert.review.status",
+        "rule.name",
+        "user.name"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

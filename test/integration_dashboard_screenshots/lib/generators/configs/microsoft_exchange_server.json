@@ -1,0 +1,34 @@
+{
+  "package": "microsoft_exchange_server",
+  "dataStreams": [
+    {
+      "dataset": "microsoft_exchange_server.httpproxy",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "host.name",
+        "http.request.bytes",
+        "http.response.bytes",
+        "http.response.status_code",
+        "microsoft.exchange.anchormailbox",
+        "microsoft.exchange.authenticateduser",
+        "microsoft.exchange.urlhost"
+      ],
+      "filterValues": {}
+    },
+    {
+      "dataset": "microsoft_exchange_server.messagetracking",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "email.direction",
+        "email.from.address",
+        "email.message_id",
+        "email.sender.address",
+        "email.to.address",
+        "network.bytes"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

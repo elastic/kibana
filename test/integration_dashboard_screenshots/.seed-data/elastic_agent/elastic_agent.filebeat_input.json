@@ -1,0 +1,992 @@
+[
+  {
+    "@timestamp": "2026-03-10T03:35:43.610Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 1803125,
+      "ingested": "2026-03-10T03:35:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 977142.0,
+      "events_pipeline_filtered_total": 193.0,
+      "events_pipeline_published_total": 1047.0,
+      "events_pipeline_total": 1240.0,
+      "events_processed_total": 1240.0,
+      "files_active": 1.0,
+      "files_closed_total": 1.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 1240.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 1240.0,
+          "max": 52372943000.0,
+          "mean": 6014528000.0,
+          "median": 1699673900.0,
+          "min": 12199136.0,
+          "p75": 3625553400.0,
+          "p95": 34613465000.0,
+          "p99": 51909095000.0,
+          "p999": 52367470000.0,
+          "stddev": 10888362000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:34:43.609Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 1541958,
+      "ingested": "2026-03-10T03:34:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 908728.0,
+      "events_pipeline_filtered_total": 186.0,
+      "events_pipeline_published_total": 983.0,
+      "events_pipeline_total": 1169.0,
+      "events_processed_total": 1169.0,
+      "files_active": 1.0,
+      "files_closed_total": 1.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 1169.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 1169.0,
+          "max": 52372943000.0,
+          "mean": 6243160000.0,
+          "median": 1752053000.0,
+          "min": 12199136.0,
+          "p75": 3785733400.0,
+          "p95": 35232227000.0,
+          "p99": 51909095000.0,
+          "p999": 52367470000.0,
+          "stddev": 10978348000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:33:43.611Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 1493166,
+      "ingested": "2026-03-10T03:33:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 861109.0,
+      "events_pipeline_filtered_total": 179.0,
+      "events_pipeline_published_total": 955.0,
+      "events_pipeline_total": 1134.0,
+      "events_processed_total": 1134.0,
+      "files_active": 1.0,
+      "files_closed_total": 1.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 1134.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 1134.0,
+          "max": 52372943000.0,
+          "mean": 6277049000.0,
+          "median": 1759189000.0,
+          "min": 12199136.0,
+          "p75": 3913581000.0,
+          "p95": 35232227000.0,
+          "p99": 51909095000.0,
+          "p999": 52367470000.0,
+          "stddev": 10977047000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:32:43.607Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 1645875,
+      "ingested": "2026-03-10T03:32:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 792232.0,
+      "events_pipeline_filtered_total": 172.0,
+      "events_pipeline_published_total": 892.0,
+      "events_pipeline_total": 1064.0,
+      "events_processed_total": 1064.0,
+      "files_active": 2.0,
+      "files_closed_total": 0.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 1064.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 1064.0,
+          "max": 52372943000.0,
+          "mean": 6586062000.0,
+          "median": 1775991700.0,
+          "min": 12199136.0,
+          "p75": 5671752000.0,
+          "p95": 36965520000.0,
+          "p99": 51909095000.0,
+          "p999": 52367470000.0,
+          "stddev": 11371721000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:31:43.609Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 2247208,
+      "ingested": "2026-03-10T03:31:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 737787.0,
+      "events_pipeline_filtered_total": 165.0,
+      "events_pipeline_published_total": 852.0,
+      "events_pipeline_total": 1017.0,
+      "events_processed_total": 1017.0,
+      "files_active": 2.0,
+      "files_closed_total": 0.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 1017.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 1017.0,
+          "max": 52372943000.0,
+          "mean": 6781511700.0,
+          "median": 1796769700.0,
+          "min": 12199136.0,
+          "p75": 6205495000.0,
+          "p95": 38281050000.0,
+          "p99": 51909165000.0,
+          "p999": 52369002000.0,
+          "stddev": 11485030000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:30:43.614Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 6331542,
+      "ingested": "2026-03-10T03:30:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 674073.0,
+      "events_pipeline_filtered_total": 158.0,
+      "events_pipeline_published_total": 798.0,
+      "events_pipeline_total": 956.0,
+      "events_processed_total": 956.0,
+      "files_active": 2.0,
+      "files_closed_total": 0.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 956.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 956.0,
+          "max": 52372943000.0,
+          "mean": 7115467000.0,
+          "median": 1841539800.0,
+          "min": 12199136.0,
+          "p75": 6227321300.0,
+          "p95": 38495977000.0,
+          "p99": 51912335000.0,
+          "p999": 52372943000.0,
+          "stddev": 11763277000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:29:43.609Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 1204583,
+      "ingested": "2026-03-10T03:29:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 520441.0,
+      "events_pipeline_filtered_total": 151.0,
+      "events_pipeline_published_total": 602.0,
+      "events_pipeline_total": 753.0,
+      "events_processed_total": 753.0,
+      "files_active": 2.0,
+      "files_closed_total": 0.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 753.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 753.0,
+          "max": 52372943000.0,
+          "mean": 8740353000.0,
+          "median": 2939722800.0,
+          "min": 12199136.0,
+          "p75": 7895078000.0,
+          "p95": 43803795000.0,
+          "p99": 52141203000.0,
+          "p999": 52372943000.0,
+          "stddev": 12773661000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:28:43.610Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 1233333,
+      "ingested": "2026-03-10T03:28:44Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 464497.0,
+      "events_pipeline_filtered_total": 144.0,
+      "events_pipeline_published_total": 558.0,
+      "events_pipeline_total": 702.0,
+      "events_processed_total": 702.0,
+      "files_active": 2.0,
+      "files_closed_total": 0.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 702.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 702.0,
+          "max": 52372943000.0,
+          "mean": 9262517000.0,
+          "median": 2973333800.0,
+          "min": 12199136.0,
+          "p75": 16059343000.0,
+          "p95": 43924770000.0,
+          "p99": 52141224000.0,
+          "p999": 52372943000.0,
+          "stddev": 13073367000.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T03:27:43.607Z",
+    "agent": {
+      "ephemeral_id": "321bd5fa-5139-4efd-9d30-07ee6ba4c15e",
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "name": "docker-fleet-server",
+      "type": "metricbeat",
+      "version": "9.3.1"
+    },
+    "component": {
+      "binary": "filebeat",
+      "id": "filestream-monitoring"
+    },
+    "data_stream": {
+      "dataset": "elastic_agent.filebeat_input",
+      "namespace": "default",
+      "type": "metrics"
+    },
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "elastic_agent": {
+      "id": "a7f9fd8f-3f6d-4285-98a7-b5500c10d295",
+      "process": "filebeat",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "dataset": "elastic_agent.filebeat_input",
+      "duration": 1081250,
+      "ingested": "2026-03-10T03:27:47Z",
+      "module": "http"
+    },
+    "filebeat_input": {
+      "bytes_processed_total": 707.0,
+      "events_pipeline_filtered_total": 0.0,
+      "events_pipeline_published_total": 0.0,
+      "events_pipeline_total": 2.0,
+      "events_processed_total": 0.0,
+      "files_active": 2.0,
+      "files_closed_total": 0.0,
+      "files_opened_total": 2.0,
+      "gzip_bytes_processed_total": 0.0,
+      "gzip_events_processed_total": 0.0,
+      "gzip_files_active": 0.0,
+      "gzip_files_closed_total": 0.0,
+      "gzip_files_opened_total": 0.0,
+      "gzip_messages_read_total": 0.0,
+      "gzip_messages_truncated_total": 0.0,
+      "gzip_processing_errors_total": 0.0,
+      "gzip_processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      },
+      "id": "filestream-monitoring-agent",
+      "input": "filestream",
+      "messages_read_total": 2.0,
+      "messages_truncated_total": 0.0,
+      "processing_errors_total": 0.0,
+      "processing_time": {
+        "histogram": {
+          "count": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "p75": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "p999": 0.0,
+          "stddev": 0.0
+        }
+      }
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "docker-fleet-server",
+      "ip": "172.18.0.8",
+      "mac": "A2-2C-33-E2-F2-C8",
+      "name": "docker-fleet-server",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "metricset": {
+      "name": "json",
+      "period": 60000
+    },
+    "service": {
+      "address": "http://unix/inputs",
+      "type": "http"
+    }
+  }
+]

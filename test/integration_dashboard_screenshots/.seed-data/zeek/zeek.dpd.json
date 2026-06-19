@@ -1,0 +1,101 @@
+[
+  {
+    "@timestamp": "2017-10-09T16:45:00.423Z",
+    "agent": {
+      "ephemeral_id": "9256e1cf-89ad-454b-a8ff-daad67d02391",
+      "id": "684ce0cb-ae6b-4d20-85d8-6133f81c8e32",
+      "name": "elastic-agent-32333",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "zeek.dpd",
+      "namespace": "12924",
+      "type": "logs"
+    },
+    "destination": {
+      "address": "192.168.10.10",
+      "ip": "192.168.10.10",
+      "port": 445
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "684ce0cb-ae6b-4d20-85d8-6133f81c8e32",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "created": "2026-03-10T03:16:29.930Z",
+      "dataset": "zeek.dpd",
+      "id": "CRrT7S1ccw9H6hzCR",
+      "ingested": "2026-03-10T03:16:32Z",
+      "kind": "event",
+      "type": [
+        "connection",
+        "info"
+      ]
+    },
+    "host": {
+      "architecture": "aarch64",
+      "containerized": false,
+      "hostname": "elastic-agent-32333",
+      "ip": [
+        "172.23.0.2",
+        "172.18.0.10"
+      ],
+      "mac": [
+        "76-E5-E2-6D-8B-C0",
+        "C2-DF-0C-A6-CF-23"
+      ],
+      "name": "elastic-agent-32333",
+      "os": {
+        "family": "",
+        "kernel": "6.12.72-linuxkit",
+        "name": "Wolfi",
+        "platform": "wolfi",
+        "type": "linux",
+        "version": "20230201"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/dpd.log"
+      },
+      "offset": 0
+    },
+    "network": {
+      "community_id": "1:b+Szw+ia464igf5e+MwW1WUzw9Y=",
+      "transport": "tcp"
+    },
+    "related": {
+      "ip": [
+        "192.168.10.31",
+        "192.168.10.10"
+      ]
+    },
+    "source": {
+      "address": "192.168.10.31",
+      "ip": "192.168.10.31",
+      "port": 49285
+    },
+    "tags": [
+      "zeek-dpd"
+    ],
+    "zeek": {
+      "dpd": {
+        "analyzer": "DCE_RPC",
+        "failure_reason": "Binpac exception: binpac exception: &enforce violation : DCE_RPC_Header:rpc_vers"
+      },
+      "session_id": "CRrT7S1ccw9H6hzCR"
+    }
+  }
+]

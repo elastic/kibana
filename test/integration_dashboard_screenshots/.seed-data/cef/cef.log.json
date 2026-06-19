@@ -1,0 +1,3984 @@
+[
+  {
+    "@timestamp": "2026-04-01T05:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc3164"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/empty-fields.log"
+      },
+      "offset": 0,
+      "syslog": {
+        "priority": 163
+      }
+    },
+    "message": "rfc3164",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-04-01T05:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc3164"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/empty-fields.log"
+      },
+      "offset": 103
+    },
+    "message": "rfc3164",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-04-01T05:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc3164"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/syslog.log"
+      },
+      "offset": 0,
+      "syslog": {
+        "priority": 163
+      }
+    },
+    "message": "rfc3164",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-04-01T05:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc3164"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/syslog.log"
+      },
+      "offset": 98
+    },
+    "message": "rfc3164",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.892Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "APPFW",
+        "product": "NetScaler",
+        "vendor": "Citrix",
+        "version": "NS10.0"
+      },
+      "extensions": {
+        "deviceAction": "not blocked",
+        "deviceCustomNumber1": 465,
+        "deviceCustomNumber2": 535,
+        "deviceCustomString1": "profile1",
+        "deviceCustomString2": "PPE0",
+        "deviceCustomString3": "IliG4Dxp1SjOhKVRDVBXmqvAaIcA000",
+        "deviceCustomString4": "ALERT",
+        "deviceCustomString5": "2012",
+        "message": "Disallow Illegal URL.",
+        "method": "GET",
+        "requestUrl": "http://vpx247.example.net/FFC/login_post.html?abc=def",
+        "sourceAddress": "10.217.253.78",
+        "sourcePort": 54711
+      },
+      "name": "APPFW_STARTURL",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "not blocked",
+      "agent_id_status": "verified",
+      "code": "APPFW",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/netscaler.log"
+      },
+      "offset": 272
+    },
+    "message": "Disallow Illegal URL.",
+    "observer": {
+      "product": "NetScaler",
+      "vendor": "Citrix",
+      "version": "NS10.0"
+    },
+    "related": {
+      "ip": [
+        "10.217.253.78"
+      ]
+    },
+    "source": {
+      "ip": "10.217.253.78",
+      "port": 54711
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ],
+    "url": {
+      "original": "http://vpx247.example.net/FFC/login_post.html?abc=def"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.892Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "APPFW",
+        "product": "NetScaler",
+        "vendor": "Citrix",
+        "version": "NS10.0"
+      },
+      "extensions": {
+        "deviceAction": "transformed",
+        "deviceCustomNumber1": 652,
+        "deviceCustomNumber2": 610,
+        "deviceCustomString1": "pr_ffc",
+        "deviceCustomString2": "PPE0",
+        "deviceCustomString3": "li8MdGfW49uG8tGdSV85ech41a0A000",
+        "deviceCustomString4": "ALERT",
+        "deviceCustomString5": "2012",
+        "message": " Transformed (xout) potential credit card numbers seen in server response",
+        "method": "GET",
+        "requestUrl": "http://vpx247.example.net/FFC/CreditCardMind.html",
+        "sourceAddress": "10.217.253.78",
+        "sourcePort": 56116
+      },
+      "name": "APPFW_SAFECOMMERCE_XFORM",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "transformed",
+      "agent_id_status": "verified",
+      "code": "APPFW",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/netscaler.log"
+      },
+      "offset": 562
+    },
+    "message": " Transformed (xout) potential credit card numbers seen in server response",
+    "observer": {
+      "product": "NetScaler",
+      "vendor": "Citrix",
+      "version": "NS10.0"
+    },
+    "related": {
+      "ip": [
+        "10.217.253.78"
+      ]
+    },
+    "source": {
+      "ip": "10.217.253.78",
+      "port": 56116
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ],
+    "url": {
+      "original": "http://vpx247.example.net/FFC/CreditCardMind.html"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.892Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "APPFW",
+        "product": "NetScaler",
+        "vendor": "Citrix",
+        "version": "NS10.0"
+      },
+      "extensions": {
+        "deviceAction": "transformed",
+        "deviceCustomNumber1": 653,
+        "deviceCustomNumber2": 610,
+        "deviceCustomString1": "pr_ffc",
+        "deviceCustomString2": "PPE0",
+        "deviceCustomString3": "li8MdGfW49uG8tGdSV85ech41a0A000",
+        "deviceCustomString4": "ALERT",
+        "deviceCustomString5": "2012",
+        "message": " Maximum no. of potential credit card numbers seen",
+        "method": "GET",
+        "requestUrl": "http://vpx247.example.net/FFC/CreditCardMind.html",
+        "sourceAddress": "10.217.253.78",
+        "sourcePort": 56116
+      },
+      "name": "APPFW_SAFECOMMERCE",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "transformed",
+      "agent_id_status": "verified",
+      "code": "APPFW",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/netscaler.log"
+      },
+      "offset": 907
+    },
+    "message": " Maximum no. of potential credit card numbers seen",
+    "observer": {
+      "product": "NetScaler",
+      "vendor": "Citrix",
+      "version": "NS10.0"
+    },
+    "related": {
+      "ip": [
+        "10.217.253.78"
+      ]
+    },
+    "source": {
+      "ip": "10.217.253.78",
+      "port": 56116
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ],
+    "url": {
+      "original": "http://vpx247.example.net/FFC/CreditCardMind.html"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.892Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "APPFW",
+        "product": "NetScaler",
+        "vendor": "Citrix",
+        "version": "NS10.0"
+      },
+      "extensions": {
+        "deviceAction": "not blocked",
+        "deviceCustomNumber1": 224,
+        "deviceCustomNumber2": 205,
+        "deviceCustomString1": "pr_ffc",
+        "deviceCustomString2": "PPE0",
+        "deviceCustomString3": "POousP7CIMW5nwZ5Rs4nq5DND0sA000",
+        "deviceCustomString4": "ALERT",
+        "deviceCustomString5": "2012",
+        "message": " Signature violation rule ID 807: web-cgi /wwwboard/passwd.txt access",
+        "method": "GET",
+        "requestUrl": "http://vpx247.example.net/FFC/wwwboard/passwd.txt",
+        "sourceAddress": "10.217.253.78",
+        "sourcePort": 56687
+      },
+      "name": "APPFW_SIGNATURE_MATCH",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "not blocked",
+      "agent_id_status": "verified",
+      "code": "APPFW",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/netscaler.log"
+      },
+      "offset": 1223
+    },
+    "message": " Signature violation rule ID 807: web-cgi /wwwboard/passwd.txt access",
+    "observer": {
+      "product": "NetScaler",
+      "vendor": "Citrix",
+      "version": "NS10.0"
+    },
+    "related": {
+      "ip": [
+        "10.217.253.78"
+      ]
+    },
+    "source": {
+      "ip": "10.217.253.78",
+      "port": 56687
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ],
+    "url": {
+      "original": "http://vpx247.example.net/FFC/wwwboard/passwd.txt"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.891Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "APPFW",
+        "product": "NetScaler",
+        "vendor": "Citrix",
+        "version": "NS10.0"
+      },
+      "extensions": {
+        "deviceAction": "blocked",
+        "deviceCustomNumber1": 233,
+        "deviceCustomNumber2": 205,
+        "deviceCustomString1": "profile1",
+        "deviceCustomString2": "PPE0",
+        "deviceCustomString3": "AjSZM26h2M+xL809pON6C8joebUA000",
+        "deviceCustomString4": "ALERT",
+        "deviceCustomString5": "2012",
+        "message": "Disallow Illegal URL.",
+        "method": "GET",
+        "requestUrl": "http://vpx247.example.net/FFC/login.html",
+        "sourceAddress": "10.217.253.78",
+        "sourcePort": 53743
+      },
+      "name": "APPFW_STARTURL",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "blocked",
+      "agent_id_status": "verified",
+      "code": "APPFW",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/netscaler.log"
+      },
+      "offset": 0
+    },
+    "message": "Disallow Illegal URL.",
+    "observer": {
+      "product": "NetScaler",
+      "vendor": "Citrix",
+      "version": "NS10.0"
+    },
+    "related": {
+      "ip": [
+        "10.217.253.78"
+      ]
+    },
+    "source": {
+      "ip": "10.217.253.78",
+      "port": 53743
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ],
+    "url": {
+      "original": "http://vpx247.example.net/FFC/login.html"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.886Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "1001111",
+        "product": "Deep Security Agent",
+        "vendor": "Trend Micro",
+        "version": "1.2.3"
+      },
+      "extensions": {
+        "TrendMicroDsFrameType": "IP",
+        "TrendMicroDsPacketData": "R0VUIC9zP3",
+        "baseEventCount": 1,
+        "bytesOut": 1093,
+        "destinationAddress": "72.14.204.105",
+        "destinationMacAddress": "00:50:56:f5:7f:47",
+        "destinationPort": 80,
+        "deviceAction": "IDS:Reset",
+        "deviceCustomNumber1": 1,
+        "deviceCustomNumber1Label": "Host ID",
+        "deviceCustomNumber3": 10,
+        "deviceCustomNumber3Label": "Intrusion Prevention Packet Position",
+        "deviceCustomString2": "0x00 ACK PSH",
+        "deviceCustomString2Label": "TCP Flags",
+        "deviceCustomString3": "DF MF",
+        "deviceCustomString3Label": "Fragmentation Bits",
+        "deviceCustomString5": "10",
+        "deviceCustomString5Label": "Intrusion Prevention Stream Position",
+        "deviceCustomString6": "8",
+        "deviceCustomString6Label": "Intrusion Prevention Flags",
+        "deviceHostName": "hostname",
+        "sourceAddress": "192.168.126.150",
+        "sourceMacAddress": "00:0c:29:eb:35:de",
+        "sourcePort": 49786,
+        "transportProtocol": "TCP"
+      },
+      "name": "Test Intrusion Prevention Rule",
+      "severity": "3",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 1093,
+      "ip": "72.14.204.105",
+      "mac": "00-50-56-F5-7F-47",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "IDS:Reset",
+      "agent_id_status": "verified",
+      "code": "1001111",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 3
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/trend-micro.log"
+      },
+      "offset": 1783
+    },
+    "message": "Test Intrusion Prevention Rule",
+    "network": {
+      "community_id": "1:Fwji11e8HkaelryFNMwqv8FhyFs=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "hostname",
+      "product": "Deep Security Agent",
+      "vendor": "Trend Micro",
+      "version": "1.2.3"
+    },
+    "related": {
+      "hosts": [
+        "hostname"
+      ],
+      "ip": [
+        "72.14.204.105",
+        "192.168.126.150"
+      ]
+    },
+    "source": {
+      "ip": "192.168.126.150",
+      "mac": "00-0C-29-EB-35-DE",
+      "port": 49786
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.886Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "3002795",
+        "product": "Deep Security Agent",
+        "vendor": "Trend Micro",
+        "version": "1.2.3"
+      },
+      "extensions": {
+        "destinationUserName": "(no user)",
+        "deviceCustomNumber1": 1,
+        "deviceCustomNumber1Label": "Host ID",
+        "deviceCustomString1": "Multiple Windows Logon Failures",
+        "deviceCustomString1Label": "LI Description",
+        "deviceHostName": "hostname",
+        "filename": "Security",
+        "message": "WinEvtLog Security: AUDIT_FAILURE(4625): Microsoft-Windows-Security-Auditing: (no user): no domain: WIN-RM6HM42G65V: An account failed to log on. Subject: ..",
+        "sourceAddress": "127.0.0.1",
+        "sourceHostName": "WIN-RM6HM42G65V"
+      },
+      "name": "Microsoft Windows Events",
+      "severity": "8",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "name": "(no user)"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "3002795",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 8
+    },
+    "file": {
+      "name": "Security"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/trend-micro.log"
+      },
+      "offset": 2329
+    },
+    "message": "WinEvtLog Security: AUDIT_FAILURE(4625): Microsoft-Windows-Security-Auditing: (no user): no domain: WIN-RM6HM42G65V: An account failed to log on. Subject: ..",
+    "observer": {
+      "hostname": "hostname",
+      "product": "Deep Security Agent",
+      "vendor": "Trend Micro",
+      "version": "1.2.3"
+    },
+    "related": {
+      "hosts": [
+        "hostname"
+      ],
+      "ip": [
+        "127.0.0.1"
+      ],
+      "user": [
+        "(no user)"
+      ]
+    },
+    "source": {
+      "domain": "WIN-RM6HM42G65V",
+      "ip": "127.0.0.1"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.886Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "5000000",
+        "product": "Deep Security Agent",
+        "vendor": "Trend Micro",
+        "version": "1.2.3"
+      },
+      "extensions": {
+        "deviceCustomNumber1": 1,
+        "deviceCustomNumber1Label": "Host ID",
+        "deviceHostName": "hostname",
+        "message": "Blocked By Admin",
+        "requestUrl": "example.com"
+      },
+      "name": "WebReputation",
+      "severity": "5",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "5000000",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 5
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/trend-micro.log"
+      },
+      "offset": 2737
+    },
+    "message": "Blocked By Admin",
+    "observer": {
+      "hostname": "hostname",
+      "product": "Deep Security Agent",
+      "vendor": "Trend Micro",
+      "version": "1.2.3"
+    },
+    "related": {
+      "hosts": [
+        "hostname"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ],
+    "url": {
+      "original": "example.com"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.886Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "Log",
+        "product": "VPN-1 & FireWall-1",
+        "vendor": "Check Point",
+        "version": "Check Point"
+      },
+      "extensions": {
+        "baseEventCount": 12,
+        "cp_app_risk": "High",
+        "cp_severity": "Very-High",
+        "deviceAction": "Drop",
+        "deviceCustomIPv6Address2": "fd00::555",
+        "deviceCustomIPv6Address2Label": "Source IPv6 Address",
+        "deviceCustomIPv6Address3": "::1",
+        "deviceCustomIPv6Address3Label": "Destination IPv6 Address",
+        "deviceCustomNumber2": 5,
+        "deviceCustomNumber2Label": "Duration in Seconds",
+        "deviceFacility": "4",
+        "fileHash": "580a783c1cb2b20613323f715d231a69"
+      },
+      "name": "https",
+      "severity": "Unknown",
+      "version": "0"
+    },
+    "checkpoint": {
+      "app_risk": "High",
+      "event_count": 12,
+      "severity": "Very-High"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "::1"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Drop",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "Log",
+      "dataset": "cef.log",
+      "duration": 5000000000,
+      "ingested": "2026-03-10T02:39:17Z",
+      "kind": "event",
+      "risk_score": 4.0,
+      "severity": 4
+    },
+    "file": {
+      "hash": {
+        "md5": "580a783c1cb2b20613323f715d231a69"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/checkpoint.log"
+      },
+      "offset": 1291
+    },
+    "message": "https",
+    "observer": {
+      "product": "VPN-1 & FireWall-1",
+      "type": "Mobile",
+      "vendor": "Check Point",
+      "version": "Check Point"
+    },
+    "related": {
+      "hash": [
+        "580a783c1cb2b20613323f715d231a69"
+      ]
+    },
+    "source": {
+      "ip": "fd00::555"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.885Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "destinationAddress": "89.160.20.156",
+        "destinationPort": 443,
+        "destinationTranslatedAddress": "10.10.10.10",
+        "destinationUserName": "alice",
+        "eventId": 123,
+        "fileHash": "bc8bbe52f041fd17318f08a0f73762ce",
+        "oldFileHash": "a9796280592f86b74b27e370662d41eb",
+        "sourceAddress": "89.160.20.156",
+        "sourcePort": 33876,
+        "sourceUserName": "bob"
+      },
+      "name": "Authentication",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "nat": {
+        "ip": "10.10.10.10"
+      },
+      "port": 443,
+      "user": {
+        "name": "alice"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "id": "123",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cef.log"
+      },
+      "offset": 275
+    },
+    "message": "Authentication",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "related": {
+      "hash": [
+        "bc8bbe52f041fd17318f08a0f73762ce",
+        "a9796280592f86b74b27e370662d41eb"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "10.10.10.10"
+      ],
+      "user": [
+        "alice",
+        "bob"
+      ]
+    },
+    "source": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 33876,
+      "user": {
+        "name": "bob"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.885Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "destinationUserPrivileges": "root",
+        "sourceUserPrivileges": "user"
+      },
+      "name": "Authentication",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "user": {
+        "group": {
+          "name": "root"
+        }
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cef.log"
+      },
+      "offset": 549
+    },
+    "message": "Authentication",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "source": {
+      "user": {
+        "group": {
+          "name": "user"
+        }
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.885Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "destinationAddress": "192.168.1.2",
+        "message": "This event is padded with whitespace",
+        "sourceAddress": "192.168.3.4"
+      },
+      "name": "Authentication",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "192.168.1.2"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cef.log"
+      },
+      "offset": 629
+    },
+    "message": "This event is padded with whitespace",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "related": {
+      "ip": [
+        "192.168.1.2",
+        "192.168.3.4"
+      ]
+    },
+    "source": {
+      "ip": "192.168.3.4"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.885Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "6001200",
+        "product": "Deep Security Agent",
+        "vendor": "Trend Micro",
+        "version": "10.2.229"
+      },
+      "extensions": {
+        "TrendMicroDsTenant": "Primary",
+        "TrendMicroDsTenantId": "0",
+        "aggregationType": "0",
+        "deviceAction": "detectOnly",
+        "deviceAddress": "192.168.33.128",
+        "deviceCustomNumber1": 202,
+        "deviceCustomNumber1Label": "Host ID",
+        "deviceCustomString1": "notWhitelisted",
+        "deviceCustomString1Label": "actionReason",
+        "deviceCustomString2": "0CC9713BA896193A527213D9C94892D41797EB7C",
+        "deviceCustomString2Label": "sha1",
+        "deviceCustomString3": "7EA8EF10BEB2E9876D4D7F7E5A46CF8D",
+        "deviceCustomString3Label": "md5",
+        "fileHash": "80D4AC182F97D2AB48EE4310AC51DA5974167C596D133D64A83107B9069745E0",
+        "filePath": "/home/user1/Desktop/Directory1//heartbeatSync.sh",
+        "fileSize": 20,
+        "repeatCount": "1",
+        "sourceUserId": "0",
+        "sourceUserName": "root"
+      },
+      "name": "AppControl detectOnly",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "detectOnly",
+      "agent_id_status": "verified",
+      "code": "6001200",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "file": {
+      "path": "/home/user1/Desktop/Directory1//heartbeatSync.sh",
+      "size": 20
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/trend-micro.log"
+      },
+      "offset": 681
+    },
+    "message": "AppControl detectOnly",
+    "observer": {
+      "ip": [
+        "192.168.33.128"
+      ],
+      "product": "Deep Security Agent",
+      "vendor": "Trend Micro",
+      "version": "10.2.229"
+    },
+    "related": {
+      "hash": [
+        "80D4AC182F97D2AB48EE4310AC51DA5974167C596D133D64A83107B9069745E0"
+      ],
+      "user": [
+        "root"
+      ]
+    },
+    "source": {
+      "user": {
+        "id": "0",
+        "name": "root"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.885Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "20",
+        "product": "Deep Security Agent",
+        "vendor": "Trend Micro",
+        "version": "1.2.3"
+      },
+      "extensions": {
+        "TrendMicroDsFrameType": "IP",
+        "TrendMicroDsPacketData": "AFB",
+        "baseEventCount": 1,
+        "bytesOut": 1019,
+        "destinationAddress": "72.14.204.147",
+        "destinationMacAddress": "00:50:56:f5:7f:47",
+        "destinationPort": 80,
+        "deviceAction": "Log",
+        "deviceCustomNumber1": 1,
+        "deviceCustomNumber1Label": "Host ID",
+        "deviceCustomString2": "0x00 ACK PSH",
+        "deviceCustomString2Label": "TCP Flags",
+        "deviceCustomString3": "DF MF",
+        "deviceCustomString3Label": "Fragmentation Bits",
+        "deviceHostName": "hostname",
+        "sourceAddress": "192.168.126.150",
+        "sourceMacAddress": "00:0c:29:eb:35:de",
+        "sourcePort": 49617,
+        "transportProtocol": "TCP"
+      },
+      "name": "Log for TCP Port 80",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 1019,
+      "ip": "72.14.204.147",
+      "mac": "00-50-56-F5-7F-47",
+      "port": 80
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Log",
+      "agent_id_status": "verified",
+      "code": "20",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/trend-micro.log"
+      },
+      "offset": 1210
+    },
+    "message": "Log for TCP Port 80",
+    "network": {
+      "community_id": "1:ucxz//uUfZKryA0gsf6voYSodI8=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "hostname": "hostname",
+      "product": "Deep Security Agent",
+      "vendor": "Trend Micro",
+      "version": "1.2.3"
+    },
+    "related": {
+      "hosts": [
+        "hostname"
+      ],
+      "ip": [
+        "72.14.204.147",
+        "192.168.126.150"
+      ]
+    },
+    "source": {
+      "ip": "192.168.126.150",
+      "mac": "00-0C-29-EB-35-DE",
+      "port": 49617
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:16.885Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "30",
+        "product": "Deep Security Agent",
+        "vendor": "Trend Micro",
+        "version": "1.2.3"
+      },
+      "extensions": {
+        "deviceAction": "updated",
+        "deviceCustomNumber1": 1,
+        "deviceCustomNumber1Label": "Host ID",
+        "deviceHostName": "hostname",
+        "filePath": "c:\\windows\\message.dll",
+        "message": "lastModified,sha1,size",
+        "sourceUserName": "admin"
+      },
+      "name": "New Integrity Monitoring Rule",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "updated",
+      "agent_id_status": "verified",
+      "code": "30",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "file": {
+      "path": "c:\\windows\\message.dll"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/trend-micro.log"
+      },
+      "offset": 1579
+    },
+    "message": "lastModified,sha1,size",
+    "observer": {
+      "hostname": "hostname",
+      "product": "Deep Security Agent",
+      "vendor": "Trend Micro",
+      "version": "1.2.3"
+    },
+    "related": {
+      "hosts": [
+        "hostname"
+      ],
+      "user": [
+        "admin"
+      ]
+    },
+    "source": {
+      "user": {
+        "name": "admin"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:14.907Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "destinationAddress": "192.168.10.1",
+        "destinationPort": 443,
+        "eventId": 3457,
+        "requestContext": "https://www.google.com",
+        "requestMethod": "POST",
+        "requestUrl": "https://www.example.com/cart",
+        "sourceAddress": "89.160.20.156",
+        "sourceGeoLatitude": 38,
+        "sourceGeoLongitude": -77,
+        "sourcePort": 33876,
+        "sourceServiceName": "httpd",
+        "transportProtocol": "TCP"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "192.168.10.1",
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "id": "3457",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "http": {
+      "request": {
+        "method": "POST",
+        "referrer": "https://www.google.com"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cef.log"
+      },
+      "offset": 0
+    },
+    "message": "Web request",
+    "network": {
+      "community_id": "1:UgazGyZMuRDtuImGjF+6GveZFw0=",
+      "transport": "tcp"
+    },
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "related": {
+      "ip": [
+        "192.168.10.1",
+        "89.160.20.156"
+      ]
+    },
+    "source": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 33876,
+      "service": {
+        "name": "httpd"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ],
+    "url": {
+      "original": "https://www.example.com/cart"
+    }
+  },
+  {
+    "@timestamp": "2026-03-10T02:39:14.906Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "4000000",
+        "product": "Deep Security Agent",
+        "vendor": "Trend Micro",
+        "version": "1.2.3"
+      },
+      "extensions": {
+        "TrendMicroDsDetectionConfidence": "95",
+        "TrendMicroDsFileMD5": "44D88612FEA8A8F36DE82E1278ABB02F",
+        "TrendMicroDsFileSHA1": "3395856CE81F2B7382DEE72602F798B642F14140",
+        "TrendMicroDsFileSHA256": "275A021BBFB6489E54D471899F7DB9D1663FC695EC2FE2A2C4538AABF651FD0F",
+        "TrendMicroDsMalwareTarget": "N/A",
+        "TrendMicroDsMalwareTargetType": "N/A",
+        "TrendMicroDsRelevantDetectionNames": "Ransom_CERBER.BZC;Ransom_CERBER.C;Ransom_CRYPNISCA.SM",
+        "deviceAction": "Delete",
+        "deviceCustomNumber1": 1,
+        "deviceCustomNumber1Label": "Host ID",
+        "deviceCustomNumber2": 205,
+        "deviceCustomNumber2Label": "Quarantine File Size",
+        "deviceCustomString6": "ContainerImageName | ContainerName | ContainerID",
+        "deviceCustomString6Label": "Container",
+        "deviceHostName": "hostname",
+        "filePath": "C:\\Users\\trend\\Desktop\\eicar.exe",
+        "message": "Realtime"
+      },
+      "name": "Eicar_test_file",
+      "severity": "6",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Delete",
+      "agent_id_status": "verified",
+      "code": "4000000",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 6
+    },
+    "file": {
+      "path": "C:\\Users\\trend\\Desktop\\eicar.exe"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/trend-micro.log"
+      },
+      "offset": 0
+    },
+    "message": "Realtime",
+    "observer": {
+      "hostname": "hostname",
+      "product": "Deep Security Agent",
+      "vendor": "Trend Micro",
+      "version": "1.2.3"
+    },
+    "related": {
+      "hosts": [
+        "hostname"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2021-04-01T10:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc5424"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/syslog.log"
+      },
+      "offset": 191,
+      "syslog": {
+        "priority": 164
+      }
+    },
+    "message": "rfc5424",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2021-04-01T10:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc5424"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/syslog.log"
+      },
+      "offset": 328
+    },
+    "message": "rfc5424",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2021-04-01T05:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "eventId": 22,
+        "message": "rfc5424"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "id": "22",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/empty-fields.log"
+      },
+      "offset": 201
+    },
+    "message": "rfc5424",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2021-04-01T05:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc5424"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/syslog.log"
+      },
+      "offset": 458,
+      "syslog": {
+        "priority": 165
+      }
+    },
+    "message": "rfc5424",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2021-04-01T05:14:15.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "18",
+        "product": "Vaporware",
+        "vendor": "Elastic",
+        "version": "1.0.0-alpha"
+      },
+      "extensions": {
+        "message": "rfc5424"
+      },
+      "name": "Web request",
+      "severity": "low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "18",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/syslog.log"
+      },
+      "offset": 590
+    },
+    "message": "rfc5424",
+    "observer": {
+      "product": "Vaporware",
+      "vendor": "Elastic",
+      "version": "1.0.0-alpha"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:56:33.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "72714",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "unknown"
+      },
+      "extensions": {
+        "deviceAddress": "10.1.1.3",
+        "deviceExternalId": "Firewall-3 node 1",
+        "deviceFacility": "Endpoint Context Agent",
+        "deviceHostName": "10.1.1.3",
+        "deviceReceiptTime": "2020-01-17T08:56:33.000Z",
+        "sourceAddress": "192.168.1.1",
+        "sourceUserName": "bob"
+      },
+      "name": "ECA_Metadata_login",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "72714",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 1771
+    },
+    "message": "ECA_Metadata_login",
+    "observer": {
+      "hostname": "10.1.1.3",
+      "ip": [
+        "10.1.1.3"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "unknown"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.3"
+      ],
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "bob"
+      ]
+    },
+    "source": {
+      "ip": "192.168.1.1",
+      "user": {
+        "name": "bob"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:56:31.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "72715",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "unknown"
+      },
+      "extensions": {
+        "deviceAddress": "10.1.1.10",
+        "deviceExternalId": "Firewall-10 node 1",
+        "deviceFacility": "Endpoint Context Agent",
+        "deviceHostName": "10.1.1.10",
+        "deviceReceiptTime": "2020-01-17T08:56:31.000Z",
+        "sourceAddress": "192.168.1.1",
+        "sourceUserName": "bob"
+      },
+      "name": "ECA_Metadata_logout",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "72715",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 1985
+    },
+    "message": "ECA_Metadata_logout",
+    "observer": {
+      "hostname": "10.1.1.10",
+      "ip": [
+        "10.1.1.10"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "unknown"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.10"
+      ],
+      "ip": [
+        "192.168.1.1"
+      ],
+      "user": [
+        "bob"
+      ]
+    },
+    "source": {
+      "ip": "192.168.1.1",
+      "user": {
+        "name": "bob"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:56:26.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "72716",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "unknown"
+      },
+      "extensions": {
+        "deviceAddress": "10.1.1.8",
+        "deviceExternalId": "Firewall-8 node 1",
+        "deviceFacility": "Endpoint Context Agent",
+        "deviceHostName": "10.1.1.8",
+        "deviceReceiptTime": "2020-01-17T08:56:26.000Z",
+        "sourceAddress": "172.16.2.1",
+        "sourceUserName": "alice"
+      },
+      "name": "ECA_Metadata_system_metadata_received",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "72716",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 2203
+    },
+    "message": "ECA_Metadata_system_metadata_received",
+    "observer": {
+      "hostname": "10.1.1.8",
+      "ip": [
+        "10.1.1.8"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "unknown"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.8"
+      ],
+      "ip": [
+        "172.16.2.1"
+      ],
+      "user": [
+        "alice"
+      ]
+    },
+    "source": {
+      "ip": "172.16.2.1",
+      "user": {
+        "name": "alice"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:56:23.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "70020",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "unknown"
+      },
+      "extensions": {
+        "applicationProtocol": "Echo Request (No Code)",
+        "destinationAddress": "192.168.1.1",
+        "deviceAction": "Refuse",
+        "deviceAddress": "10.1.1.1",
+        "deviceCustomString1": "601.0",
+        "deviceCustomString1Label": "RuleID",
+        "deviceExternalId": "Firewall-1 node 1",
+        "deviceFacility": "Packet Filtering",
+        "deviceHostName": "10.1.1.1",
+        "deviceOutboundInterface": "255",
+        "deviceReceiptTime": "2020-01-17T08:56:23.000Z",
+        "sourceAddress": "172.16.1.1",
+        "transportProtocol": "1"
+      },
+      "name": "Connection_Refused",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "192.168.1.1"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Refuse",
+      "agent_id_status": "verified",
+      "code": "70020",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 1171
+    },
+    "message": "Connection_Refused",
+    "network": {
+      "application": "Echo Request (No Code)",
+      "community_id": "1:rdTu3DxOTXebXEr+rcV80Pk9a1s=",
+      "transport": "1"
+    },
+    "observer": {
+      "hostname": "10.1.1.1",
+      "ip": [
+        "10.1.1.1"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "unknown"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.1"
+      ],
+      "ip": [
+        "192.168.1.1",
+        "172.16.1.1"
+      ]
+    },
+    "rule": {
+      "id": "601.0"
+    },
+    "source": {
+      "ip": "172.16.1.1"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:56:21.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "70019",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "unknown"
+      },
+      "extensions": {
+        "applicationProtocol": "BOOTPS (UDP)",
+        "destinationAddress": "89.160.20.156",
+        "destinationPort": 67,
+        "deviceAddress": "10.1.1.10",
+        "deviceCustomString1": "605.0",
+        "deviceCustomString1Label": "RuleID",
+        "deviceExternalId": "Firewall-10 node 1",
+        "deviceFacility": "Packet Filtering",
+        "deviceHostName": "10.1.1.10",
+        "deviceOutboundInterface": "255",
+        "deviceReceiptTime": "2020-01-17T08:56:21.000Z",
+        "sourceAddress": "172.16.1.1",
+        "sourcePort": 68,
+        "transportProtocol": "17"
+      },
+      "name": "Connection_Discarded",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "port": 67
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "70019",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 857
+    },
+    "message": "Connection_Discarded",
+    "network": {
+      "application": "BOOTPS (UDP)",
+      "community_id": "1:IcNEAJyCWv55JCK7X370ZGE73NI=",
+      "transport": "17"
+    },
+    "observer": {
+      "hostname": "10.1.1.10",
+      "ip": [
+        "10.1.1.10"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "unknown"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.10"
+      ],
+      "ip": [
+        "89.160.20.156",
+        "172.16.1.1"
+      ]
+    },
+    "rule": {
+      "id": "605.0"
+    },
+    "source": {
+      "ip": "172.16.1.1",
+      "port": 68
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:56:20.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "70021",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "unknown"
+      },
+      "extensions": {
+        "applicationProtocol": "TCP",
+        "bytesIn": 32526,
+        "bytesOut": 27366,
+        "destinationServiceName": "YouTube",
+        "deviceAddress": "10.1.1.6",
+        "deviceExternalId": "Firewall-6 node 1",
+        "deviceFacility": "Packet Filtering",
+        "deviceHostName": "10.1.1.6",
+        "deviceOutboundInterface": "255",
+        "deviceReceiptTime": "2020-01-17T08:56:20.000Z",
+        "sourceUserName": "alice",
+        "transportProtocol": "6"
+      },
+      "name": "Connection_Closed",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "bytes": 27366,
+      "service": {
+        "name": "YouTube"
+      }
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "70021",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 1484
+    },
+    "message": "Connection_Closed",
+    "network": {
+      "application": "TCP",
+      "transport": "6"
+    },
+    "observer": {
+      "hostname": "10.1.1.6",
+      "ip": [
+        "10.1.1.6"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "unknown"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.6"
+      ],
+      "user": [
+        "alice"
+      ]
+    },
+    "source": {
+      "bytes": 32526,
+      "user": {
+        "name": "alice"
+      }
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:52:10.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "0",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "6.6.1"
+      },
+      "extensions": {
+        "deviceAddress": "10.1.1.40",
+        "deviceExternalId": "Master FW node 1",
+        "deviceFacility": "Logging System",
+        "deviceHostName": "10.1.1.40",
+        "deviceReceiptTime": "2020-01-17T08:52:10.000Z",
+        "message": "log server connection established"
+      },
+      "name": "Generic",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "0",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 0
+    },
+    "message": "log server connection established",
+    "observer": {
+      "hostname": "10.1.1.40",
+      "ip": [
+        "10.1.1.40"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "6.6.1"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.40"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:52:09.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "9005",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "6.6.1"
+      },
+      "extensions": {
+        "deviceAddress": "10.1.1.40",
+        "deviceExternalId": "Master FW node 1",
+        "deviceFacility": "Management",
+        "deviceHostName": "10.1.1.40",
+        "deviceReceiptTime": "2020-01-17T08:52:09.000Z",
+        "message": "Communication error: No route to host (-3, 5, 0)"
+      },
+      "name": "FW_Communication-Communication-Error",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "9005",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 202
+    },
+    "message": "Communication error: No route to host (-3, 5, 0)",
+    "observer": {
+      "hostname": "10.1.1.40",
+      "ip": [
+        "10.1.1.40"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "6.6.1"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.40"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:52:09.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "70018",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "6.6.1"
+      },
+      "extensions": {
+        "applicationProtocol": "Dest. Unreachable (Host Unreachable)",
+        "destinationAddress": "10.1.1.40",
+        "deviceAction": "Allow",
+        "deviceAddress": "10.1.1.40",
+        "deviceCustomString1": "2097157.1",
+        "deviceCustomString1Label": "RuleID",
+        "deviceExternalId": "Master FW node 1",
+        "deviceFacility": "Packet Filtering",
+        "deviceHostName": "10.1.1.40",
+        "deviceOutboundInterface": "255",
+        "deviceReceiptTime": "2020-01-17T08:52:09.000Z",
+        "message": "Referred connection: 10.1.1.40 -> 10.37.133.35 frag=0x4000 TCP 47413->3020",
+        "sourceAddress": "10.37.205.252",
+        "transportProtocol": "1"
+      },
+      "name": "Connection_Allowed",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "ip": "10.1.1.40"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Allow",
+      "agent_id_status": "verified",
+      "code": "70018",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 447
+    },
+    "message": "Referred connection: 10.1.1.40 -> 10.37.133.35 frag=0x4000 TCP 47413->3020",
+    "network": {
+      "application": "Dest. Unreachable (Host Unreachable)",
+      "community_id": "1:jVNka6fvdh9Qms3nSigb93hGP6U=",
+      "transport": "1"
+    },
+    "observer": {
+      "hostname": "10.1.1.40",
+      "ip": [
+        "10.1.1.40"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "6.6.1"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.40"
+      ],
+      "ip": [
+        "10.1.1.40",
+        "10.37.205.252"
+      ]
+    },
+    "rule": {
+      "id": "2097157.1"
+    },
+    "source": {
+      "ip": "10.37.205.252"
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2020-01-17T08:52:09.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "78002",
+        "product": "Firewall",
+        "vendor": "FORCEPOINT",
+        "version": "6.6.1"
+      },
+      "extensions": {
+        "deviceAddress": "10.1.1.40",
+        "deviceExternalId": "Master FW node 1",
+        "deviceFacility": "Management",
+        "deviceHostName": "10.1.1.40",
+        "deviceReceiptTime": "2020-01-17T08:52:09.000Z",
+        "message": "TLS: Couldn't establish TLS connection (11, N/A)"
+      },
+      "name": "TLS connection state",
+      "severity": "0",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "code": "78002",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/forcepoint-ngfw-smc.log"
+      },
+      "offset": 2437
+    },
+    "message": "TLS: Couldn't establish TLS connection (11, N/A)",
+    "observer": {
+      "hostname": "10.1.1.40",
+      "ip": [
+        "10.1.1.40"
+      ],
+      "product": "Firewall",
+      "vendor": "FORCEPOINT",
+      "version": "6.6.1"
+    },
+    "related": {
+      "hosts": [
+        "10.1.1.40"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-12-19T09:22:10.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "Log",
+        "product": "VPN-1 & FireWall-1",
+        "vendor": "Check Point",
+        "version": "Check Point"
+      },
+      "extensions": {
+        "destinationPort": 25,
+        "deviceAction": "Bypass",
+        "deviceCustomDate2": "2020-04-11T10:42:13.000Z",
+        "deviceCustomDate2Label": "Subscription expiration",
+        "deviceCustomNumber1Label": "Email Recipients Number",
+        "deviceCustomString1Label": "Email ID",
+        "deviceCustomString4": "SMTP Policy Restrictions",
+        "deviceCustomString4Label": "Email Control",
+        "deviceCustomString5Label": "Email Session ID",
+        "deviceDirection": 0,
+        "deviceReceiptTime": "2018-12-19T09:22:10.000Z",
+        "fileHash": "55f4a511e6f630a6b1319505414f114e7bcaf13d",
+        "message": "Encrypted session",
+        "sourcePort": 4001
+      },
+      "name": "https",
+      "severity": "Unknown",
+      "version": "0"
+    },
+    "checkpoint": {
+      "email_control": "SMTP Policy Restrictions",
+      "subs_exp": "2020-04-11T10:42:13.000Z"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "port": 25
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Bypass",
+      "agent_id_status": "verified",
+      "code": "Log",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "kind": "event"
+    },
+    "file": {
+      "hash": {
+        "sha1": "55f4a511e6f630a6b1319505414f114e7bcaf13d"
+      }
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/checkpoint.log"
+      },
+      "offset": 875
+    },
+    "message": "Encrypted session",
+    "network": {
+      "direction": "inbound"
+    },
+    "observer": {
+      "product": "VPN-1 & FireWall-1",
+      "vendor": "Check Point",
+      "version": "Check Point"
+    },
+    "related": {
+      "hash": [
+        "55f4a511e6f630a6b1319505414f114e7bcaf13d"
+      ]
+    },
+    "source": {
+      "port": 4001
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2018-11-26T22:17:32.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "name": "elastic-agent-42480",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "Log",
+        "product": "VPN-1 & FireWall-1",
+        "vendor": "Check Point",
+        "version": "Check Point"
+      },
+      "extensions": {
+        "destinationAddress": "89.160.20.156",
+        "destinationPort": 443,
+        "destinationTranslatedAddress": "0.0.0.0",
+        "destinationTranslatedPort": 0,
+        "deviceAction": "Accept",
+        "deviceCustomDate2": "2017-10-16T10:42:13.713Z",
+        "deviceCustomDate2Label": "This field is made up",
+        "deviceCustomString2Label": "Rule Name",
+        "deviceCustomString5": "Business / Economy",
+        "deviceCustomString5Label": "Matched Category",
+        "deviceDirection": 0,
+        "deviceReceiptTime": "2018-11-26T22:17:32.000Z",
+        "ifname": "eth0",
+        "inzone": "Internal",
+        "layer_name": "Network",
+        "layer_uuid": "b406b732-2437-4848-9741-6eae1f5bf112",
+        "logid": "0",
+        "loguid": "{0x5bfc70fc,0x1,0xfe65a8c0,0xc0000001}",
+        "match_id": "4",
+        "nat_addtnl_rulenum": "1",
+        "nat_rulenum": "4",
+        "origin": "192.168.101.254",
+        "originsicname": "CN=R80,O=R80_M..6u6bdo",
+        "outzone": "External",
+        "parent_rule": "0",
+        "product": "VPN-1 & FireWall-1",
+        "rule_action": "Accept",
+        "rule_uid": "9e5e6e74-aa9a-4693-b9fe-53712dd27bea",
+        "sequencenum": "1",
+        "service_id": "https",
+        "sourceAddress": "192.168.101.100",
+        "sourcePort": 49363,
+        "sourceTranslatedAddress": "192.168.103.254",
+        "sourceTranslatedPort": 35398,
+        "transportProtocol": "6",
+        "version": "5"
+      },
+      "name": "https",
+      "severity": "Unknown",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "destination": {
+      "as": {
+        "number": 29518,
+        "organization": {
+          "name": "Bredband2 AB"
+        }
+      },
+      "geo": {
+        "city_name": "Link\u00f6ping",
+        "continent_name": "Europe",
+        "country_iso_code": "SE",
+        "country_name": "Sweden",
+        "location": {
+          "lat": 58.416699967347085,
+          "lon": 15.61669997870922
+        },
+        "region_iso_code": "SE-E",
+        "region_name": "\u00d6sterg\u00f6tland County"
+      },
+      "ip": "89.160.20.156",
+      "nat": {
+        "ip": "0.0.0.0",
+        "port": 0
+      },
+      "port": 443
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "action": "Accept",
+      "agent_id_status": "verified",
+      "category": [
+        "network"
+      ],
+      "code": "Log",
+      "dataset": "cef.log",
+      "ingested": "2026-03-10T02:39:17Z",
+      "kind": "event"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/checkpoint.log"
+      },
+      "offset": 0
+    },
+    "message": "https",
+    "network": {
+      "community_id": "1:nPWqYgBLqf+/kUDiA7Jaoif4tMI=",
+      "direction": "inbound",
+      "transport": "6"
+    },
+    "observer": {
+      "egress": {
+        "zone": "External"
+      },
+      "ingress": {
+        "interface": {
+          "name": "eth0"
+        },
+        "zone": "Internal"
+      },
+      "product": "VPN-1 & FireWall-1",
+      "vendor": "Check Point",
+      "version": "Check Point"
+    },
+    "related": {
+      "ip": [
+        "89.160.20.156",
+        "0.0.0.0",
+        "192.168.101.100",
+        "192.168.103.254"
+      ]
+    },
+    "rule": {
+      "category": "Business / Economy",
+      "uuid": "9e5e6e74-aa9a-4693-b9fe-53712dd27bea"
+    },
+    "source": {
+      "ip": "192.168.101.100",
+      "nat": {
+        "ip": "192.168.103.254",
+        "port": 35398
+      },
+      "port": 49363
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2017-01-11T00:54:54.000Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "4p9IZi1kBABCq5RFPFdJWYUw==",
+      "ip": "89.160.20.11",
+      "name": "host.gtr.gtr",
+      "type": "agent_ac",
+      "version": "7.1.7.7602.0"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "305012",
+        "product": "ASA",
+        "vendor": "CISCO"
+      },
+      "extensions": {
+        "ad": {
+          "arcSightEventPath": "7q0sfHVcBABCcMZVvMSDFc1w=="
+        },
+        "agentAddress": "89.160.20.11",
+        "agentHostName": "host.gtr.gtr",
+        "agentId": "4p9IZi1kBABCq5RFPFdJWYUw==",
+        "agentReceiptTime": "2017-01-11T00:55:08.163Z",
+        "agentTimeZone": "LA/la",
+        "agentType": "agent_ac",
+        "agentVersion": "7.1.7.7602.0",
+        "assetCriticality": "0",
+        "categoryBehavior": "/Access/Stop",
+        "categoryDeviceGroup": "/Firewall",
+        "categoryDeviceType": "Firewall",
+        "categoryObject": "/Host/Application/Service",
+        "categoryOutcome": "/Success",
+        "categorySignificance": "/Informational",
+        "deviceAddress": "81.2.69.142",
+        "deviceAssetId": "5Wa8hHVSDFBCc-t56wI7mTw==",
+        "deviceCustomIPv6Address4": "ffff::222:5555:ffff:5555",
+        "deviceCustomIPv6Address4Label": "Agent IPv6 Address",
+        "deviceCustomNumber1Label": "ICMP Type",
+        "deviceCustomNumber2Label": "ICMP Code",
+        "deviceCustomNumber3Label": "DurationInSeconds",
+        "deviceCustomString1Label": "ACL",
+        "deviceCustomString2Label": "Unit",
+        "deviceCustomString3Label": "TCP Flags",
+        "deviceCustomString4Label": "Order",
+        "deviceCustomString5": "dynamic",
+        "deviceCustomString5Label": "Connection Type",
+        "deviceCustomString6": "0:00:00",
+        "deviceCustomString6Label": "Duration",
+        "deviceHostName": "super",
+        "deviceInboundInterface": "eth0",
+        "deviceOutboundInterface": "eth1",
+        "deviceReceiptTime": "2017-01-11T00:54:54.000Z",
+        "deviceSeverity": "6",
+        "deviceTimeZone": "LA/LA",
+        "deviceZoneID": "K-fU33AAOGVdfFpYAT3UdQ==",
+        "deviceZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "eventAnnotationAuditTrail": "1,1484012146095,root,Queued,,,,\\n",
+        "eventAnnotationEndTime": "2017-01-11T00:54:54.000Z",
+        "eventAnnotationFlags": "0",
+        "eventAnnotationManagerReceiptTime": "2017-01-11T01:21:26.471Z",
+        "eventAnnotationModificationTime": "2017-01-11T01:21:26.475Z",
+        "eventAnnotationStageUpdateTime": "2017-01-11T01:21:26.473Z",
+        "eventAnnotationVersion": "1",
+        "eventId": 56265798504,
+        "locality": "1",
+        "managerReceiptTime": "2017-01-10T23:58:03.471Z",
+        "modelConfidence": "0",
+        "originalAgentAddress": "10.2.88.3",
+        "originalAgentHostName": "host",
+        "originalAgentId": "6q0sfHVcBABCcSDFvMpvc1w==",
+        "originalAgentType": "syslog_file",
+        "originalAgentVersion": "7.3.0.7885.0",
+        "originalAgentZoneURI": "/All Zones/GR/GR/GR",
+        "priority": "4",
+        "relevance": "10",
+        "severity": "4",
+        "sourceAddress": "1.2.3.4",
+        "sourcePort": 5260,
+        "sourceTranslatedAddress": "4.3.2.1",
+        "sourceTranslatedPort": 5260,
+        "sourceTranslatedZoneID": "P84KXXTYDFYYFwwHq40BQcd==",
+        "sourceTranslatedZoneURI": "/All Zones/GTR/GTR Internet Primary",
+        "sourceZoneID": "GqtK3G9YBABCadQ465CqVeW==",
+        "sourceZoneURI": "/All Zones/GTR/GTR/GTR/GTR",
+        "transportProtocol": "UDP"
+      },
+      "name": "Teardown dynamic UDP translation",
+      "severity": "Low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "mismatch",
+      "code": "305012",
+      "created": "2017-01-11T00:55:08.163Z",
+      "dataset": "cef.log",
+      "id": "56265798504",
+      "ingested": "2026-03-10T02:39:17Z",
+      "outcome": "success",
+      "severity": 0,
+      "timezone": "LA/LA"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/cisco.log"
+      },
+      "offset": 0
+    },
+    "message": "Teardown dynamic UDP translation",
+    "network": {
+      "transport": "udp"
+    },
+    "observer": {
+      "hostname": "super",
+      "ip": [
+        "81.2.69.142"
+      ],
+      "product": "ASA",
+      "vendor": "CISCO"
+    },
+    "related": {
+      "hosts": [
+        "super"
+      ],
+      "ip": [
+        "1.2.3.4",
+        "4.3.2.1"
+      ]
+    },
+    "source": {
+      "ip": "1.2.3.4",
+      "nat": {
+        "ip": "4.3.2.1",
+        "port": 5260
+      },
+      "port": 5260
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2014-09-12T17:38:20.432Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "4Pz6paUgBABCAAudQNx1w0w==",
+      "ip": "192.168.1.56",
+      "name": "VirtualXP",
+      "type": "sdkrfilereader",
+      "version": "7.0.5.7132.1"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "agent:030",
+        "product": "ArcSight",
+        "vendor": "ArcSight",
+        "version": "7.0.5.7132.1"
+      },
+      "extensions": {
+        "agentAddress": "192.168.1.56",
+        "agentHostName": "VirtualXP",
+        "agentId": "4Pz6paUgBABCAAudQNx1w0w==",
+        "agentReceiptTime": "2014-09-13T16:06:42.535Z",
+        "agentTimeZone": "Europe/Prague",
+        "agentType": "sdkrfilereader",
+        "agentVersion": "7.0.5.7132.1",
+        "agentZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "categoryBehavior": "/Execute/Start",
+        "categoryDeviceGroup": "/Application",
+        "categoryDeviceType": "Security Mangement",
+        "categoryObject": "/Host/Application/Service",
+        "categoryOutcome": "/Success",
+        "categorySignificance": "/Normal",
+        "deviceAddress": "192.168.0.65",
+        "deviceCustomString2": "<Resource ID=\"3Tg5paUgBABCAAwIZ-kC0dw==\"/>",
+        "deviceCustomString2Label": "Configuration Resource",
+        "deviceEventCategory": "/Agent/Started",
+        "deviceHostName": "VirtualXP",
+        "deviceReceiptTime": "2014-09-12T17:38:20.432Z",
+        "deviceSeverity": "Warning",
+        "deviceTimeZone": "Europe/Prague",
+        "deviceZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "eventId": 2,
+        "fileType": "Agent",
+        "managerReceiptTime": "2014-09-12T12:21:40.493Z"
+      },
+      "name": "Agent [NAT] type [sdkrfilereader] started",
+      "severity": "Low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "mismatch",
+      "code": "agent:030",
+      "created": "2014-09-13T16:06:42.535Z",
+      "dataset": "cef.log",
+      "id": "2",
+      "ingested": "2026-03-10T02:39:17Z",
+      "outcome": "success",
+      "severity": 0,
+      "timezone": "Europe/Prague"
+    },
+    "file": {
+      "type": "Agent"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/arcsight.log"
+      },
+      "offset": 948
+    },
+    "message": "Agent [NAT] type [sdkrfilereader] started",
+    "observer": {
+      "hostname": "VirtualXP",
+      "ip": [
+        "192.168.0.65"
+      ],
+      "product": "ArcSight",
+      "vendor": "ArcSight",
+      "version": "7.0.5.7132.1"
+    },
+    "related": {
+      "hosts": [
+        "VirtualXP"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2014-09-12T12:22:15.833Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "3Pz6paUgBABCAAudQNx1w0w==",
+      "ip": "192.168.131.65",
+      "name": "VirtualXP",
+      "type": "sdkrfilereader",
+      "version": "7.0.5.7132.0"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "agent:031",
+        "product": "ArcSight",
+        "vendor": "ArcSight",
+        "version": "7.0.5.7132.1"
+      },
+      "extensions": {
+        "agentAddress": "192.168.131.65",
+        "agentHostName": "VirtualXP",
+        "agentId": "3Pz6paUgBABCAAudQNx1w0w==",
+        "agentReceiptTime": "2014-09-12T12:22:15.843Z",
+        "agentTimeZone": "Europe/Prague",
+        "agentType": "sdkrfilereader",
+        "agentVersion": "7.0.5.7132.0",
+        "agentZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "categoryBehavior": "/Execute/Stop",
+        "categoryDeviceGroup": "/Application",
+        "categoryDeviceType": "Security Mangement",
+        "categoryObject": "/Host/Application/Service",
+        "categoryOutcome": "/Success",
+        "categorySignificance": "/Normal",
+        "deviceAddress": "192.168.131.65",
+        "deviceCustomString2": "<Resource ID=\"3Qg5paUgBABCAAwIZ-kC0dw==\"/>",
+        "deviceCustomString2Label": "Configuration Resource",
+        "deviceEventCategory": "/Agent/ShuttingDown",
+        "deviceHostName": "VirtualXP",
+        "deviceReceiptTime": "2014-09-12T12:22:15.833Z",
+        "deviceSeverity": "Warning",
+        "deviceTimeZone": "Europe/Prague",
+        "deviceZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "eventId": 7,
+        "fileType": "Agent",
+        "managerReceiptTime": "2014-09-12T12:22:15.833Z",
+        "message": "Process Stopped by User"
+      },
+      "name": "Agent [NAT] type [sdkrfilereader] shutting down",
+      "severity": "Very-High",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "mismatch",
+      "code": "agent:031",
+      "created": "2014-09-12T12:22:15.843Z",
+      "dataset": "cef.log",
+      "id": "7",
+      "ingested": "2026-03-10T02:39:17Z",
+      "outcome": "success",
+      "severity": 9,
+      "timezone": "Europe/Prague"
+    },
+    "file": {
+      "type": "Agent"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/arcsight.log"
+      },
+      "offset": 2504
+    },
+    "message": "Process Stopped by User",
+    "observer": {
+      "hostname": "VirtualXP",
+      "ip": [
+        "192.168.131.65"
+      ],
+      "product": "ArcSight",
+      "vendor": "ArcSight",
+      "version": "7.0.5.7132.1"
+    },
+    "related": {
+      "hosts": [
+        "VirtualXP"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2014-09-12T12:21:40.502Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "3Pz6paUgBABCAAudQNx1w0w==",
+      "ip": "192.168.131.65",
+      "name": "VirtualXP",
+      "type": "sdkrfilereader",
+      "version": "7.0.5.7132.0"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "agent:016",
+        "product": "ArcSight",
+        "vendor": "ArcSight",
+        "version": "7.0.5.7132.1"
+      },
+      "extensions": {
+        "agentAddress": "192.168.131.65",
+        "agentHostName": "VirtualXP",
+        "agentId": "3Pz6paUgBABCAAudQNx1w0w==",
+        "agentReceiptTime": "2014-09-12T12:21:42.535Z",
+        "agentTimeZone": "Europe/Prague",
+        "agentType": "sdkrfilereader",
+        "agentVersion": "7.0.5.7132.0",
+        "agentZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "categoryBehavior": "/Access/Start",
+        "categoryDeviceGroup": "/Application",
+        "categoryDeviceType": "Security Mangement",
+        "categoryObject": "/Host/Application",
+        "categoryOutcome": "/Success",
+        "categorySignificance": "/Normal",
+        "deviceAddress": "192.168.131.65",
+        "deviceCustomString2": "<Resource ID=\"3Qg5paUgBABCAAwIZ-kC0dw==\"/>",
+        "deviceCustomString2Label": "Configuration Resource",
+        "deviceEventCategory": "/Agent/Connection/Device?Success",
+        "deviceHostName": "VirtualXP",
+        "deviceReceiptTime": "2014-09-12T12:21:40.502Z",
+        "deviceSeverity": "Warning",
+        "deviceTimeZone": "Europe/Prague",
+        "deviceZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "eventId": 1,
+        "fileType": "Agent",
+        "filename": "C:\\Documents and Settings\\XPMUser\\Desktop\\Logs\\NAT_Log",
+        "managerReceiptTime": "2014-09-12T12:23:20.502Z",
+        "message": "File Opened"
+      },
+      "name": "Device connection up",
+      "severity": "Low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "mismatch",
+      "code": "agent:016",
+      "created": "2014-09-12T12:21:42.535Z",
+      "dataset": "cef.log",
+      "id": "1",
+      "ingested": "2026-03-10T02:39:17Z",
+      "outcome": "success",
+      "severity": 0,
+      "timezone": "Europe/Prague"
+    },
+    "file": {
+      "name": "C:\\Documents and Settings\\XPMUser\\Desktop\\Logs\\NAT_Log",
+      "type": "Agent"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/arcsight.log"
+      },
+      "offset": 0
+    },
+    "message": "File Opened",
+    "observer": {
+      "hostname": "VirtualXP",
+      "ip": [
+        "192.168.131.65"
+      ],
+      "product": "ArcSight",
+      "vendor": "ArcSight",
+      "version": "7.0.5.7132.1"
+    },
+    "related": {
+      "hosts": [
+        "VirtualXP"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  },
+  {
+    "@timestamp": "2014-09-12T12:21:40.502Z",
+    "agent": {
+      "ephemeral_id": "79fea8df-556d-4737-9bec-15b4f2a06dd0",
+      "id": "3Pz6paUgBABCAAudQNx1w0w==",
+      "ip": "192.168.131.65",
+      "name": "VirtualXP",
+      "type": "sdkrfilereader",
+      "version": "7.0.5.7132.0"
+    },
+    "cef": {
+      "device": {
+        "event_class_id": "agent:044",
+        "product": "ArcSight",
+        "vendor": "ArcSight",
+        "version": "7.0.5.7132.1"
+      },
+      "extensions": {
+        "agentAddress": "192.168.131.65",
+        "agentHostName": "VirtualXP",
+        "agentId": "3Pz6paUgBABCAAudQNx1w0w==",
+        "agentReceiptTime": "2014-09-12T12:21:42.535Z",
+        "agentTimeZone": "Europe/Prague",
+        "agentType": "sdkrfilereader",
+        "agentVersion": "7.0.5.7132.0",
+        "agentZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "categoryDeviceType": "Security Mangement",
+        "deviceAddress": "192.168.131.65",
+        "deviceEventCategory": "/LogFile/Processing/Started",
+        "deviceHostName": "VirtualXP",
+        "deviceReceiptTime": "2014-09-12T12:21:40.502Z",
+        "deviceSeverity": "Warning",
+        "deviceTimeZone": "Europe/Prague",
+        "deviceZoneURI": "/All Zones/ArcSight System/Private Address Space Zones/RFC1918: 192.168.0.0-192.168.255.255",
+        "eventId": 6,
+        "filename": "C:\\Documents and Settings\\XPMUser\\Desktop\\Logs\\NAT_Log",
+        "managerReceiptTime": "2014-09-12T12:21:40.502Z"
+      },
+      "name": "File processing started",
+      "severity": "Low",
+      "version": "0"
+    },
+    "data_stream": {
+      "dataset": "cef.log",
+      "namespace": "86716",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.17.0"
+    },
+    "elastic_agent": {
+      "id": "aaf8d7ad-5fc2-4d8b-9caf-7bff5729ec18",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "mismatch",
+      "code": "agent:044",
+      "created": "2014-09-12T12:21:42.535Z",
+      "dataset": "cef.log",
+      "id": "6",
+      "ingested": "2026-03-10T02:39:17Z",
+      "severity": 0,
+      "timezone": "Europe/Prague"
+    },
+    "file": {
+      "name": "C:\\Documents and Settings\\XPMUser\\Desktop\\Logs\\NAT_Log"
+    },
+    "input": {
+      "type": "log"
+    },
+    "log": {
+      "file": {
+        "path": "/tmp/service_logs/arcsight.log"
+      },
+      "offset": 1822
+    },
+    "message": "File processing started",
+    "observer": {
+      "hostname": "VirtualXP",
+      "ip": [
+        "192.168.131.65"
+      ],
+      "product": "ArcSight",
+      "vendor": "ArcSight",
+      "version": "7.0.5.7132.1"
+    },
+    "related": {
+      "hosts": [
+        "VirtualXP"
+      ]
+    },
+    "tags": [
+      "cef",
+      "forwarded"
+    ]
+  }
+]

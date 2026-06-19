@@ -1,0 +1,27 @@
+{
+  "package": "cockroachdb",
+  "dataStreams": [
+    {
+      "dataset": "cockroachdb.status",
+      "indexPattern": "metrics-*",
+      "docTarget": 500,
+      "fields": [
+        "cockroachdb.status.ranges.value",
+        "cockroachdb.status.ranges_overreplicated.value",
+        "cockroachdb.status.ranges_unavailable.value",
+        "cockroachdb.status.ranges_underreplicated.value",
+        "cockroachdb.status.replicas.value",
+        "cockroachdb.status.replicas_leaseholders.value",
+        "cockroachdb.status.sql_conns.value",
+        "cockroachdb.status.sql_delete_count.counter",
+        "cockroachdb.status.sql_insert_count.counter",
+        "cockroachdb.status.sql_select_count.counter",
+        "cockroachdb.status.sql_service_latency.histogram",
+        "cockroachdb.status.sql_update_count.counter",
+        "cockroachdb.status.txn_durations.histogram",
+        "service.address"
+      ],
+      "filterValues": {}
+    }
+  ]
+}

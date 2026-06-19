@@ -1,0 +1,290 @@
+[
+  {
+    "@timestamp": "2020-04-01T12:03:00.000Z",
+    "admin_by_request_epm": {
+      "auditlog": {
+        "approved_by": "Jim Kerr",
+        "auditlog_link": "https://www.example.com/AuditLog?Page=AppElevations&ID=579&ShowFilter=false",
+        "computer": {
+          "make": "Dell Inc.",
+          "model": "XPS 15 9550",
+          "name": "W1005623",
+          "platform": "Windows",
+          "platform_code": "0"
+        },
+        "end_time_utc": "2020-04-01T12:09:11.000Z",
+        "id": "1",
+        "reason": "Need to update reader. It says out of date when trying to open PDF files from our supplier.",
+        "request_time_utc": "2020-04-01T12:03:00.000Z",
+        "response_time": "00:00:05.4100000",
+        "response_time_in_seconds": 5,
+        "settings_name": "Global",
+        "sso_validated": false,
+        "start_time_utc": "2020-04-01T12:03:30.000Z",
+        "status": "Finished",
+        "status_code": "2",
+        "trace_no": "34376579",
+        "type": "Run As Admin",
+        "type_code": "0",
+        "user": {
+          "account": "ACMEPDH",
+          "email": "pdh@acme.com",
+          "full_name": "Paul David Hewson",
+          "is_admin": false,
+          "phone": "555.345.6789"
+        }
+      }
+    },
+    "agent": {
+      "ephemeral_id": "1b8423c4-9bf2-43e2-9295-f68ab5faf47b",
+      "id": "365e8911-a30d-4c9a-ac35-f040d8cbfb63",
+      "name": "elastic-agent-90534",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "admin_by_request_epm.auditlog",
+      "namespace": "74261",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "365e8911-a30d-4c9a-ac35-f040d8cbfb63",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "admin_by_request_epm.auditlog",
+      "ingested": "2026-03-10T01:52:10Z",
+      "kind": "event",
+      "module": "admin_by_request_epm",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "hostname": "W1005623"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "os": {
+      "platform": "Windows"
+    },
+    "related": {
+      "hosts": [
+        "W1005623"
+      ],
+      "user": [
+        "Paul David Hewson",
+        "pdh@acme.com"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "admin_by_request_epm.auditlog"
+    ],
+    "user": {
+      "email": "pdh@acme.com",
+      "full_name": "Paul David Hewson"
+    }
+  },
+  {
+    "@timestamp": "2020-04-01T12:03:00.000Z",
+    "admin_by_request_epm": {
+      "auditlog": {
+        "approved_by": "Jim Kerr",
+        "auditlog_link": "https://www.example.com/AuditLog?Page=AppElevations&ID=349&ShowFilter=false",
+        "computer": {
+          "make": "Dell Inc.",
+          "model": "XPS 15 9550",
+          "name": "W1005623",
+          "platform": "Windows",
+          "platform_code": "0"
+        },
+        "end_time_utc": "2020-04-01T12:09:11.000Z",
+        "id": "2",
+        "reason": "Need to update reader. It says out of date when trying to open PDF files from our supplier.",
+        "request_time_utc": "2020-04-01T12:03:00.000Z",
+        "response_time": "00:00:05.4100000",
+        "response_time_in_seconds": 5,
+        "settings_name": "Global",
+        "sso_validated": false,
+        "start_time_utc": "2020-04-01T12:03:30.000Z",
+        "status": "Finished",
+        "status_code": "2",
+        "trace_no": "34376579",
+        "type": "Run As Admin",
+        "type_code": "0",
+        "user": {
+          "account": "ACMEPDH",
+          "email": "pdh@acme.com",
+          "full_name": "Paul David Hewson",
+          "is_admin": false,
+          "phone": "555.345.6789"
+        }
+      }
+    },
+    "agent": {
+      "ephemeral_id": "1b8423c4-9bf2-43e2-9295-f68ab5faf47b",
+      "id": "365e8911-a30d-4c9a-ac35-f040d8cbfb63",
+      "name": "elastic-agent-90534",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "admin_by_request_epm.auditlog",
+      "namespace": "74261",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "365e8911-a30d-4c9a-ac35-f040d8cbfb63",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "admin_by_request_epm.auditlog",
+      "ingested": "2026-03-10T01:52:10Z",
+      "kind": "event",
+      "module": "admin_by_request_epm",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "hostname": "W1005623"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "os": {
+      "platform": "Windows"
+    },
+    "related": {
+      "hosts": [
+        "W1005623"
+      ],
+      "user": [
+        "Paul David Hewson",
+        "pdh@acme.com"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "admin_by_request_epm.auditlog"
+    ],
+    "user": {
+      "email": "pdh@acme.com",
+      "full_name": "Paul David Hewson"
+    }
+  },
+  {
+    "@timestamp": "2020-04-01T12:03:00.000Z",
+    "admin_by_request_epm": {
+      "auditlog": {
+        "approved_by": "Jim Kerr",
+        "auditlog_link": "https://www.example.com/AuditLog?Page=AppElevations&ID=34379&ShowFilter=false",
+        "computer": {
+          "make": "Dell Inc.",
+          "model": "XPS 15 9550",
+          "name": "W1005623",
+          "platform": "Windows",
+          "platform_code": "0"
+        },
+        "end_time_utc": "2020-04-01T12:09:11.000Z",
+        "id": "3",
+        "reason": "Need to update reader. It says out of date when trying to open PDF files from our supplier.",
+        "request_time_utc": "2020-04-01T12:03:00.000Z",
+        "response_time": "00:00:05.4100000",
+        "response_time_in_seconds": 5,
+        "settings_name": "Global",
+        "sso_validated": false,
+        "start_time_utc": "2020-04-01T12:03:30.000Z",
+        "status": "Finished",
+        "status_code": "2",
+        "trace_no": "34376579",
+        "type": "Run As Admin",
+        "type_code": "0",
+        "user": {
+          "account": "ACMEPDH",
+          "email": "pdh@acme.com",
+          "full_name": "Paul David Hewson",
+          "is_admin": false,
+          "phone": "555.345.6789"
+        }
+      }
+    },
+    "agent": {
+      "ephemeral_id": "1b8423c4-9bf2-43e2-9295-f68ab5faf47b",
+      "id": "365e8911-a30d-4c9a-ac35-f040d8cbfb63",
+      "name": "elastic-agent-90534",
+      "type": "filebeat",
+      "version": "9.3.1"
+    },
+    "data_stream": {
+      "dataset": "admin_by_request_epm.auditlog",
+      "namespace": "74261",
+      "type": "logs"
+    },
+    "ecs": {
+      "version": "8.11.0"
+    },
+    "elastic_agent": {
+      "id": "365e8911-a30d-4c9a-ac35-f040d8cbfb63",
+      "snapshot": false,
+      "version": "9.3.1"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "category": [
+        "configuration"
+      ],
+      "dataset": "admin_by_request_epm.auditlog",
+      "ingested": "2026-03-10T01:52:10Z",
+      "kind": "event",
+      "module": "admin_by_request_epm",
+      "type": [
+        "info"
+      ]
+    },
+    "host": {
+      "hostname": "W1005623"
+    },
+    "input": {
+      "type": "cel"
+    },
+    "os": {
+      "platform": "Windows"
+    },
+    "related": {
+      "hosts": [
+        "W1005623"
+      ],
+      "user": [
+        "Paul David Hewson",
+        "pdh@acme.com"
+      ]
+    },
+    "tags": [
+      "forwarded",
+      "admin_by_request_epm.auditlog"
+    ],
+    "user": {
+      "email": "pdh@acme.com",
+      "full_name": "Paul David Hewson"
+    }
+  }
+]

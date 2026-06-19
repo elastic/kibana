@@ -1,0 +1,27 @@
+{
+  "package": "ti_threatconnect",
+  "dataStreams": [
+    {
+      "dataset": "ti_threatconnect.indicator",
+      "indexPattern": "logs-*",
+      "docTarget": 500,
+      "fields": [
+        "event.id",
+        "observer.hostname",
+        "threat.indicator.ip",
+        "threat.indicator.type",
+        "threat.indicator.url.original",
+        "threat_connect.indicator.associated_groups.data.id",
+        "threat_connect.indicator.associated_groups.data.name",
+        "threat_connect.indicator.associated_groups.data.status",
+        "threat_connect.indicator.associated_groups.data.type",
+        "threat_connect.indicator.attributes.data.id",
+        "threat_connect.indicator.attributes.data.type",
+        "threat_connect.indicator.confidence",
+        "threat_connect.indicator.owner.name",
+        "threat_connect.indicator.rating"
+      ],
+      "filterValues": {}
+    }
+  ]
+}
