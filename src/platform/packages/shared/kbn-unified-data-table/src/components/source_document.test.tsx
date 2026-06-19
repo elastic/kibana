@@ -15,8 +15,8 @@ import {
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render } from '@testing-library/react';
+import { mountWithIntl, renderWithI18n } from '@kbn/test-jest-helpers';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import SourceDocument from './source_document';
 import type { EsHitRecord } from '@kbn/discover-utils/src/types';

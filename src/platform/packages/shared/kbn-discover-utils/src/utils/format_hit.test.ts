@@ -179,9 +179,9 @@ describe('formatHit', () => {
       dataViewMock
     );
 
-    formatHitReact(rowWithNullishFields, dataViewMock, () => true, 2, fieldFormatsMock, undefined);
+    formatHit(rowWithNullishFields, dataViewMock, () => true, 2, fieldFormatsMock, undefined);
 
-    const formatted = formatHitReact(
+    const formatted = formatHit(
       rowWithNullishFields,
       dataViewMock,
       () => true,
@@ -214,7 +214,7 @@ describe('formatHit', () => {
       dataViewMock
     );
 
-    const formatted = formatHitReact(
+    const formatted = formatHit(
       rowWithFalsyFields,
       dataViewMock,
       () => true,
