@@ -17,7 +17,7 @@ import {
 } from './get_installable_catalog_overview_tool';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
-import { getInstallableRuleVersions } from '../../../lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_handler';
+import { getInstallableRuleVersions } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
 
 jest.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
@@ -28,8 +28,10 @@ jest.mock(
   () => ({ createPrebuiltRuleObjectsClient: jest.fn() })
 );
 jest.mock(
-  '../../../lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_handler',
-  () => ({ getInstallableRuleVersions: jest.fn() })
+  '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review',
+  () => ({
+    getInstallableRuleVersions: jest.fn(),
+  })
 );
 
 const mockCreatePrebuiltRuleAssetsClient = jest.mocked(createPrebuiltRuleAssetsClient);

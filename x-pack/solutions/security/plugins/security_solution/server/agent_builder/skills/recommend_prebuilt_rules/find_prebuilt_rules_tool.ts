@@ -11,65 +11,52 @@ import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../../../common/utils/kql';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
-import type { PrebuiltRuleAssetsSort } from '../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { getInstallableRulesForReview } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
-import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_type';
+import { fetchInstalledRuleVersionsMap } from '../../../lib/detection_engine/prebuilt_rules/logic/fetch_installed_rule_versions_map';
 import type { MlAuthz } from '../../../lib/machine_learning/authz';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import { buildPrebuiltRulesToolFilter } from './find_prebuilt_rules_filter';
 
 export const FIND_PREBUILT_RULES_INLINE_TOOL_ID = 'security.find_prebuilt_rules';
-
-const SEVERITY_VALUES = ['critical', 'high', 'medium', 'low'] as const;
-const RULE_TYPE_VALUES = [
-  'query',
-  'eql',
-  'esql',
-  'threshold',
-  'machine_learning',
-  'new_terms',
-  'threat_match',
-  'saved_query',
-] as const;
-const FIELD_VALUES = [
-  'description',
-  'query',
-  'mitre',
-  'related_integrations',
-  'index',
-  'note',
-  'references',
-  'false_positives',
-  'investigation_fields',
-] as const;
-const SORT_FIELDS = ['name', 'risk_score', 'severity'] as const;
 
 const MAX_STRING_LENGTH = 10_000;
 const MAX_TAG_LENGTH = 1000;
 const MAX_RULE_IDS = 50;
 
-export const findPrebuiltRulesSchema = z
+// Structured filters that select which installable rules match. Different filters are ANDed;
+// array values are ORed within a single filter. Grouped under `filter` to keep the top-level
+// schema split between "what to match" (filter) and "how to return it" (fields, perPage, sort).
+const findPrebuiltRulesFilterSchema = z
   .object({
-    searchTerm: z
+    keywords: z
       .string()
       .min(1)
       .max(MAX_STRING_LENGTH)
       .optional()
       .describe(
-        'Free-text keyword search over rule name and description. Multiple words are ANDed ' +
-          '(all must appear in the same field). Case-insensitive; no wildcards; no relevance ' +
-          'ranking. For categorical queries — Windows, endpoint, LLM, Initial Access — use the ' +
-          'structured filters (tags, mitreTactic, etc.); they are more precise.'
+        'Free-text keywords matched against rule name and description (case-insensitive, no ' +
+          'wildcards). For categorical concepts — Windows, endpoint, LLM, Initial Access — prefer ' +
+          'the structured filters (`tags`, `mitreTactic`, etc.); they are more precise.'
       ),
     severity: z
-      .array(z.enum(SEVERITY_VALUES))
+      .array(z.enum(['critical', 'high', 'medium', 'low']))
       .optional()
       .describe('Severity levels to include (OR). E.g. ["critical", "high"].'),
     ruleType: z
-      .array(z.enum(RULE_TYPE_VALUES))
+      .array(
+        z.enum([
+          'query',
+          'eql',
+          'esql',
+          'threshold',
+          'machine_learning',
+          'new_terms',
+          'threat_match',
+          'saved_query',
+        ])
+      )
       .optional()
       .describe('Rule types to include (OR). E.g. ["esql", "eql"].'),
     tags: z
@@ -80,10 +67,6 @@ export const findPrebuiltRulesSchema = z
           '`security.get_installable_catalog_overview` — call it in the same turn before any ' +
           'tags-filtered search.'
       ),
-    excludeTags: z
-      .array(z.string().min(1).max(MAX_TAG_LENGTH))
-      .optional()
-      .describe('Exclude rules with any of these tags.'),
     mitreTechnique: z
       .array(
         z
@@ -99,9 +82,7 @@ export const findPrebuiltRulesSchema = z
       .describe(
         'MITRE tactics to include (OR), each either an ID (e.g. "TA0001") or display name ' +
           '(e.g. "Initial Access"). Queries the structured threat field, so it finds rules whose ' +
-          'tactic is in rule metadata even when no "Tactic: X" tag is present. Prefer IDs. Pass ' +
-          'several to gather candidates across tactics in one call; use separate single-tactic ' +
-          'calls when you need balanced per-tactic coverage or a count per tactic.'
+          'tactic is in rule metadata even when no "Tactic: X" tag is present. Prefer IDs.'
       ),
     relatedIntegrations: z
       .array(z.string().min(1).max(MAX_STRING_LENGTH))
@@ -116,16 +97,33 @@ export const findPrebuiltRulesSchema = z
       .optional()
       .describe(
         'Deep-fetch specific rules by their `rule_id` signature (OR). Typically used as a ' +
-          'follow-up to fetch finalists; omit other filters when using it. Already-installed ' +
+          'follow-up to fetch finalists; omit the other filters when using it. Already-installed ' +
           'IDs return nothing (this tool only sees not-yet-installed rules).'
       ),
-    fields: z
-      .array(z.enum(FIELD_VALUES))
+  })
+  .strict();
+
+export const findPrebuiltRulesSchema = z
+  .object({
+    filter: findPrebuiltRulesFilterSchema
       .optional()
       .describe(
-        'Opt into deeper per-rule detail beyond the default triage fields. Omit for the compact ' +
-          'triage shape (rule_id, name, severity, risk_score, tags, mitre tactics, ' +
-          'related_integrations.package).'
+        'Structured filters selecting which installable rules match. Filters are ANDed together; ' +
+          'array values are ORed within a single filter. Omit to match the whole installable catalog.'
+      ),
+    fields: z
+      .array(z.enum(['description', 'query', 'threat', 'note', 'references', 'false_positives']))
+      .optional()
+      .describe(
+        'Opt into deeper per-rule detail beyond the default triage shape (omit for triage only). ' +
+          'Available fields: ' +
+          '`description` (full rule description); ' +
+          '`query` (the detection query/logic; `machine_learning` rules have none); ' +
+          '`threat` (full MITRE ATT&CK mapping incl. techniques and subtechniques — triage gives ' +
+          'tactics only); ' +
+          '`note` (investigation guide / runbook shown when an alert fires); ' +
+          '`references` (external reference URLs); ' +
+          '`false_positives` (known false-positive scenarios).'
       ),
     perPage: z
       .number()
@@ -133,155 +131,28 @@ export const findPrebuiltRulesSchema = z
       .min(1)
       .max(50)
       .default(10)
-      .describe(
-        'Number of results to return (default 10, max 50). Use a larger value (e.g. 30–50) for a ' +
-          'triage-only survey pass that maps the candidate landscape; keep it small for results ' +
-          'you actually present, and do not paginate just to show the user more — narrow the ' +
-          'filter instead.'
-      ),
-    sortField: z
-      .enum(SORT_FIELDS)
+      .describe('Number of results to return (default 10, max 50).'),
+    sort: z
+      .object({
+        field: z
+          .enum(['name', 'risk_score', 'severity'])
+          .describe(
+            'Field to sort by. Use `severity`/`risk_score` for "most severe"/"highest risk" queries.'
+          ),
+        order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction (default desc).'),
+      })
       .optional()
-      .describe(
-        'Field to sort by. Use `severity`/`risk_score` for "most severe"/"highest risk" queries.'
-      ),
-    sortOrder: z.enum(['asc', 'desc']).default('desc').describe('Sort direction (default desc).'),
+      .describe('Sort order. Omit to use the default order.'),
   })
   .strict();
 
-type FindPrebuiltRulesInput = z.infer<typeof findPrebuiltRulesSchema>;
-
-// ---- Filter building ----
-//
-// Builds a single KQL string over the `security-rule` saved-object attributes from the
-// structured params. Different params are ANDed together; array params are ORed within
-// the same field. Enum- and regex-constrained values (severity, ruleType, MITRE IDs) are
-// emitted unquoted; free-form values (tags, tactic name, packages, rule IDs) are quoted
-// and escaped.
-
-const field = (name: string): string => `${PREBUILT_RULE_ASSETS_SO_TYPE}.${name}`;
-
-const NAME_FIELD = field('name');
-const DESCRIPTION_FIELD = field('description');
-const SEVERITY_FIELD = field('severity');
-const TYPE_FIELD = field('type');
-const TAGS_FIELD = field('tags');
-const TACTIC_ID_FIELD = field('threat.tactic.id');
-const TACTIC_NAME_FIELD = field('threat.tactic.name');
-const TECHNIQUE_ID_FIELD = field('threat.technique.id');
-const SUBTECHNIQUE_ID_FIELD = field('threat.technique.subtechnique.id');
-const RELATED_INTEGRATIONS_PACKAGE_FIELD = field('related_integrations.package');
-const RULE_ID_FIELD = field('rule_id');
-
-const buildSearchTermClause = (searchTerm: string): string | undefined => {
-  const tokens = searchTerm
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((token) => fullyEscapeKQLStringParam(token));
-
-  if (tokens.length === 0) {
-    return undefined;
-  }
-
-  const value = tokens.length === 1 ? tokens[0] : `(${tokens.join(' AND ')})`;
-  return `(${NAME_FIELD}: ${value} OR ${DESCRIPTION_FIELD}: ${value})`;
-};
-
-export const buildPrebuiltRulesToolFilter = (
-  params: Pick<
-    FindPrebuiltRulesInput,
-    | 'searchTerm'
-    | 'severity'
-    | 'ruleType'
-    | 'tags'
-    | 'excludeTags'
-    | 'mitreTechnique'
-    | 'mitreTactic'
-    | 'relatedIntegrations'
-    | 'ruleIds'
-  >
-): string | undefined => {
-  const parts: string[] = [];
-
-  if (params.searchTerm) {
-    const clause = buildSearchTermClause(params.searchTerm);
-    if (clause) {
-      parts.push(clause);
-    }
-  }
-
-  if (params.severity?.length) {
-    parts.push(`${SEVERITY_FIELD}: (${params.severity.join(' OR ')})`);
-  }
-
-  if (params.ruleType?.length) {
-    parts.push(`${TYPE_FIELD}: (${params.ruleType.join(' OR ')})`);
-  }
-
-  if (params.tags?.length) {
-    const tagClauses = params.tags.map((tag) => `${TAGS_FIELD}: ${prepareKQLStringParam(tag)}`);
-    parts.push(tagClauses.length === 1 ? tagClauses[0] : `(${tagClauses.join(' OR ')})`);
-  }
-
-  if (params.excludeTags?.length) {
-    const excludeClauses = params.excludeTags.map(
-      (tag) => `NOT ${TAGS_FIELD}: ${prepareKQLStringParam(tag)}`
-    );
-    parts.push(excludeClauses.join(' AND '));
-  }
-
-  if (params.mitreTechnique?.length) {
-    // Sub-technique IDs (e.g. T1059.001) live in a different field than technique IDs.
-    const techniqueIds = params.mitreTechnique.filter((value) => !value.includes('.'));
-    const subtechniqueIds = params.mitreTechnique.filter((value) => value.includes('.'));
-    const clauses: string[] = [];
-    if (techniqueIds.length) {
-      clauses.push(`${TECHNIQUE_ID_FIELD}: (${techniqueIds.join(' OR ')})`);
-    }
-    if (subtechniqueIds.length) {
-      clauses.push(`${SUBTECHNIQUE_ID_FIELD}: (${subtechniqueIds.join(' OR ')})`);
-    }
-    if (clauses.length) {
-      parts.push(clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`);
-    }
-  }
-
-  if (params.mitreTactic?.length) {
-    // Each value is routed by shape: a TA-ID hits threat.tactic.id, a display name hits
-    // threat.tactic.name (quoted). Values of both kinds are OR-ed across the two fields.
-    const tacticIds = params.mitreTactic.filter((value) => /^TA\d{4}$/i.test(value));
-    const tacticNames = params.mitreTactic.filter((value) => !/^TA\d{4}$/i.test(value));
-    const clauses: string[] = [];
-    if (tacticIds.length) {
-      clauses.push(`${TACTIC_ID_FIELD}: (${tacticIds.join(' OR ')})`);
-    }
-    if (tacticNames.length) {
-      const quoted = tacticNames.map((name) => prepareKQLStringParam(name));
-      clauses.push(`${TACTIC_NAME_FIELD}: (${quoted.join(' OR ')})`);
-    }
-    if (clauses.length) {
-      parts.push(clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`);
-    }
-  }
-
-  if (params.relatedIntegrations?.length) {
-    const packages = params.relatedIntegrations.map((pkg) => prepareKQLStringParam(pkg));
-    parts.push(`${RELATED_INTEGRATIONS_PACKAGE_FIELD}: (${packages.join(' OR ')})`);
-  }
-
-  if (params.ruleIds?.length) {
-    const ids = params.ruleIds.map((id) => prepareKQLStringParam(id));
-    parts.push(`${RULE_ID_FIELD}: (${ids.join(' OR ')})`);
-  }
-
-  return parts.length > 0 ? parts.join(' AND ') : undefined;
-};
-
 // ---- Response shaping ----
 
-// Top-level `security-rule` attribute keys fetched from ES for the default triage shape.
-const TRIAGE_TOP_LEVEL_FIELDS = [
+// Top-level `security-rule` attribute keys always fetched from ES — they form the default triage
+// shape and are also included on deep (`fields`) calls so every row is self-contained. Identity
+// fields (rule_id, name, type, version, ...) are intentionally absent here: getInstallableRulesForReview
+// always backfills them from the rule-asset baseline, so they come back regardless of this list.
+const DEFAULT_FIELDS_TO_FETCH = [
   'severity',
   'risk_score',
   'tags',
@@ -289,72 +160,12 @@ const TRIAGE_TOP_LEVEL_FIELDS = [
   'related_integrations',
 ] as const;
 
-// Maps the tool's opt-in `fields` enum to the underlying top-level rule attribute key.
-const DEEP_FIELD_TO_ATTRIBUTE: Record<(typeof FIELD_VALUES)[number], string> = {
-  description: 'description',
-  query: 'query',
-  mitre: 'threat',
-  related_integrations: 'related_integrations',
-  index: 'index',
-  note: 'note',
-  references: 'references',
-  false_positives: 'false_positives',
-  investigation_fields: 'investigation_fields',
-};
-
-const MITRE_ATTACK_FRAMEWORK = 'MITRE ATT&CK';
-
-/**
- * Trims a projected rule down to the compact triage shape. Codes defensively for the ~9%
- * of catalog rules with empty `threat`/`related_integrations` — those become empty arrays,
- * not errors (the LLM treats them as "unknown runnability").
- */
-export const summarizeForTriage = (rule: RuleResponse) => {
-  const threat = rule.threat ?? [];
-  const relatedIntegrations = rule.related_integrations ?? [];
-
-  return {
-    rule_id: rule.rule_id,
-    name: rule.name,
-    severity: rule.severity,
-    risk_score: rule.risk_score,
-    tags: rule.tags ?? [],
-    mitre: threat
-      .filter((entry) => entry.framework === MITRE_ATTACK_FRAMEWORK)
-      .map((entry) => ({ tactic: { id: entry.tactic?.id, name: entry.tactic?.name } })),
-    related_integrations: relatedIntegrations.map((integration) => ({
-      package: integration.package,
-    })),
-  };
-};
-
-const buildResponseMessage = ({
-  total,
-  shown,
-  hasTagFilter,
-}: {
-  total: number;
-  shown: number;
-  hasTagFilter: boolean;
-}): string => {
-  if (total === 0) {
-    return hasTagFilter
-      ? 'No installable prebuilt rules matched the filter. The filter included tag values that may ' +
-          'not exist in the installable catalog. Call `security.get_installable_catalog_overview` to ' +
-          'list available tag values.'
-      : 'No installable prebuilt rules matched the filter. Consider broadening the filter, or call ' +
-          '`security.get_installable_catalog_overview` to explore the catalog.';
-  }
-
-  if (total > shown) {
-    return (
-      `Found ${total} installable prebuilt rules, showing top ${shown}. ` +
-      'Narrow the filter (severity, rule type, tag, or MITRE) to see more specific results.'
-    );
-  }
-
-  return `Found ${total} installable prebuilt rules.`;
-};
+export const reduceMitreToTacticsOnly = (rule: RuleResponse) => ({
+  ...rule,
+  threat: (rule.threat ?? [])
+    .filter((entry) => entry.framework === 'MITRE ATT&CK')
+    .map((entry) => ({ tactic: { id: entry.tactic?.id, name: entry.tactic?.name } })),
+});
 
 // ---- Tool handler ----
 
@@ -376,72 +187,48 @@ export const createFindPrebuiltRulesInlineTool = ({
   id: FIND_PREBUILT_RULES_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Search the catalog of installable (not-yet-installed, non-deprecated) Elastic prebuilt ' +
-    'detection rules using structured filters. Returns a compact triage shape per rule by ' +
-    'default — rule_id, name, severity, risk_score, tags, MITRE tactics, and ' +
-    "related_integrations.package — plus the total match count. A rule's related_integrations are the " +
-    'Fleet packages it is built to query (they supply its source events); compare them against the ' +
-    'cached user inventory to reason about which rules likely have data to run on — a related ' +
-    'integration being installed is a signal, not a guarantee that the right data is flowing. ' +
-    'Opt into deeper detail (description, query, full MITRE, etc.) via `fields`, and deep-fetch ' +
-    'specific rules via `ruleIds`. ' +
-    'Before any call that uses a `tags` filter, call `security.get_installable_catalog_overview` ' +
-    'in the same turn to enumerate valid tag values and avoid tag hallucination. ' +
-    'For currently-installed rules use the `find-security-rules` skill instead — this tool only ' +
-    'sees rules that are not yet installed. Read-only: it never installs, edits, or enables rules.',
+    'Search the catalog of installable (not-yet-installed) Elastic prebuilt detection rules using ' +
+    'the structured `filter` object. Returns a compact triage shape per rule by default — rule_id, ' +
+    'name, severity, risk_score, tags, MITRE tactics, and related_integrations — plus the ' +
+    'total match count. Opt into deeper per-rule detail via `fields`, and deep-fetch specific rules ' +
+    'via `filter.ruleIds`. This tool only sees not-yet-installed rules. Read-only: it never ' +
+    'installs, edits, or enables rules.',
   schema: findPrebuiltRulesSchema,
   handler: async (input, { request }) => {
     try {
       const [coreStart, startPlugins] = await getStartServices();
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-      const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-      const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
-      const installedRuleVersionsMap = new Map(installedRuleVersions.map((v) => [v.rule_id, v]));
+      const installedRuleVersionsMap = await fetchInstalledRuleVersionsMap(rulesClient);
 
-      const kqlFilter = buildPrebuiltRulesToolFilter(input);
-      const { perPage, sortField, sortOrder } = input;
-      const sort: PrebuiltRuleAssetsSort | undefined = sortField
-        ? [{ field: sortField, order: sortOrder }]
-        : undefined;
+      const additionalFieldsToFetch = input.fields ?? [];
+      const fieldsToFetch = [...DEFAULT_FIELDS_TO_FETCH, ...additionalFieldsToFetch];
 
-      const deepFields = input.fields ?? [];
-      const hasDeepFields = deepFields.length > 0;
-      const projectionFields = hasDeepFields
-        ? Array.from(
-            new Set([
-              ...TRIAGE_TOP_LEVEL_FIELDS,
-              ...deepFields.map((toolField) => DEEP_FIELD_TO_ATTRIBUTE[toolField]),
-            ])
-          )
-        : [...TRIAGE_TOP_LEVEL_FIELDS];
-
-      const { rules: projectedRules, total } = await getInstallableRulesForReview({
+      const { rules: partialRules, total } = await getInstallableRulesForReview({
         ruleAssetsClient,
         logger,
         mlAuthz: permissiveMlAuthz,
         installedRuleVersionsMap,
-        filter: kqlFilter,
-        sort,
+        filter: buildPrebuiltRulesToolFilter(input.filter),
+        sort: input.sort ? [{ field: input.sort.field, order: input.sort.order }] : undefined,
         page: 1,
-        perPage,
-        fields: projectionFields,
+        perPage: input.perPage,
+        fields: fieldsToFetch,
       });
 
-      // When deep fields are requested, return the projected RuleResponse as-is; otherwise
-      // trim to the compact triage shape.
-      const rules = hasDeepFields ? projectedRules : projectedRules.map(summarizeForTriage);
-      const hasTagFilter = Boolean(input.tags?.length);
+      // Reduce `threat` fields to tactics unless the caller explicitly requested the full `threat` via `fields`.
+      // This helps keep the response size small.
+      const rules = additionalFieldsToFetch.includes('threat')
+        ? partialRules
+        : partialRules.map(reduceMitreToTacticsOnly);
 
       return {
         results: [
           {
             type: ToolResultType.other,
             data: {
-              message: buildResponseMessage({ total, shown: rules.length, hasTagFilter }),
               total,
               rules,
             },

@@ -38,7 +38,7 @@ This skill only covers **not-yet-installed** prebuilt rules. Route elsewhere whe
 - Triaging a specific alert (alert id) -> \`alert-analysis\`
 - ES|QL hunting over raw events -> \`threat-hunting\`
 - Authoring a brand-new custom rule -> \`rule-creation\`
-- Finding or listing ML **jobs** (the anomaly-detection jobs themselves) -> \`find-security-ml-jobs\`. Installable ML *detection rules* (rule type \`machine_learning\`) are in scope here — recommend them with \`ruleType: ["machine_learning"]\`.
+- Finding or listing ML **jobs** (the anomaly-detection jobs themselves) -> \`find-security-ml-jobs\`. Installable ML *detection rules* (rule type \`machine_learning\`) are in scope here — recommend them with \`filter: { ruleType: ["machine_learning"] }\`.
 
 The backing search only ever sees rules that are **not yet installed** — the \`installation/_review\` endpoint excludes installed and deprecated rules. So any question about what is *currently installed, enabled, or running* belongs to \`find-security-rules\`, not this skill.
 
@@ -65,7 +65,7 @@ When the ask is open-ended ("what should I install first?", "the most important 
 Three axes, applied in order:
 
 1. **Data availability gates the set.** Lead with rules whose related integrations the user already has; surface high-value rules that need missing integrations separately, not interleaved (see Integration Coverage). This decides what is recommendable, not the order within it.
-2. **Tactic criticality sets the rank.** Within recommendable rules, prefer higher-criticality MITRE tactics, read from each rule's triage \`mitre.tactic\` (a multi-tactic rule takes its highest-ranked tactic). v18 order, highest first:
+2. **Tactic criticality sets the rank.** Within recommendable rules, prefer higher-criticality MITRE tactics, read from each rule's triage \`threat\` (its \`tactic\` entries; a multi-tactic rule takes its highest-ranked tactic). v18 order, highest first:
    - **Critical:** Credential Access, Lateral Movement, Privilege Escalation, Defense Evasion
    - **High:** Command and Control, Execution, Exfiltration, Impact
    - **Medium:** Persistence, Initial Access, Collection
@@ -78,22 +78,22 @@ Three axes, applied in order:
 
 | Tool | When to use | Returns |
 |---|---|---|
-| \`security.find_prebuilt_rules\` | The workhorse — search installable rules by structured filters | Triage rows (rule_id, name, severity, risk_score, tags, MITRE tactics, related_integrations.package) + total |
+| \`security.find_prebuilt_rules\` | The workhorse — search installable rules by structured filters | Triage rows (rule_id, name, severity, risk_score, tags, MITRE tactics, related_integrations) + total |
 | \`security.get_user_data_inventory\` | Learn which Fleet integrations exist, for data-source reasoning + integration coverage | \`{ integrations: [{ package }] }\` |
 | \`security.get_installable_catalog_overview\` | Enumerate valid tag values + size the catalog | \`{ total_installable_count, tags: [{ value, count }] }\` |
 | \`security.get_installed_rules_mitre_coverage\` | What MITRE tactics/techniques the installed rules already cover | \`total_installed_rules\`, \`total_with_mitre_mapping\`, and per-tactic + per-technique (with nested subtechniques) counts |
 
 \`security.get_user_data_inventory\`, \`security.get_installable_catalog_overview\`, and \`security.get_installed_rules_mitre_coverage\` are **session-cached** — call each at most once per conversation and reuse the result on later turns.
 
-\`security.find_prebuilt_rules\` returns compact **triage** fields by default; pass \`fields\` for deeper per-rule detail (description, query, full MITRE, investigation_fields, false_positives, references) and \`ruleIds\` to deep-fetch specific finalists. Use these to sharpen recommendations — see Precision: Narrow, Then Deepen.
+\`security.find_prebuilt_rules\` takes its matching criteria in a single \`filter\` object — \`{ filter: { keywords, severity, ruleType, tags, mitreTactic, mitreTechnique, relatedIntegrations, ruleIds } }\` — alongside the top-level \`fields\`, \`perPage\`, and \`sort: { field, order }\`. All filters are ANDed; array values are ORed within a filter.
+
+It returns compact **triage** fields by default; pass \`fields\` for deeper per-rule detail (description, query, \`threat\` for full MITRE, false_positives, references) and \`filter.ruleIds\` to deep-fetch specific finalists. Use these to sharpen recommendations — see Precision: Narrow, Then Deepen.
 
 ## Mandatory Tool Sequence
 
 **Before any \`security.find_prebuilt_rules\` call that uses a \`tags\` filter, you MUST call \`security.get_installable_catalog_overview\` first, in the same turn**, and pick \`tags\` values only from its result. Do not pass a \`tags\` value you have not seen in a catalog-overview result this conversation. Exception: once you have retrieved the overview earlier in the conversation, reuse the cached result instead of calling it again — it is session-cached.
 
-The overview is **not** required for searches that use no \`tags\` filter (e.g. pure \`mitreTactic\`, \`mitreTechnique\`, \`relatedIntegrations\`, \`severity\`, \`ruleType\`, or \`searchTerm\` searches).
-
-\`excludeTags\` is the negative counterpart of \`tags\` — use it to peel a category out of a result ("not the deprecated/beta ones", "everything except the cloud rules", or dropping a group during a refinement). Draw its values from the catalog overview too, but excluding a tag that isn't in the catalog is harmless: it simply removes nothing.
+The overview is **not** required for searches that use no \`tags\` filter (e.g. pure \`mitreTactic\`, \`mitreTechnique\`, \`relatedIntegrations\`, \`severity\`, \`ruleType\`, or \`keywords\` searches).
 
 For **install recommendations**, also call \`security.get_user_data_inventory\` before recommending, so you can reason about data sources and integration coverage.
 
@@ -126,14 +126,14 @@ Every tag value, rule name, \`rule_id\`, count, total, and MITRE tactic/techniqu
 
 ## Precision: Narrow, Then Deepen
 
-The default triage fields (severity, tags, MITRE tactics, related_integrations.package) are enough to *survey and rank* candidates, but not to *choose between* similar rules or to *justify* a pick. Aim for a precise, well-fit set — not "here are 20 of hundreds." Work in passes, and treat narrowing as real subtraction (many candidates in, fewer out):
+The default triage fields (severity, tags, MITRE tactics, related_integrations) are enough to *survey and rank* candidates, but not to *choose between* similar rules or to *justify* a pick. Aim for a precise, well-fit set — not "here are 20 of hundreds." Work in passes, and treat narrowing as real subtraction (many candidates in, fewer out):
 
 1. **Map the space.** Use \`security.get_installable_catalog_overview\` (catalog size + tags) and \`security.get_installed_rules_mitre_coverage\` (gaps) to understand scale and where coverage is thin.
 2. **Cast a wide, thin net.** For an open-ended install ask, do a **triage-only** \`security.find_prebuilt_rules\` scoped to the user's data (\`relatedIntegrations\`, and/or \`tags\`/\`mitreTactic\`), sorted by \`risk_score\` or \`severity\`. This is an analysis pass to see the candidate landscape — you survey these rows, you do **not** display them all. Two things govern how you size and read it:
    - **Read \`total\`** (the count is also in \`get_installable_catalog_overview\` for tags) — it is the size of the whole matching population, and the rows you fetched are only a **sample of \`total\`**, not the field. Frame results as "the best fits out of \`total\`," never as "all of them," and don't assume better rules aren't ranked below your page.
    - **Pick \`perPage\` deliberately**, not reflexively the max. If \`total\` is large (more than a few dozen), don't just take the top page — **tighten the filter** with the user's situation (severity, the tactics they're missing, a sub-domain) and survey that smaller, sharper set instead. A focused 30 beats a generic 50. Keep \`perPage\` modest when the filter is already specific.
 3. **Pre-rank and pick a candidate shortlist.** From the triage signals — tactic criticality and fidelity (see Prioritization), severity, MITRE spread vs. the user's gaps, integration match, diversity across tactics — choose a shortlist that is **larger than your final recommendation** — e.g. ~10–20 candidates — so the deepen pass has something to cut.
-4. **Deepen the candidates, then cut.** Re-query the shortlist by \`ruleIds\` with \`fields\` — start with \`description\` (cheapest, highest-signal); add \`query\`, \`investigation_fields\`, \`false_positives\`, \`references\`, or full \`mitre\` only where the decision is close. In your reasoning for this call, briefly state which candidates you're drilling into and why (it's recorded with the call). Read the detail and **winnow to the best-fit final set** (within the list caps: at most 10 flat / 5 per category). Because you deepen a wider pool than you'll keep, the final set is normally a subset — expect to drop the weaker fits once the detail shows them to be redundant, noisy, or off-target. Don't pad the list with rules you'd otherwise cut; equally, don't drop a genuinely strong rule just to hit a smaller number. If nothing was worth dropping, that's a sign the candidate pool was too narrow — widen it next pass so there are real alternatives to weigh against.
+4. **Deepen the candidates, then cut.** Re-query the shortlist by \`filter.ruleIds\` with \`fields\` — start with \`description\` (cheapest, highest-signal); add \`query\`, \`false_positives\`, \`references\`, or full \`threat\` (MITRE) only where the decision is close. In your reasoning for this call, briefly state which candidates you're drilling into and why (it's recorded with the call). Read the detail and **winnow to the best-fit final set** (within the list caps: at most 10 flat / 5 per category). Because you deepen a wider pool than you'll keep, the final set is normally a subset — expect to drop the weaker fits once the detail shows them to be redundant, noisy, or off-target. Don't pad the list with rules you'd otherwise cut; equally, don't drop a genuinely strong rule just to hit a smaller number. If nothing was worth dropping, that's a sign the candidate pool was too narrow — widen it next pass so there are real alternatives to weigh against.
 5. **Recommend + Selection notes.** Present the cut-down set, justified from the deep detail. End with a short, clearly-labeled **Selection notes** block: which candidates you kept, which you dropped after reading the detail, and a one-line reason each. Drops are the norm when you deepen a wide pool — if you ended up keeping everything, say briefly why the field was already tight rather than manufacturing a cut.
 
 Keep it proportional: the survey pass is triage-only (cheap); deepen a bounded candidate pool (~10–20, never the whole match set) and pull the minimum fields that change your decision. Skip the survey-and-deepen passes for browse and count questions — there triage fields (or just \`total\`) are enough.
@@ -160,12 +160,12 @@ These are illustrative. Reason about unfamiliar packages by analogy: a host/EDR 
 Route MITRE intent through the structured params **\`mitreTactic\`** and **\`mitreTechnique\`**, never through \`tags\`. The structured threat fields are populated on rule metadata even when no \`Tactic: X\` / \`Technique: Y\` tag exists, so they are strictly more reliable. Do not put a \`Tactic: ...\` or \`Technique: ...\` value into the \`tags\` filter, even if it appears in a catalog-overview result.
 
 Priority:
-1. **Technique IDs** (\`T1059\`, or sub-technique \`T1059.001\`) -> \`{ mitreTechnique: ["T1059"] }\`. Syntax per value: \`T\` + 4 digits, optionally \`.\` + 3 digits.
-2. **Tactic IDs** (\`TA0001\`) -> \`{ mitreTactic: ["TA0001"] }\`.
-3. **Tactic names** in the table below -> convert to IDs: \`{ mitreTactic: ["<TA-ID>"] }\`. Prefer IDs; they are stable across MITRE versions.
-4. **Anything uncertain** — a typo, a technique *name* like "Phishing", informal phrasing, or an ID you are unsure of -> \`{ searchTerm: "<phrase>" }\`. Never guess an ID.
+1. **Technique IDs** (\`T1059\`, or sub-technique \`T1059.001\`) -> \`{ filter: { mitreTechnique: ["T1059"] } }\`. Syntax per value: \`T\` + 4 digits, optionally \`.\` + 3 digits.
+2. **Tactic IDs** (\`TA0001\`) -> \`{ filter: { mitreTactic: ["TA0001"] } }\`.
+3. **Tactic names** in the table below -> convert to IDs: \`{ filter: { mitreTactic: ["<TA-ID>"] } }\`. Prefer IDs; they are stable across MITRE versions.
+4. **Anything uncertain** — a typo, a technique *name* like "Phishing", informal phrasing, or an ID you are unsure of -> \`{ filter: { keywords: "<phrase>" } }\`. Never guess an ID.
 
-\`mitreTactic\` and \`mitreTechnique\` are **arrays (OR-ed)**. Pass several at once — e.g. \`{ mitreTactic: ["TA0001", "TA0006"] }\` — to gather candidates across tactics in a single call instead of one call per tactic. Use separate single-tactic calls only when you need balanced coverage of each tactic (a few rules from every gap) or a count per tactic.
+\`mitreTactic\` and \`mitreTechnique\` are **arrays (OR-ed)**. Pass several at once — e.g. \`{ filter: { mitreTactic: ["TA0001", "TA0006"] } }\` — to gather candidates across tactics in a single call instead of one call per tactic. Use separate single-tactic calls only when you need balanced coverage of each tactic (a few rules from every gap) or a count per tactic.
 
 | Tactic ID | Tactic Name |
 |---|---|
@@ -218,16 +218,16 @@ Do **not** re-call \`security.get_user_data_inventory\`, \`security.get_installa
 
 Each maps a user request to the tool call(s). These are patterns for you, not scripts to echo to the user.
 
-- "Recommend rules for my Okta logs" -> \`security.get_user_data_inventory\`, then \`security.find_prebuilt_rules { relatedIntegrations: ["okta"] }\`; report integration coverage.
-- "What Windows rules can I install?" -> \`security.get_installable_catalog_overview\` (find the Windows tag), then \`security.find_prebuilt_rules { tags: ["OS: Windows"] }\`.
-- "Installable rules for Credential Access" -> \`security.find_prebuilt_rules { mitreTactic: ["TA0006"] }\` (no overview needed — not a tag filter).
-- "Rules for Initial Access or Credential Access" -> \`security.find_prebuilt_rules { mitreTactic: ["TA0001", "TA0006"] }\` (one call, not two).
-- "Any rules for T1059.001?" -> \`security.find_prebuilt_rules { mitreTechnique: ["T1059.001"] }\`.
-- "Do you have a rule that mentions mimikatz?" -> \`security.find_prebuilt_rules { searchTerm: "mimikatz" }\` (searches description too).
-- "Show me critical ES|QL rules to install" -> \`security.find_prebuilt_rules { severity: ["critical"], ruleType: ["esql"] }\`.
-- "How many LLM rules can I install?" -> \`security.get_installable_catalog_overview\` (read the \`Domain: LLM\` tag count); confirm with \`security.find_prebuilt_rules { tags: ["Domain: LLM"], perPage: 1 }\` and answer from \`total\`.
+- "Recommend rules for my Okta logs" -> \`security.get_user_data_inventory\`, then \`security.find_prebuilt_rules { filter: { relatedIntegrations: ["okta"] } }\`; report integration coverage.
+- "What Windows rules can I install?" -> \`security.get_installable_catalog_overview\` (find the Windows tag), then \`security.find_prebuilt_rules { filter: { tags: ["OS: Windows"] } }\`.
+- "Installable rules for Credential Access" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["TA0006"] } }\` (no overview needed — not a tag filter).
+- "Rules for Initial Access or Credential Access" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["TA0001", "TA0006"] } }\` (one call, not two).
+- "Any rules for T1059.001?" -> \`security.find_prebuilt_rules { filter: { mitreTechnique: ["T1059.001"] } }\`.
+- "Do you have a rule that mentions mimikatz?" -> \`security.find_prebuilt_rules { filter: { keywords: "mimikatz" } }\` (searches description too).
+- "Show me critical ES|QL rules to install" -> \`security.find_prebuilt_rules { filter: { severity: ["critical"], ruleType: ["esql"] } }\`.
+- "How many LLM rules can I install?" -> \`security.get_installable_catalog_overview\` (read the \`Domain: LLM\` tag count); confirm with \`security.find_prebuilt_rules { filter: { tags: ["Domain: LLM"] }, perPage: 1 }\` and answer from \`total\`.
 - "Which MITRE tactics am I missing?" -> \`security.get_installed_rules_mitre_coverage\`, then diff against the canonical 14.
-- "Recommend rules to fill those gaps" -> \`security.find_prebuilt_rules { mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...] }\` for the missing tactics in one call (or one call per tactic if you want balanced coverage of each), prioritizing rules whose related integrations are already installed.
+- "Recommend rules to fill those gaps" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...] } }\` for the missing tactics in one call (or one call per tactic if you want balanced coverage of each), prioritizing rules whose related integrations are already installed.
 
 ## No Actions
 

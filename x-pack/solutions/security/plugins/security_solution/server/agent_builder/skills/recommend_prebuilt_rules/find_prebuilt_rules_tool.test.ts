@@ -13,10 +13,9 @@ import {
 } from '../../__mocks__/test_helpers';
 import {
   FIND_PREBUILT_RULES_INLINE_TOOL_ID,
-  buildPrebuiltRulesToolFilter,
   createFindPrebuiltRulesInlineTool,
   findPrebuiltRulesSchema,
-  summarizeForTriage,
+  reduceMitreToTacticsOnly,
 } from './find_prebuilt_rules_tool';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
@@ -94,191 +93,83 @@ const createMockDeps = () => {
   };
 };
 
-describe('buildPrebuiltRulesToolFilter', () => {
-  it('returns undefined when no parameters are provided', () => {
-    expect(buildPrebuiltRulesToolFilter({})).toBeUndefined();
-  });
-
-  it('builds a single-token searchTerm clause over name and description', () => {
-    expect(buildPrebuiltRulesToolFilter({ searchTerm: 'mimikatz' })).toBe(
-      '(security-rule.name: mimikatz OR security-rule.description: mimikatz)'
-    );
-  });
-
-  it('ANDs multi-token searchTerm within each field', () => {
-    expect(buildPrebuiltRulesToolFilter({ searchTerm: 'lsass memory' })).toBe(
-      '(security-rule.name: (lsass AND memory) OR security-rule.description: (lsass AND memory))'
-    );
-  });
-
-  it('builds severity clause (single)', () => {
-    expect(buildPrebuiltRulesToolFilter({ severity: ['critical'] })).toBe(
-      'security-rule.severity: (critical)'
-    );
-  });
-
-  it('builds severity clause with OR for multiple values', () => {
-    expect(buildPrebuiltRulesToolFilter({ severity: ['critical', 'high'] })).toBe(
-      'security-rule.severity: (critical OR high)'
-    );
-  });
-
-  it('builds ruleType clause with OR for multiple values', () => {
-    expect(buildPrebuiltRulesToolFilter({ ruleType: ['esql', 'eql'] })).toBe(
-      'security-rule.type: (esql OR eql)'
-    );
-  });
-
-  it('builds tags clause (single)', () => {
-    expect(buildPrebuiltRulesToolFilter({ tags: ['OS: Windows'] })).toBe(
-      'security-rule.tags: "OS: Windows"'
-    );
-  });
-
-  it('builds tags clause with OR for multiple values', () => {
-    expect(buildPrebuiltRulesToolFilter({ tags: ['OS: Windows', 'Domain: LLM'] })).toBe(
-      '(security-rule.tags: "OS: Windows" OR security-rule.tags: "Domain: LLM")'
-    );
-  });
-
-  it('builds excludeTags clause (single)', () => {
-    expect(buildPrebuiltRulesToolFilter({ excludeTags: ['Custom'] })).toBe(
-      'NOT security-rule.tags: "Custom"'
-    );
-  });
-
-  it('builds excludeTags clause with AND for multiple values', () => {
-    expect(buildPrebuiltRulesToolFilter({ excludeTags: ['A', 'B'] })).toBe(
-      'NOT security-rule.tags: "A" AND NOT security-rule.tags: "B"'
-    );
-  });
-
-  it('routes a single mitreTechnique to the technique id field', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059'] })).toBe(
-      'security-rule.threat.technique.id: (T1059)'
-    );
-  });
-
-  it('routes a single sub-technique to the subtechnique id field', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059.001'] })).toBe(
-      'security-rule.threat.technique.subtechnique.id: (T1059.001)'
-    );
-  });
-
-  it('ORs techniques and sub-techniques across their respective fields', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059', 'T1071', 'T1059.001'] })).toBe(
-      '(security-rule.threat.technique.id: (T1059 OR T1071) OR security-rule.threat.technique.subtechnique.id: (T1059.001))'
-    );
-  });
-
-  it('routes a single tactic ID to threat.tactic.id', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001'] })).toBe(
-      'security-rule.threat.tactic.id: (TA0001)'
-    );
-  });
-
-  it('routes a single tactic display name to threat.tactic.name', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['Initial Access'] })).toBe(
-      'security-rule.threat.tactic.name: ("Initial Access")'
-    );
-  });
-
-  it('ORs multiple tactic IDs in one clause', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001', 'TA0006'] })).toBe(
-      'security-rule.threat.tactic.id: (TA0001 OR TA0006)'
-    );
-  });
-
-  it('ORs tactic IDs and names across their respective fields', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001', 'Credential Access'] })).toBe(
-      '(security-rule.threat.tactic.id: (TA0001) OR security-rule.threat.tactic.name: ("Credential Access"))'
-    );
-  });
-
-  it('builds relatedIntegrations clause with quoted packages', () => {
-    expect(buildPrebuiltRulesToolFilter({ relatedIntegrations: ['okta', 'aws'] })).toBe(
-      'security-rule.related_integrations.package: ("okta" OR "aws")'
-    );
-  });
-
-  it('builds ruleIds clause with quoted ids', () => {
-    expect(buildPrebuiltRulesToolFilter({ ruleIds: ['abc-123', 'def-456'] })).toBe(
-      'security-rule.rule_id: ("abc-123" OR "def-456")'
-    );
-  });
-
-  it('ANDs multiple parameters together', () => {
-    const result = buildPrebuiltRulesToolFilter({ severity: ['critical'], ruleType: ['esql'] });
-    expect(result).toBe('security-rule.severity: (critical) AND security-rule.type: (esql)');
-  });
-
-  it('treats an empty array the same as an omitted parameter (no clause)', () => {
-    expect(buildPrebuiltRulesToolFilter({ tags: [], severity: [] })).toBeUndefined();
-  });
-});
-
-describe('summarizeForTriage', () => {
-  it('trims to the triage shape with MITRE tactics and integration packages only', () => {
-    const result = summarizeForTriage(makeRule());
+describe('reduceMitreToTacticsOnly', () => {
+  it('abridges threat to MITRE tactics and passes every other field through unchanged', () => {
+    const result = reduceMitreToTacticsOnly(makeRule());
     expect(result).toEqual({
       rule_id: 'rule-1',
       name: 'Test Rule',
       severity: 'high',
       risk_score: 73,
       tags: ['OS: Windows'],
-      mitre: [{ tactic: { id: 'TA0001', name: 'Initial Access' } }],
-      related_integrations: [{ package: 'windows' }],
+      threat: [{ tactic: { id: 'TA0001', name: 'Initial Access' } }],
+      related_integrations: [{ package: 'windows', version: '^1.0.0' }],
     });
   });
 
-  it('codes defensively for rules with empty threat and related_integrations', () => {
-    const result = summarizeForTriage(
-      makeRule({ threat: undefined, related_integrations: undefined, tags: undefined })
-    );
-    expect(result.mitre).toEqual([]);
-    expect(result.related_integrations).toEqual([]);
-    expect(result.tags).toEqual([]);
+  it('abridges absent threat to an empty array', () => {
+    const result = reduceMitreToTacticsOnly(makeRule({ threat: undefined }));
+    expect(result.threat).toEqual([]);
   });
 });
 
 describe('findPrebuiltRulesSchema', () => {
-  it('accepts structured filter parameters', () => {
-    expect(findPrebuiltRulesSchema.safeParse({ searchTerm: 'mimikatz' }).success).toBe(true);
-    expect(findPrebuiltRulesSchema.safeParse({ ruleType: ['esql'] }).success).toBe(true);
+  it('accepts structured filter parameters under `filter`', () => {
+    expect(findPrebuiltRulesSchema.safeParse({ filter: { keywords: 'mimikatz' } }).success).toBe(
+      true
+    );
+    expect(findPrebuiltRulesSchema.safeParse({ filter: { ruleType: ['esql'] } }).success).toBe(
+      true
+    );
     expect(
-      findPrebuiltRulesSchema.safeParse({ mitreTactic: ['TA0001', 'Execution'] }).success
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['TA0001', 'Execution'] } })
+        .success
     ).toBe(true);
     expect(
-      findPrebuiltRulesSchema.safeParse({ mitreTechnique: ['T1059', 'T1059.001'] }).success
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059', 'T1059.001'] } })
+        .success
     ).toBe(true);
-    expect(findPrebuiltRulesSchema.safeParse({ fields: ['description', 'mitre'] }).success).toBe(
+    expect(findPrebuiltRulesSchema.safeParse({ fields: ['description', 'threat'] }).success).toBe(
       true
     );
   });
 
-  it('rejects unknown parameters', () => {
+  it('rejects unknown parameters at the top level and inside `filter`', () => {
     expect(findPrebuiltRulesSchema.safeParse({ ruleSource: 'prebuilt' }).success).toBe(false);
     expect(findPrebuiltRulesSchema.safeParse({ enabled: true }).success).toBe(false);
+    // Filter params are no longer accepted at the top level.
+    expect(findPrebuiltRulesSchema.safeParse({ keywords: 'mimikatz' }).success).toBe(false);
+    // Unknown keys inside `filter` are rejected too.
+    expect(findPrebuiltRulesSchema.safeParse({ filter: { enabled: true } }).success).toBe(false);
   });
 
   it('rejects malformed MITRE technique IDs', () => {
-    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: ['TA0001'] }).success).toBe(false);
-    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: ['powershell'] }).success).toBe(
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['TA0001'] } }).success
+    ).toBe(false);
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['powershell'] } }).success
+    ).toBe(false);
+    // A non-array value is no longer accepted.
+    expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: 'T1059' } }).success).toBe(
       false
     );
-    // A non-array value is no longer accepted.
-    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: 'T1059' }).success).toBe(false);
   });
 
   it('caps ruleIds at 50', () => {
     const ids = Array.from({ length: 51 }, (_, i) => `id-${i}`);
-    expect(findPrebuiltRulesSchema.safeParse({ ruleIds: ids }).success).toBe(false);
+    expect(findPrebuiltRulesSchema.safeParse({ filter: { ruleIds: ids } }).success).toBe(false);
   });
 
-  it('defaults perPage to 10 and sortOrder to desc', () => {
+  it('defaults perPage to 10 and leaves sort unset when omitted', () => {
     const parsed = findPrebuiltRulesSchema.parse({});
     expect(parsed.perPage).toBe(10);
-    expect(parsed.sortOrder).toBe('desc');
+    expect(parsed.sort).toBeUndefined();
+  });
+
+  it('defaults sort order to desc when a sort field is given', () => {
+    const parsed = findPrebuiltRulesSchema.parse({ sort: { field: 'risk_score' } });
+    expect(parsed.sort).toEqual({ field: 'risk_score', order: 'desc' });
   });
 });
 
@@ -304,7 +195,7 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       mockGetInstallableRulesForReview.mockResolvedValue(result);
       const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger });
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      // Parse through the schema so zod defaults (perPage, sortOrder) are applied, exactly
+      // Parse through the schema so zod defaults (perPage, sort.order) are applied, exactly
       // as the Agent Builder framework does before invoking the handler in production.
       const validatedInput = findPrebuiltRulesSchema.parse(input);
       const toolResult = await tool.handler(validatedInput, context);
@@ -330,16 +221,19 @@ describe('createFindPrebuiltRulesInlineTool', () => {
     });
 
     it('translates structured params into a single KQL filter', async () => {
-      await runHandler({ searchTerm: 'mimikatz', severity: ['critical'] }, { rules: [], total: 0 });
+      await runHandler(
+        { filter: { keywords: 'mimikatz', severity: ['critical'] } },
+        { rules: [], total: 0 }
+      );
       const args = mockGetInstallableRulesForReview.mock.calls[0][0];
       expect(args.filter).toBe(
         '(security-rule.name: mimikatz OR security-rule.description: mimikatz) AND security-rule.severity: (critical)'
       );
     });
 
-    it('maps sortField/sortOrder to the prebuilt-asset sort shape', async () => {
+    it('maps the sort object to the prebuilt-asset sort shape', async () => {
       await runHandler(
-        { sortField: 'risk_score', sortOrder: 'asc', perPage: 5 },
+        { sort: { field: 'risk_score', order: 'asc' }, perPage: 5 },
         { rules: [], total: 0 }
       );
       const args = mockGetInstallableRulesForReview.mock.calls[0][0];
@@ -347,19 +241,28 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       expect(args.perPage).toBe(5);
     });
 
-    it('returns the trimmed triage shape and includes related_integrations.package', async () => {
+    it('abridges threat to tactics and passes related_integrations through in full', async () => {
       const { toolResult } = await runHandler({}, { rules: [makeRule()], total: 1 });
       expect('results' in toolResult).toBe(true);
       if ('results' in toolResult) {
         const data = toolResult.results[0].data as {
           total: number;
-          rules: Array<{ related_integrations: Array<{ package: string }>; mitre: unknown[] }>;
+          rules: Array<{
+            related_integrations: Array<{ package: string }>;
+            threat: unknown[];
+          }>;
         };
         expect(toolResult.results[0].type).toBe(ToolResultType.other);
         expect(data.total).toBe(1);
-        expect(data.rules[0].related_integrations).toEqual([{ package: 'windows' }]);
-        expect(data.rules[0].mitre).toEqual([{ tactic: { id: 'TA0001', name: 'Initial Access' } }]);
-        // Triage shape should not carry deep fields.
+        // `threat` is abridged to tactics only, under the same `threat` key.
+        expect(data.rules[0].threat).toEqual([
+          { tactic: { id: 'TA0001', name: 'Initial Access' } },
+        ]);
+        // related_integrations is passed through in full (not trimmed to `package` only).
+        expect(data.rules[0].related_integrations).toEqual([
+          { package: 'windows', version: '^1.0.0' },
+        ]);
+        // Deep fields are not pulled in unless requested.
         expect(data.rules[0]).not.toHaveProperty('description');
       }
     });
@@ -367,12 +270,12 @@ describe('createFindPrebuiltRulesInlineTool', () => {
     it('returns the untrimmed projected rule and widens the projection when deep fields are requested', async () => {
       const deepRule = makeRule({ description: 'Detects mimikatz' } as Partial<RuleResponse>);
       const { toolResult } = await runHandler(
-        { fields: ['description', 'mitre'] },
+        { fields: ['description', 'threat'] },
         { rules: [deepRule], total: 1 }
       );
 
       const args = mockGetInstallableRulesForReview.mock.calls[0][0];
-      // Triage fields are still fetched, plus the requested deep attributes (mitre -> threat).
+      // Triage fields are still fetched, plus the requested deep attributes (projected directly).
       expect(args.fields).toEqual(
         expect.arrayContaining([
           'severity',
@@ -392,32 +295,30 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       }
     });
 
-    it('adds a truncation hint when total exceeds the returned page', async () => {
+    it('reports the full total alongside the returned page when results are truncated', async () => {
       const { toolResult } = await runHandler({ perPage: 2 }, { rules: [makeRule()], total: 84 });
       if ('results' in toolResult) {
-        const { message } = toolResult.results[0].data as { message: string };
-        expect(message).toContain('Found 84 installable prebuilt rules');
-        expect(message).toContain('showing top 1');
-        expect(message).toContain('Narrow the filter');
+        const { total, rules } = toolResult.results[0].data as {
+          total: number;
+          rules: unknown[];
+        };
+        expect(total).toBe(84);
+        expect(rules).toHaveLength(1);
       }
     });
 
-    it('hints at catalog overview when zero results and a tag filter was used', async () => {
-      const { toolResult } = await runHandler({ tags: ['Domain: LLM'] }, { rules: [], total: 0 });
+    it('returns total 0 and an empty rules array when nothing matches', async () => {
+      const { toolResult } = await runHandler(
+        { filter: { severity: ['low'] } },
+        { rules: [], total: 0 }
+      );
       if ('results' in toolResult) {
-        const { message } = toolResult.results[0].data as { message: string };
-        expect(message).toContain('No installable prebuilt rules matched');
-        expect(message).toContain('security.get_installable_catalog_overview');
-        expect(message).toContain('may');
-      }
-    });
-
-    it('hints at broadening when zero results without a tag filter', async () => {
-      const { toolResult } = await runHandler({ severity: ['low'] }, { rules: [], total: 0 });
-      if ('results' in toolResult) {
-        const { message } = toolResult.results[0].data as { message: string };
-        expect(message).toContain('No installable prebuilt rules matched');
-        expect(message).toContain('broadening the filter');
+        const { total, rules } = toolResult.results[0].data as {
+          total: number;
+          rules: unknown[];
+        };
+        expect(total).toBe(0);
+        expect(rules).toHaveLength(0);
       }
     });
 
@@ -427,7 +328,7 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger });
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const toolResult = await tool.handler({ perPage: 10, sortOrder: 'desc' }, context);
+      const toolResult = await tool.handler({ perPage: 10 }, context);
       if ('results' in toolResult) {
         expect(toolResult.results[0].type).toBe(ToolResultType.error);
         expect((toolResult.results[0].data as { message: string }).message).toContain('ES is down');
