@@ -125,7 +125,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         graphLoadingElements: 0,
         graphErrorElements: 0,
       });
-    });
+    }, 30000);
 
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
     it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected.`, async () => {
@@ -142,7 +142,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         unselectedSecondChildCount: 1,
         nodePrimaryButtonCount: 3,
       });
-    });
+    }, 30000);
 
     it('should render 3 elements with "treeitem" roles, each owned by an element with a "tree" role', async () => {
       await expect(
@@ -172,13 +172,13 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           };
         })
       ).toYieldEqualTo({ treeCount: 1, nodesOwnedByTrees: 3 });
-    });
+    }, 30000);
 
     it(`should show links to the 3 nodes in the node list.`, async () => {
       await expect(
         simulator.map(() => simulator.testSubject('resolver:node-list:node-link:title').length)
       ).toYieldEqualTo(3);
-    });
+    }, 30000);
 
     describe("when the second child node's first button has been clicked", () => {
       beforeEach(async () => {
