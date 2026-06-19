@@ -2502,6 +2502,30 @@ describe('RulesClient', () => {
         expect(mockSavedObjectsClient.update).toHaveBeenCalled();
       });
 
+      it('allows reducing the schedule frequency of an enabled rule without scanning, even past the limit', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        const getTotalSpy = jest
+          .spyOn(rulesSavedObjectService, 'getTotalScheduledPerMinute')
+          .mockResolvedValue(1000);
+
+        // Existing enabled rule runs every 1m; moving to a less frequent 5m adds no load.
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          id: 'rule-id-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        await expect(
+          client.updateRule({ id: 'rule-id-1', data: { schedule: { every: '5m' } } })
+        ).resolves.toBeDefined();
+
+        // The cluster-wide scan is skipped because the schedule adds no load.
+        expect(getTotalSpy).not.toHaveBeenCalled();
+        expect(mockSavedObjectsClient.update).toHaveBeenCalled();
+      });
+
       it('rejects enabling a disabled rule when the limit is already reached', async () => {
         const client = createClient({ maxScheduledPerMinute: 1 });
         jest.spyOn(rulesSavedObjectService, 'getTotalScheduledPerMinute').mockResolvedValueOnce(1);

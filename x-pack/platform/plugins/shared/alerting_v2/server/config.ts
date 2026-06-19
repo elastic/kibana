@@ -24,7 +24,7 @@ const MINIMUM_SCHEDULE_INTERVAL_PROD_FLOOR = '1m';
  */
 const MINIMUM_SCHEDULE_INTERVAL_DEV_FLOOR = MIN_SCHEDULE_INTERVAL;
 /** Highest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to. */
-const MINIMUM_SCHEDULE_INTERVAL_CEILING = '30d';
+const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
 const createMinimumScheduleIntervalSchema = (floor: string) =>
   schema.string({
@@ -39,8 +39,8 @@ const createMinimumScheduleIntervalSchema = (floor: string) =>
       if (durationMs < parseDurationToMs(floor)) {
         return `duration cannot be less than ${floor}`;
       }
-      if (durationMs > parseDurationToMs(MINIMUM_SCHEDULE_INTERVAL_CEILING)) {
-        return `duration cannot exceed ${MINIMUM_SCHEDULE_INTERVAL_CEILING}`;
+      if (durationMs > parseDurationToMs(MAX_MINIMUM_SCHEDULE_INTERVAL)) {
+        return `duration cannot exceed ${MAX_MINIMUM_SCHEDULE_INTERVAL}`;
       }
     },
   });

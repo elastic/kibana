@@ -275,6 +275,9 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
    * space. Used to enforce the `maxScheduledPerMinute` guardrail. Scans rules
    * via a point-in-time finder so it does not depend on `schedule.every` being
    * an indexed (mapped) field.
+   *
+   * TODO(https://github.com/elastic/kibana/issues/274206): replace this
+   * per-write full scan with a terms aggregation (or another cheaper strategy).
    */
   public async getTotalScheduledPerMinute(): Promise<number> {
     let totalScheduledPerMinute = 0;

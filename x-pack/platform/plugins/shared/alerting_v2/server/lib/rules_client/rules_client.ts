@@ -113,6 +113,28 @@ export class RulesClient {
   }
 
   /**
+   * Validates a rule's schedule against the configured guardrails: the interval
+   * may not be shorter than `minimumScheduleInterval`, and (when `checkLimit`)
+   * scheduling it may not push the cluster past `maxScheduledPerMinute`. The
+   * limit is only relevant when the rule contributes to the scheduled load
+   * (i.e. it is, or is becoming, enabled).
+   */
+  private async validateSchedule({
+    updatedEvery,
+    prevEvery,
+    checkLimit,
+  }: {
+    updatedEvery: string;
+    prevEvery?: string;
+    checkLimit: boolean;
+  }): Promise<void> {
+    this.assertScheduleIntervalAllowed(updatedEvery);
+    if (checkLimit) {
+      await this.assertScheduleLimitNotExceeded({ updatedEvery, prevEvery });
+    }
+  }
+
+  /**
    * Rejects a rule whose `schedule.every` is shorter than the configured
    * `xpack.alerting_v2.rules.minimumScheduleInterval`.
    */
@@ -148,10 +170,18 @@ export class RulesClient {
   }): Promise<void> {
     const { maxScheduledPerMinute } = this.config.rules;
 
-    const totalScheduledPerMinute =
-      await this.rulesSavedObjectServiceInternal.getTotalScheduledPerMinute();
     const updatedSchedulesPerMinute = convertEveryToSchedulesPerMinute(updatedEvery);
     const prevSchedulesPerMinute = prevEvery ? convertEveryToSchedulesPerMinute(prevEvery) : 0;
+
+    // An unchanged or less-frequent schedule adds no scheduled load, so it can
+    // never breach the limit. Skip the cluster-wide scan in that case (the
+    // previous schedule is already counted in the total).
+    if (updatedSchedulesPerMinute <= prevSchedulesPerMinute) {
+      return;
+    }
+
+    const totalScheduledPerMinute =
+      await this.rulesSavedObjectServiceInternal.getTotalScheduledPerMinute();
 
     const remainingSchedulesPerMinute =
       Math.max(maxScheduledPerMinute - totalScheduledPerMinute, 0) + prevSchedulesPerMinute;
@@ -261,8 +291,8 @@ export class RulesClient {
       updatedAt: nowIso,
     });
 
-    this.assertScheduleIntervalAllowed(ruleAttributes.schedule.every);
-    await this.assertScheduleLimitNotExceeded({ updatedEvery: ruleAttributes.schedule.every });
+    // A freshly created rule is always enabled, so it always counts towards the limit.
+    await this.validateSchedule({ updatedEvery: ruleAttributes.schedule.every, checkLimit: true });
 
     let created: { id: string; version?: string };
     try {
@@ -324,13 +354,11 @@ export class RulesClient {
       updatedAt: nowIso,
     });
 
-    this.assertScheduleIntervalAllowed(nextAttrs.schedule.every);
-    if (existingAttrs.enabled) {
-      await this.assertScheduleLimitNotExceeded({
-        updatedEvery: nextAttrs.schedule.every,
-        prevEvery: existingAttrs.schedule.every,
-      });
-    }
+    await this.validateSchedule({
+      updatedEvery: nextAttrs.schedule.every,
+      prevEvery: existingAttrs.schedule.every,
+      checkLimit: existingAttrs.enabled,
+    });
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
@@ -418,8 +446,7 @@ export class RulesClient {
     // The rule is transitioning to enabled, so it does not yet contribute to
     // the scheduled total; no previous schedule is added back.
     if (!existingAttrs.enabled) {
-      this.assertScheduleIntervalAllowed(nextAttrs.schedule.every);
-      await this.assertScheduleLimitNotExceeded({ updatedEvery: nextAttrs.schedule.every });
+      await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
     }
 
     await this.scheduleRuleExecutorTask({
@@ -831,13 +858,11 @@ export class RulesClient {
       updatedAt: nowIso,
     });
 
-    this.assertScheduleIntervalAllowed(nextAttrs.schedule.every);
-    if (existingAttrs.enabled) {
-      await this.assertScheduleLimitNotExceeded({
-        updatedEvery: nextAttrs.schedule.every,
-        prevEvery: existingAttrs.schedule.every,
-      });
-    }
+    await this.validateSchedule({
+      updatedEvery: nextAttrs.schedule.every,
+      prevEvery: existingAttrs.schedule.every,
+      checkLimit: existingAttrs.enabled,
+    });
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,

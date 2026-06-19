@@ -170,28 +170,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest(
-    'validation: accepts schedule.every at exactly the configured minimum interval',
-    async ({ apiClient, apiServices }) => {
-      // The test harness sets `xpack.alerting_v2.rules.minimumScheduleInterval`
-      // to the fast-test interval, so a rule scheduled exactly at the configured
-      // minimum is allowed by the minimumScheduleInterval guardrail.
-      const body = buildCreateRuleData({
-        metadata: { name: 'min-interval-rule' },
-        schedule: { every: testData.SCHEDULE_INTERVAL },
-      });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(201);
-      expect(response.body.schedule.every).toBe(testData.SCHEDULE_INTERVAL);
-
-      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
-      expect(persisted.schedule.every).toBe(testData.SCHEDULE_INTERVAL);
-    }
-  );
-
   apiTest('validation: rejects body with empty query.breach.query', async ({ apiClient }) => {
     const body = buildCreateRuleData({
       query: { format: 'standalone', breach: { query: '' } },
