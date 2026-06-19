@@ -301,9 +301,10 @@ processors:
 
           // Some datasets are written by Kibana rather than agents.
           // Kibana is trusted to accurately report agent.id for these datasets.
-          if ((ctx?._security?.username == 'elastic/kibana' || ctx?._security?.username == 'kibana_system')
+          if (ctx?._security?.authentication_type != null
               && params?.kibana_user_allowed_datasets != null
-              && params.kibana_user_allowed_datasets.contains(ctx?.data_stream?.dataset)) {
+              && params.kibana_user_allowed_datasets.contains(ctx?.data_stream?.dataset)
+              && is_user_trusted(ctx, params.kibana_trusted_users)) {
             return "verified";
           }
 
@@ -340,6 +341,11 @@ processors:
           - username: cloud-internal-agent-server
             realm: found
           - username: elastic
+            realm: reserved
+        kibana_trusted_users:
+          - username: elastic/kibana
+            realm: _service_account
+          - username: kibana_system
             realm: reserved
         # Datasets written by Kibana (elastic/kibana user) that are allowed to bypass API key verification.
         kibana_user_allowed_datasets:
