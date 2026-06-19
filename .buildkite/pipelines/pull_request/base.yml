@@ -150,7 +150,6 @@ steps:
       CHECK_GATE: 'true'
       RESTORE_ARCHIVE: 'true'
       UPLOAD_ARCHIVE: 'true'
-      KBN_TYPECHECK_RAMDISK_SIZE: '2G'
     retry:
       automatic:
         - exit_status: '-1'

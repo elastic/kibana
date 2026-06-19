@@ -47,7 +47,6 @@ export const runTypeCheckContractCli = () => {
         verbose: flagsReader.boolean('verbose'),
         restoreArchive: withArchive || flagsReader.boolean('restore-archive'),
         uploadArchive: withArchive || flagsReader.boolean('upload-archive'),
-        ramdiskMountPath: flagsReader.path('ramdisk-types') ?? undefined,
       });
     },
     {
@@ -71,7 +70,7 @@ export const runTypeCheckContractCli = () => {
         node scripts/type_check --scope branch --base-ref origin/main --head-ref HEAD
     `,
       flags: {
-        string: ['project', 'ramdisk-types', ...VALIDATION_RUN_STRING_FLAGS],
+        string: ['project', ...VALIDATION_RUN_STRING_FLAGS],
         boolean: [
           'clean-cache',
           'cleanup',
@@ -110,11 +109,6 @@ export const runTypeCheckContractCli = () => {
           {
             flag: '--with-archive',
             description: 'Shorthand for `--restore-archive --upload-archive`',
-          },
-          {
-            flag: '--ramdisk-types [path]',
-            description:
-              "Symlink each project's target/types into a pre-mounted RAM volume to speed up emit I/O.\nThe path must already be a writable tmpfs/APFS RAM volume.\nAlternatively, set KBN_TYPECHECK_RAMDISK=/path/to/mount.",
           },
         ],
       },

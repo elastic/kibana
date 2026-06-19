@@ -32,11 +32,6 @@ import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
 import { formatPathForLog } from './src/normalize_project_path';
 import { resolveTypeCheckCompiler } from './src/resolve_compiler';
-import {
-  resolveRamdiskMountPath,
-  setupTypesRamdisk,
-  type RamdiskTypesSession,
-} from './src/ramdisk_types';
 
 export const TSC_LABEL = 'tsc';
 
@@ -157,14 +152,6 @@ export async function cleanTypeCheckCaches(log: ToolingLog, projects: TsProject[
     force: true,
     recursive: true,
   });
-
-  // If a ramdisk mirror is configured, wipe it too so the next run starts cold.
-  const ramdiskMount = resolveRamdiskMountPath();
-  if (ramdiskMount) {
-    const { purgeRamdiskMirror } = await import('./src/ramdisk_types');
-    await purgeRamdiskMirror(log, ramdiskMount);
-  }
-
   log.warning('Deleted all TypeScript caches');
 }
 
@@ -186,12 +173,6 @@ export interface ExecuteTypeCheckValidationOptions {
   restoreArchive?: boolean;
   /** Upload the resulting `target/types` artifacts to GCS after a successful `tsc -b`. */
   uploadArchive?: boolean;
-  /**
-   * Mount path of a pre-mounted tmpfs/RAM volume. When set, each project's
-   * `target/types` is symlinked into a mirror tree under this path so emit I/O
-   * (declarations + .tsbuildinfo) hits RAM instead of the project disk.
-   */
-  ramdiskMountPath?: string;
 }
 
 /**
@@ -208,7 +189,6 @@ export const executeTypeCheckValidation = async ({
   verbose = false,
   restoreArchive = false,
   uploadArchive = false,
-  ramdiskMountPath,
 }: ExecuteTypeCheckValidationOptions): Promise<TscValidationResult | null> => {
   // Lazy-load so reusable consumers can avoid TS project metadata work until needed.
   const { TS_PROJECTS } = await import('@kbn/ts-projects');
@@ -302,20 +282,12 @@ export const executeTypeCheckValidation = async ({
 
   let rootRefsConfigCreated = false;
   let createdConfigs = new Set<string>();
-  let ramdiskSession: RamdiskTypesSession | undefined;
   let tscFailed = false;
-
-  const resolvedRamdiskMount = resolveRamdiskMountPath(ramdiskMountPath);
 
   try {
     if (shouldRunAllProjects) {
       await updateRootRefsConfig(log);
       rootRefsConfigCreated = true;
-    }
-
-    if (resolvedRamdiskMount) {
-      // Set up symlinks before restore so the tar extract writes into RAM directly.
-      ramdiskSession = await setupTypesRamdisk(log, selectedProjects, resolvedRamdiskMount);
     }
 
     if (restoreArchive) {
@@ -388,10 +360,6 @@ export const executeTypeCheckValidation = async ({
       await asyncForEachWithLimit(createdConfigs, 40, async (path) => {
         await Fsp.unlink(path);
       });
-
-      if (ramdiskSession) {
-        await ramdiskSession.unlink();
-      }
     }
   }
 

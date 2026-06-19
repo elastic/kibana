@@ -17,7 +17,6 @@ import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
 import { join } from './utils';
 import { LOCAL_CACHE_ROOT } from '../constants';
-import { resolveRamdiskMountPath } from '../../ramdisk_types';
 
 export class LocalFileSystem extends AbstractFileSystem {
   private readonly basePath = LOCAL_CACHE_ROOT;
@@ -36,9 +35,7 @@ export class LocalFileSystem extends AbstractFileSystem {
   protected async archive(archivePath: string, fileListPath: string): Promise<void> {
     await this.ensureArchiveDir(archivePath);
 
-    const tarArgs = getTarCreateArgs(archivePath, fileListPath, {
-      dereference: Boolean(resolveRamdiskMountPath()),
-    });
+    const tarArgs = getTarCreateArgs(archivePath, fileListPath);
 
     await execa('tar', tarArgs, {
       cwd: REPO_ROOT,

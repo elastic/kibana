@@ -104,9 +104,6 @@ export function buildCandidateShaList(currentSha: string | undefined, history: s
 }
 
 export async function cleanTypeCheckArtifacts(log: SomeDevLog) {
-  // When ramdisk mode is on, target/types is a symlink. With onlyDirectories +
-  // followSymbolicLinks:false those entries would be filtered out and the link
-  // would survive, leaving stale .d.ts in RAM. Capture both real dirs and links.
   const directoryMatches = await globby(TYPES_DIRECTORY_GLOB, {
     cwd: REPO_ROOT,
     absolute: true,
@@ -115,18 +112,6 @@ export async function cleanTypeCheckArtifacts(log: SomeDevLog) {
     ignore: CACHE_IGNORE_GLOBS,
   });
   const directoryPaths: string[] = Array.from(new Set<string>(directoryMatches));
-
-  // Symlinks pointing at directories (used by ramdisk mode) — match as files.
-  const symlinkMatches = await globby(TYPES_DIRECTORY_GLOB, {
-    cwd: REPO_ROOT,
-    absolute: true,
-    onlyFiles: false,
-    followSymbolicLinks: false,
-    ignore: CACHE_IGNORE_GLOBS,
-  });
-  const symlinkPaths: string[] = Array.from(
-    new Set<string>(symlinkMatches.filter((path) => !directoryMatches.includes(path)))
-  );
 
   const configMatches = await globby(TYPE_CHECK_CONFIG_GLOB, {
     cwd: REPO_ROOT,
@@ -141,25 +126,13 @@ export async function cleanTypeCheckArtifacts(log: SomeDevLog) {
     await Fs.promises.rm(directoryPath, { recursive: true, force: true });
   });
 
-  // Remove just the link (not what it points to) so a shared ramdisk tree survives.
-  await asyncForEachWithLimit(symlinkPaths, 25, async (linkPath) => {
-    try {
-      const stat = await Fs.promises.lstat(linkPath);
-      if (stat.isSymbolicLink()) {
-        await Fs.promises.unlink(linkPath);
-      }
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-    }
-  });
-
   await asyncForEachWithLimit(configPaths, 25, async (configPath) => {
     await Fs.promises.rm(configPath, { force: true });
   });
 
-  if (directoryPaths.length > 0 || symlinkPaths.length > 0 || configPaths.length > 0) {
+  if (directoryPaths.length > 0 || configPaths.length > 0) {
     log.info(
-      `Cleared ${directoryPaths.length} type cache directories, ${symlinkPaths.length} ramdisk symlinks, and ${configPaths.length} config files before restore.`
+      `Cleared ${directoryPaths.length} type cache directories and ${configPaths.length} config files before restore.`
     );
   }
 }

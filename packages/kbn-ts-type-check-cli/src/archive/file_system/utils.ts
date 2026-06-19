@@ -41,18 +41,11 @@ const TAR_PLATFORM_OPTIONS =
 
 export const getTarPlatformOptions = () => TAR_PLATFORM_OPTIONS;
 
-export const getTarCreateArgs = (
-  fileArg: string,
-  fileListPath: string,
-  options: { dereference?: boolean } = {}
-): string[] => [
+export const getTarCreateArgs = (fileArg: string, fileListPath: string): string[] => [
   '--create',
   '--file',
   fileArg,
   '--gzip',
-  // When ramdisk mode is active, target/types/* paths traverse a symlink. Dereferencing
-  // stores the real file contents in the archive instead of a broken symlink entry.
-  ...(options.dereference ? ['--dereference'] : []),
   '--directory',
   REPO_ROOT,
   '--null',
