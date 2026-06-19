@@ -10,18 +10,18 @@ import { sectionGridSchema } from '@kbn/agent-builder-dashboards-common';
 import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
-import { getResolvedVisualizationCreationRequests } from './visualization_creation';
+import { getResolvedPanelCreationRequests } from './panel_creation';
 import { defineOperation } from './types';
 import {
   markdownPanelInputSchema,
   panelConfigPanelInputSchema,
-  visualizationPanelInputSchema,
+  panelRequestSchema,
 } from './panel_kinds';
 
 const addSectionPanelItemSchema = z.discriminatedUnion('kind', [
   markdownPanelInputSchema,
   panelConfigPanelInputSchema,
-  visualizationPanelInputSchema,
+  panelRequestSchema,
 ]);
 
 export const addSectionOperation = defineOperation({
@@ -34,7 +34,7 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        'Optional inline panels (markdown, panelConfig, or visualization) to create inside the new section. Panel grids are section-relative.'
+        'Optional inline panels (markdown, panelConfig, or panelRequest) to create inside the new section. Panel grids are section-relative.'
       ),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {
@@ -48,8 +48,8 @@ export const addSectionOperation = defineOperation({
 
     if (operation.panels) {
       const resolvedRequestsByInputIndex = new Map(
-        getResolvedVisualizationCreationRequests({
-          resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
+        getResolvedPanelCreationRequests({
+          resolvedRequestsByOperationIndex: context.resolvedPanelCreationRequests,
           operationIndex,
         }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
       );
@@ -74,11 +74,11 @@ export const addSectionOperation = defineOperation({
               grid: item.grid,
             });
             break;
-          case 'visualization': {
+          case 'panelRequest': {
             const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
             if (!resolvedRequest) {
               throw new Error(
-                `Missing pre-resolved visualization request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
+                `Missing pre-resolved panel request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
               );
             }
             if (resolvedRequest.resolvedPanel.type === 'failure') {
@@ -86,8 +86,8 @@ export const addSectionOperation = defineOperation({
             } else {
               sectionPanels.push({
                 id: uuidv4(),
-                type: resolvedRequest.resolvedPanel.visContent.type,
-                config: resolvedRequest.resolvedPanel.visContent.config,
+                type: resolvedRequest.resolvedPanel.panelContent.type,
+                config: resolvedRequest.resolvedPanel.panelContent.config,
                 grid: item.grid,
               });
             }

@@ -9,7 +9,7 @@ import { buildVisualizationConfig } from '@kbn/agent-builder-tools-base';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { createVisualizationResolver } from './visualization_resolver';
+import { createPanelResolver } from './panel_resolver';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 jest.mock('@kbn/agent-builder-tools-base', () => ({
@@ -26,7 +26,7 @@ const createMockLogger = (): Logger =>
     warn: jest.fn(),
   } as unknown as Logger);
 
-describe('createVisualizationResolver', () => {
+describe('createPanelResolver', () => {
   const logger = createMockLogger();
   const modelProvider = {} as ModelProvider;
   const events = {} as ToolEventEmitter;
@@ -49,14 +49,14 @@ describe('createVisualizationResolver', () => {
       createBuildVisualizationConfigResult({ type: 'metric' })
     );
 
-    const resolveVisualizationConfig = createVisualizationResolver({
+    const resolvePanelContent = createPanelResolver({
       logger,
       modelProvider,
       events,
       esClient,
     });
 
-    const result = await resolveVisualizationConfig({
+    const result = await resolvePanelContent({
       operationType: 'add_panels',
       identifier: 'show total requests',
       nlQuery: 'show total requests',
@@ -65,7 +65,7 @@ describe('createVisualizationResolver', () => {
 
     expect(result).toEqual({
       type: 'success',
-      visContent: {
+      panelContent: {
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       },
@@ -82,14 +82,14 @@ describe('createVisualizationResolver', () => {
       createBuildVisualizationConfigResult({ type: 'line' })
     );
 
-    const resolveVisualizationConfig = createVisualizationResolver({
+    const resolvePanelContent = createPanelResolver({
       logger,
       modelProvider,
       events,
       esClient,
     });
 
-    await resolveVisualizationConfig({
+    await resolvePanelContent({
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'turn this into a line chart',
@@ -110,14 +110,14 @@ describe('createVisualizationResolver', () => {
   });
 
   it('returns a failure when editing a non-Lens panel', async () => {
-    const resolveVisualizationConfig = createVisualizationResolver({
+    const resolvePanelContent = createPanelResolver({
       logger,
       modelProvider,
       events,
       esClient,
     });
 
-    const result = await resolveVisualizationConfig({
+    const result = await resolvePanelContent({
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'refine this analysis',

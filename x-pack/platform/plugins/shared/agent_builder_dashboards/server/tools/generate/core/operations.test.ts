@@ -13,7 +13,7 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import type { ResolveVisualizationConfig, VisualizationAttempt } from './resolve_visualization';
+import type { ResolvePanelContent, PanelContentAttempt } from './resolve_panel';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
@@ -79,19 +79,19 @@ describe('executeDashboardOperations', () => {
     panels,
   });
 
-  const createResolvedVisualization = (
-    visContent: Pick<AttachmentPanel, 'type' | 'config'>
-  ): VisualizationAttempt => ({
+  const createResolvedPanelContent = (
+    panelContent: Pick<AttachmentPanel, 'type' | 'config'>
+  ): PanelContentAttempt => ({
     type: 'success',
-    visContent,
+    panelContent,
   });
 
-  const createResolveVisualizationConfig = (
-    resultsByIdentifier: Record<string, VisualizationAttempt> = {}
-  ): ResolveVisualizationConfig => {
+  const createResolvePanelContent = (
+    resultsByIdentifier: Record<string, PanelContentAttempt> = {}
+  ): ResolvePanelContent => {
     return async ({ identifier }) =>
       resultsByIdentifier[identifier] ??
-      createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } });
+      createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } });
   };
 
   it('executes operations in order', async () => {
@@ -230,7 +230,7 @@ describe('executeDashboardOperations', () => {
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show total requests',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -241,7 +241,7 @@ describe('executeDashboardOperations', () => {
               grid: { x: 0, y: 9, w: 24, h: 9 },
             },
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show p95 latency',
               sectionId: 'section-a',
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -250,8 +250,8 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolveVisualizationConfig: createResolveVisualizationConfig({
-        'show total requests': createResolvedVisualization({
+      resolvePanelContent: createResolvePanelContent({
+        'show total requests': createResolvedPanelContent({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
         }),
@@ -376,12 +376,12 @@ describe('executeDashboardOperations', () => {
           grid: { y: 12 },
           panels: [
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -389,12 +389,12 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolveVisualizationConfig: createResolveVisualizationConfig({
-        'show total requests': createResolvedVisualization({
+      resolvePanelContent: createResolvePanelContent({
+        'show total requests': createResolvedPanelContent({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
         }),
-        'show error rate': createResolvedVisualization({
+        'show error rate': createResolvedPanelContent({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'bar' },
         }),
@@ -440,12 +440,12 @@ describe('executeDashboardOperations', () => {
           grid: { y: 12 },
           panels: [
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show p95 latency',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -453,8 +453,8 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolveVisualizationConfig: createResolveVisualizationConfig({
-        'show total requests': createResolvedVisualization({
+      resolvePanelContent: createResolvePanelContent({
+        'show total requests': createResolvedPanelContent({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
         }),
@@ -489,9 +489,9 @@ describe('executeDashboardOperations', () => {
   });
 
   it('adds non-visualization section panels without invoking the visualization resolver', async () => {
-    const resolveVisualizationConfig = jest.fn<
-      ReturnType<ResolveVisualizationConfig>,
-      Parameters<ResolveVisualizationConfig>
+    const resolvePanelContent = jest.fn<
+      ReturnType<ResolvePanelContent>,
+      Parameters<ResolvePanelContent>
     >();
 
     const result = await executeDashboardOperations({
@@ -521,10 +521,10 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolveVisualizationConfig,
+      resolvePanelContent,
     });
 
-    expect(resolveVisualizationConfig).not.toHaveBeenCalled();
+    expect(resolvePanelContent).not.toHaveBeenCalled();
     expect(getSections(result.dashboardData.panels)[0].panels).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
@@ -539,11 +539,11 @@ describe('executeDashboardOperations', () => {
   });
 
   it('resolves inline panels for multiple section creations in parallel', async () => {
-    const firstSectionPanel = createDeferred<VisualizationAttempt>();
-    const secondSectionPanel = createDeferred<VisualizationAttempt>();
-    const resolveVisualizationConfig = jest.fn<
-      ReturnType<ResolveVisualizationConfig>,
-      Parameters<ResolveVisualizationConfig>
+    const firstSectionPanel = createDeferred<PanelContentAttempt>();
+    const secondSectionPanel = createDeferred<PanelContentAttempt>();
+    const resolvePanelContent = jest.fn<
+      ReturnType<ResolvePanelContent>,
+      Parameters<ResolvePanelContent>
     >(async ({ nlQuery }) => {
       if (nlQuery === 'show total requests') {
         return firstSectionPanel.promise;
@@ -565,7 +565,7 @@ describe('executeDashboardOperations', () => {
           grid: { y: 0 },
           panels: [
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -577,7 +577,7 @@ describe('executeDashboardOperations', () => {
           grid: { y: 1 },
           panels: [
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -585,20 +585,20 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolveVisualizationConfig,
+      resolvePanelContent,
     });
 
     await Promise.resolve();
 
-    expect(resolveVisualizationConfig).toHaveBeenCalledTimes(2);
-    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+    expect(resolvePanelContent).toHaveBeenCalledTimes(2);
+    expect(resolvePanelContent).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         operationType: 'add_section',
         identifier: 'show total requests',
       })
     );
-    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+    expect(resolvePanelContent).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         operationType: 'add_section',
@@ -607,13 +607,13 @@ describe('executeDashboardOperations', () => {
     );
 
     secondSectionPanel.resolve(
-      createResolvedVisualization({
+      createResolvedPanelContent({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'bar' },
       })
     );
     firstSectionPanel.resolve(
-      createResolvedVisualization({
+      createResolvedPanelContent({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       })
@@ -634,11 +634,11 @@ describe('executeDashboardOperations', () => {
   });
 
   it('pre-resolves top-level visualization creations alongside section creations', async () => {
-    const sectionPanel = createDeferred<VisualizationAttempt>();
-    const topLevelPanel = createDeferred<VisualizationAttempt>();
-    const resolveVisualizationConfig = jest.fn<
-      ReturnType<ResolveVisualizationConfig>,
-      Parameters<ResolveVisualizationConfig>
+    const sectionPanel = createDeferred<PanelContentAttempt>();
+    const topLevelPanel = createDeferred<PanelContentAttempt>();
+    const resolvePanelContent = jest.fn<
+      ReturnType<ResolvePanelContent>,
+      Parameters<ResolvePanelContent>
     >(async ({ nlQuery }) => {
       if (nlQuery === 'show total requests') {
         return sectionPanel.promise;
@@ -660,7 +660,7 @@ describe('executeDashboardOperations', () => {
           grid: { y: 0 },
           panels: [
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -670,7 +670,7 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'visualization',
+              kind: 'panelRequest',
               query: 'show error rate',
               grid: { x: 0, y: 1, w: 24, h: 9 },
             },
@@ -678,20 +678,20 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolveVisualizationConfig,
+      resolvePanelContent,
     });
 
     await Promise.resolve();
 
-    expect(resolveVisualizationConfig).toHaveBeenCalledTimes(2);
-    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+    expect(resolvePanelContent).toHaveBeenCalledTimes(2);
+    expect(resolvePanelContent).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         operationType: 'add_section',
         identifier: 'show total requests',
       })
     );
-    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+    expect(resolvePanelContent).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         operationType: 'add_panels',
@@ -700,13 +700,13 @@ describe('executeDashboardOperations', () => {
     );
 
     topLevelPanel.resolve(
-      createResolvedVisualization({
+      createResolvedPanelContent({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'bar' },
       })
     );
     sectionPanel.resolve(
-      createResolvedVisualization({
+      createResolvedPanelContent({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       })
@@ -740,7 +740,7 @@ describe('executeDashboardOperations', () => {
             grid: { y: 0 },
             panels: [
               {
-                kind: 'visualization',
+                kind: 'panelRequest',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
@@ -750,7 +750,7 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'visualization',
+                kind: 'panelRequest',
                 query: 'show error rate',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -759,9 +759,7 @@ describe('executeDashboardOperations', () => {
         ],
         logger,
       })
-    ).rejects.toThrow(
-      'Inline visualization resolver is required for visualization creation operations.'
-    );
+    ).rejects.toThrow('Inline panel resolver is required for panel creation operations.');
   });
 
   it('adds panelConfig panels into a target section when sectionId is provided', async () => {
@@ -1055,12 +1053,12 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'visualization',
+                kind: 'panelRequest',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
-                kind: 'visualization',
+                kind: 'panelRequest',
                 query: 'show error rate',
                 sectionId: 'section-a',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -1069,12 +1067,12 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolveVisualizationConfig: createResolveVisualizationConfig({
-          'show total requests': createResolvedVisualization({
+        resolvePanelContent: createResolvePanelContent({
+          'show total requests': createResolvedPanelContent({
             type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'metric' },
           }),
-          'show error rate': createResolvedVisualization({
+          'show error rate': createResolvedPanelContent({
             type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'bar' },
           }),
@@ -1114,9 +1112,9 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'visualization', panelId: 'panel-1', query: 'turn this into a bar chart' },
+              { kind: 'panelRequest', panelId: 'panel-1', query: 'turn this into a bar chart' },
               {
-                kind: 'visualization',
+                kind: 'panelRequest',
                 panelId: 'section-panel-1',
                 query: 'turn this into a line chart',
               },
@@ -1124,12 +1122,12 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolveVisualizationConfig: createResolveVisualizationConfig({
-          'panel-1': createResolvedVisualization({
+        resolvePanelContent: createResolvePanelContent({
+          'panel-1': createResolvedPanelContent({
             type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'bar' },
           }),
-          'section-panel-1': createResolvedVisualization({
+          'section-panel-1': createResolvedPanelContent({
             type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'line' },
           }),
@@ -1167,17 +1165,17 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'visualization', panelId: 'panel-1', query: 'make this a bar chart' }],
+            panels: [{ kind: 'panelRequest', panelId: 'panel-1', query: 'make this a bar chart' }],
           },
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'visualization', panelId: 'panel-1', query: 'now make this a line chart' },
+              { kind: 'panelRequest', panelId: 'panel-1', query: 'now make this a line chart' },
             ],
           },
         ],
         logger,
-        resolveVisualizationConfig: async (params) => {
+        resolvePanelContent: async (params) => {
           const { nlQuery } = params;
           const config = params.existingPanel?.config as
             | { attributes?: { testStep?: string }; testStep?: string }
@@ -1186,13 +1184,13 @@ describe('executeDashboardOperations', () => {
           seenConfigSteps.push(configStep);
 
           if (nlQuery === 'make this a bar chart') {
-            return createResolvedVisualization({
+            return createResolvedPanelContent({
               type: LENS_EMBEDDABLE_TYPE,
               config: { type: 'metric', testStep: 'after-first-edit' },
             });
           }
 
-          return createResolvedVisualization({
+          return createResolvedPanelContent({
             type: LENS_EMBEDDABLE_TYPE,
             config: {
               type: 'metric',
@@ -1213,11 +1211,11 @@ describe('executeDashboardOperations', () => {
     });
 
     it('does not resolve visualization edits for panels removed earlier in the sequence', async () => {
-      const resolveVisualizationConfig = jest.fn<
-        ReturnType<ResolveVisualizationConfig>,
-        Parameters<ResolveVisualizationConfig>
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
       >(async () =>
-        createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+        createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
       );
 
       const result = await executeDashboardOperations({
@@ -1230,14 +1228,14 @@ describe('executeDashboardOperations', () => {
           { operation: 'remove_panels', panelIds: ['panel-1'] },
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'visualization', panelId: 'panel-1', query: 'make this a bar chart' }],
+            panels: [{ kind: 'panelRequest', panelId: 'panel-1', query: 'make this a bar chart' }],
           },
         ],
         logger,
-        resolveVisualizationConfig,
+        resolvePanelContent,
       });
 
-      expect(resolveVisualizationConfig).not.toHaveBeenCalled();
+      expect(resolvePanelContent).not.toHaveBeenCalled();
       expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
       expect(result.failures).toEqual([
         {
@@ -1260,12 +1258,12 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'visualization',
+                kind: 'panelRequest',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
-                kind: 'visualization',
+                kind: 'panelRequest',
                 query: 'show p95 latency',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1273,8 +1271,8 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolveVisualizationConfig: createResolveVisualizationConfig({
-          'show total requests': createResolvedVisualization({
+        resolvePanelContent: createResolvePanelContent({
+          'show total requests': createResolvedPanelContent({
             type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'metric' },
           }),
@@ -1316,11 +1314,11 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'visualization', panelId: 'panel-1', query: 'refine this analysis' }],
+            panels: [{ kind: 'panelRequest', panelId: 'panel-1', query: 'refine this analysis' }],
           },
         ],
         logger,
-        resolveVisualizationConfig: createResolveVisualizationConfig({
+        resolvePanelContent: createResolvePanelContent({
           'panel-1': {
             type: 'failure',
             failure: {
@@ -1354,15 +1352,15 @@ describe('executeDashboardOperations', () => {
     it('resolves multiple panel edits in one edit_panels op in parallel', async () => {
       const deferredByPanelId = new Map<
         string,
-        ReturnType<typeof createDeferred<VisualizationAttempt>>
+        ReturnType<typeof createDeferred<PanelContentAttempt>>
       >([
-        ['panel-1', createDeferred<VisualizationAttempt>()],
-        ['panel-2', createDeferred<VisualizationAttempt>()],
+        ['panel-1', createDeferred<PanelContentAttempt>()],
+        ['panel-2', createDeferred<PanelContentAttempt>()],
       ]);
 
-      const resolveVisualizationConfig = jest.fn<
-        ReturnType<ResolveVisualizationConfig>,
-        Parameters<ResolveVisualizationConfig>
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
       >(({ identifier }) => {
         const deferred = deferredByPanelId.get(identifier);
         if (!deferred) {
@@ -1381,29 +1379,29 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'visualization', panelId: 'panel-1', query: 'make this a bar chart' },
-              { kind: 'visualization', panelId: 'panel-2', query: 'make this a line chart' },
+              { kind: 'panelRequest', panelId: 'panel-1', query: 'make this a bar chart' },
+              { kind: 'panelRequest', panelId: 'panel-2', query: 'make this a line chart' },
             ],
           },
         ],
         logger,
-        resolveVisualizationConfig,
+        resolvePanelContent,
       });
 
       // Gives the operation a chance to start both parallel resolver calls.
       await waitForNextEventLoopTurn();
 
-      expect(resolveVisualizationConfig).toHaveBeenCalledTimes(2);
+      expect(resolvePanelContent).toHaveBeenCalledTimes(2);
 
       deferredByPanelId
         .get('panel-1')!
         .resolve(
-          createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+          createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
         );
       deferredByPanelId
         .get('panel-2')!
         .resolve(
-          createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'line' } })
+          createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'line' } })
         );
 
       const result = await operationPromise;
@@ -1419,11 +1417,11 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure for each occurrence when a panelId is duplicated within one op', async () => {
-      const resolveVisualizationConfig = jest.fn<
-        ReturnType<ResolveVisualizationConfig>,
-        Parameters<ResolveVisualizationConfig>
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
       >(async ({ identifier }) =>
-        createResolvedVisualization({
+        createResolvedPanelContent({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'bar', identifier },
         })
@@ -1439,14 +1437,14 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'visualization', panelId: 'panel-1', query: 'first edit' },
-              { kind: 'visualization', panelId: 'panel-2', query: 'edit a different panel' },
-              { kind: 'visualization', panelId: 'panel-1', query: 'second edit of same panel' },
+              { kind: 'panelRequest', panelId: 'panel-1', query: 'first edit' },
+              { kind: 'panelRequest', panelId: 'panel-2', query: 'edit a different panel' },
+              { kind: 'panelRequest', panelId: 'panel-1', query: 'second edit of same panel' },
             ],
           },
         ],
         logger,
-        resolveVisualizationConfig,
+        resolvePanelContent,
       });
 
       const duplicateError =
@@ -1466,8 +1464,8 @@ describe('executeDashboardOperations', () => {
       ]);
 
       // The duplicated panel must not be touched; the non-duplicated panel still resolves.
-      expect(resolveVisualizationConfig).toHaveBeenCalledTimes(1);
-      expect(resolveVisualizationConfig).toHaveBeenCalledWith(
+      expect(resolvePanelContent).toHaveBeenCalledTimes(1);
+      expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({ identifier: 'panel-2' })
       );
 
@@ -1484,9 +1482,9 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits a markdown panel content in place by panelId', async () => {
-      const resolveVisualizationConfig = jest.fn<
-        ReturnType<ResolveVisualizationConfig>,
-        Parameters<ResolveVisualizationConfig>
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
       >();
 
       const result = await executeDashboardOperations({
@@ -1502,10 +1500,10 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolveVisualizationConfig,
+        resolvePanelContent,
       });
 
-      expect(resolveVisualizationConfig).not.toHaveBeenCalled();
+      expect(resolvePanelContent).not.toHaveBeenCalled();
       expect(result.failures).toEqual([]);
 
       const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
@@ -1520,9 +1518,9 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when kind: "markdown" targets a non-markdown panel', async () => {
-      const resolveVisualizationConfig = jest.fn<
-        ReturnType<ResolveVisualizationConfig>,
-        Parameters<ResolveVisualizationConfig>
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
       >();
 
       const result = await executeDashboardOperations({
@@ -1538,15 +1536,15 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolveVisualizationConfig,
+        resolvePanelContent,
       });
 
-      expect(resolveVisualizationConfig).not.toHaveBeenCalled();
+      expect(resolvePanelContent).not.toHaveBeenCalled();
       expect(result.failures).toEqual([
         {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
-          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as markdown. Use kind: "visualization" for ES|QL-backed Lens panels.`,
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as markdown. Use kind: "panelRequest" for ES|QL-backed Lens panels.`,
         },
       ]);
 
@@ -1561,10 +1559,10 @@ describe('executeDashboardOperations', () => {
     });
 
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
-      const deferred = createDeferred<VisualizationAttempt>();
-      const resolveVisualizationConfig = jest.fn<
-        ReturnType<ResolveVisualizationConfig>,
-        Parameters<ResolveVisualizationConfig>
+      const deferred = createDeferred<PanelContentAttempt>();
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
       >(() => deferred.promise);
 
       const operationPromise = executeDashboardOperations({
@@ -1578,24 +1576,24 @@ describe('executeDashboardOperations', () => {
             operation: 'edit_panels',
             panels: [
               { kind: 'markdown', panelId: 'md-1', markdownContent: '### New summary' },
-              { kind: 'visualization', panelId: 'panel-1', query: 'turn into a bar chart' },
+              { kind: 'panelRequest', panelId: 'panel-1', query: 'turn into a bar chart' },
             ],
           },
         ],
         logger,
-        resolveVisualizationConfig,
+        resolvePanelContent,
       });
 
       // Gives the operation a chance to subscribe to the visualization resolve.
       await waitForNextEventLoopTurn();
 
-      expect(resolveVisualizationConfig).toHaveBeenCalledTimes(1);
-      expect(resolveVisualizationConfig).toHaveBeenCalledWith(
+      expect(resolvePanelContent).toHaveBeenCalledTimes(1);
+      expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({ identifier: 'panel-1' })
       );
 
       deferred.resolve(
-        createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+        createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
       );
 
       const result = await operationPromise;

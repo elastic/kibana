@@ -12,12 +12,13 @@ import { z } from '@kbn/zod/v4';
 
 export const markdownPanelInputSchema = z.object({
   kind: z.literal('markdown'),
-  markdownContent: z.string().describe('Markdown content for the panel.'),
   grid: panelGridSchema,
+  markdownContent: z.string().describe('Markdown content for the panel.'),
 });
 
 export const panelConfigPanelInputSchema = z.object({
   kind: z.literal('panelConfig'),
+  grid: panelGridSchema,
   type: z
     .string()
     .max(256)
@@ -29,12 +30,13 @@ export const panelConfigPanelInputSchema = z.object({
     .describe(
       'Already-resolved panel configuration. Supply the config of an existing visualization (e.g. read from a visualization attachment) rather than an attachment ID. The generation tool does not read any attachment store.'
     ),
-  grid: panelGridSchema,
 });
 
 export type PanelConfigPanelInput = z.infer<typeof panelConfigPanelInputSchema>;
 
-export const visualizationPanelBaseInputSchema = z.object({
+export const panelRequestSchema = z.object({
+  kind: z.literal('panelRequest'),
+  grid: panelGridSchema,
   query: z.string().describe('A natural language query describing the desired visualization.'),
   index: z
     .string()
@@ -54,11 +56,6 @@ export const visualizationPanelBaseInputSchema = z.object({
     .describe(
       '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
     ),
-  grid: panelGridSchema,
 });
 
-export const visualizationPanelInputSchema = visualizationPanelBaseInputSchema.extend({
-  kind: z.literal('visualization'),
-});
-
-export type VisualizationPanelInput = z.infer<typeof visualizationPanelInputSchema>;
+export type PanelRequestInput = z.infer<typeof panelRequestSchema>;

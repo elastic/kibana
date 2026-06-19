@@ -8,24 +8,16 @@
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
-import {
-  createVisualizationFailureResult,
-  type VisualizationAttempt,
-} from '../resolve_visualization';
+import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { visualizationPanelBaseInputSchema } from './panel_kinds';
+import { panelRequestSchema } from './panel_kinds';
 import { defineOperation } from './types';
 
-const editVisualizationPanelInputSchema = visualizationPanelBaseInputSchema
-  .omit({ grid: true, index: true })
-  .extend({
-    kind: z.literal('visualization'),
-    panelId: z.string().describe('Existing visualization panel id to update.'),
-    query: z
-      .string()
-      .describe('A natural language query describing how to update the visualization.'),
-  });
+const editPanelRequestInputSchema = panelRequestSchema.omit({ grid: true, index: true }).extend({
+  panelId: z.string().describe('Existing Lens panel id to update.'),
+  query: z.string().describe('A natural language query describing how to update the panel.'),
+});
 
 const editMarkdownPanelInputSchema = z.object({
   kind: z.literal('markdown'),
@@ -36,11 +28,11 @@ const editMarkdownPanelInputSchema = z.object({
 });
 
 const editPanelItemSchema = z.discriminatedUnion('kind', [
-  editVisualizationPanelInputSchema,
+  editPanelRequestInputSchema,
   editMarkdownPanelInputSchema,
 ]);
 
-type EditVisualizationPanelInput = z.infer<typeof editVisualizationPanelInputSchema>;
+type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 type EditMarkdownPanelInput = z.infer<typeof editMarkdownPanelInputSchema>;
 
 interface ValidMarkdownEdit {
@@ -48,16 +40,16 @@ interface ValidMarkdownEdit {
   panelInput: EditMarkdownPanelInput;
 }
 
-interface ValidVisualizationEdit {
-  kind: 'visualization';
-  panelInput: EditVisualizationPanelInput;
+interface ValidPanelRequestEdit {
+  kind: 'panelRequest';
+  panelInput: EditPanelRequestInput;
   existingPanel: AttachmentPanel;
 }
 
-type ValidEdit = ValidMarkdownEdit | ValidVisualizationEdit;
+type ValidEdit = ValidMarkdownEdit | ValidPanelRequestEdit;
 
-const missingVisualizationResolverError =
-  'Inline visualization resolver is required for edit_panels visualizations.';
+const missingPanelResolverError =
+  'Inline panel resolver is required for edit_panels panel requests.';
 
 export const editPanelsOperation = defineOperation({
   schema: z
@@ -66,26 +58,23 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (kind: "visualization") and markdown panels (kind: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (kind: "panelRequest") and markdown panels (kind: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
-    const { resolveVisualizationConfig } = context;
+    const { resolvePanelContent } = context;
 
     const recordFailure = (panelId: string, error: string): void => {
       context.failures.push(
-        createVisualizationFailureResult(
-          DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
-          panelId,
-          error
-        ).failure
+        createPanelFailureResult(DASHBOARD_OPERATION_FAILURE_TYPES.editPanels, panelId, error)
+          .failure
       );
     };
 
-    const hasVisualizationEdits = operation.panels.some(
-      (panelInput): panelInput is EditVisualizationPanelInput => panelInput.kind === 'visualization'
+    const hasPanelRequestEdits = operation.panels.some(
+      (panelInput): panelInput is EditPanelRequestInput => panelInput.kind === 'panelRequest'
     );
-    if (hasVisualizationEdits && !resolveVisualizationConfig) {
-      throw new Error(missingVisualizationResolverError);
+    if (hasPanelRequestEdits && !resolvePanelContent) {
+      throw new Error(missingPanelResolverError);
     }
 
     const panelIndex = indexPanelsById(dashboardData.panels);
@@ -95,7 +84,7 @@ export const editPanelsOperation = defineOperation({
       occurrences.set(panelId, (occurrences.get(panelId) ?? 0) + 1);
     }
 
-    // Validate before resolving visualizations so only valid edits call the LLM.
+    // Validate before resolving panel requests so only valid edits call the LLM.
     const validEdits: ValidEdit[] = [];
 
     for (const panelInput of operation.panels) {
@@ -117,7 +106,7 @@ export const editPanelsOperation = defineOperation({
         if (existingPanel.type !== MARKDOWN_EMBEDDABLE_TYPE) {
           recordFailure(
             panelInput.panelId,
-            `Panel "${panelInput.panelId}" with type "${existingPanel.type}" cannot be edited as markdown. Use kind: "visualization" for ES|QL-backed Lens panels.`
+            `Panel "${panelInput.panelId}" with type "${existingPanel.type}" cannot be edited as markdown. Use kind: "panelRequest" for ES|QL-backed Lens panels.`
           );
           continue;
         }
@@ -125,25 +114,25 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      // Visualization edits: the resolver enforces the Lens-type check and
+      // Panel request edits: the resolver enforces the Lens-type check and
       // returns a failure attempt if the existing panel isn't supported.
-      validEdits.push({ kind: 'visualization', panelInput, existingPanel });
+      validEdits.push({ kind: 'panelRequest', panelInput, existingPanel });
     }
 
-    // Resolve valid visualization edits in parallel from the entry-time snapshot.
-    const validVisualizationEdits = validEdits.filter(
-      (validEdit): validEdit is ValidVisualizationEdit => validEdit.kind === 'visualization'
+    // Resolve valid panel request edits in parallel from the entry-time snapshot.
+    const validPanelRequestEdits = validEdits.filter(
+      (validEdit): validEdit is ValidPanelRequestEdit => validEdit.kind === 'panelRequest'
     );
 
-    const visualizationAttemptByPanelId = new Map<string, VisualizationAttempt>();
-    if (validVisualizationEdits.length > 0) {
-      if (!resolveVisualizationConfig) {
-        throw new Error(missingVisualizationResolverError);
+    const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
+    if (validPanelRequestEdits.length > 0) {
+      if (!resolvePanelContent) {
+        throw new Error(missingPanelResolverError);
       }
 
       const attempts = await Promise.all(
-        validVisualizationEdits.map(({ panelInput, existingPanel }) =>
-          resolveVisualizationConfig({
+        validPanelRequestEdits.map(({ panelInput, existingPanel }) =>
+          resolvePanelContent({
             operationType: operation.operation,
             identifier: panelInput.panelId,
             nlQuery: panelInput.query,
@@ -153,8 +142,8 @@ export const editPanelsOperation = defineOperation({
           })
         )
       );
-      validVisualizationEdits.forEach(({ panelInput }, i) => {
-        visualizationAttemptByPanelId.set(panelInput.panelId, attempts[i]);
+      validPanelRequestEdits.forEach(({ panelInput }, i) => {
+        panelContentAttemptByPanelId.set(panelInput.panelId, attempts[i]);
       });
     }
 
@@ -183,10 +172,10 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      const attempt = visualizationAttemptByPanelId.get(validEdit.panelInput.panelId);
+      const attempt = panelContentAttemptByPanelId.get(validEdit.panelInput.panelId);
       if (!attempt) {
         throw new Error(
-          `Visualization edit result for panel "${validEdit.panelInput.panelId}" is missing.`
+          `Panel edit result for panel "${validEdit.panelInput.panelId}" is missing.`
         );
       }
 
@@ -200,7 +189,7 @@ export const editPanelsOperation = defineOperation({
         panelId: validEdit.panelInput.panelId,
         transformPanel: (panel) => ({
           ...panel,
-          ...attempt.visContent,
+          ...attempt.panelContent,
         }),
       });
 

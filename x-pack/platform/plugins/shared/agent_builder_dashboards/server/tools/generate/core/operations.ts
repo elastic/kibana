@@ -7,8 +7,8 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
-import type { ResolveVisualizationConfig } from './resolve_visualization';
-import type { VisualizationFailure } from './utils';
+import type { ResolvePanelContent } from './resolve_panel';
+import type { PanelFailure } from './utils';
 import {
   dashboardOperationSchema,
   executeOperationHandler,
@@ -23,7 +23,7 @@ interface ExecuteDashboardOperationsParams {
   dashboardData?: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
-  resolveVisualizationConfig?: ResolveVisualizationConfig;
+  resolvePanelContent?: ResolvePanelContent;
 }
 
 const createEmptyDashboardData = (): DashboardAttachmentData => ({
@@ -36,18 +36,18 @@ export const executeDashboardOperations = async ({
   dashboardData,
   operations,
   logger,
-  resolveVisualizationConfig,
+  resolvePanelContent,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
-  failures: VisualizationFailure[];
+  failures: PanelFailure[];
 }> => {
   let nextDashboardData = structuredClone(dashboardData ?? createEmptyDashboardData());
-  const failures: VisualizationFailure[] = [];
+  const failures: PanelFailure[] = [];
 
   const context = await prepareOperationExecution({
     operations,
     logger,
-    resolveVisualizationConfig,
+    resolvePanelContent,
     failures,
   });
 

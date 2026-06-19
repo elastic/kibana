@@ -9,9 +9,9 @@ import type { DashboardOperation } from './operations';
 import { type DashboardOperationFailureType } from './failure_types';
 
 /**
- * Failure record for tracking visualization errors.
+ * Failure record for tracking panel operation errors.
  */
-export interface VisualizationFailure {
+export interface PanelFailure {
   type: DashboardOperationFailureType;
   identifier: string;
   error: string;

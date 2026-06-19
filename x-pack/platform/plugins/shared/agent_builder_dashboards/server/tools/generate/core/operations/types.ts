@@ -8,15 +8,15 @@
 import type { Logger } from '@kbn/core/server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
-import type { ResolveVisualizationConfig } from '../resolve_visualization';
-import type { VisualizationFailure } from '../utils';
-import type { ResolvedVisualizationCreationRequest } from './visualization_creation';
+import type { ResolvePanelContent } from '../resolve_panel';
+import type { PanelFailure } from '../utils';
+import type { ResolvedPanelCreationRequest } from './panel_creation';
 
 export interface OperationExecutionContext {
   logger: Logger;
-  failures: VisualizationFailure[];
-  resolvedVisualizationCreationRequests: Map<number, ResolvedVisualizationCreationRequest[]>;
-  resolveVisualizationConfig?: ResolveVisualizationConfig;
+  failures: PanelFailure[];
+  resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
+  resolvePanelContent?: ResolvePanelContent;
 }
 
 export interface OperationHandlerParams<TOperation> {

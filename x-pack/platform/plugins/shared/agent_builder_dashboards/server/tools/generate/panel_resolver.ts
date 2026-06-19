@@ -10,20 +10,16 @@ import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-se
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import {
-  getErrorMessage,
-  createVisualizationFailureResult,
-  type ResolveVisualizationConfig,
-} from './core';
+import { getErrorMessage, createPanelFailureResult, type ResolvePanelContent } from './core';
 
 /**
- * Kibana implementation of the core's {@link ResolveVisualizationConfig} contract.
+ * Kibana implementation of the core's {@link ResolvePanelContent} contract.
  *
  * Builds inline Lens panel content from natural language / ES|QL using Kibana
  * plumbing (`modelProvider`, `esClient`, the visualization builder). The generate
  * core consumes the resulting function purely through the contract type.
  */
-export const createVisualizationResolver = ({
+export const createPanelResolver = ({
   logger,
   modelProvider,
   events,
@@ -33,11 +29,11 @@ export const createVisualizationResolver = ({
   modelProvider: ModelProvider;
   events: ToolEventEmitter;
   esClient: IScopedClusterClient;
-}): ResolveVisualizationConfig => {
+}): ResolvePanelContent => {
   return async ({ operationType, identifier, nlQuery, index, chartType, esql, existingPanel }) => {
     try {
       if (existingPanel && existingPanel.type !== LENS_EMBEDDABLE_TYPE) {
-        return createVisualizationFailureResult(
+        return createPanelFailureResult(
           operationType,
           identifier,
           `Panel "${identifier}" with type "${existingPanel.type}" is not supported for inline visualization editing.`
@@ -65,13 +61,13 @@ export const createVisualizationResolver = ({
 
       return {
         type: 'success',
-        visContent: {
+        panelContent: {
           type: LENS_EMBEDDABLE_TYPE,
           config: result.validatedConfig,
         },
       };
     } catch (error) {
-      return createVisualizationFailureResult(operationType, identifier, getErrorMessage(error));
+      return createPanelFailureResult(operationType, identifier, getErrorMessage(error));
     }
   };
 };

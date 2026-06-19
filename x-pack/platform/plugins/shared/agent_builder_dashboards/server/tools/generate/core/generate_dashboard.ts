@@ -7,8 +7,8 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
-import type { ResolveVisualizationConfig } from './resolve_visualization';
-import type { VisualizationFailure } from './utils';
+import type { ResolvePanelContent } from './resolve_panel';
+import type { PanelFailure } from './utils';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 
 /**
@@ -16,18 +16,18 @@ import { executeDashboardOperations, type DashboardOperation } from './operation
  *
  * These are intentionally injected callbacks rather than imports so that any
  * environment (Kibana, a third-party MCP host, etc.) can supply its own
- * visualization resolution while reusing identical generation logic.
+ * panel content resolution while reusing identical generation logic.
  *
  * Note: the generate core reads no attachment/state store. Prior dashboard
- * state arrives as `previousDashboardData`, and existing visualization content
- * arrives already resolved via `panelConfig` panel inputs in the operations.
+ * state arrives as `previousDashboardData`, and existing panel content arrives
+ * already resolved via `panelConfig` panel inputs in the operations.
  */
 export interface DashboardGenerationResolvers {
   /**
-   * Resolves an inline visualization request (natural language / ES|QL) into
-   * panel content. Optional: environments without visualization support omit it.
+   * Resolves an inline panel request (natural language / ES|QL) into panel
+   * content. Optional: environments without panel resolution support omit it.
    */
-  resolveVisualizationConfig?: ResolveVisualizationConfig;
+  resolvePanelContent?: ResolvePanelContent;
 }
 
 export interface GenerateDashboardParams {
@@ -41,8 +41,8 @@ export interface GenerateDashboardParams {
 export interface GenerateDashboardResult {
   /** The generated, environment-agnostic dashboard payload. */
   dashboardData: DashboardAttachmentData;
-  /** Per-item generation failures (e.g. unresolved visualizations). */
-  failures: VisualizationFailure[];
+  /** Per-item generation failures (e.g. unresolved panel requests). */
+  failures: PanelFailure[];
 }
 
 /**
@@ -63,7 +63,7 @@ export const generateDashboard = async ({
     dashboardData: previousDashboardData,
     operations,
     logger,
-    resolveVisualizationConfig: resolvers?.resolveVisualizationConfig,
+    resolvePanelContent: resolvers?.resolvePanelContent,
   });
 
   return {

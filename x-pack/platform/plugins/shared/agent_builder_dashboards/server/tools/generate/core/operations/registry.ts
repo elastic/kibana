@@ -15,7 +15,7 @@ import { removeSectionOperation } from './remove_section';
 import { setMetadataOperation } from './set_metadata';
 import type { OperationExecutionContext } from './types';
 import { updatePanelLayoutsOperation } from './update_panel_layouts';
-import { resolveVisualizationCreationRequests } from './visualization_creation';
+import { resolvePanelCreationRequests } from './panel_creation';
 
 const operationDefinitions = [
   setMetadataOperation,
@@ -44,25 +44,25 @@ interface PrepareOperationExecutionParams {
   operations: DashboardOperation[];
   logger: OperationExecutionContext['logger'];
   failures: OperationExecutionContext['failures'];
-  resolveVisualizationConfig?: OperationExecutionContext['resolveVisualizationConfig'];
+  resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
 }
 
 export const prepareOperationExecution = async ({
   operations,
   logger,
   failures,
-  resolveVisualizationConfig,
+  resolvePanelContent,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
-  const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({
+  const resolvedPanelCreationRequests = await resolvePanelCreationRequests({
     operations,
-    resolveVisualizationConfig,
+    resolvePanelContent,
   });
 
   return {
     logger,
     failures,
-    resolvedVisualizationCreationRequests,
-    resolveVisualizationConfig,
+    resolvedPanelCreationRequests,
+    resolvePanelContent,
   };
 };
 

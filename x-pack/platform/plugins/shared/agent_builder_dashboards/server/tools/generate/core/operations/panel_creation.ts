@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import type { ResolveVisualizationConfig } from '../resolve_visualization';
+import type { ResolvePanelContent } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
 import type { AddPanelsItemInput } from './add_panels';
-import type { VisualizationPanelInput } from './panel_kinds';
+import type { PanelRequestInput } from './panel_kinds';
 
-type ResolvedVisualizationPanel = Awaited<ReturnType<ResolveVisualizationConfig>>;
+type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
-export type VisualizationCreationRequest =
+export type PanelCreationRequest =
   | {
       operationType: 'add_section';
-      panelInput: VisualizationPanelInput;
+      panelInput: PanelRequestInput;
       panelInputIndex: number;
     }
   | {
       operationType: 'add_panels';
-      panelInput: Extract<AddPanelsItemInput, { kind: 'visualization' }>;
+      panelInput: Extract<AddPanelsItemInput, { kind: 'panelRequest' }>;
       panelInputIndex: number;
       sectionId?: string;
     };
 
-export interface ResolvedVisualizationCreationRequest {
-  request: VisualizationCreationRequest;
-  resolvedPanel: ResolvedVisualizationPanel;
+export interface ResolvedPanelCreationRequest {
+  request: PanelCreationRequest;
+  resolvedPanel: ResolvedPanelContent;
 }
 
 /**
- * Collect inline visualization creation work by operation index so it can be
+ * Collect inline panel creation work by operation index so it can be
  * resolved up front in parallel and then applied later in original operation order.
  */
-const collectVisualizationCreationRequests = (
+const collectPanelCreationRequests = (
   operations: DashboardOperation[]
-): Map<number, VisualizationCreationRequest[]> => {
-  const requestsByOperationIndex = new Map<number, VisualizationCreationRequest[]>();
+): Map<number, PanelCreationRequest[]> => {
+  const requestsByOperationIndex = new Map<number, PanelCreationRequest[]>();
 
   for (const [operationIndex, operation] of operations.entries()) {
     switch (operation.operation) {
@@ -46,8 +46,8 @@ const collectVisualizationCreationRequests = (
           break;
         }
 
-        const visualizationRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.kind === 'visualization'
+        const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
+          panelInput.kind === 'panelRequest'
             ? [
                 {
                   operationType: operation.operation,
@@ -58,14 +58,14 @@ const collectVisualizationCreationRequests = (
             : []
         );
 
-        if (visualizationRequests.length > 0) {
-          requestsByOperationIndex.set(operationIndex, visualizationRequests);
+        if (panelRequests.length > 0) {
+          requestsByOperationIndex.set(operationIndex, panelRequests);
         }
         break;
       }
       case 'add_panels': {
-        const visualizationRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.kind === 'visualization'
+        const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
+          panelInput.kind === 'panelRequest'
             ? [
                 {
                   operationType: operation.operation,
@@ -77,8 +77,8 @@ const collectVisualizationCreationRequests = (
             : []
         );
 
-        if (visualizationRequests.length > 0) {
-          requestsByOperationIndex.set(operationIndex, visualizationRequests);
+        if (panelRequests.length > 0) {
+          requestsByOperationIndex.set(operationIndex, panelRequests);
         }
         break;
       }
@@ -91,39 +91,37 @@ const collectVisualizationCreationRequests = (
 };
 
 /**
- * Resolve all collected inline visualization creation requests up front while
- * keeping results grouped by their source operation for ordered application later.
+ * Resolve all collected inline panel creation requests up front while keeping
+ * results grouped by their source operation for ordered application later.
  */
-export const resolveVisualizationCreationRequests = async ({
+export const resolvePanelCreationRequests = async ({
   operations,
-  resolveVisualizationConfig,
+  resolvePanelContent,
 }: {
   operations: DashboardOperation[];
-  resolveVisualizationConfig?: ResolveVisualizationConfig;
-}): Promise<Map<number, ResolvedVisualizationCreationRequest[]>> => {
-  const requestsByOperationIndex = collectVisualizationCreationRequests(operations);
+  resolvePanelContent?: ResolvePanelContent;
+}): Promise<Map<number, ResolvedPanelCreationRequest[]>> => {
+  const requestsByOperationIndex = collectPanelCreationRequests(operations);
 
   if (requestsByOperationIndex.size === 0) {
     return new Map();
   }
 
-  if (!resolveVisualizationConfig) {
-    throw new Error(
-      'Inline visualization resolver is required for visualization creation operations.'
-    );
+  if (!resolvePanelContent) {
+    throw new Error('Inline panel resolver is required for panel creation operations.');
   }
 
   const resolvedRequestsByOperationIndex = await Promise.all(
     Array.from(requestsByOperationIndex.entries()).map(
       async ([operationIndex, requests]): Promise<
-        readonly [number, ResolvedVisualizationCreationRequest[]]
+        readonly [number, ResolvedPanelCreationRequest[]]
       > =>
         [
           operationIndex,
           await Promise.all(
             requests.map(async (request) => ({
               request,
-              resolvedPanel: await resolveVisualizationConfig({
+              resolvedPanel: await resolvePanelContent({
                 operationType: request.operationType,
                 identifier: request.panelInput.query,
                 nlQuery: request.panelInput.query,
@@ -142,13 +140,12 @@ export const resolveVisualizationCreationRequests = async ({
 
 /**
  * Return the resolved create results for one operation during the apply phase.
- * Returns an empty array for operations with no visualization panels
+ * Returns an empty array for operations with no panel requests.
  */
-export const getResolvedVisualizationCreationRequests = ({
+export const getResolvedPanelCreationRequests = ({
   resolvedRequestsByOperationIndex,
   operationIndex,
 }: {
-  resolvedRequestsByOperationIndex: Map<number, ResolvedVisualizationCreationRequest[]>;
+  resolvedRequestsByOperationIndex: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
-}): ResolvedVisualizationCreationRequest[] =>
-  resolvedRequestsByOperationIndex.get(operationIndex) ?? [];
+}): ResolvedPanelCreationRequest[] => resolvedRequestsByOperationIndex.get(operationIndex) ?? [];

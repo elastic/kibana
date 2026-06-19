@@ -19,7 +19,7 @@ import {
 
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import { createVisualizationResolver } from './visualization_resolver';
+import { createPanelResolver } from './panel_resolver';
 import {
   generateDashboard,
   getErrorMessage,
@@ -120,7 +120,7 @@ Use operations[] to:
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const resolveVisualizationConfig = createVisualizationResolver({
+        const resolvePanelContent = createPanelResolver({
           logger,
           modelProvider,
           events,
@@ -131,7 +131,7 @@ Use operations[] to:
           previousDashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvers: { resolveVisualizationConfig },
+          resolvers: { resolvePanelContent },
         });
 
         const description = `Dashboard: ${dashboardData.title}`;

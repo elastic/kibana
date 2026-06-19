@@ -13,9 +13,9 @@ import { defineOperation } from './types';
 import {
   markdownPanelInputSchema,
   panelConfigPanelInputSchema,
-  visualizationPanelInputSchema,
+  panelRequestSchema,
 } from './panel_kinds';
-import { getResolvedVisualizationCreationRequests } from './visualization_creation';
+import { getResolvedPanelCreationRequests } from './panel_creation';
 
 const sectionIdField = z
   .string()
@@ -27,7 +27,7 @@ const sectionIdField = z
 const addPanelsItemSchema = z.discriminatedUnion('kind', [
   markdownPanelInputSchema.extend({ sectionId: sectionIdField }),
   panelConfigPanelInputSchema.extend({ sectionId: sectionIdField }),
-  visualizationPanelInputSchema.extend({ sectionId: sectionIdField }),
+  panelRequestSchema.extend({ sectionId: sectionIdField }),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -40,8 +40,8 @@ export const addPanelsOperation = defineOperation({
   handler: ({ dashboardData, operation, operationIndex, context }) => {
     let nextDashboardData = dashboardData;
     const resolvedRequestsByInputIndex = new Map(
-      getResolvedVisualizationCreationRequests({
-        resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
+      getResolvedPanelCreationRequests({
+        resolvedRequestsByOperationIndex: context.resolvedPanelCreationRequests,
         operationIndex,
       }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
     );
@@ -76,11 +76,11 @@ export const addPanelsOperation = defineOperation({
             sectionId: item.sectionId,
           });
           break;
-        case 'visualization': {
+        case 'panelRequest': {
           const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
           if (!resolvedRequest) {
             throw new Error(
-              `Missing pre-resolved visualization request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
+              `Missing pre-resolved panel request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
             );
           }
           if (resolvedRequest.resolvedPanel.type === 'failure') {
@@ -91,8 +91,8 @@ export const addPanelsOperation = defineOperation({
               panelsToAdd: [
                 {
                   id: uuidv4(),
-                  type: resolvedRequest.resolvedPanel.visContent.type,
-                  config: resolvedRequest.resolvedPanel.visContent.config,
+                  type: resolvedRequest.resolvedPanel.panelContent.type,
+                  config: resolvedRequest.resolvedPanel.panelContent.config,
                   grid: item.grid,
                 },
               ],
