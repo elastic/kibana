@@ -66,10 +66,10 @@ LIQUID SYNTAX:
 - Filters:       {{ row.value | round: 2 }}
 
 REQUIRED: Your output MUST begin with exactly this comment on the very first line (nothing before it):
-<!--ai-template-v2-->
+<!--ai-template-->
 
 OUTPUT RULES:
-- Output ONLY the HTML template starting with <!--ai-template-v2-->. No markdown fences, no explanation.
+- Output ONLY the HTML template starting with <!--ai-template-->. No markdown fences, no explanation.
 - All CSS inline in <style> tags.
 - CRITICAL: No <script> tags or JavaScript. No <a> anchor tags or href attributes. Pure HTML + CSS only.
 - No external resources (no CDN, no Google Fonts, no image URLs).

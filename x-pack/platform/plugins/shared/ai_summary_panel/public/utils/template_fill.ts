@@ -9,9 +9,7 @@ import DOMPurify from 'dompurify';
 import { Liquid } from 'liquidjs';
 import { normalizeColumnName } from '../../common/utils';
 
-// v2 sentinel — templates use Liquid syntax. Old v1 Mustache-style templates
-// won't match and will trigger re-generation automatically.
-export const TEMPLATE_SENTINEL = '<!--ai-template-v2-->';
+export const TEMPLATE_SENTINEL = '<!--ai-template-->';
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
 
