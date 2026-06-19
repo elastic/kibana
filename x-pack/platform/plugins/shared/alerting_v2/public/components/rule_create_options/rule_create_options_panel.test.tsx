@@ -57,7 +57,7 @@ describe('RuleCreateOptionsPanel', () => {
   it('renders the rule builder divider between the second and third options', () => {
     renderPanel();
 
-    expect(screen.getByText('Or start from a builder')).toBeInTheDocument();
+    expect(screen.getByText('or start from a builder')).toBeInTheDocument();
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 

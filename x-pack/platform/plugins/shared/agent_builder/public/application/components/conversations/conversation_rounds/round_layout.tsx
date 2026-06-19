@@ -15,7 +15,7 @@ import type {
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import {
   isAuthorizationPrompt,
@@ -130,18 +130,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     pendingPrompts.length > 0 &&
     !isResuming;
 
-  const hasMessage = Boolean(response?.message);
-
-  const { latestStep, displayedSteps } = useMemo(() => {
-    if (!isLoadingCurrentRound || hasMessage) {
-      return { latestStep: undefined, displayedSteps: steps };
-    }
-    const idx = steps.findLastIndex((s) => s.type !== ConversationRoundStepType.updateTodos);
-    return idx === -1
-      ? { latestStep: undefined, displayedSteps: steps }
-      : { latestStep: steps[idx], displayedSteps: steps.slice(0, idx) };
-  }, [steps, isLoadingCurrentRound, hasMessage]);
-
   const cumulativeAttachmentRefsKey = useMemo(() => {
     if (!response?.message) {
       return '';
@@ -225,16 +213,15 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         />
       </EuiFlexItem>
 
-      {/* Steps container — `latestStep` is held back from `displayedSteps`
-          and rendered inside `RoundResponse` as the live indicator instead.
-          Always rendered above the error block (when one exists) so the
-          steps stay anchored where the user last saw them and the error
-          appears below, rather than the error shoving them down. */}
-      {displayedSteps.length > 0 && (
+      {/* Steps container — always rendered above the error block so steps
+          stay anchored where the user last saw them. */}
+      {steps.length > 0 && (
         <EuiFlexItem grow={false}>
           <RoundEvents
-            steps={displayedSteps}
-            isReloadedRound={!(isLoadingCurrentRound || hasBeenLoading)}
+            steps={steps}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
           />
         </EuiFlexItem>
       )}
@@ -301,7 +288,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               steps={steps}
               isLoading={isLoadingCurrentRound}
               isLastRound={isCurrentRound}
-              latestStep={latestStep}
               conversationAttachments={conversationAttachments}
               attachmentRefs={attachmentRefs}
               conversationId={conversationId}
