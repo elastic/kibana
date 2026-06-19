@@ -7,21 +7,15 @@
 
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-types';
-import type { RuleHistoryItem } from '../../../../../../common/api/detection_engine/rule_management';
-import { convertAlertingRuleToRuleResponse } from '../detection_rules_client/converters/convert_alerting_rule_to_rule_response';
+import type { RuleHistoryItem } from '../../../../../../../../common/api/detection_engine/rule_management';
+import { convertAlertingRuleToRuleResponse } from '../../converters/convert_alerting_rule_to_rule_response';
 import { computeOldValues } from './compute_old_values';
-import type { RuleParams } from '../../../rule_schema';
+import type { RuleParams } from '../../../../../rule_schema';
 
-/**
- * Convert a single alerting-framework `RuleChangeHistoryDocument` into the
- * API-shaped `RuleHistoryItem`. `old_values` is the RFC 7396 merge patch
- * describing the fields that differ between this revision's snapshot and the
- * immediately preceding one (or `null` for creation events).
- */
-export const mapRuleHistoryItem = (
+export function mapRuleHistoryItem(
   current: RuleChangeHistoryDocument,
   previous?: RuleChangeHistoryDocument
-): RuleHistoryItem => {
+): RuleHistoryItem {
   const rule = convertAlertingRuleToRuleResponse(current.rule as SanitizedRule<RuleParams>);
   const previousRule = previous
     ? convertAlertingRuleToRuleResponse(previous.rule as SanitizedRule<RuleParams>)
@@ -34,6 +28,15 @@ export const mapRuleHistoryItem = (
     action: current.event.action,
     rule,
     old_values: computeOldValues(rule, previousRule),
-    metadata: current.metadata,
+    metadata: normalizeMetadata(current.metadata),
   };
-};
+}
+
+function normalizeMetadata(
+  metadata: RuleChangeHistoryDocument['metadata']
+): Record<string, unknown> | undefined {
+  if (metadata == null) return undefined;
+  const { bulkCount, ...rest } = metadata;
+
+  return bulkCount !== undefined ? { ...rest, bulk_count: bulkCount } : rest;
+}
