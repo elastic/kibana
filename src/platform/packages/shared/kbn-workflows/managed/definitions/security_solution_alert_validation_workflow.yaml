@@ -70,6 +70,9 @@ consts:
   # Tag suffix appended when an alert is auto-closed by this workflow
   closed_tag_suffix: "closed-by-agent"
 
+  # AI connector used for alert classification
+  connector_id: "gpt41Azure"
+
 # =============================================================================
 # Steps
 # =============================================================================
@@ -910,7 +913,7 @@ steps:
           - name: onechat_runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
-            connector-id: gpt41Azure
+            connector-id: "{{ consts.connector_id }}"
             create-conversation: true
             on-failure:
               retry:

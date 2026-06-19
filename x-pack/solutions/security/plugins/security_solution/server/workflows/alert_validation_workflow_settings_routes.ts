@@ -52,10 +52,12 @@ const toWorkflowSettings = ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
+  connectorId,
 }: AlertValidationWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertValidationWorkflowSettings => ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
+  connectorId: connectorId ?? '',
 });
 
 export const registerAlertValidationWorkflowSettingsRoutes = (
@@ -153,8 +155,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         }
 
         try {
-          const { connectorId, ...baseBody } = request.body;
-          const settings = toWorkflowSettings(baseBody);
+          const settings = toWorkflowSettings(request.body);
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
             coreStart.savedObjects.getScopedClient(request)
           );
@@ -172,7 +173,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           );
           await uiSettingsClient.set(
             SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
-            connectorId ?? ''
+            settings.connectorId
           );
 
           const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
@@ -187,7 +188,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
 
           return response.ok({
             body: {
-              settings: { ...settings, connectorId: connectorId ?? '' },
+              settings,
               installed: true,
               workflowId: getSecurityAlertValidationWorkflowIdForSpace(spaceId),
             },
