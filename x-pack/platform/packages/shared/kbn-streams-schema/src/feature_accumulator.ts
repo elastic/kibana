@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isDuplicateFeature, type BaseFeature } from './feature';
+import { isDuplicateFeature, normalizeFeatureSlug, type BaseFeature } from './feature';
 
 export class FeatureAccumulator {
   private readonly byId = new Map<string, BaseFeature>();
@@ -21,7 +21,7 @@ export class FeatureAccumulator {
 
   add(feature: BaseFeature) {
     this.byId.set(feature.id, feature);
-    this.byLowerId.set(feature.id.toLowerCase(), feature);
+    this.byLowerId.set(normalizeFeatureSlug(feature.id), feature);
   }
 
   update(feature: BaseFeature) {
@@ -29,12 +29,12 @@ export class FeatureAccumulator {
       return;
     }
     this.byId.set(feature.id, feature);
-    this.byLowerId.set(feature.id.toLowerCase(), feature);
+    this.byLowerId.set(normalizeFeatureSlug(feature.id), feature);
   }
 
   findDuplicate(candidate: BaseFeature): BaseFeature | undefined {
     return (
-      this.byLowerId.get(candidate.id.toLowerCase()) ??
+      this.byLowerId.get(normalizeFeatureSlug(candidate.id)) ??
       this.getAll().find((f) => isDuplicateFeature(f, candidate))
     );
   }

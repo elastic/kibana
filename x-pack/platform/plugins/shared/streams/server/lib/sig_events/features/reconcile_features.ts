@@ -14,6 +14,7 @@ import {
   isDuplicateFeature,
   hasSameFingerprint,
   mergeFeature,
+  normalizeFeatureSlug,
   toBaseFeature,
 } from '@kbn/streams-schema';
 import type { IgnoredFeature } from '@kbn/streams-ai';
@@ -61,11 +62,11 @@ function filterExcluded(
   excludedFeatures: ReadonlyArray<Feature>,
   logger: Logger
 ): { nonExcluded: BaseFeature[]; codeIgnoredCount: number } {
-  const excludedByLowerId = new Set(excludedFeatures.map((f) => f.id.toLowerCase()));
+  const excludedByLowerId = new Set(excludedFeatures.map((f) => normalizeFeatureSlug(f.id)));
   let codeIgnoredCount = 0;
 
   const nonExcluded = rawFeatures.filter((feature) => {
-    const lowerId = feature.id.toLowerCase();
+    const lowerId = normalizeFeatureSlug(feature.id);
     if (excludedByLowerId.has(lowerId)) {
       codeIgnoredCount++;
       logger.debug(`Dropping inferred feature [${feature.id}] matches excluded feature by ID`);
@@ -119,12 +120,12 @@ export function reconcileInferredFeatures({
   const discoveredSet = new Set(discoveredFeatures.map((f) => f.id));
   const byLowerId = new Map<string, Feature>();
   for (const f of allKnownFeatures) {
-    byLowerId.set(f.id.toLowerCase(), f);
+    byLowerId.set(normalizeFeatureSlug(f.id), f);
   }
 
   for (const raw of nonExcluded) {
     const match =
-      byLowerId.get(raw.id.toLowerCase()) ??
+      byLowerId.get(normalizeFeatureSlug(raw.id)) ??
       allKnownFeatures.find((f) => isDuplicateFeature(f, raw));
 
     if (match) {

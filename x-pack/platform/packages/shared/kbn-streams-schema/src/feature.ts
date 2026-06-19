@@ -144,7 +144,10 @@ export function hasSameFingerprint(feature: BaseFeature, other: BaseFeature): bo
 }
 
 export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): boolean {
-  return feature.id.toLowerCase() === other.id.toLowerCase() || hasSameFingerprint(feature, other);
+  return (
+    normalizeFeatureSlug(feature.id) === normalizeFeatureSlug(other.id) ||
+    hasSameFingerprint(feature, other)
+  );
 }
 
 const mergeArrays = (a: string[] | undefined, b: string[] | undefined): string[] | undefined => {
