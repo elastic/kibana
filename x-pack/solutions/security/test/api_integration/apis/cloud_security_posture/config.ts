@@ -7,6 +7,7 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { getKibanaCliLoggers } from '@kbn/test';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-common';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('../../config.ts'));
@@ -26,6 +27,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             appenders: ['default'],
           },
         ])}`,
+        // Preconfigure the CSP package (fixed version) so Fleet installs it and
+        // caches its archive in-process at Kibana startup. Without this the
+        // first test that creates a CSP package policy pays a cold registry
+        // download, which intermittently fails (404 / socket hang up) on the
+        // first-loaded suite. Mirrors the cloud_security_posture_api config.
+        `--xpack.fleet.packages.0.name=cloud_security_posture`,
+        `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
       ],
     },
   };
