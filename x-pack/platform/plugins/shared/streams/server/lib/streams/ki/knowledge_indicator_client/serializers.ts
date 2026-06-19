@@ -126,18 +126,9 @@ export function toTombstone(
 }
 
 export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature {
-  // Back-compat: `feature.slug` is required on the v2 write contract, but v1
-  // docs predate the field and used the slug as the document id. When it is
-  // missing at runtime, recover the slug from `doc.id` and recompute the
-  // deterministic uuid so we never surface the slug standing in as the uuid.
-  const slug = doc.feature.slug || doc.id;
-  const uuid = doc.feature.slug
-    ? doc.id
-    : computeFeatureUuid({ id: slug, stream_name: doc['stream.name'], type: doc.feature.type });
-
   return {
-    id: slug,
-    uuid,
+    id: doc.feature.slug,
+    uuid: doc.id,
     stream_name: doc['stream.name'],
     type: doc.feature.type,
     description: doc.description,
