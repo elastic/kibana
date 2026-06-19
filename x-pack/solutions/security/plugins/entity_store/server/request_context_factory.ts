@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreCoreSetup,
@@ -116,6 +117,9 @@ export async function createRequestHandlerContext({
       security: startPlugins.security,
       analytics,
       savedObjectsClient: core.savedObjects.client,
+      savedObjectsImporter: coreStart.savedObjects.createImporter(
+        new SavedObjectsClient(coreStart.savedObjects.createInternalRepository())
+      ),
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,

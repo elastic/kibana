@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
 import { AssetManagerClient } from '../domain/asset_manager';
 import { LogsExtractionClient } from '../domain/logs_extraction';
@@ -92,6 +93,9 @@ export async function createAssetManagerClient({
 
   const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
   const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
+  const internalSoImporter = coreStart.savedObjects.createImporter(
+    new SavedObjectsClient(coreStart.savedObjects.createInternalRepository())
+  );
   const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
   const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
   const ccsLogExtractionStateClient = new CcsLogExtractionStateClient(soClient, namespace, logger);
@@ -117,6 +121,7 @@ export async function createAssetManagerClient({
       security: pluginsStart.security,
       analytics,
       savedObjectsClient: soClient,
+      savedObjectsImporter: internalSoImporter,
     }),
   };
 }

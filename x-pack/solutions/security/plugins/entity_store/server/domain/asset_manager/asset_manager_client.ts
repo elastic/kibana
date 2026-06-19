@@ -8,9 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import type {
   ElasticsearchClient,
+  ISavedObjectsImporter,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { installEntityStoreDashboards } from '../../telemetry/dashboards/install_dashboards';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
@@ -82,6 +84,7 @@ interface AssetManagerDependencies {
   security: SecurityPluginStart;
   analytics: TelemetryReporter;
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: ISavedObjectsImporter;
 }
 
 export class AssetManagerClient {
@@ -97,6 +100,7 @@ export class AssetManagerClient {
   private readonly security: SecurityPluginStart;
   private readonly analytics: TelemetryReporter;
   private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly savedObjectsImporter: ISavedObjectsImporter;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -111,6 +115,7 @@ export class AssetManagerClient {
     this.security = deps.security;
     this.analytics = deps.analytics;
     this.savedObjectsClient = deps.savedObjectsClient;
+    this.savedObjectsImporter = deps.savedObjectsImporter;
   }
 
   public async init(
@@ -178,6 +183,13 @@ export class AssetManagerClient {
           logger: this.logger,
         }),
       ]);
+      await installEntityStoreDashboards({
+        importer: this.savedObjectsImporter,
+        logger: this.logger,
+        spaceId: this.namespace,
+      }).catch((e: Error) => {
+        this.logger.warn(`Failed to install Entity Store APM dashboards: ${e.message}`);
+      });
     } catch (error) {
       this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_FAILURE_EVENT, {
         namespace: this.namespace,

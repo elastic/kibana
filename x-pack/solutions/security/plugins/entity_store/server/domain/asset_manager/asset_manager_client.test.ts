@@ -143,6 +143,7 @@ describe('AssetManagerClient', () => {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
       savedObjectsClient: {} as SavedObjectsClientContract,
+      savedObjectsImporter: { import: jest.fn().mockResolvedValue({ success: true, warnings: [] }) } as unknown as import('@kbn/core/server').ISavedObjectsImporter,
     });
   });
 
@@ -207,6 +208,7 @@ describe('AssetManagerClient', () => {
           reportEvent: jest.fn(),
         } as unknown as import('../../telemetry/events').TelemetryReporter,
         savedObjectsClient: {} as SavedObjectsClientContract,
+        savedObjectsImporter: { import: jest.fn().mockResolvedValue({ success: true, warnings: [] }) } as unknown as import('@kbn/core/server').ISavedObjectsImporter,
       });
     });
 
