@@ -64,7 +64,11 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
         inheritLifecycle: true,
         inheritedEffectiveLifecycle: { ilm: { policy: 'my-policy' } },
         ilmPolicies: [
-          { name: 'my-policy', phases: ilmSerializedPolicy.phases, serializedPolicy: ilmSerializedPolicy },
+          {
+            name: 'my-policy',
+            phases: ilmSerializedPolicy.phases,
+            serializedPolicy: ilmSerializedPolicy,
+          },
         ],
       })
     );
@@ -107,7 +111,11 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
         method: 'ilm',
         selectedIlmPolicyName: 'my-policy',
         ilmPolicies: [
-          { name: 'my-policy', phases: ilmSerializedPolicy.phases, serializedPolicy: ilmSerializedPolicy },
+          {
+            name: 'my-policy',
+            phases: ilmSerializedPolicy.phases,
+            serializedPolicy: ilmSerializedPolicy,
+          },
         ],
       })
     );
@@ -126,7 +134,11 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
         inspectedIlmPolicyName: 'my-policy',
         selectedIlmPolicyNameAtInspect: 'my-policy',
         ilmPolicies: [
-          { name: 'my-policy', phases: ilmSerializedPolicy.phases, serializedPolicy: ilmSerializedPolicy },
+          {
+            name: 'my-policy',
+            phases: ilmSerializedPolicy.phases,
+            serializedPolicy: ilmSerializedPolicy,
+          },
         ],
       })
     );
@@ -155,4 +167,3 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
     }
   });
 });
-

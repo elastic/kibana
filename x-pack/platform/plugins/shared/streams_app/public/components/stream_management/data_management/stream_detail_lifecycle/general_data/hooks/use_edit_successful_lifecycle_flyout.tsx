@@ -394,10 +394,9 @@ export const useEditSuccessfulLifecycleFlyout = ({
         return undefined;
       }
 
-      const ilmPolicyName =
-        isIlmLifecycle(inheritedEffectiveLifecycleOrNull)
-          ? inheritedEffectiveLifecycleOrNull.ilm.policy
-          : undefined;
+      const ilmPolicyName = isIlmLifecycle(inheritedEffectiveLifecycleOrNull)
+        ? inheritedEffectiveLifecycleOrNull.ilm.policy
+        : undefined;
       const inheritedMethod: 'dlm' | 'ilm' = ilmPolicyName ? 'ilm' : 'dlm';
       return {
         inheritLifecycle: true,
