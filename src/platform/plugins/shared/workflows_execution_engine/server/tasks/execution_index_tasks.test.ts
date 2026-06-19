@@ -9,10 +9,6 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import {
-  DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
-  DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL,
-} from '../config';
 import { scheduleExecutionIndexCleanupTask } from './register_execution_index_cleanup_task';
 import { scheduleExecutionIndexRolloverTask } from './register_execution_index_rollover_task';
 import {
@@ -21,6 +17,10 @@ import {
   WORKFLOW_EXECUTION_INDEX_ROLLOVER_TASK_ID,
   WORKFLOW_EXECUTION_INDEX_ROLLOVER_TASK_TYPE,
 } from './types';
+import {
+  DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
+  DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL,
+} from '../config';
 
 describe('execution index scheduled tasks', () => {
   const logger = { debug: jest.fn(), error: jest.fn() } as any;

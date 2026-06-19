@@ -185,11 +185,7 @@ export async function markExecutionFailedTaskRecovery(
     finishedAt,
   });
 
-  await stepExecutionRepository.markNonTerminalStepsFailed(
-    executionId,
-    error,
-    stepsExecutionIndex
-  );
+  await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error, stepsExecutionIndex);
 }
 
 /**

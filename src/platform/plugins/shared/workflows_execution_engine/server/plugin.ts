@@ -51,6 +51,12 @@ import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import {
+  registerExecutionIndexCleanupTask,
+  registerExecutionIndexRolloverTask,
+  scheduleExecutionIndexCleanupTask,
+  scheduleExecutionIndexRolloverTask,
+} from './tasks';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -91,12 +97,6 @@ import {
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
-import {
-  registerExecutionIndexCleanupTask,
-  registerExecutionIndexRolloverTask,
-  scheduleExecutionIndexCleanupTask,
-  scheduleExecutionIndexRolloverTask,
-} from './tasks';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -728,7 +728,8 @@ export class WorkflowsExecutionEnginePlugin
         executionsIndex: string;
       };
     }): Promise<Partial<EsWorkflowExecution>> => {
-      const { workflow, context, defaultTriggeredBy, authenticatedUser, now, resolvedIndexes } = args;
+      const { workflow, context, defaultTriggeredBy, authenticatedUser, now, resolvedIndexes } =
+        args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = resolvedIndexes

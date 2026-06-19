@@ -8,13 +8,10 @@
  */
 
 import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../../common';
-import {
   cleanupExecutionIndexIfEligible,
   cleanupWorkflowExecutionIndexes,
 } from './cleanup_execution_indexes';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 
 const OPTIONS = { minIndexAge: '3m' };
 const NOW_MS = 1_000_000_000_000;
