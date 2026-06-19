@@ -82,10 +82,10 @@ import {
 } from './lib/workflows/continuous_onboarding_workflow';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
-import { isSignificantEventsInvestigationEnabled } from './lib/sig_events/investigations/is_significant_events_investigation_enabled';
-import { installInvestigationWorkflow } from './lib/sig_events/investigations/install_investigation_workflow';
+import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
+import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
 import {
-  STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
+  STREAMS_INVESTIGATION_ENABLED_FLAG,
   STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
 } from '../common/feature_flags';
 
@@ -324,9 +324,7 @@ export class StreamsPlugin
       void core
         .getStartServices()
         .then(async ([coreStart]) => {
-          const investigationEnabled = await isSignificantEventsInvestigationEnabled(
-            coreStart.featureFlags
-          );
+          const investigationEnabled = await isInvestigationEnabled(coreStart.featureFlags);
 
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
@@ -614,7 +612,7 @@ export class StreamsPlugin
       );
 
     const investigationEnabled$ = core.featureFlags
-      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG, false)
+      .getBooleanValue$(STREAMS_INVESTIGATION_ENABLED_FLAG, false)
       .pipe(
         distinctUntilChanged(),
         skip(1),
@@ -721,7 +719,7 @@ export class StreamsPlugin
     workflowsExtensions: WorkflowsExtensionsServerPluginStart,
     featureFlags: FeatureFlagsStart
   ): Promise<void> {
-    if (!(await isSignificantEventsInvestigationEnabled(featureFlags))) {
+    if (!(await isInvestigationEnabled(featureFlags))) {
       this.logger.debug(
         'streams: investigation is disabled, skipping investigation workflow installation'
       );
@@ -749,7 +747,7 @@ export class StreamsPlugin
         isSignificantEventsMemoryEnabled: await isSignificantEventsMemoryEnabled(featureFlags),
       });
 
-      if (await isSignificantEventsInvestigationEnabled(featureFlags)) {
+      if (await isInvestigationEnabled(featureFlags)) {
         await installInvestigationWorkflow({ client });
       } else {
         this.logger.debug(
