@@ -14,6 +14,7 @@ import {
   EuiFormFieldset,
   EuiPanel,
   EuiText,
+  useEuiShadowHover,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -41,6 +42,9 @@ const PrimaryNavLabelsOptionCard = ({
   onSelect,
 }: OptionCardProps) => {
   const { euiTheme } = useEuiTheme();
+  const hoverShadow = useEuiShadowHover('xs');
+  const selectedBorderShadow = `inset 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.borderStrongPrimary}`;
+  const unselectedBorderShadow = `inset 0 0 0 ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued}`;
 
   return (
     <EuiPanel
@@ -54,39 +58,44 @@ const PrimaryNavLabelsOptionCard = ({
       element="button"
       role="radio"
       css={css`
+        position: relative;
         inline-size: 100%;
         text-align: start;
-        box-shadow: inset 0 0 0
-          ${isSelected ? euiTheme.border.width.thick : euiTheme.border.width.thin}
-          ${isSelected ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued} !important;
         border-radius: ${euiTheme.border.radius.small};
         background-color: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
         border: none;
         outline: none;
-        transition: background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+        box-shadow: none;
+        transition: box-shadow ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
 
-        &:hover {
-          transform: none;
-          filter: none;
-          box-shadow: inset 0 0 0
-            ${isSelected ? euiTheme.border.width.thick : euiTheme.border.width.thin}
-            ${isSelected ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued} !important;
-          background-color: ${isSelected
-            ? euiTheme.colors.backgroundBaseInteractiveSelectHover
-            : euiTheme.colors.backgroundBaseInteractiveHover};
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          box-shadow: ${isSelected ? selectedBorderShadow : unselectedBorderShadow};
+          pointer-events: none;
+          transition: box-shadow ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
         }
 
-        &:focus,
-        &:focus-visible,
-        &:not(:focus-visible) {
-          transform: none;
+        &:hover {
+          transform: none !important;
+          filter: none;
+          ${hoverShadow}
+        }
+
+        &:hover::before {
+          box-shadow: ${isSelected ? selectedBorderShadow : 'none'};
+        }
+
+        &:focus:not(:hover),
+        &:focus-visible:not(:hover) {
+          transform: none !important;
           filter: none;
           outline: none;
-          box-shadow: inset 0 0 0
-            ${isSelected ? euiTheme.border.width.thick : euiTheme.border.width.thin}
-            ${isSelected ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued} !important;
+          box-shadow: none !important;
         }
       `}
     >
@@ -105,6 +114,7 @@ const PrimaryNavLabelsOptionCard = ({
 };
 
 export const PrimaryNavLabelsSelector = ({ hidePrimaryLabels, onChange }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const legend = i18n.translate('navigationCustomizationComponents.primaryNavLabelsLegend', {
     defaultMessage: 'Primary navigation labels',
   });
@@ -123,7 +133,15 @@ export const PrimaryNavLabelsSelector = ({ hidePrimaryLabels, onChange }: Props)
       }}
       data-test-subj="primaryNavLabelsSelector"
     >
-      <div role="radiogroup" aria-label={legend}>
+      <div
+        role="radiogroup"
+        aria-label={legend}
+        css={css`
+          overflow: visible;
+          padding: ${euiTheme.size.xs};
+          margin: -${euiTheme.size.xs};
+        `}
+      >
         <EuiFlexGrid columns={2} gutterSize="s">
           <EuiFlexItem data-test-subj="primaryNavLabelsShow">
             <PrimaryNavLabelsOptionCard
