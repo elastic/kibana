@@ -14,7 +14,7 @@ import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
-import { EntitiesNotFoundError } from '../../../domain/errors';
+import { EntitiesNotFoundError, MixedEntityTypesError } from '../../../domain/errors';
 import { ENTITY_STORE_RESOLUTION_UNLINK_EVENT } from '../../../telemetry/events';
 import { reportResolutionError } from './resolution_telemetry';
 
@@ -55,6 +55,9 @@ export async function handleResolutionUnlink(
 
     if (error instanceof EntitiesNotFoundError) {
       return res.customError({ statusCode: 404, body: error });
+    }
+    if (error instanceof MixedEntityTypesError) {
+      return res.badRequest({ body: error });
     }
 
     logger.error(error);

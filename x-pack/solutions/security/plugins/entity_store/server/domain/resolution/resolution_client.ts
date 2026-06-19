@@ -195,11 +195,16 @@ export class ResolutionClient {
       }
     }
 
+    const typeEntityIds = toUnlink.length > 0 ? toUnlink : entityIds;
+    const entityType = this.resolveSharedEntityType(this.getSourcesSubset(sources, typeEntityIds), {
+      validateSingleType: true,
+    });
+
     if (toUnlink.length === 0) {
       return {
         unlinked: [],
         skipped,
-        entity_type: this.resolveSharedEntityType(sources, { validateSingleType: false }),
+        entity_type: entityType,
       };
     }
 
@@ -217,7 +222,7 @@ export class ResolutionClient {
     return {
       unlinked: toUnlink,
       skipped,
-      entity_type: this.resolveSharedEntityType(sources, { validateSingleType: false }),
+      entity_type: entityType,
     };
   }
 
@@ -410,5 +415,19 @@ export class ResolutionClient {
     }
 
     return firstType;
+  }
+
+  private getSourcesSubset(
+    sources: Map<string, Record<string, unknown>>,
+    entityIds: string[]
+  ): Map<string, Record<string, unknown>> {
+    const subset = new Map<string, Record<string, unknown>>();
+    for (const entityId of entityIds) {
+      const entity = sources.get(entityId);
+      if (entity) {
+        subset.set(entityId, entity);
+      }
+    }
+    return subset;
   }
 }

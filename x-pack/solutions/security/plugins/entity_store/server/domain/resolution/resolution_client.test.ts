@@ -467,6 +467,52 @@ describe('ResolutionClient', () => {
       expect(result.entity_type).toBe('host');
     });
 
+    it('should throw MixedEntityTypesError when unlinked entities have different types', async () => {
+      const userAlias = createEntityDoc('alias-user', 'user', 'target-1');
+      const hostAlias = createEntityDoc('alias-host', 'host', 'target-2');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([userAlias, hostAlias]) as never
+      );
+
+      await expect(client.unlinkEntities(['alias-user', 'alias-host'])).rejects.toThrow(
+        MixedEntityTypesError
+      );
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should throw MixedEntityTypesError when all-skipped entities have different types', async () => {
+      const userStandalone = createEntityDoc('entity-user', 'user');
+      const hostStandalone = createEntityDoc('entity-host', 'host');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([userStandalone, hostStandalone]) as never
+      );
+
+      await expect(client.unlinkEntities(['entity-user', 'entity-host'])).rejects.toThrow(
+        MixedEntityTypesError
+      );
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should allow unlinked aliases and skipped standalones of different types', async () => {
+      const userAlias = createEntityDoc('alias-user', 'user', 'target-1');
+      const hostStandalone = createEntityDoc('entity-host', 'host');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([userAlias, hostStandalone]) as never
+      );
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      const result = await client.unlinkEntities(['alias-user', 'entity-host']);
+
+      expect(result).toEqual({
+        unlinked: ['alias-user'],
+        skipped: ['entity-host'],
+        entity_type: 'user',
+      });
+    });
+
     it('should unlink aliases and skip non-aliases in mixed input', async () => {
       const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
       const standaloneDoc = createEntityDoc('entity-1');

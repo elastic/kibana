@@ -7,7 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
-import { EntitiesNotFoundError, ResolutionUpdateError } from '../../../domain/errors';
+import {
+  EntitiesNotFoundError,
+  MixedEntityTypesError,
+  ResolutionUpdateError,
+} from '../../../domain/errors';
 import type { EntityStoreRequestHandlerContext } from '../../../types';
 import type { ResolutionClient } from '../../../domain/resolution';
 import type { TelemetryReporter } from '../../../telemetry/events';
@@ -91,6 +95,23 @@ describe('handleResolutionUnlink', () => {
       namespace: NAMESPACE,
     });
     expect(response.status).toBe(404);
+  });
+
+  it('reports error telemetry for MixedEntityTypesError', async () => {
+    mockUnlinkEntities.mockRejectedValue(new MixedEntityTypesError(['user', 'host']));
+
+    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities }, analytics);
+    const req = { body: { entity_ids: ['alias-user', 'alias-host'] } } as never;
+    const res = createMockResponse();
+
+    const response = await handleResolutionUnlink(ctx, req, res);
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_ERROR_EVENT, {
+      errorType: 'mixed_entity_types',
+      operation: 'unlink',
+      namespace: NAMESPACE,
+    });
+    expect(response.status).toBe(400);
   });
 
   it('reports resolution_update error telemetry before re-throwing', async () => {
