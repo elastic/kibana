@@ -114,7 +114,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: stri
   },
   {
     id: 'cases.pushCases',
-    definitionHash: '35fe57a4996b0495c3ab850e6b628d2c0bea19bde3960146793069f12fc6c2af',
+    definitionHash: '148063b4a694fb3454cd485a28f0fb1a668b5dca7ae25cb361c61b595cb61c89',
   },
   {
     id: 'cases.setCustomField',
