@@ -463,7 +463,7 @@ describe('StepExecutionRepository', () => {
   describe('resolveWriteIndex', () => {
     it('returns the index marked as write index', async () => {
       esClient.indices.getAlias.mockResolvedValue({
-        '.workflows-step-executions-000001': {
+        '.workflows-step-executions-000002': {
           aliases: { [WORKFLOWS_STEP_EXECUTIONS_INDEX]: { is_write_index: false } },
         },
         [TARGET_INDEX]: {

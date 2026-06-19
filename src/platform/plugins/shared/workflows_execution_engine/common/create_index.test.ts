@@ -171,7 +171,7 @@ describe('createOrUpdateIndex', () => {
 });
 
 describe('setupRolloverIndex', () => {
-  const mappings = { dynamic: false, properties: { id: { type: 'keyword' } } };
+  const mappings = { dynamic: false as const, properties: { id: { type: 'keyword' as const } } };
   const baseOptions = {
     aliasName: '.workflows-executions',
     indexPattern: '.workflows-executions-*',

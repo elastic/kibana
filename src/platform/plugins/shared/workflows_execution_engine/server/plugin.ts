@@ -727,7 +727,7 @@ export class WorkflowsExecutionEnginePlugin
         stepExecutionsIndex: string;
         executionsIndex: string;
       };
-    }): Promise<Partial<EsWorkflowExecution>> => {
+    }): Promise<WorkflowExecutionForInputRendering> => {
       const { workflow, context, defaultTriggeredBy, authenticatedUser, now, resolvedIndexes } = args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
@@ -757,7 +757,7 @@ export class WorkflowsExecutionEnginePlugin
       );
       const dispatchEventId =
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
-      const workflowExecution: Partial<EsWorkflowExecution> = {
+      const workflowExecution: WorkflowExecutionForInputRendering = {
         id: generateEncodedWorkflowExecutionId({
           indexName: resolvedExecutionsIndex,
           indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,

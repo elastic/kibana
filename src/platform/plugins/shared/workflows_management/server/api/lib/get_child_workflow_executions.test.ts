@@ -13,6 +13,8 @@ import { getChildWorkflowExecutions } from './get_child_workflow_executions';
 describe('getChildWorkflowExecutions', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
 
+  const TEST_STEP_EXECUTIONS_BACKING_INDEX = '.workflows-steps-000001';
+
   const baseParams = {
     workflowExecutionIndex: '.workflows-executions',
     stepsExecutionIndex: '.workflows-steps',
@@ -23,6 +25,7 @@ describe('getChildWorkflowExecutions', () => {
   const parentDoc = {
     spaceId: 'default',
     stepExecutionIds: ['step-1', 'step-2'],
+    stepExecutionsIndex: TEST_STEP_EXECUTIONS_BACKING_INDEX,
   };
 
   const createWorkflowExecuteStep = (
@@ -68,7 +71,6 @@ describe('getChildWorkflowExecutions', () => {
     mockEsClient = {
       get: jest.fn(),
       mget: jest.fn(),
-      search: jest.fn(),
     } as any;
     jest.clearAllMocks();
   });
@@ -143,6 +145,7 @@ describe('getChildWorkflowExecutions', () => {
               workflowDefinition: { name: 'Child Workflow' },
               status: 'completed',
               stepExecutionIds: ['child-step-1', 'child-step-2'],
+              stepExecutionsIndex: TEST_STEP_EXECUTIONS_BACKING_INDEX,
             },
           },
         ],
@@ -199,9 +202,45 @@ describe('getChildWorkflowExecutions', () => {
 
     expect(mockEsClient.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        _source_includes: ['spaceId', 'stepExecutionIds'],
+        _source_includes: ['spaceId', 'stepExecutionIds', 'stepExecutionsIndex'],
       })
     );
+  });
+
+  it('should use backing index for parent step mget when stepExecutionsIndex is pinned', async () => {
+    mockEsClient.get.mockResolvedValue({ _source: parentDoc } as any);
+    mockEsClient.mget.mockResolvedValue({
+      docs: [createRegularStep('step-1')],
+    } as any);
+
+    await getChildWorkflowExecutions({
+      ...baseParams,
+      esClient: mockEsClient,
+    });
+
+    expect(mockEsClient.mget).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: TEST_STEP_EXECUTIONS_BACKING_INDEX,
+        ids: ['step-1', 'step-2'],
+      })
+    );
+  });
+
+  it('should return empty array when parent has no pinned stepExecutionsIndex', async () => {
+    mockEsClient.get.mockResolvedValue({
+      _source: {
+        spaceId: 'default',
+        stepExecutionIds: ['step-1'],
+      },
+    } as any);
+
+    const result = await getChildWorkflowExecutions({
+      ...baseParams,
+      esClient: mockEsClient,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockEsClient.mget).not.toHaveBeenCalled();
   });
 
   it('should filter out child executions from a different space', async () => {

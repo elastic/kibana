@@ -21,8 +21,7 @@ describe('response size limits', () => {
         workflowRunFixture = new WorkflowRunFixture();
         // Disable size limit to simulate the "before" state
         const noLimit = new ByteSizeValue(0);
-        (workflowRunFixture.configMock as any).maxResponseSize = noLimit;
-        workflowRunFixture.dependencies.config.maxResponseSize = noLimit;
+        workflowRunFixture.setMaxResponseSize(noLimit);
 
         const workflowYaml = `
 steps:
@@ -52,8 +51,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         // Set a 1KB limit -- the connector returns 5KB, so it should fail
         const limit1kb = new ByteSizeValue(1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
+        workflowRunFixture.setMaxResponseSize(limit1kb);
 
         const workflowYaml = `
 steps:
@@ -85,8 +83,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         // Set a 10KB limit -- the connector returns 5KB, so it should pass
         const limit10kb = new ByteSizeValue(10 * 1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit10kb;
+        workflowRunFixture.setMaxResponseSize(limit10kb);
 
         const workflowYaml = `
 steps:
@@ -116,8 +113,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         // Plugin config: 1KB (would reject 5KB output)
         const limit1kb = new ByteSizeValue(1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
+        workflowRunFixture.setMaxResponseSize(limit1kb);
 
         // But step-level override allows 10KB
         const workflowYaml = `
@@ -149,8 +145,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         // Plugin config: 1KB (would reject 5KB output)
         const limit1kb = new ByteSizeValue(1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
+        workflowRunFixture.setMaxResponseSize(limit1kb);
 
         // But workflow-level settings allow 10KB
         const workflowYaml = `
@@ -183,8 +178,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         // Set a 1KB limit
         const limit1kb = new ByteSizeValue(1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
+        workflowRunFixture.setMaxResponseSize(limit1kb);
 
         const workflowYaml = `
 steps:
@@ -226,8 +220,7 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         const limit10kb = new ByteSizeValue(10 * 1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit10kb;
+        workflowRunFixture.setMaxResponseSize(limit10kb);
 
         const workflowYaml = `
 steps:
@@ -256,8 +249,7 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         const limit1kb = new ByteSizeValue(1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
+        workflowRunFixture.setMaxResponseSize(limit1kb);
 
         // large_response connector returns 5KB -- exceeds 1KB limit
         const workflowYaml = `
@@ -287,8 +279,7 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         const limit10kb = new ByteSizeValue(10 * 1024);
-        (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
-        workflowRunFixture.dependencies.config.maxResponseSize = limit10kb;
+        workflowRunFixture.setMaxResponseSize(limit10kb);
 
         // Step 1: generate large output (under 10kb limit)
         // Step 2: pass it as input to a step with 100b limit -- input check should fail
