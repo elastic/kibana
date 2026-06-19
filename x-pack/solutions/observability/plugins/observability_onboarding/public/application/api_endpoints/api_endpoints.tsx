@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -44,7 +45,7 @@ export const ApiEndpoints = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  const { endpoints, isLoading } = useApiEndpoints();
+  const { endpoints, isLoading, isError } = useApiEndpoints();
   const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [isOpen, setIsOpen] = useState<boolean>(true);
@@ -161,6 +162,24 @@ export const ApiEndpoints = () => {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+          {isError && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                color="warning"
+                iconType="warning"
+                size="s"
+                title={i18n.translate(
+                  'xpack.observability_onboarding.apiEndpoints.fetchErrorTitle',
+                  {
+                    defaultMessage:
+                      'Could not load endpoint details. Refresh the page to try again.',
+                  }
+                )}
+                data-test-subj="observabilityOnboardingApiEndpointsFetchError"
+              />
+            </>
+          )}
           {isOpen && (
             <>
               <EuiSpacer size="m" />

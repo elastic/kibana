@@ -36,6 +36,11 @@ export function useApiKeys(): UseApiKeysResult {
           { signal: null, params: { path: { id: endpointId } } }
         );
         setEncodedApiKeys((previous) => ({ ...previous, [endpointId]: encodedApiKey }));
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeySuccess', {
+            defaultMessage: 'API key created successfully',
+          }),
+        });
       } catch (error) {
         const fetchError = error as IHttpFetchError<ResponseErrorBody>;
         notifications?.toasts.addError(fetchError, {
@@ -51,11 +56,6 @@ export function useApiKeys(): UseApiKeysResult {
         });
       } finally {
         setCreatingEndpointId(undefined);
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeySuccess', {
-            defaultMessage: 'API key created successfully',
-          }),
-        });
       }
     },
     [notifications]
