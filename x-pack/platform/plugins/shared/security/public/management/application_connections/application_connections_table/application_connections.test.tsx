@@ -12,7 +12,6 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
-import * as UseCurrentUserModule from '../../../components/use_current_user';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../application_connections_management_app';
 import { ApplicationConnectionsPage } from '../application_connections_page';
@@ -21,10 +20,15 @@ jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-st
   virtual: true,
 });
 
-jest.spyOn(UseCurrentUserModule, 'useCurrentUser').mockReturnValue({
-  isLoading: false,
-  user: mockAuthenticatedUser({ username: 'current_user', full_name: 'Current User' }),
-  error: undefined,
+jest.mock('@kbn/core-user-profile-browser', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser');
+  return {
+    ...actual,
+    useCurrentUser: jest.fn(() => ({
+      isLoading: false,
+      user: { username: 'current_user', displayName: 'Current User' },
+    })),
+  };
 });
 
 type CoreStartMock = ReturnType<typeof coreMock.createStart>;

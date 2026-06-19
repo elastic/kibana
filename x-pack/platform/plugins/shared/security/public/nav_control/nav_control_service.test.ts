@@ -20,16 +20,9 @@ import * as UseCurrentUserImports from '../components/use_current_user';
 import { UserAPIClient } from '../management';
 
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
-const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
 
 useUserProfileMock.mockReturnValue({
   loading: true,
-});
-
-useCurrentUserMock.mockReturnValue({
-  isLoading: true,
-  user: null,
-  error: null,
 });
 
 const validLicense = {

@@ -10,12 +10,19 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { useCurrentUser } from '@kbn/core-user-profile-browser';
 
 import type { ChangePasswordFormValues } from './change_password_modal';
 import { ChangePasswordModal, validateChangePasswordForm } from './change_password_modal';
-import * as currentUserModule from '../../../components/use_current_user';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
+
+jest.mock('@kbn/core-user-profile-browser', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser');
+  return { ...actual, useCurrentUser: jest.fn() };
+});
+
+const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 describe('ChangePasswordModal', () => {
   describe('#validateChangePasswordForm', () => {
@@ -173,7 +180,7 @@ describe('ChangePasswordModal', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       // Mock useCurrentUser to return a different user by default
-      jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({
+      useCurrentUserMock.mockReturnValue({
         isLoading: false,
         user: {
           username: 'different_user',
@@ -310,7 +317,7 @@ describe('ChangePasswordModal', () => {
     describe('when rendered for current user', () => {
       beforeEach(() => {
         // Mock useCurrentUser to return the current user
-        jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({
+        useCurrentUserMock.mockReturnValue({
           isLoading: false,
           user: {
             username: 'currentuser',

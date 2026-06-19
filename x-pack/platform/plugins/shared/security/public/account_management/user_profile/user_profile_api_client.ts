@@ -70,7 +70,7 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
       return Promise.reject(new Error('Unable to retrieve user profile for anonymous paths'));
     }
 
-    const key = params?.dataPath ?? '';
+    const key = params?.dataPath ?? '__profile__';
 
     if (!this._cache.has(key)) {
       const req = this.http

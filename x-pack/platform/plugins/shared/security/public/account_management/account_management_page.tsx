@@ -10,19 +10,24 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
+import { useCurrentUser } from '@kbn/core-user-profile-browser';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { UserProfile } from './user_profile';
 import type { UserProfileData } from '../../common';
 import { canUserHaveProfile } from '../../common/model';
-import { useCurrentUser, useUserProfile } from '../components';
+import { useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
 
 export const AccountManagementPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
 
-  const { user, error: authError } = useCurrentUser();
+  // The account page needs the raw `AuthenticatedUser` for `canUserHaveProfile` and the
+  // `UserProfile` component, so opt into the raw query source.
+  const { rawAuthQuery } = useCurrentUser({ includeRawQuerySource: true });
+  const user = rawAuthQuery.data;
+  const authError = rawAuthQuery.error;
   const userProfile = useUserProfile<UserProfileData>('avatar,userSettings');
 
   // If we fail to load profile, we treat it as a failure _only_ if user is supposed

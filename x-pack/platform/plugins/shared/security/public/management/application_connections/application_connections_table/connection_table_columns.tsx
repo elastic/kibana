@@ -13,10 +13,9 @@ import type {
 import { EuiHealth, EuiLink, EuiText, EuiTextColor, EuiToolTip, formatDate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { getUserDisplayName } from '@kbn/user-profile-components';
+import { useCurrentUser } from '@kbn/core-user-profile-browser';
 
 import { InlineEditConnectionName } from './inline_edit_connection_name';
-import { useCurrentUser } from '../../../components/use_current_user';
 import { labels } from '../constants/i18n';
 import type { ApplicationConnection } from '../constants/types';
 import { useApplicationConnectionsActions } from '../context/application_connections_provider';
@@ -106,9 +105,7 @@ export const useConnectionTableColumns = ({
           );
         }
         const displayName =
-          user && connection.user_id === user.username
-            ? getUserDisplayName(user)
-            : connection.user_id;
+          user && connection.user_id === user.username ? user.displayName : connection.user_id;
         return (
           <EuiText size="s" data-test-subj={dataTestSubj}>
             {displayName}

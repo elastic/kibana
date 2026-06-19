@@ -28,12 +28,12 @@ import {
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
+import { useCurrentUser } from '@kbn/core-user-profile-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { useCurrentUser } from '../../../components/use_current_user';
 import type { ValidationErrors } from '../../../components/use_form';
 import { useForm } from '../../../components/use_form';
 import { useInitialFocus } from '../../../components/use_initial_focus';

@@ -20,13 +20,11 @@ import React, { Fragment, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
+import { useCurrentUser } from '@kbn/core-user-profile-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
 import { UserAvatar } from '@kbn/user-profile-components';
-
-import { getUserDisplayName, isUserAnonymous } from '../../common/model';
-import { useCurrentUser } from '../components';
 
 type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content' | 'onClick'> & {
   content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
@@ -91,24 +89,31 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { user, isLoading } = useCurrentUser();
+  const { user, isLoading, rawAuthQuery, rawProfileQuery } = useCurrentUser({
+    includeRawQuerySource: true,
+  });
 
-  const displayName = user ? getUserDisplayName(user) : '';
+  const displayName = user?.displayName ?? '';
 
   const toggleMenu = useCallback(
     () => setIsPopoverOpen((value) => (user ? !value : false)),
     [user]
   );
 
-  const avatar = user?.profile ? (
+  const avatar = rawProfileQuery.data ? (
     <UserAvatar
-      user={user?.profile.user}
-      avatar={user?.profile.data.avatar}
+      user={rawProfileQuery.data.user}
+      avatar={user?.avatar}
       size={avatarSize}
       data-test-subj="userMenuAvatar"
     />
   ) : user && !isLoading ? (
-    <UserAvatar user={user} size={avatarSize} data-test-subj="userMenuAvatar" />
+    <UserAvatar
+      user={rawAuthQuery.data}
+      avatar={user.avatar}
+      size={avatarSize}
+      data-test-subj="userMenuAvatar"
+    />
   ) : (
     <EuiLoadingSpinner size="m" />
   );
@@ -145,7 +150,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.push(...userMenuLinkMenuItems);
   }
 
-  const isAnonymous = user ? isUserAnonymous(user) : false;
+  const isAnonymous = user?.isAnonymous ?? false;
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
   if (!isAnonymous && !hasCustomProfileLinks) {

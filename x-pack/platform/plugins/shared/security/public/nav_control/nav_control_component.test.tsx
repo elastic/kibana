@@ -10,17 +10,20 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
+import { useCurrentUser } from '@kbn/core-user-profile-browser';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { SecurityNavControl } from './nav_control_component';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import * as UseCurrentUserImports from '../components/use_current_user';
 
-jest.mock('../components/use_current_user');
+jest.mock('@kbn/core-user-profile-browser', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser');
+  return { ...actual, useCurrentUser: jest.fn() };
+});
 jest.mock('react-use/lib/useObservable');
 
 const useObservableMock = useObservable as jest.Mock;
-const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
+const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 const userMenuLinks$ = new BehaviorSubject([]);
 
@@ -31,8 +34,9 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReset();
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
-      user: mockAuthenticatedUser(),
-      error: undefined,
+      user: { displayName: 'full name', isAnonymous: false, avatar: undefined },
+      rawAuthQuery: { isLoading: false, data: mockAuthenticatedUser(), error: undefined },
+      rawProfileQuery: { isLoading: false, data: undefined, error: undefined },
     });
 
     useObservableMock.mockReset();
@@ -91,7 +95,8 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      error: undefined,
+      rawAuthQuery: { isLoading: true, data: undefined, error: undefined },
+      rawProfileQuery: { isLoading: true, data: undefined, error: undefined },
     });
 
     renderWithIntl(
@@ -145,7 +150,8 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      error: undefined,
+      rawAuthQuery: { isLoading: true, data: undefined, error: undefined },
+      rawProfileQuery: { isLoading: true, data: undefined, error: undefined },
     });
 
     renderWithIntl(
@@ -510,14 +516,14 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render anonymous user', async () => {
+    const anonymousUser = mockAuthenticatedUser({
+      authentication_provider: { type: 'anonymous', name: 'does no matter' },
+    });
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
-      user: {
-        ...mockAuthenticatedUser({
-          authentication_provider: { type: 'anonymous', name: 'does no matter' },
-        }),
-      },
-      error: undefined,
+      user: { displayName: 'full name', isAnonymous: true, avatar: undefined },
+      rawAuthQuery: { isLoading: false, data: anonymousUser, error: undefined },
+      rawProfileQuery: { isLoading: false, data: undefined, error: undefined },
     });
 
     renderWithIntl(
