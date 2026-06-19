@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import {
+  setMockValues,
+  setMockActions,
+  mockTelemetryActions,
+} from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
@@ -72,7 +76,7 @@ describe('AnalyticsOverView', () => {
     expect(screen.getByTestId('analyticsCollectionChart')).toBeInTheDocument();
   });
 
-  it('sends correct telemetry page name for selected tab', async () => {
+  it('sends correct telemetry page name on render', async () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 
@@ -80,7 +84,13 @@ describe('AnalyticsOverView', () => {
       <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
     );
 
-    expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockTelemetryActions.sendTelemetry).toHaveBeenCalledWith({
+        action: 'viewed',
+        metric: 'View Analytics Collection - Overview',
+        product: 'enterprise_search',
+      });
+    });
   });
 
   it('render toolbar in pageHeader rightSideItems ', async () => {

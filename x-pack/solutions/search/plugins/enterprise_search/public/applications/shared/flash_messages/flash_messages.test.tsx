@@ -30,9 +30,9 @@ describe('FlashMessages', () => {
     ];
     setMockValues({ messages: mockMessages });
 
-    const { container } = renderWithKibanaRenderContext(<FlashMessages />);
+    renderWithKibanaRenderContext(<FlashMessages />);
 
-    const callouts = container.querySelectorAll('.euiCallOut');
+    const callouts = screen.getAllByTestId('flashMessageCallout');
     expect(callouts).toHaveLength(5);
     // success type maps to iconType='check'
     expect(callouts[0].querySelector('[data-euiicon-type="check"]')).not.toBeNull();

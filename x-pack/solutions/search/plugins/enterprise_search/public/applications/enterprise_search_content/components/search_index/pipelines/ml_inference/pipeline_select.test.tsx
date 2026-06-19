@@ -22,7 +22,11 @@ jest.mock('@elastic/eui', () => {
       return (
         <div data-test-subj="euiSelectable">
           {renderedOptions.map((opt: any) => (
-            <div key={opt.label} data-test-subj={`option-${opt.label}`}>
+            <div
+              key={opt.label}
+              data-test-subj={`option-${opt.label}`}
+              aria-selected={opt.checked === 'on'}
+            >
               {opt.label}
             </div>
           ))}
@@ -108,11 +112,9 @@ describe('PipelineSelect', () => {
       ],
     });
     renderWithKibanaRenderContext(<PipelineSelect />);
-    // The captured onChange lets us verify that the component configures the selected option
-    // by checking the rendered option matching the current pipelineName has checked='on'.
-    // We verify this by checking what getPipelineOptions produced for the captured render.
-    // (The EuiSelectable mock renders all options as divs, preserving label.)
-    expect(screen.getByTestId('option-pipeline_3')).toBeInTheDocument();
+    expect(screen.getByTestId('option-pipeline_3')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('option-pipeline_1')).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByTestId('option-pipeline_2')).toHaveAttribute('aria-selected', 'false');
   });
 
   it('sets pipeline name on selecting a pipeline', () => {

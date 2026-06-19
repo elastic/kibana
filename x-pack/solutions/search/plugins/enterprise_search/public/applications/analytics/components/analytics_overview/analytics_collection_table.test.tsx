@@ -59,6 +59,10 @@ describe('AnalyticsCollectionTable', () => {
     expect(screen.getByTestId('NoResults')).toBeInTheDocument();
     expect(screen.getByTestId('Clicks')).toBeInTheDocument();
     expect(screen.getByTestId('Sessions')).toBeInTheDocument();
+
+    // Searches is the default selected filter
+    expect(screen.getByTestId('Searches')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('NoResults')).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('renders datePick', () => {

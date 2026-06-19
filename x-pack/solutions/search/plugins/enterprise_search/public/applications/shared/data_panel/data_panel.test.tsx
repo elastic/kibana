@@ -147,18 +147,6 @@ describe('DataPanel', () => {
       expect(screen.getByTestId('enterpriseSearchLoadingOverlay')).toBeInTheDocument();
     });
 
-    it('passes hasBorder', () => {
-      const { container, rerender } = renderWithKibanaRenderContext(
-        <DataPanel filled title={<h1>Test</h1>} />
-      );
-
-      expect(container).not.toBeEmptyDOMElement();
-
-      rerender(<DataPanel filled title={<h1>Test</h1>} hasBorder />);
-
-      expect(container).not.toBeEmptyDOMElement();
-    });
-
     it('passes class names', () => {
       const { container } = renderWithKibanaRenderContext(
         <DataPanel title={<h1>Test</h1>} className="testing" />

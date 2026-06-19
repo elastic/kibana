@@ -73,14 +73,27 @@ describe('EnterpriseSearchContentPageTemplate', () => {
   describe('props', () => {
     it('passes down any ...pageTemplateProps that EnterpriseSearchPageTemplateWrapper accepts', () => {
       renderWithKibanaRenderContext(
-        <EnterpriseSearchContentPageTemplate
-          pageHeader={{ pageTitle: 'hello world' }}
-          isLoading={false}
-          emptyState={<div />}
-        />
+        <EnterpriseSearchContentPageTemplate pageHeader={{ pageTitle: 'hello world' }} />
       );
 
       expect(screen.getByText('hello world')).toBeInTheDocument();
+    });
+
+    it('passes isLoading to EnterpriseSearchPageTemplateWrapper', () => {
+      renderWithKibanaRenderContext(<EnterpriseSearchContentPageTemplate isLoading />);
+
+      expect(screen.getByTestId('enterpriseSearchLoading')).toBeInTheDocument();
+    });
+
+    it('passes emptyState to EnterpriseSearchPageTemplateWrapper', () => {
+      renderWithKibanaRenderContext(
+        <EnterpriseSearchContentPageTemplate
+          isEmptyState
+          emptyState={<div data-test-subj="emptyState" />}
+        />
+      );
+
+      expect(screen.getByTestId('emptyState')).toBeInTheDocument();
     });
   });
 });

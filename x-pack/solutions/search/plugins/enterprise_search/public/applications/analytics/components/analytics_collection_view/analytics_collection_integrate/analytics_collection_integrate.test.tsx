@@ -56,13 +56,16 @@ describe('AnalyticsCollectionIntegrate', () => {
       <AnalyticsCollectionIntegrateView analyticsCollection={analyticsCollections} />
     );
 
+    // webClientSrc is embedded inside a <script src="..."> tag
     expect(
       screen.getByText(
-        'https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2',
-        { exact: false }
+        /<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@elastic\/behavioral-analytics-browser-tracker@2"><\/script>/s
       )
     ).toBeInTheDocument();
 
+    // analyticsConfig fields are interpolated into the tracker initialization snippet
     expect(screen.getByText(/endpoint.*your_deployment_url/s)).toBeInTheDocument();
+    expect(screen.getByText(/collectionName.*"example"/s)).toBeInTheDocument();
+    expect(screen.getByText(/apiKey.*"########"/s)).toBeInTheDocument();
   });
 });

@@ -9,7 +9,7 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
@@ -41,6 +41,12 @@ describe('MultiFieldMapping', () => {
     renderWithKibanaRenderContext(<MultiFieldMapping />);
     expect(screen.getByText('Source text field')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument();
+
+    // All source fields are available as combobox options
+    fireEvent.click(screen.getByRole('combobox'));
+    expect(screen.getByRole('option', { name: 'my-source-field1' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'my-source-field2' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'my-source-field3' })).toBeInTheDocument();
   });
 
   it('renders multi field selector with options excluding mapped and selected fields', () => {
@@ -54,7 +60,14 @@ describe('MultiFieldMapping', () => {
       },
     });
     renderWithKibanaRenderContext(<MultiFieldMapping />);
-    expect(screen.getByText('Source text field')).toBeInTheDocument();
+
+    // Open dropdown — only my-source-field3 should remain as an available option
+    fireEvent.click(screen.getByRole('combobox'));
+    expect(screen.getByRole('option', { name: 'my-source-field3' })).toBeInTheDocument();
+    // my-source-field1 is already selected (rendered as a badge, not a dropdown option)
+    // my-source-field2 is already mapped — must not appear as an option
+    expect(screen.queryByRole('option', { name: 'my-source-field1' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'my-source-field2' })).not.toBeInTheDocument();
   });
 
   it('disables add mapping button if no fields are selected', () => {
