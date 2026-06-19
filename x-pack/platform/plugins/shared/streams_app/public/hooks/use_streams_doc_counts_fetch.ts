@@ -56,7 +56,10 @@ export function useStreamDocCountsFetch({
   numDataPoints,
 }: UseDocCountFetchProps): {
   getStreamDocCounts(streamName?: string): StreamDocCountsFetch;
-  getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
+  getStreamHistogram(
+    streamName: string,
+    options?: { loadUnmappedFields?: boolean }
+  ): Promise<UnparsedEsqlResponse>;
 } {
   const { timeState, timeState$ } = useTimefilter();
   const {
@@ -170,7 +173,10 @@ export function useStreamDocCountsFetch({
 
       return docCountsFetch;
     },
-    getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
+    getStreamHistogram(
+      streamName: string,
+      { loadUnmappedFields = false }: { loadUnmappedFields?: boolean } = {}
+    ): Promise<UnparsedEsqlResponse> {
       const cacheKey = `${streamName}::${timeState.start}::${timeState.end}`;
       const cachedPromise = histogramPromiseCache.current[cacheKey];
       if (cachedPromise) {
@@ -189,7 +195,7 @@ export function useStreamDocCountsFetch({
       const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
       const histogramPromise = executeEsqlQuery({
-        query: buildStreamIngestHistogramEsql(source, minInterval),
+        query: buildStreamIngestHistogramEsql(source, minInterval, { loadUnmappedFields }),
         search: data.search.search,
         timezone,
         signal: abortController.signal,
