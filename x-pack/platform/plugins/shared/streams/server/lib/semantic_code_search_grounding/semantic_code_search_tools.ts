@@ -112,7 +112,8 @@ export const createSemanticCodeSearchTools = async ({
     if (!activeIndex && !activeRepository) {
       return { error: { results: [], count: 0, error: NO_ACTIVE_INDEX_ERROR } };
     }
-    const index = activeIndex ?? (activeRepository ? await resolveIndex(activeRepository) : undefined);
+    const index =
+      activeIndex ?? (activeRepository ? await resolveIndex(activeRepository) : undefined);
     return { params: { index, repository: activeRepository } };
   };
 
