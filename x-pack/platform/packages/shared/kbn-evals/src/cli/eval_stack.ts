@@ -17,6 +17,7 @@ import {
   startService,
   stopService,
   connectorsHash,
+  scoutEnvHash,
   tailLog,
   isEdotDockerRunning,
 } from './services';
@@ -160,8 +161,18 @@ export const ensureScout = async ({
   tracingExporters,
   serverConfigSet = 'evals_tracing',
 }: EnsureScoutOptions): Promise<void> => {
+  const scoutEnv: Record<string, string> = {};
+  if (gcsCredentials) {
+    scoutEnv.GCS_CREDENTIALS = gcsCredentials;
+  }
+  if (tracingExporters) {
+    scoutEnv.TRACING_EXPORTERS = tracingExporters;
+  }
+
   const scoutAlive = isServiceRunning(repoRoot, 'scout');
-  const staleCheck = scoutAlive ? isScoutStale(repoRoot, serverConfigSet) : { stale: false };
+  const staleCheck = scoutAlive
+    ? isScoutStale(repoRoot, serverConfigSet, scoutEnv)
+    : { stale: false };
 
   if (staleCheck.stale) {
     log.warning(`[scout] Scout server is stale (${staleCheck.reason}). Restarting...`);
@@ -190,13 +201,6 @@ export const ensureScout = async ({
   }
 
   log.info(`[scout] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`);
-  const scoutEnv: Record<string, string> = {};
-  if (gcsCredentials) {
-    scoutEnv.GCS_CREDENTIALS = gcsCredentials;
-  }
-  if (tracingExporters) {
-    scoutEnv.TRACING_EXPORTERS = tracingExporters;
-  }
 
   startService(
     repoRoot,
@@ -207,6 +211,7 @@ export const ensureScout = async ({
     {
       connectorsHash: connectorsHash(),
       serverConfigSet,
+      envHash: scoutEnvHash(scoutEnv),
       env: Object.keys(scoutEnv).length > 0 ? scoutEnv : undefined,
     }
   );
