@@ -142,6 +142,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
 
       <EuiFormRow label={CONFIRM_LABEL(datasetName)}>
         <EuiFieldText
+          autoFocus
           value={confirmText}
           onChange={(event) => setConfirmText(event.target.value)}
           isInvalid={confirmText.length > 0 && !isConfirmed}

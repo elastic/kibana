@@ -223,9 +223,10 @@ export class DatasetClient {
     const from = (page - 1) * perPage;
 
     const search = options.search?.trim();
-    const sortField = DATASET_SORTABLE_FIELDS.includes(options.sortField as DatasetSortField)
-      ? (options.sortField as DatasetSortField)
-      : 'updated_at';
+    const sortField =
+      options.sortField != null && DATASET_SORTABLE_FIELDS.includes(options.sortField)
+        ? options.sortField
+        : 'updated_at';
     const sortOrder: DatasetSortOrder = options.sortOrder === 'asc' ? 'asc' : 'desc';
 
     // The leading `*` wildcard on the `name` keyword field can't use the inverted

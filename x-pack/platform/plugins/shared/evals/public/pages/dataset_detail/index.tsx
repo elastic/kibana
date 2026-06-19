@@ -1059,9 +1059,9 @@ export const DatasetDetailPage: React.FC = () => {
 
       {/* Edit metadata modal */}
       {isMetadataModalOpen ? (
-        <EuiModal onClose={closeModals} aria-labelledby="editMetadataModalTitle">
+        <EuiModal onClose={closeModals} aria-labelledby="editDescriptionModalTitle">
           <EuiModalHeader>
-            <EuiModalHeaderTitle id="editMetadataModalTitle">
+            <EuiModalHeaderTitle id="editDescriptionModalTitle">
               {i18n.EDIT_DESCRIPTION_MODAL_TITLE}
             </EuiModalHeaderTitle>
           </EuiModalHeader>

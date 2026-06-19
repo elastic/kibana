@@ -163,6 +163,12 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   );
 };
 
+// Upper bound on datasets fetched solely to resolve which referenced datasets
+// still exist (for the "(deleted)" label). Above this, existence is treated as
+// undetermined and links are kept. A server-side existence flag is the proper
+// long-term fix; see the follow-up tracked for the experiment stats response.
+const MAX_DATASETS_FOR_EXISTENCE_CHECK = 1000;
+
 export const ExperimentDetailPage: React.FC = () => {
   const { experimentId } = useParams<{ experimentId: string }>();
   const history = useHistory();
@@ -259,7 +265,7 @@ export const ExperimentDetailPage: React.FC = () => {
     [updateSearchParams]
   );
 
-  const { data: datasetsData } = useDatasets({ perPage: 1000 });
+  const { data: datasetsData } = useDatasets({ perPage: MAX_DATASETS_FOR_EXISTENCE_CHECK });
 
   // A null set means existence is undetermined (still loading, or there are more
   // datasets than we fetched), in which case we keep the link to avoid rendering
