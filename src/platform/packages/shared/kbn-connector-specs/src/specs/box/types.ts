@@ -24,6 +24,7 @@ export const SearchFilesKeywordInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
+      .max(2000)
       .describe(
         'Keyword search query. Box searches file and folder names, content, descriptions, and metadata. Example: "Q3 budget report"'
       ),
@@ -58,6 +59,7 @@ export const SearchFoldersByNameInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
+      .max(2000)
       .describe('Folder name search query. Matches folder names containing this string.'),
     limit: z
       .number()
@@ -137,6 +139,7 @@ export const AiQaSingleFileInputSchema = lazySchema(() =>
     prompt: z
       .string()
       .min(1)
+      .max(10000)
       .describe(
         'The question or instruction to send to Box AI about the file. Example: "Summarize the key findings" or "What is the total budget in this document?"'
       ),
@@ -155,6 +158,7 @@ export const AiQaMultiFileInputSchema = lazySchema(() =>
     prompt: z
       .string()
       .min(1)
+      .max(10000)
       .describe(
         'The question or instruction to send to Box AI about the selected files. Example: "Compare the budget figures across these reports."'
       ),
@@ -171,6 +175,7 @@ export const AiQaHubInputSchema = lazySchema(() =>
     prompt: z
       .string()
       .min(1)
+      .max(10000)
       .describe(
         'The question or instruction to send to Box AI about the hub content. Example: "What projects are currently in progress?"'
       ),
@@ -189,6 +194,7 @@ export const AiExtractFreeformInputSchema = lazySchema(() =>
     prompt: z
       .string()
       .min(1)
+      .max(10000)
       .describe(
         'Natural-language description of what metadata to extract. Example: "Extract the contract start date, end date, and total contract value."'
       ),
@@ -281,6 +287,7 @@ export const SearchByMetadataInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
+      .max(2000)
       .describe(
         'A metadata query expression. Example: `amount >= 100 AND currency = "USD"`. Refer to Box metadata query syntax for operators and field references.'
       ),
