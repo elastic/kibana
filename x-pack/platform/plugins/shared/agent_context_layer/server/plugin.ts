@@ -62,8 +62,8 @@ export class AgentContextLayerPlugin
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 
     // Register the neutral 'corpus_entry' SML type so workflow authors can sink
-    // ad-hoc / eval documents (e.g. the BrowseComp-Plus corpus) via the
-    // contextEngine.addEntry step without reusing a solution-owned type.
+    // ad-hoc / eval documents via contextEngine.addEntry without reusing a
+    // solution-owned type.
     smlSetup.registerType(corpusEntrySmlType);
 
     registerSmlCrawlerTaskDefinition({
