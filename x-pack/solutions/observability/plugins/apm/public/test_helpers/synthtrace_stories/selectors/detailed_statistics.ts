@@ -38,6 +38,7 @@ export function toDetailedStatisticsResponse(
     const sortedKeys = [...buckets.keys()].sort((a, b) => a - b);
 
     currentPeriod[serviceName] = {
+      serviceName,
       latency: sortedKeys.map((bucket) => {
         const b = buckets.get(bucket)!;
         return { x: bucket, y: b.durations.reduce((s, d) => s + d, 0) / b.durations.length };

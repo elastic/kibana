@@ -30,8 +30,8 @@ const argsDecorator: Decorator<Args> = (Story, { args }) => {
 
   // Lazy require keeps the route tree out of the module graph until after each
   // test file's hoisted `jest.mock()` calls have registered. See jest_preview.tsx.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { apmRouter } = require('../../apm_route_config');
+
+  require('../../apm_route_config');
 
   const routePath = `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
     environment ?? ENVIRONMENT_ALL.value
@@ -60,7 +60,6 @@ const argsDecorator: Decorator<Args> = (Story, { args }) => {
       routePath={routePath}
       apmContext={apmContext}
       serviceContextValue={serviceContextValue}
-      router={apmRouter}
     >
       <Story />
     </MockApmPluginStorybook>
