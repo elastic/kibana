@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/sig_events_tuning_config';
 import { GCS_BUCKET, OTEL_DEMO_GCS_BASE_PATH_PREFIX, OTEL_DEMO_NAMESPACE } from '../constants';
 import type { DatasetConfig } from './types';
 
@@ -84,7 +85,14 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Must identify the dependency checkout → payment (evidence: 74 checkout docs log "payment went through (transaction_id: ...)" correlating with payment "Charge request received" / "Transaction complete")',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'payment went through' } },
+                  ],
+                },
+              },
               { term: { 'resource.attributes.app': 'payment' } },
             ],
           },
@@ -560,12 +568,17 @@ export const otelDemoDataset: DatasetConfig = {
       },
     },
   ],
-  kiFeatureDuplication: [
+  kiFeatureDeduplication: [
     {
       input: {
         scenario_id: 'healthy-baseline',
-        sample_document_count: 20,
-        runs: 5,
+        iterations: DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_iterations,
+      },
+    },
+    {
+      input: {
+        scenario_id: 'payment-unreachable',
+        iterations: DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_iterations,
       },
     },
   ],

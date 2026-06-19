@@ -19,11 +19,13 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getConfidenceColor } from '../utils/get_confidence_color';
@@ -48,18 +50,25 @@ interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
+  features: Feature[];
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
   knowledgeIndicator,
   occurrencesByQueryId,
   onClose,
+  features,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+
+  const streamFeatures = useMemo(
+    () => features.filter((f) => f.stream_name === streamName),
+    [features, streamName]
+  );
 
   const {
     excludeFeature,
@@ -96,7 +105,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     const computed = isComputedFeature(knowledgeIndicator.feature);
 
     if (!computed) {
-      if (knowledgeIndicator.feature.excluded_at) {
+      if (knowledgeIndicator.feature.excluded) {
         items.push(
           <EuiContextMenuItem
             key="feature-restore"
@@ -104,7 +113,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              restoreFeature(knowledgeIndicator.feature.uuid);
+              restoreFeature(knowledgeIndicator.feature.id);
             }}
           >
             {RESTORE_LABEL}
@@ -118,7 +127,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              excludeFeature(knowledgeIndicator.feature.id);
             }}
           >
             {EXCLUDE_LABEL}
@@ -201,28 +210,32 @@ export function KnowledgeIndicatorDetailsFlyout({
             <EuiPopover
               aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
               button={
-                <EuiButtonIcon
-                  iconType="boxesVertical"
-                  aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
-                  isLoading={isMutating}
-                  isDisabled={isMutating}
-                  onClick={() => setIsActionsMenuOpen((open) => !open)}
-                />
+                <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
+                    isLoading={isMutating}
+                    isDisabled={isMutating}
+                    onClick={() => setIsActionsMenuOpen((open) => !open)}
+                  />
+                </EuiToolTip>
               }
               isOpen={isActionsMenuOpen}
               closePopover={() => setIsActionsMenuOpen(false)}
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel size="s" items={[...featureActionItems, ...queryActionItems]} />
+              <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
             </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={CLOSE_BUTTON_ARIA_LABEL}
-              onClick={onClose}
-            />
+            <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                onClick={onClose}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </FlyoutToolbarHeader>
 
@@ -280,6 +293,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
               occurrences={occurrencesByQueryId[knowledgeIndicator.query.id]}
+              streamFeatures={streamFeatures}
             />
           )}
         </EuiFlyoutBody>

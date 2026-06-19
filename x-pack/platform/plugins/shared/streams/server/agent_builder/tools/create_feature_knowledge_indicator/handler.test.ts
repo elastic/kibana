@@ -9,10 +9,6 @@ import type { BaseFeature } from '@kbn/streams-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'generated-feature-uuid'),
-}));
-
 describe('createFeatureKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
 
@@ -29,42 +25,39 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
   });
 
   it('creates and stores feature KI with server-managed fields', async () => {
-    const featureClient = {
-      bulk: jest.fn().mockResolvedValue(undefined),
+    const kiClient = {
+      bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     };
 
     const result = await createFeatureKnowledgeIndicatorToolHandler({
-      featureClient: featureClient as never,
+      kiClient: kiClient as never,
       streamName: 'logs.test',
       featureInput,
       logger,
     });
 
-    expect(result).toEqual({ id: 'feature-1', uuid: 'generated-feature-uuid' });
-    expect(featureClient.bulk).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ id: 'feature-1' });
+    expect(kiClient.bulk).toHaveBeenCalledTimes(1);
 
-    const [streamNameArg, operationsArg] = featureClient.bulk.mock.calls[0];
+    const [streamNameArg, operationsArg] = kiClient.bulk.mock.calls[0];
     expect(streamNameArg).toBe('logs.test');
     expect(operationsArg).toHaveLength(1);
     expect(operationsArg[0].index.feature).toEqual(
       expect.objectContaining({
         ...featureInput,
         stream_name: 'logs.test',
-        uuid: 'generated-feature-uuid',
-        status: 'active',
       })
     );
-    expect(typeof operationsArg[0].index.feature.last_seen).toBe('string');
   });
 
   it('throws when feature storage fails', async () => {
-    const featureClient = {
+    const kiClient = {
       bulk: jest.fn().mockRejectedValue(new Error('bulk failed')),
     };
 
     await expect(
       createFeatureKnowledgeIndicatorToolHandler({
-        featureClient: featureClient as never,
+        kiClient: kiClient as never,
         streamName: 'logs.test',
         featureInput,
         logger,

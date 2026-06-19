@@ -7,7 +7,7 @@
   ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
-  "baseBranches": ["main", "9.4", "9.3", "9.2", "8.19"],
+  "baseBranches": ["main", "9.4", "9.3", "8.19"],
   "labels": ["release_note:skip", "backport:all-open"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -26,12 +26,20 @@
       "enabled": false
     },
     {
+      "groupName": "gh-aw",
+      "matchDepNames": ["github/gh-aw"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:skip", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "webpack",
       "matchDepNames": [
         "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
-        "file-loader",
         "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
@@ -43,15 +51,30 @@
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
-        "@types/webpack",
         "@types/webpack-bundle-analyzer",
-        "@types/webpack-env",
         "@types/webpack-sources"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:build-webpack-bundle-analyzer"],
       "minimumReleaseAge": "60 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@rspack",
+      "matchDepNames": [
+        "@rspack/core",
+        "@rspack/plugin-react-refresh",
+        "@rsdoctor/rspack-plugin"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": [
+        "Team:Operations",
+        "backport:skip",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "30 days",
       "enabled": true
     },
     {
@@ -104,12 +127,10 @@
         "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
-        "ajv",
         "aws4",
         "eventsource-parser",
         "fast-glob",
         "gpt-tokenizer",
-        "langsmith",
         "openai",
         "@types/json-schema",
         "table",
@@ -152,7 +173,6 @@
         "@playwright/test",
         "playwright",
         "pngjs",
-        "qs",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -216,7 +236,7 @@
     },
     {
       "groupName": "base64-js dependencies",
-      "matchDepNames": ["base64-js", "@types/base64-js"],
+      "matchDepNames": ["base64-js"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -233,7 +253,7 @@
     },
     {
       "groupName": "classnames dependencies",
-      "matchDepNames": ["classnames", "@types/classnames"],
+      "matchDepNames": ["classnames"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -251,7 +271,7 @@
     },
     {
       "groupName": "lz-string dependencies",
-      "matchDepNames": ["lz-string", "@types/lz-string"],
+      "matchDepNames": ["lz-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -326,29 +346,17 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "matchDepNames": [
-        "react-element-to-jsx-string"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-element-to-jsx-string"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
     {
-      "matchDepNames": [
-        "react-use"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-use"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -369,11 +377,7 @@
       "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "Team:SharedUX",
-        "effort:high",
-        "upgrade-risk:high"
-      ],
+      "addLabels": ["Team:SharedUX", "effort:high", "upgrade-risk:high"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -560,7 +564,6 @@
         "reflect-metadata",
         "type-detect",
         "utility-types",
-        "@types/fetch-mock",
         "@types/getos",
         "@types/mock-fs",
         "@types/node-fetch",
@@ -683,8 +686,7 @@
       "reviewers": ["team:kibana-visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
+      "enabled": true
     },
     {
       "groupName": "@elastic/ecs",
@@ -820,6 +822,7 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
+        "ajv",
         "ajv-draft-04",
         "ajv-formats"
       ],
@@ -909,7 +912,7 @@
     },
     {
       "groupName": "micromatch/minimatch",
-      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch", "@types/minimatch"],
+      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -918,7 +921,7 @@
     },
     {
       "groupName": "nock",
-      "matchDepNames": ["nock", "@types/nock"],
+      "matchDepNames": ["nock"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -974,15 +977,6 @@
       "enabled": true
     },
     {
-      "groupName": "cssstyle",
-      "matchDepNames": ["cssstyle", "@types/cssstyle"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "execa",
       "matchDepNames": ["execa"],
       "reviewers": ["team:kibana-operations"],
@@ -1002,7 +996,7 @@
     },
     {
       "groupName": "polyfills",
-      "matchDepNames": ["blob-polyfill", "core-js"],
+      "matchDepNames": ["blob-polyfill", "core-js", "qs"],
       "matchDepPatterns": ["polyfill"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1163,7 +1157,7 @@
     },
     {
       "groupName": "source-map",
-      "matchDepNames": ["source-map", "source-map-support", "@types/source-map-support"],
+      "matchDepNames": ["source-map-support", "@types/source-map-support"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1226,17 +1220,9 @@
     },
     {
       "groupName": "hjson",
-      "matchDepNames": [
-        "@types/hjson",
-        "hjson"
-      ],
-      "reviewers": [
-        "team:kibana-visualizations",
-        "team:fleet"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["@types/hjson", "hjson"],
+      "reviewers": ["team:kibana-visualizations", "team:fleet"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1313,12 +1299,7 @@
       "matchDepNames": ["kea"],
       "reviewers": ["team:search-kibana"],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "Team:Search",
-        "Team:Enterprise Search",
-        "effort:high",
-        "upgrade-risk:medium"
-      ],
+      "addLabels": ["Team:Search", "Team:Enterprise Search", "effort:high", "upgrade-risk:medium"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1333,7 +1314,7 @@
     },
     {
       "groupName": "workplace_ai gen-ai dependencies",
-      "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk"],
+      "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk", "just-bash"],
       "reviewers": ["team:search-kibana"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search"],
@@ -1556,7 +1537,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/extract-zip", "@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],
@@ -1812,11 +1793,7 @@
       "matchDepNames": ["camelcase-keys"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "Team: SecuritySolution",
-        "effort:low",
-        "blocked"
-      ],
+      "addLabels": ["Team: SecuritySolution", "effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1891,16 +1868,14 @@
     {
       "groupName": "platform security modules",
       "matchDepNames": [
-        "css.escape",
-        "dependency-check",
         "dependency-cruiser",
         "dompurify",
         "fast-deep-equal",
         "node-forge",
         "formik",
         "handlebars",
-        "js-sha256",
         "js-yaml",
+        "knip",
         "magic-bytes.js",
         "minimist",
         "object-hash",
@@ -1913,8 +1888,7 @@
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
-        "@types/object-hash",
-        "@types/tough-cookie"
+        "@types/object-hash"
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
@@ -1983,11 +1957,7 @@
       "groupName": "minify",
       "matchDepNames": [
         "gulp-brotli",
-        "gulp-postcss",
-        "gulp-terser",
-        "terser",
-        "terser-webpack-plugin",
-        "@types/gulp"
+        "terser-webpack-plugin"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2023,14 +1993,12 @@
         "expect",
         "jest",
         "jest-canvas-mock",
-        "jest-cli",
         "jest-config",
         "jest-diff",
         "jest-environment-jsdom",
         "jest-matcher-utils",
         "jest-mock",
         "jest-runtime",
-        "jest-specific-snapshot",
         "jest-snapshot",
         "jest-styled-components",
         "mutation-observer"
@@ -2141,11 +2109,7 @@
         "team:security-solution"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "ci:all-cypress-suites",
-        "effort:high",
-        "upgrade-risk:high"
-      ],
+      "addLabels": ["ci:all-cypress-suites", "effort:high", "upgrade-risk:high"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2153,14 +2117,6 @@
       "groupName": "Peggy",
       "matchDepNames": ["peggy"],
       "reviewers": ["team:kibana-visualizations", "team:kibana-data-discovery"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "Cytoscape",
-      "matchDepNames": ["cytoscape", "cytoscape-dagre"],
-      "reviewers": ["team:ml-ui"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2185,12 +2141,10 @@
     {
       "groupName": "langchain",
       "matchDepNames": [
-        "langchain",
         "@langchain/aws",
         "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
-        "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
         "@langchain/langgraph-checkpoint",
@@ -2211,20 +2165,11 @@
       "enabled": true
     },
     {
-      "groupName": "nunjucks",
-      "matchDepNames": ["@types/nunjucks", "nunjucks"],
-      "reviewers": ["team:integration-experience"],
+      "groupName": "langsmith",
+      "matchDepNames": ["langsmith"],
+      "reviewers": ["team:security-threat-hunting"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "oas",
-      "matchDepNames": ["oas"],
-      "reviewers": ["team:integration-experience"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
+      "addLabels": ["Team:Threat Hunting"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2279,15 +2224,9 @@
     },
     {
       "groupName": "esql-js",
-      "matchDepNames": [
-        "@elastic/esql"
-      ],
-      "reviewers": [
-        "team:kibana-esql"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["@elastic/esql"],
+      "reviewers": ["team:kibana-esql"],
+      "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2348,7 +2287,9 @@
         "@opentelemetry/api",
         "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/exporter-logs-otlp-grpc",
         "@opentelemetry/exporter-logs-otlp-http",
+        "@opentelemetry/exporter-logs-otlp-proto",
         "@opentelemetry/exporter-metrics-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-metrics-otlp-proto",
@@ -2360,6 +2301,7 @@
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/otlp-transformer",
         "@opentelemetry/sdk-logs",
         "@opentelemetry/semantic-conventions"
       ],
@@ -2439,7 +2381,7 @@
     },
     {
       "groupName": "Kibana ES|QL Team",
-      "matchDepNames": ["recast", "tree-dump"],
+      "matchDepNames": ["recast"],
       "reviewers": ["team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ESQL"],
@@ -2457,7 +2399,7 @@
     {
       "groupName": "re2js",
       "matchDepNames": ["re2js"],
-      "reviewers": ["team:kibana-visualizations", "dej611"],
+      "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Visualizations"],
       "enabled": true,
@@ -2489,15 +2431,9 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": [
-        "oxlint"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["oxlint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2523,6 +2459,15 @@
     {
       "groupName": "@elastic/request-converter",
       "matchDepNames": ["@elastic/request-converter"],
+      "reviewers": ["team:kibana-management"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/micro-jq",
+      "matchDepNames": ["@elastic/micro-jq"],
       "reviewers": ["team:kibana-management"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],
@@ -2556,15 +2501,6 @@
       "enabled": true
     },
     {
-      "groupName": "canvas-confetti",
-      "matchDepNames": ["canvas-confetti", "@types/canvas-confetti"],
-      "reviewers": ["team:appex-sharedux"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:SharedUX", "release_note:skip", "backport:previous-minor"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "xml Format Util",
       "matchDepNames": ["xml-formatter"],
       "reviewers": ["team:security-threat-hunting"],
@@ -2583,8 +2519,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@swc/core",
-      "matchDepNames": ["@swc/core"],
+      "groupName": "@swc",
+      "matchDepNames": ["@swc/core", "@swc/helpers"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2620,15 +2556,9 @@
     },
     {
       "groupName": "alerting v2 dependencies",
-      "matchDepNames": [
-        "apache-arrow"
-      ],
-      "reviewers": [
-        "team:response-ops"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["apache-arrow"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:ResponseOps"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -2644,6 +2574,18 @@
     }
   ],
   "customManagers": [
+    {
+      "description": "Update gh-aw CLI version used to validate generated agentic workflows",
+      "customType": "regex",
+      "fileMatch": ["^\\.github/workflows/validate-agentic-workflow-locks\\.yml$"],
+      "matchStrings": [
+        "GH_AW_VERSION:\\s(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"
+      ],
+      "depNameTemplate": "github/gh-aw",
+      "packageNameTemplate": "github/gh-aw",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
     {
       "description": "Update Wolfi base image",
       "customType": "regex",

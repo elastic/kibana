@@ -1,0 +1,19 @@
+{
+  "name": "@kbn/esql-scripts",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "sideEffects": false,
+  "scripts": {
+    "make:defs": "./definitions/make_defs.sh",
+    "postmake:defs": "yarn run lint:fix:definitions",
+    "lint:fix:definitions": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated",
+    "make:docs": "./documentation/make_docs.sh",
+    "postmake:docs": "yarn run lint:fix:docs",
+    "lint:fix:docs": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/private/kbn-language-documentation/src/sections/generated"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "5.9.3"
+  }
+}

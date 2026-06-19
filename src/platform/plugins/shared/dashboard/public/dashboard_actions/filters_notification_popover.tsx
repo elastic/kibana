@@ -19,12 +19,13 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiPopoverFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
-import { ACTION_EDIT_PANEL } from '@kbn/presentation-panel-plugin/public';
+import { ACTION_EDIT_PANEL } from '@kbn/embeddable-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
@@ -97,18 +98,20 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          color="text"
-          iconType={'filter'}
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-            if (apiCanLockHoverActions(api)) {
-              api?.lockHoverActions(!api.hasLockedHoverActions$.value);
-            }
-          }}
-          data-test-subj={`embeddablePanelNotification-${api.uuid}`}
-          aria-label={displayName}
-        />
+        <EuiToolTip content={displayName} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            iconType={'filter'}
+            onClick={() => {
+              setIsPopoverOpen(!isPopoverOpen);
+              if (apiCanLockHoverActions(api)) {
+                api?.lockHoverActions(!api.hasLockedHoverActions$.value);
+              }
+            }}
+            data-test-subj={`embeddablePanelNotification-${api.uuid}`}
+            aria-label={displayName}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

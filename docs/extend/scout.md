@@ -9,9 +9,10 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 ## Start here [scout-start-here]
 
 - [Getting started](./scout/getting-started.md)
-- [Best practices](./scout/best-practices.md) (see also [UI test best practices](./scout/ui-best-practices.md) and [API test best practices](./scout/api-best-practices.md))
+- [Best practices](./scout/best-practices.md) (see also [UI](./scout/ui-best-practices.md) and [API](./scout/api-best-practices.md) test best practices)
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
+- [Migrate tests to Scout](./scout/migrate-tests.md)
 
 ## Scout benefits [scout-main-features]
 
@@ -21,7 +22,7 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 - **Deployment-agnostic**: write tests once, then use [tags](./scout/deployment-tags.md) to declare where they should run (stateful/serverless).
 - **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
 - **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
-- **Reporting**: we capture test events that power our dashboards (for example, skipped tests, flaky tests, and more).
+- **Reporting**: we provide you with dashboards to track skipped tests, flaky tests, and more.
 - **Reusability**: reuse or write reusable fixtures, page objects and API helpers to reduce duplication.
 - **Follows modern best practices**: check out our [Scout best practices](./scout/best-practices.md).
 
@@ -57,7 +58,7 @@ We welcome contributions to one of the Scout packages.
 | Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers     |
 | Is specific to one plugin or package  | In your plugin or package’s `test/scout` directory                                                        | Components specific to your plugin or package only |
 
-## Need help?
+## Need help? [need-help]
 
 - **Internal (Elasticians)**: reach out to the AppEx QA team in the `#kibana-scout` Slack channel for guidance.
 
@@ -67,11 +68,11 @@ We welcome contributions to one of the Scout packages.
 
 #### Q: Does Scout prevent flaky tests? [scout-faq-flakes]
 
-No—good test design still matters.
+No, good test design still matters.
 
 #### Q: Is Scout designed to be _just_ a Playwright UI test runner? [scout-faq-ui-only]
 
-No. Scout supports both UI and API testing with Playwright.
+No. Scout supports both [UI](./scout/ui-testing.md) and [API](./scout/api-testing.md) testing with Playwright.
 
 #### Q: Are test runs going to be faster? [scout-faq-faster]
 
@@ -92,6 +93,10 @@ Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 #### Q: What happens to FTR tests? [scout-faq-ftr-tests]
 
 Existing FTR tests continue to run, and teams can migrate them to Scout incrementally over time.
+
+#### Q: Should I migrate every FTR test to Scout? [scout-faq-migrate-ftr-to-scout]
+
+_It depends_: [pick the right test type](./scout/best-practices.md#pick-the-right-test-type) before migrating a test. Refer to our [Migrate tests to Scout](./scout/migrate-tests.md) guide.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 

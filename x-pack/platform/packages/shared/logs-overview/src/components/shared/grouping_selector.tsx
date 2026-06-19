@@ -65,6 +65,7 @@ export const GroupingSelector: React.FC<GroupingSelectorProps> = ({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downRight"
+      aria-label={groupingSelectorPopoverAriaLabel}
     >
       <EuiContextMenuPanel items={groupingSelectorItems} />
     </EuiPopover>
@@ -82,5 +83,12 @@ const groupingItemCategoriesTitle = i18n.translate(
   'xpack.observabilityLogsOverview.groupingSelector.categories',
   {
     defaultMessage: 'Log Patterns',
+  }
+);
+
+const groupingSelectorPopoverAriaLabel = i18n.translate(
+  'xpack.observabilityLogsOverview.groupingSelector.popoverAriaLabel',
+  {
+    defaultMessage: 'Select grouping option',
   }
 );

@@ -12,6 +12,7 @@ import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
 import { getHiddenBandsFilters } from '../hidden_bands_filter';
+import { getEntityIdsFilter } from '../entity_ids_filter';
 
 export type ViewByMode = 'entity' | 'jobId';
 
@@ -41,7 +42,7 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
-    parts.push(`| EVAL ${entityType}_euid = ${euidApi.esql.getEuidEvaluation(entityType)}`);
+    parts.push(`| EVAL ${euidApi.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
   parts.push(
@@ -76,7 +77,7 @@ const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
   // Filter ensures only entities that exist in the entity store are shown.
   // For watchlists, the watchlist filter implicitly achieves this.
   const entityFilter = watchlistId
-    ? `| WHERE entity.attributes.watchlists == "${watchlistId}"`
+    ? `| WHERE MV_CONTAINS(entity.attributes.watchlists, "${watchlistId}")`
     : `| WHERE entity.name IS NOT NULL`;
 
   return `
@@ -92,6 +93,12 @@ interface EsqlSourceParams {
   viewBy: ViewByMode;
   watchlistId?: string;
   spaceId?: string;
+  /**
+   * Entity IDs (EUIDs) the global search bar filter resolved to, used to
+   * constrain anomalies to matching entities. `undefined` means no active
+   * filter (leave unconstrained).
+   */
+  entityIds?: string[];
 }
 
 export const useRecentAnomaliesTopRowsEsqlSource = ({
@@ -100,6 +107,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   viewBy,
   watchlistId,
   spaceId,
+  entityIds,
 }: EsqlSourceParams & { rowsLimit: number }): string | undefined => {
   const euidApi = useEntityStoreEuidApi();
 
@@ -111,6 +119,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     | WHERE record_score IS NOT NULL
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
+    ${getEntityIdsFilter(entityIds)}
     ${getEntityStoreJoinBlock(spaceId, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | STATS max_record_score = MAX(record_score) BY job_id
@@ -125,6 +134,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     | WHERE record_score IS NOT NULL
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
+    ${getEntityIdsFilter(entityIds)}
     ${getEntityStoreJoinBlock(spaceId, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | STATS max_record_score = MAX(record_score), entity_name = VALUES(entity_name), entity_type = VALUES(entity_type) BY entity_id
@@ -140,9 +150,11 @@ export const useRecentAnomaliesDataEsqlSource = ({
   viewBy,
   watchlistId,
   spaceId,
-}: EsqlSourceParams & { rowLabels?: string[] }) => {
+  entityIds,
+  timeRange,
+}: EsqlSourceParams & { rowLabels?: string[]; timeRange?: { from: string; to: string } }) => {
   const euidApi = useEntityStoreEuidApi();
-  const interval = useIntervalForHeatmap();
+  const interval = useIntervalForHeatmap(timeRange);
 
   if (!euidApi || !spaceId || !rowLabels) return undefined;
   const formattedLabels = rowLabels.map((each) => `"${each}"`).join(', ');
@@ -153,6 +165,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
     | WHERE record_score IS NOT NULL AND job_id IN (${formattedLabels})
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
+    ${getEntityIdsFilter(entityIds)}
     ${getEntityStoreJoinBlock(spaceId, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | EVAL job_id_to_record_score = CONCAT(job_id, " : ", TO_STRING(record_score))

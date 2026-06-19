@@ -11,7 +11,7 @@ import pMap from 'p-map';
 import type { WatchlistCsvUploadResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
-import { getExistingEntitiesMap, getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
 import { MANUAL_SOURCE_ID } from '../manual/constants';
 import type { MatchedEntity, Watchlist } from './types';
 import { lookupEntitiesForRow } from './lookup';
@@ -68,18 +68,11 @@ const upsertToWatchlistIndex = async (
     currentWatchlists: m.currentWatchlists,
   }));
 
-  const existingMap = await getExistingEntitiesMap(
-    esClient,
-    watchlist,
-    entities.map((e) => e.euid)
-  );
-  const enriched = entities.map((e) => ({ ...e, existingEntityId: existingMap.get(e.euid) }));
-
   const operations = bulkUpsertOperationsFactory(
     logger,
     watchlist
   )({
-    entities: enriched,
+    entities,
     sourceLabel: MANUAL_SOURCE_ID,
     targetIndex: watchlist.index,
   });

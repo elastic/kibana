@@ -154,8 +154,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
-    // flush event logs after start step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     // Create APM span for step execution visibility in traces
     const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
@@ -171,15 +169,30 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       const result = await this._run(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
-      // This is the generic catch-all that protects every step type against context growth.
-      // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
-      if (result.output != null && !result.error) {
+      // This is the generic catch-all that protects every step type against
+      // context growth. Layer 1 (pre-emptive I/O enforcement) may have
+      // already caught this at the transport level.
+      let measuredOutputSize: number | undefined;
+      if (result.output != null) {
         const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const outputSize = safeOutputSize(result.output);
-          if (outputSize > 0 && outputSize > maxBytes) {
+          // Fail closed on non-serializable outputs (null sentinel) — the
+          // value cannot be persisted to ES, so silently allowing it through
+          // would leak a payload of unknown size into in-memory state and
+          // bypass both the size limit and eviction.
+          if (outputSize === null) {
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
+          if (outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(maxBytes, this.step.name, {
+              actualBytes: outputSize,
+            });
+          }
+          // Forward the already-computed size to finishStep so the IO service
+          // can decide eviction without re-serialising. Zero-byte outputs are
+          // forwarded so the step still counts toward stats.
+          measuredOutputSize = outputSize;
         }
       }
 
@@ -193,12 +206,18 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
 
       if (result.error) {
-        this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
+        // Pass partial output (e.g. token-usage metadata accumulated before a
+        // stream error) so it is persisted and reachable via
+        // `steps.x.output.metadata.usage` even when the step fails.
+        this.stepExecutionRuntime.failStep(
+          new ExecutionError(result.error),
+          result.output ?? undefined
+        );
         if (stepSpan) {
           stepSpan.setOutcome('failure');
         }
       } else {
-        this.stepExecutionRuntime.finishStep(result.output);
+        this.stepExecutionRuntime.finishStep(result.output, measuredOutputSize);
         if (stepSpan) {
           stepSpan.setOutcome('success');
         }
@@ -214,9 +233,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         stepSpan.end();
       }
     }
-
-    // flush event logs after finishing the step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     this.workflowExecutionRuntime.navigateToNextNode();
   }

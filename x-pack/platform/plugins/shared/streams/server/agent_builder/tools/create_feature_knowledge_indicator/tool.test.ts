@@ -11,7 +11,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { StreamsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../test_helpers';
+import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import {
   createFeatureKnowledgeIndicatorTool,
   STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID,
@@ -138,7 +138,7 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getFeatureClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;
@@ -196,7 +196,7 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getFeatureClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;

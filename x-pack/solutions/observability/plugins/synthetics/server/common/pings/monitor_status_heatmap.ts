@@ -6,6 +6,7 @@
  */
 
 import type { SyntheticsEsClient } from '../../lib';
+import { getSyntheticsCcsIndex } from '../../../common/get_synthetics_indices';
 
 export async function queryMonitorHeatmap({
   syntheticsEsClient,
@@ -14,6 +15,7 @@ export async function queryMonitorHeatmap({
   monitorId,
   location,
   intervalInMinutes,
+  remoteName,
 }: {
   syntheticsEsClient: SyntheticsEsClient;
   from: number | string;
@@ -21,8 +23,10 @@ export async function queryMonitorHeatmap({
   monitorId: string;
   location: string;
   intervalInMinutes: number;
+  remoteName?: string;
 }) {
   return syntheticsEsClient.search({
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     size: 0,
     query: {
       bool: {

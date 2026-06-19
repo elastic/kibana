@@ -13,6 +13,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import {
   STREAMS_API_PRIVILEGES,
   MIN_EXTRACTION_INTERVAL_HOURS,
@@ -47,26 +48,19 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    continuousKiExtractionWorkflowService,
+    continuousKiOnboardingWorkflowService,
+    logger,
   }): Promise<{ success: true }> => {
-    const { licensing, uiSettingsClient, globalUiSettingsClient, taskClient } =
-      await getScopedClients({ request });
+    if (!continuousKiOnboardingWorkflowService) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
+    }
+
+    const { licensing, uiSettingsClient, globalUiSettingsClient } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { continuousKiExtraction } = params.body;
-
-    if (continuousKiExtractionWorkflowService) {
-      const enabled =
-        continuousKiExtraction.enabled ??
-        (await globalUiSettingsClient.get<boolean>(
-          OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-        ));
-      await continuousKiExtractionWorkflowService.ensureWorkflow({
-        enabled,
-        request,
-        taskClient,
-      });
-    }
 
     const updates: Record<string, boolean | number | string> = {};
 
@@ -83,8 +77,38 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
         continuousKiExtraction.excludedStreamPatterns;
     }
 
-    if (Object.keys(updates).length > 0) {
+    const previousValues: Record<string, boolean | number | string> = {};
+    const keys = Object.keys(updates);
+    const allSettings = await globalUiSettingsClient.getAll<boolean | number | string>();
+    if (keys.length > 0) {
+      for (const key of keys) {
+        previousValues[key] = allSettings[key];
+      }
       await globalUiSettingsClient.setMany(updates);
+    }
+
+    // Only reconcile the workflow on an actual enabled-state transition so the
+    // legacy and managed workflows never run at the same time. Interval/excluded
+    // changes are picked up by the running workflow at execution time.
+    const previousEnabled = allSettings[
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+    ] as boolean;
+    const nextEnabled = continuousKiExtraction.enabled;
+
+    if (nextEnabled !== undefined && nextEnabled !== previousEnabled) {
+      try {
+        await continuousKiOnboardingWorkflowService.ensureWorkflow({
+          enabled: nextEnabled,
+          request,
+        });
+      } catch (err) {
+        if (Object.keys(previousValues).length > 0) {
+          await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
+            logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
+          });
+        }
+        throw err;
+      }
     }
 
     return { success: true };

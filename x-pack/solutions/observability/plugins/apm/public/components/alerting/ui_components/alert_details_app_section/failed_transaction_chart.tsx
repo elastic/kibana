@@ -16,18 +16,19 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Theme } from '@elastic/charts';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { ChartType } from '../../../shared/charts/helper/get_timeseries_color';
-import * as get_timeseries_color from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { isFailedTransactionRateRuleType, yLabelFormat } from './helpers';
+import { yLabelFormat } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
 
 type ErrorRate =
@@ -63,9 +64,11 @@ export function FailedTransactionChart({
   customAlertEvaluationThreshold,
   threshold,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
-  transactionType: string;
+  transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
@@ -81,14 +84,19 @@ export function FailedTransactionChart({
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
-  ruleTypeId?: string;
+  ruleTypeId?: ApmRuleType;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
   } = useKibana();
 
-  const { currentPeriodColor: currentPeriodColorErrorRate } =
-    get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+  const { currentPeriodColor: currentPeriodColorErrorRate } = getTimeSeriesColor(
+    ChartType.FAILED_TRANSACTION_RATE
+  );
 
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -145,8 +153,9 @@ export function FailedTransactionChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     dateFormat,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     customAlertEvaluationThreshold,
-    isMatchingRuleType: isFailedTransactionRateRuleType,
     normalizeThreshold: (value) => value / 100,
   });
 
@@ -161,7 +170,7 @@ export function FailedTransactionChart({
     },
   ];
 
-  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>
@@ -201,18 +210,19 @@ export function FailedTransactionChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
+                  element={APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="errorRate"
               height={200}

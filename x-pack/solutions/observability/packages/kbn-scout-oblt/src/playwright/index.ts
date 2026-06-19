@@ -6,4 +6,5 @@
  */
 
 export * from './fixtures';
+export { OBSERVABILITY_SPA_SHELL_TIMEOUT_MS } from './page_objects';
 export type { ObltPageObjects } from './page_objects';

@@ -11,15 +11,14 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
 import { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
-import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
-import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
@@ -378,16 +377,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           getSpaceId()
         );
       }),
-      getAssetInventoryClient: memoize(
-        () =>
-          new AssetInventoryDataClient({
-            logger: options.logger,
-            clusterClient: coreContext.elasticsearch.client,
-            uiSettingsClient: coreContext.uiSettings.client,
-            usageCollection: options.plugins.usageCollection,
-            coreStartPromise: core.getStartServices(),
-          })
-      ),
       getMlAuthz: memoize(() => {
         return mlAuthz;
       }),

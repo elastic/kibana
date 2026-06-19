@@ -12,7 +12,6 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { resolveSmlAttachItems } from '../../../sml/execute_sml_attach_items';
 import type { SmlToolsOptions } from './types';
 
 const smlAttachSchema = z.object({
@@ -30,7 +29,7 @@ const smlAttachSchema = z.object({
  * Converts SML search results into conversation attachments.
  */
 export const createSmlAttachTool = ({
-  getSmlService,
+  getAgentContextLayer,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlAttachSchema> => ({
   id: platformCoreTools.smlAttach,
   type: ToolType.builtin,
@@ -56,13 +55,12 @@ export const createSmlAttachTool = ({
     },
   },
   handler: async ({ chunk_ids: chunkIds }, context) => {
-    const smlService = getSmlService();
+    const agentContextLayer = getAgentContextLayer();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
-    const resolvedItems = await resolveSmlAttachItems({
+    const resolvedItems = await agentContextLayer.resolveSmlAttachItems({
       chunkIds,
-      sml: smlService,
-      esClient: esClient.asCurrentUser,
+      esClient,
       request,
       spaceId,
       savedObjectsClient,

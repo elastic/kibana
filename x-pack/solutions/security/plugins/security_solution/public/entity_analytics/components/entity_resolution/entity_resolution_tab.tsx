@@ -27,7 +27,7 @@ export const EntityResolutionTab: React.FC = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityResolution.uploadDescription"
-            defaultMessage="Bulk link entities to resolution targets by importing a CSV file. Each row uses identity fields to find matching entities and links them to a target entity specified by its entity ID."
+            defaultMessage="Bulk link entities to resolution targets by importing a CSV file. Each row uses identity fields to find matching entities and links them to a primary entity specified by its entity ID."
           />
         </EuiText>
         <EuiSpacer size="s" />
@@ -46,7 +46,7 @@ const WhatIsEntityResolutionPanel: React.FC = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityResolution.introText"
-          defaultMessage="Use a CSV file to batch-link entity records that represent the same real-world identity. Aliases are matched by identity fields and linked to a target entity."
+          defaultMessage="Use a CSV file to batch-link entity records that represent the same real-world identity. Aliases are matched by identity fields and linked to a primary entity."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -65,7 +65,7 @@ const WhatIsEntityResolutionPanel: React.FC = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityResolution.whatIsDescription"
-          defaultMessage="Entity resolution links multiple entity records that represent the same real-world identity across different data sources. For example, a user may appear as separate entities from Active Directory, Okta, and Entra ID. Resolution groups these aliases under a single target entity, providing a unified view for risk scoring, investigation, and threat detection."
+          defaultMessage="Entity resolution links multiple entity records that represent the same real-world identity across different data sources. For example, a user may appear as separate entities from Active Directory, Okta, and Entra ID. Resolution groups these aliases under a single primary entity, providing a unified view for risk scoring, investigation, and threat detection."
         />
       </EuiText>
       <EuiHorizontalRule />

@@ -45,11 +45,6 @@ export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
   createModelVersion: CreateEsoModelVersionFn;
-}
-
-export interface EncryptedSavedObjectsPluginStart {
-  isEncryptionError: (error: Error) => boolean;
-  getClient: ClientInstanciator;
   /**
    * This function is exposed for Core migration testing purposes only.
    */
@@ -57,6 +52,11 @@ export interface EncryptedSavedObjectsPluginStart {
     typeRegistry: ISavedObjectTypeRegistry,
     typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
   ) => SavedObjectsEncryptionExtension;
+}
+
+export interface EncryptedSavedObjectsPluginStart {
+  isEncryptionError: (error: Error) => boolean;
+  getClient: ClientInstanciator;
 }
 
 /**
@@ -171,14 +171,6 @@ export class EncryptedSavedObjectsPlugin
           return serviceForMigration;
         }
       ),
-    };
-  }
-
-  public start() {
-    this.logger.debug('Starting plugin');
-    return {
-      isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getClient: (options = {}) => this.savedObjectsSetup(options),
       __testCreateDangerousExtension: (
         typeRegistry: ISavedObjectTypeRegistry,
         typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
@@ -192,6 +184,14 @@ export class EncryptedSavedObjectsPlugin
           getCurrentUser: async () => undefined,
         });
       },
+    };
+  }
+
+  public start() {
+    this.logger.debug('Starting plugin');
+    return {
+      isEncryptionError: (error: Error) => error instanceof EncryptionError,
+      getClient: (options = {}) => this.savedObjectsSetup(options),
     };
   }
 

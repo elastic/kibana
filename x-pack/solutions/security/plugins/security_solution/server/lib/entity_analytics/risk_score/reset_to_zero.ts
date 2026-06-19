@@ -60,6 +60,7 @@ export const resetToZero = async ({
     ? EntityIdentifierFields.generic
     : EntityTypeToIdentifierField[entityType];
   const esql = /* sql */ `
+    SET unmapped_fields="nullify";
     FROM ${alias}
     | WHERE ${entityType}.${RISK_SCORE_FIELD} > 0
     | EVAL id_value = TO_STRING(${entityField})

@@ -8,7 +8,10 @@
  */
 
 export { extractTemplateVariables } from './extract_template_variables/extract_template_variables';
-export { findInputsInGraph } from './find_inputs_in_graph/find_inputs_in_graph';
+export {
+  findInputsInGraph,
+  scanForTemplateVariables,
+} from './find_inputs_in_graph/find_inputs_in_graph';
 export {
   extractSchemaPropertyPaths,
   type ExtractedSchemaPropertyPath,
@@ -27,3 +30,10 @@ export {
   LIQUID_ALLOWED_TAGS,
   createWorkflowLiquidEngine,
 } from './create_workflow_liquid_engine/create_workflow_liquid_engine';
+export {
+  pickManagedWorkflowFields,
+  toManagedWorkflowTelemetryFields,
+  type ManagedWorkflowFields,
+  type ManagedWorkflowFieldsSource,
+  type ManagedWorkflowTelemetryFields,
+} from './pick_managed_workflow_fields/pick_managed_workflow_fields';

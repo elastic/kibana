@@ -14,7 +14,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { GetWatchlistRequestParams as WatchlistIdParams } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import { WatchlistConfigClient } from '../watchlist_config';
-import { getRequestSavedObjectClient } from '../../shared/utils';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
 
 interface DeleteWatchlistResponse {
@@ -23,7 +22,9 @@ interface DeleteWatchlistResponse {
 
 export const deleteWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .delete({
@@ -52,7 +53,7 @@ export const deleteWatchlistRoute = (
             const core = await context.core;
 
             const namespace = secSol.getSpaceId();
-            const soClient = getRequestSavedObjectClient(core);
+            const soClient = core.savedObjects.client;
             const esClient = core.elasticsearch.client.asCurrentUser;
 
             const entitySourcesService = createEntitySourcesService({
@@ -60,18 +61,23 @@ export const deleteWatchlistRoute = (
               soClient,
               esClient,
               logger,
+              getStartServices,
+              hasEncryptionKey,
             });
 
             // Clean up entities from the watchlist index and entity store before
             // removing the saved objects, so we can still resolve the watchlist name.
             await entitySourcesService.deleteWatchlistEntities(request.params.id);
 
+            const [coreStart] = await getStartServices();
             const watchlistClient = new WatchlistConfigClient({
               namespace,
               soClient,
               esClient,
+              securityServiceStart: coreStart.security,
               logger,
             });
+
             await watchlistClient.delete(request.params.id);
             return response.ok({ body: { deleted: true } });
           } catch (e) {
@@ -82,7 +88,8 @@ export const deleteWatchlistRoute = (
               statusCode: error.statusCode,
             });
           }
-        }
+        },
+        'platinum'
       )
     );
 };

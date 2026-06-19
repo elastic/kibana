@@ -17,7 +17,9 @@ import type {
   ESQLAstItem,
   ESQLAstQueryExpression,
   ESQLBinaryExpression,
+  ESQLColumn,
   ESQLCommand,
+  ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLSource,
@@ -43,6 +45,25 @@ function isIndexSource(arg: ESQLCommand['args'][number]): arg is ESQLSource {
     arg.type === 'source' &&
     (arg as ESQLSource).sourceType === 'index'
   );
+}
+
+type MetadataOption = ESQLCommandOption & { name: 'metadata' };
+
+function isMetadataOption(arg: ESQLAstItem): arg is MetadataOption {
+  return !Array.isArray(arg) && arg.type === 'option' && arg.name === 'metadata';
+}
+
+/**
+ * Reads the column identifier name out of a single METADATA option argument
+ * (e.g. `_id` from `column(_id)`). Returns `undefined` for parameterized columns
+ * or unexpected shapes so callers can leave them untouched.
+ */
+function getMetadataIdentifierName(arg: ESQLAstItem): string | undefined {
+  if (Array.isArray(arg) || arg.type !== 'column') return undefined;
+  const column: ESQLColumn = arg;
+  const inner = column.args[0];
+  if (!inner || inner.type !== 'identifier') return undefined;
+  return inner.name;
 }
 
 function printWithUpdatedFrom(
@@ -122,6 +143,17 @@ function tryParseEsql(esql: string) {
 // Public API
 // ---------------------------------------------------------------------------
 
+const UNMAPPED_FIELDS_DIRECTIVE = 'SET unmapped_fields="LOAD";\n';
+
+/**
+ * Prepends the `SET unmapped_fields="LOAD";` directive to an ES|QL query.
+ * This tells ES|QL to load unmapped fields from `_source` as keyword
+ * instead of raising "Unknown column" errors.
+ */
+export function withUnmappedFieldsDirective(query: string): string {
+  return `${UNMAPPED_FIELDS_DIRECTIVE}${query}`;
+}
+
 /**
  * Builds the ES|QL AST node for `METADATA _id, _source`.
  * Shared across all locations that construct or augment FROM commands.
@@ -160,18 +192,74 @@ export function ensureMetadata(esql: string): string {
   const { root, fromCmd } = parseFromCommand(esql);
   if (!fromCmd) return esql;
 
-  const hasMetadata = fromCmd.args.some(
-    (arg) =>
-      !Array.isArray(arg) &&
-      'type' in arg &&
-      arg.type === 'option' &&
-      'name' in arg &&
-      arg.name === 'metadata'
-  );
-
-  if (hasMetadata) return esql;
+  if (fromCmd.args.some(isMetadataOption)) return esql;
 
   return printWithUpdatedFrom(root, fromCmd, [...fromCmd.args, buildMetadataOption()]);
+}
+
+/**
+ * Removes METADATA columns from the FROM clause.
+ *
+ * - `stripMetadata(esql)` — drops the entire METADATA option (inverse of
+ *   {@link ensureMetadata}).
+ * - `stripMetadata(esql, ['_source'])` — drops only the listed identifiers from
+ *   METADATA, preserving any others (e.g. `_id`). When no identifiers remain,
+ *   the METADATA option itself is dropped.
+ *
+ * Returns the input unchanged when:
+ *   - the query has no FROM clause,
+ *   - the query has no METADATA option (or none of the listed identifiers),
+ *   - the input cannot be parsed.
+ *
+ * Parse failures are swallowed so a corrupted persisted query passes through
+ * untouched and surfaces a precise error at execution time, rather than
+ * crashing rule create/update flows with an opaque parser stack.
+ */
+export function stripMetadata(esql: string, identifiersToStrip?: string[]): string {
+  let parsed: ReturnType<typeof parseFromCommand>;
+  try {
+    parsed = parseFromCommand(esql);
+  } catch {
+    return esql;
+  }
+  const { root, fromCmd } = parsed;
+  if (!fromCmd) return esql;
+
+  const stripSet = identifiersToStrip ? new Set(identifiersToStrip) : null;
+
+  let changed = false;
+  const newArgs: ESQLCommand['args'] = [];
+
+  for (const arg of fromCmd.args) {
+    if (!isMetadataOption(arg)) {
+      newArgs.push(arg);
+      continue;
+    }
+
+    // No identifiers list provided → drop the entire METADATA option.
+    if (stripSet === null) {
+      changed = true;
+      continue;
+    }
+
+    const filtered = arg.args.filter((opt) => {
+      const name = getMetadataIdentifierName(opt);
+      return name === undefined || !stripSet.has(name);
+    });
+
+    if (filtered.length === arg.args.length) {
+      newArgs.push(arg);
+      continue;
+    }
+
+    changed = true;
+    if (filtered.length > 0) {
+      newArgs.push({ ...arg, args: filtered });
+    }
+  }
+
+  if (!changed) return esql;
+  return printWithUpdatedFrom(root, fromCmd, newArgs);
 }
 
 /**

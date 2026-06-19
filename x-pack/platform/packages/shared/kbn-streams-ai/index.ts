@@ -6,6 +6,7 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
+export { descriptionPrompt, overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
@@ -25,15 +26,17 @@ export {
 } from './workflows/suggest_processing_pipeline';
 export {
   generateSignificantEvents,
+  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
 } from './src/significant_events/generate_significant_events';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
-export { sumTokens } from './src/helpers/sum_tokens';
+export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
+  toPreviouslyIdentifiedFeature,
   type IdentifyFeaturesOptions,
   type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,

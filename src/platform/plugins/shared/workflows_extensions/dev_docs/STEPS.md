@@ -485,13 +485,19 @@ The workflows YAML editor uses two in-memory layers to reduce duplicate work whi
 
 Register the step definitions in both server and public plugin setup:
 
+Both `registerStepDefinition` contracts (server and public) accept either a **direct definition** or an **async loader** of the form `() => Promise<Definition | undefined>`. Use the loader form when you need to:
+
+- Keep the step module out of your plugin's main bundle (defer the import).
+- Conditionally register the step based on something only known at runtime (feature flag, license, capabilities, etc.). **Resolve the loader with `undefined` to skip the registration silently** — no error is thrown and no entry is added to the registry.
+
+Loader rejections (and any error thrown while inserting the resolved definition into the registry) are caught and logged via the plugin logger; they do **not** propagate to the caller. This way a single broken loader cannot prevent other steps — or workflow execution as a whole — from working. Consumers that need to wait for all pending registrations can `await workflowsExtensions.isReady()`; it always resolves once every loader has settled.
+
 **Server-side** (`server/plugin.ts`):
 
 ```typescript
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { myStepDefinition } from './workflows/step_types/my_step';
-import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
+import { getMyStepDefinition } from './workflows/step_types/my_step';
 
 export interface MyPluginServerSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -499,18 +505,29 @@ export interface MyPluginServerSetupDeps {
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: MyPluginServerSetupDeps) {
-    // Create the step definition passing the necessary dependencies to factory function
-    const stepDefinition = getMyStepDefinition(core);
+    // Sync registration — definition is built up-front
+    plugins.workflowsExtensions.registerStepDefinition(getMyStepDefinition(core));
 
-    // Register server-side step definition using its factory function result
-    plugins.workflowsExtensions.registerStepDefinition(stepDefinition);
+    // Async / conditional registration — resolve with `undefined` to skip
+    plugins.workflowsExtensions.registerStepDefinition(async () => {
+      const isFeatureFlagEnabled = await checkFeatureFlag();
+      if (!isFeatureFlagEnabled) {
+        return undefined; // Skip step registration
+      }
+      const { getMyOptionalStepDefinition } = await import(
+        './workflows/step_types/my_optional_step'
+      );
+      return getMyOptionalStepDefinition(core);
+    });
   }
 }
 ```
 
+The workflow execution engine awaits `workflowsExtensions.isReady()` before reading a workflow execution, so handlers registered through async loaders are guaranteed to be available when the engine runs.
+
 **Public-side** (`public/plugin.ts`):
 
-Register the public step definition using either a **direct definition** or an **async loader**. Prefer the loader form so the step module (and its dependencies, e.g. zod) are not pulled into your plugin’s main bundle:
+Prefer the loader form so the step module (and its dependencies, e.g. zod) are not pulled into your plugin's main bundle. As on the server, the loader can resolve with `undefined` to skip registration:
 
 ```typescript
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
@@ -527,6 +544,18 @@ export class MyPlugin implements Plugin {
       import('./workflows/step_types/my_step').then((m) => m.myStepDefinition)
     );
 
+    // Conditional registration — resolve with `undefined` to skip
+    plugins.workflowsExtensions.registerStepDefinition(async () => {
+      const isFeatureFlagEnabled = await checkFeatureFlag();
+      if (!isFeatureFlagEnabled) {
+        return undefined; // Skip step registration
+      }
+      const { myOptionalStepDefinition } = await import(
+        './workflows/step_types/my_optional_step'
+      );
+      return myOptionalStepDefinition;
+    });
+
     // Alternatively: sync registration (pulls step module into main bundle)
     // import { myStepDefinition } from './workflows/step_types/my_step';
     // plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
@@ -534,7 +563,9 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-Loaders are resolved in the background after setup. The workflows app waits for `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
+Loaders are resolved in the background after setup. The workflows app awaits `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
+
+For complete examples of conditional async registration on both sides, see `examples/workflows_extensions_example/server/step_types/index.ts` and `examples/workflows_extensions_example/public/step_types/index.ts`.
 
 ### Step 5: Get Approval
 
@@ -574,6 +605,8 @@ function MyComponent() {
 ```
 
 **Waiting for async step definitions:** If your app mounts before step definitions are needed, you can await `workflowsExtensions.isReady()` before rendering. That ensures all step definitions registered via async loaders have resolved. The workflows app does this in its mount so the step registry is ready when the UI runs.
+
+The same `isReady()` method exists on the server start contract. The workflow execution engine already awaits it before reading a workflow execution; you only need to call it directly if you read the registry from another server-side entry point that runs before async loaders have settled.
 
 ## Step Type Requirements
 
@@ -838,10 +871,40 @@ The `context` parameter provides access to runtime services and step information
   - `getScopedEsClient()`: Scoped Elasticsearch client
   - `renderInputTemplate()`: Evaluate template strings
   - `getFakeRequest()`: Fake KibanaRequest for other services
+  - `callKibanaApi(params)`: Call a Kibana API route on this Kibana instance (see [Calling Kibana APIs](#calling-kibana-apis-callkibanaapi))
 - **`context.logger`**: Scoped logger (`debug`, `info`, `warn`, `error`)
 - **`context.abortSignal`**: AbortSignal for cancellation support
 - **`context.stepId`**: Current step instance identifier
 - **`context.stepType`**: Step type identifier (e.g., `'my-namespace.myCustomStep'`)
+
+### Calling Kibana APIs (`callKibanaApi`)
+
+`context.contextManager.callKibanaApi(params)` lets a custom step invoke any registered Kibana HTTP route, authenticated as the workflow's fake request. Use this when the step needs to consume a Kibana API for which the owning plugin does not (yet) expose a request-scoped client on its start contract — instead of reinventing URL building, auth, and event-chain header propagation.
+
+```typescript
+const result = await context.contextManager.callKibanaApi<{ id: string }>({
+  method: 'POST',
+  path: '/api/cases',
+  body: { title: context.input.title, owner: 'cases' },
+});
+// result = { status: 200, headers: {...}, body: { id: 'case-1' } }
+```
+
+**Contract (stable):**
+
+- Throws `Error('HTTP <status>: <body>')` on any non-2xx response (except 304, treated like 204).
+- Returns `{ status, headers, body }`. `body` is parsed JSON for JSON content types, a `string` for non-JSON text bodies, a `Buffer` for binary content types, and `{}` for 204/304.
+- Cross-cutting headers (`Authorization`, `Content-Type`, `kbn-xsrf`, `x-elastic-internal-origin`, event-chain headers) are managed by the engine and cannot be overridden by caller-supplied `headers`.
+- The implementation may evolve (for example, moving from network `fetch` to an in-process Kibana HTTP API). The API surface above will not change.
+
+**Not supported (use the `kibana.request` YAML step instead):**
+
+- Multipart / `form_data` uploads
+- Custom fetcher options (TLS, redirects, keep-alive, undici Agent options)
+- Streaming / SSE responses
+- Overriding URL resolution (the request always targets this Kibana instance)
+
+If you already have a request-scoped client from another plugin's start contract (for example `alerting.getRulesClientWithRequest`, `cases.getCasesClientWithRequest`), prefer that — it is strongly typed and skips the HTTP layer entirely. `callKibanaApi` exists for the general case where such a client does not exist.
 
 ### Cancellation Cleanup (`onCancel`)
 
@@ -893,55 +956,46 @@ The public definition must include:
 
 ## Step Definition Approval Process
 
-All custom step definitions must be approved by the workflows-eng team before being merged. This is enforced through a Scout API test that validates registered steps against an approved list.
+All custom step definitions must be approved by the workflows-eng team before being merged. This is enforced through a Scout API test that validates registered steps against a set of approved hashes.
 
 ### How It Works
 
-1. **Registration Detection**: When you register a new step or modify an existing step's handler, the test will detect it during CI runs.
+1. **Registration Detection**: When you register a new step or change an existing step definition (id, label, schemas, category, documentation, etc.), the test will detect it during CI runs.
 
-2. **Handler Hash**: The test generates a SHA256 hash of each step's handler function implementation. This ensures that:
+2. **Definition Hash**: The test generates a SHA256 hash of each step's definition and exposes it on the `internal/workflows_extensions/step_definitions` endpoint as `definitionHash`. Any meaningful change to the definition produces a new hash.
 
-   - New steps are detected
-   - Changes to handler implementations are detected (even if the step ID remains the same)
+3. **Per-step approval files**: Each approved step is stored in its own file under:
 
-3. **Approval Required**: The test compares registered steps against the approved list in:
    ```
-   test/scout/api/fixtures/approved_step_definitions.ts
+   test/scout/api/fixtures/approved_step_definitions/<step.id>.txt
    ```
 
-### Adding a New Step
+   The file contains a single line: the approved `definitionHash` for that step. One file per step means PRs that add or update different steps never conflict on a shared list.
 
-When registering a new step, you must:
+### Adding a New Step or Updating an Existing One
 
-1. **Run the test locally** to get the step ID and handler hash:
+1. **Run the approval test locally** so it prints the exact commands you need:
 
    ```bash
    node scripts/scout.js run-tests --arch stateful --domain classic \
      --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
    ```
 
-2. **Add the step to the approved list** in `test/scout/api/fixtures/approved_step_definitions.ts`:
+   When a step is unapproved (new id or changed hash), the test fails with a message like:
 
-   ```typescript
-   export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
-     {
-       id: 'my-namespace.myCustomStep',
-       handlerHash: 'abc123...', // SHA256 hash from test output
-     },
-   ];
+   ```
+   Found 1 unapproved step definition(s). Run the following command(s) from your kibana directory and request review from the workflows-eng team:
+
+   echo <definitionHash> > src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions/my-namespace.myCustomStep.txt
    ```
 
-3. **Get approval** from the workflows-eng team (via PR review)
+2. **Run the printed `echo` command(s) from your kibana directory.** This creates (or overwrites) the per-step approval file with the new hash.
 
-4. **Update the test** to include your new step in the approved list
+3. **Re-run the test** to confirm it passes.
 
-### Modifying an Existing Step Handler
+4. **Commit the new/updated file** under `approved_step_definitions/` and request approval from the workflows-eng team in your PR.
 
-If you modify a step's handler implementation:
-
-1. The handler hash will change
-2. The test will fail until you update the hash in `approved_step_definitions.ts`
-3. You must get re-approval from the workflows-eng team
+If you change a step's definition later, only its own approval file needs updating — repeat the steps above.
 
 ### Running the Approval Test
 
@@ -953,8 +1007,8 @@ node scripts/scout.js run-tests --arch stateful --domain classic --config src/pl
 
 # Or start servers separately, then run tests
 node scripts/scout.js start-server --arch stateful --domain classic
-npx playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
+node scripts/playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
 ```
 
-The test will fail with a clear error message indicating which steps need to be added or updated in the approved list.
+The test prints one `echo … > …` command per offending step, ready to copy-paste from your kibana directory.
 

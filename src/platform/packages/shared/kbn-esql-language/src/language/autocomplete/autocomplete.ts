@@ -36,7 +36,7 @@ import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_hel
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
-import { attachReplacementRanges } from './utils/prefix_range';
+import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -49,6 +49,13 @@ function isHeaderCommandSuggestion({ label }: { label: string }) {
   return label === 'SET';
 }
 
+function isFromSourceCommand(commands: ESQLAstAllCommands[]) {
+  const sourceCommandNames = new Set(esqlCommandRegistry.getSourceCommandNames());
+  const sourceCommand = commands.find(({ name }) => sourceCommandNames.has(name));
+
+  return sourceCommand?.name.toLowerCase() === 'from';
+}
+
 const orderingEngine = new SuggestionOrderingEngine();
 
 export async function suggest(
@@ -56,10 +63,7 @@ export async function suggest(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  const { innerText, correctedQuery, root, astContext } = getAutocompleteCursorContext(
-    fullText,
-    offset
-  );
+  const { innerText, root, astContext, tokens } = getAutocompleteCursorContext(fullText, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -70,7 +74,7 @@ export async function suggest(
   const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, astForFields),
+    getQueryForFields(innerText, astForFields),
     innerText,
     resourceRetriever
   );
@@ -80,7 +84,9 @@ export async function suggest(
 
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
-  const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
+  const hasMinimumLicenseRequired = licenseInstance
+    ? (license: LicenseType) => licenseInstance.hasAtLeast(license)
+    : undefined;
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -176,17 +182,24 @@ export async function suggest(
         ...recommendedQueriesSuggestionsFromStaticTemplates
       );
 
-      const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
+      const rootLevelSuggestions: ISuggestionItem[] = [
+        ...suggestions.filter(isSourceCommandSuggestion),
+        ...recommendedQueriesSuggestions,
+      ].map((suggestion) => ({
+        ...suggestion,
+        replacementRangeStrategy: { kind: ReplacementRangeStrategyKind.ROOT_QUERY },
+      }));
 
-      return orderingEngine.sort(
-        [
-          ...headerCommandsSuggestions,
-          ...sourceCommandsSuggestions,
-          ...recommendedQueriesSuggestions,
-        ],
-        { command: '' }
-      );
+      const rootLevelQuerySuggestions = attachReplacementRanges(innerText, rootLevelSuggestions, {
+        fullText,
+        offset,
+        tokens,
+      });
+
+      return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
+        command: '',
+      });
     }
 
     return suggestions.filter(
@@ -237,7 +250,8 @@ export async function suggest(
     );
 
     return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
-      columns: await getColumnMapOnce(),
+      commandContext: { columns: await getColumnMapOnce() },
+      tokens,
     });
   }
   return [];
@@ -300,14 +314,18 @@ async function getSuggestionsWithinCommandExpression(
 
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
   const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
+  const subquerySupport =
+    commandDefinition.metadata.subquerySupport === true && isFromSourceCommand(commands);
 
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
+    subquerySupport,
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;

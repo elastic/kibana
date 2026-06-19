@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Evals Common Attributes
-  version: "1"
+  version: '1'
 paths: {}
 components:
   schemas:
@@ -10,10 +10,13 @@ components:
       properties:
         id:
           type: string
+          maxLength: 256
         family:
           type: string
+          maxLength: 256
         provider:
           type: string
+          maxLength: 256
       required:
         - id
 
@@ -22,66 +25,60 @@ components:
       properties:
         '@timestamp':
           type: string
-        run_id:
-          type: string
+          maxLength: 64
         experiment_id:
           type: string
-        suite:
-          type: object
-          properties:
-            id:
-              type: string
-        ci:
-          type: object
-          properties:
-            buildkite:
-              $ref: '#/components/schemas/BuildkiteMetadata'
+          maxLength: 1024
+        experiment_name:
+          type: string
+          maxLength: 256
         example:
           $ref: '#/components/schemas/ExampleInfo'
         task:
           $ref: '#/components/schemas/TaskInfo'
         evaluator:
           $ref: '#/components/schemas/EvaluatorInfo'
-        run_metadata:
-          $ref: '#/components/schemas/RunMetadata'
-        environment:
-          type: object
-          properties:
-            hostname:
-              type: string
+        metadata:
+          $ref: '#/components/schemas/ScoreMetadata'
       required:
         - '@timestamp'
-        - run_id
         - experiment_id
         - example
         - task
         - evaluator
-        - run_metadata
-        - environment
+        - metadata
 
     BuildkiteMetadata:
       type: object
       properties:
         build_id:
           type: string
+          maxLength: 256
         job_id:
           type: string
+          maxLength: 256
         build_url:
           type: string
+          maxLength: 2048
         pipeline_slug:
           type: string
+          maxLength: 256
         pull_request:
           type: string
+          maxLength: 64
         branch:
           type: string
+          maxLength: 256
         commit:
           type: string
+          maxLength: 256
 
     ExampleInfo:
       type: object
       properties:
         id:
           type: string
+          maxLength: 1024
         index:
           type: integer
         input:
@@ -93,8 +90,10 @@ components:
           properties:
             id:
               type: string
+              maxLength: 1024
             name:
               type: string
+              maxLength: 256
           required:
             - id
             - name
@@ -108,6 +107,7 @@ components:
       properties:
         trace_id:
           type: string
+          maxLength: 256
           nullable: true
         repetition_index:
           type: integer
@@ -126,14 +126,17 @@ components:
       properties:
         name:
           type: string
+          maxLength: 256
         score:
           type: number
           nullable: true
         label:
           type: string
+          maxLength: 256
           nullable: true
         explanation:
           type: string
+          maxLength: 4096
           nullable: true
         metadata:
           type: object
@@ -141,6 +144,7 @@ components:
           nullable: true
         trace_id:
           type: string
+          maxLength: 256
           nullable: true
         model:
           $ref: '#/components/schemas/Model'
@@ -148,17 +152,33 @@ components:
         - name
         - model
 
-    RunMetadata:
+    ScoreMetadata:
       type: object
       properties:
-        git_branch:
+        execution_id:
           type: string
-          nullable: true
-        git_commit_sha:
+          maxLength: 1024
+        suite_id:
           type: string
-          nullable: true
+          maxLength: 256
         total_repetitions:
           type: integer
+        hostname:
+          type: string
+          maxLength: 256
+        git:
+          type: object
+          properties:
+            branch:
+              type: string
+              maxLength: 256
+              nullable: true
+            commit_sha:
+              type: string
+              maxLength: 256
+              nullable: true
+        ci:
+          $ref: '#/components/schemas/BuildkiteMetadata'
       required:
         - total_repetitions
 
@@ -167,10 +187,17 @@ components:
       properties:
         dataset_id:
           type: string
+          maxLength: 1024
         dataset_name:
           type: string
+          maxLength: 256
         evaluator_name:
           type: string
+          maxLength: 256
+        example_count:
+          type: integer
+          minimum: 0
+          description: Number of unique examples evaluated in this dataset
         stats:
           type: object
           properties:
@@ -204,20 +231,28 @@ components:
       properties:
         span_id:
           type: string
+          maxLength: 256
         trace_id:
           type: string
+          maxLength: 256
         parent_span_id:
           type: string
+          maxLength: 256
         name:
           type: string
+          maxLength: 256
         kind:
           type: string
+          maxLength: 64
         status:
           type: string
+          maxLength: 64
         start_time:
           type: string
+          maxLength: 64
         end_time:
           type: string
+          maxLength: 64
         duration_ms:
           type: number
         attributes:

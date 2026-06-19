@@ -11,7 +11,6 @@ import {
   EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -19,84 +18,78 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
+import type { EndpointDeprecationInfo } from '../../types';
 import { SubFeatureCard } from './sub_feature_card';
 
 interface FeatureSettingItem {
   endpointIds: string[];
+  effectiveRecommendedEndpoints: string[];
   feature: InferenceFeatureConfig;
+  hasSavedObject: boolean;
+  isFeatureDirty: boolean;
 }
 
 interface FeatureSectionProps {
   parentName: string;
   parentDescription: string;
   features: FeatureSettingItem[];
-  onReset: () => void;
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   isTechPreview?: boolean;
   isBeta?: boolean;
+  globalDefaultId: string | undefined;
+  canManage?: boolean;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
   parentName,
   parentDescription,
   features,
-  onReset,
   onEndpointsChange,
   invalidEndpointIds,
+  deprecatedEndpointsMap,
   isTechPreview = false,
   isBeta = false,
+  globalDefaultId,
+  canManage = true,
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="flexEnd"
-        data-test-subj={`featureSection-${parentName}`}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h3>{parentName}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            {isTechPreview || isBeta ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadgeGroup>
-                  {isTechPreview && (
-                    <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
-                        defaultMessage: 'Technical Preview',
-                      })}
-                    </EuiBadge>
-                  )}
-                  {isBeta && (
-                    <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
-                        defaultMessage: 'Beta',
-                      })}
-                    </EuiBadge>
-                  )}
-                </EuiBadgeGroup>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>{parentDescription}</p>
-          </EuiText>
-        </EuiFlexItem>
-        {features.length > 0 && (
+      <EuiFlexItem grow={false} data-test-subj={`featureSection-${parentName}`}>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
-              {i18n.translate('xpack.searchInferenceEndpoints.settings.resetDefaults', {
-                defaultMessage: 'Reset all to defaults',
-              })}
-            </EuiLink>
+            <EuiTitle size="s">
+              <h3>{parentName}</h3>
+            </EuiTitle>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          {(isTechPreview || isBeta) && (
+            <EuiFlexItem grow={false}>
+              <EuiBadgeGroup>
+                {isTechPreview && (
+                  <EuiBadge>
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
+                      defaultMessage: 'Technical Preview',
+                    })}
+                  </EuiBadge>
+                )}
+                {isBeta && (
+                  <EuiBadge>
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
+                      defaultMessage: 'Beta',
+                    })}
+                  </EuiBadge>
+                )}
+              </EuiBadgeGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>{parentDescription}</p>
+        </EuiText>
+      </EuiFlexItem>
       <EuiPanel hasBorder paddingSize="l">
         {features.length === 0 ? (
           <EuiText size="s" color="subdued">
@@ -109,17 +102,35 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
           </EuiText>
         ) : (
           <EuiFlexGroup direction="column" gutterSize="xl">
-            {features.map(({ endpointIds, feature }) => (
-              <EuiFlexItem key={feature.featureId} grow={false}>
-                <SubFeatureCard
-                  featureId={feature.featureId}
-                  feature={feature}
-                  endpointIds={endpointIds}
-                  onEndpointsChange={onEndpointsChange}
-                  invalidEndpointIds={invalidEndpointIds}
-                />
-              </EuiFlexItem>
-            ))}
+            {features.map(
+              ({
+                endpointIds,
+                effectiveRecommendedEndpoints,
+                feature,
+                hasSavedObject,
+                isFeatureDirty,
+              }) => (
+                <EuiFlexItem key={feature.featureId} grow={false}>
+                  <SubFeatureCard
+                    featureId={feature.featureId}
+                    feature={feature}
+                    endpointIds={endpointIds}
+                    effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
+                    onEndpointsChange={onEndpointsChange}
+                    invalidEndpointIds={invalidEndpointIds}
+                    deprecatedEndpointsMap={deprecatedEndpointsMap}
+                    hasSavedObject={hasSavedObject}
+                    isFeatureDirty={isFeatureDirty}
+                    globalDefaultId={
+                      feature.ignoreGlobalDefault
+                        ? NO_DEFAULT_MODEL
+                        : globalDefaultId ?? NO_DEFAULT_MODEL
+                    }
+                    canManage={canManage}
+                  />
+                </EuiFlexItem>
+              )
+            )}
           </EuiFlexGroup>
         )}
       </EuiPanel>

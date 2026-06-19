@@ -36,6 +36,38 @@ pipeline. They include:
   - What it is: Total number of custom agents created.
   - How we count: ES `count` on the agents system index.
 
+### skills
+- `skills.total`
+  - What it is: Total number of persisted skills (custom + plugin-bundled).
+  - How we count: ES `hits.total` on the skills system index.
+- `skills.custom`
+  - What it is: Number of user-created custom skills.
+  - How we count: ES filter aggregation on skills without a `plugin_id` field.
+- `skills.plugin`
+  - What it is: Number of plugin-bundled skills.
+  - How we count: ES filter aggregation on skills with a `plugin_id` field.
+
+### plugins
+- `plugins.total`
+  - What it is: Total number of installed plugins.
+  - How we count: ES `count` on the plugins system index.
+
+### skill_invocations
+- `skill_invocations.total`
+  - What it is: Total skill invocations across all origins.
+  - How we count: Sum of per-origin usage counters (see usage counters section).
+- `skill_invocations.by_origin.builtin|custom|plugin`
+  - What it is: Skill invocations grouped by origin.
+  - How we count: Individual usage counters per origin.
+
+### plugin_imports
+- `plugin_imports.total`
+  - What it is: Total plugin imports across all source types.
+  - How we count: Sum of per-source usage counters (see usage counters section).
+- `plugin_imports.by_source.url|upload`
+  - What it is: Plugin imports grouped by source type.
+  - How we count: Individual usage counters per source type.
+
 ### conversations
 
 All-time conversation metrics (no date filter).
@@ -263,8 +295,8 @@ Fired when a tool call fails.
 
 ### Skill CRUD events
 
-These three events share the same schema. They fire on skill create/update/delete via the
-public API or during plugin import.
+Skill create/update/delete events fire on skill CRUD via the public API. Created and Updated
+include `tool_ids`; Deleted does not.
 
 | Event type | Constant |
 |------------|----------|
@@ -272,10 +304,11 @@ public API or during plugin import.
 | `agent_builder_skill_updated` | `AGENT_BUILDER_EVENT_TYPES.SkillUpdated` |
 | `agent_builder_skill_deleted` | `AGENT_BUILDER_EVENT_TYPES.SkillDeleted` |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `skill_id` | keyword | yes | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
-| `origin` | keyword | no | `custom` (direct API) or `plugin` (plugin-bundled). |
+| Field | Type | Required | Events | Description |
+|-------|------|----------|--------|-------------|
+| `skill_id` | keyword | yes | all | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
+| `origin` | keyword | no | all | `custom` (direct API) or `plugin` (plugin-bundled). |
+| `tool_ids` | keyword[] | yes | created, updated | Deduplicated, normalized tool IDs included in the skill after create/update. |
 
 ### `agent_builder_skill_invoked`
 
@@ -356,6 +389,20 @@ period configured by Kibana (defaults to several days).
 - `agent_builder_rounds_21-50`
 - `agent_builder_rounds_51+`
   - Count of conversation rounds bucketed by current round number.
+
+### Skill invocation counters
+- `agent_builder_skill_invocation_builtin`
+  - Count of skill invocations from built-in skills.
+- `agent_builder_skill_invocation_custom`
+  - Count of skill invocations from user-created skills.
+- `agent_builder_skill_invocation_plugin`
+  - Count of skill invocations from plugin-bundled skills.
+
+### Plugin import counters
+- `agent_builder_plugin_import_url`
+  - Count of plugins imported via URL.
+- `agent_builder_plugin_import_upload`
+  - Count of plugins imported via file upload.
 
 ### Query-to-result time counters
 - `agent_builder_query_to_result_time_<1s`

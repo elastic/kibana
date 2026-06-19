@@ -16,9 +16,10 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { UsersAvatarsPanel } from '../../../common/components/user_profiles/users_avatars_panel';
 import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
@@ -58,7 +59,7 @@ AssigneesButton.displayName = 'AssigneesButton';
  */
 export const Assignees = memo(() => {
   const { attackId, indexName, refetch } = useAttackDetailsContext();
-  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
   const { alertIds, assignees } = useHeaderData();
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { hasIndexWrite, hasAttackIndexWrite, loading: privilegesLoading } = useAttacksPrivileges();
@@ -68,6 +69,7 @@ export const Assignees = memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const assigneesTitleId = useGeneratedHtmlId();
 
   const attacksWithAssignees = useMemo(
     () => [{ attackId, relatedAlertIds: alertIds, assignees }],
@@ -128,13 +130,14 @@ export const Assignees = memo(() => {
       )}
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-labelledby={assigneesTitleId}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
           data-test-subj="attack-details-flyout-header-assignees-popover"
         >
-          <EuiPopoverTitle paddingSize="m">
+          <EuiPopoverTitle id={assigneesTitleId} paddingSize="m">
             {i18n.translate(
               'xpack.securitySolution.attackDetailsFlyout.header.assignees.popoverTitle',
               {

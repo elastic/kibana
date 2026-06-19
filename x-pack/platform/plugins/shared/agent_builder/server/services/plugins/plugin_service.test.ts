@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createPluginsService, type PluginsServiceStart } from './plugin_service';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import type { SkillClient } from '../skills/persisted/client';
-import type { AnalyticsService } from '../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 
 const mockRandomUUID = jest.fn().mockReturnValue('test-plugin-uuid');
 jest.mock('crypto', () => ({
@@ -99,6 +99,7 @@ describe('PluginsService', () => {
   let mockSkillClient: jest.Mocked<SkillClient>;
   let mockToolRegistry: { has: jest.Mock };
   let mockAnalyticsService: jest.Mocked<Pick<AnalyticsService, 'reportPluginImported'>>;
+  let mockTrackingService: jest.Mocked<Pick<TrackingService, 'trackPluginImport'>>;
   const mockRequest = {} as KibanaRequest;
 
   beforeEach(() => {
@@ -134,6 +135,10 @@ describe('PluginsService', () => {
       reportPluginImported: jest.fn(),
     };
 
+    mockTrackingService = {
+      trackPluginImport: jest.fn(),
+    };
+
     mockCreateClient.mockReturnValue(mockClient);
     mockCreateSkillClient.mockReturnValue(mockSkillClient);
 
@@ -155,8 +160,15 @@ describe('PluginsService', () => {
         enabled: true,
         githubBaseUrl: 'https://github.com',
         topSnippets: { numSnippets: 2, numWords: 750 },
+        tracing: {
+          send_to_self: true,
+          exporters: [],
+          scheduledDelay: 1000,
+          opik_distributed_tracing: false,
+        },
       },
       analyticsService: mockAnalyticsService as unknown as AnalyticsService,
+      trackingService: mockTrackingService as unknown as TrackingService,
     });
   });
 
@@ -507,6 +519,7 @@ describe('PluginsService', () => {
             sourceType: 'url',
             skillCount: 2,
           });
+          expect(mockTrackingService.trackPluginImport).toHaveBeenCalledWith('url');
         });
 
         it('reports PluginImported with sourceType "file" when installing from a file', async () => {
@@ -527,6 +540,51 @@ describe('PluginsService', () => {
             sourceType: 'file',
             skillCount: 2,
           });
+          expect(mockTrackingService.trackPluginImport).toHaveBeenCalledWith('file');
+        });
+
+        it('does not throw when trackingService is undefined', async () => {
+          const mockElasticsearch = {
+            client: {
+              asScoped: jest.fn(() => ({
+                asInternalUser: {},
+              })),
+            },
+          };
+
+          const service = createPluginsService();
+          service.setup({ skillsSetup: { registerSkill: jest.fn() } });
+          const startWithoutTracking = service.start({
+            logger: loggerMock.create(),
+            elasticsearch: mockElasticsearch as any,
+            getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+            config: {
+              enabled: true,
+              githubBaseUrl: 'https://github.com',
+              topSnippets: { numSnippets: 2, numWords: 750 },
+              tracing: {
+                send_to_self: true,
+                exporters: [],
+                scheduledDelay: 1000,
+                opik_distributed_tracing: false,
+              },
+            },
+            analyticsService: mockAnalyticsService as unknown as AnalyticsService,
+          });
+
+          mockParsePluginFromUrl.mockResolvedValue(archiveWithSkills);
+          mockClient.findByName.mockResolvedValue(undefined);
+          mockClient.create.mockResolvedValue(
+            createMockPersistedPlugin({ id: 'created-plugin-id' })
+          );
+          mockSkillClient.bulkCreate.mockResolvedValue([]);
+
+          await expect(
+            startWithoutTracking.installPlugin({
+              request: mockRequest,
+              source: { type: 'url', url: 'https://example.com/plugin.zip' },
+            })
+          ).resolves.toBeDefined();
         });
 
         it('does not report PluginImported when install fails (existing plugin)', async () => {
@@ -543,6 +601,7 @@ describe('PluginsService', () => {
           ).rejects.toThrow(/already installed/);
 
           expect(mockAnalyticsService.reportPluginImported).not.toHaveBeenCalled();
+          expect(mockTrackingService.trackPluginImport).not.toHaveBeenCalled();
         });
       });
 

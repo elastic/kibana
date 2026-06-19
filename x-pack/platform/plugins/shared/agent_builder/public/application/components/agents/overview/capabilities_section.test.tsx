@@ -22,9 +22,13 @@ const baseProps = {
   skillsHref: '/agents/a/skills',
   pluginsHref: '/agents/a/plugins',
   toolsHref: '/agents/a/tools',
+  connectorsCount: 0,
+  hasConnectorsPrivileges: true,
+  connectorsHref: '/agents/a/connectors',
   onNavigateToSkills: jest.fn(),
   onNavigateToPlugins: jest.fn(),
   onNavigateToTools: jest.fn(),
+  onNavigateToConnectors: jest.fn(),
 };
 
 describe('CapabilitiesSection', () => {

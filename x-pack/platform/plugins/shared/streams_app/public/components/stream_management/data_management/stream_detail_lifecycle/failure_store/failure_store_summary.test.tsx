@@ -214,4 +214,62 @@ describe('FailureStoreSummary', () => {
       expect(screen.getByText('∞')).toBeInTheDocument();
     });
   });
+
+  describe('Inherited badge', () => {
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockUseKibana.mockReturnValue({ isServerless: false } as any);
+    });
+
+    it('shows the Inherited badge for classic streams inheriting from index template', () => {
+      const stats = createMockStats(50000);
+      const failureStoreConfig = createMockFailureStoreConfig({
+        inheritOptions: { canShowInherit: true, isWired: false, isCurrentlyInherited: true },
+      });
+
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
+
+      expect(screen.getByText('Inherited')).toBeInTheDocument();
+    });
+
+    it('shows the Inherited badge for wired child streams inheriting from parent', () => {
+      const stats = createMockStats(50000);
+      const failureStoreConfig = createMockFailureStoreConfig({
+        inheritOptions: { canShowInherit: true, isWired: true, isCurrentlyInherited: true },
+      });
+
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
+
+      expect(screen.getByText('Inherited')).toBeInTheDocument();
+    });
+
+    it('does not show the Inherited badge for wired root streams', () => {
+      const stats = createMockStats(50000);
+      const failureStoreConfig = createMockFailureStoreConfig({
+        inheritOptions: { canShowInherit: false, isWired: true, isCurrentlyInherited: true },
+      });
+
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
+
+      expect(screen.queryByText('Inherited')).not.toBeInTheDocument();
+    });
+  });
 });

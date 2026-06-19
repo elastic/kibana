@@ -7,18 +7,28 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type {
   SnapshotNodeResponse,
   SnapshotMetricInput,
+  SnapshotNode,
+  SnapshotNodeMetric,
   SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './utils/constants';
+import {
+  generateSemconvHostsData,
+  SEMCONV_HOSTS,
+  SEMCONV_HOSTS_DATA_FROM,
+  SEMCONV_HOSTS_DATA_TO,
+} from './utils/semconv_hosts_data';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe('POST /api/metrics/snapshot', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
@@ -67,6 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'container',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -150,6 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'pod',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: false,
         });
@@ -185,6 +197,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'container',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: false,
         });
@@ -222,6 +235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [{ field: 'host.name' }],
           includeTimeseries: false,
         });
@@ -255,6 +269,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should not return timeseries data - without groupBy', async () => {
+        // NOTE: `schema` is intentionally omitted here. The host `nodeFilter`
+        // (see metrics_data_access `inventory_models/host/index.ts`) returns
+        // `[]` when `schema` is undefined and applies an ECS module filter
+        // when `schema: 'ecs'`. With `groupBy: null` the request aggregates
+        // across ALL hosts in the archive, so adding the ECS module filter
+        // excludes non-system docs and shifts the pinned `max`/`avg` values.
+        // Other tests in this file pin `schema: 'ecs'` because their
+        // assertions are per-host and unaffected by the filter.
         const snapshot = await fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -312,6 +334,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -380,6 +403,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -413,6 +437,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -449,6 +474,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           ] as SnapshotMetricInput[],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -514,6 +540,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [{ field: 'cloud.availability_zone' }],
           includeTimeseries: false,
         });
@@ -540,6 +567,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
           includeTimeseries: false,
         });
@@ -558,6 +586,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should show metrics for all nodes when grouping by service type', async () => {
+        // NOTE: `schema` is intentionally omitted. The host `nodeFilter`
+        // (see metrics_data_access `inventory_models/host/index.ts`) returns
+        // `[]` when `schema` is undefined and adds an ECS module filter
+        // (`event.module: system` OR `metricset.module: system`) when
+        // `schema: 'ecs'`. This test asserts both `service.type: mysql` and
+        // `service.type: system` groups exist; the mysql-module docs do not
+        // satisfy the ECS module filter, so pinning `schema: 'ecs'` here
+        // would drop the mysql group and break the assertion.
         const snapshot = await fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -631,6 +667,83 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('semconv (OpenTelemetry hostmetricsreceiver)', () => {
+      let synthtraceClient: InfraSynthtraceEsClient | undefined;
+      const from = new Date(SEMCONV_HOSTS_DATA_FROM).getTime();
+      const to = new Date(SEMCONV_HOSTS_DATA_TO).getTime();
+
+      const findMetric = (node: SnapshotNode, name: string): SnapshotNodeMetric => {
+        const metric = node.metrics.find((m) => m.name === name);
+        if (!metric) {
+          throw new Error(
+            `Expected node "${
+              first(node.path)?.value
+            }" to expose metric "${name}", got: ${node.metrics.map((m) => m.name).join(', ')}`
+          );
+        }
+        return metric;
+      };
+
+      before(async () => {
+        synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
+        await synthtraceClient.clean();
+        await synthtraceClient.index(
+          generateSemconvHostsData({
+            from: SEMCONV_HOSTS_DATA_FROM,
+            to: SEMCONV_HOSTS_DATA_TO,
+            hosts: SEMCONV_HOSTS,
+          })
+        );
+      });
+
+      after(async () => {
+        await synthtraceClient?.clean();
+      });
+
+      it('returns OTel hosts when schema=semconv (cpu)', async () => {
+        const snapshot = await fetchSnapshot({
+          sourceId: 'default',
+          timerange: { from, to, interval: '1m' },
+          metrics: [{ type: 'cpuV2' }],
+          nodeType: 'host',
+          schema: 'semconv',
+          groupBy: [],
+          includeTimeseries: false,
+        });
+
+        expect(snapshot).to.be.ok();
+        const { nodes } = snapshot!;
+
+        const nodeNames = nodes.map((n) => first(n.path)?.value).sort();
+        expect(nodeNames).to.eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
+
+        const cpu = findMetric(nodes[0], 'cpuV2');
+        // OTel cpu utilization is non-null because semconvHost emits state-based docs.
+        expect(cpu.avg).to.be.a('number');
+      });
+
+      it('returns OTel hosts when schema=semconv (memory)', async () => {
+        const snapshot = await fetchSnapshot({
+          sourceId: 'default',
+          timerange: { from, to, interval: '1m' },
+          metrics: [{ type: 'memory' }],
+          nodeType: 'host',
+          schema: 'semconv',
+          groupBy: [],
+          includeTimeseries: false,
+        });
+
+        expect(snapshot).to.be.ok();
+        const { nodes } = snapshot!;
+
+        const nodeNames = nodes.map((n) => first(n.path)?.value).sort();
+        expect(nodeNames).to.eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
+
+        const memory = findMetric(nodes[0], 'memory');
+        expect(memory.avg).to.be.a('number');
+      });
+    });
+
     describe('request validation', () => {
       it('should return 400 when requesting more than 20 metrics', async () => {
         const { min, max } = DATES['8.0.0'].logs_and_metrics;
@@ -644,6 +757,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             metrics: Array(21).fill({ type: 'cpu' }),
             nodeType: 'host',
+            schema: 'ecs',
             groupBy: [{ field: 'service.type' }],
             includeTimeseries: true,
           },

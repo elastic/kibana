@@ -12,19 +12,11 @@ import { TraceWaterfall } from '.';
 import { traceUnprocessedOtelSample } from './mock/trace_unprocessed_otel_sample';
 import { traceSample } from './mock/trace_sample';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 const stories: Meta = {
-  title: 'UnifiedTraceWaterfall',
+  title: 'shared/TraceWaterfall/UnifiedTraceWaterfall',
   component: TraceWaterfall,
-  decorators: [
-    (StoryComponent) => (
-      <MockApmPluginStorybook>
-        <StoryComponent />
-      </MockApmPluginStorybook>
-    ),
-  ],
 };
 
 export default stories;
@@ -189,7 +181,7 @@ export const Example: StoryFn<{}> = () => {
           status: { fieldName: 'event.outcome', value: 'failure' },
         },
       ]}
-      highlightedSpanId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
     />
   );
 };
@@ -246,7 +238,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           docType: 'span',
         },
       ]}
-      highlightedSpanId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       showLegend
     />
   );
@@ -307,7 +299,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           docType: 'span',
         },
       ]}
-      highlightedSpanId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       serviceName="frontend"
       showLegend
     />
@@ -333,7 +325,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
     <TraceWaterfall
       traceItems={traceItems}
       showAccordion={false}
-      highlightedSpanId="99e36adf40935241"
+      contextSpanIds={['99e36adf40935241']}
       onClick={() => {}}
     />
   );

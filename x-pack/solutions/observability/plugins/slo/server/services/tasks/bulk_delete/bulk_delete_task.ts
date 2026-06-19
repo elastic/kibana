@@ -83,6 +83,7 @@ export class BulkDeleteTask {
                 summaryTransformManager,
                 scopedClusterClient,
                 rulesClient,
+                this.logger,
                 abortController
               );
 

@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
@@ -18,7 +18,7 @@ import { PanelContent } from './content';
 import type { LeftPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { getField } from '../shared/utils';
-import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/main/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
 import { DocumentEventTypes } from '../../../common/lib/telemetry/types';
@@ -39,7 +39,7 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
     notesPrivileges: { read: canSeeNotes },
   } = useUserPrivileges();
 
-  const isRemoteDocument = isCCSRemoteIndexName(indexName);
+  const isRemoteDocument = isNonLocalIndexName(indexName);
 
   const tabsDisplayed = useMemo(() => {
     const tabList =

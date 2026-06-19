@@ -8,6 +8,9 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 
 export interface ActionSubItem {
   id: string;
@@ -15,6 +18,7 @@ export interface ActionSubItem {
   onClick?: () => void;
   href?: string;
   icon?: string;
+  ebt?: EbtClickAttrs;
 }
 
 export interface Action {
@@ -24,6 +28,7 @@ export interface Action {
   href?: string;
   icon?: string;
   items?: ActionSubItem[];
+  ebt?: EbtClickAttrs;
 }
 
 export interface ActionGroup {
@@ -110,6 +115,7 @@ export function ActionsContextMenu({
                       closePopover();
                     },
                   }),
+              ...(subItem.ebt ? getEbtProps(subItem.ebt) : {}),
               'data-test-subj': `${dataTestSubjPrefix}Item-${subItem.id}`,
             })),
           });
@@ -125,6 +131,7 @@ export function ActionsContextMenu({
                     closePopover();
                   },
                 }),
+            ...(action.ebt ? getEbtProps(action.ebt) : {}),
             'data-test-subj': `${dataTestSubjPrefix}Item-${action.id}`,
           });
         }
@@ -137,6 +144,9 @@ export function ActionsContextMenu({
   return (
     <EuiPopover
       id={id}
+      aria-label={i18n.translate('xpack.apm.actionsContextMenu.ariaLabel', {
+        defaultMessage: 'Actions',
+      })}
       button={buttonWithToggle}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

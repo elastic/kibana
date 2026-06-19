@@ -39,6 +39,7 @@ import {
 } from '../../utils/eis_utils';
 import { ModelFamilyFilter } from './model_family_filter';
 import { useKibana } from '../../hooks/use_kibana';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 
 export const ElasticInferenceServiceModelsPage = () => {
   const {
@@ -49,6 +50,7 @@ export const ElasticInferenceServiceModelsPage = () => {
   );
   const queryClient = useQueryClient();
   const { data: endpoints, isLoading, isError } = useEisModels();
+  const { canManage } = useInferenceCapabilities();
   const {
     showDeleteAction,
     selectedInferenceEndpoint,
@@ -113,6 +115,17 @@ export const ElasticInferenceServiceModelsPage = () => {
 
   return (
     <>
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="elasticInferencePage"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="top"
+        />
+      )}
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
@@ -121,7 +134,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               <EuiFieldSearch
                 placeholder={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
-                  { defaultMessage: 'Search models...' }
+                  { defaultMessage: 'Search Elastic Inference Service models...' }
                 )}
                 value={searchQuery}
                 fullWidth={true}
@@ -129,7 +142,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
                   {
-                    defaultMessage: 'Find Elastic Inference Service models',
+                    defaultMessage: 'Search Elastic Inference Service models',
                   }
                 )}
                 data-test-subj="eisModelsSearchBar"
@@ -166,29 +179,16 @@ export const ElasticInferenceServiceModelsPage = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           {filtered.length === 0 ? (
-            <>
-              <EuiEmptyPrompt
-                data-test-subj="eisNoModelsFound"
-                title={
-                  <h3>
-                    {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
-                      defaultMessage: 'No models found',
-                    })}
-                  </h3>
-                }
-              />
-              {!isCloudConnectStatusLoading && !isCloudConnected && (
-                <EisCloudConnectPromoCallout
-                  promoId="elasticInferencePage"
-                  isSelfManaged={!cloud?.isCloudEnabled}
-                  direction="row"
-                  navigateToApp={() =>
-                    application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-                  }
-                  addSpacer="top"
-                />
-              )}
-            </>
+            <EuiEmptyPrompt
+              data-test-subj="eisNoModelsFound"
+              title={
+                <h3>
+                  {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
+                    defaultMessage: 'No models found',
+                  })}
+                </h3>
+              }
+            />
           ) : (
             <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">
               {filtered.map((m) => (
@@ -221,8 +221,9 @@ export const ElasticInferenceServiceModelsPage = () => {
           allEndpoints={endpoints}
           onClose={onModelDetailFlyoutClose}
           onSaveEndpoint={() => queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY])}
-          onDeleteEndpoint={displayDeleteActionItem}
+          onDeleteEndpoint={canManage ? displayDeleteActionItem : undefined}
           onCopyEndpointId={copyContent}
+          canManage={canManage}
         />
       )}
     </>

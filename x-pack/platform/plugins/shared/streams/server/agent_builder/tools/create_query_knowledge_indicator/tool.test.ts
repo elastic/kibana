@@ -11,7 +11,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { StreamsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../test_helpers';
+import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import {
   createQueryKnowledgeIndicatorTool,
   STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID,
@@ -124,7 +124,7 @@ describe('ki_query_create tool', () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
     const queryClient = {
-      upsert: jest.fn().mockResolvedValue(undefined),
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
     };
 
     const getScopedClients = jest.fn(async () => {
@@ -140,7 +140,7 @@ describe('ki_query_create tool', () => {
             },
           }),
         },
-        getQueryClient: jest.fn().mockResolvedValue(queryClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(queryClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;
@@ -180,7 +180,7 @@ describe('ki_query_create tool', () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
     const queryClient = {
-      upsert: jest.fn().mockRejectedValue(new Error('upsert failed')),
+      upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
     };
 
     const getScopedClients = jest.fn(async () => {
@@ -196,7 +196,7 @@ describe('ki_query_create tool', () => {
             },
           }),
         },
-        getQueryClient: jest.fn().mockResolvedValue(queryClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(queryClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;

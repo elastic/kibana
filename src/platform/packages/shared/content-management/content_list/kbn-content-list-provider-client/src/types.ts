@@ -8,26 +8,65 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { ContentListServices } from '@kbn/content-list-provider';
+import type {
+  ContentListFeatures,
+  ContentListServices,
+  SortingConfig,
+} from '@kbn/content-list-provider';
+import type { ContentEditorKibanaDependencies } from '@kbn/content-management-content-editor';
+import type { ContentEditorConfig } from './content_editor';
+import type { ContentListFilterMap } from './filters';
+import type { ContentListSortFieldConfig } from './sorting';
 
 /**
- * UI settings accessor interface.
- *
- * Matches the minimal surface of `IUiSettingsClient` needed by the client provider.
+ * Kibana `CoreStart` slice required by {@link ContentEditorKibanaProvider}.
  */
-interface UiSettingsAccessor {
-  get: <T = unknown>(key: string) => T;
+export type ContentEditorKibanaCore = ContentEditorKibanaDependencies['core'];
+
+/**
+ * Kibana `CoreStart` slice required by {@link ContentListClientProvider}.\
+ */
+export type ContentListKibanaCore = ContentEditorKibanaCore & {
+  uiSettings: { get: <T = unknown>(key: string) => T };
+};
+
+/**
+ * Kibana `SavedObjectTaggingPluginStart` slice required by {@link ContentEditorKibanaProvider}.
+ */
+export type ContentListSavedObjectsTagging = ContentEditorKibanaDependencies['savedObjectsTagging'];
+
+/**
+ * Domain services required by {@link ContentListClientProvider}.
+ */
+export interface ContentListClientServices extends ContentListServices {
+  /**
+   * Optional Saved Objects Tagging plugin start contract. A full
+   * `SavedObjectTaggingPluginStart` value satisfies this structurally.
+   */
+  savedObjectsTagging?: ContentListSavedObjectsTagging;
 }
 
 /**
- * Services required by the client provider.
- *
- * Extends the base `ContentListServices` with `uiSettings`, which is used to read
- * the `savedObjects:perPage` setting for default page size.
+ * Feature configuration for {@link ContentListClientProvider}.
  */
-export interface ContentListClientServices extends ContentListServices {
-  /** UI settings accessor. Required for reading defaults like page size. */
-  uiSettings: UiSettingsAccessor;
+export type ContentListFilterConfig =
+  | ContentListFilterMap
+  | ((defaults: ContentListFilterMap) => ContentListFilterMap);
+
+export interface ContentListClientSortingConfig extends Omit<SortingConfig, 'fields'> {
+  fields?: SortingConfig['fields'] | ContentListSortFieldConfig;
+}
+
+export interface ContentListClientFeatures
+  extends Omit<ContentListFeatures, 'contentEditor' | 'sorting' | 'toolbarFilters'> {
+  /**
+   * Content editor (metadata editing flyout) feature configuration.
+   */
+  contentEditor?: ContentEditorConfig;
+  /** Client-side custom filters keyed by filter id. */
+  filters?: ContentListFilterConfig;
+  /** Sorting configuration with client-side custom sort field support. */
+  sorting?: boolean | ContentListClientSortingConfig;
 }
 
 /**
@@ -50,6 +89,24 @@ export interface TableListViewFindItemsResult {
 }
 
 /**
+ * Options passed to {@link TableListViewFindItemsFn} alongside the search query.
+ */
+export interface TableListViewFindItemsOptions {
+  /** Saved object references to filter by. */
+  references?: SavedObjectReference[];
+  /** Saved object references to exclude. */
+  referencesToExclude?: SavedObjectReference[];
+  /**
+   * Maximum number of items to fetch from the server.
+   *
+   * Populated automatically by {@link ContentListClientProvider} from the
+   * `savedObjects:listingLimit` UI setting. Consumers should forward this value
+   * to their underlying search call so they do not need to read the setting themselves.
+   */
+  listingLimit?: number;
+}
+
+/**
  * The existing `TableListView` `findItems` signature that consumers already have.
  *
  * This matches the signature expected by `TableListViewTableProps.findItems`, with an
@@ -57,10 +114,7 @@ export interface TableListViewFindItemsResult {
  */
 export type TableListViewFindItemsFn = (
   searchQuery: string,
-  refs?: {
-    references?: SavedObjectReference[];
-    referencesToExclude?: SavedObjectReference[];
-  },
+  options?: TableListViewFindItemsOptions,
   /** Optional abort signal for request cancellation. */
   signal?: AbortSignal
 ) => Promise<TableListViewFindItemsResult>;

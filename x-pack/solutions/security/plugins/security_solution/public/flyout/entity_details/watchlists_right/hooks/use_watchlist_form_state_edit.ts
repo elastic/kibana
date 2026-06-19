@@ -12,6 +12,7 @@ import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
   getWatchlistFieldLengthValidation,
+  getWatchlistRiskModifierValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
 
@@ -47,8 +48,11 @@ export const useEditWatchlistFormState = ({
     setHasUserEdits(true);
   };
 
-  const { initialWatchlist: fetchedWatchlist, ruleBasedSourceIds } =
-    useGetWatchlistFormData(normalizedWatchlistId);
+  const {
+    initialWatchlist: fetchedWatchlist,
+    ruleBasedSourceIds,
+    indexSourceWithMissingApiKey,
+  } = useGetWatchlistFormData(normalizedWatchlistId);
 
   useResetEditsOnFlyoutOpen(setHasUserEdits);
 
@@ -74,22 +78,26 @@ export const useEditWatchlistFormState = ({
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
     JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
   const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const { isRiskModifierInvalid } = getWatchlistRiskModifierValidation(watchlist);
   const isDisabled =
     isMissingId ||
     !watchlist.name.trim() ||
     !hasChanges ||
     isNameTooLong ||
     isDescriptionTooLong ||
+    isRiskModifierInvalid ||
     !isSourceValid;
 
   return {
     watchlist,
     normalizedWatchlistId,
     ruleBasedSourceIds: ruleBasedSourceIds ?? {},
+    indexSourceWithMissingApiKey,
     isEditMode: true,
     isDisabled,
     isNameTooLong,
     isDescriptionTooLong,
+    isRiskModifierInvalid,
     setWatchlistField,
     setSourceValid,
   };

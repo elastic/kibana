@@ -10,16 +10,6 @@
 import type { AssetCriticalityLevel } from '@kbn/entity-store/common';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 
-/** Output of entity categorization for write routing decisions. */
-export interface CategorizedEntities {
-  /** Entities missing in Entity Store. */
-  not_in_store: EntityRiskScoreRecord[];
-  /** Scores safe to persist immediately. */
-  write_now: EntityRiskScoreRecord[];
-  /** Scores reserved for deferred handling. */
-  defer_to_phase_2: EntityRiskScoreRecord[];
-}
-
 /** Minimal entity fields required for modifier application. */
 export interface RiskScoreModifierEntity {
   entity?: {
@@ -36,6 +26,20 @@ export interface RiskScoreModifierEntity {
   asset?: {
     criticality?: AssetCriticalityLevel | null;
   };
+}
+
+/**
+ * Loose entity-store `_source` boundary shape. `unknown` fields are variably
+ * typed; `normalizeModifierEntity` is the single normalizer to the strict
+ * `RiskScoreModifierEntity`. Keep this type loose — only widen at the boundary.
+ */
+export interface EntityStoreModifierSource {
+  entity?: {
+    id?: string;
+    attributes?: { watchlists?: unknown };
+    relationships?: { resolution?: { resolved_to?: unknown } };
+  };
+  asset?: RiskScoreModifierEntity['asset'] | null;
 }
 
 /** Shared scored page shape used across scoring loops. */

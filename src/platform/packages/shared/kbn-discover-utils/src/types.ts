@@ -8,6 +8,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
@@ -26,6 +27,11 @@ export interface EsHitRecord extends Omit<DiscoverSearchHit, '_index' | '_id' | 
   _index?: DiscoverSearchHit['_index'];
   _id?: DiscoverSearchHit['_id'];
   _source?: DiscoverSearchHit['_source'];
+  /**
+   * As oposed to DSL, ES|QL highlights are inlined in the hit value.
+   * This record holds which columns have highlights and what tag was used for it.
+   */
+  inline_highlights?: ESQLColumnsWithHighlights;
 }
 
 /**
@@ -191,15 +197,4 @@ export interface SpanFields {
 export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
-}
-
-export interface TraceDocumentOverview
-  extends TraceFields,
-    Partial<ServiceFields>,
-    Partial<SpanFields>,
-    Partial<UserAgentFields>,
-    Partial<TransactionFields> {
-  duration?: number;
-  kind?: string;
-  'resource.attributes.telemetry.sdk.language'?: string;
 }

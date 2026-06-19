@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Feature, QueryType, Streams } from '@kbn/streams-schema';
+import type { Feature, QueryFeature, QueryType, Streams } from '@kbn/streams-schema';
 import {
-  QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
   deriveQueryType,
   ensureMetadata,
@@ -23,7 +22,6 @@ import type {
   ToolCallback,
   ToolDefinition,
 } from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
@@ -41,7 +39,7 @@ import {
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
 
-const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
+export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 
 export interface ExistingQuerySummary {
   id: string;
@@ -66,6 +64,7 @@ interface ParsedToolQuery {
   severity_score: number;
   evidence?: string[];
   replaces?: string;
+  features: QueryFeature[];
 }
 
 function getErrorMessage(error: unknown): string {
@@ -87,6 +86,7 @@ export async function generateSignificantEvents({
   additionalTools,
   additionalToolCallbacks,
   existingQueries,
+  maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -102,6 +102,7 @@ export async function generateSignificantEvents({
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
   existingQueries?: ExistingQuerySummary[];
+  maxExistingQueriesForContext?: number;
 }): Promise<{
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
@@ -118,13 +119,18 @@ export async function generateSignificantEvents({
 
   const normalizedStoredEsqls = new Set(existingQueriesList.map((q) => normalizeEsqlSafe(q.esql)));
 
+  const contextLimit = Math.max(0, Math.floor(maxExistingQueriesForContext));
+
   const existingQueriesContext = existingQueriesList.length
     ? JSON.stringify(
         [...existingQueriesList]
           .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
-          .slice(0, MAX_EXISTING_QUERIES_FOR_CONTEXT)
+          .slice(0, contextLimit)
       )
     : '';
+
+  const returnedFeatureMap = new Map<string, string | undefined>();
+  const validatedQueries: ParsedToolQuery[] = [];
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -157,6 +163,10 @@ export async function generateSignificantEvents({
               })
             );
             const llmFeatures = features.map(toFeatureForLlmContext);
+
+            for (const feature of features) {
+              returnedFeatureMap.set(feature.id, feature.run_id);
+            }
 
             return {
               response: {
@@ -207,6 +217,34 @@ export async function generateSignificantEvents({
                   );
                 }
 
+                const rawFeatureIds: string[] = query.feature_ids ?? [];
+                const validFeatureIds: string[] = [];
+                const invalidFeatureIds: string[] = [];
+                for (const id of rawFeatureIds) {
+                  (returnedFeatureMap.has(id) ? validFeatureIds : invalidFeatureIds).push(id);
+                }
+
+                if (validFeatureIds.length === 0) {
+                  hasFailures = true;
+                  return {
+                    query,
+                    valid: false,
+                    status: 'Failed to add',
+                    error: `feature_ids must reference at least one feature returned by get_stream_features. Unknown IDs: [${rawFeatureIds.join(
+                      ', '
+                    )}]`,
+                  };
+                }
+
+                if (invalidFeatureIds.length > 0) {
+                  warnings.push(`Stripped unknown feature_ids: [${invalidFeatureIds.join(', ')}]`);
+                }
+
+                const queryFeatures: QueryFeature[] = validFeatureIds.map((id) => ({
+                  id,
+                  run_id: returnedFeatureMap.get(id),
+                }));
+
                 const sourceRewritten = replaceFromSources(query.esql, targetSources);
                 const rewritten =
                   derivedType === QUERY_TYPE_STATS
@@ -215,7 +253,11 @@ export async function generateSignificantEvents({
 
                 if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
                   return {
-                    query: { ...query, type: derivedType, esql: rewritten },
+                    query: {
+                      ...query,
+                      type: derivedType,
+                      esql: rewritten,
+                    },
                     valid: false,
                     status: 'Duplicate',
                     error: 'This query already exists for this stream.',
@@ -225,14 +267,33 @@ export async function generateSignificantEvents({
 
                 const hints = getStatsQueryHints(rewritten);
 
-                await esClient.esql.query({
-                  query: `${rewritten}\n| LIMIT 0`,
-                  format: 'json',
+                await esClient.esql.query(
+                  {
+                    query: `${rewritten}\n| LIMIT 0`,
+                    format: 'json',
+                  },
+                  { signal, requestTimeout: '10s' }
+                );
+
+                validatedQueries.push({
+                  type: derivedType,
+                  esql: rewritten,
+                  title: query.title,
+                  description: query.description,
+                  category: query.category,
+                  severity_score: query.severity_score,
+                  evidence: query.evidence,
+                  replaces: query.replaces,
+                  features: queryFeatures,
                 });
 
                 const allHints = [...warnings, ...hints];
                 return {
-                  query: { ...query, type: derivedType, esql: rewritten },
+                  query: {
+                    ...query,
+                    type: derivedType,
+                    esql: rewritten,
+                  },
                   valid: true,
                   status: 'Added',
                   error: undefined,
@@ -266,36 +327,11 @@ export async function generateSignificantEvents({
     })
   );
 
-  const queries: ParsedToolQuery[] = response.input.flatMap((message) => {
-    if (message.role === MessageRole.Tool && message.name === 'add_queries') {
-      const toolQueries = message.response?.queries;
-      if (!Array.isArray(toolQueries)) return [];
-      return toolQueries.flatMap(({ valid, query }) => {
-        if (!valid || !query?.esql) return [];
-        const type: QueryType =
-          query.type === QUERY_TYPE_MATCH || query.type === QUERY_TYPE_STATS
-            ? query.type
-            : deriveQueryType(query.esql);
-        return [{ ...query, type }];
-      });
-    }
-
-    return [];
-  });
-
-  logger.debug(`Generated ${queries.length} significant event queries`);
+  logger.debug(`Generated ${validatedQueries.length} significant event queries`);
 
   return {
-    queries,
-    tokensUsed: sumTokens(
-      {
-        prompt: 0,
-        completion: 0,
-        total: 0,
-        cached: 0,
-      },
-      response.tokens
-    ),
+    queries: validatedQueries,
+    tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
   };
 }

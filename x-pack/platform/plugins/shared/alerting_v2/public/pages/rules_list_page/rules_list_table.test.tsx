@@ -18,7 +18,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
   {
     id: 'rule-2',
@@ -26,7 +26,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM metrics-*' } },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   },
 ];
 
@@ -40,7 +40,7 @@ const mockRulesWithManyTags = [
       tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
@@ -54,7 +54,7 @@ const mockRulesWithLongTags = [
       tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
@@ -81,6 +81,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDelete: jest.fn(),
   onNavigateToDetails: jest.fn(),
   onExpand: jest.fn(),
+  onQuickEdit: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),
@@ -156,11 +157,11 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleStatusDisabled')).toHaveTextContent('Disabled');
     });
 
-    it('renders Mode column with Alerting and Detect only', () => {
+    it('renders Mode column with Alert and Signal', () => {
       renderTable();
 
-      expect(screen.getByText('Alerting')).toBeInTheDocument();
-      expect(screen.getByText('Detect only')).toBeInTheDocument();
+      expect(screen.getByText('Alert')).toBeInTheDocument();
+      expect(screen.getByText('Signal')).toBeInTheDocument();
     });
 
     it('renders tag badges for rules with tags', () => {

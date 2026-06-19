@@ -7,11 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'fs';
+import path from 'path';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
+
+/** Each approved step definition lives in its own file at:
+ *   ../fixtures/approved_step_definitions/<step_id>.txt
+ * The file contains exactly one line: the approved definitionHash.
+ * Splitting one step per file avoids semantic merge conflicts when multiple
+ * PRs add or update different steps concurrently.
+ */
+const APPROVED_STEP_DEFINITIONS_DIR_ABS = path.resolve(
+  __dirname,
+  '../fixtures/approved_step_definitions'
+);
+const APPROVED_STEP_DEFINITIONS_DIR_REL =
+  'src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions';
+
+const loadApprovedStepHash = (stepId: string): string | null => {
+  try {
+    return readFileSync(
+      path.join(APPROVED_STEP_DEFINITIONS_DIR_ABS, `${stepId}.txt`),
+      'utf8'
+    ).trim();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+    throw error;
+  }
+};
 
 apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',
@@ -22,6 +50,7 @@ apiTest.describe(
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
       ...tags.serverless.workplaceai,
+      ...tags.serverless.vectordb,
     ],
   },
   () => {
@@ -46,17 +75,35 @@ apiTest.describe(
         expect(response.body.steps).toBeDefined();
         expect(Array.isArray(response.body.steps)).toBe(true);
 
-        for (const step of response.body.steps) {
-          const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
+        const issues: string[] = [];
+        const fixCommands: string[] = [];
 
-          expect(approvedStep, {
-            message: `Step "${step.id}" is not in the approved list`,
-          }).toBeDefined();
+        for (const step of response.body.steps as Array<{ id: string; definitionHash: string }>) {
+          const approvedHash = loadApprovedStepHash(step.id);
 
-          expect(step.handlerHash, {
-            message: `Step "${step.id}" has an invalid handler hash`,
-          }).toBe(approvedStep?.handlerHash);
+          /* eslint-disable playwright/no-conditional-in-test */
+          if (approvedHash === null) {
+            issues.push(`Step "${step.id}" is not in the approved list.`);
+            fixCommands.push(
+              `echo ${step.definitionHash} > ${APPROVED_STEP_DEFINITIONS_DIR_REL}/${step.id}.txt`
+            );
+          } else if (approvedHash !== step.definitionHash) {
+            issues.push(
+              `Step "${step.id}" has an invalid definition hash (expected "${approvedHash}", got "${step.definitionHash}").`
+            );
+            fixCommands.push(
+              `echo ${step.definitionHash} > ${APPROVED_STEP_DEFINITIONS_DIR_REL}/${step.id}.txt`
+            );
+          }
         }
+
+        expect(issues, {
+          message: `Found ${
+            issues.length
+          } unapproved step definition(s). Run the following command(s) from your kibana directory and request review from the workflows-eng team:\n\n${fixCommands.join(
+            '\n'
+          )}`,
+        }).toStrictEqual([]);
       }
     );
   }

@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Meta } from '@kbn/search-connectors';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../routes';
 import {
   connectorStatusToColor,
@@ -65,6 +66,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             ),
             render: (connector: ConnectorViewItem) => (
               <EuiLinkTo
+                data-test-subj="contentConnectorsConnectorsTableNameLink"
                 to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
               >
                 {connector.name}
@@ -179,24 +181,18 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             if (isCrawler) {
               // crawler always has an index this is to satisfy TS
               if (connector.index_name) {
-                application?.navigateToUrl(
-                  generateEncodedPath(
-                    `/app/management/data/content_connectors${SEARCH_INDEX_PATH}`,
-                    {
-                      indexName: connector.index_name,
-                    }
-                  )
-                );
+                application?.navigateToApp(MANAGEMENT_APP_ID, {
+                  path: `/data/content_connectors${generateEncodedPath(SEARCH_INDEX_PATH, {
+                    indexName: connector.index_name,
+                  })}`,
+                });
               }
             } else {
-              application?.navigateToUrl(
-                generateEncodedPath(
-                  `/app/management/data/content_connectors${CONNECTOR_DETAIL_PATH}`,
-                  {
-                    connectorId: connector.id,
-                  }
-                )
-              );
+              application?.navigateToApp(MANAGEMENT_APP_ID, {
+                path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_PATH, {
+                  connectorId: connector.id,
+                })}`,
+              });
             }
           },
           type: 'icon',

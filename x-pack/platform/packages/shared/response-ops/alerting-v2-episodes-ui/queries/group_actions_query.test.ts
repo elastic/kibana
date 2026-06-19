@@ -7,14 +7,18 @@
 
 import { buildGroupActionsQuery } from './group_actions_query';
 
+const SPACE_ID = 'default';
+
 describe('buildGroupActionsQuery', () => {
   it('filters by group hashes and aggregates tags and snooze fields', () => {
-    const queryString = buildGroupActionsQuery(['gh-1', 'gh-2']).print('basic');
+    const queryString = buildGroupActionsQuery(SPACE_ID, ['gh-1', 'gh-2']).print('basic');
     expect(queryString).toContain('group_hash IN');
     expect(queryString).toContain('"gh-1"');
     expect(queryString).toContain('"gh-2"');
     expect(queryString).toContain('last_snooze_action');
     expect(queryString).toContain('snooze_expiry');
+    expect(queryString).toContain('last_snooze_actor');
+    expect(queryString).toContain('last_deactivate_actor');
     expect(queryString).toContain('BY group_hash, rule_id');
   });
 });

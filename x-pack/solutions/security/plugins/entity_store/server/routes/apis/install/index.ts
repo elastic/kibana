@@ -6,8 +6,8 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
@@ -22,7 +22,10 @@ export function registerInstall(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Install the Entity Store',
       description:
-        'Install the Entity Store, creating engines for the specified entity types and configuring log extraction.',
+        'Install the Entity Store and create engines for the specified entity types. ' +
+        'A single `logExtraction` configuration is shared across all entity types. ' +
+        'Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
+        'To change settings after install, use the update endpoint.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },
@@ -36,7 +39,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(BodySchema),
+            body: buildStrictRouteValidationWithZod(BodySchema),
           },
         },
         options: {

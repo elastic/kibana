@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   useForm,
   useFormContext,
@@ -23,6 +23,10 @@ import {
   DEFAULT_INTEGRATION_VALUES,
   INTEGRATION_DETAILS_UNTRACKED_FIELDS,
 } from './constants';
+
+const PackageNamesContext = createContext<Set<string> | undefined>(undefined);
+
+export const usePackageNames = (): Set<string> | undefined => useContext(PackageNamesContext);
 
 export interface IntegrationFormProviderProps {
   children?: React.ReactNode;
@@ -102,16 +106,18 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   });
 
   return (
-    <Form
-      form={form}
-      onKeyDown={(e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
-          e.preventDefault();
-        }
-      }}
-    >
-      {children}
-    </Form>
+    <PackageNamesContext.Provider value={packageNames}>
+      <Form
+        form={form}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
+            e.preventDefault();
+          }
+        }}
+      >
+        {children}
+      </Form>
+    </PackageNamesContext.Provider>
   );
 };
 

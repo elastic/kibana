@@ -75,6 +75,42 @@ describe('getViewInAppUrl', () => {
     );
   });
 
+  it('should extend the time range with the lookback window', () => {
+    const mockDateNow = jest
+      .spyOn(global.Date, 'now')
+      .mockImplementation(() => new Date('2026-01-01T00:00:00.000Z').valueOf());
+
+    const args: GetViewInAppUrlArgs = {
+      logsLocator,
+      startedAt,
+      endedAt,
+      timeSize: 7,
+      timeUnit: 'd',
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        dataViewSpec: undefined,
+        timeRange: {
+          // startedAt - 7d * 20 = 2023-12-07 - 140d = 2023-07-20
+          from: '2023-07-20T16:30:15.403Z',
+          // endedAt + 7d * 20 = 2023-12-07 + 140d = 2024-04-25
+          to: '2024-04-25T20:30:15.403Z',
+        },
+        filters: [],
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      },
+      {}
+    );
+
+    mockDateNow.mockRestore();
+  });
+
   it('should call getRedirectUrl with only count filter', () => {
     const args: GetViewInAppUrlArgs = {
       metrics: [
@@ -273,7 +309,7 @@ describe('getViewInAppUrl', () => {
   });
 
   it('should call getRedirectUrl with spaceId', () => {
-    const spaceId = 'mockedSpaceId';
+    const spaceId = 'mocked-space-id';
     const args: GetViewInAppUrlArgs = {
       metrics: [
         {
@@ -304,7 +340,7 @@ describe('getViewInAppUrl', () => {
     );
   });
   it('should call getRedirectUrl with dataViewSpec of the AD-HOC data view', () => {
-    const spaceId = 'mockedSpaceId';
+    const spaceId = 'mocked-space-id';
     const dataViewSpec = {
       id: 'mockedDataViewId',
       title: 'mockedDataViewTitle',
@@ -347,7 +383,7 @@ describe('getViewInAppUrl', () => {
     );
   });
   it('should call getRedirectUrl with the id of the SAVED data view ', () => {
-    const spaceId = 'mockedSpaceId';
+    const spaceId = 'mocked-space-id';
     const mockedDataViewId = 'uuid-mocked-dataView-id';
     const args: GetViewInAppUrlArgs = {
       dataViewId: mockedDataViewId,

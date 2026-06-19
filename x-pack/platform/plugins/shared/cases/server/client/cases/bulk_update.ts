@@ -34,17 +34,25 @@ import type {
 import { PatchCasesResponseRt, CasesPatchRequestRt } from '../../../common/types/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
+import type { Owner } from '../../../common/constants/types';
 import { Operations } from '../../authorization';
 import { createCaseError, isSOError } from '../../common/error';
+import { createAlertUpdateStatusRequest, flattenCaseSavedObject } from '../../common/utils';
 import {
-  createAlertUpdateStatusRequest,
-  flattenCaseSavedObject,
-  isCommentRequestTypeAlert,
-} from '../../common/utils';
-import { arraysDifference, getCaseToUpdate } from '../utils';
+  isAlertAttachmentType,
+  UNIFIED_ALERT_TYPES_ARRAY,
+} from '../../../common/utils/attachments';
+import {
+  arraysDifference,
+  getCaseToUpdate,
+  buildFilter,
+  combineFilters,
+  NodeBuilderOperators,
+} from '../utils';
 import {
   dedupAssignees,
   fillMissingCustomFields,
@@ -66,9 +74,12 @@ import type {
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
-import { validateCustomFields, validateExtendedFieldsInRequest } from './validators';
+import {
+  validateCustomFields,
+  validateExtendedFieldsInRequest,
+  resolveGlobalFields,
+} from './validators';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
-
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -186,19 +197,40 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
+  isCasesAttachmentsEnabled,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
+  isCasesAttachmentsEnabled: boolean;
 }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
-  // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
+  const legacyAlertFilter = nodeBuilder.is(
+    `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+    AttachmentType.alert
+  );
+
+  const alertFilter = isCasesAttachmentsEnabled
+    ? combineFilters(
+        [
+          legacyAlertFilter,
+          buildFilter({
+            filters: UNIFIED_ALERT_TYPES_ARRAY,
+            field: 'type',
+            operator: 'or',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+          }),
+        ],
+        NodeBuilderOperators.or
+      )
+    : legacyAlertFilter;
+
   return (await caseService.getAllCaseComments({
     id: idsOfCasesToSync,
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
+      filter: alertFilter,
     },
-    mode: 'legacy',
+    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   })) as SavedObjectsFindResponse<AttachmentAttributes>;
 }
 
@@ -230,11 +262,13 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
+  isCasesAttachmentsEnabled,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
+  isCasesAttachmentsEnabled: boolean;
 }): Promise<Map<string, number>> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -260,11 +294,12 @@ async function updateAlerts({
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
+    isCasesAttachmentsEnabled,
   });
 
   const alertsToUpdateByCaseId = totalAlerts.saved_objects.reduce(
     (acc: Map<string, UpdateAlertStatusRequest[]>, alertComment) => {
-      if (isCommentRequestTypeAlert(alertComment.attributes)) {
+      if (isAlertAttachmentType(alertComment.attributes.type)) {
         const caseId = getID(alertComment, CASE_SAVED_OBJECT);
         if (caseId == null) {
           return acc;
@@ -419,12 +454,16 @@ export const bulkUpdate = async (
       notificationService,
       attachmentService,
       templatesService,
+      fieldDefinitionsService,
     },
     user,
     logger,
     authorization,
     closeReasonValidator,
+    config,
   } = clientArgs;
+
+  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -543,9 +582,30 @@ export const bulkUpdate = async (
 
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
 
+    // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
+    const uniqueOwnersWithExtendedFields = [
+      ...casesToUpdate.reduce((owners, { updateReq, originalCase }) => {
+        if (updateReq.extended_fields) owners.add(originalCase.attributes.owner);
+        return owners;
+      }, new Set<string>()),
+    ];
+    const globalFieldsByOwner = new Map(
+      await Promise.all(
+        uniqueOwnersWithExtendedFields.map(async (owner) => {
+          const fields = await resolveGlobalFields(owner, fieldDefinitionsService);
+          return [owner, fields] as const;
+        })
+      )
+    );
+
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>
-        validateExtendedFieldsInRequest({ updateReq, originalCase, templatesService })
+        validateExtendedFieldsInRequest({
+          updateReq,
+          originalCase,
+          templatesService,
+          globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
+        })
       )
     );
 
@@ -592,6 +652,7 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
+      isCasesAttachmentsEnabled,
     });
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({
@@ -640,8 +701,9 @@ export const bulkUpdate = async (
 
     const builtUserActions =
       userActionsDict != null
-        ? Object.keys(userActionsDict).reduce<UserActionEvent[]>((acc, key) => {
-            return [...acc, ...userActionsDict[key]];
+        ? Object.values(userActionsDict).reduce<UserActionEvent[]>((acc, userActions) => {
+            acc.push(...userActions);
+            return acc;
           }, [])
         : [];
 
@@ -657,7 +719,40 @@ export const bulkUpdate = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+    const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+    const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
+      (acc, { updateReq }) => {
+        // Keep first occurrence for duplicate ids handling.
+        if (acc.has(updateReq.id)) {
+          return acc;
+        }
+
+        const { id, version, ...restFields } = updateReq;
+        const updatedFields = Object.keys(restFields);
+        if (updatedFields.length > 0) {
+          acc.set(updateReq.id, updatedFields);
+        }
+
+        return acc;
+      },
+      new Map()
+    );
+
+    for (const updatedCase of updatedCasesResponse) {
+      const updatedFields = updatedFieldsByCaseId.get(updatedCase.id);
+      clientArgs.casesEventBus?.emitCaseUpdated(
+        clientArgs.request,
+        {
+          caseId: updatedCase.id,
+          owner: updatedCase.owner as Owner,
+
+          ...(updatedFields != null ? { updatedFields } : {}),
+        },
+        { previousCase: casesMap.get(updatedCase.id), updatedCase }
+      );
+    }
+
+    return updatedCasesResponse;
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,
@@ -745,6 +840,25 @@ const createPatchCasesPayload = ({
         updateCaseAttributes,
         customFieldsConfigurationMap.get(originalCase.attributes.owner)
       );
+
+      // Merge incoming extended_fields on top of existing so that concurrent saves
+      // from GlobalCaseFields and TemplateFields (two independent form instances)
+      // don't clobber each other's values.
+      //
+      // Intentional: ALL existing keys are preserved — including any template-specific
+      // keys that remain on the SO after a template is cleared. Orphaned keys are
+      // harmless: the UI only renders fields that have a matching definition, and
+      // validation rejects future writes of non-global keys without a template.
+      // Preserving them also allows values to survive a template re-application.
+      if (
+        trimmedCaseAttributes.extended_fields &&
+        typeof trimmedCaseAttributes.extended_fields === 'object'
+      ) {
+        trimmedCaseAttributes.extended_fields = {
+          ...(originalCase.attributes.extended_fields ?? {}),
+          ...trimmedCaseAttributes.extended_fields,
+        };
+      }
 
       return {
         caseId,

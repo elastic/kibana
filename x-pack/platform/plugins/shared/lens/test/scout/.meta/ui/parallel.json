@@ -1,5 +1,5 @@
 {
-  "sha1": "2f428c9a8e5a15d561b9e46f6a9f1b6b674f0e8d",
+  "sha1": "918ec9c379225fd3e03e5a2648f5fd96b231a6ee",
   "tests": [
     {
       "id": "a88e11e11af63ac-04de5a79d29d1c0",
@@ -21,7 +21,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 12
       }
     },
@@ -34,7 +34,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 12
       }
     },
@@ -47,7 +47,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 12
       }
     },
@@ -60,7 +60,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 119,
+        "line": 120,
         "column": 12
       }
     },
@@ -126,6 +126,132 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
         "line": 199,
+        "column": 14
+      }
+    },
+    {
+      "id": "6d5a791f20beb95-62679370e15b14d",
+      "title": "Lens metric progress bar in Lens editor uses default progress bar fill color when no custom color is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "6d5a791f20beb95-82e19c1faf5a3c8",
+      "title": "Lens metric progress bar in Lens editor applies static color to progress bar fill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "6d5a791f20beb95-76f9da3b700bc06",
+      "title": "Lens metric progress bar in Lens editor applies dynamic color to progress bar fill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
+        "line": 150,
+        "column": 14
+      }
+    },
+    {
+      "id": "467d533f08d1c40-95153a994012fd9",
+      "title": "Lens metric progress bar on dashboard (DSL) renders vertical progress bar on dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
+        "line": 81,
+        "column": 14
+      }
+    },
+    {
+      "id": "467d533f08d1c40-bdb86154af9030f",
+      "title": "Lens metric progress bar on dashboard (DSL) renders horizontal progress bar on dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
+        "line": 134,
+        "column": 14
+      }
+    },
+    {
+      "id": "467d533f08d1c40-560cf5301485b87",
+      "title": "Lens metric progress bar on dashboard (DSL) does not render progress bar when max value is not configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
+        "line": 188,
+        "column": 14
+      }
+    },
+    {
+      "id": "4ac51c41fd57fce-e3b22d6d08f1ea3",
+      "title": "Lens metric trendline with custom time field renders trendline when referenced data view time field is not timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_custom_time_field.spec.ts",
+        "line": 98,
+        "column": 14
+      }
+    },
+    {
+      "id": "87de2e194eba8a5-085afac13830272",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses inline data view spec",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 81,
+        "column": 14
+      }
+    },
+    {
+      "id": "87de2e194eba8a5-1fa09f3d15077a3",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses stored data view reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 121,
         "column": 14
       }
     }

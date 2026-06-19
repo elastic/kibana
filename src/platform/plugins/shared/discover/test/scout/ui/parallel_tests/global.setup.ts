@@ -9,7 +9,10 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
-import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
+import {
+  createMetricsTestIndexIfNeeded,
+  DIMENSIONS_WIPE_CONFIG,
+} from '../fixtures/metrics_experience';
 import {
   TRACES,
   richTrace,
@@ -30,6 +33,39 @@ globalSetupHook(
     );
     log.debug('[setup:logstash] logstash_functional ES data ready');
 
+    // Date nanos data for surrounding_docs/context app tests.
+    log.debug('[setup:date_nanos] loading date_nanos ES data (only if it does not exist)...');
+    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nanos');
+    log.debug('[setup:date_nanos] date_nanos ES data ready');
+
+    log.debug(
+      '[setup:date_nanos_custom] loading date_nanos_custom ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/date_nanos_custom'
+    );
+    log.debug('[setup:date_nanos_custom] date_nanos_custom ES data ready');
+
+    // Unmapped fields test data
+    log.debug(
+      '[setup:unmapped_fields] loading unmapped_fields ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/unmapped_fields'
+    );
+    log.debug('[setup:unmapped_fields] unmapped_fields ES data ready');
+
+    // Index pattern without timefield test data
+    log.debug(
+      '[setup:index_pattern_without_timefield] loading index_pattern_without_timefield ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+    );
+    log.debug(
+      '[setup:index_pattern_without_timefield] index_pattern_without_timefield ES data ready'
+    );
+
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);
@@ -39,8 +75,19 @@ globalSetupHook(
         : '[setup:metrics] metrics test index already exists, skipping'
     );
 
-    // Traces Experience setup (not supported in serverless security - no Fleet/APM privileges)
-    const hasFleetSupport = !(config.serverless && config.projectType === 'security');
+    // Companion index for stream-switch coverage
+    log.debug(
+      '[setup:metrics] creating companion metrics test index (only if it does not exist)...'
+    );
+    const createdOther = await createMetricsTestIndexIfNeeded(esClient, DIMENSIONS_WIPE_CONFIG);
+    log.debug(
+      createdOther
+        ? '[setup:metrics] companion metrics test index created successfully'
+        : '[setup:metrics] companion metrics test index already exists, skipping'
+    );
+
+    // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
+    const hasFleetSupport = !config.serverless || config.projectType === 'oblt';
     if (hasFleetSupport) {
       if (!config.isCloud) {
         await apiServices.fleet.internal.setup();

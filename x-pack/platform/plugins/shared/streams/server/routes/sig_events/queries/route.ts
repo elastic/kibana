@@ -15,11 +15,16 @@ import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
 import {
+  upsertStreamQueryRequest,
+  bulkStreamQueriesRequest,
+  listStreamQueriesResponse,
+} from '../../../oas_examples';
+import {
   EsqlQueryValidationError,
   validateEsqlQueryForStreamOrThrow,
 } from '../../../lib/sig_events/validate_esql_query';
 import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -46,10 +51,39 @@ const listQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-get-streams-name-queries',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'List of queries linked to the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                listQueries: { value: listStreamQueriesResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
   }),
   security: {
@@ -57,17 +91,20 @@ const listQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { getQueryClient, streamsClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+  async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
+    const { getKnowledgeIndicatorClient, streamsClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const {
       path: { name: streamName },
     } = params;
 
-    const queryClient = await getQueryClient();
-    const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
+    const kiClient = await getKnowledgeIndicatorClient();
+    const { [streamName]: queryLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
 
     return {
       queries: queryLinks.map((queryLink) => queryLink.query),
@@ -85,6 +122,30 @@ const upsertQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-put-streams-name-queries-queryid',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertQuery: { value: upsertStreamQueryRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The query was added or updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -93,18 +154,21 @@ const upsertQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query.'),
     }),
     body: upsertStreamQueryRequestSchema,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
+    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
-    await assertEnterpriseLicense(licensing);
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const definition = await streamsClient.getStream(streamName);
 
@@ -113,8 +177,8 @@ const upsertQueryRoute = createServerRoute({
       stream: definition,
     });
 
-    const queryClient = await getQueryClient();
-    await queryClient.upsert(definition, {
+    const kiClient = await getKnowledgeIndicatorClient();
+    await kiClient.upsertQuery(definition, {
       id: queryId,
       type: deriveQueryType(body.esql.query),
       title: body.title,
@@ -140,6 +204,28 @@ const deleteQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-delete-streams-name-queries-queryid',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The query was removed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -148,15 +234,22 @@ const deleteQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query to remove.'),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({
-      request,
-    });
-    await assertEnterpriseLicense(licensing);
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+    server,
+  }): Promise<DeleteQueryResponse> => {
+    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { queryId, name: streamName },
@@ -164,13 +257,13 @@ const deleteQueryRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
-    const queryClient = await getQueryClient();
-    const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
+    const kiClient = await getKnowledgeIndicatorClient();
+    const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
 
-    await queryClient.delete(definition, queryId);
+    await kiClient.deleteQuery(definition, queryId);
 
     logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
@@ -190,6 +283,30 @@ const bulkQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-post-streams-name-queries-bulk',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              bulkQueries: { value: bulkStreamQueriesRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Bulk operation completed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -198,7 +315,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
     body: z.object({
       operations: z.array(
@@ -218,9 +335,13 @@ const bulkQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
+    server,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name: streamName },
@@ -231,7 +352,7 @@ const bulkQueriesRoute = createServerRoute({
 
     // Validation is all-or-nothing: if any index operation fails validation,
     // the entire batch is rejected. Operations that pass validation are
-    // collected in typedOperations and applied atomically via queryClient.bulk.
+    // collected in typedOperations and applied atomically via kiClient.syncQueries.
     const validationErrors: Array<{ id: string; message: string }> = [];
     const typedOperations: Array<{ index?: StreamQuery; delete?: { id: string } }> = [];
 
@@ -267,8 +388,20 @@ const bulkQueriesRoute = createServerRoute({
       });
     }
 
-    const queryClient = await getQueryClient();
-    await queryClient.bulk(definition, typedOperations);
+    const kiClient = await getKnowledgeIndicatorClient();
+    const deleteIds = new Set(typedOperations.flatMap((op) => (op.delete ? [op.delete.id] : [])));
+    const indexQueriesById = new Map(
+      typedOperations.flatMap((op) => (op.index ? [[op.index.id, op.index] as const] : []))
+    );
+    const { [streamName]: currentLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
+    const currentIds = new Set(currentLinks.map((l) => l.query.id));
+    const nextQueries: StreamQuery[] = [
+      ...currentLinks
+        .filter((l) => !deleteIds.has(l.query.id))
+        .map((l) => indexQueriesById.get(l.query.id) ?? l.query),
+      ...Array.from(indexQueriesById.values()).filter((q) => !currentIds.has(q.id)),
+    ];
+    await kiClient.syncQueries(definition, nextQueries, { currentLinks });
 
     logger
       .get('significant_events')

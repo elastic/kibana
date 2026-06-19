@@ -14,37 +14,41 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AttackDiscoveryGeneration } from '../../../generation.gen';
 
+export const GetAttackDiscoveryGenerationsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
+     */
+    end: z.string().optional(),
+    /**
+     * The maximum number of generations to retrieve
+     */
+    size: z.coerce.number().min(1).optional().default(50),
+    /**
+     * Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
+     */
+    start: z.string().optional(),
+  })
+);
 export type GetAttackDiscoveryGenerationsRequestQuery = z.infer<
   typeof GetAttackDiscoveryGenerationsRequestQuery
 >;
-export const GetAttackDiscoveryGenerationsRequestQuery = z.object({
-  /**
-   * End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
-   */
-  end: z.string().optional(),
-  /**
-   * The maximum number of generations to retrieve
-   */
-  size: z.coerce.number().min(1).optional().default(50),
-  /**
-   * Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
-   */
-  start: z.string().optional(),
-});
 export type GetAttackDiscoveryGenerationsRequestQueryInput = z.input<
   typeof GetAttackDiscoveryGenerationsRequestQuery
 >;
 
+export const GetAttackDiscoveryGenerationsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * List of Attack Discovery generations
+     */
+    generations: z.array(AttackDiscoveryGeneration),
+  })
+);
 export type GetAttackDiscoveryGenerationsResponse = z.infer<
   typeof GetAttackDiscoveryGenerationsResponse
 >;
-export const GetAttackDiscoveryGenerationsResponse = z.object({
-  /**
-   * List of Attack Discovery generations
-   */
-  generations: z.array(AttackDiscoveryGeneration),
-});

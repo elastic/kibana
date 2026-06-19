@@ -140,6 +140,7 @@ interface AgentBase {
   capabilities?: string[];
   health?: ComponentHealth;
   effective_config?: any;
+  signals?: string[];
 }
 
 export enum UnhealthyReason {
@@ -177,6 +178,7 @@ export interface Agent extends AgentBase {
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
   outputs?: OutputMap;
   status?: AgentStatus;
+  pipeline_config?: string;
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;

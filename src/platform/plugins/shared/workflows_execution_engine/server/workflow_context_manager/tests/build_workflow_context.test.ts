@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, ExecutionStatus, WorkflowYaml } from '@kbn/workflows';
+import type { EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
 import { buildWorkflowContext } from '../build_workflow_context';
 
@@ -21,8 +23,22 @@ jest.mock('../../utils', () => ({
     }),
 }));
 
+jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
+  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
+  getInputsFromDefinition: jest.fn(),
+}));
+
+const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+  typeof getInputsFromDefinition
+>;
+
 describe('buildWorkflowContext', () => {
   const dependencies = mockContextDependencies();
+
+  // Format-shape coverage of `inputs` is owned by `getInputsFromDefinition` unit tests
+  // in `field_conversion.test.ts`. Tests here mock that helper so the workflow definition
+  // can stay shape-agnostic and we only verify how `buildWorkflowContext` consumes the
+  // normalized schema.
   const baseExecution: EsWorkflowExecution = {
     id: 'test-execution-id',
     workflowId: 'test-workflow-id',
@@ -34,9 +50,8 @@ describe('buildWorkflowContext', () => {
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      inputs: [] as any,
       consts: {},
-      triggers: [],
+      triggers: [{ type: 'manual' }],
       steps: [],
     },
     yaml: '',
@@ -49,6 +64,15 @@ describe('buildWorkflowContext', () => {
     error: null,
     cancelRequested: false,
   };
+
+  const setInputsSchema = (schema: JsonModelSchemaType | undefined) => {
+    mockGetInputsFromDefinition.mockReturnValue(schema);
+  };
+
+  beforeEach(() => {
+    mockGetInputsFromDefinition.mockReset();
+    mockGetInputsFromDefinition.mockReturnValue(undefined);
+  });
 
   describe('execution context', () => {
     it('should include executedBy and triggeredBy in execution context', () => {
@@ -106,29 +130,44 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.executedBy).toBe('system');
       expect(context.execution.triggeredBy).toBe('scheduled');
     });
+
+    it('should expose accumulated token usage so it is queryable via {{ execution.usage }}', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        usage: { inputTokens: 45305, outputTokens: 289, totalTokens: 45594 },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.usage).toEqual({
+        inputTokens: 45305,
+        outputTokens: 289,
+        totalTokens: 45594,
+      });
+    });
+
+    it('should leave execution.usage undefined when no step reported usage', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        usage: undefined,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.usage).toBeUndefined();
+    });
   });
 
   describe('input default values', () => {
     it('should merge default input values when inputs are not provided', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Merge inputs into ctx',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
         context: {
           inputs: {},
         },
@@ -141,26 +180,71 @@ describe('buildWorkflowContext', () => {
       });
     });
 
-    it('should override default values with provided inputs', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Merge inputs into ctx',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+    it('should leave templated default input values raw when inputs are not provided', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {},
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
+      });
+    });
+
+    it('should leave provided templated input values raw', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {
+            inputWithDefault: '{{ consts.default_input }}',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
+      });
+    });
+
+    it('should override default values with provided inputs', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
         context: {
           inputs: {
             inputWithDefault: 'customValue',
@@ -176,30 +260,15 @@ describe('buildWorkflowContext', () => {
     });
 
     it('should apply defaults for missing inputs while preserving provided ones', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Merge inputs into ctx',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-          {
-            name: 'anotherInput',
-            type: 'string',
-            default: 'anotherDefault',
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+          anotherInput: { type: 'string', default: 'anotherDefault' },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
         context: {
           inputs: {
             inputWithDefault: 'customValue',
@@ -217,25 +286,14 @@ describe('buildWorkflowContext', () => {
     });
 
     it('should handle workflows without input defaults', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Merge inputs into ctx',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            // no default value
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string' },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
         context: {
           inputs: {
             inputWithDefault: 'providedValue',
@@ -251,25 +309,14 @@ describe('buildWorkflowContext', () => {
     });
 
     it('should return undefined inputs when there are no defaults and no provided inputs (backwards compatible)', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Merge inputs into ctx',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            // no default value
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string' },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
         context: {
           // inputs is undefined
         },
@@ -282,25 +329,14 @@ describe('buildWorkflowContext', () => {
     });
 
     it('should handle empty inputs context', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Merge inputs into ctx',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
         context: {
           // inputs is undefined
         },
@@ -314,38 +350,16 @@ describe('buildWorkflowContext', () => {
     });
 
     it('should handle different input types with defaults', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Test Workflow',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'count',
-            type: 'number',
-            required: false,
-            default: 42,
-          },
-          {
-            name: 'enabled',
-            type: 'boolean',
-            required: false,
-            default: true,
-          },
-          {
-            name: 'tags',
-            type: 'array',
-            required: false,
-            default: ['tag1', 'tag2'],
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+      setInputsSchema({
+        properties: {
+          count: { type: 'number', default: 42 },
+          enabled: { type: 'boolean', default: true },
+          tags: { type: 'array', default: ['tag1', 'tag2'] },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
         context: {
           inputs: {},
         },
@@ -361,25 +375,14 @@ describe('buildWorkflowContext', () => {
     });
 
     it('should handle empty provided inputs object (not undefined)', () => {
-      const workflowDefinition: WorkflowYaml = {
-        name: 'Merge inputs into ctx',
-        version: '1',
-        enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
-        consts: {},
-        triggers: [],
-        steps: [],
-      };
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
 
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition,
         context: {
           inputs: {}, // Empty object, not undefined
         },
@@ -397,13 +400,9 @@ describe('buildWorkflowContext', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         workflowDefinition: {
+          ...baseExecution.workflowDefinition,
           name: undefined as any,
-          version: '1',
           enabled: undefined as any,
-          inputs: [] as any,
-          consts: {},
-          triggers: [],
-          steps: [],
         },
         context: {},
       };
@@ -419,13 +418,8 @@ describe('buildWorkflowContext', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         workflowDefinition: {
-          name: 'Test Workflow',
-          version: '1',
-          enabled: true,
-          inputs: [] as any,
+          ...baseExecution.workflowDefinition,
           consts: undefined as any,
-          triggers: [],
-          steps: [],
         },
         context: {},
       };
@@ -497,7 +491,7 @@ describe('buildWorkflowContext', () => {
       expect(context.event).toBeDefined();
       expect(context.event?.spaceId).toBe('default');
       expect(context.event?.alerts).toHaveLength(1);
-      expect(context.event?.alerts?.[0]._id).toBe('alert-1');
+      expect((context.event?.alerts?.[0] as { _id: string })._id).toBe('alert-1');
       expect(context.event?.rule?.name).toBe('Test Rule');
       expect(context.event?.params).toEqual({ threshold: 10 });
     });
@@ -544,15 +538,6 @@ describe('buildWorkflowContext', () => {
     it('should handle when workflowInputs parameter is undefined (uses default)', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        workflowDefinition: {
-          name: 'Test Workflow',
-          version: '1',
-          enabled: true,
-          inputs: undefined as any,
-          consts: {},
-          triggers: [],
-          steps: [],
-        },
         context: {
           inputs: {
             customInput: 'value',
@@ -562,7 +547,7 @@ describe('buildWorkflowContext', () => {
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
-      // Should handle undefined inputs array (uses default empty array)
+      // Should pass provided inputs through when no schema is defined
       expect(context.inputs).toEqual({
         customInput: 'value',
       });

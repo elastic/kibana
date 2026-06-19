@@ -11,23 +11,30 @@ import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
+import { useInferenceCapabilities } from '../hooks/use_inference_capabilities';
 import { isEndpointPreconfigured } from '../utils/preconfigured_endpoint_helper';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { ExternalInferenceHeader } from './external_inference_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 import { ExternalInferenceEmptyPrompt } from './external_inference_empty_prompt';
+import { useUsageTracker } from '../contexts/usage_tracker_context';
+import { EventType } from '../analytics/constants';
 
 export const InferenceEndpoints: React.FC = () => {
   const { data, isLoading, refetch } = useQueryInferenceEndpoints();
   const [isAddInferenceFlyoutOpen, setIsAddInferenceFlyoutOpen] = useState<boolean>(false);
+  const usageTracker = useUsageTracker();
+  const { canManage } = useInferenceCapabilities();
 
   const onFlyoutOpen = useCallback(() => {
+    usageTracker.count([EventType.FLYOUT_OPENED, `${EventType.FLYOUT_OPENED}_add_inference`]);
     setIsAddInferenceFlyoutOpen(true);
-  }, []);
+  }, [usageTracker]);
 
   const onFlyoutClose = useCallback(() => {
+    usageTracker.count([EventType.FLYOUT_CLOSED, `${EventType.FLYOUT_CLOSED}_add_inference`]);
     setIsAddInferenceFlyoutOpen(false);
-  }, []);
+  }, [usageTracker]);
 
   const reload = useCallback(() => {
     refetch();
@@ -56,8 +63,8 @@ export const InferenceEndpoints: React.FC = () => {
   if (showEmptyState) {
     return (
       <>
-        <ExternalInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />
-        {isAddInferenceFlyoutOpen && (
+        <ExternalInferenceEmptyPrompt canManage={canManage} onFlyoutOpen={onFlyoutOpen} />
+        {canManage && isAddInferenceFlyoutOpen && (
           <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />
         )}
       </>
@@ -66,11 +73,11 @@ export const InferenceEndpoints: React.FC = () => {
 
   return (
     <>
-      <ExternalInferenceHeader onFlyoutOpen={onFlyoutOpen} />
+      <ExternalInferenceHeader canManage={canManage} onFlyoutOpen={onFlyoutOpen} />
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
         <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
-      {isAddInferenceFlyoutOpen && (
+      {canManage && isAddInferenceFlyoutOpen && (
         <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />
       )}
     </>

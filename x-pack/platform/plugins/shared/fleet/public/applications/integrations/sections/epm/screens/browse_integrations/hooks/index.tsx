@@ -31,7 +31,7 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards: originalFilteredCards,
+    allCards: originalFilteredCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const urlFilters = useUrlFilters();
@@ -44,18 +44,16 @@ export function useBrowseIntegrationHook({
 
     if (sortKey === 'a-z') {
       return [...originalFilteredCards].sort((a, b) => {
-        return a.name.localeCompare(b.name);
+        return a.title.localeCompare(b.title);
       });
     } else if (sortKey === 'z-a') {
       return [...originalFilteredCards].sort((a, b) => {
-        return b.name.localeCompare(a.name);
+        return b.title.localeCompare(a.title);
       });
     } else {
       // TODO implement recent-old and old-recent sorting when we have a date field
       return originalFilteredCards;
     }
-
-    return sortedCards;
   }, [originalFilteredCards, urlFilters.sort]);
 
   // Cards filtered by non-category filters (search, status, setup method, signal).
@@ -106,6 +104,11 @@ export function useBrowseIntegrationHook({
       cards = cards.filter((card) => signalFilters.some((s) => card.signalTypes?.includes(s)));
     }
 
+    // Hide content packs by default; only show when the user has explicitly enabled the filter
+    if (!urlFilters.showContent) {
+      cards = cards.filter((card) => card.type !== 'content');
+    }
+
     return cards;
   }, [
     localSearch,
@@ -114,6 +117,7 @@ export function useBrowseIntegrationHook({
     urlFilters.status,
     urlFilters.setupMethod,
     urlFilters.signal,
+    urlFilters.showContent,
   ]);
 
   // Apply category filter on top of non-category filters

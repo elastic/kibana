@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
-
 /**
  * Utility functions for building ESQL queries
  */
@@ -72,13 +70,33 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
+/**
+ * Wraps a string-valued ES|QL expression so its result can be safely embedded as a JSON
+ * string value. Escapes the two JSON-significant characters at query time:
+ *   - backslash  \  ->  \\
+ *   - double quote "  ->  \"
+ * Backslash is escaped first so the backslashes added when escaping quotes are not doubled again.
+ *
+ * Without this, identity values containing a backslash (e.g. Windows/AD `DOMAIN\user` EUIDs such
+ * as `user:AzureAD\FelixRoessel@...`) or a double quote produce invalid JSON that fails
+ * `JSON.parse` downstream in parse_records, 500-ing the whole graph request.
+ *
+ * REPLACE uses Java regex for the pattern and Java replacement semantics for the third argument,
+ * which is why the escape/replacement strings carry doubled backslashes. Returns null when the
+ * input expression is null, preserving the COALESCE null-handling of the callers.
+ */
+export const escapeJsonStringValueEsql = (esqlExpr: string): string =>
+  String.raw`REPLACE(REPLACE(${esqlExpr}, "\\\\", "\\\\\\\\"), "\"", "\\\\\"")`;
+
 export const concatJsonObjectPropertyEsqlExprSafe = (
   propertyName: string,
   esqlVariable: string
 ): string => {
   // CONCAT returns null if any argument is null, so if valueVar is null,
   // the entire CONCAT returns null, and COALESCE returns empty string
-  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${esqlVariable}, "\\""), "")`;
+  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(
+    esqlVariable
+  )}, "\\""), "")`;
 };
 
 export const concatJsonObjectPropertyString = (
@@ -92,59 +110,16 @@ export const concatJsonObjectPropertyBool = (propertyName: string, boolValue: bo
   return `CONCAT("\\"${propertyName}\\":", "${boolValue}")`;
 };
 
-export const concatJsonObjectPropertyEsqlExpr = (
-  propertyName: string,
-  esqlExpr: string
-): string => {
-  return `CONCAT("\\"${propertyName}\\":", ${esqlExpr})`;
-};
-
 export const concatJsonObjectPropertyEsqlExprAsString = (
   propertyName: string,
   esqlExpr: string
 ): string => {
-  return `CONCAT("\\"${propertyName}\\":\\"", ${esqlExpr}, "\\"")`;
+  return `CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(esqlExpr)}, "\\"")`;
 };
 
 export const JSON_OBJECT_SEPARATOR = '","';
 export const JSON_OBJECT_START = '"{"';
 export const JSON_OBJECT_END = '"}"';
-
-/**
- * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
- * This is the preferred method for enriching actor and target entities with entity store data.
- *
- * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default-00001')
- * @returns ESQL statements for LOOKUP JOIN enrichment
- *
- * @example
- * ```typescript
- * buildLookupJoinEsql('.entities.v2.latest.security_default-00001')
- * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
- * ```
- */
-export const buildLookupJoinEsql = (lookupIndexName: string): string => {
-  return `| DROP entity.id
-| DROP entity.target.id
-// rename entity.*fields before next pipeline to avoid name collisions
-| EVAL entity.id = actorEntityId
-| LOOKUP JOIN ${lookupIndexName} ON entity.id
-| RENAME actorEntityName    = entity.name
-| RENAME actorEntityType    = entity.type
-| RENAME actorEntitySubType = entity.sub_type
-| RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id
-| RENAME actorEntityEngineType = entity.EngineMetadata.Type
-
-| EVAL entity.id = targetEntityId
-| LOOKUP JOIN ${lookupIndexName} ON entity.id
-| RENAME targetEntityName    = entity.name
-| RENAME targetEntityType    = entity.type
-| RENAME targetEntitySubType = entity.sub_type
-| RENAME targetHostIp        = host.ip
-| RENAME targetLookupEntityId = entity.id
-| RENAME targetEntityEngineType = entity.EngineMetadata.Type`;
-};
 
 /**
  * Generates ESQL EVAL statement for actor entity ID using COALESCE.
@@ -274,26 +249,4 @@ ${targetCases},
 export const buildSourceMetadataEvals = (): string => {
   return `| EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code`;
-};
-
-/**
- * Builds ESQL enrichment pipeline based on availability.
- * Uses LOOKUP JOIN when available, otherwise falls back to null values.
- */
-export const buildEntityEnrichment = (isLookupIndexAvailable: boolean, spaceId: string): string => {
-  if (isLookupIndexAvailable) {
-    return buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId));
-  }
-
-  return `// No enrichment available - use null values
-| EVAL actorEntityName = TO_STRING(null)
-| EVAL actorEntityType = TO_STRING(null)
-| EVAL actorEntitySubType = TO_STRING(null)
-| EVAL actorHostIp = TO_STRING(null)
-| EVAL actorEntityEngineType = TO_STRING(null)
-| EVAL targetEntityName = TO_STRING(null)
-| EVAL targetEntityType = TO_STRING(null)
-| EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)
-| EVAL targetEntityEngineType = TO_STRING(null)`;
 };

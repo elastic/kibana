@@ -6,28 +6,42 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
+import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
 
 /**
- * Registers all security workflow steps with the workflowsExtensions plugin
+ * Registers all security workflow steps with the workflowsExtensions plugin.
+ * Registration is synchronous; each step uses an async loader to perform the
+ * feature-flag check at resolution time.
  */
-export const registerWorkflowSteps = async (
+export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  coreStart: CoreStart
-): Promise<void> => {
-  const registerAlertValidationStepsEnabled = await coreStart.featureFlags.getBooleanValue(
-    REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-    REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
-  );
+  core: CoreSetup
+): void => {
+  const isEnabled = core
+    .getStartServices()
+    .then(([coreStart]) =>
+      coreStart.featureFlags.getBooleanValue(
+        REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
+        REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
+      )
+    );
 
-  if (registerAlertValidationStepsEnabled) {
-    workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
-    workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
-  }
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isEnabled)) return undefined;
+    return renderAlertNarrativeStepDefinition;
+  });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isEnabled)) return undefined;
+    return buildAlertEntityGraphStepDefinition;
+  });
+
+  workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
 };

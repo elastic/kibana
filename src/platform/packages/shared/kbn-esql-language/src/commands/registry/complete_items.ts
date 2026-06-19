@@ -56,6 +56,22 @@ export const pipeCompleteItem: ISuggestionItem = withAutoSuggest({
   category: SuggestionCategory.PIPE,
 });
 
+export const newLineCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: `${i18n.translate('kbn-esql-language.esql.autocomplete.newLineLabel', {
+    defaultMessage: 'New line',
+  })} ⏎`,
+  filterText: '',
+  text: '\n',
+  kind: 'Keyword',
+  detail: '⇧↵',
+  category: SuggestionCategory.NEW_LINE,
+});
+
+export const newLineAndPipeCompleteItems: ISuggestionItem[] = [
+  newLineCompleteItem,
+  pipeCompleteItem,
+];
+
 export const allStarConstant: ISuggestionItem = {
   label: i18n.translate('kbn-esql-language.esql.autocomplete.allStarConstantDoc', {
     defaultMessage: 'All (*)',
@@ -84,7 +100,9 @@ export function buildMapKeySuggestion(
     kind: 'Constant',
     detail: description || paramName,
     ...(options?.filterText && { filterText: options.filterText }),
-    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    ...(options?.replacementRangeStrategy && {
+      replacementRangeStrategy: options.replacementRangeStrategy,
+    }),
   });
 }
 
@@ -138,7 +156,9 @@ export function buildAddValuePlaceholder(
     }),
     category: SuggestionCategory.VALUE,
     filterText: text,
-    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    ...(options?.replacementRangeStrategy && {
+      replacementRangeStrategy: options.replacementRangeStrategy,
+    }),
   });
 }
 
@@ -353,20 +373,34 @@ export const MAP_VALUE_SNIPPETS: Record<MapValueType, string> = {
 
 export interface MapKeySuggestionOptions {
   filterText?: string;
-  rangeToReplace?: { start: number; end: number };
+  replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
 }
 
-export function buildSubqueryCompleteItem(): ISuggestionItem {
+function buildSubqueryCompleteItem(sourceCommand: string): ISuggestionItem {
+  const commandName = sourceCommand.toUpperCase();
+
   return withAutoSuggest({
-    label: '(FROM ...)',
-    text: '(FROM $0)',
+    label: `(${commandName} ...)`,
+    text: `(${commandName} $0)`,
     asSnippet: true,
     kind: 'Method',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subquerySourceDoc', {
       defaultMessage: 'Adds a nested ES|QL query to your current query',
     }),
     category: SuggestionCategory.SUBQUERY,
   });
+}
+
+export function buildSubqueryCompleteItems(): ISuggestionItem[] {
+  return esqlCommandRegistry
+    .getAllCommands()
+    .filter(
+      ({ metadata }) =>
+        metadata.subquerySource === true &&
+        metadata.hidden !== true &&
+        !metadata.subquerySourceHidden
+    )
+    .map(({ name }) => buildSubqueryCompleteItem(name));
 }
 
 export const minMaxValueCompleteItem: ISuggestionItem = {
