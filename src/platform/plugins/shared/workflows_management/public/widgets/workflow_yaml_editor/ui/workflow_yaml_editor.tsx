@@ -229,6 +229,9 @@ export const WorkflowYAMLEditor = ({
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const workflowLookupRef = useRef(workflowLookup);
+  workflowLookupRef.current = workflowLookup;
+  const lastRevealedHighlightedStepIdRef = useRef<string | undefined>(undefined);
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -538,21 +541,33 @@ export const WorkflowYAMLEditor = ({
   }, [isEditorMounted, dispatch]);
 
   // Scroll editor to highlighted step when selected from execution flyout.
-  // workflowLookup is a dependency because the line numbers may shift, but in
-  // practice this only fires in execution mode where the editor is read-only,
-  // so re-scrolling on lookup changes is harmless.
+  // Do not re-scroll on workflow lookup updates; editing can change line numbers
+  // while a step remains highlighted for reference.
   useEffect(() => {
-    if (!isEditorMounted || !highlightedStepId || !workflowLookup) {
+    if (!highlightedStepId) {
+      lastRevealedHighlightedStepIdRef.current = undefined;
       return;
     }
+    if (!isEditorMounted) {
+      return;
+    }
+    if (lastRevealedHighlightedStepIdRef.current === highlightedStepId) {
+      return;
+    }
+    const currentWorkflowLookup = workflowLookupRef.current;
+    if (!currentWorkflowLookup) {
+      return;
+    }
+
     const lineStart =
       highlightedStepId === HIGHLIGHTED_STEP_TRIGGER
-        ? workflowLookup.triggersLineStart
-        : workflowLookup.steps[highlightedStepId]?.lineStart;
+        ? currentWorkflowLookup.triggersLineStart
+        : currentWorkflowLookup.steps[highlightedStepId]?.lineStart;
     if (lineStart != null) {
       editorRef.current?.revealLineInCenter(lineStart);
+      lastRevealedHighlightedStepIdRef.current = highlightedStepId;
     }
-  }, [isEditorMounted, highlightedStepId, workflowLookup]);
+  }, [isEditorMounted, highlightedStepId]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
