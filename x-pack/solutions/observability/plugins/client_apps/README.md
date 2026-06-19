@@ -112,7 +112,8 @@ user must still have Elasticsearch index privileges for the requested pattern.
 
 ### Android
 
-Android R8 mapping data is stored in per-build Elasticsearch indices named
+Android [R8](https://developer.android.com/topic/performance/app-optimization/enable-app-optimization) mapping data is
+stored in per-build Elasticsearch indices named
 `.android-r8-mappings-<build_id>`, where `build_id` is read from the crash document. Each
 index contains one document per obfuscated class, with `_id = SHA-256(obfuscated_class)`.
 
@@ -121,7 +122,8 @@ Each method contains ranged `mappings` and, when R8 emitted entries without obfu
 ranges, optional `default_mappings`. `default_mappings` are used only when the method has no
 ranged mappings at all; an out-of-range line on a ranged method is left unchanged.
 
-R8 extras are forwarded as native JSON under `mappings[].extras`. The retracer handles known
+[R8 extras](https://r8.googlesource.com/r8/+/refs/heads/main/doc/retrace.md#additional-information-appended-as-comments-to-the-file)
+are forwarded as native JSON under `mappings[].extras`. The retracer handles known
 extras such as `outline`, `outlineCallsite`, `rewriteFrame`, and `synthesized`, and ignores
 unknown extra IDs or fields so newer R8 metadata can flow through without changing the index
 mapping.
