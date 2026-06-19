@@ -36,7 +36,20 @@ test.describe(
   'Onboarding connect step IAM permissions viewer',
   { tag: tags.stateful.classic },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
+    test.beforeAll(async ({ apiServices, config }) => {
+      // The /internal/core/_settings route is only registered when
+      // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
+      // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
+      // eslint-disable-next-line playwright/no-skipped-test
+      test.skip(
+        config.isCloud === true,
+        `Core API returns 404 for 'ingestHub.onboardingEnabled' on ECH`
+      );
+      // skip() in beforeAll only skips the tests, not the hook body itself.
+      if (config.isCloud) {
+        return;
+      }
+
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'ingestHub.onboardingEnabled': 'true',
@@ -44,7 +57,10 @@ test.describe(
       });
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    test.afterAll(async ({ apiServices, config }) => {
+      if (config.isCloud) {
+        return;
+      }
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'ingestHub.onboardingEnabled': 'false',
