@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { useRunWorkflow, useWorkflows, WorkflowSelector } from '@kbn/workflows-ui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -164,7 +164,7 @@ export const RunWorkflowPanel = ({
 
   return (
     <>
-      <EuiPanel paddingSize={'none'} css={{ position: 'relative' }}>
+      <div css={{ position: 'relative' }}>
         {workflowSelector}
         {isLoading && (
           <div
@@ -182,7 +182,7 @@ export const RunWorkflowPanel = ({
             <EuiLoadingSpinner size="m" />
           </div>
         )}
-      </EuiPanel>
+      </div>
       <EuiButton
         data-test-subj={executeButtonTestSubj}
         fullWidth
