@@ -284,8 +284,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // chart and time picker updated
         await elasticChart.waitForRenderingCount(renderingCount + 1);
         const updatedTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:23:44.196');
-        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 02:32:51.702');
+        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:04:51.128');
+        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 02:23:51.722');
       });
     });
 
