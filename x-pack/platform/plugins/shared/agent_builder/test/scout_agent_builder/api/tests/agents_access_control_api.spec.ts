@@ -323,7 +323,7 @@ apiTest.describe(
       expect(response.body).toMatchObject({
         id: agentId,
         access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
-        permissions: { can_edit: true, can_change_access_control: true },
+        permissions: { update_agent: true, update_access_control: true },
       });
     });
 
@@ -418,8 +418,8 @@ apiTest.describe(
       const listedAgent = listAfterGrant.body.results.find((a: { id: string }) => a.id === agentId);
       expect(listedAgent.access_control.entries).toHaveLength(1);
       expect(listedAgent.permissions).toMatchObject({
-        can_edit: false,
-        can_change_access_control: false,
+        update_agent: false,
+        update_access_control: false,
       });
     });
 
@@ -469,8 +469,8 @@ apiTest.describe(
           role: AgentAccessControlRole.User,
         });
         expect(granted.body.permissions).toMatchObject({
-          can_edit: false,
-          can_change_access_control: false,
+          update_agent: false,
+          update_access_control: false,
         });
 
         const list = await apiClient.get(`${accessControlApiBase}/agents`, {
@@ -487,7 +487,7 @@ apiTest.describe(
           { headers: headersFor(bob), responseType: 'json' }
         );
         expect(bobAccessControl).toHaveStatusCode(200);
-        expect(bobAccessControl.body.permissions.can_change_access_control).toBe(false);
+        expect(bobAccessControl.body.permissions.update_access_control).toBe(false);
         expect(bobAccessControl.body.access_control.entries).toHaveLength(1);
         expect(bobAccessControl.body.access_control.entries[0]).toMatchObject({
           type: 'user',
@@ -500,7 +500,7 @@ apiTest.describe(
           { headers: headersFor(eve), responseType: 'json' }
         );
         expect(eveAccessControl).toHaveStatusCode(200);
-        expect(eveAccessControl.body.permissions.can_change_access_control).toBe(true);
+        expect(eveAccessControl.body.permissions.update_access_control).toBe(true);
         expect(eveAccessControl.body.access_control.entries).toHaveLength(2);
       }
     );
@@ -535,8 +535,8 @@ apiTest.describe(
           role: AgentAccessControlRole.Editor,
         });
         expect(eveRes.body.permissions).toMatchObject({
-          can_edit: true,
-          can_change_access_control: false,
+          update_agent: true,
+          update_access_control: false,
         });
 
         // Bob has User → manage threshold NOT met → only his own grant is returned.
@@ -555,8 +555,8 @@ apiTest.describe(
           role: AgentAccessControlRole.User,
         });
         expect(bobRes.body.permissions).toMatchObject({
-          can_edit: false,
-          can_change_access_control: false,
+          update_agent: false,
+          update_access_control: false,
         });
       }
     );
@@ -578,7 +578,7 @@ apiTest.describe(
           { headers: headersFor(eve), responseType: 'json' }
         );
         expect(eveAccessControlRes).toHaveStatusCode(200);
-        expect(eveAccessControlRes.body.permissions.can_change_access_control).toBe(true);
+        expect(eveAccessControlRes.body.permissions.update_access_control).toBe(true);
         expect(eveAccessControlRes.body.access_control.entries).toHaveLength(2);
 
         const bobAccessControlRes = await apiClient.get(
@@ -586,7 +586,7 @@ apiTest.describe(
           { headers: headersFor(bob), responseType: 'json' }
         );
         expect(bobAccessControlRes).toHaveStatusCode(200);
-        expect(bobAccessControlRes.body.permissions.can_change_access_control).toBe(false);
+        expect(bobAccessControlRes.body.permissions.update_access_control).toBe(false);
         expect(bobAccessControlRes.body.access_control.entries).toHaveLength(1);
         expect(bobAccessControlRes.body.access_control.entries[0]).toMatchObject({
           type: 'user',

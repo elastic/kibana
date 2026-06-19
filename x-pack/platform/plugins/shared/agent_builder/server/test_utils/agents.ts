@@ -59,8 +59,8 @@ export const createMockedInternalAgent = (
     created_by: { username: 'test-user' },
     readonly: false,
     permissions: {
-      can_edit: true,
-      can_change_access_control: true,
+      update_agent: true,
+      update_access_control: true,
     },
     isAvailable: jest.fn() as any,
     ...parts,

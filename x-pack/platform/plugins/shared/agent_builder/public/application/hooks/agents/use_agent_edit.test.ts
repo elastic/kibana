@@ -13,7 +13,7 @@ const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
 const mockUpdateAccessControl = jest.fn();
 type MockAgent = AgentEditState & {
-  permissions?: { can_edit: boolean; can_change_access_control: boolean };
+  permissions?: { update_agent: boolean; update_access_control: boolean };
 };
 let mockAgent: MockAgent | undefined;
 
@@ -248,7 +248,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       avatar_color: '',
       avatar_symbol: '',
       configuration: baseConfiguration,
-      permissions: { can_edit: true, can_change_access_control: false },
+      permissions: { update_agent: true, update_access_control: false },
     };
 
     const { result } = renderHook(() =>
@@ -260,8 +260,8 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     );
 
     expect(result.current.permissions).toEqual({
-      can_edit: true,
-      can_change_access_control: false,
+      update_agent: true,
+      update_access_control: false,
     });
     expect(result.current.state).not.toHaveProperty('permissions');
   });

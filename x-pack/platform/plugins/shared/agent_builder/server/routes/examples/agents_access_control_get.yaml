@@ -17,7 +17,7 @@ responses:
                     name: bob
                     role: user
               permissions:
-                can_change_access_control: true
+                update_access_control: true
           getAgentAccessControlMaskedResponseExample:
             description: "Example response for a caller without manage permission — only the caller's own entry is returned."
             value:
@@ -28,7 +28,7 @@ responses:
                     name: bob
                     role: user
               permissions:
-                can_change_access_control: false
+                update_access_control: false
   404:
     description: "Not Found — no agent with this ID is visible to the caller. Matches the existing `agentNotFound` shape, so unprivileged callers cannot probe for hidden agents."
     content:

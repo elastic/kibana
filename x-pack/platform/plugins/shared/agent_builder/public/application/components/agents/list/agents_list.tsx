@@ -77,7 +77,7 @@ export const AgentsList: React.FC = () => {
   const [aclAgent, setAclAgent] = React.useState<AgentDefinitionWithPermissions | null>(null);
 
   const canManageAgentAccess = React.useCallback((agent: AgentDefinitionWithPermissions) => {
-    return agent.permissions.can_change_access_control;
+    return agent.permissions.update_access_control;
   }, []);
 
   const columns: Array<EuiBasicTableColumn<AgentDefinitionWithPermissions>> = useMemo(() => {
@@ -87,7 +87,7 @@ export const AgentsList: React.FC = () => {
       render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
-    const canEditAgent = (agent: AgentDefinitionWithPermissions) => agent.permissions.can_edit;
+    const canEditAgent = (agent: AgentDefinitionWithPermissions) => agent.permissions.update_agent;
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
       field: 'name',

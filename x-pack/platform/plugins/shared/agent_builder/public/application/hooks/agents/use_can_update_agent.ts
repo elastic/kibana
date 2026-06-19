@@ -11,7 +11,7 @@ import type { AgentPermissions } from '../../../../common/http_api/agents';
 
 type AgentWithOptionalPermissions = AgentDefinition & { permissions?: AgentPermissions };
 
-export const useCanEditAgent = ({
+export const useCanUpdateAgent = ({
   agent,
 }: {
   agent: AgentWithOptionalPermissions | null;
@@ -20,6 +20,6 @@ export const useCanEditAgent = ({
     if (!agent) {
       return false;
     }
-    return agent.permissions?.can_edit ?? false;
+    return agent.permissions?.update_agent ?? false;
   }, [agent]);
 };

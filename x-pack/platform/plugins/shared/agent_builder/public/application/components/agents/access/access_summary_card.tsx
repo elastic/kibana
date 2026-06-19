@@ -21,8 +21,8 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
-import { useAgentAccessControl } from '../../../hooks/agents/use_agent_acl';
-import { useCanManageAgentAccess } from '../../../hooks/agents/use_can_manage_agent_access';
+import { useAgentAccessControl } from '../../../hooks/agents/use_agent_access_control';
+import { useCanUpdateAgentAccess } from '../../../hooks/agents/use_can_update_agent_access';
 import { ROLE_LABEL } from './role_to_capabilities';
 import {
   accessSummaryCardTitle,
@@ -55,10 +55,10 @@ const tokenStackStyles = (euiTheme: EuiThemeComputed) => css`
 export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onManage }) => {
   const { euiTheme } = useEuiTheme();
   const isDefaultAgent = agent.id === agentBuilderDefaultAgentId;
-  const { canManage } = useCanManageAgentAccess(agent);
+  const { canUpdate } = useCanUpdateAgentAccess(agent);
 
   const { data, isLoading } = useAgentAccessControl(agent.id, {
-    enabled: canManage && !isDefaultAgent,
+    enabled: canUpdate && !isDefaultAgent,
   });
 
   const userCount = data?.access_control.entries.filter((e) => e.type === 'user').length ?? 0;
@@ -75,14 +75,14 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
   }
 
   const renderDescription = () => {
-    if (isLoading && canManage) {
+    if (isLoading && canUpdate) {
       return (
         <EuiText size="s" color="subdued">
           {accessSummaryLoading}
         </EuiText>
       );
     }
-    if (!canManage) {
+    if (!canUpdate) {
       return (
         <EuiText size="s" color="subdued">
           {hasCustom ? accessSummaryHiddenDescription : accessSummaryDefaultDescription}
@@ -146,7 +146,7 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
           <EuiSpacer size="xs" />
           {renderDescription()}
         </EuiFlexItem>
-        {canManage ? (
+        {canUpdate ? (
           <EuiFlexItem grow={false}>
             {hasCustom ? (
               <EuiButtonEmpty

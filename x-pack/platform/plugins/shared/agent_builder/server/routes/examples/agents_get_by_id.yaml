@@ -24,8 +24,8 @@ responses:
                   name: alice
                   role: manager
               permissions:
-                can_edit: true
-                can_change_access_control: true
+                update_agent: true
+                update_access_control: true
               configuration:
                 instructions: You are a custom agent that wants to help searching data using all
                   indices starting with prefix "content-".

@@ -135,8 +135,8 @@ export const getAgentPermissions = ({
   user: CurrentUser;
   isAdmin: boolean;
 }): AgentPermissions => ({
-  can_edit: hasWriteAccess({ source, user, isAdmin }),
-  can_change_access_control: hasManageAccessControlAccess({ source, user, isAdmin }),
+  update_agent: hasWriteAccess({ source, user, isAdmin }),
+  update_access_control: hasManageAccessControlAccess({ source, user, isAdmin }),
 });
 
 /**

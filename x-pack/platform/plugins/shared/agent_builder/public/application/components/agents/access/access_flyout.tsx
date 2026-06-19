@@ -30,8 +30,8 @@ import type {
 } from '@kbn/agent-builder-common';
 import { AccessForm } from './access_form';
 import { AccessControlModeContextStrip } from './access_control_mode_context_strip';
-import { useAgentAccessControl } from '../../../hooks/agents/use_agent_acl';
-import { useUpdateAgentAccessControl } from '../../../hooks/agents/use_update_agent_acl';
+import { useAgentAccessControl } from '../../../hooks/agents/use_agent_access_control';
+import { useUpdateAgentAccessControl } from '../../../hooks/agents/use_update_agent_access_control';
 import {
   accessFlyoutCancel,
   accessFlyoutHiddenBody,
@@ -133,7 +133,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
         </EuiCallOut>
       );
     }
-    if (!data.permissions.can_change_access_control) {
+    if (!data.permissions.update_access_control) {
       // The user can read the agent but not manage its ACL. Server has already redacted
       // entries — this is its own first-class state, not an error. Be honest about it.
       return (
@@ -189,10 +189,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          !isLoading &&
-          draft !== null &&
-          !isError &&
-          data?.permissions.can_change_access_control ? (
+          !isLoading && draft !== null && !isError && data?.permissions.update_access_control ? (
             <AccessControlModeContextStrip agent={agent} />
           ) : undefined
         }
@@ -211,7 +208,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
               fill
               onClick={handleSave}
               isLoading={updateMutation.isLoading}
-              isDisabled={!isDirty || isBusy || !data?.permissions.can_change_access_control}
+              isDisabled={!isDirty || isBusy || !data?.permissions.update_access_control}
               data-test-subj="agentBuilderAclSaveButton"
             >
               {accessFlyoutSave}

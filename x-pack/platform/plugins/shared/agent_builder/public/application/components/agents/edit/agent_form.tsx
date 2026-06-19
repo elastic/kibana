@@ -160,7 +160,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     onSaveError,
   });
 
-  const canEditAgent = isCreateMode ? manageAgents : permissions?.can_edit ?? false;
+  const canEditAgent = isCreateMode ? manageAgents : permissions?.update_agent ?? false;
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
@@ -269,7 +269,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             isCreateMode={isCreateMode}
             isFormDisabled={isFormDisabled || !canEditAgent}
             canChangeAccessControl={
-              isCreateMode ? manageAgents : permissions?.can_change_access_control ?? false
+              isCreateMode ? manageAgents : permissions?.update_access_control ?? false
             }
             owner={agentState?.created_by}
             agentId={editingAgentId}
@@ -379,7 +379,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activeSkillsCount,
       activePluginsCount,
       manageAgents,
-      permissions?.can_change_access_control,
+      permissions?.update_access_control,
       isExperimentalFeaturesEnabled,
       enableElasticCapabilities,
     ]

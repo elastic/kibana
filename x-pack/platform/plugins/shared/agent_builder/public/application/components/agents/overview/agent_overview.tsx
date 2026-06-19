@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { useCanUpdateAgent } from '../../../hooks/agents/use_can_update_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useToolsService } from '../../../hooks/tools/use_tools';
@@ -34,7 +34,7 @@ import { SettingsSection } from './settings_section';
 import { PageWrapper } from '../common/page_wrapper';
 import { AccessFlyout } from '../access/access_flyout';
 import { AccessSummaryCard } from '../access/access_summary_card';
-import { useCanManageAgentAccess } from '../../../hooks/agents/use_can_manage_agent_access';
+import { useCanUpdateAgentAccess } from '../../../hooks/agents/use_can_update_agent_access';
 import {
   getActivePlugins,
   getActiveSkills,
@@ -58,11 +58,10 @@ export const AgentOverview: React.FC = () => {
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [isAccessFlyoutOpen, setIsAccessFlyoutOpen] = useState(false);
-  const canEditAgent = useCanEditAgent({ agent });
-  const { canManage: canManageAccess } = useCanManageAgentAccess(agent);
+  const canEditAgent = useCanUpdateAgent({ agent });
+  const { canUpdate: canUpdateAgentAccess } = useCanUpdateAgentAccess(agent);
 
-  const canChangeAccessControlMode =
-    isExperimentalFeaturesEnabled && Boolean(agent?.permissions.can_change_access_control);
+  const canChangeAccessControlMode = isExperimentalFeaturesEnabled && canUpdateAgentAccess;
 
   const showWorkflowSection = isPreExecutionWorkflowEnabled(uiSettings);
 
@@ -124,7 +123,7 @@ export const AgentOverview: React.FC = () => {
           docsUrl={docLinksService.agentBuilderAgents}
           canEditAgent={canEditAgent}
           onEditDetails={() => setIsEditFlyoutOpen(true)}
-          canManageAccess={canManageAccess}
+          canManageAccess={canUpdateAgentAccess}
           onManageAccess={() => setIsAccessFlyoutOpen(true)}
         />
 

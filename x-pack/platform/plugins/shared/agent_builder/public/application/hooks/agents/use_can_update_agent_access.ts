@@ -19,13 +19,13 @@ type AgentWithOptionalPermissions = AgentDefinition & { permissions?: AgentPermi
  *
  * Returns `false` while the current user is still loading to avoid flashing incorrect actions.
  */
-export const useCanManageAgentAccess = (
+export const useCanUpdateAgentAccess = (
   agent: AgentWithOptionalPermissions | null | undefined
-): { canManage: boolean; isLoading: boolean } => {
-  const canManage = useMemo(() => {
+): { canUpdate: boolean; isLoading: boolean } => {
+  const canUpdate = useMemo(() => {
     if (!agent) return false;
-    return agent.permissions?.can_change_access_control ?? false;
+    return agent.permissions?.update_access_control ?? false;
   }, [agent]);
 
-  return { canManage, isLoading: false };
+  return { canUpdate, isLoading: false };
 };

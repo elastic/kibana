@@ -203,8 +203,8 @@ describe('getAgentPermissions', () => {
     };
 
     expect(getAgentPermissions({ source, user: nonOwnerUser, isAdmin: false })).toEqual({
-      can_edit: true,
-      can_change_access_control: false,
+      update_agent: true,
+      update_access_control: false,
     });
   });
 
@@ -217,8 +217,8 @@ describe('getAgentPermissions', () => {
     };
 
     expect(getAgentPermissions({ source, user: ownerUser, isAdmin: false })).toEqual({
-      can_edit: true,
-      can_change_access_control: true,
+      update_agent: true,
+      update_access_control: true,
     });
   });
 
@@ -232,8 +232,8 @@ describe('getAgentPermissions', () => {
     };
 
     expect(getAgentPermissions({ source, user: ownerUser, isAdmin: false })).toEqual({
-      can_edit: true,
-      can_change_access_control: false,
+      update_agent: true,
+      update_access_control: false,
     });
   });
 });

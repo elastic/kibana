@@ -70,7 +70,7 @@ export interface GetAgentAccessControlResult {
   /** Always present; entries[] may be empty for default agents. */
   access_control: AgentAccessControl;
   permissions: {
-    can_change_access_control: boolean;
+    update_access_control: boolean;
   };
 }
 
@@ -407,7 +407,7 @@ class AgentClientImpl implements AgentClient {
     return {
       access_control: definition.access_control,
       permissions: {
-        can_change_access_control: canManage,
+        update_access_control: canManage,
       },
     };
   }
