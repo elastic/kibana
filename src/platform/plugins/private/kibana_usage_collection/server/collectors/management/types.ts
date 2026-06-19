@@ -200,6 +200,7 @@ export interface UsageStats {
   'securitySolution:alertValidationWorkflowAutoCloseEnabled': boolean;
   'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMinThreshold': number;
   'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
+  'securitySolution:alertValidationWorkflowConnectorId': string;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;

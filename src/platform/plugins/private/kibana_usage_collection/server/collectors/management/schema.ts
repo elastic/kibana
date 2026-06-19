@@ -828,6 +828,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Maximum false positive confidence score for auto-closing alerts',
     },
   },
+  'securitySolution:alertValidationWorkflowConnectorId': {
+    type: 'keyword',
+    _meta: { description: 'AI connector used by the alert analysis workflow' },
+  },
   'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {

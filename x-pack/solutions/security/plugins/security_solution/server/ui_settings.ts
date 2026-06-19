@@ -14,6 +14,7 @@ import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
@@ -732,6 +733,25 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     category: [APP_ID],
     requiresPageReload: false,
     schema: schema.number({ min: 0, max: 1 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+  },
+  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowConnectorIdLabel',
+      { defaultMessage: 'Alert analysis workflow AI connector' }
+    ),
+    value: '',
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowConnectorIdDescription',
+      {
+        defaultMessage: 'The AI connector used by the alert analysis workflow to classify alerts.',
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.string(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
   },

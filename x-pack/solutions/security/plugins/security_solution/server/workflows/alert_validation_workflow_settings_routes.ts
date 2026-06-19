@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
 } from '@kbn/management-settings-ids';
 import {
   ALERT_VALIDATION_WORKFLOW_API_VERSION,
   ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
-  AlertValidationWorkflowSettingsRequestBody,
+  AlertValidationWorkflowSettings,
   MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
   MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
-  type AlertValidationWorkflowSettingsRequestBody as AlertValidationWorkflowSettingsRequestBodyType,
 } from '@kbn/workflows/common/alert_validation_workflow';
 import type { SecuritySolutionPluginRouter } from '../types';
 import type { StartPlugins } from '../plugin';
@@ -31,11 +32,27 @@ import {
 
 export { ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE };
 
+const AlertValidationWorkflowSettingsWithConnectorRequestBody =
+  AlertValidationWorkflowSettings.extend({
+    connectorId: z.string().optional(),
+  }).refine(
+    ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
+      autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
+    {
+      message: 'Minimum confidence score must be lower than maximum confidence score',
+      path: ['autoCloseConfidenceScoreMaxThreshold'],
+    }
+  );
+
+type AlertValidationWorkflowSettingsWithConnectorRequestBodyType = z.infer<
+  typeof AlertValidationWorkflowSettingsWithConnectorRequestBody
+>;
+
 const toWorkflowSettings = ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
-}: AlertValidationWorkflowSettingsRequestBodyType): SecurityAlertValidationWorkflowSettings => ({
+}: AlertValidationWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertValidationWorkflowSettings => ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
@@ -77,6 +94,9 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           autoCloseConfidenceScoreMaxThreshold: await uiSettingsClient.get<number>(
             SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD
           ),
+          connectorId: await uiSettingsClient.get<string>(
+            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID
+          ),
         };
 
         const spaceId = (await context.securitySolution).getSpaceId();
@@ -105,7 +125,9 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(AlertValidationWorkflowSettingsRequestBody),
+            body: buildRouteValidationWithZod(
+              AlertValidationWorkflowSettingsWithConnectorRequestBody
+            ),
           },
         },
       },
@@ -131,7 +153,8 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         }
 
         try {
-          const settings = toWorkflowSettings(request.body);
+          const { connectorId, ...baseBody } = request.body;
+          const settings = toWorkflowSettings(baseBody);
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
             coreStart.savedObjects.getScopedClient(request)
           );
@@ -147,6 +170,10 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
             SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
             settings.autoCloseConfidenceScoreMaxThreshold
           );
+          await uiSettingsClient.set(
+            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+            connectorId ?? ''
+          );
 
           const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
             workflowsExtensions
@@ -160,7 +187,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
 
           return response.ok({
             body: {
-              settings,
+              settings: { ...settings, connectorId: connectorId ?? '' },
               installed: true,
               workflowId: getSecurityAlertValidationWorkflowIdForSpace(spaceId),
             },

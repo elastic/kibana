@@ -19,18 +19,20 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { NotFoundPage } from '../../../../app/404';
 import { SecurityPageName } from '../../../../app/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import {
   fetchAlertValidationWorkflowSettings,
   MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
   MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
   saveAlertValidationWorkflowSettings,
-  type AlertValidationWorkflowSettings,
+  type AlertValidationWorkflowSettingsWithConnector,
 } from './api';
 import { AlertValidationWorkflowRuleAttachmentSection } from './alert_validation_workflow_rule_attachment_section';
 import * as translations from './translations';
@@ -43,19 +45,20 @@ const ALERT_VALIDATION_WORKFLOW_SETTINGS_QUERY_KEY = [
 type AlertValidationWorkflowSettingsError = Error & { body?: { message?: string } };
 
 const areSettingsEqual = (
-  left: AlertValidationWorkflowSettings | undefined,
-  right: AlertValidationWorkflowSettings | undefined
+  left: AlertValidationWorkflowSettingsWithConnector | undefined,
+  right: AlertValidationWorkflowSettingsWithConnector | undefined
 ): boolean => {
   return (
     left?.autoCloseEnabled === right?.autoCloseEnabled &&
     left?.autoCloseConfidenceScoreMinThreshold === right?.autoCloseConfidenceScoreMinThreshold &&
-    left?.autoCloseConfidenceScoreMaxThreshold === right?.autoCloseConfidenceScoreMaxThreshold
+    left?.autoCloseConfidenceScoreMaxThreshold === right?.autoCloseConfidenceScoreMaxThreshold &&
+    left?.connectorId === right?.connectorId
   );
 };
 
 export const AlertValidationWorkflowPage: React.FC = () => {
   const {
-    services: { application, http, notifications, featureFlags },
+    services: { application, http, notifications, featureFlags, settings },
   } = useKibana();
   const queryClient = useQueryClient();
   const isEnabled = featureFlags.getBooleanValue(
@@ -63,6 +66,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
     MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
   );
   const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
+  const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
   const { data: savedSettingsResponse, isLoading } = useQuery({
     queryKey: ALERT_VALIDATION_WORKFLOW_SETTINGS_QUERY_KEY,
     enabled: isEnabled,
@@ -74,11 +78,14 @@ export const AlertValidationWorkflowPage: React.FC = () => {
   const workflowHref = savedSettingsResponse?.workflowId
     ? application.getUrlForApp('workflows', { path: `/${savedSettingsResponse.workflowId}` })
     : undefined;
-  const [settings, setSettings] = useState<AlertValidationWorkflowSettings | undefined>();
-  const isDirty = !areSettingsEqual(settings, savedSettings);
+  const [pageSettings, setPageSettings] = useState<
+    AlertValidationWorkflowSettingsWithConnector | undefined
+  >();
+  const isDirty = !areSettingsEqual(pageSettings, savedSettings);
   const isThresholdRangeInvalid =
-    settings !== undefined &&
-    settings.autoCloseConfidenceScoreMinThreshold >= settings.autoCloseConfidenceScoreMaxThreshold;
+    pageSettings !== undefined &&
+    pageSettings.autoCloseConfidenceScoreMinThreshold >=
+      pageSettings.autoCloseConfidenceScoreMaxThreshold;
   const thresholdRangeErrorMessage = i18n.translate(
     'xpack.securitySolution.alertValidationWorkflow.thresholdRangeErrorMessage',
     {
@@ -86,11 +93,11 @@ export const AlertValidationWorkflowPage: React.FC = () => {
     }
   );
   const saveSettingsMutation = useMutation({
-    mutationFn: async (settingsToSave: AlertValidationWorkflowSettings) => {
+    mutationFn: async (settingsToSave: AlertValidationWorkflowSettingsWithConnector) => {
       return saveAlertValidationWorkflowSettings({ http, settings: settingsToSave });
     },
     onSuccess: (response) => {
-      setSettings(response.settings);
+      setPageSettings(response.settings);
       queryClient.setQueryData(ALERT_VALIDATION_WORKFLOW_SETTINGS_QUERY_KEY, response);
       notifications.toasts.addSuccess(
         i18n.translate('xpack.securitySolution.alertValidationWorkflow.saveSuccessMessage', {
@@ -110,7 +117,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
 
   useEffect(() => {
     if (savedSettings) {
-      setSettings(savedSettings);
+      setPageSettings(savedSettings);
     }
   }, [savedSettings]);
 
@@ -150,10 +157,49 @@ export const AlertValidationWorkflowPage: React.FC = () => {
             />
           }
         />
-        {isLoading || !settings ? (
+        {isLoading || !pageSettings ? (
           <EuiLoadingSpinner data-test-subj="alertValidationWorkflowSettingsLoading" />
         ) : (
           <>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertValidationWorkflow.connectorSectionTitle"
+                    defaultMessage="AI connector"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertValidationWorkflow.connectorSectionDescription"
+                    defaultMessage="Select the AI connector used to classify alerts as false positives."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.securitySolution.alertValidationWorkflow.connectorLabel',
+                  { defaultMessage: 'Connector' }
+                )}
+              >
+                <ConnectorSelector
+                  data-test-subj="alertValidationWorkflowConnectorSelector"
+                  connectors={aiConnectors}
+                  selectedId={pageSettings.connectorId}
+                  isLoading={isLoadingConnectors}
+                  isDisabled={!canEditAdvancedSettings}
+                  settings={settings}
+                  onChange={(connectorId) =>
+                    setPageSettings((prev) => (prev ? { ...prev, connectorId } : prev))
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
             <EuiDescribedFormGroup
               fullWidth
               title={
@@ -189,11 +235,11 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                       defaultMessage: 'Auto-close alerts classified as false positives',
                     }
                   )}
-                  checked={settings.autoCloseEnabled}
+                  checked={pageSettings.autoCloseEnabled}
                   disabled={!canEditAdvancedSettings}
                   onChange={(event) =>
-                    setSettings({
-                      ...settings,
+                    setPageSettings({
+                      ...pageSettings,
                       autoCloseEnabled: event.target.checked,
                     })
                   }
@@ -225,7 +271,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  value={settings.autoCloseConfidenceScoreMinThreshold}
+                  value={pageSettings.autoCloseConfidenceScoreMinThreshold}
                   disabled={!canEditAdvancedSettings}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={i18n.translate(
@@ -235,8 +281,8 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                     }
                   )}
                   onChange={(event) =>
-                    setSettings({
-                      ...settings,
+                    setPageSettings({
+                      ...pageSettings,
                       autoCloseConfidenceScoreMinThreshold: event.target.valueAsNumber,
                     })
                   }
@@ -272,7 +318,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  value={settings.autoCloseConfidenceScoreMaxThreshold}
+                  value={pageSettings.autoCloseConfidenceScoreMaxThreshold}
                   disabled={!canEditAdvancedSettings}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={i18n.translate(
@@ -282,8 +328,8 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                     }
                   )}
                   onChange={(event) =>
-                    setSettings({
-                      ...settings,
+                    setPageSettings({
+                      ...pageSettings,
                       autoCloseConfidenceScoreMaxThreshold: event.target.valueAsNumber,
                     })
                   }
@@ -296,8 +342,8 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               disabled={!canEditAdvancedSettings || !isDirty || isThresholdRangeInvalid}
               isLoading={saveSettingsMutation.isLoading}
               onClick={() => {
-                if (settings) {
-                  saveSettingsMutation.mutate(settings);
+                if (pageSettings) {
+                  saveSettingsMutation.mutate(pageSettings);
                 }
               }}
             >

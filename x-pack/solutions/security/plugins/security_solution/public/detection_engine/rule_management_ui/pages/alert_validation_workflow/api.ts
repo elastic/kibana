@@ -19,8 +19,6 @@ import {
   type AlertValidationWorkflowRuleAttachmentStatsRequestBody,
   type AlertValidationWorkflowRuleAttachmentUpdateRequestBody,
   type AlertValidationWorkflowSettings,
-  type AlertValidationWorkflowSaveResponse,
-  type AlertValidationWorkflowSettingsResponse,
   type RuleAttachmentPage,
   type RuleAttachmentSelection,
   type RuleAttachmentStats,
@@ -48,12 +46,26 @@ export type {
   UpdateRuleAttachmentsResult,
 };
 
+export type AlertValidationWorkflowSettingsWithConnector = AlertValidationWorkflowSettings & {
+  connectorId?: string;
+};
+
+export interface AlertValidationWorkflowSettingsWithConnectorResponse {
+  settings: AlertValidationWorkflowSettingsWithConnector;
+  workflowId: string;
+}
+
+export interface AlertValidationWorkflowSaveWithConnectorResponse
+  extends AlertValidationWorkflowSettingsWithConnectorResponse {
+  installed: boolean;
+}
+
 export const fetchAlertValidationWorkflowSettings = ({
   http,
 }: {
   http: HttpStart;
-}): Promise<AlertValidationWorkflowSettingsResponse> => {
-  return http.fetch<AlertValidationWorkflowSettingsResponse>(
+}): Promise<AlertValidationWorkflowSettingsWithConnectorResponse> => {
+  return http.fetch<AlertValidationWorkflowSettingsWithConnectorResponse>(
     ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
     {
       method: 'GET',
@@ -67,13 +79,16 @@ export const saveAlertValidationWorkflowSettings = ({
   settings,
 }: {
   http: HttpStart;
-  settings: AlertValidationWorkflowSettings;
-}): Promise<AlertValidationWorkflowSaveResponse> => {
-  return http.fetch<AlertValidationWorkflowSaveResponse>(ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE, {
-    method: 'PUT',
-    version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
-    body: JSON.stringify(settings),
-  });
+  settings: AlertValidationWorkflowSettingsWithConnector;
+}): Promise<AlertValidationWorkflowSaveWithConnectorResponse> => {
+  return http.fetch<AlertValidationWorkflowSaveWithConnectorResponse>(
+    ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
+    {
+      method: 'PUT',
+      version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+      body: JSON.stringify(settings),
+    }
+  );
 };
 
 export const fetchAlertValidationWorkflowRuleAttachments = ({
