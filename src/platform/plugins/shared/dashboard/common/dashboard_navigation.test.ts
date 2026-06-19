@@ -68,12 +68,12 @@ describe('createDashboardsNavigationNode', () => {
 
     expect(node.children).toHaveLength(3);
     expect(node.children?.[1]).toMatchObject({
-      id: 'dashboards_recent',
-      title: 'Recent',
-    });
-    expect(node.children?.[2]).toMatchObject({
       id: 'dashboards_starred',
       title: 'Starred',
+    });
+    expect(node.children?.[2]).toMatchObject({
+      id: 'dashboards_recent',
+      title: 'Recent',
     });
   });
 
@@ -123,17 +123,6 @@ describe('createDashboardsNavigationNode', () => {
         ],
       },
       {
-        id: 'dashboards_recent',
-        label: 'Recent',
-        items: [
-          expect.objectContaining({
-            id: 'recent_1',
-            label: 'Recent dashboard',
-            href: 'http://mocked/kibana/foo/app/dashboards#/view/1',
-          }),
-        ],
-      },
-      {
         id: 'dashboards_starred',
         label: 'Starred',
         items: [
@@ -141,6 +130,17 @@ describe('createDashboardsNavigationNode', () => {
             id: 'starred_2',
             label: 'Starred dashboard',
             href: 'http://mocked/kibana/foo/app/dashboards#/view/2',
+          }),
+        ],
+      },
+      {
+        id: 'dashboards_recent',
+        label: 'Recent',
+        items: [
+          expect.objectContaining({
+            id: 'recent_1',
+            label: 'Recent dashboard',
+            href: 'http://mocked/kibana/foo/app/dashboards#/view/1',
           }),
         ],
       },
@@ -178,11 +178,11 @@ describe('createDashboardsNavigationNode', () => {
       { deepLinks, cloudLinks: {} }
     );
 
-    const recentNode = navigationTreeUI.body[0].children![1].children![0];
-    const starredNode = navigationTreeUI.body[0].children![2].children![0];
+    const starredNode = navigationTreeUI.body[0].children![1].children![0];
+    const recentNode = navigationTreeUI.body[0].children![2].children![0];
     const panelNode = navigationTreeUI.body[0];
-    const recentSection = navigationTreeUI.body[0].children![1];
-    const starredSection = navigationTreeUI.body[0].children![2];
+    const starredSection = navigationTreeUI.body[0].children![1];
+    const recentSection = navigationTreeUI.body[0].children![2];
 
     const panelStateManager = new PanelStateManager();
     panelStateManager.setPanelLastActive(DASHBOARD_APP_ID, 'starred_flights');

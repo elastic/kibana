@@ -80,16 +80,6 @@ export const createDashboardsNavigationNode = (
     },
   ];
 
-  if (options.recentDashboards?.length) {
-    children.push({
-      id: 'dashboards_recent',
-      title: i18n.translate('dashboard.nav.recent', {
-        defaultMessage: 'Recent',
-      }),
-      children: options.recentDashboards.map(createDashboardPanelItem),
-    });
-  }
-
   if (options.starredDashboards?.length) {
     children.push({
       id: 'dashboards_starred',
@@ -97,6 +87,16 @@ export const createDashboardsNavigationNode = (
         defaultMessage: 'Starred',
       }),
       children: options.starredDashboards.map(createDashboardPanelItem),
+    });
+  }
+
+  if (options.recentDashboards?.length) {
+    children.push({
+      id: 'dashboards_recent',
+      title: i18n.translate('dashboard.nav.recent', {
+        defaultMessage: 'Recent',
+      }),
+      children: options.recentDashboards.map(createDashboardPanelItem),
     });
   }
 
