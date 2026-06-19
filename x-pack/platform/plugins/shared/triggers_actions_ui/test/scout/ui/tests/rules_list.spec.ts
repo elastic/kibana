@@ -750,13 +750,27 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await searchRules(page, uniqueTag);
     await expect(getTableRows(page)).toHaveCount(4);
 
-    // Toggle a status option, then confirm it registered before checking rows.
-    // Re-open the selectable for each change so EUI derives option checked state
-    // from the latest selectedStatuses after each table refetch.
     const optionsPanel = page.testSubj.locator('ruleStatusFilterSelect');
     const activeFilterBadge = page.testSubj
       .locator('ruleStatusFilterButton')
       .locator('.euiFilterButton__notification');
+
+    // Toggle one option per freshly-opened popover. Clicking several options in a
+    // single popover session is racy: the first toggle triggers a table refetch +
+    // re-render and the next click can land mid-render and be swallowed (badge
+    // stuck). A fresh popover means EUI derives option state from the latest
+    // selectedStatuses and the click lands on a stable list. Asserting the badge
+    // count after each toggle confirms it registered before moving on.
+    const toggleOption = async (filterSubj: string, expectedBadge: number) => {
+      await expect(optionsPanel).toBeHidden();
+      await page.testSubj.click('ruleStatusFilterButton');
+      await expect(optionsPanel).toBeVisible();
+      await page.testSubj.click(filterSubj);
+      await expect(activeFilterBadge).toHaveText(String(expectedBadge));
+      await page.keyboard.press('Escape');
+      await expect(optionsPanel).toBeHidden();
+    };
+
     const applyFilters = async (
       filterSubjs: string[],
       expectedSelectedCount: number,
@@ -766,13 +780,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       await searchRules(page, uniqueTag);
       await expect(getTableRows(page)).toHaveCount(4);
 
-      await expect(optionsPanel).toBeHidden();
-      await page.testSubj.click('ruleStatusFilterButton');
-      await expect(optionsPanel).toBeVisible();
-
       for (const [index, filterSubj] of filterSubjs.entries()) {
-        await page.testSubj.click(filterSubj);
-        await expect(activeFilterBadge).toHaveText(String(index + 1));
+        await toggleOption(filterSubj, index + 1);
       }
 
       await expect(activeFilterBadge).toHaveText(String(expectedSelectedCount));
@@ -781,12 +790,10 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       // Status filters persist in localStorage + the URL, so refreshRulesList does
       // NOT reset them — deselect everything here so the next call starts from a
       // clean, unfiltered baseline (badge back to 0).
-      for (const filterSubj of filterSubjs) {
-        await page.testSubj.click(filterSubj);
+      for (const [index, filterSubj] of filterSubjs.entries()) {
+        await toggleOption(filterSubj, filterSubjs.length - index - 1);
       }
       await expect(activeFilterBadge).toHaveText('0');
-      await page.keyboard.press('Escape');
-      await expect(optionsPanel).toBeHidden();
     };
 
     // Select only enabled → 2 rules (enabled + snoozed)
