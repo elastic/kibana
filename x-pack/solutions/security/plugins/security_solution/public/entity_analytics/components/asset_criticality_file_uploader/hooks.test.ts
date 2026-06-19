@@ -42,6 +42,7 @@ describe('useFileValidation', () => {
     const { result } = renderHook(
       () =>
         useFileValidation({
+          isEntityStoreV2Enabled: true,
           onError: onErrorMock,
           onComplete: onCompleteMock,
         }),
@@ -62,6 +63,7 @@ describe('useFileValidation', () => {
     const { result } = renderHook(
       () =>
         useFileValidation({
+          isEntityStoreV2Enabled: true,
           onError: onErrorMock,
           onComplete: onCompleteMock,
         }),
@@ -94,6 +96,7 @@ describe('useFileValidation', () => {
     const { result } = renderHook(
       () =>
         useFileValidation({
+          isEntityStoreV2Enabled: true,
           onError: jest.fn(),
           onComplete: onCompleteMock,
         }),
@@ -121,7 +124,7 @@ describe('useNavigationSteps', () => {
   const resultState = { step: FileUploaderSteps.RESULT as const, validLinesAsText: '' };
 
   test('renders select-file and results steps', () => {
-    const { result } = renderHook(() => useNavigationSteps(filePickerState, goToFirstStep));
+    const { result } = renderHook(() => useNavigationSteps(filePickerState, true, goToFirstStep));
 
     expect(result.current).toHaveLength(2);
     expect(result.current[0].title).toMatch(/select a file/i);
@@ -129,7 +132,7 @@ describe('useNavigationSteps', () => {
   });
 
   test('result step is always last', () => {
-    const { result } = renderHook(() => useNavigationSteps(resultState, goToFirstStep));
+    const { result } = renderHook(() => useNavigationSteps(resultState, true, goToFirstStep));
 
     expect(result.current[result.current.length - 1].title).toMatch(/results/i);
   });
