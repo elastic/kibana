@@ -342,8 +342,13 @@ describe('When on integration detail', () => {
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
-    it('should display version text and no callout if prerelease setting disabled', async () => {
-      expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
+    it('should display version selector with current version and no callout if prerelease setting disabled', async () => {
+      // With prerelease disabled the selector still shows (always visible now),
+      // but only contains the single GA version since latestGA === latestPrerelease.
+      expect(renderResult.queryByTestId('versionText')).toBeNull();
+      const versionSelect = renderResult.queryByTestId('versionSelect');
+      expect(versionSelect).toBeInTheDocument();
+      expect((versionSelect as HTMLSelectElement)?.value).toEqual('1.0.0');
       expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
   });

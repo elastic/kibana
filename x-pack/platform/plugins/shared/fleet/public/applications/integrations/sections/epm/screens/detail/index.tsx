@@ -531,31 +531,34 @@ export function Detail() {
     ]
   );
 
-  const showVersionSelect = useMemo(
-    () =>
-      latestGAVersion &&
-      latestPrereleaseVersion &&
-      latestGAVersion !== latestPrereleaseVersion &&
-      (!packageInfo?.version ||
-        packageInfo.version === latestGAVersion ||
-        packageInfo.version === latestPrereleaseVersion ||
-        packageInstallStatus === InstallStatus.notInstalled),
-    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version, packageInstallStatus]
-  );
+  const showVersionSelect = Boolean(latestGAVersion);
 
-  const versionOptions = useMemo(
-    () => [
-      {
-        value: latestPrereleaseVersion,
-        text: latestPrereleaseVersion,
-      },
-      {
-        value: latestGAVersion,
-        text: latestGAVersion,
-      },
-    ],
-    [latestPrereleaseVersion, latestGAVersion]
-  );
+  const installedVersion =
+    packageInfo && 'installationInfo' in packageInfo
+      ? packageInfo.installationInfo?.version
+      : undefined;
+
+  const versionOptions = useMemo(() => {
+    const options: Array<{ value: string; text: string }> = [];
+    if (latestPrereleaseVersion && latestPrereleaseVersion !== latestGAVersion) {
+      options.push({ value: latestPrereleaseVersion, text: latestPrereleaseVersion });
+    }
+    if (latestGAVersion) {
+      options.push({ value: latestGAVersion, text: latestGAVersion });
+    }
+    if (
+      installedVersion &&
+      installedVersion !== latestGAVersion &&
+      installedVersion !== latestPrereleaseVersion
+    ) {
+      options.push({ value: installedVersion, text: installedVersion });
+    }
+    // Include the currently viewed version if it isn't already listed (e.g. old pinned URL)
+    if (packageInfo?.version && !options.some((o) => o.value === packageInfo.version)) {
+      options.push({ value: packageInfo.version, text: packageInfo.version });
+    }
+    return options;
+  }, [latestPrereleaseVersion, latestGAVersion, installedVersion, packageInfo?.version]);
 
   const versionLabel = i18n.translate('xpack.fleet.epm.versionLabel', {
     defaultMessage: 'Version',
