@@ -150,6 +150,23 @@ describe('FormattedRelativeEnhanced', () => {
     });
   });
 
+  describe('updateIntervalInSeconds guard', () => {
+    it('does not throw when updateIntervalInSeconds is provided with a non-incrementable unit', () => {
+      mockSelectUnit.mockReturnValue({ value: -2, unit: 'day' });
+      expect(() => {
+        renderWithI18n(
+          <FormattedRelativeEnhanced value={new Date()} updateIntervalInSeconds={60} />
+        );
+      }).not.toThrow();
+    });
+
+    it('renders relative time for minute unit when updateIntervalInSeconds is provided', () => {
+      mockSelectUnit.mockReturnValue({ value: -5, unit: 'minute' });
+      renderWithI18n(<FormattedRelativeEnhanced value={new Date()} updateIntervalInSeconds={60} />);
+      expect(screen.getByText('5 minutes ago')).toBeInTheDocument();
+    });
+  });
+
   describe('invalid date handling', () => {
     it('treats invalid date strings as current date', () => {
       mockSelectUnit.mockReturnValue({ value: 0, unit: 'second' });
