@@ -62,7 +62,6 @@ import { KnowledgeIndicatorService, initializeKnowledgeIndicatorsTemplate } from
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
-import { InsightService } from './lib/sig_events/insights/client/insight_service';
 import {
   createSignificantEventsClients,
   createSignificantEventsServices,
@@ -83,7 +82,12 @@ import {
 } from './lib/workflows/continuous_onboarding_workflow';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
-import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
+import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
+import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
+import {
+  STREAMS_INVESTIGATION_ENABLED_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+} from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -163,7 +167,6 @@ export class StreamsPlugin
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
-    const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
     this.streamsGetScopedClients = async ({
@@ -190,12 +193,11 @@ export class StreamsPlugin
         this.logger
       );
 
-      const [attachmentClient, insightClient, contentClient, tuningConfig] = await Promise.all([
+      const [attachmentClient, contentClient, tuningConfig] = await Promise.all([
         attachmentService.getClient({
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         }),
-        insightService.getInternalClient(),
         contentService.getClient(),
         getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
@@ -255,7 +257,7 @@ export class StreamsPlugin
             rulesClientOptions
           );
           return knowledgeIndicatorService.getClient({
-            esClient: scopedClusterClient.asCurrentUser,
+            esClient: scopedClusterClient.asInternalUser,
             soClient,
             alertingRulesClient: rulesClient,
             alertingV2RulesClient,
@@ -294,7 +296,6 @@ export class StreamsPlugin
         streamsClient,
         getKnowledgeIndicatorClient,
         ...significantEventsClients,
-        insightClient,
         inferenceClient,
         contentClient,
         getAlertingV2RulesClient,
@@ -313,21 +314,32 @@ export class StreamsPlugin
 
     // Build workflow clients once and reuse the shared onboarding client instance
     // everywhere, rather than constructing a second one from the same management API.
-    const workflowClients = createWorkflowClients(plugins.workflowsManagement?.management);
+    const workflowClients = createWorkflowClients(
+      plugins.workflowsManagement?.management,
+      telemetryClient
+    );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
     if (plugins.agentBuilder) {
-      registerStreamsAgentBuilder({
-        agentBuilder: plugins.agentBuilder,
-        getScopedClients: this.streamsGetScopedClients,
-        agentContextLayer: plugins.agentContextLayer,
-        server: this.server,
-        logger: this.logger,
-        telemetry: telemetryClient,
-        streamsKIsOnboardingClient,
-      }).catch((err) => {
-        this.logger.error(`Failed to register agent builder: ${err.message}`);
-      });
+      void core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          const investigationEnabled = await isInvestigationEnabled(coreStart.featureFlags);
+
+          await registerStreamsAgentBuilder({
+            agentBuilder: plugins.agentBuilder!,
+            getScopedClients: this.streamsGetScopedClients,
+            agentContextLayer: plugins.agentContextLayer,
+            server: this.server,
+            logger: this.logger,
+            telemetry: telemetryClient,
+            streamsKIsOnboardingClient,
+            investigationEnabled,
+          });
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register agent builder: ${err.message}`);
+        });
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
@@ -599,6 +611,14 @@ export class StreamsPlugin
         filter((enabled) => enabled)
       );
 
+    const investigationEnabled$ = core.featureFlags
+      .getBooleanValue$(STREAMS_INVESTIGATION_ENABLED_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        skip(1),
+        filter((enabled) => enabled)
+      );
+
     initializeKnowledgeIndicatorsTemplate({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
@@ -633,6 +653,19 @@ export class StreamsPlugin
             );
           }
         );
+      });
+
+      investigationEnabled$.subscribe(() => {
+        void this.installInvestigationWorkflowIfEnabled(
+          workflowsExtensions,
+          core.featureFlags
+        ).catch((error: unknown) => {
+          this.logger.error(
+            `streams: Failed to install investigation managed workflow after feature flag change: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
       });
     }
 
@@ -682,6 +715,24 @@ export class StreamsPlugin
     await client.ready();
   }
 
+  private async installInvestigationWorkflowIfEnabled(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
+    featureFlags: FeatureFlagsStart
+  ): Promise<void> {
+    if (!(await isInvestigationEnabled(featureFlags))) {
+      this.logger.debug(
+        'streams: investigation is disabled, skipping investigation workflow installation'
+      );
+      return;
+    }
+
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      STREAMS_MANAGED_WORKFLOW_OWNER
+    );
+    await installInvestigationWorkflow({ client });
+    await client.ready();
+  }
+
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart,
     featureFlags: FeatureFlagsStart
@@ -695,6 +746,15 @@ export class StreamsPlugin
         client,
         isSignificantEventsMemoryEnabled: await isSignificantEventsMemoryEnabled(featureFlags),
       });
+
+      if (await isInvestigationEnabled(featureFlags)) {
+        await installInvestigationWorkflow({ client });
+      } else {
+        this.logger.debug(
+          'streams: investigation is disabled, skipping investigation workflow installation'
+        );
+      }
+
       this.logger.info('Streams managed workflows installed');
 
       await client.ready();

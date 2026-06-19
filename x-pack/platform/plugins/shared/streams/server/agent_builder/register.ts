@@ -53,6 +53,7 @@ export const registerStreamsAgentBuilder = async ({
   logger,
   telemetry,
   streamsKIsOnboardingClient,
+  investigationEnabled = false,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   agentContextLayer?: AgentContextLayerPluginSetup;
@@ -61,11 +62,14 @@ export const registerStreamsAgentBuilder = async ({
   logger: Logger;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
+  investigationEnabled?: boolean;
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
-  registerInvestigationAgents(agentBuilder);
+  if (investigationEnabled) {
+    registerInvestigationAgents(agentBuilder);
+  }
 };

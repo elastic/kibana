@@ -33,14 +33,14 @@ import { InvestigationVisualization } from '../investigation/investigation_visua
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
   const criticality = entry.criticality ?? '-';
   switch (entry.kind) {
-    case 'finding':
+    case 'discovery':
       if (prev?.kind === 'clearance') {
         return i18n.translate('xpack.streams.discoveryFlyout.transition.reopened', {
           defaultMessage: 'Re-opened — Criticality {criticality}',
           values: { criticality },
         });
       }
-      if (prev?.kind === 'finding') {
+      if (prev?.kind === 'discovery') {
         return i18n.translate('xpack.streams.discoveryFlyout.transition.updated', {
           defaultMessage: 'Updated — Criticality {criticality}',
           values: { criticality },
@@ -189,7 +189,6 @@ export const DiscoveryFlyout = ({
                 </EuiText>
                 <EuiText size="xs" color="subdued">
                   {[
-                    det.detected_at ? formatTimestamp(det.detected_at) : null,
                     det.stream_name,
                     det.alert_count != null
                       ? i18n.translate('xpack.streams.discoveryFlyout.alertCount', {
