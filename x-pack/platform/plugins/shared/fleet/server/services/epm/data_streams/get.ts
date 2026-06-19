@@ -12,7 +12,7 @@ import type { PackageDataStreamTypes } from '../../../../common/types';
 import { dataStreamService } from '../../data_streams';
 import { FleetUnauthorizedError } from '../../../errors';
 
-const VALID_STREAM_TYPES = ['logs', 'metrics', 'traces', 'synthetics', 'profiling'];
+const VALID_STREAM_TYPES = ['logs', 'metrics', 'traces', 'synthetics', 'profiles'];
 
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
