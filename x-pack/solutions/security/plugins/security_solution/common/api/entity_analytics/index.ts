@@ -9,6 +9,7 @@ export * from './asset_criticality';
 export * from './risk_engine';
 export * from './monitoring';
 export * from './watchlists';
+export * from './anomaly_summary';
 export type { EntityAnalyticsPrivileges } from './common';
 
 // Entity Store v1 schemas were removed; types now come from @kbn/entity-store/common
