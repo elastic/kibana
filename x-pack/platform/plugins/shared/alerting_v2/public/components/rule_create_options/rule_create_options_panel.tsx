@@ -174,10 +174,16 @@ const RuleBuilderSectionDivider: React.FC = () => (
 );
 
 /** Rules list empty state — matches dashboard create empty prompt layout. */
-const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
+export interface RuleCreatePrimaryOptionsProps {
+  onCreateEsqlRule: () => void;
+  onCreateWithAgent: () => void;
+  direction?: 'column' | 'row';
+}
+
+export const RuleCreatePrimaryOptions: React.FC<RuleCreatePrimaryOptionsProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdAlert,
+  direction = 'column',
 }) => {
   const styles = useMemoCss(listEmptyStateStyles);
 
@@ -202,6 +208,30 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
     ],
     [onCreateEsqlRule, onCreateWithAgent]
   );
+
+  const optionItems = primaryCreateOptions.map((item) => (
+    <EuiFlexItem key={item.id} grow={direction === 'row'}>
+      <RuleCreateOptionActionPanel item={item} actionPanelStyle={styles.actionPanel} />
+    </EuiFlexItem>
+  ));
+
+  if (direction === 'row') {
+    return (
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+        {optionItems}
+      </EuiFlexGroup>
+    );
+  }
+
+  return <>{optionItems}</>;
+};
+
+const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
+  onCreateEsqlRule,
+  onCreateWithAgent,
+  onCreateThresholdAlert,
+}) => {
+  const styles = useMemoCss(listEmptyStateStyles);
 
   const thresholdCreateOption = useMemo<RuleCreateOptionItem>(
     () => ({
@@ -238,11 +268,10 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
           }
           actions={
             <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
-              {primaryCreateOptions.map((item) => (
-                <EuiFlexItem key={item.id} grow={false}>
-                  <RuleCreateOptionActionPanel item={item} actionPanelStyle={styles.actionPanel} />
-                </EuiFlexItem>
-              ))}
+              <RuleCreatePrimaryOptions
+                onCreateEsqlRule={onCreateEsqlRule}
+                onCreateWithAgent={onCreateWithAgent}
+              />
               <EuiFlexItem grow={false}>
                 <RuleBuilderSectionDivider />
                 <RuleCreateOptionActionPanel

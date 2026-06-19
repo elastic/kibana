@@ -194,6 +194,7 @@ export const createAiNavigationTree = (
                 title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
                 renderAs: 'panelOpener' as const,
                 children: [
+                  { link: 'management:why_v2' as const },
                   { link: 'management:rules' as const },
                   { link: 'management:action_policies' as const },
                   { link: 'management:execution_history' as const },

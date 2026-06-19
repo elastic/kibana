@@ -513,6 +513,7 @@ export const createNavigationTree = ({
               renderAs: 'panelOpener' as const,
               breadcrumbStatus: 'hidden',
               children: [
+                { link: 'management:why_v2', breadcrumbStatus: 'hidden' },
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },
                 { link: 'management:episodes', breadcrumbStatus: 'hidden' },
                 { link: 'management:action_policies', breadcrumbStatus: 'hidden' },

@@ -89,6 +89,9 @@ export function useBreadcrumbs(
       case 'execution_history_list':
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('execution_history_list') }];
         break;
+      case 'why_v2':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('why_v2') }];
+        break;
       default:
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
     }

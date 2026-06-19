@@ -21,6 +21,7 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import React from 'react';
 import {
   ALERTING_V2_SECTION_ID,
+  ALERTING_V2_WHY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
@@ -118,6 +119,23 @@ export const module = new ContainerModule(({ bind }) => {
       title: 'V2 Alerting Preview',
       tip: 'Start exploring our latest alerts experience',
       order: 1,
+    });
+
+    alertingV2Section.registerApp({
+      id: ALERTING_V2_WHY_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.whyV2NavTitle', {
+        defaultMessage: 'Why Alerting v2.0',
+      }),
+      order: 0,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountWhyV2App } = await import('./application/mount');
+        return mountWhyV2App({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
     });
 
     alertingV2Section.registerApp({

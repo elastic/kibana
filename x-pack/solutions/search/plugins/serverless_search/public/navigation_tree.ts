@@ -272,6 +272,7 @@ export function createNavigationTree({
                   renderAs: 'panelOpener' as const,
                   breadcrumbStatus: 'hidden' as const,
                   children: [
+                    { link: 'management:why_v2' as const, breadcrumbStatus: 'hidden' as const },
                     { link: 'management:rules' as const, breadcrumbStatus: 'hidden' as const },
                     { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
                     {
