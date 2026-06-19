@@ -16,14 +16,13 @@ import {
 } from '../../src/data_generators/endpoint_data';
 import { cleanupSeededData } from '../../src/data_generators/cleanup';
 
-const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
 const ALL_SCENARIO_COUNT = Object.keys(SCENARIOS).length;
 
 const COMMON_CRITERIA = [
-  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+  'Activated the troubleshooting skill',
   'Called automatic_troubleshooting.check_endpoint_package_freshness before the final diagnosis',
-  'Called generate_insight to persist structured findings',
+  'Called automatic_troubleshooting.generate_insight to persist structured findings',
 ] as const;
 
 const P0_EVALS = [
@@ -40,6 +39,12 @@ const P0_EVALS = [
       'Explained that the policy response is successful and the missing alerts are caused by telemetry shipping, not policy application',
       'Recommended checking Fleet output or Logstash SSL configuration and verifying event flow after the output is fixed',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 29,
   },
   {
     name: 'endpoint_exception_field_mismatch_explicit_prompt',
@@ -54,6 +59,12 @@ const P0_EVALS = [
       'Explained that Endpoint Alert Exceptions require literal field matching against the alert document',
       'Recommended recreating the endpoint exception with process.executable = C:\\Program Files\\GoodApp\\good.exe or comparing entries to the alert fields',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'automatic_troubleshooting.get_endpoint_artifacts',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 11,
   },
   {
     name: 'endpoint_alert_needs_endpoint_exception_not_siem_explicit_prompt',
@@ -68,6 +79,12 @@ const P0_EVALS = [
       'Explained that endpoint blocking requires an Endpoint Alert Exception rather than only a detection rule exception',
       'Recommended creating an Endpoint Alert Exception assigned to the affected policy or using alert fields such as file hash, signature, or path',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 7,
   },
   {
     name: 'trusted_app_wrong_condition_field',
@@ -82,6 +99,12 @@ const P0_EVALS = [
       'Recommended using process.executable = C:\\Program Files\\NoisyApp\\noisy.exe for the Trusted Application entry',
       'Explained that field/operator mismatches silently prevent Trusted Applications from matching the running process',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'automatic_troubleshooting.get_endpoint_artifacts',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 21,
   },
   {
     name: 'linux_high_cpu_monitoring_scripts',
@@ -95,6 +118,12 @@ const P0_EVALS = [
       'Identified /opt/monitoring/check_database.sh or its short-lived child processes as the source of process churn',
       'Recommended a targeted Trusted Application, Event Filter, or event reduction strategy rather than treating this as a policy response failure',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.integration_knowledge',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 31,
   },
   {
     name: 'windows_high_cpu_authentication_events',
@@ -108,6 +137,12 @@ const P0_EVALS = [
       'Recognized the policy response is successful and the degraded state is caused by event processing load',
       'Recommended event filters, Trusted Applications for noisy sources, or disabling Malicious Behavior Protection only when acceptable',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 27,
   },
   {
     name: 'linux_missed_checkins_selinux_203_exec',
@@ -121,6 +156,12 @@ const P0_EVALS = [
       'Identified SELinux denied execute on /opt/Elastic/Endpoint/elastic-endpoint with an unlabeled_t context as the cause',
       'Recommended fixing the SELinux file context with semanage or restorecon and restarting ElasticEndpoint.service',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 21,
   },
   {
     name: 'windows_missed_checkins_crash_dump',
@@ -134,6 +175,12 @@ const P0_EVALS = [
       'Mentioned the crash dump path C:\\Program Files\\Elastic\\Endpoint\\cache\\CrashDumps\\elasticendpoint.dmp',
       'Recommended collecting the crash dump or diagnostics and restarting the service or rebooting as recovery steps',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 19,
   },
   {
     name: 'output_kafka_message_size_rejection_explicit_prompt',
@@ -148,6 +195,12 @@ const P0_EVALS = [
       'Explained the version-aware behavior that newer versions drop non-retriable oversized messages instead of retrying indefinitely',
       'Recommended increasing Kafka topic or broker message-size limits or reducing event sizes with filters or Trusted Applications',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 24,
   },
   {
     name: 'windows_bsod_network_driver_regression_explicit_prompt',
@@ -161,6 +214,13 @@ const P0_EVALS = [
       'Recognized this as the known network driver pool corruption regression involving long-lived idle network connections',
       'Recommended upgrading to 8.18.4 or disabling advanced.kernel.network as an immediate mitigation with the host-isolation tradeoff',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'platform.core.integration_knowledge',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 23,
   },
   {
     name: 'incompatible_aws_vpc_cni_ebpf_conflict',
@@ -175,6 +235,12 @@ const P0_EVALS = [
       'Explained that disabling Linux network event collection does not fix the host isolation TC probe conflict',
       'Recommended setting linux.advanced.host_isolation.allowed to false if host isolation is not required',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.integration_knowledge',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 23,
   },
   {
     name: 'currently_healthy_endpoint_no_active_issue',
@@ -188,6 +254,12 @@ const P0_EVALS = [
       'Did not call integration_knowledge or search warning/error logs to manufacture a root cause for the healthy endpoint',
       'Asked the user for a specific symptom, time range, alert, or behavior to investigate instead of reporting a root cause',
     ],
+    expectedToolCalls: [
+      'automatic_troubleshooting.check_endpoint_package_freshness',
+      'platform.core.search',
+      'automatic_troubleshooting.generate_insight',
+    ],
+    maxToolCalls: 21,
   },
 ] as const;
 
@@ -236,11 +308,17 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                'Activated the troubleshooting skill',
                 'Queried endpoint metadata or process events to investigate the issue',
                 'Identified incompatible antivirus software on the endpoint',
-                'Called generate_insight to persist structured findings',
+                'Called automatic_troubleshooting.generate_insight to persist structured findings',
               ],
+              expectedToolCalls: [
+                'automatic_troubleshooting.check_endpoint_package_freshness',
+                'platform.core.integration_knowledge',
+                'automatic_troubleshooting.generate_insight',
+              ],
+              maxToolCalls: 25,
             },
           },
         ],
@@ -261,11 +339,17 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                'Activated the troubleshooting skill',
                 'Queried policy response data to investigate the failure',
                 'Identified the policy application failure and its cause',
-                'Called generate_insight to persist structured findings',
+                'Called automatic_troubleshooting.generate_insight to persist structured findings',
               ],
+              expectedToolCalls: [
+                'automatic_troubleshooting.check_endpoint_package_freshness',
+                'automatic_troubleshooting.get_package_configurations',
+                'automatic_troubleshooting.generate_insight',
+              ],
+              maxToolCalls: 22,
             },
           },
         ],
@@ -286,6 +370,8 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
               },
               output: {
                 criteria: [...evalDefinition.criteria],
+                expectedToolCalls: [...evalDefinition.expectedToolCalls],
+                maxToolCalls: evalDefinition.maxToolCalls,
               },
             },
           ],
@@ -315,12 +401,19 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
               },
               output: {
                 criteria: [
-                  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
-                  'Called get_package_configurations to inspect transform settings and stats',
+                  'Activated the troubleshooting skill',
+                  'Inspected transform settings and stats to identify why endpoints are missing from the list',
                   'Identified that the endpoint.metadata_united transform is stopped',
                   'Recommended restarting the stopped transform as a remediation step',
-                  'Called generate_insight to persist structured findings',
+                  'Called automatic_troubleshooting.generate_insight to persist structured findings',
                 ],
+                expectedToolCalls: [
+                  'automatic_troubleshooting.check_endpoint_package_freshness',
+                  'platform.core.search',
+                  'automatic_troubleshooting.get_package_configurations',
+                  'automatic_troubleshooting.generate_insight',
+                ],
+                maxToolCalls: 14,
               },
             },
           ],
