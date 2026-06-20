@@ -260,25 +260,27 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          <EuiFormRow
-            label={createDatasetFlyoutStrings.resourceLabel()}
-            helpText={resourceHelpText}
-            fullWidth
-            isInvalid={Boolean(errors.resource)}
-            error={errors.resource?.message}
-          >
-            <EuiFieldText
-              data-test-subj="createDatasetFlyoutResource"
+          {dataSourceIdField.value ? (
+            <EuiFormRow
+              label={createDatasetFlyoutStrings.resourceLabel()}
+              helpText={resourceHelpText}
               fullWidth
-              autoComplete="off"
               isInvalid={Boolean(errors.resource)}
-              value={resourceField.value}
-              onChange={(e) => resourceField.onChange(e.target.value)}
-              name={resourceField.name}
-              inputRef={resourceField.ref}
-            />
-          </EuiFormRow>
-          <CreateDatasetFlyoutSettings control={control} />
+              error={errors.resource?.message}
+            >
+              <EuiFieldText
+                data-test-subj="createDatasetFlyoutResource"
+                fullWidth
+                autoComplete="off"
+                isInvalid={Boolean(errors.resource)}
+                value={resourceField.value}
+                onChange={(e) => resourceField.onChange(e.target.value)}
+                name={resourceField.name}
+                inputRef={resourceField.ref}
+              />
+            </EuiFormRow>
+          ) : null}
+          {dataSourceIdField.value ? <CreateDatasetFlyoutSettings control={control} /> : null}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
