@@ -7,16 +7,17 @@
 
 import { z } from '@kbn/zod/v4';
 import type { PanelContentAttempt } from '../../resolve_panel';
+import type { PanelTypeDefinition } from './panel_type';
 import {
-  LENS_EMBEDDABLE_TYPE,
   visPanelConfigInputSchema,
+  visPanelDefinition,
   panelRequestSchema,
   editPanelRequestInputSchema,
   type VisPanelResolutionRequest,
 } from './vis';
 import {
-  MARKDOWN_EMBEDDABLE_TYPE,
   markdownPanelConfigInputSchema,
+  markdownPanelDefinition,
   editMarkdownPanelConfigInputSchema,
 } from './markdown';
 
@@ -24,15 +25,16 @@ import {
  * Panel registry.
  *
  * Each panel type lives in its own module under `./<type>` and owns its
- * embeddable-type identity, config contract, and input schemas. This barrel is
- * the single place that combines those per-type schemas into the shapes the
- * operations consume — the discriminated unions, the `type` -> embeddable-type
- * map, and the per-operation panel item schemas. Operations import from here and
- * never reach into a specific panel implementation, so adding a panel type means
- * touching its module plus this file.
+ * embeddable-type identity, config contract, input schemas, and by-value
+ * behavior (its {@link PanelTypeDefinition}). This barrel is the single place
+ * that combines those per-type pieces into the shapes the operations consume:
+ * the discriminated input unions, the per-operation panel item schemas, and the
+ * `type` -> definition registry. Operations import from here and never reach into
+ * a specific panel implementation, so adding a panel type means adding its module
+ * plus an entry here.
  */
-export { MARKDOWN_EMBEDDABLE_TYPE } from './markdown';
 export type { PanelRequestInput, EditPanelRequestInput } from './vis';
+export type { PanelContent, PanelTypeDefinition } from './panel_type';
 
 /**
  * A `panelConfig` adds a panel from an already-resolved configuration passed by
@@ -49,10 +51,10 @@ export const panelConfigPanelInputSchema = z.discriminatedUnion('type', [
 export type PanelConfigPanelInput = z.infer<typeof panelConfigPanelInputSchema>;
 export type PanelType = PanelConfigPanelInput['type'];
 
-/** Maps a model-facing panel `type` to its embeddable type id (1:1). */
-export const PANEL_TYPE_TO_EMBEDDABLE_TYPE: Record<PanelType, string> = {
-  vis: LENS_EMBEDDABLE_TYPE,
-  markdown: MARKDOWN_EMBEDDABLE_TYPE,
+/** Per-type behavior, keyed by model-facing panel `type`. */
+export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
+  vis: visPanelDefinition,
+  markdown: markdownPanelDefinition,
 };
 
 const sectionIdField = z

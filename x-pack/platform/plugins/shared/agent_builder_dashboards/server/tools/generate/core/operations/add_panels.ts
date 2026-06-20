@@ -10,7 +10,7 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
-import { addPanelsItemSchema, PANEL_TYPE_TO_EMBEDDABLE_TYPE } from './panels';
+import { addPanelsItemSchema, PANEL_TYPE_DEFINITIONS } from './panels';
 import { getResolvedPanelCreationRequests } from './panel_creation';
 
 export const addPanelsOperation = defineOperation({
@@ -31,7 +31,7 @@ export const addPanelsOperation = defineOperation({
       let panelContent: Pick<AttachmentPanel, 'type' | 'config'>;
 
       if (item.kind === 'panelConfig') {
-        panelContent = { type: PANEL_TYPE_TO_EMBEDDABLE_TYPE[item.type], config: item.config };
+        panelContent = PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config);
       } else {
         const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
         if (!resolvedRequest) {

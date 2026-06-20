@@ -11,7 +11,7 @@ import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_p
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import {
-  MARKDOWN_EMBEDDABLE_TYPE,
+  PANEL_TYPE_DEFINITIONS,
   editPanelItemSchema,
   type EditPanelItem,
   type EditPanelRequestInput,
@@ -20,7 +20,7 @@ import { defineOperation } from './types';
 
 /**
  * An edit that passed validation. `existingPanel` is only carried for panel
- * request edits (the resolver needs it); markdown edits don't have one.
+ * request edits (the resolver needs it); `panelConfig` edits don't have one.
  */
 interface ValidEdit {
   panelInput: EditPanelItem;
@@ -81,12 +81,12 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      if (panelInput.kind === 'panelConfig' && panelInput.type === 'markdown') {
-        if (existingPanel.type !== MARKDOWN_EMBEDDABLE_TYPE) {
-          recordFailure(
-            panelInput.panelId,
-            `Panel "${panelInput.panelId}" with type "${existingPanel.type}" cannot be edited as markdown. Use kind: "panelRequest" for ES|QL-backed Lens panels.`
-          );
+      if (panelInput.kind === 'panelConfig') {
+        const validation = PANEL_TYPE_DEFINITIONS[panelInput.type].validateConfigEdit?.(
+          existingPanel
+        ) ?? { ok: true };
+        if (!validation.ok) {
+          recordFailure(panelInput.panelId, validation.error);
           continue;
         }
         validEdits.push({ panelInput });
@@ -131,12 +131,14 @@ export const editPanelsOperation = defineOperation({
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
     for (const { panelInput } of validEdits) {
-      if (panelInput.kind === 'panelConfig' && panelInput.type === 'markdown') {
-        const { config } = panelInput;
+      if (panelInput.kind === 'panelConfig') {
+        const panelContent = PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(
+          panelInput.config
+        );
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId: panelInput.panelId,
-          transformPanel: (panel) => ({ ...panel, config }),
+          transformPanel: (panel) => ({ ...panel, ...panelContent }),
         });
 
         if (!updateResult.updated) {

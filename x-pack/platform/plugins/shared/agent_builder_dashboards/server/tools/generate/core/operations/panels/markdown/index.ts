@@ -6,7 +6,9 @@
  */
 
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
+import type { PanelTypeDefinition } from '../panel_type';
 
 /**
  * Home for markdown panel logic.
@@ -18,7 +20,7 @@ import { z } from '@kbn/zod/v4';
  * for future markdown-specific behavior (e.g. a markdown generation prompt that
  * authors the content).
  */
-export { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+export { MARKDOWN_EMBEDDABLE_TYPE };
 
 /**
  * By-value markdown panel config, mirroring the dashboard markdown embeddable's
@@ -68,3 +70,20 @@ export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
   });
 
 export type EditMarkdownPanelConfigInput = z.infer<typeof editMarkdownPanelConfigInputSchema>;
+
+/**
+ * Registry entry for the `markdown` panel type. Markdown is editable by config
+ * (content is replaced in place), so it provides `validateConfigEdit` to reject
+ * edits that target a non-markdown panel.
+ */
+export const markdownPanelDefinition: PanelTypeDefinition = {
+  embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
+  buildPanelContent: (config) => ({ type: MARKDOWN_EMBEDDABLE_TYPE, config }),
+  validateConfigEdit: (existingPanel) =>
+    existingPanel.type === MARKDOWN_EMBEDDABLE_TYPE
+      ? { ok: true }
+      : {
+          ok: false,
+          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as markdown. Use kind: "panelRequest" for ES|QL-backed Lens panels.`,
+        },
+};
