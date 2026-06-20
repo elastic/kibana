@@ -291,14 +291,20 @@ export const attachTimelineToExistingCase = () => {
 };
 
 export const closeTimeline = () => {
-  // Retry clicking the close button until the overlay mask gets the --hidden class.
-  // A single click can land during a React re-render (e.g. after markAsFavorite triggers a
-  // timelines-list refresh) and silently not register. Mirroring the recurse pattern used
-  // in openTimelineUsingToggle makes the close robust against that race.
+  // Retry closing the timeline until the overlay mask gets the --hidden class.
+  // Each iteration first checks whether the overlay is already hidden to avoid
+  // clicking a button that is no longer in the visible portal. When the overlay is
+  // still open, .should('be.visible') retries until the close button is actionable,
+  // letting any concurrent React re-renders (e.g. from markAsFavorite's Redux
+  // dispatches) settle before the click is issued.
   recurse(
     () => {
-      cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
-      return cy.get(TIMELINE_WRAPPER);
+      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
+        if (!$wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
+          cy.get(CLOSE_TIMELINE_BTN).should('be.visible').click();
+        }
+        return cy.get(TIMELINE_WRAPPER);
+      });
     },
     ($timelineWrapper) => $timelineWrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
