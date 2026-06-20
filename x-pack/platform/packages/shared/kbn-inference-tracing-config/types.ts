@@ -47,8 +47,16 @@ export interface InferenceTracingPhoenixExportConfig {
   project_name?: string;
   /**
    * The API key for API requests to Phoenix server.
+   * When provided, it will be sent as `Authorization: Bearer <api_key>`.
    */
   api_key?: string;
+  /**
+   * Custom headers to include in requests to the Phoenix server.
+   * These headers will be merged with (and can override) the default
+   * Authorization header. Useful for Arize compatibility which requires
+   * `space_id` and `authorization` headers.
+   */
+  headers?: Record<string, string>;
   /**
    * The delay in milliseconds before the exporter sends another
    * batch of spans.
