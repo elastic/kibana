@@ -428,6 +428,19 @@ export class DiscoverApp {
     return this.readFieldTokenLabels(flyout, limit);
   }
 
+  async getDocViewerFieldValue(fieldName: string): Promise<string> {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    return flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-value"]`).innerText();
+  }
+
+  async goToNextDocViewerDocument() {
+    const navigation = this.page.testSubj.locator('docViewerFlyoutNavigation');
+    await navigation.waitFor({ state: 'visible' });
+    await navigation.locator('[data-test-subj="pagination-button-next"]').click();
+  }
+
   private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
     return scope
       .locator('.kbnFieldIcon svg')
