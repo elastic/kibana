@@ -52,6 +52,7 @@ import { createMockFramePublicAPI } from '../../mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import type { Query } from '@kbn/es-query';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -220,6 +221,7 @@ describe('IndexPattern Data Source', () => {
       charts: chartPluginMock.createSetupContract(),
       dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
     });
 
     baseState = {

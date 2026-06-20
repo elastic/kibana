@@ -6,25 +6,30 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { partition } from 'lodash';
 import { css } from '@emotion/react';
-
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { LayerAction, Visualization } from '@kbn/lens-common';
+import type { FormBasedLayer, LayerAction, Visualization } from '@kbn/lens-common';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import { UnifiedTabs } from '@kbn/unified-tabs';
-
 import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
+import { operationDefinitionMap } from '../../../datasources/form_based/operations';
+import { generateEsqlQuery } from '../../../datasources/form_based/generate_esql_query';
 import {
   cloneLayer,
   registerLibraryAnnotationGroup,
   removeOrClearLayer,
   selectSelectedLayerId,
+  selectResolvedDateRange,
   selectVisualization,
   setSelectedLayerId,
+  updateDatasourceState,
   updateVisualizationState,
   useLensDispatch,
   useLensSelector,
@@ -66,6 +71,7 @@ export function LayerTabs({
   const { datasourceMap } = useEditorFrameService();
   const { isSaveable, visualization, datasourceStates } = useLensSelector((state) => state.lens);
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
+  const dateRange = useLensSelector(selectResolvedDateRange);
 
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
@@ -161,7 +167,259 @@ export function LayerTabs({
     const visualizationState = visualization.state;
 
     return visibleLayerConfigs.map((layerConfig, layerIndex) => {
+      // eslint-disable-next-line no-console
+      console.log('[Convert to ES|QL] Building actions for layer:', {
+        layerId: layerConfig.layerId,
+        layerType: layerConfig.layerType,
+        willShowConvertAction: layerConfig.layerType === 'data',
+      });
+
       const compatibleActions: LayerAction[] = [
+        // Convert to ES|QL action - only for data layers that aren't already ES|QL
+        ...(layerConfig.layerType === 'data'
+          ? [
+              {
+                execute: () => {
+                  const datasourcePublicAPI =
+                    framePublicAPI.datasourceLayers?.[layerConfig.layerId];
+                  const datasourceId = datasourcePublicAPI?.datasourceId;
+
+                  if (!datasourceId) {
+                    // eslint-disable-next-line no-console
+                    console.log(
+                      '[Convert to ES|QL] No datasource ID found for layer:',
+                      layerConfig.layerId
+                    );
+                    return;
+                  }
+
+                  const layerDatasourceState = datasourceStates?.[datasourceId]?.state as
+                    | Record<string, unknown>
+                    | undefined;
+                  if (!layerDatasourceState) {
+                    // eslint-disable-next-line no-console
+                    console.log(
+                      '[Convert to ES|QL] No datasource state found for datasource:',
+                      datasourceId
+                    );
+                    return;
+                  }
+
+                  const layers = layerDatasourceState.layers as
+                    | Record<string, Record<string, unknown>>
+                    | undefined;
+
+                  // Check if layer is already ES|QL
+                  if (layers?.[layerConfig.layerId]?.query) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Layer is already ES|QL, skipping conversion');
+                    return;
+                  }
+
+                  const layer = layers?.[layerConfig.layerId] as FormBasedLayer | undefined;
+                  if (!layer || !layer.columnOrder || !layer.columns) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Invalid layer structure:', {
+                      hasLayer: !!layer,
+                      hasColumnOrder: !!layer?.columnOrder,
+                      hasColumns: !!layer?.columns,
+                    });
+                    return;
+                  }
+
+                  // Get the index pattern
+                  const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
+                  if (!indexPattern) {
+                    // eslint-disable-next-line no-console
+                    console.log(
+                      '[Convert to ES|QL] Index pattern not found:',
+                      layer.indexPatternId
+                    );
+                    return;
+                  }
+
+                  // Partition columns to get esAggEntries (exclude fullReference and managedReference)
+                  const { columnOrder } = layer;
+                  const columns = { ...layer.columns };
+                  const columnEntries = columnOrder.map(
+                    (colId) => [colId, columns[colId]] as const
+                  );
+                  const [, esAggEntries] = partition(
+                    columnEntries,
+                    ([, col]) =>
+                      operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+                      operationDefinitionMap[col.operationType]?.input === 'managedReference'
+                  );
+
+                  // Call getESQLForLayer to get the conversion result
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] Attempting conversion with:', {
+                    layerId: layerConfig.layerId,
+                    esAggEntriesCount: esAggEntries.length,
+                    indexPatternTitle: indexPattern.title,
+                    hasTimeField: !!indexPattern.timeFieldName,
+                  });
+
+                  // Call generateEsqlQuery to get the conversion result
+                  const esqlResult = generateEsqlQuery(
+                    esAggEntries,
+                    layer,
+                    indexPattern,
+                    coreStart.uiSettings,
+                    dateRange,
+                    new Date()
+                  );
+
+                  if (!esqlResult.success) {
+                    // eslint-disable-next-line no-console
+                    console.log(
+                      '[Convert to ES|QL] Conversion failed - getESQLForLayer returned null'
+                    );
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Common reasons:');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Non-UTC timezone');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Contains formulas');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Contains time shifts');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Uses runtime fields');
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Layer columns:', layer.columns);
+                    return;
+                  }
+
+                  const newColumns = Object.keys(esqlResult.esAggsIdMap).map((key) => {
+                    const sourceColumn = esqlResult.esAggsIdMap[key][0];
+                    // Only include serializable properties - exclude functions
+                    // Use the ES|QL field name (key) as the columnId
+                    const newColumn = {
+                      columnId: key, // ← ES|QL field name (e.g., "bucket_0_0", "@timestamp")
+                      fieldName: key,
+                      meta: {
+                        type: sourceColumn.dataType,
+                        label: sourceColumn.label,
+                      },
+                    };
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Creating column:', newColumn);
+                    return newColumn;
+                  });
+
+                  const newState = {
+                    ...layerDatasourceState,
+                    layers: {
+                      ...layerDatasourceState.layers,
+                      [layerConfig.layerId]: {
+                        indexPatternId: layer.indexPatternId,
+                        linkToLayers: [],
+                        columns: newColumns,
+                        columnOrder: [],
+                        sampling: 1,
+                        ignoreGlobalFilters: false,
+                        query: {
+                          esql: esqlResult.esql,
+                        },
+                      },
+                    },
+                  };
+
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] ✅ Conversion successful!');
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] Generated ES|QL query:', esqlResult.esql);
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] Column mappings:', esqlResult.esAggsIdMap);
+                  // eslint-disable-next-line no-console
+                  console.log(
+                    '[Convert to ES|QL] Current visualization state:',
+                    visualizationState
+                  );
+
+                  // Create mapping from old column IDs to new ES|QL field names
+                  const columnIdMapping: Record<string, string> = {};
+                  Object.entries(esqlResult.esAggsIdMap).forEach(([esqlFieldName, cols]) => {
+                    const oldColumnId = cols[0].id;
+                    columnIdMapping[oldColumnId] = esqlFieldName;
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Column ID mapping:', {
+                      oldColumnId,
+                      newFieldName: esqlFieldName,
+                      label: cols[0].label,
+                    });
+                  });
+
+                  // Update visualization state to remap column IDs
+                  const updatedVisualizationState = JSON.parse(JSON.stringify(visualizationState));
+
+                  if (updatedVisualizationState.layers) {
+                    updatedVisualizationState.layers = updatedVisualizationState.layers.map(
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      (vizLayer: Record<string, any>) => {
+                        if (vizLayer.layerId !== layerConfig.layerId) {
+                          return vizLayer;
+                        }
+
+                        // eslint-disable-next-line no-console
+                        console.log('[Convert to ES|QL] Updating visualization layer:', {
+                          layerId: vizLayer.layerId,
+                          oldXAccessor: vizLayer.xAccessor,
+                          oldAccessors: vizLayer.accessors,
+                        });
+
+                        const updatedLayer = { ...vizLayer };
+
+                        // Remap xAccessor (horizontal axis - typically the date histogram)
+                        if (vizLayer.xAccessor && columnIdMapping[vizLayer.xAccessor]) {
+                          updatedLayer.xAccessor = columnIdMapping[vizLayer.xAccessor];
+                        }
+
+                        // Remap accessors array (vertical axis - metrics)
+                        if (Array.isArray(vizLayer.accessors)) {
+                          updatedLayer.accessors = vizLayer.accessors.map(
+                            (accessor: string) => columnIdMapping[accessor] || accessor
+                          );
+                        }
+
+                        // Remap splitAccessor if present
+                        if (vizLayer.splitAccessor && columnIdMapping[vizLayer.splitAccessor]) {
+                          updatedLayer.splitAccessor = columnIdMapping[vizLayer.splitAccessor];
+                        }
+
+                        // eslint-disable-next-line no-console
+                        console.log('[Convert to ES|QL] Updated visualization layer:', {
+                          layerId: updatedLayer.layerId,
+                          newXAccessor: updatedLayer.xAccessor,
+                          newAccessors: updatedLayer.accessors,
+                        });
+
+                        return updatedLayer;
+                      }
+                    );
+                  }
+
+                  // Dispatch both datasource and visualization state updates
+                  dispatchLens(
+                    updateDatasourceState({ newDatasourceState: newState, datasourceId })
+                  );
+                  dispatchLens(
+                    updateVisualizationState({
+                      visualizationId: activeVisualization.id,
+                      newState: updatedVisualizationState,
+                    })
+                  );
+                },
+                displayName: i18n.translate('xpack.lens.convert', {
+                  defaultMessage: 'Convert to ES|QL',
+                }),
+                icon: 'sortUp',
+                'data-test-subj': 'lnsConvertLayer',
+                order: -1, // Show before other actions
+                isCompatible: true,
+              },
+            ]
+          : []),
         ...(activeVisualization
           .getSupportedActionsForLayer?.(
             layerConfig.layerId,
@@ -221,7 +479,10 @@ export function LayerTabs({
   }, [
     activeVisualization,
     coreStart,
+    dateRange,
+    datasourceStates,
     dispatchLens,
+    framePublicAPI,
     isSaveable,
     isTextBasedLanguage,
     layerIds.length,

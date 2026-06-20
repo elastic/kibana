@@ -264,6 +264,9 @@ export const termsOperation: OperationDefinition<
       },
     };
   },
+  toESQL: (column, _columnId, _indexPattern, _layer, _uiSettings, _dateRange) => {
+    return { template: column.sourceField };
+  },
   toEsAggsFn: (
     column,
     columnId,

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { LensDatasourceId } from '@kbn/lens-common';
-
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { EMPTY } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
+import { BehaviorSubject } from 'rxjs';
+import { css } from '@emotion/react';
+
 import {
   EuiSpacer,
   EuiFlexGroup,
@@ -21,24 +23,20 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
+
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { LensDatasourceId, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { ESQLLangEditor } from '@kbn/esql/public';
+
 import { isOperation } from '../../../types_guards';
-import { LayerHeader } from './layer_header';
-import type { LayerPanelProps } from './types';
-import { DimensionContainer } from './dimension_container';
-import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
-import { useFocusUpdate } from './use_focus_update';
 import {
   useLensSelector,
   useLensDispatch,
@@ -51,10 +49,23 @@ import {
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
-import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { ESQLEditor } from './esql_editor';
+import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+
 import { useEditorFrameService } from '../../editor_frame_service_context';
+
+// POC: loose type for datasource state to allow accessing .layers[layerId].query
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DatasourceStateWithLayers = Record<string, any>;
+
+import { LayerHeader } from './layer_header';
+import type { LayerPanelProps } from './types';
+import { DimensionContainer } from './dimension_container';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
+import { useFocusUpdate } from './use_focus_update';
+import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
 import { getRemoveLayerAction } from './layer_actions/remove_layer_action';
 import { getCloneLayerAction } from './layer_actions/clone_layer_action';
@@ -320,6 +331,7 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
+  const layerState = layerDatasourceState as DatasourceStateWithLayers | undefined;
   const isTextBasedLanguage =
     datasource?.isTextBasedLanguage() ||
     isOfAggregateQueryType(editorProps.attributes?.state.query) ||
@@ -395,6 +407,52 @@ export function LayerPanel(props: LayerPanelProps) {
   const supportsMultipleLayers = useMemo(
     () => Boolean(activeVisualization.getAddLayerButtonComponent),
     [activeVisualization]
+  );
+
+  const layerHasQuery = (ds: DatasourceStateWithLayers | undefined): boolean => {
+    if (!ds) return false;
+    if (!ds.layers?.[layerId]) return false;
+    if (!ds.layers[layerId].query) return false;
+    return true;
+  };
+
+  const initialQuery = layerHasQuery(layerState) ? layerState!.layers[layerId].query : { esql: '' };
+
+  const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
+
+  const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
+
+  // Sync query state when layer is converted to ES|QL
+  useEffect(() => {
+    if (layerHasQuery(layerState)) {
+      const newQuery = layerState!.layers[layerId].query;
+      setQuery(newQuery);
+    }
+    // Only sync when datasource state changes, not on user keystrokes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layerState, layerId]);
+
+  const [errors, _setErrors] = useState<Error[] | undefined>();
+  const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [suggestsLimitedColumns, _setSuggestsLimitedColumns] = useState(false);
+  const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
+  const [dataGridAttrs, _setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
+
+  const runQuery = useCallback(
+    async (q: AggregateQuery, abortController?: AbortController) => {
+      updateDatasource(datasourceId, {
+        ...layerState,
+        layers: {
+          ...(layerState as DatasourceStateWithLayers)?.layers,
+          [layerId]: { ...(layerState as DatasourceStateWithLayers)?.layers?.[layerId], query: q },
+        },
+      });
+      prevQuery.current = q;
+      setIsVisualizationLoading(false);
+    },
+    [updateDatasource, datasourceId, layerState, layerId]
   );
 
   return (
@@ -511,16 +569,54 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
-            {shouldRenderESQLEditor ? (
-              <ESQLEditor
-                uiSettings={core.uiSettings}
-                http={core.http}
-                isTextBasedLanguage={isTextBasedLanguage}
-                framePublicAPI={framePublicAPI}
-                layerId={layerId}
-                {...editorProps}
+            {shouldRenderESQLEditor && (
+              <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
+                <ESQLLangEditor
+                  query={query as AggregateQuery}
+                  onTextLangQueryChange={(q) => {
+                    setQuery(q);
+                  }}
+                  // detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
+                  errors={errors}
+                  warning={
+                    suggestsLimitedColumns
+                      ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                          defaultMessage:
+                            'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                        })
+                      : undefined
+                  }
+                  editorIsInline={true}
+                  onTextLangQuerySubmit={async (q, a) => {
+                    // do not run the suggestions if the query is the same as the previous one
+                    if (q && !isEqual(q, prevQuery.current)) {
+                      // setIsVisualizationLoading(true);
+                      await runQuery(q, a);
+                    }
+                  }}
+                  isDisabled={false}
+                  allowQueryCancellation
+                  isLoading={isVisualizationLoading}
+                />
+              </EuiFlexItem>
+            )}
+            {shouldRenderESQLEditor && dataGridAttrs && (
+              <ESQLDataGridAccordion
+                dataGridAttrs={dataGridAttrs}
+                isAccordionOpen={isESQLResultsAccordionOpen}
+                setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+                query={query as AggregateQuery}
+                isTableView={true}
+                onAccordionToggleCb={(status) => {
+                  if (status && isSuggestionsAccordionOpen) {
+                    setIsSuggestionsAccordionOpen(!status);
+                  }
+                  if (status && isLayerAccordionOpen) {
+                    setIsLayerAccordionOpen(!status);
+                  }
+                }}
               />
-            ) : null}
+            )}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{

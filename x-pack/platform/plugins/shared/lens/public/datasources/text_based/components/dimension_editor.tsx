@@ -13,13 +13,14 @@ import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import type {
   TextBasedPrivateState,
-  TextBasedLayer,
   DatasourceDimensionEditorProps,
   DataType,
 } from '@kbn/lens-common';
-import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
+import type { TextBasedLayer } from '@kbn/lens-common';
+import { mergeLayer, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
+
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import { isNotNumeric, isNumeric } from '../utils';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
@@ -32,7 +33,9 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const query = props.state.layers[props.layerId]?.query;
+
   const { euiTheme } = useEuiTheme();
+
   const {
     isFullscreen,
     columnId,
@@ -107,13 +110,11 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
 
   const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
     (newFormat) => {
-      updateLayer(
-        updateColumnFormat({
-          layer: state.layers[layerId],
-          columnId,
-          value: newFormat,
-        })
+      const layer = state.layers[layerId];
+      const updatedColumns = layer.columns.map((col) =>
+        col.columnId === columnId ? { ...col, params: { ...col.params, format: newFormat } } : col
       );
+      updateLayer({ columns: updatedColumns });
     },
     [columnId, layerId, state.layers, updateLayer]
   );

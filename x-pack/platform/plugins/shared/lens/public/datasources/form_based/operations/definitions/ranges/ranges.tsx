@@ -21,6 +21,7 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '@kbn/lens-common';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { RangeEditor } from './range_editor';
 import type { OperationDefinition } from '..';
 import { updateColumnParam } from '../../layer_helpers';
@@ -123,8 +124,14 @@ export const rangeOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId, _indexPattern, layer, uiSettings) => {
-    return undefined;
+  toESQL: (column, _columnId, _indexPattern, _layer, uiSettings, _dateRange) => {
+    if (column.params?.includeEmptyRows || column.params.type === MODES.Range) return;
+
+    const maxBarsDefaultValue =
+      (uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS) - MIN_HISTOGRAM_BARS) / 2;
+    const maxBars =
+      column.params.maxBars === AUTO_BARS ? maxBarsDefaultValue : column.params.maxBars;
+    return { template: `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${maxBars})` };
   },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
