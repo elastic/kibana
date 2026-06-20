@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogDocument } from '@kbn/synthtrace-client';
+import type { ApmFields, Instance, LogDocument } from '@kbn/synthtrace-client';
 import type {
   ChannelSpike,
   ChannelVolume,
@@ -19,20 +19,24 @@ import type {
   NoiseConfig,
   ServiceFailure,
   ServiceGraph,
+  ServiceNamesOf,
   ServiceNode,
+  ServiceStats,
 } from '../types';
 import { isInfraErrorType } from '../types';
 import { DEP_TO_CATEGORY } from '../constants';
 import { generateServiceDocs } from '../log_utils/service_logs';
 import { generateInfraDoc, generateHostSystemLog } from '../log_utils/infra_logs';
 import { generateNoiseDocs } from '../log_utils/noise_logs';
-import { buildLogDoc } from '../log_utils/shared';
+import { buildLogDoc } from '../log_builder';
 import { toLogEntries } from './converter';
 import type { MetadataCache } from './metadata';
 import { getOrBuildMetadata } from './metadata';
 import { mulberry32 } from '../placeholders';
 import { deriveSeed, probabilisticCount, resolveEffectiveSeed } from './seed';
 import { pickHealthyMessage } from './templates';
+import type { InfraBuilder } from '../metrics_builder';
+import { buildApmTrace } from '../trace_builder';
 
 /** Maps InfraErrorTypes that originate from a specific infra category to that category. */
 const INFRA_ERROR_CATEGORY: Partial<Record<ErrorType, InfraCategory>> = {
@@ -40,9 +44,9 @@ const INFRA_ERROR_CATEGORY: Partial<Record<ErrorType, InfraCategory>> = {
   message_queue_failure: 'message_queue',
 };
 
-export interface GeneratorContext {
-  serviceGraph: ServiceGraph;
-  entryService: string;
+export interface GeneratorContext<TServiceGraph extends ServiceGraph = ServiceGraph> {
+  serviceGraph: TServiceGraph;
+  entryService: ServiceNamesOf<TServiceGraph>;
   failures: FailuresOrFn | undefined;
   volume: ChannelVolume<string> | undefined;
   noise: NoiseConfig | undefined;
@@ -52,6 +56,9 @@ export interface GeneratorContext {
   tickSpreadMs: number;
   cycleMs?: number;
   cycleOriginMs?: number;
+  apmInstances: Map<ServiceNamesOf<TServiceGraph>, Instance>;
+  infraBuilders: Map<ServiceNamesOf<TServiceGraph>, InfraBuilder>;
+  traceSampleRate: number;
 }
 
 export interface TickState {
@@ -83,12 +90,17 @@ export const cycleTimestamp = (ts: number, cycleMs: number, originMs: number): n
   return originMs + ((ts - originMs) % cycleMs);
 };
 
-function resolveSpikes(
-  spikes: ChannelSpike[] | undefined,
-  timestamp: number,
-  ctx: GeneratorContext,
-  serviceName?: string
-): number {
+function resolveSpikes({
+  spikes,
+  timestamp,
+  ctx,
+  serviceName,
+}: {
+  spikes: ChannelSpike[] | undefined;
+  timestamp: number;
+  ctx: GeneratorContext;
+  serviceName?: string;
+}): number {
   if (!spikes || spikes.length === 0) {
     return 1;
   }
@@ -99,9 +111,7 @@ function resolveSpikes(
 
   for (const spike of spikes) {
     if (spike.services && (!serviceName || !spike.services.includes(serviceName))) {
-      {
-        continue;
-      }
+      continue;
     }
 
     const afterStart = spike.start === undefined || ts >= spike.start;
@@ -186,7 +196,19 @@ export function resolveTickState({
   return { currentFailures, failingDeps, failingServiceErrors };
 }
 
-export function collectServiceDocs({
+export interface ServiceCollectionResult {
+  docs: Array<Partial<LogDocument>>;
+  apmEvents: ApmFields[];
+  serviceStats: Record<string, ServiceStats>;
+}
+
+const EMPTY_SERVICE_RESULT: ServiceCollectionResult = {
+  docs: [],
+  apmEvents: [],
+  serviceStats: {},
+};
+
+export function collectServiceResults({
   ctx,
   tickState,
   index,
@@ -196,22 +218,19 @@ export function collectServiceDocs({
   tickState: TickState;
   index: number;
   timestamp: number;
-}): Array<Partial<LogDocument>> {
-  const { serviceGraph, entryService, volume, metadataCache, seed } = ctx;
+}): ServiceCollectionResult {
+  const { serviceGraph, entryService, volume, metadataCache, seed, apmInstances, traceSampleRate } =
+    ctx;
   const { currentFailures } = tickState;
 
   const entryCfg = volume?.[entryService];
   if (!resolveChannelEvery(entryCfg?.every, index)) {
-    {
-      return [];
-    }
+    return EMPTY_SERVICE_RESULT;
   }
 
-  const spikeMultiplier = resolveSpikes(entryCfg?.spikes, timestamp, ctx);
+  const spikeMultiplier = resolveSpikes({ spikes: entryCfg?.spikes, timestamp, ctx });
   if (spikeMultiplier === 0) {
-    {
-      return [];
-    }
+    return EMPTY_SERVICE_RESULT;
   }
 
   const baseRate = entryCfg?.rate ?? 1;
@@ -220,20 +239,45 @@ export function collectServiceDocs({
   const traceCount = probabilisticCount(baseRate * spikeMultiplier, rng);
 
   const docs: Array<Partial<LogDocument>> = [];
+  const allApmEvents: ApmFields[] = [];
+  const mergedStats: Record<string, ServiceStats> = {};
+
+  const traceSamplingRng = mulberry32(deriveSeed(tickSeed, 'trace_sampling'));
+
+  const serviceLabels = new Map(
+    serviceGraph.services.map((svc) => [svc.name, svc.displayName ?? svc.name])
+  );
+
   for (let m = 0; m < traceCount; m++) {
-    docs.push(
-      ...generateServiceDocs({
-        serviceGraph,
-        entryService,
-        index: index * traceCount + m,
-        failures: currentFailures,
-        timestamp,
-        metadataCache,
-        seed: seed ?? 0,
-      })
-    );
+    const traced = traceSamplingRng() < traceSampleRate;
+    const result = generateServiceDocs({
+      serviceGraph,
+      entryService,
+      index: index * traceCount + m,
+      failures: currentFailures,
+      timestamp,
+      metadataCache,
+      seed: seed ?? 0,
+    });
+    docs.push(...result.docs);
+
+    if (traced) {
+      allApmEvents.push(
+        ...buildApmTrace({ rootSpan: result.rootSpan, apmInstances, timestamp, serviceLabels })
+      );
+    }
+
+    for (const [svcName, stats] of Object.entries(result.serviceStats)) {
+      if (!mergedStats[svcName]) {
+        mergedStats[svcName] = { requests: 0, errors: 0, totalLatencyUs: 0 };
+      }
+      mergedStats[svcName].requests += stats.requests;
+      mergedStats[svcName].errors += stats.errors;
+      mergedStats[svcName].totalLatencyUs += stats.totalLatencyUs;
+    }
   }
-  return docs;
+
+  return { docs, apmEvents: allApmEvents, serviceStats: mergedStats };
 }
 
 export function collectVolumeSkewDocs({
@@ -258,7 +302,12 @@ export function collectVolumeSkewDocs({
       continue;
     }
 
-    const spikeMultiplier = resolveSpikes(svcCfg.spikes, timestamp, ctx, svc.name);
+    const spikeMultiplier = resolveSpikes({
+      spikes: svcCfg.spikes,
+      timestamp,
+      ctx,
+      serviceName: svc.name,
+    });
     const effectiveWeight = (svcCfg.rate ?? 1) * spikeMultiplier;
     if (effectiveWeight <= 0) {
       continue;
@@ -286,6 +335,40 @@ export function collectVolumeSkewDocs({
   return docs;
 }
 
+function collectHostSystemLog({
+  svc,
+  failingServiceErrors,
+  currentFailures,
+  tickSeed,
+  metadataCache,
+  timestamp,
+}: {
+  svc: ServiceNode;
+  failingServiceErrors: Map<string, ErrorType>;
+  currentFailures: FailureMap | undefined;
+  tickSeed: number;
+  metadataCache: MetadataCache | undefined;
+  timestamp: number;
+}): Array<Partial<LogDocument>> {
+  const serviceErrorType = failingServiceErrors.get(svc.name);
+  let k8sErrorType: 'k8s_oom' | 'k8s_crash_loop_backoff' | undefined;
+  if (serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff') {
+    const svcFailureCfg = currentFailures?.services?.[svc.name];
+    const resolvedK8sRate = svcFailureCfg?.rate ?? 1;
+    const k8sRng = mulberry32(deriveSeed(tickSeed, svc.name));
+    if (!svcFailureCfg || k8sRng() < resolvedK8sRate) {
+      k8sErrorType = serviceErrorType;
+    }
+  }
+  return generateHostSystemLog({
+    service: svc,
+    seed: tickSeed,
+    cachedMetadata: metadataCache?.get(svc.name),
+    timestamp,
+    errorType: k8sErrorType,
+  });
+}
+
 export function collectInfraDocs({
   ctx,
   tickState,
@@ -300,19 +383,13 @@ export function collectInfraDocs({
   const { volume, allDeps, metadataCache, seed } = ctx;
   const { failingDeps, failingServiceErrors, currentFailures } = tickState;
   if (allDeps.length === 0) {
-    {
-      return [];
-    }
+    return [];
   }
 
   const priorityPairs = allDeps.filter(({ svc, dep }) => {
-    if (failingDeps.has(dep)) {
-      return true;
-    }
+    if (failingDeps.has(dep)) return true;
     const svcErr = failingServiceErrors.get(svc.name);
-    if (svcErr === undefined || !isInfraErrorType(svcErr)) {
-      return false;
-    }
+    if (svcErr === undefined || !isInfraErrorType(svcErr)) return false;
     const errorCategory = INFRA_ERROR_CATEGORY[svcErr];
     return errorCategory !== undefined && DEP_TO_CATEGORY[dep] === errorCategory;
   });
@@ -320,10 +397,14 @@ export function collectInfraDocs({
   const { svc, dep } = selectInfraPair(allDeps, priorityPairs, index);
   const result: Array<Partial<LogDocument>> = [];
 
-  // Infra dependency logs — gated by every/rate/volume.
   const depCfg = volume?.[dep];
   if (resolveChannelEvery(depCfg?.every, index)) {
-    const spikeMultiplier = resolveSpikes(depCfg?.spikes, timestamp, ctx, svc.name);
+    const spikeMultiplier = resolveSpikes({
+      spikes: depCfg?.spikes,
+      timestamp,
+      ctx,
+      serviceName: svc.name,
+    });
     const baseRate = depCfg?.rate ?? 1;
     const rng = mulberry32(deriveSeed(resolveEffectiveSeed(seed, index, timestamp), dep));
     const infraCount = probabilisticCount(baseRate * spikeMultiplier, rng);
@@ -354,25 +435,15 @@ export function collectInfraDocs({
     }
   }
 
-  // Host/k8s system log: at most once per tick, independent of infra rate/volume.
   const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
-  const serviceErrorType = failingServiceErrors.get(svc.name);
-  let k8sErrorType: 'k8s_oom' | 'k8s_crash_loop_backoff' | undefined;
-  if (serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff') {
-    const svcFailureCfg = currentFailures?.services?.[svc.name];
-    const resolvedK8sRate = svcFailureCfg?.rate ?? 1;
-    const k8sRng = mulberry32(deriveSeed(tickSeed, svc.name));
-    if (!svcFailureCfg || k8sRng() < resolvedK8sRate) {
-      k8sErrorType = serviceErrorType;
-    }
-  }
   result.push(
-    ...generateHostSystemLog({
-      service: svc,
-      seed: tickSeed,
-      cachedMetadata: metadataCache?.get(svc.name),
+    ...collectHostSystemLog({
+      svc,
+      failingServiceErrors,
+      currentFailures,
+      tickSeed,
+      metadataCache,
       timestamp,
-      errorType: k8sErrorType,
     })
   );
 
@@ -399,7 +470,7 @@ export function collectNoiseDocs({
     return [];
   }
 
-  const spikeMultiplier = resolveSpikes(volume?.spikes, timestamp, ctx);
+  const spikeMultiplier = resolveSpikes({ spikes: volume?.spikes, timestamp, ctx });
   if (spikeMultiplier === 0) {
     return [];
   }
