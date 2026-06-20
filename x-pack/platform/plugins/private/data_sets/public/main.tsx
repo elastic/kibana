@@ -234,9 +234,17 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
   }, [isDeletingDataSource]);
 
   const handleDataSetSave = useCallback(
-    async (dataSet: DataSetWithName): Promise<string | null> => {
+    async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
       try {
+        const nextId = dataSet.name.trim();
+        const prevIdTrimmed = previousId?.trim();
+
         await dataSetsClient.add(dataSet);
+
+        if (prevIdTrimmed && prevIdTrimmed !== nextId) {
+          await dataSetsClient.delete(prevIdTrimmed);
+        }
+
         setDataSetsRaw(await dataSetsClient.get());
         setDataSetFlyout({ kind: 'closed' });
         return null;

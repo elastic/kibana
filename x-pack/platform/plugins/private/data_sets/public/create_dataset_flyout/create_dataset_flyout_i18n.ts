@@ -19,6 +19,12 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Edit data set',
     }),
 
+  editTitleWithId: (id: string) =>
+    i18n.translate('dataSets.createDatasetFlyout.editTitleWithId', {
+      defaultMessage: 'Edit data set: {id}',
+      values: { id },
+    }),
+
   nameRequired: () =>
     i18n.translate('dataSets.createDatasetFlyout.nameRequired', {
       defaultMessage: 'Name is required.',

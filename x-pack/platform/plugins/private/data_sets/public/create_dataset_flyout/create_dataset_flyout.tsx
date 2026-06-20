@@ -52,7 +52,7 @@ export interface CreateDatasetFlyoutProps {
   /**
    * Persist a data set (create or update). Resolve `null` on success, or an error message to show in the flyout.
    */
-  onSave: (data: DataSetWithName) => Promise<string | null>;
+  onSave: (data: DataSetWithName, previousId?: string) => Promise<string | null>;
   /** Data sources used to populate the data source selector (typically `DataSourcesClient.get()`). */
   dataSources: DataSource[];
 }
@@ -70,6 +70,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   dataSources,
 }) => {
   const isEditMode = initialDataSet !== undefined;
+  const initialIdNormalized = initialDataSet?.name?.trim().toLowerCase() ?? '';
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -105,12 +106,14 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
           return createDatasetFlyoutStrings.nameRequired();
         }
 
-        if (isEditMode) {
-          return true;
-        }
-
         const normalized = trimmed.toLowerCase();
-        const isDuplicate = existingDataSetNames.some((n) => n.trim().toLowerCase() === normalized);
+        const isDuplicate = existingDataSetNames.some((n) => {
+          const nNormalized = n.trim().toLowerCase();
+          if (isEditMode && nNormalized === initialIdNormalized) {
+            return false;
+          }
+          return nNormalized === normalized;
+        });
         return isDuplicate ? createDatasetFlyoutStrings.nameAlreadyExists() : true;
       },
     },
@@ -172,7 +175,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         ...(desc ? { description: desc } : {}),
         ...(settings ? { settings } : {}),
       };
-      const message = await onSave(payload);
+      const message = await onSave(payload, initialDataSet?.name);
       if (message) {
         setSaveError(message);
       }
@@ -184,7 +187,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   };
 
   const flyoutTitle = isEditMode
-    ? createDatasetFlyoutStrings.editTitle()
+    ? createDatasetFlyoutStrings.editTitleWithId(initialDataSet?.name ?? '')
     : createDatasetFlyoutStrings.createTitle();
 
   return (
@@ -246,7 +249,6 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               onChange={(e) => nameField.onChange(e.target.value)}
               name={nameField.name}
               inputRef={nameField.ref}
-              readOnly={isEditMode}
             />
           </EuiFormRow>
           <EuiFormRow label={createDatasetFlyoutStrings.descriptionLabel()} fullWidth>
