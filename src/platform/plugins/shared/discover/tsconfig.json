@@ -147,7 +147,8 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/react-hooks",
-    "@kbn/app-header"
+    "@kbn/app-header",
+    "@kbn/data-grid-in-table-search"
   ],
   "exclude": ["target/**/*"]
 }
