@@ -204,7 +204,7 @@ class FunctionValidator {
     // Validate column arguments
     const columnsToValidate: Array<ESQLColumn | ESQLIdentifier> = [];
     const flatArgs = this.fn.args.flat();
-    const skipUnsupportedOrConflictingFieldValidation = isTypeConversionFunction(
+    const skipUnsupportedOrConflictingColumnValidation = isTypeConversionFunction(
       this.definition.name
     );
     for (let i = 0; i < flatArgs.length; i++) {
@@ -220,7 +220,7 @@ class FunctionValidator {
 
     const columnMessages = columnsToValidate.flatMap((arg) => {
       return new ColumnValidator(arg, this.context, this.parentCommand.name, {
-        skipUnsupportedOrConflictingFieldValidation,
+        skipUnsupportedOrConflictingColumnValidation,
       }).validate();
     });
 

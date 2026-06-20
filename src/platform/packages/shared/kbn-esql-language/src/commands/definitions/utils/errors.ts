@@ -252,13 +252,13 @@ Expected one of:
           },
         }),
       };
-    case 'fieldTypeConflict':
+    case 'columnTypeConflict':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.fieldTypeConflict', {
-          defaultMessage: 'Field [{field}] has conflicting types across indices{typesSuffix}',
+        message: i18n.translate('kbn-esql-language.esql.validation.columnTypeConflict', {
+          defaultMessage: 'Column [{columnName}] has conflicting types across indices{typesSuffix}',
           values: {
-            field: out.field,
-            // Live validation may know only that a field is conflicted; include exact types when available.
+            columnName: out.columnName,
+            // Live validation may know only that a column is conflicted; include exact types when available.
             typesSuffix: out.types ? `: ${out.types}` : '',
           },
         }),
@@ -783,17 +783,17 @@ export const errors = {
       'getColumnsFor'
     ),
 
-  fieldTypeConflict: (
+  columnTypeConflict: (
     column: ESQLColumn | ESQLIdentifier,
-    field: string,
-    types?: string[],
+    columnName: string,
+    types: string[],
     shouldWarn = false
   ): ESQLMessage =>
     tagSemanticError(
       withWarningSeverity(
-        errors.byId('fieldTypeConflict', column.location, {
-          field,
-          types: types?.map((type) => `[${type}]`).join(', '),
+        errors.byId('columnTypeConflict', column.location, {
+          columnName,
+          types: types.map((type) => `[${type}]`).join(', '),
         }),
         shouldWarn
       ),
