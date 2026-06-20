@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-export { generateDashboard } from './generate_dashboard';
-export type {
-  DashboardGenerationResolvers,
-  GenerateDashboardParams,
-  GenerateDashboardResult,
-} from './generate_dashboard';
-
-export { dashboardOperationSchema } from './operations';
+export { dashboardOperationSchema, executeDashboardOperations } from './operations';
 export type { DashboardOperation } from './operations';
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './utils';

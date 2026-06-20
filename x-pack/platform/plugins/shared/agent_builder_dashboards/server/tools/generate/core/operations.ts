@@ -32,6 +32,15 @@ const createEmptyDashboardData = (): DashboardAttachmentData => ({
   panels: [],
 });
 
+/**
+ * Environment-agnostic dashboard generation.
+ *
+ * Transforms a prior dashboard payload (or an empty one) plus an ordered list of
+ * operations into a new dashboard payload. It owns no identity, persistence, or
+ * result-shape concerns; those belong to the environment-specific tool that
+ * calls this function. Inline panel content arrives already resolved via the
+ * injected `resolvePanelContent` callback so the core never reads any store.
+ */
 export const executeDashboardOperations = async ({
   dashboardData,
   operations,

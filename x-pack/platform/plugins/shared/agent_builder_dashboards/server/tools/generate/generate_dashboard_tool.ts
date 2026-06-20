@@ -19,9 +19,9 @@ import {
 
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import { createPanelResolver } from './panel_resolver';
+import { createVisPanelResolver } from './core/operations/panels/vis';
 import {
-  generateDashboard,
+  executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
@@ -76,7 +76,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
 /**
  * Kibana dashboard generation tool.
  *
- * It wraps the environment-agnostic {@link generateDashboard} core with Kibana's
+ * It wraps the environment-agnostic {@link executeDashboardOperations} core with Kibana's
  * attachment persistence so the LLM works exclusively against a lightweight
  * reference:
  * - the prior dashboard payload is read server-side from `dashboardAttachmentId`
@@ -120,18 +120,18 @@ Use operations[] to:
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const resolvePanelContent = createPanelResolver({
+        const resolvePanelContent = createVisPanelResolver({
           logger,
           modelProvider,
           events,
           esClient,
         });
 
-        const { dashboardData, failures } = await generateDashboard({
-          previousDashboardData: latestVersion?.data,
+        const { dashboardData, failures } = await executeDashboardOperations({
+          dashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvers: { resolvePanelContent },
+          resolvePanelContent,
         });
 
         const description = `Dashboard: ${dashboardData.title}`;
