@@ -34,19 +34,20 @@ export async function buildApmToolResources({
   request,
   esClient,
 }: {
-  core: CoreSetup<APMPluginStartDependencies>;
+  core: Pick<CoreSetup, 'getStartServices'>;
   plugins: APMPluginSetupDependencies;
   request: KibanaRequest;
   esClient?: IScopedClusterClient;
 }): Promise<ApmToolResources> {
   const [coreStart, pluginStart] = await core.getStartServices();
+  const { licensing, ml, ruleRegistry } = pluginStart as APMPluginStartDependencies;
   const esScoped = esClient ?? coreStart.elasticsearch.client.asScoped(request);
   const soClient = coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: [] });
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
 
-  const licensingContext = firstValueFrom(pluginStart.licensing.license$).then((license) => ({
+  const licensingContext = firstValueFrom(licensing.license$).then((license) => ({
     license,
-    featureUsage: pluginStart.licensing.featureUsage,
+    featureUsage: licensing.featureUsage,
   }));
 
   const contextAdapter = {
@@ -62,12 +63,12 @@ export async function buildApmToolResources({
     ml: plugins.ml
       ? {
           setup: plugins.ml,
-          start: async () => pluginStart.ml!,
+          start: async () => ml!,
         }
       : undefined,
     ruleRegistry: {
       setup: plugins.ruleRegistry,
-      start: async () => pluginStart.ruleRegistry,
+      start: async () => ruleRegistry,
     },
   } as unknown as MinimalAPMRouteHandlerResources['plugins'];
 

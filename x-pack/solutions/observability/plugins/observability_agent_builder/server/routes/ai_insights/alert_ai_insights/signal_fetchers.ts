@@ -16,7 +16,6 @@ import type {
 import { getToolHandler as getLogGroups } from '../../../tools/get_log_groups/handler';
 import { getToolHandler as getRuntimeMetrics } from '../../../tools/get_runtime_metrics/handler';
 import { getToolHandler as getHosts } from '../../../tools/get_hosts/handler';
-import { getToolHandler as getServices } from '../../../tools/get_services/handler';
 import { getServiceTopology } from '../../../tools/get_service_topology/get_service_topology';
 
 export interface SignalFetcherDeps {
@@ -218,19 +217,14 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     ) {
       if (!hostName || serviceName) return null;
 
-      const result = await getServices({
-        core,
-        plugins,
+      const result = await dataRegistry.getData('servicesItems', {
         request,
-        esClient,
-        dataRegistry,
-        logger,
         start,
         end,
         kqlFilter: `host.name: "${hostName}"`,
       });
 
-      return result.services.length > 0 ? result.services : null;
+      return result && result.services.length > 0 ? result.services : null;
     },
   },
 ];

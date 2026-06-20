@@ -21,5 +21,7 @@
     "@kbn/apm-types-shared",
     "@kbn/slo-schema",
     "@kbn/rule-data-utils",
+    "@kbn/zod",
+    "@kbn/ml-anomaly-utils",
   ]
 }

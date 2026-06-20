@@ -16,6 +16,8 @@ export type {
 
 export type { ObservabilityAgentBuilderServerRouteRepository } from './routes/get_global_observability_agent_builder_route_repository';
 
+export { getAgentBuilderResourceAvailability } from './utils/get_agent_builder_resource_availability';
+
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { ObservabilityAgentBuilderPlugin } = await import('./plugin');
   return new ObservabilityAgentBuilderPlugin(initializerContext);

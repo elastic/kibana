@@ -11,6 +11,7 @@ export default function apmApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
   describe('APM', function () {
+    loadTestFile(require.resolve('./agent_builder'));
     loadTestFile(require.resolve('./agent_explorer'));
     loadTestFile(require.resolve('./alerts'));
     loadTestFile(require.resolve('./cold_start'));

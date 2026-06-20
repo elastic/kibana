@@ -8,6 +8,7 @@
 export * from './es_fields';
 export type * from './es_schemas_raw';
 export type * from './es_schemas_ui';
+export * from './src/agent_builder';
 export * from './src/agent_explorer';
 export * from './src/aggregation_type';
 export * from './src/annotations';

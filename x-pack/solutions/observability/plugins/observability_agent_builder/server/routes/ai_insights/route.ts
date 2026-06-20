@@ -142,7 +142,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
       const [, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry, searchInferenceEndpoints } = startDeps;
-
       try {
         const { connectorId, connector } = await resolveConnectorForFeature({
           searchInferenceEndpoints,
