@@ -2140,7 +2140,7 @@
     "lighthouse": "13.0.3",
     "lightningcss": "1.32.0",
     "listr2": "8.2.5",
-    "lmdb": "3.4.4",
+    "lmdb": "3.5.1",
     "marge": "1.0.1",
     "micromatch": "4.0.8",
     "mini-css-extract-plugin": "2.9.1",
