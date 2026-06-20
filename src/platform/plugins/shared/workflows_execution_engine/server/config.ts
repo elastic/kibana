@@ -12,15 +12,15 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
-export const DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL = '1d';
+export const DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL = '5m'; // 1 day
 
-export const DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL = '1d';
+export const DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL = '10'; // 1 day
 
-export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE = '7d';
+export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE = '10'; // 7 days
 
-export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE = '10gb';
+export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE = '1gb'; // 10GB
 
-export const DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE = '7d';
+export const DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE = '20d'; // 7 days
 
 const EventTriggersConfigSchema = schema.object({
   /**
