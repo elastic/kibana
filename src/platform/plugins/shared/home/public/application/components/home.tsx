@@ -145,6 +145,7 @@ export class Home extends Component<HomeProps, State> {
         pageHeader={{
           bottomBorder: false,
           pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
+          pageTitleProps: { css: { textAlign: 'center' } },
         }}
         panelled={false}
       >

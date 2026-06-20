@@ -10,6 +10,11 @@ exports[`home change home route should render a link to change the default route
         defaultMessage="Welcome home"
         id="home.header.title"
       />,
+      "pageTitleProps": Object {
+        "css": Object {
+          "textAlign": "center",
+        },
+      },
     }
   }
   panelled={false}
@@ -66,6 +71,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
         defaultMessage="Welcome home"
         id="home.header.title"
       />,
+      "pageTitleProps": Object {
+        "css": Object {
+          "textAlign": "center",
+        },
+      },
     }
   }
   panelled={false}
@@ -122,6 +132,11 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
         defaultMessage="Welcome home"
         id="home.header.title"
       />,
+      "pageTitleProps": Object {
+        "css": Object {
+          "textAlign": "center",
+        },
+      },
     }
   }
   panelled={false}
@@ -190,6 +205,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
         defaultMessage="Welcome home"
         id="home.header.title"
       />,
+      "pageTitleProps": Object {
+        "css": Object {
+          "textAlign": "center",
+        },
+      },
     }
   }
   panelled={false}
@@ -281,6 +301,11 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
         defaultMessage="Welcome home"
         id="home.header.title"
       />,
+      "pageTitleProps": Object {
+        "css": Object {
+          "textAlign": "center",
+        },
+      },
     }
   }
   panelled={false}
@@ -337,6 +362,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         defaultMessage="Welcome home"
         id="home.header.title"
       />,
+      "pageTitleProps": Object {
+        "css": Object {
+          "textAlign": "center",
+        },
+      },
     }
   }
   panelled={false}
@@ -400,6 +430,11 @@ exports[`home should render home component 1`] = `
         defaultMessage="Welcome home"
         id="home.header.title"
       />,
+      "pageTitleProps": Object {
+        "css": Object {
+          "textAlign": "center",
+        },
+      },
     }
   }
   panelled={false}
