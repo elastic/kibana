@@ -81,6 +81,14 @@ export const addSectionPanelItemSchema = z.discriminatedUnion('kind', [
   panelRequestSchema,
 ]);
 
+/**
+ * A "create a new panel" input — either an already-resolved `panelConfig` or a
+ * `panelRequest` to resolve. The common shape that `add_panels` and `add_section`
+ * materialize into panel content (`add_panels` items also carry a `sectionId`,
+ * which is assignable to this base).
+ */
+export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
+
 /** A single panel item accepted by `edit_panels` (targets an existing panel by id). */
 export const editPanelItemSchema = z.discriminatedUnion('kind', [
   editPanelRequestInputSchema,

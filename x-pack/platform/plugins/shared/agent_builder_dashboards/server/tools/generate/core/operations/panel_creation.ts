@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import type { PanelFailure } from '../utils';
 import type { DashboardOperation } from './registry';
-import type { AddPanelsItemInput, PanelRequestInput, ResolvePanelContent } from './panels';
+import {
+  PANEL_TYPE_DEFINITIONS,
+  type AddPanelsItemInput,
+  type NewPanelInput,
+  type PanelContent,
+  type PanelRequestInput,
+  type ResolvePanelContent,
+} from './panels';
 
 type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
@@ -141,10 +149,59 @@ export const resolvePanelCreationRequests = async ({
  * Return the resolved create results for one operation during the apply phase.
  * Returns an empty array for operations with no panel requests.
  */
-export const getResolvedPanelCreationRequests = ({
+const getResolvedPanelCreationRequests = ({
   resolvedRequestsByOperationIndex,
   operationIndex,
 }: {
   resolvedRequestsByOperationIndex: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
 }): ResolvedPanelCreationRequest[] => resolvedRequestsByOperationIndex.get(operationIndex) ?? [];
+
+/**
+ * Single seam for turning a new-panel input into `AttachmentPanel` content,
+ * unifying the two paths so operation handlers don't branch on `kind`:
+ * - `panelConfig`: built by value from the panel type's registry definition.
+ * - `panelRequest`: read from the up-front parallel resolution for this
+ *   operation (keyed by panel input index).
+ *
+ * Returns `undefined` when a panel request failed to resolve, recording the
+ * failure so the caller can simply skip that item.
+ */
+export const createPanelInputMaterializer = ({
+  resolvedPanelCreationRequests,
+  operationIndex,
+  operationType,
+  failures,
+}: {
+  resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
+  operationIndex: number;
+  operationType: DashboardOperation['operation'];
+  failures: PanelFailure[];
+}): ((item: NewPanelInput, panelInputIndex: number) => PanelContent | undefined) => {
+  const resolvedRequestByInputIndex = new Map(
+    getResolvedPanelCreationRequests({
+      resolvedRequestsByOperationIndex: resolvedPanelCreationRequests,
+      operationIndex,
+    }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
+  );
+
+  return (item, panelInputIndex) => {
+    if (item.kind === 'panelConfig') {
+      return PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config);
+    }
+
+    const resolvedRequest = resolvedRequestByInputIndex.get(panelInputIndex);
+    if (!resolvedRequest) {
+      throw new Error(
+        `Missing pre-resolved panel request for ${operationType} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
+      );
+    }
+
+    if (resolvedRequest.resolvedPanel.type === 'failure') {
+      failures.push(resolvedRequest.resolvedPanel.failure);
+      return undefined;
+    }
+
+    return resolvedRequest.resolvedPanel.panelContent;
+  };
+};

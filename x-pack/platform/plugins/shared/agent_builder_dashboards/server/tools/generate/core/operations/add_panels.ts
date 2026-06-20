@@ -6,12 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
-import { addPanelsItemSchema, PANEL_TYPE_DEFINITIONS } from './panels';
-import { getResolvedPanelCreationRequests } from './panel_creation';
+import { addPanelsItemSchema } from './panels';
+import { createPanelInputMaterializer } from './panel_creation';
 
 export const addPanelsOperation = defineOperation({
   schema: z.object({
@@ -19,31 +18,19 @@ export const addPanelsOperation = defineOperation({
     panels: z.array(addPanelsItemSchema).min(1),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {
+    const materializePanelInput = createPanelInputMaterializer({
+      resolvedPanelCreationRequests: context.resolvedPanelCreationRequests,
+      operationIndex,
+      operationType: operation.operation,
+      failures: context.failures,
+    });
+
     let nextDashboardData = dashboardData;
-    const resolvedRequestsByInputIndex = new Map(
-      getResolvedPanelCreationRequests({
-        resolvedRequestsByOperationIndex: context.resolvedPanelCreationRequests,
-        operationIndex,
-      }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
-    );
 
     for (const [panelInputIndex, item] of operation.panels.entries()) {
-      let panelContent: Pick<AttachmentPanel, 'type' | 'config'>;
-
-      if (item.kind === 'panelConfig') {
-        panelContent = PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config);
-      } else {
-        const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
-        if (!resolvedRequest) {
-          throw new Error(
-            `Missing pre-resolved panel request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
-          );
-        }
-        if (resolvedRequest.resolvedPanel.type === 'failure') {
-          context.failures.push(resolvedRequest.resolvedPanel.failure);
-          continue;
-        }
-        panelContent = resolvedRequest.resolvedPanel.panelContent;
+      const panelContent = materializePanelInput(item, panelInputIndex);
+      if (panelContent === undefined) {
+        continue;
       }
 
       nextDashboardData = appendPanelsToDashboard({
