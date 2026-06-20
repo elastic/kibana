@@ -21,6 +21,12 @@ import { z } from '@kbn/zod/v4';
  */
 export { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
+export {
+  createVisPanelResolver,
+  type VisPanelResolutionRequest,
+  type VisPanelResolverDeps,
+} from './resolve';
+
 /**
  * By-value Lens panel config. Currently passed through to the embeddable
  * unvalidated; typed as an opaque record so the model supplies a config it read

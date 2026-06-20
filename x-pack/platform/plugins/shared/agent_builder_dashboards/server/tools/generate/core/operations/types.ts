@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
-import type { ResolvePanelContent } from '../resolve_panel';
+import type { ResolvePanelContent } from './panels';
 import type { PanelFailure } from '../utils';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
 

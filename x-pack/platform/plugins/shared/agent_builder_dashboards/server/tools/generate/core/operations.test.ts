@@ -13,7 +13,8 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import type { ResolvePanelContent, PanelContentAttempt } from './resolve_panel';
+import type { PanelContentAttempt } from './resolve_panel';
+import type { ResolvePanelContent } from './operations/panels';
 import {
   executeDashboardOperations,
   dashboardOperationSchema,

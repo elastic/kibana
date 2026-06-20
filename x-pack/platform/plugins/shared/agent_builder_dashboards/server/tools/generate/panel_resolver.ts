@@ -5,69 +5,34 @@
  * 2.0.
  */
 
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
-import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { getErrorMessage, createPanelFailureResult, type ResolvePanelContent } from './core';
+import { createPanelFailureResult, type ResolvePanelContent } from './core';
+import { createVisPanelResolver, type VisPanelResolverDeps } from './core/operations/panels/vis';
+
+/** Host plumbing needed to build the per-type panel resolvers. */
+type PanelResolverDeps = VisPanelResolverDeps;
 
 /**
  * Kibana implementation of the core's {@link ResolvePanelContent} contract.
  *
- * Builds inline Lens panel content from natural language / ES|QL using Kibana
- * plumbing (`modelProvider`, `esClient`, the visualization builder). The generate
- * core consumes the resulting function purely through the contract type.
+ * A generic dispatcher: it builds the per-panel-type resolvers from host
+ * plumbing and routes each request to the resolver for its `type`. Adding a new
+ * resolvable panel type means registering its resolver here; the panel-specific
+ * resolution logic lives in that type's module under `core/operations/panels`.
+ * The generate core consumes the result purely through the contract type.
  */
-export const createPanelResolver = ({
-  logger,
-  modelProvider,
-  events,
-  esClient,
-}: {
-  logger: Logger;
-  modelProvider: ModelProvider;
-  events: ToolEventEmitter;
-  esClient: IScopedClusterClient;
-}): ResolvePanelContent => {
-  return async ({ operationType, identifier, nlQuery, index, chartType, esql, existingPanel }) => {
-    try {
-      if (existingPanel && existingPanel.type !== LENS_EMBEDDABLE_TYPE) {
+export const createPanelResolver = (deps: PanelResolverDeps): ResolvePanelContent => {
+  const visResolver = createVisPanelResolver(deps);
+
+  return async (request) => {
+    switch (request.type) {
+      case 'vis':
+        return visResolver(request);
+      default:
         return createPanelFailureResult(
-          operationType,
-          identifier,
-          `Panel "${identifier}" with type "${existingPanel.type}" is not supported for inline visualization editing.`
+          request.operationType,
+          request.identifier,
+          `Inline resolution is not supported for panel type "${request.type}".`
         );
-      }
-
-      const existingConfig =
-        existingPanel?.type === LENS_EMBEDDABLE_TYPE
-          ? (existingPanel?.config as VisualizationConfig)
-          : undefined;
-
-      const result = await buildVisualizationConfig({
-        nlQuery,
-        index,
-        chartType,
-        esql,
-        existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
-        parsedExistingConfig: existingConfig,
-        includeTimeRange: false,
-        modelProvider,
-        logger,
-        events,
-        esClient,
-      });
-
-      return {
-        type: 'success',
-        panelContent: {
-          type: LENS_EMBEDDABLE_TYPE,
-          config: result.validatedConfig,
-        },
-      };
-    } catch (error) {
-      return createPanelFailureResult(operationType, identifier, getErrorMessage(error));
     }
   };
 };

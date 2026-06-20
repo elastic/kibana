@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { PanelFailure } from './utils';
 
 /**
- * Contract for inline panel content resolution.
+ * Generic primitives for inline panel content resolution.
  *
- * The generate core consumes this to turn an inline panel request (natural
- * language / ES|QL) into panel content, without depending on any
- * environment-specific implementation. The host (e.g. Kibana) provides the
- * concrete resolver — see `panel_resolver.ts`.
+ * The generate core turns inline panel requests into panel content without
+ * depending on any environment-specific implementation. This module owns the
+ * type-agnostic pieces: the resolution result, the failure helper, and the
+ * request fields shared by every panel type. Each panel type contributes its
+ * own request shape and resolver (see `operations/panels/<type>`), and the
+ * panels barrel aggregates them into the `ResolvePanelContent` contract that the
+ * host (e.g. Kibana) implements — see `panel_resolver.ts`.
  */
 export type PanelContentAttempt =
   | {
@@ -27,21 +29,21 @@ export type PanelContentAttempt =
       failure: PanelFailure;
     };
 
-type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
+/** Operations that can trigger inline panel resolution. */
+export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
 
-interface ResolvePanelContentParams {
+/**
+ * Fields common to every panel resolution request, independent of panel type.
+ * Per-type modules extend this with a discriminating `type` literal and their
+ * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
+ */
+export interface PanelResolutionRequestBase {
   operationType: InlinePanelOperationType;
+  /** Human-facing identifier for failure attribution (panelId or the query). */
   identifier: string;
-  nlQuery: string;
-  index?: string;
-  chartType?: SupportedChartType;
-  esql?: string;
+  /** Present when editing an existing panel; resolvers validate compatibility. */
   existingPanel?: AttachmentPanel;
 }
-
-export type ResolvePanelContent = (
-  params: ResolvePanelContentParams
-) => Promise<PanelContentAttempt>;
 
 export const createPanelFailureResult = (
   type: PanelFailure['type'],

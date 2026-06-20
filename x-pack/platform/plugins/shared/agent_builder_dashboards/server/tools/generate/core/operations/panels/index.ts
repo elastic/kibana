@@ -6,11 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { PanelContentAttempt } from '../../resolve_panel';
 import {
   LENS_EMBEDDABLE_TYPE,
   visPanelConfigInputSchema,
   panelRequestSchema,
   editPanelRequestInputSchema,
+  type VisPanelResolutionRequest,
 } from './vis';
 import {
   MARKDOWN_EMBEDDABLE_TYPE,
@@ -84,3 +86,18 @@ export const editPanelItemSchema = z.discriminatedUnion('kind', [
 ]);
 
 export type EditPanelItem = z.infer<typeof editPanelItemSchema>;
+
+/**
+ * Every panel resolution request the resolver can receive, discriminated by
+ * `type`. Extend this union as more panel types gain inline resolution support;
+ * each type contributes its request shape from its own module.
+ */
+export type PanelResolutionRequest = VisPanelResolutionRequest;
+
+/**
+ * Contract for inline panel content resolution. The generate core consumes this
+ * to turn a panel resolution request into panel content; the host supplies the
+ * concrete dispatcher (see `panel_resolver.ts`) that routes each request to the
+ * resolver for its `type`.
+ */
+export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;

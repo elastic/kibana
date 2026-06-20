@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvePanelContent } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
-import type { AddPanelsItemInput, PanelRequestInput } from './panels';
+import type { AddPanelsItemInput, PanelRequestInput, ResolvePanelContent } from './panels';
 
 type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
@@ -121,6 +120,7 @@ export const resolvePanelCreationRequests = async ({
             requests.map(async (request) => ({
               request,
               resolvedPanel: await resolvePanelContent({
+                type: 'vis',
                 operationType: request.operationType,
                 identifier: request.panelInput.query,
                 nlQuery: request.panelInput.query,

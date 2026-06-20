@@ -7,7 +7,7 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
-import type { ResolvePanelContent } from './resolve_panel';
+import type { ResolvePanelContent } from './operations/panels';
 import type { PanelFailure } from './utils';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 
