@@ -1,0 +1,152 @@
+name: Cleanup stale branches
+
+on:
+  # schedule:
+  #   - cron: '0 6 * * 1' # Weekly on Monday at 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no deletions)'
+        type: boolean
+        default: true
+      limit:
+        description: 'Max branches to delete (0 = unlimited)'
+        type: number
+        default: 10
+      closed_pr_max_age_days:
+        description: 'Max age in days for branches with closed PRs'
+        type: number
+        default: 30
+      no_pr_max_age_days:
+        description: 'Max age in days for branches with no PRs'
+        type: number
+        default: 365
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete stale branches from closed PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const DRY_RUN = '${{ inputs.dry_run }}' !== 'false';
+            const parseNonNeg = (raw, fallback) => {
+              const n = parseInt(raw, 10);
+              return Number.isNaN(n) || n < 0 ? fallback : n;
+            };
+            const LIMIT = parseNonNeg('${{ inputs.limit }}', 0);
+            const CLOSED_PR_MAX_AGE_DAYS = parseNonNeg('${{ inputs.closed_pr_max_age_days }}', 30);
+            const NO_PR_MAX_AGE_DAYS = parseNonNeg('${{ inputs.no_pr_max_age_days }}', 365);
+            const CLOSED_PR_CUTOFF_MS = Date.now() - (CLOSED_PR_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+            const NO_PR_CUTOFF_MS = Date.now() - (NO_PR_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+            console.log(`Dry run: ${DRY_RUN}`);
+            console.log(`Closed PR cutoff: ${new Date(CLOSED_PR_CUTOFF_MS).toISOString()}`);
+            console.log(`No PR cutoff: ${new Date(NO_PR_CUTOFF_MS).toISOString()}`);
+
+            // Fetch default branch name to always protect it
+            const { repository: { defaultBranchRef } } = await github.graphql(`
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  defaultBranchRef { name }
+                }
+              }
+            `, { owner: context.repo.owner, repo: context.repo.repo });
+            const defaultBranch = defaultBranchRef.name;
+            console.log(`Default branch: ${defaultBranch}`);
+
+            let deleted = 0, skipped = 0, failed = 0, tooRecent = 0;
+            let cursor = null;
+            let hasMore = true;
+
+            while (hasMore && (LIMIT === 0 || deleted < LIMIT)) {
+              const result = await github.graphql(`
+                query($owner: String!, $repo: String!, $cursor: String) {
+                  repository(owner: $owner, name: $repo) {
+                    refs(refPrefix: "refs/heads/", first: 100, after: $cursor) {
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                      nodes {
+                        name
+                        branchProtectionRule {
+                          id
+                        }
+                        target {
+                          ... on Commit {
+                            committedDate
+                          }
+                        }
+                        associatedPullRequests(first: 1, states: [OPEN]) {
+                          totalCount
+                        }
+                        allPrs: associatedPullRequests(first: 1) {
+                          totalCount
+                        }
+                      }
+                    }
+                  }
+                }
+              `, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                cursor,
+              });
+
+              const refs = result.repository.refs;
+              hasMore = refs.pageInfo.hasNextPage;
+              cursor = refs.pageInfo.endCursor;
+
+              for (const ref of refs.nodes) {
+                if (ref.name === defaultBranch) continue;
+                if (ref.branchProtectionRule) continue;
+                if (/^\d+\.\d+$/.test(ref.name)) continue; // Release branches (e.g. 8.18, 9.0)
+                if (!ref.target?.committedDate) continue;
+
+                const commitDate = new Date(ref.target.committedDate);
+                const commitMs = commitDate.getTime();
+                const hasAnyPr = ref.allPrs.totalCount > 0;
+                const hasOpenPr = ref.associatedPullRequests.totalCount > 0;
+
+                // Skip branches with open PRs
+                if (hasOpenPr) { skipped++; continue; }
+
+                // Apply the appropriate cutoff based on PR existence
+                const cutoff = hasAnyPr ? CLOSED_PR_CUTOFF_MS : NO_PR_CUTOFF_MS;
+                if (commitMs > cutoff) {
+                  tooRecent++;
+                  continue;
+                }
+
+                if (LIMIT > 0 && deleted >= LIMIT) break;
+
+                const reason = hasAnyPr ? 'closed PR' : 'no PR';
+                if (DRY_RUN) {
+                  console.log(`WOULD DELETE: ${ref.name} (${reason}, last commit: ${commitDate.toISOString()})`);
+                  deleted++;
+                } else {
+                  console.log(`DELETE: ${ref.name} (${reason}, last commit: ${commitDate.toISOString()})`);
+                  try {
+                    await github.rest.git.deleteRef({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: `heads/${ref.name}`,
+                    });
+                    deleted++;
+                  } catch (e) {
+                    console.log(`  Failed: ${e.message}`);
+                    failed++;
+                  }
+                }
+              }
+            }
+
+            console.log(`\n=== Summary ===`);
+            console.log(`${DRY_RUN ? 'Would delete' : 'Deleted'}: ${deleted}`);
+            console.log(`Failed: ${failed}`);
+            console.log(`Skipped (open PR): ${skipped}`);
+            console.log(`Skipped (too recent): ${tooRecent}`);
