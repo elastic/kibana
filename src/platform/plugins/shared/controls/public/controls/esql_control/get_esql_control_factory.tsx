@@ -163,7 +163,7 @@ export const getESQLControlFactory = <
 
             relatedQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
             if (!relatedQuery && apiPublishesChildren(parentApi)) {
-              // the parent API does not publish a related query, so check all children
+              // the parent API does not publish a related query, so check all related children
               for (const panel of relatedPanelsApi.relatedPanels$.getValue()) {
                 const child = parentApi.children$.getValue()[panel];
                 const childQuery = getRelatedQuery(child);
