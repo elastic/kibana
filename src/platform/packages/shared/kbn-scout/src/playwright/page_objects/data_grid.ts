@@ -53,7 +53,7 @@ export class DataGrid {
     }).toPass();
   }
 
-  private async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
+  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
     const expandButton = this.page.locator(
       `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
     );
