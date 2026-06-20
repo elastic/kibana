@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { APMPluginSetupDependencies } from '../../types';
+import type { CoreSetup } from '@kbn/core/server';
+import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { createApmAgentBuilderRoute } from './create_route';
 import { getServices } from '../../agent_builder/services/get_services';
 import { getServicesRequestSchema } from '../../agent_builder/services/get_services';
@@ -26,7 +27,7 @@ const getServicesRoute = createApmAgentBuilderRoute({
     ) as unknown as APMPluginSetupDependencies;
 
     return getServices({
-      core: core.setup,
+      core: core.setup as CoreSetup<APMPluginStartDependencies>,
       plugins: setupPlugins,
       request,
       logger,

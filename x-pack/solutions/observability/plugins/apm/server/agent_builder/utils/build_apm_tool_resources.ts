@@ -34,13 +34,13 @@ export async function buildApmToolResources({
   request,
   esClient,
 }: {
-  core: Pick<CoreSetup, 'getStartServices'>;
+  core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   request: KibanaRequest;
   esClient?: IScopedClusterClient;
 }): Promise<ApmToolResources> {
   const [coreStart, pluginStart] = await core.getStartServices();
-  const { licensing, ml, ruleRegistry } = pluginStart as APMPluginStartDependencies;
+  const { licensing, ml, ruleRegistry } = pluginStart;
   const esScoped = esClient ?? coreStart.elasticsearch.client.asScoped(request);
   const soClient = coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: [] });
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
