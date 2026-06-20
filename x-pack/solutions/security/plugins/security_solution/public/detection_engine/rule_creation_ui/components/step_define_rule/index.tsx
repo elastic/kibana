@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -51,6 +52,7 @@ import { useExperimentalFeatureFieldsTransform } from './use_experimental_featur
 import * as i18n from './translations';
 import {
   isEqlRule,
+  isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
   isQueryRule,
@@ -74,8 +76,10 @@ import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_r
 import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
 import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   AlertSuppressionEdit,
 } from '../../../rule_creation/components/alert_suppression_edit';
+import { EqlGroupByV2Fields } from '../../../rule_creation/components/alert_suppression_edit/components/eql_group_by_v2_fields';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { MachineLearningJobIdEdit } from '../../../rule_creation/components/machine_learning_job_id_edit';
 import { ThresholdEdit } from '../../../rule_creation/components/threshold_edit';
@@ -161,10 +165,30 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   shouldLoadQueryDynamically,
   threatIndex,
 }) => {
-  const [{ ruleType, queryBar, machineLearningJobId, threshold }] = useFormData<DefineStepRule>({
+  const [
+    {
+      ruleType,
+      queryBar,
+      machineLearningJobId,
+      threshold,
+      [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: alertSuppressionGroupByV2,
+    },
+  ] = useFormData<DefineStepRule>({
     form,
-    watch: ['ruleType', 'queryBar', 'machineLearningJobId', 'threshold.field'],
+    watch: [
+      'ruleType',
+      'queryBar',
+      'machineLearningJobId',
+      'threshold.field',
+      ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
+    ],
   });
+
+  const eqlRuleQuery = isEqlRule(ruleType)
+    ? (queryBar?.query?.query as string | undefined)
+    : undefined;
+  const isEqlSequenceSuppressionUi = isEqlRule(ruleType) && isEqlSequenceQuery(eqlRuleQuery);
+  const previousIsEqlSequenceSuppressionUi = usePrevious(isEqlSequenceSuppressionUi);
 
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -224,6 +248,29 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   useEffect(() => {
     setIndexModified(!isEqual(index, indicesConfig));
   }, [index, indicesConfig]);
+
+  useEffect(() => {
+    if (ruleType !== 'eql') {
+      return;
+    }
+    const lostSequenceUi =
+      previousIsEqlSequenceSuppressionUi === true && isEqlSequenceSuppressionUi === false;
+    const queryText = typeof eqlRuleQuery === 'string' ? eqlRuleQuery.trim() : '';
+    const staleV2OnNonSequenceQuery =
+      queryText.length > 0 &&
+      !isEqlSequenceSuppressionUi &&
+      (alertSuppressionGroupByV2?.length ?? 0) > 0;
+    if (lostSequenceUi || staleV2OnNonSequenceQuery) {
+      setFieldValue(ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME, []);
+    }
+  }, [
+    ruleType,
+    eqlRuleQuery,
+    isEqlSequenceSuppressionUi,
+    previousIsEqlSequenceSuppressionUi,
+    alertSuppressionGroupByV2,
+    setFieldValue,
+  ]);
 
   const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({
     form,
@@ -307,7 +354,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * disable these fields and leave users in a bad state that they cannot change.
    * The exception is threshold rules, which use an existing threshold field for the same
    * purpose and so are treated as if the field is always selected.  */
-  const areSuppressionFieldsSelected = isThresholdRule || Boolean(alertSuppressionFields?.length);
+  const hasEqlGroupByV2FieldEntry =
+    isEqlSequenceSuppressionUi &&
+    Boolean(alertSuppressionGroupByV2?.some((row) => row?.field && row.field.trim().length > 0));
+  const areSuppressionFieldsSelected =
+    isThresholdRule || Boolean(alertSuppressionFields?.length) || hasEqlGroupByV2FieldEntry;
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
 
@@ -675,6 +726,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             ) : (
               <AlertSuppressionEdit
                 suppressibleFields={suppressionGroupByFields}
+                hasAdditionalSuppressionSelection={hasEqlGroupByV2FieldEntry}
+                preDurationContent={
+                  isEqlSequenceSuppressionUi ? (
+                    <>
+                      <EuiSpacer size="m" />
+                      <UseField
+                        path={ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME}
+                        component={EqlGroupByV2Fields}
+                        componentProps={{
+                          browserFields: suppressionGroupByFields,
+                          isDisabled: isSuppressionGroupByDisabled,
+                          showSequenceIndex: true,
+                        }}
+                      />
+                    </>
+                  ) : null
+                }
                 labelAppend={alertSuppressionFieldsAppendText}
                 warningText={
                   isMlSuppressionIncomplete

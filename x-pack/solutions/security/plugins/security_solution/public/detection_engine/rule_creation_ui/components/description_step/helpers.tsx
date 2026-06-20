@@ -39,7 +39,12 @@ import * as i18nRiskScore from '../risk_score_mapping/translations';
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, ListItems } from './types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
-import type { AboutStepRiskScore, AboutStepSeverity, Duration } from '../../../common/types';
+import type {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+  AlertSuppressionGroupByV2FormEntry,
+  Duration,
+} from '../../../common/types';
 import { AlertSuppressionDurationType } from '../../../common/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
@@ -331,7 +336,7 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                   </EuiToolTip>
                 </OverrideValueColumn>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="sortRight" />
+                  <EuiIcon type="sortRight" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <SeverityBadge
@@ -369,7 +374,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                   </EuiToolTip>
                 </OverrideColumn>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={'sortRight'} />
+                  <EuiIcon type={'sortRight'} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>{ALERT_RISK_SCORE}</EuiFlexItem>
               </EuiFlexGroup>
@@ -587,6 +592,43 @@ export const buildAlertSuppressionDescription = (
           </EuiFlexItem>
         )
       )}
+    </EuiFlexGroup>
+  );
+
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildEqlGroupByV2Description = (
+  label: string,
+  entries: AlertSuppressionGroupByV2FormEntry[],
+  ruleType: Type
+): ListItems[] => {
+  const filled = entries.filter((e) => e?.field && e.field.trim().length > 0);
+  if (isEmpty(filled)) {
+    return [];
+  }
+  const description = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {filled.map((entry, index) => {
+        const fieldName = entry.field.trim();
+        const withSeq =
+          entry.sequenceIndex != null && !Number.isNaN(entry.sequenceIndex)
+            ? `${fieldName} (event ${entry.sequenceIndex})`
+            : fieldName;
+        return (
+          <EuiFlexItem grow={false} key={`eqlGroupByV2Description-${index}`}>
+            <EuiBadgeWrap data-test-subj="eqlGroupByV2DescriptionBadgeItem" color="hollow">
+              {withSeq}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 

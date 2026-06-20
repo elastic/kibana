@@ -64,8 +64,10 @@ import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
+import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { convertDurationToDateMath } from '../../../../common/utils/date_math';
 
@@ -423,12 +425,42 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }),
   };
 
-  // Threshold rule won't contain alert suppression fields
+  // Threshold rule won't use standard alert_suppression (handled below in threshold branch)
+  const eqlQuery =
+    stepData.ruleType === 'eql'
+      ? (stepData.queryBar?.query?.query as string | undefined)
+      : undefined;
+  const eqlIsSequence = isEqlSequenceQuery(eqlQuery);
+
+  const v2Form = ruleFields[ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME] ?? [];
+  const groupByV2Payload =
+    stepData.ruleType === 'eql' && eqlIsSequence && v2Form.length > 0
+      ? v2Form
+          .map((row) => {
+            const field = row.field?.trim() ?? '';
+            const includeSequenceIndex =
+              eqlIsSequence && row.sequenceIndex != null && Number.isFinite(row.sequenceIndex);
+            return {
+              field,
+              ...(includeSequenceIndex ? { sequence_index: row.sequenceIndex as number } : {}),
+            };
+          })
+          .filter((r) => r.field.length > 0)
+      : [];
+
+  const hasAlertSuppressionGroupBy =
+    (ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]?.length ?? 0) > 0;
+  const hasAlertSuppressionGroupByV2 = groupByV2Payload.length > 0;
   const alertSuppressionFields =
-    ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]?.length > 0
+    hasAlertSuppressionGroupBy || hasAlertSuppressionGroupByV2
       ? {
           alert_suppression: {
-            group_by: ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
+            ...(hasAlertSuppressionGroupBy
+              ? { group_by: ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME] }
+              : {}),
+            ...(hasAlertSuppressionGroupByV2
+              ? { group_by_v2: groupByV2Payload as AlertSuppression['group_by_v2'] }
+              : {}),
             duration:
               ruleFields[ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME] ===
               AlertSuppressionDurationType.PerTimePeriod

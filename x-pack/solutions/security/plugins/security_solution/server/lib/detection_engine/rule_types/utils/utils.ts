@@ -77,7 +77,7 @@ import type {
   WrappedEqlShellOptionalSubAlertsType,
 } from '../eql/build_alert_group_from_sequence';
 import type { BuildReasonMessage } from './reason_formatters';
-import { getSuppressionTerms } from './suppression_utils';
+import { getEqlSequenceSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { SECURITY_NUM_EXCEPTION_ITEMS, SECURITY_QUERY_SPAN_S } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
@@ -960,9 +960,13 @@ export const buildShellAlertSuppressionTermsAndFields = ({
 } => {
   const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
     sharedParams;
-  const suppressionTerms = getSuppressionTerms({
+  const buildingBlockSources = buildingBlockAlerts.map(
+    (block) => block._source as Record<string, unknown>
+  );
+  const suppressionTerms = getEqlSequenceSuppressionTerms({
     alertSuppression: completeRule?.ruleParams?.alertSuppression,
-    input: shellAlert._source,
+    shellAlertSource: shellAlert._source as Record<string, unknown>,
+    buildingBlockSources,
   });
   const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 

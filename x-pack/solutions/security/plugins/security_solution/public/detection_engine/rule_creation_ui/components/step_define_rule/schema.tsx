@@ -24,6 +24,7 @@ import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_s
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
@@ -185,6 +186,14 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldEqlGroupByV2Label',
+      {
+        defaultMessage: 'Field-specific suppression (EQL)',
+      }
+    ),
   },
   [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
     label: i18n.translate(

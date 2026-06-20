@@ -3284,5 +3284,214 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    /**
+     * `group_by_v2` with `sequence_index` reads suppression values from each sequence event's
+     * building-block document instead of the merged shell (legacy `group_by`). That allows
+     * distinct suppression buckets when later events share a legacy intersection (e.g. same host)
+     * but per-step fields differ.
+     */
+    describe('@skipInServerless EQL sequence suppression with group_by_v2 (per-sequence fields)', () => {
+      it('does not suppress the second sequence when per-sequence suppression tuples differ', async () => {
+        const id = uuidv4();
+        // EQL forms two overlapping sequences from three events: (doc1, doc1WithLater) and
+        // (doc1WithLater, doc2WithLater). Each sequence has distinct per-step user.name values
+        // so the suppression tuples differ and neither sequence is suppressed.
+        const doc1 = {
+          id,
+          '@timestamp': '2020-10-28T06:50:00.000Z',
+          host: { name: 'host-a' },
+          user: { name: 'sequence-a-user-0' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:51:00.000Z',
+          user: { name: 'shared-middle-user' },
+        };
+        const doc2WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:53:00.000Z',
+          user: { name: 'sequence-b-user-1' },
+        };
+
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by_v2: [
+              { field: 'user.name', sequence_index: 0 },
+              { field: 'user.name', sequence_index: 1 },
+            ],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+
+        expect(previewAlerts).toHaveLength(6);
+        const [sequenceAlerts, buildingBlockAlerts] =
+          partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts).toHaveLength(4);
+        expect(sequenceAlerts).toHaveLength(2);
+
+        const sortedSequenceAlerts = sortBy(sequenceAlerts, (hit) =>
+          JSON.stringify(hit._source?.[ALERT_SUPPRESSION_TERMS] ?? [])
+        );
+
+        expect(sortedSequenceAlerts[0]?._source).toEqual({
+          ...sortedSequenceAlerts[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            { field: 'user.name', value: 'sequence-a-user-0' },
+            { field: 'user.name', value: 'shared-middle-user' },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+        expect(sortedSequenceAlerts[1]?._source).toEqual({
+          ...sortedSequenceAlerts[1]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            { field: 'user.name', value: 'shared-middle-user' },
+            { field: 'user.name', value: 'sequence-b-user-1' },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+      });
+
+      it('suppresses a later sequence when group_by_v2 targets only the second event and values match', async () => {
+        const id = uuidv4();
+        // EQL forms two overlapping sequences from three events: (doc1, doc1WithLater) and
+        // (doc1WithLater, doc2WithLater). Both sequences' second event share the same
+        // host.name, so under `sequence_index: 1` suppression the second sequence is
+        // suppressed.
+        const doc1 = {
+          id,
+          '@timestamp': '2020-10-28T06:50:00.000Z',
+          host: { name: 'host-first' },
+          user: { name: 'only-used-for-context' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:51:00.000Z',
+          host: { name: 'shared-second-step-host' },
+        };
+        const doc2WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:53:00.000Z',
+          host: { name: 'shared-second-step-host' },
+        };
+
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by_v2: [{ field: 'host.name', sequence_index: 1 }],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+
+        expect(previewAlerts).toHaveLength(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [{ field: 'host.name', value: 'shared-second-step-host' }],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it('uses merged shell field values when group_by_v2 omits sequence_index', async () => {
+        const id = uuidv4();
+        // EQL forms two overlapping sequences from three events. All events share the same
+        // host.name, so the merged-shell suppression value matches across both sequences and
+        // the second one is suppressed.
+        const doc1 = {
+          id,
+          '@timestamp': '2020-10-28T06:50:00.000Z',
+          host: { name: 'host-a' },
+        };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:51:00.000Z',
+        };
+        const doc2WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:53:00.000Z',
+        };
+
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by_v2: [{ field: 'host.name' }],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts).toHaveLength(3);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
+
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [{ field: 'host.name', value: 'host-a' }],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+    });
   });
 };
