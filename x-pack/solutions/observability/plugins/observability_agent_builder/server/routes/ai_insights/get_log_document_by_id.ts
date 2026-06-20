@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 
 const LOG_DOCUMENT_FIELDS = [
   '@timestamp',
@@ -47,6 +48,7 @@ export const getLogDocumentById = async ({
     query: {
       ids: { values: [id] },
     },
+    project_routing: PROJECT_ROUTING_ALL,
   });
 
   const hit = result.hits.hits[0];
