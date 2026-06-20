@@ -701,6 +701,80 @@ export class DiscoverApp {
     await this.page.getByRole('button', { name: 'Copy name' }).click();
   }
 
+  private getRowSelectionCheckbox(rowIndex: number): Locator {
+    return this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] input[type="checkbox"]`
+    );
+  }
+
+  async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
+    const checkbox = this.getRowSelectionCheckbox(rowIndex);
+    await checkbox.click({ modifiers: pressShiftKey ? ['Shift'] : [] });
+  }
+
+  async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
+    return this.page
+      .locator('.euiDataGridRow [data-gridcell-column-id="select"] input[type="checkbox"]:checked')
+      .count();
+  }
+
+  async isSelectedRowsMenuVisible(): Promise<boolean> {
+    return this.page.testSubj.locator('unifiedDataTableSelectionBtn').isVisible();
+  }
+
+  async getNumberOfSelectedRows(): Promise<number> {
+    const selectedRowsMenu = this.page.testSubj.locator('unifiedDataTableSelectionBtn');
+    if (!(await selectedRowsMenu.isVisible())) {
+      return 0;
+    }
+
+    const badgeText = await selectedRowsMenu.locator('.euiNotificationBadge').innerText();
+    return Number(badgeText);
+  }
+
+  async getSelectAllRowsOnCurrentPageTitle(): Promise<string | null> {
+    return this.page.testSubj.locator('selectAllDocsOnPageToggle').getAttribute('title');
+  }
+
+  async toggleSelectAllRowsOnCurrentPage() {
+    await this.page.testSubj.click('selectAllDocsOnPageToggle');
+  }
+
+  async getSelectAllRowsText(): Promise<string | null> {
+    const selectAllRows = this.page.testSubj.locator('dscGridSelectAllDocs');
+    if (!(await selectAllRows.isVisible())) {
+      return null;
+    }
+
+    return selectAllRows.innerText();
+  }
+
+  async selectAllRows() {
+    await this.page.testSubj.click('dscGridSelectAllDocs');
+  }
+
+  async openSelectedRowsMenu() {
+    await this.page.testSubj.click('unifiedDataTableSelectionBtn');
+    await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'visible' });
+  }
+
+  async clickSelectedRowsMenuAction(actionTestSubj: string) {
+    await this.page.testSubj.click(actionTestSubj);
+    await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'hidden' });
+  }
+
+  async getDataGridHeaderFields(): Promise<string[]> {
+    return this.page
+      .locator('[data-test-subj^="dataGridHeaderCell-"]')
+      .evaluateAll((headers) =>
+        headers
+          .map((header) =>
+            (header.getAttribute('data-test-subj') ?? '').replace('dataGridHeaderCell-', '')
+          )
+          .filter((fieldName) => !['select', 'actions'].includes(fieldName))
+      );
+  }
+
   async openGridDisplaySettings() {
     await this.page.testSubj.click('dataGridDisplaySelectorButton');
   }
