@@ -166,7 +166,7 @@ jest.mock(
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
-    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', async () => {
+    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
       const wrapper = render(
         <TestProviders>
           <AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />
@@ -175,13 +175,11 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      await waitFor(() => {
-        expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-        expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
-      });
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
 
-    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', async () => {
+    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
       const wrapper = render(
         <TestProviders>
           <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />
@@ -190,13 +188,11 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      await waitFor(() => {
-        expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-        expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
-      });
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
 
-    test('it render AddToCase context menu item if timelineId === TimelineId.active', async () => {
+    test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
       const wrapper = render(
         <TestProviders>
           <AlertContextMenu {...props} scopeId={TimelineId.active} />
@@ -205,10 +201,8 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      await waitFor(() => {
-        expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-        expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
-      });
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
   });
 
