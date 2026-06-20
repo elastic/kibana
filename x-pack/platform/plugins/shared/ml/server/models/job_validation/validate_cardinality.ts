@@ -78,6 +78,7 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
 
     if (relevantDetectors.length > 0) {
       try {
+        // / debug here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const uniqueFieldNames = [
           ...new Set(relevantDetectors.map((f) => f[fieldName])),
         ] as string[];

@@ -22,6 +22,7 @@ import type { Job, Detector, BucketSpan } from '@kbn/ml-common-types/anomaly_det
 import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreator } from './job_creator';
 import { createBasicDetector } from './util/default_configs';
+import { ML_MEDIAN_PERCENTS } from '../../../../../../common/util/job_utils';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
@@ -118,8 +119,6 @@ export class SingleMetricJobCreator extends JobCreator {
           };
           break;
         case ES_AGGREGATION.AVG:
-        // TODO - fix median aggregations
-        // case ES_AGGREGATION.PERCENTILES:
         case ES_AGGREGATION.SUM:
         case ES_AGGREGATION.MIN:
         case ES_AGGREGATION.MAX:
@@ -135,14 +134,43 @@ export class SingleMetricJobCreator extends JobCreator {
                   fixed_interval: `${interval * 0.1}ms`, // use 10% of bucketSpan to allow for better sampling
                 },
                 aggregations: {
+                  [timeField]: {
+                    max: {
+                      field: timeField,
+                    },
+                  },
                   [fieldName]: {
                     [functionName]: {
                       field: fieldName,
                     },
                   },
+                },
+              },
+            };
+          }
+          break;
+        case ES_AGGREGATION.PERCENTILES:
+          field = this._fields[0];
+          if (field !== null) {
+            const fieldName = field.name;
+            this._job_config.analysis_config.summary_count_field_name = DOC_COUNT;
+
+            this._datafeed_config.aggregations = {
+              buckets: {
+                date_histogram: {
+                  field: timeField,
+                  fixed_interval: `${interval * 0.1}ms`, // use 10% of bucketSpan to allow for better sampling
+                },
+                aggregations: {
                   [timeField]: {
                     max: {
                       field: timeField,
+                    },
+                  },
+                  [fieldName]: {
+                    percentiles: {
+                      field: fieldName,
+                      percents: [Number(ML_MEDIAN_PERCENTS)],
                     },
                   },
                 },
