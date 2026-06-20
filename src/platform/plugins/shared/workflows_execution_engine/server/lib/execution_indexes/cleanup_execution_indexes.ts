@@ -174,41 +174,43 @@ export const cleanupExecutionIndexIfEligible = async ({
       return deletedCount;
     }
 
-    const anyNonTerminalStatus = await hasNonTerminalExecutionsInIndex({
-      esClient,
-      indexName: candidate.indexName,
-      signal,
-    });
-
-    if (anyNonTerminalStatus) {
-      await deleteTerminalExecutionsFromIndex({
-        esClient,
-        indexName: candidate.indexName,
-        logger,
-        signal,
-      });
-    } else if (!candidate.isWriteIndex) {
-      const creationTimeMs = await getIndexCreationTimeMs({
+    if (!candidate.isWriteIndex) {
+      const anyNonTerminalStatus = await hasNonTerminalExecutionsInIndex({
         esClient,
         indexName: candidate.indexName,
         signal,
       });
 
-      if (creationTimeMs === undefined) {
-        logger.warn(`Skipping ${candidate.indexName}: missing index.creation_date`);
+      if (anyNonTerminalStatus) {
+        await deleteTerminalExecutionsFromIndex({
+          esClient,
+          indexName: candidate.indexName,
+          logger,
+          signal,
+        });
       } else {
-        const indexAgeMs = nowMs - creationTimeMs;
+        const creationTimeMs = await getIndexCreationTimeMs({
+          esClient,
+          indexName: candidate.indexName,
+          signal,
+        });
 
-        if (indexAgeMs < minIndexAgeMs) {
-          logger.debug(
-            `Skipping ${candidate.indexName}: age ${indexAgeMs}ms is below minIndexAge ${options.minIndexAge}`
-          );
+        if (creationTimeMs === undefined) {
+          logger.warn(`Skipping ${candidate.indexName}: missing index.creation_date`);
         } else {
-          await esClient.indices.delete({ index: candidate.indexName }, { signal });
-          deletedCount += 1;
-          logger.info(
-            `Deleted backing index ${candidate.indexName} for alias ${aliasName} (age >= ${options.minIndexAge})`
-          );
+          const indexAgeMs = nowMs - creationTimeMs;
+
+          if (indexAgeMs < minIndexAgeMs) {
+            logger.debug(
+              `Skipping ${candidate.indexName}: age ${indexAgeMs}ms is below minIndexAge ${options.minIndexAge}`
+            );
+          } else {
+            await esClient.indices.delete({ index: candidate.indexName }, { signal });
+            deletedCount += 1;
+            logger.info(
+              `Deleted backing index ${candidate.indexName} for alias ${aliasName} (age >= ${options.minIndexAge})`
+            );
+          }
         }
       }
     }

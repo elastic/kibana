@@ -62,14 +62,13 @@ export const rolloverExecutionIndexIfRequired = async ({
     }));
 
   if (conditionsMet.length) {
-    if (await esClient.indices.exists({ index: response.new_index }, { signal })) {
-      return false;
+    if (!await esClient.indices.exists({ index: response.new_index }, { signal })) {
+      await esClient.indices.create({
+        index: response.new_index,
+        mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+      });
     }
-
-    await esClient.indices.create({
-      index: response.new_index,
-      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-    });
+    
     await esClient.indices.updateAliases({
       actions: [
         { add: { index: response.new_index, alias: aliasName, is_write_index: true } },
