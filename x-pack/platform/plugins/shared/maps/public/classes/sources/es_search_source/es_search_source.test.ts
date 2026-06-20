@@ -154,10 +154,9 @@ describe('ESSearchSource', () => {
             '3': { '0': 'query' },
             '4': { '0': 'index', '1': { fields: {}, title: 'foobar-title-*' } },
             '5': { '0': 'query', '1': { language: 'KQL', query: 'tooltipField: foobar' } },
-            '6': { '0': 'fieldsFromSource', '1': ['_id'] },
-            '7': { '0': 'source', '1': false },
-            '8': { '0': 'fields', '1': ['tooltipField', 'styleField'] },
-            '9': { '0': 'filter', '1': [{ meta: {}, query: { exists: { field: 'bar' } } }] },
+            '6': { '0': 'source', '1': false },
+            '7': { '0': 'fields', '1': ['tooltipField', 'styleField'] },
+            '8': { '0': 'filter', '1': [{ meta: {}, query: { exists: { field: 'bar' } } }] },
           },
         });
       });
