@@ -15,7 +15,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 spaceTest.describe(
   'Discover data grid density - saved search',
@@ -32,8 +32,8 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -45,20 +45,20 @@ spaceTest.describe(
       await pageObjects.discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
 
       // Change density and save it onto the saved search.
-      await pageObjects.discover.openGridDisplaySettings();
-      await pageObjects.discover.setDensityValue('Expanded');
+      await pageObjects.dataGrid.openGridDisplaySettings();
+      await pageObjects.dataGrid.setDensityValue('Expanded');
       await pageObjects.discover.saveUnsavedChanges();
 
       // Change density again without saving -> unsaved-changes indicator appears.
-      await pageObjects.discover.openGridDisplaySettings();
-      await pageObjects.discover.setDensityValue('Normal');
+      await pageObjects.dataGrid.openGridDisplaySettings();
+      await pageObjects.dataGrid.setDensityValue('Normal');
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
 
       // Reverting restores the last saved density.
       await pageObjects.discover.revertUnsavedChanges();
 
-      await pageObjects.discover.openGridDisplaySettings();
-      expect(await pageObjects.discover.getCurrentDensityValue()).toBe('Expanded');
+      await pageObjects.dataGrid.openGridDisplaySettings();
+      expect(await pageObjects.dataGrid.getCurrentDensityValue()).toBe('Expanded');
     });
   }
 );

@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Clipboard export actions for selected data-grid rows and visible columns.
+ */
+
 import type { ScoutPage, ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const PAGE_SIZE = 5;
 
@@ -24,6 +28,23 @@ const EXPECTED_SELECTED_COLUMNS_MARKDOWN =
   '| @timestamp | extension | bytes |\n| --- | --- | --- |\n| Sep 22, 2015 @ 23:50:13.253 | jpg | 7,124 |\n| Sep 22, 2015 @ 23:43:58.175 | jpg | 5,453 |';
 const EXPECTED_SELECTED_COLUMNS_TEXT =
   '"\'@timestamp"\textension\tbytes\n"Sep 22, 2015 @ 23:50:13.253"\tjpg\t"7,124"\n"Sep 22, 2015 @ 23:43:58.175"\tjpg\t"5,453"';
+
+const clickSelectedRowsMenuAction = async (page: ScoutPage, actionTestSubj: string) => {
+  await page.testSubj.click(actionTestSubj);
+  await page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'hidden' });
+};
+
+const getDataGridHeaderFields = (page: ScoutPage): Promise<string[]> => {
+  return page
+    .locator('[data-test-subj^="dataGridHeaderCell-"]')
+    .evaluateAll((headers) =>
+      headers
+        .map((header) =>
+          (header.getAttribute('data-test-subj') ?? '').replace('dataGridHeaderCell-', '')
+        )
+        .filter((fieldName) => !['select', 'actions'].includes(fieldName))
+    );
+};
 
 const tryReadClipboard = async (page: ScoutPage): Promise<string | null> => {
   try {
@@ -44,17 +65,17 @@ const copySelectedRowsAsText = async ({
   page: ScoutPage;
   pageObjects: ScoutTestFixtures['pageObjects'];
 }): Promise<string | null> => {
-  const { discover } = pageObjects;
+  const { dataGrid } = pageObjects;
 
-  await discover.selectRow(2);
-  await discover.selectRow(1);
+  await dataGrid.selectRow(2);
+  await dataGrid.selectRow(1);
 
-  await expect.poll(() => discover.isSelectedRowsMenuVisible()).toBe(true);
-  await expect.poll(() => discover.getNumberOfSelectedRowsOnCurrentPage()).toBe(2);
-  await expect.poll(() => discover.getNumberOfSelectedRows()).toBe(2);
+  await expect.poll(() => dataGrid.isSelectedRowsMenuVisible()).toBe(true);
+  await expect.poll(() => dataGrid.getNumberOfSelectedRowsOnCurrentPage()).toBe(2);
+  await expect.poll(() => dataGrid.getNumberOfSelectedRows()).toBe(2);
 
-  await discover.openSelectedRowsMenu();
-  await discover.clickSelectedRowsMenuAction(actionTestSubj);
+  await dataGrid.openSelectedRowsMenu();
+  await clickSelectedRowsMenuAction(page, actionTestSubj);
 
   return await tryReadClipboard(page);
 };
@@ -68,24 +89,24 @@ const copyVisibleColumnsForSelectedRowsAsText = async ({
   page: ScoutPage;
   pageObjects: ScoutTestFixtures['pageObjects'];
 }): Promise<string | null> => {
-  const { discover } = pageObjects;
+  const { dataGrid } = pageObjects;
 
-  await discover.addFieldFromSidebar('extension');
-  await discover.addFieldFromSidebar('bytes');
+  await dataGrid.addFieldFromSidebar('extension');
+  await dataGrid.addFieldFromSidebar('bytes');
 
   await expect
-    .poll(() => discover.getDataGridHeaderFields())
+    .poll(() => getDataGridHeaderFields(page))
     .toStrictEqual(['@timestamp', 'extension', 'bytes']);
 
-  await discover.selectRow(1);
-  await discover.selectRow(0);
+  await dataGrid.selectRow(1);
+  await dataGrid.selectRow(0);
 
-  await expect.poll(() => discover.isSelectedRowsMenuVisible()).toBe(true);
-  await expect.poll(() => discover.getNumberOfSelectedRowsOnCurrentPage()).toBe(2);
-  await expect.poll(() => discover.getNumberOfSelectedRows()).toBe(2);
+  await expect.poll(() => dataGrid.isSelectedRowsMenuVisible()).toBe(true);
+  await expect.poll(() => dataGrid.getNumberOfSelectedRowsOnCurrentPage()).toBe(2);
+  await expect.poll(() => dataGrid.getNumberOfSelectedRows()).toBe(2);
 
-  await discover.openSelectedRowsMenu();
-  await discover.clickSelectedRowsMenuAction(actionTestSubj);
+  await dataGrid.openSelectedRowsMenu();
+  await clickSelectedRowsMenuAction(page, actionTestSubj);
 
   return await tryReadClipboard(page);
 };
@@ -106,8 +127,8 @@ spaceTest.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -120,17 +141,17 @@ spaceTest.describe(
     });
 
     spaceTest('copies selected rows as JSON', async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
+      const { dataGrid } = pageObjects;
 
-      await discover.selectRow(2);
-      await discover.selectRow(1);
+      await dataGrid.selectRow(2);
+      await dataGrid.selectRow(1);
 
-      await expect.poll(() => discover.isSelectedRowsMenuVisible()).toBe(true);
-      await expect.poll(() => discover.getNumberOfSelectedRowsOnCurrentPage()).toBe(2);
-      await expect.poll(() => discover.getNumberOfSelectedRows()).toBe(2);
+      await expect.poll(() => dataGrid.isSelectedRowsMenuVisible()).toBe(true);
+      await expect.poll(() => dataGrid.getNumberOfSelectedRowsOnCurrentPage()).toBe(2);
+      await expect.poll(() => dataGrid.getNumberOfSelectedRows()).toBe(2);
 
-      await discover.openSelectedRowsMenu();
-      await discover.clickSelectedRowsMenuAction('dscGridCopySelectedDocumentsJSON');
+      await dataGrid.openSelectedRowsMenu();
+      await clickSelectedRowsMenuAction(page, 'dscGridCopySelectedDocumentsJSON');
 
       const clipboardData = await tryReadClipboard(page);
       expect(

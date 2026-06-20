@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Newline rendering in data-grid cells across document and explicit columns.
+ */
+
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const NEWLINE_INDEX = 'newline';
 const VALUE_WITH_NEW_LINES = "Newline!\nHere's a newline.\nHere's a newline again.";
@@ -20,6 +24,13 @@ const getGridCell = (page: ScoutPage, rowIndex: number, columnName: string) =>
   page.locator(
     `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"]`
   );
+
+const setCustomRowHeight = async (page: ScoutPage, newValue: number) => {
+  const input = page.testSubj.locator('unifiedDataTableRowHeightSettings_lineCountNumber');
+
+  await expect(input).toBeVisible();
+  await input.fill(newValue.toString());
+};
 
 const whiteSpaceOf = (locator: Locator) =>
   locator.evaluate((el) => window.getComputedStyle(el).whiteSpace);
@@ -57,10 +68,10 @@ spaceTest.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await pageObjects.discover.selectDataView(NEWLINE_INDEX);
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace, esClient }) => {
@@ -84,8 +95,8 @@ spaceTest.describe(
     spaceTest(
       'shows new lines for the "message" column except for the single-line row height',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.addFieldFromSidebar('message');
-        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.addFieldFromSidebar('message');
+        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
         const messageValue = () =>
           getGridCell(page, 0, 'message').locator('.unifiedDataTable__cellValue');
@@ -96,20 +107,20 @@ spaceTest.describe(
         expect(await whiteSpaceOf(messageValue())).toBe('pre-wrap');
 
         // Auto row height still preserves newlines.
-        await pageObjects.discover.openGridDisplaySettings();
-        expect(await pageObjects.discover.getCurrentRowHeight()).toBe('Custom');
-        await pageObjects.discover.setRowHeight('Auto');
-        await pageObjects.discover.openGridDisplaySettings();
+        await pageObjects.dataGrid.openGridDisplaySettings();
+        expect(await pageObjects.dataGrid.getCurrentRowHeight()).toBe('Custom');
+        await pageObjects.dataGrid.setRowHeight('Auto');
+        await pageObjects.dataGrid.openGridDisplaySettings();
 
         await expect.poll(async () => messageValue().innerText()).toBe(VALUE_WITH_NEW_LINES);
         expect(await whiteSpaceOf(messageValue())).toBe('pre-wrap');
 
         // Single-line (Custom = 1 line) row height collapses newlines.
-        await pageObjects.discover.openGridDisplaySettings();
-        expect(await pageObjects.discover.getCurrentRowHeight()).toBe('Auto');
-        await pageObjects.discover.setRowHeight('Custom');
-        await pageObjects.discover.setCustomRowHeight(1);
-        await pageObjects.discover.openGridDisplaySettings();
+        await pageObjects.dataGrid.openGridDisplaySettings();
+        expect(await pageObjects.dataGrid.getCurrentRowHeight()).toBe('Auto');
+        await pageObjects.dataGrid.setRowHeight('Custom');
+        await setCustomRowHeight(page, 1);
+        await pageObjects.dataGrid.openGridDisplaySettings();
 
         await expect.poll(async () => messageValue().innerText()).toBe(VALUE_WITHOUT_NEW_LINES);
         expect(await whiteSpaceOf(messageValue())).toBe('nowrap');

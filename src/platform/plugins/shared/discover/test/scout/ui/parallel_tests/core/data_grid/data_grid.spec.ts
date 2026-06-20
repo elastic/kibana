@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Basic Discover data-grid rendering, column selection, and full-screen behavior.
+ */
+
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 // Mirrors the FTR `dataGrid.getHeaderFields`: only the data-column titles live in
 // `.euiDataGridHeaderCell__content`, so this excludes control columns (select,
@@ -64,8 +68,8 @@ spaceTest.describe('Discover data grid', { tag: '@local-stateful-classic' }, () 
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

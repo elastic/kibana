@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Data-grid column-name and column-value copy-to-clipboard actions.
+ */
+
 import type { ScoutPage } from '@kbn/scout';
 import { EuiToastWrapper, spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 // Copying the column values produces a CSV-escaped string. The leading
 // apostrophe on `@timestamp` is intentional formula-injection protection.
@@ -18,12 +22,32 @@ const EXPECTED_TIMESTAMP_COLUMN_PREFIX =
   '"\'@timestamp"\n"Sep 22, 2015 @ 23:50:13.253"\n"Sep 22, 2015 @ 23:43:58.175"';
 const EXPECTED_SOURCE_COLUMN_PREFIX = 'Summary\n{"@message":["238.171.34.42';
 
+const clickCopyColumnName = async (page: ScoutPage, field: string) => {
+  await openColumnMenuByField(page, field);
+  await page.getByRole('button', { name: 'Copy name' }).click();
+};
+
+const clickCopyColumnValues = async (page: ScoutPage, field: string) => {
+  await openColumnMenuByField(page, field);
+  await page.getByRole('button', { name: 'Copy column' }).click();
+};
+
 const expectSingleToastThenDismiss = async (page: ScoutPage) => {
   const toasts = new EuiToastWrapper(page, { locator: '.euiToast' });
 
   await expect(toasts.getWrapper()).toHaveCount(1);
 
   await toasts.closeAllToasts();
+};
+
+const openColumnMenuByField = async (page: ScoutPage, field: string) => {
+  await expect(async () => {
+    await page.testSubj.hover(`dataGridHeaderCell-${field}`);
+    await page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
+    await page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
+      state: 'visible',
+    });
+  }).toPass();
 };
 
 /**
@@ -57,8 +81,8 @@ spaceTest.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -66,8 +90,8 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('copies a column values to clipboard', async ({ page, pageObjects }) => {
-      await pageObjects.discover.clickCopyColumnValues('@timestamp');
+    spaceTest('copies a column values to clipboard', async ({ page }) => {
+      await clickCopyColumnValues(page, '@timestamp');
       // `null` means the clipboard wasn't readable in this environment, so the
       // content check is skipped (best-effort) while the toast check below stays.
       const copiedTimestampData = await tryReadClipboard(page);
@@ -78,7 +102,7 @@ spaceTest.describe(
       ).toBe(true);
       await expectSingleToastThenDismiss(page);
 
-      await pageObjects.discover.clickCopyColumnValues('_source');
+      await clickCopyColumnValues(page, '_source');
       const copiedSourceData = await tryReadClipboard(page);
       expect(
         copiedSourceData === null ||
@@ -90,8 +114,8 @@ spaceTest.describe(
       await expectSingleToastThenDismiss(page);
     });
 
-    spaceTest('copies a column name to clipboard', async ({ page, pageObjects }) => {
-      await pageObjects.discover.clickCopyColumnName('@timestamp');
+    spaceTest('copies a column name to clipboard', async ({ page }) => {
+      await clickCopyColumnName(page, '@timestamp');
 
       const copiedTimestampName = await tryReadClipboard(page);
       expect(
@@ -101,7 +125,7 @@ spaceTest.describe(
 
       await expectSingleToastThenDismiss(page);
 
-      await pageObjects.discover.clickCopyColumnName('_source');
+      await clickCopyColumnName(page, '_source');
 
       const copiedSourceName = await tryReadClipboard(page);
       expect(

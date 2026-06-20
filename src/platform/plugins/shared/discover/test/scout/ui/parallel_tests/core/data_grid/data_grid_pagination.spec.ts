@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Discover data-grid pagination controls and rows-per-page settings.
+ */
+
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 spaceTest.describe('Discover data grid pagination', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -23,8 +27,8 @@ spaceTest.describe('Discover data grid pagination', { tag: '@local-stateful-clas
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -37,7 +41,7 @@ spaceTest.describe('Discover data grid pagination', { tag: '@local-stateful-clas
   });
 
   spaceTest('shows pagination controls', async ({ page, pageObjects }) => {
-    expect(await pageObjects.discover.getDocTableRowCount()).toBeGreaterThan(0);
+    expect(await pageObjects.dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
 
     await expect(page.testSubj.locator('pagination-button-0')).toBeVisible();
     await expect(page.testSubj.locator('pagination-button-4')).toBeVisible();
@@ -57,15 +61,15 @@ spaceTest.describe('Discover data grid pagination', { tag: '@local-stateful-clas
   });
 
   spaceTest('updates pagination when rows per page changes', async ({ page, pageObjects }) => {
-    const { discover } = pageObjects;
+    const { dataGrid } = pageObjects;
 
-    expect(await discover.getDocTableRowCount()).toBeGreaterThan(0);
+    expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
     await expect(page.testSubj.locator('pagination-button-0')).toBeVisible();
     await expect(page.testSubj.locator('pagination-button-4')).toBeVisible();
 
-    await discover.changeRowsPerPageTo(500);
+    await dataGrid.changeRowsPerPageTo(500);
 
-    await expect.poll(() => discover.getCurrentRowsPerPage()).toBe(500);
+    await expect.poll(() => dataGrid.getCurrentRowsPerPage()).toBe(500);
     await expect(page.testSubj.locator('pagination-button-1')).toBeHidden();
     await expect(page.testSubj.locator('unifiedDataTableFooter')).toBeVisible();
   });

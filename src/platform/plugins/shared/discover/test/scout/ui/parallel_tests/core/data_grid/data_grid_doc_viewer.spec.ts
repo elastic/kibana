@@ -12,15 +12,69 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { spaceTest, tags } from '@kbn/scout';
+import { KibanaCodeEditorWrapper, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const EXPECTED_FIRST_ROW_TIMESTAMP = 'Sep 22, 2015 @ 23:50:13.253';
 const EXPECTED_FIRST_ROW_ID = 'AU_x3_g4GFA8no6QjkYX';
 
+const closeDocViewerFlyout = async (page: ScoutPage) => {
+  await page.testSubj.click('euiFlyoutCloseButton');
+  await page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
+};
+
+const expandGridCell = async ({
+  page,
+  rowIndex,
+  columnId,
+}: {
+  page: ScoutPage;
+  rowIndex: number;
+  columnId: string;
+}) => {
+  const cell = page.locator(
+    `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="${columnId}"]`
+  );
+  await cell.hover();
+  await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+  await page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+};
+
 const firstRowTimestampCell = (page: ScoutPage) =>
   page.locator('[data-grid-visible-row-index="0"] [data-gridcell-column-id="@timestamp"]');
+
+const readMonacoJson = async (
+  page: ScoutPage
+): Promise<{ _id: string } & Record<string, unknown>> => {
+  const codeEditor = new KibanaCodeEditorWrapper(page);
+  let parsed: { _id: string } & Record<string, unknown> = { _id: '' };
+  await expect(async () => {
+    const raw = await codeEditor.getCodeEditorValue();
+    if (!raw) {
+      throw new Error('Monaco editor has not rendered a value yet');
+    }
+    parsed = JSON.parse(raw);
+    expect(parsed._id).toBeTruthy();
+  }).toPass({ timeout: 15_000 });
+
+  return parsed;
+};
+
+const toggleColumnInDocViewer = async (page: ScoutPage, fieldName: string) => {
+  const flyout = page.testSubj.locator('docViewerFlyout');
+  await expect(async () => {
+    const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+    await nameElement.evaluate((el) => {
+      el.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
+    await nameElement.hover();
+    const toggle = flyout.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]`);
+    await toggle.waitFor({ state: 'visible' });
+    await toggle.scrollIntoViewIfNeeded();
+    await toggle.click();
+  }).toPass({ timeout: 15_000 });
+};
 
 spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }, () => {
   // EUI DataGrid hides/truncates inline cellActions at narrow widths. The FTR
@@ -40,8 +94,8 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -58,18 +112,18 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     // is stable
     await expect(firstRowTimestampCell(page)).toContainText(EXPECTED_FIRST_ROW_TIMESTAMP);
 
-    await pageObjects.discover.expandGridCell({ rowIndex: 0, columnId: '_source' });
-    const popoverDoc = await pageObjects.discover.readMonacoJson();
+    await expandGridCell({ page, rowIndex: 0, columnId: '_source' });
+    const popoverDoc = await readMonacoJson(page);
     expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
     // Open the full flyout and read JSON from the source tab. Serverless O11y can
     // default to "Log overview" so Monaco is not mounted until the JSON tab is open.
-    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     await page.testSubj.click('docViewerTab-doc_view_source');
-    const flyoutDoc = await pageObjects.discover.readMonacoJson();
+    const flyoutDoc = await readMonacoJson(page);
     expect(flyoutDoc._id).toBe(popoverDoc._id);
 
-    await pageObjects.discover.closeDocViewerFlyout();
+    await closeDocViewerFlyout(page);
   });
 
   spaceTest(
@@ -79,29 +133,29 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
 
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addSavedSearch('expand-cell-search');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
 
       await expect(firstRowTimestampCell(page)).toContainText(EXPECTED_FIRST_ROW_TIMESTAMP);
 
-      await pageObjects.discover.expandGridCell({ rowIndex: 0, columnId: '_source' });
-      const popoverDoc = await pageObjects.discover.readMonacoJson();
+      await expandGridCell({ page, rowIndex: 0, columnId: '_source' });
+      const popoverDoc = await readMonacoJson(page);
       expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
-      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+      await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
       await page.testSubj.click('docViewerTab-doc_view_source');
-      const flyoutDoc = await pageObjects.discover.readMonacoJson();
+      const flyoutDoc = await readMonacoJson(page);
       expect(flyoutDoc._id).toBe(popoverDoc._id);
     }
   );
 
   spaceTest('expands a document row via the row toggle', async ({ page, pageObjects }) => {
-    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     await expect(page.testSubj.locator('docViewerRowDetailsTitle')).toBeVisible();
   });
 
   spaceTest('shows the detail panel row actions', async ({ page, pageObjects }) => {
-    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
 
     const rowActions = page.testSubj
       .locator('docViewerFlyout')
@@ -112,43 +166,43 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
   spaceTest(
     'paginates docs in the flyout when clicking a different row in the grid',
     async ({ page, pageObjects }) => {
-      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+      await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
       await expect(page.testSubj.locator('docViewerFlyoutNavigationPage-0')).toBeVisible();
 
-      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 1 });
+      await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 1 });
       await expect(page.testSubj.locator('docViewerFlyoutNavigationPage-1')).toBeVisible();
 
-      await pageObjects.discover.closeDocViewerFlyout();
+      await closeDocViewerFlyout(page);
     }
   );
 
   spaceTest('adds and removes columns from the detail panel', async ({ page, pageObjects }) => {
     const fields = ['_id', '_index', 'agent'];
 
-    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     // The "toggle column" action is only exposed on the field-table tab.
     await page.testSubj.click('docViewerTab-doc_view_table');
     for (const field of fields) {
-      await pageObjects.discover.toggleColumnInDocViewer(field);
+      await toggleColumnInDocViewer(page, field);
     }
     for (const field of fields) {
       await expect(
-        pageObjects.discover.getColumnHeader(field),
+        pageObjects.dataGrid.getColumnHeader(field),
         `column ${field} should appear in the grid after adding it from the flyout`
       ).toBeVisible();
     }
 
     // Calling the same toggle again removes the column.
     for (const field of fields) {
-      await pageObjects.discover.toggleColumnInDocViewer(field);
+      await toggleColumnInDocViewer(page, field);
     }
     for (const field of fields) {
       await expect(
-        pageObjects.discover.getColumnHeader(field),
+        pageObjects.dataGrid.getColumnHeader(field),
         `column ${field} should be removed from the grid`
       ).toBeHidden();
     }
 
-    await pageObjects.discover.closeDocViewerFlyout();
+    await closeDocViewerFlyout(page);
   });
 });

@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Sample-size persistence across saved searches and dashboard saved-search panels.
+ */
+
 import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const DEFAULT_ROWS_PER_PAGE = 100;
 const DEFAULT_SAMPLE_SIZE = 500;
@@ -24,10 +28,10 @@ const expectSampleSizeFooter = async ({
   pageObjects: ScoutTestFixtures['pageObjects'];
   sampleSize: number;
 }) => {
-  const { discover } = pageObjects;
+  const { dataGrid } = pageObjects;
 
-  await discover.goToLastSamplePage(sampleSize, DEFAULT_ROWS_PER_PAGE);
-  await expect.poll(() => discover.getDataGridFooterText()).toContain(String(sampleSize));
+  await dataGrid.goToLastSamplePage(sampleSize, DEFAULT_ROWS_PER_PAGE);
+  await expect.poll(() => dataGrid.getDataGridFooterText()).toContain(String(sampleSize));
 };
 
 spaceTest.describe(
@@ -62,21 +66,21 @@ spaceTest.describe(
     });
 
     spaceTest('saves a custom sample size with a search', async ({ pageObjects, scoutSpace }) => {
-      const { discover } = pageObjects;
+      const { dataGrid, discover } = pageObjects;
       const savedSearchName = `With sample size ${scoutSpace.id}`;
 
       await spaceTest.step('save a search with a custom sample size', async () => {
         await discover.goto();
-        await discover.waitUntilSearchingHasFinished();
-        await discover.waitForDocTableRendered();
-        await discover.openGridDisplaySettings();
-        expect(await discover.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+        await dataGrid.waitUntilSearchingHasFinished();
+        await dataGrid.waitForDocTableRendered();
+        await dataGrid.openGridDisplaySettings();
+        expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
 
-        await discover.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+        await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
         await discover.saveSearch(savedSearchName);
 
-        await discover.openGridDisplaySettings();
-        expect(await discover.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+        await dataGrid.openGridDisplaySettings();
+        expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
         await expectSampleSizeFooter({
           pageObjects,
           sampleSize: CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH,
@@ -85,21 +89,21 @@ spaceTest.describe(
 
       await spaceTest.step('new Discover sessions use the default sample size', async () => {
         await discover.clickNewSearch();
-        await discover.waitUntilSearchingHasFinished();
-        await discover.waitForDocTableRendered();
-        await discover.openGridDisplaySettings();
+        await dataGrid.waitUntilSearchingHasFinished();
+        await dataGrid.waitForDocTableRendered();
+        await dataGrid.openGridDisplaySettings();
 
-        expect(await discover.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+        expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
         await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
       });
 
       await spaceTest.step('loading the saved search restores the custom sample size', async () => {
         await discover.loadSavedSearch(savedSearchName);
-        await discover.waitUntilSearchingHasFinished();
-        await discover.waitForDocTableRendered();
-        await discover.openGridDisplaySettings();
+        await dataGrid.waitUntilSearchingHasFinished();
+        await dataGrid.waitForDocTableRendered();
+        await dataGrid.openGridDisplaySettings();
 
-        expect(await discover.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+        expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
         await expectSampleSizeFooter({
           pageObjects,
           sampleSize: CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH,
@@ -110,57 +114,57 @@ spaceTest.describe(
         'loading an archived saved search uses the default sample size',
         async () => {
           await discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
-          await discover.openGridDisplaySettings();
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
+          await dataGrid.openGridDisplaySettings();
 
-          expect(await discover.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+          expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
           await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
         }
       );
     });
 
     spaceTest('uses the default sample size on Dashboard', async ({ pageObjects }) => {
-      const { dashboard, discover } = pageObjects;
+      const { dashboard, dataGrid } = pageObjects;
 
       await dashboard.openNewDashboard();
       await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
-      await discover.waitUntilSearchingHasFinished();
-      await discover.waitForDocTableRendered();
+      await dataGrid.waitUntilSearchingHasFinished();
+      await dataGrid.waitForDocTableRendered();
 
-      await discover.openGridDisplaySettings();
-      expect(await discover.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+      await dataGrid.openGridDisplaySettings();
+      expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
       await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
     });
 
     spaceTest(
       'uses a custom sample size on Dashboard when specified',
       async ({ page, pageObjects, scoutSpace }) => {
-        const { dashboard, discover } = pageObjects;
+        const { dashboard, dataGrid, discover } = pageObjects;
         const savedSearchName = `dashboard sample size search ${scoutSpace.id}`;
         const dashboardName = `dashboard sample size ${scoutSpace.id}`;
 
         await spaceTest.step('save a search with a custom sample size', async () => {
           await discover.goto();
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
-          await discover.openGridDisplaySettings();
-          await discover.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
+          await dataGrid.openGridDisplaySettings();
+          await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
           await discover.saveSearch(savedSearchName);
         });
 
         await spaceTest.step('override the sample size on a Dashboard panel', async () => {
           await dashboard.openNewDashboard();
           await dashboard.addSavedSearch(savedSearchName);
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
 
-          await discover.openGridDisplaySettings();
-          expect(await discover.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+          await dataGrid.openGridDisplaySettings();
+          expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
 
-          await discover.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL);
-          await discover.openGridDisplaySettings();
-          expect(await discover.getCurrentSampleSize()).toBe(
+          await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL);
+          await dataGrid.openGridDisplaySettings();
+          expect(await dataGrid.getCurrentSampleSize()).toBe(
             CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL
           );
           await expectSampleSizeFooter({
@@ -175,11 +179,11 @@ spaceTest.describe(
             await dashboard.saveDashboard(dashboardName);
             await page.reload();
             await dashboard.waitForRenderComplete();
-            await discover.waitUntilSearchingHasFinished();
-            await discover.waitForDocTableRendered();
+            await dataGrid.waitUntilSearchingHasFinished();
+            await dataGrid.waitForDocTableRendered();
 
-            await discover.openGridDisplaySettings();
-            expect(await discover.getCurrentSampleSize()).toBe(
+            await dataGrid.openGridDisplaySettings();
+            expect(await dataGrid.getCurrentSampleSize()).toBe(
               CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL
             );
             await expectSampleSizeFooter({

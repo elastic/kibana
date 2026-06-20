@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Dashboard saved-search embeddable behavior when opening surrounding documents.
+ */
+
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 spaceTest.describe(
   'Discover data grid - dashboard context view',
@@ -26,8 +30,8 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -50,19 +54,19 @@ spaceTest.describe(
           operator: 'is',
           value: 'jpg',
         });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
         await pageObjects.discover.saveSearch(searchName);
 
         await pageObjects.dashboard.openNewDashboard();
         await pageObjects.dashboard.addSavedSearch(searchName);
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
+        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
         await pageObjects.dashboard.saveDashboard(dashboardName);
 
-        await pageObjects.discover.openSurroundingDocuments(0);
+        await pageObjects.dataGrid.openSurroundingDocuments(0);
 
         await expect(page).toHaveURL(/#\/context/);
-        await pageObjects.discover.waitForDocTableRendered();
+        await pageObjects.dataGrid.waitForDocTableRendered();
         await expect
           .poll(() =>
             page

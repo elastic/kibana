@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Dashboard embeddable behavior for Discover data-grid column resizing and reset.
+ */
+
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const WIDTH_TOLERANCE_PX = 4;
 
@@ -40,18 +44,18 @@ spaceTest.describe(
     });
 
     spaceTest('allows resetting column width in a Dashboard panel', async ({ pageObjects }) => {
-      const { discover } = pageObjects;
-      const { originalWidth, newWidth } = await discover.resizeColumn('_source', -100);
+      const { dataGrid } = pageObjects;
+      const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
       expect(newWidth).toBeLessThan(originalWidth);
       expectWidthAbout(newWidth, originalWidth - 100);
 
-      await discover.resetColumnWidth('_source');
-      expectWidthAbout(await discover.getColumnWidth('_source'), originalWidth);
+      await dataGrid.resetColumnWidth('_source');
+      expectWidthAbout(await dataGrid.getColumnWidth('_source'), originalWidth);
     });
 
     spaceTest('uses a custom column width on a saved Dashboard', async ({ page, pageObjects }) => {
-      const { discover, dashboard } = pageObjects;
-      const { originalWidth, newWidth } = await discover.resizeColumn('_source', -100);
+      const { dashboard, dataGrid } = pageObjects;
+      const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
       expect(newWidth).toBeLessThan(originalWidth);
       expectWidthAbout(newWidth, originalWidth - 100);
 
@@ -59,7 +63,7 @@ spaceTest.describe(
       await page.reload();
       await dashboard.waitForRenderComplete();
 
-      expectWidthAbout(await discover.getColumnWidth('_source'), newWidth);
+      expectWidthAbout(await dataGrid.getColumnWidth('_source'), newWidth);
     });
   }
 );

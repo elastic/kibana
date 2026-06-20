@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Saved-search persistence of data-grid rows-per-page pagination settings.
+ */
+
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const ESQL_ROWS_PER_PAGE = 5;
 const SAMPLE_SIZE = 12;
@@ -47,7 +51,7 @@ spaceTest.describe(
     spaceTest(
       'uses rows per page from settings or from the saved search',
       async ({ pageObjects, scoutSpace }) => {
-        const { dashboard, datePicker, discover } = pageObjects;
+        const { dashboard, dataGrid, datePicker, discover } = pageObjects;
         const savedSearchTitle = `search with saved rowsPerPage ${scoutSpace.id}`;
 
         await scoutSpace.uiSettings.set({
@@ -57,37 +61,37 @@ spaceTest.describe(
 
         await spaceTest.step('render the default Discover rows-per-page setting', async () => {
           await discover.goto();
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
 
-          expect(await discover.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
-          expect(await discover.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
+          expect(await dataGrid.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
+          expect(await dataGrid.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
         });
 
         await spaceTest.step('save an overridden rows-per-page value onto a search', async () => {
-          await discover.changeRowsPerPageTo(SAVED_ROWS_PER_PAGE);
-          await expect.poll(() => discover.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
+          await dataGrid.changeRowsPerPageTo(SAVED_ROWS_PER_PAGE);
+          await expect.poll(() => dataGrid.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
           await discover.saveSearch(savedSearchTitle);
         });
 
         await spaceTest.step('new Discover sessions still use the settings value', async () => {
           await discover.clickNewSearch();
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
 
-          expect(await discover.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
-          expect(await discover.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
+          expect(await dataGrid.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
+          expect(await dataGrid.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
         });
 
         await spaceTest.step(
           'the saved search restores its saved rows-per-page value',
           async () => {
             await discover.loadSavedSearch(savedSearchTitle);
-            await discover.waitUntilSearchingHasFinished();
-            await discover.waitForDocTableRendered();
+            await dataGrid.waitUntilSearchingHasFinished();
+            await dataGrid.waitForDocTableRendered();
 
-            expect(await discover.getDocTableRowCount()).toBe(SAVED_ROWS_PER_PAGE);
-            expect(await discover.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
+            expect(await dataGrid.getDocTableRowCount()).toBe(SAVED_ROWS_PER_PAGE);
+            expect(await dataGrid.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
           }
         );
 
@@ -97,11 +101,11 @@ spaceTest.describe(
             await dashboard.openNewDashboard();
             await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE);
             await dashboard.addSavedSearch(savedSearchTitle);
-            await discover.waitUntilSearchingHasFinished();
-            await discover.waitForDocTableRendered();
+            await dataGrid.waitUntilSearchingHasFinished();
+            await dataGrid.waitForDocTableRendered();
 
-            expect(await discover.getDocTableRowCount()).toBe(SAVED_ROWS_PER_PAGE);
-            expect(await discover.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
+            expect(await dataGrid.getDocTableRowCount()).toBe(SAVED_ROWS_PER_PAGE);
+            expect(await dataGrid.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
           }
         );
 
@@ -110,11 +114,11 @@ spaceTest.describe(
           async () => {
             await dashboard.removePanel(savedSearchTitle);
             await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
-            await discover.waitUntilSearchingHasFinished();
-            await discover.waitForDocTableRendered();
+            await dataGrid.waitUntilSearchingHasFinished();
+            await dataGrid.waitForDocTableRendered();
 
-            expect(await discover.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
-            expect(await discover.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
+            expect(await dataGrid.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
+            expect(await dataGrid.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
           }
         );
       }
@@ -123,7 +127,7 @@ spaceTest.describe(
     spaceTest(
       'does not split ES|QL results into pages',
       async ({ page, pageObjects, scoutSpace }) => {
-        const { dashboard, datePicker, discover } = pageObjects;
+        const { dashboard, dataGrid, datePicker, discover } = pageObjects;
         const savedSearchTitle = `testESQLPagination ${scoutSpace.id}`;
 
         await scoutSpace.uiSettings.set({
@@ -133,20 +137,20 @@ spaceTest.describe(
 
         await spaceTest.step('classic mode shows pagination', async () => {
           await discover.goto();
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
 
-          expect(await discover.getDocTableRowCount()).toBe(ESQL_ROWS_PER_PAGE);
-          expect(await discover.getCurrentRowsPerPage()).toBe(ESQL_ROWS_PER_PAGE);
+          expect(await dataGrid.getDocTableRowCount()).toBe(ESQL_ROWS_PER_PAGE);
+          expect(await dataGrid.getCurrentRowsPerPage()).toBe(ESQL_ROWS_PER_PAGE);
           await expect(page.testSubj.locator('pagination-button-0')).toBeVisible();
         });
 
         await spaceTest.step('ES|QL mode renders all rows without pagination', async () => {
           await discover.selectTextBaseLang();
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
 
-          expect(await discover.getDocTableRowCount()).toBeGreaterThan(ESQL_ROWS_PER_PAGE);
+          expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(ESQL_ROWS_PER_PAGE);
           await expect(page.testSubj.locator('pagination-button-0')).toBeHidden();
           await discover.saveSearch(savedSearchTitle);
         });
@@ -155,10 +159,10 @@ spaceTest.describe(
           await dashboard.openNewDashboard();
           await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE);
           await dashboard.addSavedSearch(savedSearchTitle);
-          await discover.waitUntilSearchingHasFinished();
-          await discover.waitForDocTableRendered();
+          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForDocTableRendered();
 
-          expect(await discover.getDocTableRowCount()).toBeGreaterThan(ESQL_ROWS_PER_PAGE);
+          expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(ESQL_ROWS_PER_PAGE);
           await expect(page.testSubj.locator('pagination-button-0')).toBeHidden();
         });
       }

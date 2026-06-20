@@ -11,9 +11,38 @@
  * Discover data-grid document-viewer navigation and field actions.
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
+
+const clickFieldActionInDocViewer = async (
+  page: ScoutPage,
+  fieldName: string,
+  actionName: string
+) => {
+  await page.testSubj.click('docViewerTab-doc_view_table');
+
+  const actionTestSubj = `${actionName}-${fieldName}`;
+
+  await expect(async () => {
+    const nameCell = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
+    await nameCell.evaluate((el) => {
+      el.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
+    await nameCell.hover();
+
+    const action = page.testSubj.locator(actionTestSubj);
+    await expect(action).toBeVisible();
+    await action.scrollIntoViewIfNeeded();
+    await action.hover();
+    await action.click();
+  }).toPass({ timeout: 15_000 });
+};
+
+const openSingleDocumentFromDocViewer = async (page: ScoutPage) => {
+  await page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
+};
 
 spaceTest.describe(
   'Discover data grid - document navigation',
@@ -31,8 +60,8 @@ spaceTest.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -43,8 +72,8 @@ spaceTest.describe(
     spaceTest(
       'opens the single-document view from the selected row',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-        await pageObjects.discover.openSingleDocumentFromDocViewer();
+        await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+        await openSingleDocumentFromDocViewer(page);
 
         await expect(page.testSubj.locator('doc-hit')).toBeVisible();
       }
@@ -52,13 +81,10 @@ spaceTest.describe(
 
     spaceTest(
       'creates an exists filter from the selected document flyout',
-      async ({ pageObjects }) => {
-        await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-        await pageObjects.discover.clickFieldActionInDocViewer(
-          '@timestamp',
-          'addExistsFilterButton'
-        );
-        await pageObjects.discover.waitUntilSearchingHasFinished();
+      async ({ page, pageObjects }) => {
+        await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+        await clickFieldActionInDocViewer(page, '@timestamp', 'addExistsFilterButton');
+        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
         await expect
           .poll(() =>

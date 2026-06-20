@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Discover data-grid sample-size defaults, changes, and reload behavior.
+ */
+
 import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const DEFAULT_ROWS_PER_PAGE = 100;
 const DEFAULT_SAMPLE_SIZE = 500;
@@ -23,10 +27,10 @@ const expectSampleSizeFooter = async ({
   pageObjects: ScoutTestFixtures['pageObjects'];
   sampleSize: number;
 }) => {
-  const { discover } = pageObjects;
+  const { dataGrid } = pageObjects;
 
-  await discover.goToLastSamplePage(sampleSize, DEFAULT_ROWS_PER_PAGE);
-  await expect.poll(() => discover.getDataGridFooterText()).toContain(String(sampleSize));
+  await dataGrid.goToLastSamplePage(sampleSize, DEFAULT_ROWS_PER_PAGE);
+  await expect.poll(() => dataGrid.getDataGridFooterText()).toContain(String(sampleSize));
 };
 
 spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-classic' }, () => {
@@ -45,8 +49,8 @@ spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-cla
       'discover:sampleRowsPerPage': DEFAULT_ROWS_PER_PAGE,
     });
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -61,42 +65,42 @@ spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-cla
   });
 
   spaceTest('uses the default sample size', async ({ pageObjects }) => {
-    const { discover } = pageObjects;
+    const { dataGrid } = pageObjects;
 
-    await discover.openGridDisplaySettings();
-    expect(await discover.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+    await dataGrid.openGridDisplaySettings();
+    expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
     await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
   });
 
   spaceTest('allows changing the sample size', async ({ pageObjects }) => {
-    const { discover } = pageObjects;
+    const { dataGrid } = pageObjects;
 
-    await discover.openGridDisplaySettings();
-    expect(await discover.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+    await dataGrid.openGridDisplaySettings();
+    expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
 
-    await discover.setSampleSize(CUSTOM_SAMPLE_SIZE);
+    await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE);
 
-    await discover.openGridDisplaySettings();
-    expect(await discover.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE);
+    await dataGrid.openGridDisplaySettings();
+    expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE);
     await expectSampleSizeFooter({ pageObjects, sampleSize: CUSTOM_SAMPLE_SIZE });
   });
 
   spaceTest('persists the sample-size selection after reloading', async ({ page, pageObjects }) => {
-    const { discover } = pageObjects;
+    const { dataGrid } = pageObjects;
 
-    await discover.openGridDisplaySettings();
-    expect(await discover.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+    await dataGrid.openGridDisplaySettings();
+    expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
 
-    await discover.setSampleSize(CUSTOM_SAMPLE_SIZE);
-    await discover.openGridDisplaySettings();
-    expect(await discover.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE);
+    await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE);
+    await dataGrid.openGridDisplaySettings();
+    expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE);
 
     await page.reload();
-    await discover.waitUntilSearchingHasFinished();
-    await discover.waitForDocTableRendered();
-    await discover.openGridDisplaySettings();
+    await dataGrid.waitUntilSearchingHasFinished();
+    await dataGrid.waitForDocTableRendered();
+    await dataGrid.openGridDisplaySettings();
 
-    expect(await discover.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE);
+    expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE);
     await expectSampleSizeFooter({ pageObjects, sampleSize: CUSTOM_SAMPLE_SIZE });
   });
 });

@@ -16,7 +16,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const CLASSIC_DOC_VIEWER_TOKENS = [
   'Keyword',
@@ -32,6 +32,8 @@ const CLASSIC_DOC_VIEWER_TOKENS = [
 ];
 
 spaceTest.describe('Discover data grid field tokens', { tag: '@local-stateful-classic' }, () => {
+  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -42,8 +44,8 @@ spaceTest.describe('Discover data grid field tokens', { tag: '@local-stateful-cl
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -54,54 +56,54 @@ spaceTest.describe('Discover data grid field tokens', { tag: '@local-stateful-cl
   spaceTest(
     'does not render header tokens when only the Document column is visible',
     async ({ pageObjects }) => {
-      const { discover } = pageObjects;
+      const { dataGrid, discover } = pageObjects;
       expect(await discover.getHitCountInt()).toBe(14004);
 
       // The summary `Document` column shows no field-type tokens in the header.
-      await expect.poll(() => discover.getDataGridHeaderFieldTokens()).toStrictEqual([]);
+      await expect.poll(() => dataGrid.getDataGridHeaderFieldTokens()).toStrictEqual([]);
 
-      await discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+      await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
       await expect
-        .poll(() => discover.getDocViewerFieldTokens())
+        .poll(() => dataGrid.getDocViewerFieldTokens())
         .toStrictEqual(CLASSIC_DOC_VIEWER_TOKENS);
     }
   );
 
   spaceTest('renders header tokens for selected columns', async ({ pageObjects }) => {
-    const { discover } = pageObjects;
-    await discover.addFieldFromSidebar('bytes');
-    await discover.addFieldFromSidebar('extension');
-    await discover.addFieldFromSidebar('ip');
-    await discover.addFieldFromSidebar('geo.coordinates');
+    const { dataGrid } = pageObjects;
+    await dataGrid.addFieldFromSidebar('bytes');
+    await dataGrid.addFieldFromSidebar('extension');
+    await dataGrid.addFieldFromSidebar('ip');
+    await dataGrid.addFieldFromSidebar('geo.coordinates');
 
     await expect
-      .poll(() => discover.getDataGridHeaderFieldTokens())
+      .poll(() => dataGrid.getDataGridHeaderFieldTokens())
       .toStrictEqual(['Number', 'Text', 'IP address', 'Geo point']);
 
-    await discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     await expect
-      .poll(() => discover.getDocViewerFieldTokens())
+      .poll(() => dataGrid.getDocViewerFieldTokens())
       .toStrictEqual(CLASSIC_DOC_VIEWER_TOKENS);
   });
 
   spaceTest('renders field tokens correctly for ES|QL', async ({ pageObjects }) => {
-    const { discover } = pageObjects;
+    const { dataGrid, discover } = pageObjects;
     await discover.selectTextBaseLang();
     expect(await discover.getHitCountInt()).toBe(1000);
 
-    await discover.addFieldFromSidebar('@timestamp');
-    await discover.addFieldFromSidebar('bytes');
-    await discover.addFieldFromSidebar('extension');
-    await discover.addFieldFromSidebar('ip');
-    await discover.addFieldFromSidebar('geo.coordinates');
+    await dataGrid.addFieldFromSidebar('@timestamp');
+    await dataGrid.addFieldFromSidebar('bytes');
+    await dataGrid.addFieldFromSidebar('extension');
+    await dataGrid.addFieldFromSidebar('ip');
+    await dataGrid.addFieldFromSidebar('geo.coordinates');
 
     await expect
-      .poll(() => discover.getDataGridHeaderFieldTokens())
+      .poll(() => dataGrid.getDataGridHeaderFieldTokens())
       .toStrictEqual(['Number', 'Text', 'IP address', 'Geo point']);
 
-    await discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     await expect
-      .poll(() => discover.getDocViewerFieldTokens())
+      .poll(() => dataGrid.getDocViewerFieldTokens())
       .toStrictEqual([
         'Text',
         'Keyword',
@@ -117,14 +119,14 @@ spaceTest.describe('Discover data grid field tokens', { tag: '@local-stateful-cl
   });
 
   spaceTest('renders header tokens on the surrounding documents page', async ({ pageObjects }) => {
-    const { discover } = pageObjects;
-    await discover.addFieldFromSidebar('bytes');
-    await discover.addFieldFromSidebar('extension');
+    const { dataGrid } = pageObjects;
+    await dataGrid.addFieldFromSidebar('bytes');
+    await dataGrid.addFieldFromSidebar('extension');
 
-    await discover.openSurroundingDocuments(0);
+    await dataGrid.openSurroundingDocuments(0);
 
     await expect
-      .poll(() => discover.getDataGridHeaderFieldTokens())
+      .poll(() => dataGrid.getDataGridHeaderFieldTokens())
       .toStrictEqual(['Number', 'Text']);
   });
 });

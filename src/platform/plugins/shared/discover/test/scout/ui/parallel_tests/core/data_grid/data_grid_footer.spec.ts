@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Discover data-grid footer document counts and load-more behavior.
+ */
+
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const expectFooterText = async (page: ScoutPage, documentCount: string) => {
   await expect(footerLocator(page)).toHaveText(
@@ -34,8 +38,8 @@ spaceTest.describe('Discover data grid footer', { tag: '@local-stateful-classic'
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -65,7 +69,7 @@ spaceTest.describe('Discover data grid footer', { tag: '@local-stateful-classic'
 
       // Loading more grows the sample and hides the footer again.
       await loadMore.click();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await expect(footer).toBeHidden();
 
       await page.testSubj.click('pagination-button-9');
@@ -73,7 +77,7 @@ spaceTest.describe('Discover data grid footer', { tag: '@local-stateful-classic'
       await expectFooterText(page, '1,000');
 
       await loadMore.click();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await expect(footer).toBeHidden();
 
       await page.testSubj.click('pagination-button-14');

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Data-grid footer and sorting behavior for date_nanos data views.
+ */
+
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
@@ -59,8 +63,8 @@ spaceTest.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -77,8 +81,8 @@ spaceTest.describe(
       const footer = footerLocator(page);
       const loadMore = page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
 
-      await pageObjects.discover.addFieldFromSidebar('_id');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.addFieldFromSidebar('_id');
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
       await expect
         .poll(() => getRowsText(page))
@@ -104,7 +108,7 @@ spaceTest.describe(
       await expect(page.testSubj.locator('pagination-button-2')).toBeHidden();
 
       await loadMore.click();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await expect(footer).toBeHidden();
 
       await page.testSubj.click('pagination-button-3');
@@ -118,7 +122,7 @@ spaceTest.describe(
         ]);
 
       await loadMore.click();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await expect(footer).toBeHidden();
 
       // Final page holds the last remaining document and shows no footer.

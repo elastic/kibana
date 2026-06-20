@@ -7,13 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRole } from '@kbn/scout';
+/**
+ * Doc-viewer navigation between rows that share an ID across different indices.
+ */
+
+import type { KibanaRole, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
 
 const TIME_RANGE = {
   from: '2015-09-21T09:00:00.000Z',
   to: '2015-09-21T10:00:00.000Z',
+};
+
+const getDocViewerFieldValue = async (page: ScoutPage, fieldName: string): Promise<string> => {
+  const flyout = page.testSubj.locator('docViewerFlyout');
+  await flyout.waitFor({ state: 'visible' });
+
+  return flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-value"]`).innerText();
 };
 
 const getIndexNames = (spaceId: string) => ({
@@ -34,6 +45,12 @@ const getRowNavigationViewerRole = (indexPattern: string): KibanaRole => ({
   },
   kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
 });
+
+const goToNextDocViewerDocument = async (page: ScoutPage) => {
+  const navigation = page.testSubj.locator('docViewerFlyoutNavigation');
+  await navigation.waitFor({ state: 'visible' });
+  await navigation.locator('[data-test-subj="pagination-button-next"]').click();
+};
 
 spaceTest.describe('Discover data grid row navigation', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices, esClient }) => {
@@ -86,8 +103,8 @@ spaceTest.describe('Discover data grid row navigation', { tag: '@local-stateful-
     await browserAuth.loginWithCustomRole(getRowNavigationViewerRole(dataViewTitle));
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace, esClient }) => {
@@ -103,18 +120,18 @@ spaceTest.describe('Discover data grid row navigation', { tag: '@local-stateful-
 
   spaceTest(
     'navigates through rows with the same document id but different indices',
-    async ({ pageObjects, scoutSpace }) => {
+    async ({ page, pageObjects, scoutSpace }) => {
       const { firstIndex, secondIndex } = getIndexNames(scoutSpace.id);
-      const { discover } = pageObjects;
+      const { dataGrid } = pageObjects;
 
       await spaceTest.step('open the first row in the document viewer', async () => {
-        await discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-        await expect.poll(() => discover.getDocViewerFieldValue('_index')).toBe(firstIndex);
+        await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+        await expect.poll(() => getDocViewerFieldValue(page, '_index')).toBe(firstIndex);
       });
 
       await spaceTest.step('navigate to the next row in the document viewer', async () => {
-        await discover.goToNextDocViewerDocument();
-        await expect.poll(() => discover.getDocViewerFieldValue('_index')).toBe(secondIndex);
+        await goToNextDocViewerDocument(page);
+        await expect.poll(() => getDocViewerFieldValue(page, '_index')).toBe(secondIndex);
       });
     }
   );

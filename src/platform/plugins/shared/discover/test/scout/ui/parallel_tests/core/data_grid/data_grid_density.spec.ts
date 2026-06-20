@@ -15,7 +15,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 spaceTest.describe('Discover data grid density', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -28,8 +28,8 @@ spaceTest.describe('Discover data grid density', { tag: '@local-stateful-classic
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -38,31 +38,31 @@ spaceTest.describe('Discover data grid density', { tag: '@local-stateful-classic
   });
 
   spaceTest('uses the default (Compact) density', async ({ pageObjects }) => {
-    await pageObjects.discover.openGridDisplaySettings();
+    await pageObjects.dataGrid.openGridDisplaySettings();
 
-    expect(await pageObjects.discover.getCurrentDensityValue()).toBe('Compact');
+    expect(await pageObjects.dataGrid.getCurrentDensityValue()).toBe('Compact');
   });
 
   spaceTest('allows changing the density', async ({ pageObjects }) => {
-    await pageObjects.discover.openGridDisplaySettings();
-    await pageObjects.discover.setDensityValue('Normal');
+    await pageObjects.dataGrid.openGridDisplaySettings();
+    await pageObjects.dataGrid.setDensityValue('Normal');
 
     // Re-open the popover (close + open) to confirm the selection sticks.
-    await pageObjects.discover.openGridDisplaySettings();
-    await pageObjects.discover.openGridDisplaySettings();
-    expect(await pageObjects.discover.getCurrentDensityValue()).toBe('Normal');
+    await pageObjects.dataGrid.openGridDisplaySettings();
+    await pageObjects.dataGrid.openGridDisplaySettings();
+    expect(await pageObjects.dataGrid.getCurrentDensityValue()).toBe('Normal');
   });
 
   spaceTest('persists the density selection after reloading', async ({ page, pageObjects }) => {
-    await pageObjects.discover.openGridDisplaySettings();
-    await pageObjects.discover.setDensityValue('Expanded');
-    expect(await pageObjects.discover.getCurrentDensityValue()).toBe('Expanded');
+    await pageObjects.dataGrid.openGridDisplaySettings();
+    await pageObjects.dataGrid.setDensityValue('Expanded');
+    expect(await pageObjects.dataGrid.getCurrentDensityValue()).toBe('Expanded');
 
     await page.reload();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
 
-    await pageObjects.discover.openGridDisplaySettings();
-    expect(await pageObjects.discover.getCurrentDensityValue()).toBe('Expanded');
+    await pageObjects.dataGrid.openGridDisplaySettings();
+    expect(await pageObjects.dataGrid.getCurrentDensityValue()).toBe('Expanded');
   });
 });

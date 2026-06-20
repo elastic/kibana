@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * In-table search interactions, highlighting, navigation, and pagination state.
+ */
+
 import type { Locator, ScoutPage } from '@kbn/scout';
 import {
   BUTTON_NEXT_TEST_SUBJ,
@@ -17,7 +21,7 @@ import {
 } from '@kbn/data-grid-in-table-search';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const changeRowsPerPageTo = async (page: ScoutPage, rowsPerPage: number) => {
   const rowsPerPageButton = page.testSubj.locator('tablePaginationPopoverButton');
@@ -93,8 +97,8 @@ spaceTest.describe('Discover data grid in-table search', { tag: '@local-stateful
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -124,9 +128,9 @@ spaceTest.describe('Discover data grid in-table search', { tag: '@local-stateful
   });
 
   spaceTest('uses different colors for highlights in the table', async ({ page, pageObjects }) => {
-    const { discover } = pageObjects;
+    const { dataGrid, discover } = pageObjects;
     await discover.writeAndSubmitEsqlQuery('from logstash-* | sort @timestamp | limit 10');
-    await discover.waitForDocTableRendered();
+    await dataGrid.waitForDocTableRendered();
 
     await runInTableSearch(page, '2015 @');
     await expect(inTableSearchMatchesCounter(page)).toHaveText('1/30');
@@ -148,10 +152,10 @@ spaceTest.describe('Discover data grid in-table search', { tag: '@local-stateful
   });
 
   spaceTest('can navigate between matches', async ({ page, pageObjects }) => {
-    const { discover } = pageObjects;
+    const { dataGrid, discover } = pageObjects;
     await changeRowsPerPageTo(page, 10);
-    await discover.addFieldFromSidebar('extension');
-    await discover.waitUntilSearchingHasFinished();
+    await dataGrid.addFieldFromSidebar('extension');
+    await dataGrid.waitUntilSearchingHasFinished();
     await discover.writeAndSubmitKqlQuery('response : 404 and @tags.raw : "info" and bytes < 1000');
 
     await runInTableSearch(page, 'php');
