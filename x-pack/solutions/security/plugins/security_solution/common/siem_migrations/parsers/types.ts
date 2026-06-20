@@ -25,6 +25,13 @@ export interface ParsedPanel {
   position: PanelPosition;
   /** section in case of multitab dashboards **/
   section?: PanelSection;
+  /**
+   * Optional source query language. When set, downstream stages can short-circuit
+   * vendor-specific transformations (e.g. SPL inlining is only valid for `'spl'`).
+   * `'unsupported'` marks panels that cannot be translated (e.g. non-KQL Sentinel
+   * Workbook items such as Azure Resource Graph queries).
+   */
+  query_language?: 'spl' | 'kql' | 'unsupported';
 }
 
 export type VizType =

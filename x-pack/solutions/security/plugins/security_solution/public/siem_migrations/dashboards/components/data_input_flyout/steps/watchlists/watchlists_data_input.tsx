@@ -8,12 +8,13 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   WatchlistsDataInput as CommonWatchlistsDataInput,
-  WATCHLISTS_DATA_INPUT_DESCRIPTION_RULES,
+  WATCHLISTS_DATA_INPUT_DESCRIPTION_DASHBOARDS,
   type WatchlistsLookupsSubStepsProps,
 } from '../../../../../common/components/watchlists_data_input';
-import type { MigrationStats, MigrationStepProps } from '../../../../../common/types';
-import { SentinelDataInputStep } from '../../types';
+import type { MigrationStepProps } from '../../../../../common/types';
+import type { DashboardMigrationStats } from '../../../../types';
 import { LookupsDataInputSubSteps } from '../lookups/lookups_data_input';
+import { SentinelDashboardDataInputStep } from '../constants';
 
 export const WatchlistsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
@@ -27,7 +28,7 @@ export const WatchlistsDataInput = React.memo<MigrationStepProps>(
         migrationStats: stats,
         missingLookups: lookups,
         onAllLookupsCreated,
-      }: WatchlistsLookupsSubStepsProps<MigrationStats>) => (
+      }: WatchlistsLookupsSubStepsProps<DashboardMigrationStats>) => (
         <LookupsDataInputSubSteps
           migrationStats={stats}
           missingLookups={lookups}
@@ -38,15 +39,15 @@ export const WatchlistsDataInput = React.memo<MigrationStepProps>(
     );
 
     return (
-      <CommonWatchlistsDataInput<MigrationStats>
+      <CommonWatchlistsDataInput<DashboardMigrationStats>
         dataInputStep={dataInputStep}
-        stepNumber={SentinelDataInputStep.Watchlists}
-        endStepNumber={SentinelDataInputStep.End}
-        migrationStats={migrationStats}
+        stepNumber={SentinelDashboardDataInputStep.Watchlists}
+        endStepNumber={SentinelDashboardDataInputStep.End}
+        migrationStats={migrationStats as DashboardMigrationStats | undefined}
         missingLookups={missingLookups}
         setDataInputStep={setDataInputStep}
         renderLookupsSubSteps={renderLookupsSubSteps}
-        description={WATCHLISTS_DATA_INPUT_DESCRIPTION_RULES}
+        description={WATCHLISTS_DATA_INPUT_DESCRIPTION_DASHBOARDS}
       />
     );
   }

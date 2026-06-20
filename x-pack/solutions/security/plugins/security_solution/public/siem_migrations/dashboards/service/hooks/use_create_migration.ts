@@ -29,7 +29,8 @@ export const DASHBOARDS_DATA_INPUT_CREATE_MIGRATION_ERROR = i18n.translate(
 
 export type CreateMigration = (
   migrationName: string,
-  dashboards: CreateDashboardMigrationDashboardsRequestBody
+  dashboards: CreateDashboardMigrationDashboardsRequestBody,
+  vendor?: MigrationSource
 ) => void;
 export type OnSuccess = (migrationStats: DashboardMigrationStats) => void;
 
@@ -51,9 +52,12 @@ export const useCreateMigration = (onSuccess?: OnSuccess) => {
             migrationId,
           });
 
+          const dashboardsCount = Array.isArray(dashboards)
+            ? dashboards.length
+            : dashboards.resources.length;
           notifications.toasts.addSuccess({
             title: DASHBOARDS_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE,
-            text: DASHBOARDS_DATA_INPUT_CREATE_MIGRATION_SUCCESS_DESCRIPTION(dashboards.length),
+            text: DASHBOARDS_DATA_INPUT_CREATE_MIGRATION_SUCCESS_DESCRIPTION(dashboardsCount),
           });
           onSuccess?.(stats);
           dispatch({ type: 'success' });

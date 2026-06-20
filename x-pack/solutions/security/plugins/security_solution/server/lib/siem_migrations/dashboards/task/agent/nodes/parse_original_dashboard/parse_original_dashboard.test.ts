@@ -107,6 +107,64 @@ describe('getParseOriginalDashboardNode', () => {
     );
   });
 
+  describe('microsoft-sentinel vendor', () => {
+    const buildSerializedData = (items: object[]) =>
+      JSON.stringify({ version: 'Notebook/1.0', items });
+
+    const sentinelState = (serializedData: string) =>
+      ({
+        id: 'wb-1',
+        original_dashboard: {
+          id: 'wb-1',
+          vendor: 'microsoft-sentinel',
+          title: 'Sign-in Overview',
+          description: 'workbook',
+          data: serializedData,
+          format: 'json',
+        },
+        resources: {},
+      } as MigrateDashboardState);
+
+    it('parses a Sentinel Workbook into ParsedPanels', async () => {
+      const node = getTestNode();
+      const result = await node(
+        sentinelState(
+          buildSerializedData([
+            {
+              type: 3,
+              name: 'panel-1',
+              title: 'Failed sign-ins',
+              content: { query: 'SigninLogs | limit 10', queryType: 0 },
+            },
+          ])
+        ),
+        mockConfig
+      );
+
+      expect(result.parsed_original_dashboard?.title).toBe('Sign-in Overview');
+      expect(result.parsed_original_dashboard?.panels).toHaveLength(1);
+      expect(result.parsed_original_dashboard?.panels[0].query_language).toBe('kql');
+    });
+
+    it('returns untranslatable when the Workbook has no query items', async () => {
+      const node = getTestNode();
+      const result = await node(
+        sentinelState(buildSerializedData([{ type: 1, content: { json: '## hi' } }])),
+        mockConfig
+      );
+
+      expect(result.translation_result).toBe(MigrationTranslationResult.UNTRANSLATABLE);
+      expect(result.parsed_original_dashboard?.panels).toEqual([]);
+    });
+
+    it('returns untranslatable when serializedData is malformed', async () => {
+      const node = getTestNode();
+      const result = await node(sentinelState('{not-json'), mockConfig);
+
+      expect(result.translation_result).toBe(MigrationTranslationResult.UNTRANSLATABLE);
+    });
+  });
+
   it('should return untranslatable result for unsupported Splunk XML - wrong root tag', async () => {
     mockSplunkXmlDashboardParser.isSupportedSplunkXml = jest.fn().mockReturnValue({
       isSupported: false,

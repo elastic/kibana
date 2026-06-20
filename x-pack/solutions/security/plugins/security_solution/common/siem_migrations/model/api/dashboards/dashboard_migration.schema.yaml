@@ -183,10 +183,14 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                description: List of Original Dashboards to be added to the migration
-                $ref: '../../vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardExport'
+              oneOf:
+                # Splunk dashboards: array of Splunk export entries (vendor implicit)
+                - type: array
+                  items:
+                    description: List of Splunk Original Dashboards to be added to the migration
+                    $ref: '../../vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardExport'
+                # Microsoft Sentinel Workbooks: vendor-discriminated wrapped body
+                - $ref: '../../vendor/dashboards/sentinel.schema.yaml#/components/schemas/CreateSentinelDashboardsBody'
       responses:
         200:
           description: Indicates dashboards have been added to the migration successfully.

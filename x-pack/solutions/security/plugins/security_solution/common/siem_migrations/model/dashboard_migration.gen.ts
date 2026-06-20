@@ -29,8 +29,10 @@ import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.ge
 /**
  * The original dashboard vendor identifier.
  */
-export const OriginalDashboardVendor = lazySchema(() => z.literal('splunk'));
+export const OriginalDashboardVendor = lazySchema(() => z.enum(['splunk', 'microsoft-sentinel']));
 export type OriginalDashboardVendor = z.infer<typeof OriginalDashboardVendor>;
+export type OriginalDashboardVendorEnum = typeof OriginalDashboardVendor.enum;
+export const OriginalDashboardVendorEnum = OriginalDashboardVendor.enum;
 
 /**
  * The dashboard migration object ( without Id ) with its settings.

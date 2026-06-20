@@ -11,6 +11,7 @@ components:
       description: The original dashboard vendor identifier.
       enum:
         - splunk
+        - microsoft-sentinel
 
     DashboardMigration:
       description: The dashboard migration object with its settings.

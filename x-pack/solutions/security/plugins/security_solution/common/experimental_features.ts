@@ -192,6 +192,10 @@ export const allowedExperimentalValues = Object.freeze({
    */
   sentinelRulesMigration: false,
   /**
+   *  Enables the Microsoft Sentinel dashboards (Workbooks) import feature
+   */
+  sentinelDashboardsMigration: false,
+  /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
   kubernetesEnabled: true,

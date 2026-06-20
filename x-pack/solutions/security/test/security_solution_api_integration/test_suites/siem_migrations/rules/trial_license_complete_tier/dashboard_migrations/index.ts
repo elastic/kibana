@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./dashboards/create'));
+    loadTestFile(require.resolve('./dashboards/sentinel_create'));
     loadTestFile(require.resolve('./resources/missing'));
     loadTestFile(require.resolve('./resources/upsert'));
     loadTestFile(require.resolve('./resources/get'));

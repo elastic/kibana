@@ -34,6 +34,9 @@ import type { SiemMigrationVendor } from '../../../../common/siem_migrations/typ
 
 export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
+const countDashboards = (data: CreateDashboardMigrationDashboardsRequestBody): number =>
+  Array.isArray(data) ? data.length : data.resources.length;
+
 export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationStats> {
   public telemetry: SiemDashboardMigrationsTelemetry;
 
@@ -76,16 +79,30 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     migrationId: string,
     dashboards: CreateDashboardMigrationDashboardsRequestBody
   ) {
-    const dashboardsCount = dashboards.length;
+    const dashboardsCount = countDashboards(dashboards);
     if (dashboardsCount === 0) {
       throw new Error(i18n.EMPTY_DASHBOARDS_ERROR);
     }
 
     // Batching creation to avoid hitting the max payload size limit of the API
     const batches = [];
-    for (let i = 0; i < dashboardsCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
-      const dashboardsBatch = dashboards.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      batches.push(api.addDashboardsToDashboardMigration({ migrationId, body: dashboardsBatch }));
+    if (Array.isArray(dashboards)) {
+      for (let i = 0; i < dashboardsCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+        const dashboardsBatch = dashboards.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+        batches.push(api.addDashboardsToDashboardMigration({ migrationId, body: dashboardsBatch }));
+      }
+    } else {
+      // Sentinel: batch the resources array, preserving the wrapped { vendor, resources } body shape per call.
+      const { vendor, resources } = dashboards;
+      for (let i = 0; i < dashboardsCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+        const resourcesBatch = resources.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+        batches.push(
+          api.addDashboardsToDashboardMigration({
+            migrationId,
+            body: { vendor, resources: resourcesBatch },
+          })
+        );
+      }
     }
     await Promise.all(batches);
   }
@@ -96,7 +113,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     migrationName: string,
     vendor: SiemMigrationVendor
   ): Promise<string> {
-    const dashboardsCount = data.length;
+    const dashboardsCount = countDashboards(data);
     if (dashboardsCount === 0) {
       const emptyDashboardError = new Error(i18n.EMPTY_DASHBOARDS_ERROR);
       this.telemetry.reportSetupMigrationCreated({
