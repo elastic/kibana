@@ -11,12 +11,8 @@ import type { ESQLMessage } from '@kbn/esql-language';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '../../../../monaco_imports';
 
-export type MonacoMessage = monaco.editor.IMarkerData & {
-  code: string;
-
-  // By default warnings are not underlined, use this flag to indicate it should be
-  underlinedWarning?: ESQLMessage['underlinedWarning'];
-};
+export type MonacoMessage = monaco.editor.IMarkerData &
+  Pick<ESQLMessage, 'code' | 'data' | 'location' | 'underlinedWarning'>;
 
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
