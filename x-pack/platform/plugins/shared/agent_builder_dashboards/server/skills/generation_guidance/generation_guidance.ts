@@ -31,32 +31,18 @@ When a dashboard needs sections, prefer a single batched call:
 
 For a new dashboard:
 - Start with \`set_metadata\` and provide both \`title\` and \`description\`.
-- Use \`add_panels\` to add panels in one batched operation. Each item declares a \`kind\`: \`panelRequest\` for a Lens visualization created inline from natural language, or \`panelConfig\` for a panel built from an already-resolved configuration. For \`panelConfig\`, set \`type\`: \`"vis"\` for a Lens visualization (e.g. an existing visualization's config) or \`"markdown"\` for a summary/context panel (\`config: { content }\`).
+- Use \`add_panels\` to add panels in one batched operation. A single \`add_panels\` call may mix panel kinds and target different \`sectionId\` values, so batch related panels together.
 - Use \`add_section\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability. Include \`panels\` on the section when you can create that section's initial panels immediately.
 
 For an existing dashboard:
-- Use \`remove_panels\` to remove existing panels by \`id\`.
-- Use \`add_panels\` to add resolved-config panels (Lens or markdown via \`panelConfig\`) or inline Lens visualization panels (\`panelRequest\`).
-- Use \`edit_panels\` to change existing panel content in place by \`panelId\`. Each item declares \`kind: "panelRequest"\` for ES|QL-backed Lens panels or \`kind: "panelConfig"\` (\`type: "markdown"\`) for markdown panels.
+- Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
 - Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
-- Use \`add_section\` or \`remove_section\` for section changes.
-- Use \`set_metadata\` to update the dashboard title/description, \`edit_panels\` with \`kind: "panelConfig"\` (\`type: "markdown"\`) to replace an existing markdown panel's config, or \`add_panels\` with \`kind: "panelConfig"\` (\`type: "markdown"\`) to add a new markdown panel.
-
-Supported operations:
-- \`set_metadata\`: set or update dashboard title and description.
-- \`add_panels\`: add panels in one batched operation. Each item declares \`kind: "panelRequest"\` or \`kind: "panelConfig"\`.
-- Combine markdown summary, resolved-config panels, and inline ES|QL visualizations in one \`add_panels\` operation when they belong to the same dashboard layout, even when items target different \`sectionId\` values.
-- \`edit_panels\`: update existing panel content in place by \`panelId\`. Each item declares \`kind: "panelRequest"\` for ES|QL-backed Lens visualization panels or \`kind: "panelConfig"\` (\`type: "markdown"\`) for markdown panels. Placement (grid and sectionId) is preserved.
-- \`update_panel_layouts\`: resize, reposition, or move existing panels by \`panelId\` by updating \`grid\` and optionally changing \`sectionId\`.
-- \`add_section\`: create a new section with its own \`grid.y\`, and optionally create that section's initial panels (markdown, resolved-config, or inline visualization) with \`panels\`. Those nested panel grids are section-relative and do not need a \`sectionId\`.
-- \`remove_section\`: remove a section by \`id\` with \`panelAction: "promote" | "delete"\`.
-- \`remove_panels\`: remove existing panels by \`id\`.
 
 ## Panel Inputs
 
-- \`kind: "panelRequest"\` (in \`add_panels\`/\`add_section\`) and \`edit_panels\` with \`kind: "panelRequest"\` create or edit Lens panels inline from natural language / ES|QL. This is the correct way to create a new visualization from a query — supply \`query\` (and optionally \`esql\`), and the tool resolves it into a valid Lens panel for you.
-- \`kind: "panelConfig"\` adds a panel from an already-resolved configuration. Supply the panel \`type\` and \`config\` directly. For \`type: "vis"\`, pass the Lens config you obtained from an existing visualization. For \`type: "markdown"\`, pass \`{ content }\` (optionally \`{ content, settings: { open_links_in_new_tab } }\`). The generation tool never reads an attachment or saved-object store, so all external content must already be resolved into \`config\` before you call it. Do **not** hand-build a Lens \`config\` for a new visualization here — use \`kind: "panelRequest"\` instead.
+- Use \`kind: "panelRequest"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
+- Use \`kind: "panelConfig"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
 
 ${dashboardDesignGuidancePrompt}
 
