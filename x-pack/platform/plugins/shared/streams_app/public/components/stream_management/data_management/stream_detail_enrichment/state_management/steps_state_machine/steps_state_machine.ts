@@ -6,7 +6,7 @@
  */
 import { isEqual, isUndefined, omitBy } from 'lodash';
 import type { ActorRefFrom, SnapshotFrom } from 'xstate';
-import { and, assign, forwardTo, sendTo, setup } from 'xstate';
+import { and, assign, enqueueActions, forwardTo, sendTo, setup } from 'xstate';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
@@ -140,6 +140,15 @@ export const stepMachine = setup({
         id: context.step.customIdentifier,
       })
     ),
+    forwardProcessorTypeChangeIfNeeded: enqueueActions(({ context, event, enqueue }) => {
+      const newStep = (event as { step: StreamlangProcessorDefinition }).step;
+      if (isActionBlock(context.step) && context.step.action !== newStep.action) {
+        enqueue.sendTo(context.parentRef, {
+          type: 'step.processorTypeChanged',
+          id: context.step.customIdentifier,
+        });
+      }
+    }),
     forwardParentChangeEventToParent: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => ({
@@ -215,6 +224,7 @@ export const stepMachine = setup({
         },
         'step.changeProcessor': {
           actions: [
+            { type: 'forwardProcessorTypeChangeIfNeeded' },
             { type: 'changeProcessor', params: ({ event }) => event },
             { type: 'updateGrokPatternDefinitions' },
             { type: 'forwardChangeEventToParent' },
@@ -273,6 +283,7 @@ export const stepMachine = setup({
             },
             'step.changeProcessor': {
               actions: [
+                { type: 'forwardProcessorTypeChangeIfNeeded' },
                 { type: 'changeProcessor', params: ({ event }) => event },
                 { type: 'updateGrokPatternDefinitions' },
                 { type: 'forwardChangeEventToParent' },

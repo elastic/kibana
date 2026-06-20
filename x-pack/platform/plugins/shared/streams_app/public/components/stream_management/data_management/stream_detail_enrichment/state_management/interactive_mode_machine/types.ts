@@ -103,6 +103,7 @@ export type InteractiveModeEvent =
       step: StreamlangConditionBlock;
     }
   | { type: 'step.change'; id: string }
+  | { type: 'step.processorTypeChanged'; id: string }
   | { type: 'step.parentChanged'; id: string }
   | { type: 'step.delete'; id: string }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
