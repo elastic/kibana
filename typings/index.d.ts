@@ -9,6 +9,43 @@
 
 declare module 'axios/lib/adapters/xhr';
 
+// Ambient shims for deep imports into @elastic/eui submodules. Importing from
+// the `@elastic/eui` barrel evaluates the entire EUI module graph (React,
+// Emotion, every component) and pins ~17 MB on the idle Kibana server heap.
+// Deep-importing the specific submodule loads only that file and its narrow
+// transitive deps — no React. EUI ships a single bundled `eui.d.ts` with no
+// per-file `.d.ts` shadows, so deep paths are untyped by default; these shims
+// re-export the already-typed symbols from the bundled types so we stay in
+// lock-step with EUI's public type surface (no drift, no manual signatures).
+//
+// Long-term fix: ask the EUI team to emit per-file declarations so this
+// ambient shim can be deleted.
+
+declare module '@elastic/eui/lib/services/color/eui_palettes' {
+  export {
+    euiPaletteColorBlind,
+    euiPaletteColorBlindBehindText,
+    euiPaletteForStatus,
+    euiPaletteForTemperature,
+    euiPaletteComplementary,
+    euiPaletteRed,
+    euiPaletteGreen,
+    euiPaletteSkyBlue,
+    euiPaletteYellow,
+    euiPaletteOrange,
+    euiPaletteCool,
+    euiPaletteWarm,
+    euiPaletteGray,
+    EuiPaletteColorBlindProps,
+    EuiPaletteRotationProps,
+    EuiPaletteCommonProps,
+  } from '@elastic/eui';
+}
+
+declare module '@elastic/eui/lib/services/color/visualization_colors' {
+  export { VISUALIZATION_COLORS, DEFAULT_VISUALIZATION_COLOR } from '@elastic/eui';
+}
+
 declare module 'find-cypress-specs';
 
 declare module '@cypress/grep' {

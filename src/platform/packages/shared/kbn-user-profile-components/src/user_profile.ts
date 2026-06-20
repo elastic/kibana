@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { VISUALIZATION_COLORS } from '@elastic/eui/lib/services/color/visualization_colors';
 import chroma from 'chroma-js';
 
 import type { UserProfileData, UserProfileUserInfo } from '@kbn/core-user-profile-common';

@@ -4,6 +4,7 @@
     "outDir": "target/types"
   },
   "include": [
+    "../../../../../typings/**/*",
     // add all the folders containing files to be compiled
     "index.ts",
     "common/**/*.ts",
