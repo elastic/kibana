@@ -82,7 +82,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await canvas.goToListingPage();
         await canvas.loadFirstWorkpad('Test Workpad');
         await header.waitUntilLoadingHasFinished();
-
         await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });

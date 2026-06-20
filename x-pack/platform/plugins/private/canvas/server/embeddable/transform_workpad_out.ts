@@ -14,8 +14,8 @@ import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
-import { transformPanelReferencesOut } from './transform_references_out';
 import { getReferencesForElement } from './get_references_for_element';
+import { ensureLibraryReference } from './ensure_library_reference';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 
@@ -125,11 +125,12 @@ export function transformWorkpadOut(
         const transforms = embeddableService.getTransforms(embeddableType);
 
         try {
-          // / BWC: Legacy Canvas embeddables have a savedObjectId and incorrect reference names,
+          // BWC: Legacy Canvas embeddables have a savedObjectId and incorrect reference names,
           // so we need to transform the references to use the correct reference name 'savedObjectRef'
           if (embeddableConfig.savedObjectId) {
-            referencesForElement = transformPanelReferencesOut(
+            referencesForElement = ensureLibraryReference(
               referencesForElement,
+              embeddableType,
               embeddableConfig.savedObjectId
             );
           }
