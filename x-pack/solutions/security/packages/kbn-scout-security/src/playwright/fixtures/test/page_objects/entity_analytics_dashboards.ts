@@ -40,6 +40,7 @@ export class EntityAnalyticsDashboardsPage {
 
   async confirmEntityStoreEnablement() {
     await this.entityStoreEnablementModalButton.click();
+    await this.entityStoreEnablementModal.waitFor({ state: 'detached' });
   }
 
   async waitForEntitiesListToAppear() {
