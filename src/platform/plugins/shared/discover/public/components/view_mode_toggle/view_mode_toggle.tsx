@@ -9,8 +9,15 @@
 
 import type { ComponentProps } from 'react';
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSuperSelect,
+  useEuiTheme,
+  type EuiSuperSelectOption,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -100,10 +107,77 @@ export const DocumentViewModeToggle = ({
   `;
 
   const tabsCss = css`
-    .euiTab__content {
-      line-height: ${euiTheme.size.xl};
-    }
+    min-width: ${euiTheme.base * 10}px;
   `;
+
+  const viewModeOptions = useMemo<Array<EuiSuperSelectOption<VIEW_MODE>>>(() => {
+    const options: Array<EuiSuperSelectOption<VIEW_MODE>> = [
+      {
+        value: VIEW_MODE.DOCUMENT_LEVEL,
+        inputDisplay: (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="table" aria-hidden="true" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {isEsqlMode
+                ? i18n.translate('discover.viewModes.esql.label', {
+                    defaultMessage: 'Results',
+                  })
+                : i18n.translate('discover.viewModes.document.label', {
+                    defaultMessage: 'Documents',
+                  })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        'data-test-subj': 'dscViewModeDocumentOption',
+      },
+    ];
+
+    if (showPatternAnalysisTab) {
+      options.push({
+        value: VIEW_MODE.PATTERN_LEVEL,
+        inputDisplay: (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="pattern" aria-hidden="true" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {i18n.translate('discover.viewModes.patternAnalysis.dropdownLabel', {
+                defaultMessage: 'Patterns{patternCount}',
+                values: {
+                  patternCount: patternCount !== undefined ? ` (${patternCount})` : '',
+                },
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        'data-test-subj': 'dscViewModePatternAnalysisOption',
+      });
+    }
+
+    if (showFieldStatisticsTab) {
+      options.push({
+        value: VIEW_MODE.AGGREGATED_LEVEL,
+        inputDisplay: (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="stats" aria-hidden="true" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {i18n.translate('discover.viewModes.fieldStatistics.label', {
+                defaultMessage: 'Field statistics',
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        disabled: isEsqlMode,
+        'data-test-subj': 'dscViewModeFieldStatsOption',
+      });
+    }
+
+    return options;
+  }, [isEsqlMode, patternCount, showFieldStatisticsTab, showPatternAnalysisTab]);
 
   useEffect(() => {
     if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) {
@@ -140,56 +214,33 @@ export const DocumentViewModeToggle = ({
             hitsTotalToDisplay={hitsTotalToDisplay}
           />
         ) : (
-          <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
-            <EuiTab
-              isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
-              onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
-              data-test-subj="dscViewModeDocumentButton"
-            >
-              {isEsqlMode ? (
-                <FormattedMessage id="discover.viewModes.esql.label" defaultMessage="Results" />
-              ) : (
-                <FormattedMessage
-                  id="discover.viewModes.document.label"
-                  defaultMessage="Documents"
-                />
-              )}
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiSuperSelect<VIEW_MODE>
+                options={viewModeOptions}
+                valueOfSelected={viewMode}
+                onChange={setDiscoverViewMode}
+                prepend={i18n.translate('discover.viewModes.visibleLabel', {
+                  defaultMessage: 'View',
+                })}
+                compressed
+                hasDividers
+                data-test-subj="dscViewModeToggle"
+                aria-label={i18n.translate('discover.viewModes.ariaLabel', {
+                  defaultMessage: 'Select a Discover view',
+                })}
+                css={tabsCss}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <HitsCounter
-                mode={HitsCounterMode.appended}
+                mode={HitsCounterMode.standalone}
                 hitCounterLabel={hitCounterLabel}
                 hitCounterPluralLabel={hitCounterPluralLabel}
                 hitsTotalToDisplay={hitsTotalToDisplay}
               />
-            </EuiTab>
-
-            {showPatternAnalysisTab ? (
-              <EuiTab
-                isSelected={viewMode === VIEW_MODE.PATTERN_LEVEL}
-                onClick={() => setDiscoverViewMode(VIEW_MODE.PATTERN_LEVEL)}
-                data-test-subj="dscViewModePatternAnalysisButton"
-              >
-                <FormattedMessage
-                  id="discover.viewModes.patternAnalysis.label"
-                  defaultMessage="Patterns {patternCount}"
-                  values={{ patternCount: patternCount !== undefined ? ` (${patternCount})` : '' }}
-                />
-              </EuiTab>
-            ) : null}
-
-            {showFieldStatisticsTab ? (
-              <EuiTab
-                disabled={isEsqlMode}
-                isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
-                onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
-                data-test-subj="dscViewModeFieldStatsButton"
-              >
-                <FormattedMessage
-                  id="discover.viewModes.fieldStatistics.label"
-                  defaultMessage="Field statistics"
-                />
-              </EuiTab>
-            ) : null}
-          </EuiTabs>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

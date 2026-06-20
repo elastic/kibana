@@ -11,13 +11,13 @@ import { VIEW_MODE } from '../../../common/constants';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { DocumentViewModeToggle } from './view_mode_toggle';
 import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import { FetchStatus } from '../../application/types';
 import { DiscoverToolkitTestProvider } from '../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 
 describe('Document view mode toggle component', () => {
   const renderComponent = async ({
@@ -68,15 +68,15 @@ describe('Document view mode toggle component', () => {
   };
 
   it('should render if SHOW_FIELD_STATISTICS is true', async () => {
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
+
     await renderComponent();
 
     expect(screen.getByTestId('dscViewModeToggle')).toBeVisible();
     expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
-
-    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeVisible();
-    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeVisible();
-    expect(screen.getByTestId('dscViewModeFieldStatsButton')).toBeVisible();
-    expect(screen.getByTestId('dscViewModeDocumentButton')).toHaveTextContent('Documents (10)');
+    expect(selector.getSelected()).toContain('Documents');
+    expect(screen.getByText('View')).toBeVisible();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('10 results');
   });
 
   it('should not render if SHOW_FIELD_STATISTICS is false', async () => {
@@ -84,10 +84,6 @@ describe('Document view mode toggle component', () => {
 
     expect(screen.getByTestId('dscViewModeToggle')).toBeVisible();
     expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
-
-    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeVisible();
-    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeVisible();
-    expect(screen.queryByTestId('dscViewModeFieldStatsButton')).not.toBeInTheDocument();
   });
 
   it('should not show document and field stats view if ES|QL', async () => {
@@ -104,59 +100,56 @@ describe('Document view mode toggle component', () => {
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when dscViewModeDocumentButton is clicked', async () => {
     const setDiscoverViewMode = jest.fn();
-    const user = userEvent.setup();
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
 
     await renderComponent({ setDiscoverViewMode });
-    await user.click(screen.getByTestId('dscViewModeDocumentButton'));
+    await selector.select('dscViewModeDocumentOption');
 
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL);
   });
 
   it('should set the view mode to VIEW_MODE.PATTERN_LEVEL when dscViewModePatternAnalysisButton is clicked', async () => {
     const setDiscoverViewMode = jest.fn();
-    const user = userEvent.setup();
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
 
     await renderComponent({ setDiscoverViewMode });
-    await user.click(screen.getByTestId('dscViewModePatternAnalysisButton'));
+    await selector.select('dscViewModePatternAnalysisOption');
 
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.PATTERN_LEVEL);
   });
 
   it('should set the view mode to VIEW_MODE.AGGREGATED_LEVEL when dscViewModeFieldStatsButton is clicked', async () => {
     const setDiscoverViewMode = jest.fn();
-    const user = userEvent.setup();
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
 
     await renderComponent({ setDiscoverViewMode });
-    await user.click(screen.getByTestId('dscViewModeFieldStatsButton'));
+    await selector.select('dscViewModeFieldStatsOption');
 
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.AGGREGATED_LEVEL);
   });
 
   it('should select the Documents tab if viewMode is VIEW_MODE.DOCUMENT_LEVEL', async () => {
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
+
     await renderComponent();
 
-    expect(screen.getByTestId('dscViewModeDocumentButton')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(selector.getSelected()).toContain('Documents');
   });
 
   it('should select the Pattern Analysis tab if viewMode is VIEW_MODE.PATTERN_LEVEL', async () => {
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
+
     await renderComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
 
-    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(selector.getSelected()).toContain('Patterns');
   });
 
   it('should select the Field statistics tab if viewMode is VIEW_MODE.AGGREGATED_LEVEL', async () => {
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
+
     await renderComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
 
-    expect(screen.getByTestId('dscViewModeFieldStatsButton')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(selector.getSelected()).toContain('Field statistics');
   });
 
   it('should switch to document and hide pattern tab when there are no text fields', async () => {
@@ -170,8 +163,10 @@ describe('Document view mode toggle component', () => {
 
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL, true);
     await waitFor(() => {
-      expect(screen.queryByTestId('dscViewModePatternAnalysisButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dscViewModeToggle')).toBeVisible();
     });
-    expect(screen.getAllByRole('tab')).toHaveLength(2);
+    const selector = new EuiSuperSelectTestHarness('dscViewModeToggle');
+    await selector.select('dscViewModeDocumentOption');
+    expect(screen.queryByTestId('dscViewModePatternAnalysisOption')).not.toBeInTheDocument();
   });
 });
