@@ -215,6 +215,12 @@ describe('UpdateSLO', () => {
 
       function expectNonBreakingChangeUpdatedResources() {
         expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
+        expect(mockScopedClusterClient.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: SUMMARY_DESTINATION_INDEX_PATTERN,
+            script: expect.objectContaining({ lang: 'painless' }),
+          })
+        );
 
         expect(mockTransformManager.install).not.toHaveBeenCalled();
         expect(mockTransformManager.start).not.toHaveBeenCalled();
