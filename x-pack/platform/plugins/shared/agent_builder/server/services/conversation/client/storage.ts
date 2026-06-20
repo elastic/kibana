@@ -29,8 +29,74 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
-      conversation_rounds: types.object({ dynamic: false, properties: {} }),
-      attachments: types.object({ dynamic: false, properties: {} }),
+      conversation_rounds: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          status: types.keyword({}),
+          started_at: types.date({}),
+          time_to_first_token: types.long({}),
+          time_to_last_token: types.long({}),
+          trace_id: types.keyword({}),
+          input: types.object({
+            dynamic: false,
+            properties: {
+              message: types.text({}),
+            },
+          }),
+          response: types.object({
+            dynamic: false,
+            properties: {
+              message: types.text({}),
+            },
+          }),
+          model_usage: types.object({
+            dynamic: false,
+            properties: {
+              connector_id: types.keyword({}),
+              llm_calls: types.long({}),
+              input_tokens: types.long({}),
+              output_tokens: types.long({}),
+              model: types.keyword({}),
+            },
+          }),
+          steps: types.object({
+            dynamic: false,
+            properties: {
+              type: types.keyword({}),
+              // tool call steps
+              tool_call_id: types.keyword({}),
+              tool_id: types.keyword({}),
+              tool_call_group_id: types.keyword({}),
+              // reasoning steps
+              reasoning: types.text({}),
+              // compaction steps
+              summarized_round_count: types.long({}),
+              token_count_before: types.long({}),
+              token_count_after: types.long({}),
+            },
+          }),
+        },
+      }),
+      attachments: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          type: types.keyword({}),
+          versions: types.object({
+            dynamic: false,
+            properties: {
+              version: types.long({}),
+              created_at: types.date({}),
+              content_hash: types.keyword({}),
+            },
+          }),
+          origin: types.keyword({}),
+          current_version: types.long({}),
+          active: types.boolean({}),
+          hidden: types.boolean({}),
+        },
+      }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
       read: types.boolean({}),
