@@ -73,24 +73,41 @@ shared@~1.2.0:
     });
   });
 
-  it('indexes each package alias in a compound yarn.lock header', () => {
+  it('handles aliased packages where yarn merges different names into one header', () => {
     const lockfile = `
-"@scope/alias@npm:@scope/alias@2.0.1", "plain-name@1 - 2", "plain-name@npm:@scope/alias@2.0.1":
+"@scope/alias@npm:@scope/alias@2.0.1", "real-pkg@1 - 2", "real-pkg@npm:@scope/alias@2.0.1":
   version "2.0.1"
-  resolved "https://example.invalid/pkg.tgz"
+  resolved "https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz"
+  integrity sha512-fake==
+
+consumer@^1.0.0:
+  version "1.0.0"
+  dependencies:
+    real-pkg "1 - 2"
 `;
 
-    const parsed = parseYarnLock(lockfile);
+    const result = parseYarnLock(lockfile);
 
-    expect(parsed['plain-name@2.0.1']).toMatchObject({
-      name: 'plain-name',
-      requestedVersions: ['1 - 2', 'npm:@scope/alias@2.0.1'],
-      resolvedVersion: '2.0.1',
-    });
-    expect(parsed['@scope/alias@2.0.1']).toMatchObject({
+    expect(result['@scope/alias@2.0.1']).toEqual({
       name: '@scope/alias',
       requestedVersions: ['npm:@scope/alias@2.0.1'],
       resolvedVersion: '2.0.1',
+      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz',
+      integrity: 'sha512-fake==',
+      dependencies: undefined,
+    });
+
+    expect(result['real-pkg@2.0.1']).toEqual({
+      name: 'real-pkg',
+      requestedVersions: ['1 - 2', 'npm:@scope/alias@2.0.1'],
+      resolvedVersion: '2.0.1',
+      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz',
+      integrity: 'sha512-fake==',
+      dependencies: undefined,
+    });
+
+    expect(result['consumer@1.0.0']).toMatchObject({
+      dependencies: { 'real-pkg': '1 - 2' },
     });
   });
 });

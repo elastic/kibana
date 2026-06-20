@@ -22,23 +22,6 @@ export interface PackageInfo {
 
 const makeKey = (name: string, version: string) => `${name}@${version}`;
 const trimQuotes = (str: string) => str.replace(/(^"|"$)/g, '');
-
-/** Splits a yarn.lock header descriptor into [packageName, requestedRangeOrDescriptor]. */
-const splitYarnLockDescriptor = (entry: string): [string, string] => {
-  if (entry.startsWith('@')) {
-    const versionSeparator = entry.indexOf('@', 1);
-    if (versionSeparator === -1) {
-      throw new Error(`Invalid yarn.lock descriptor: ${entry}`);
-    }
-    return [entry.slice(0, versionSeparator), entry.slice(versionSeparator + 1)];
-  }
-  const at = entry.indexOf('@');
-  if (at === -1) {
-    throw new Error(`Invalid yarn.lock descriptor: ${entry}`);
-  }
-  return [entry.slice(0, at), entry.slice(at + 1)];
-};
-
 const splitDependencyLine = (line: string) => {
   const match = line.trim().match(/^(\S+)\s+(.+)$/);
 
@@ -62,20 +45,27 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
     const header = lines[0].replace(/:$/, '').trim();
     const headerEntries = header.split(', ').map(trimQuotes);
 
-    if (focusSet !== null) {
-      const anyFocused = headerEntries.some((entry) => {
-        const [pkgName] = splitYarnLockDescriptor(entry);
-        return focusSet.has(pkgName);
-      });
-      if (!anyFocused) {
-        continue;
+    // Group header entries by package name to handle aliased packages
+    // where yarn merges entries with different names into one block
+    const entriesByName = new Map<string, string[]>();
+    for (const entry of headerEntries) {
+      const entryName = entry.split(/(?!^)@/)[0];
+      const entryVersion = entry.substring(entryName.length + 1);
+      if (!entriesByName.has(entryName)) {
+        entriesByName.set(entryName, []);
       }
+      entriesByName.get(entryName)!.push(entryVersion);
     }
 
+    if (focusSet !== null && ![...entriesByName.keys()].some((n) => focusSet.has(n))) {
+      continue;
+    }
+
+    // Parse the block body once (shared across all aliased names)
     let resolvedVersion: string | undefined;
     let resolvedUrl: string | undefined;
     let integrity: string | undefined;
-    let blockDependencies: { [key: string]: string } | undefined;
+    let dependencies: { [key: string]: string } | undefined;
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -89,12 +79,12 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
       } else if (key === 'dependencies:' || key === 'optionalDependencies:') {
         let depCount = 0;
         if (focusSet === null) {
-          blockDependencies = blockDependencies || {};
+          dependencies = dependencies || {};
           for (let j = i + 1; j < lines.length; j++) {
             const depLine = lines[j];
             if (!/^\s{4,}\S/.test(depLine)) break;
             const [depKey, depVersion] = splitDependencyLine(depLine);
-            blockDependencies[depKey] = depVersion;
+            dependencies![depKey] = depVersion;
             depCount++;
           }
         } else {
@@ -109,31 +99,29 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
 
     if (!resolvedVersion) {
       console.warn(
-        `No resolved version found for package block starting with ${headerEntries[0]}. Skipping.`
+        `No resolved version found for package ${[...entriesByName.keys()].join(', ')}. Skipping.`
       );
       continue;
     }
 
-    for (const headerEntry of headerEntries) {
-      const [pkgName, requestedVersion] = splitYarnLockDescriptor(headerEntry);
-      if (focusSet !== null && !focusSet.has(pkgName)) {
-        continue;
-      }
+    // Create a PackageInfo for each unique name in the header
+    for (const [entryName, requestedVersions] of entriesByName) {
+      const packageInfo: PackageInfo = {
+        name: entryName,
+        requestedVersions,
+        resolvedVersion,
+        resolvedUrl,
+        integrity,
+        dependencies: dependencies ? { ...dependencies } : undefined,
+      };
 
-      const entryKey = makeKey(pkgName, resolvedVersion);
+      const entryKey = makeKey(entryName, resolvedVersion);
       if (!packages[entryKey]) {
-        packages[entryKey] = {
-          name: pkgName,
-          requestedVersions: [requestedVersion],
-          resolvedVersion,
-          resolvedUrl,
-          integrity,
-          dependencies: blockDependencies ? { ...blockDependencies } : undefined,
-        };
+        packages[entryKey] = packageInfo;
       } else {
         const existing = packages[entryKey];
         existing.requestedVersions = Array.from(
-          new Set([...existing.requestedVersions, requestedVersion])
+          new Set([...existing.requestedVersions, ...packageInfo.requestedVersions])
         ).sort();
       }
     }
