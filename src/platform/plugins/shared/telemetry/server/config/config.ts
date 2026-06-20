@@ -21,7 +21,6 @@ const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
 
 const configSchema = schema
   .object({
-    enabled: schema.boolean({ defaultValue: true }),
     allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
     hidePrivacyStatement: schema.boolean({ defaultValue: false }),
     optIn: schema.boolean({ defaultValue: true }),
@@ -74,23 +73,19 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   dynamicConfig: {
     labels: true,
   },
-  deprecations: () => [
-    (cfg) => {
-      const raw = cfg.telemetry?.enabled;
-      const isDisabling =
-        raw === false || (typeof raw === 'string' && raw.toLowerCase() === 'false');
-
-      if (isDisabling) {
-        return {
-          set: [
-            { path: 'telemetry.optIn', value: false },
-            { path: 'telemetry.allowChangingOptInStatus', value: false },
-            { path: 'telemetry.tracing.enabled', value: false },
-            { path: 'telemetry.metrics.enabled', value: false },
-          ],
-          unset: [{ path: 'telemetry.enabled' }],
-        };
-      }
+  metaSettings: {
+    'telemetry.enabled': {
+      schema: schema.boolean({
+        validate: (value) =>
+          Boolean(value) === false ? undefined : 'telemetry.enabled: true does not apply here',
+      }),
+      config: {
+        'telemetry.optIn': false,
+        'telemetry.allowChangingOptInStatus': false,
+        'telemetry.tracing.enabled': false,
+        'telemetry.metrics.enabled': false,
+      },
+      priority: 100,
     },
-  ],
+  },
 };

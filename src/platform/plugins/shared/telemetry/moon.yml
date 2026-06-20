@@ -47,6 +47,8 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/telemetry-config'
   - '@kbn/config'
+  - '@kbn/config-mocks'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod

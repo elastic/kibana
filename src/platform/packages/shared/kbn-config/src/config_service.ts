@@ -32,6 +32,7 @@ import type {
 } from './deprecation';
 import { applyDeprecations, configDeprecationFactory } from './deprecation';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
+import { applyMetaSettings, type MetaSetting } from './meta_settings';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
@@ -66,6 +67,7 @@ export class ConfigService {
   private readonly handledPaths: Set<ConfigPath> = new Set();
   private readonly schemas = new Map<string, Type<unknown>>();
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
+  private readonly metaSettings = new BehaviorSubject<Map<string, MetaSetting[]>>(new Map());
   private readonly dynamicPaths = new Map<string, string[]>();
   private readonly overrides$ = new BehaviorSubject<{
     additions: Record<string, unknown>;
@@ -89,13 +91,15 @@ export class ConfigService {
       this.rawConfigProvider.getConfig$(),
       this.deprecations,
       this.overrides$,
+      this.metaSettings,
     ]).pipe(
-      map(([rawConfig, deprecations, overrides]) => {
+      map(([rawConfig, deprecations, overrides, metaSettings]) => {
         const overridden = merge(rawConfig, overrides.additions);
         overrides.removals.forEach((key) => unset(overridden, key));
         const migrated = applyDeprecations(overridden, deprecations);
         this.deprecatedConfigPaths.next(migrated.changedPaths);
-        return new ObjectToConfigAdapter(migrated.config);
+        const metaSettingsApplied = applyMetaSettings(migrated.config, metaSettings);
+        return new ObjectToConfigAdapter(metaSettingsApplied);
       }),
       tap((config) => {
         this.lastConfig = config;
@@ -138,6 +142,20 @@ export class ConfigService {
         context: this.createDeprecationContext(),
       })),
     ]);
+  }
+
+  /**
+   * Register a {@link MetaSetting} to be used to extend the configuration.
+   */
+  public addMetaSetting(setting: string, metaSetting: MetaSetting) {
+    const metaSettings = this.metaSettings.value.get(setting) || [];
+
+    this.metaSettings.next(
+      new Map([
+        ...this.metaSettings.value.entries(),
+        [setting, [...metaSettings, metaSetting].sort((a, b) => a.priority - b.priority)],
+      ])
+    );
   }
 
   /**
