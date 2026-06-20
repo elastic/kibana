@@ -827,6 +827,44 @@ export class DiscoverApp {
     await input.fill(newValue.toString());
   }
 
+  async getCurrentSampleSize(): Promise<number> {
+    const input = this.page.locator(
+      '[data-test-subj="unifiedDataTableSampleSizeInput"][type="number"]'
+    );
+    await input.waitFor({ state: 'visible' });
+
+    return Number(await input.inputValue());
+  }
+
+  async setSampleSize(newValue: number) {
+    const input = this.page.locator(
+      '[data-test-subj="unifiedDataTableSampleSizeInput"][type="number"]'
+    );
+    await input.waitFor({ state: 'visible' });
+    await input.fill(newValue.toString());
+    await input.press('Enter');
+    await this.waitUntilSearchingHasFinished();
+    await this.page.keyboard.press('Escape');
+  }
+
+  async goToLastSamplePage(sampleSize: number, rowsPerPage: number) {
+    const lastPageNumber = Math.ceil(sampleSize / rowsPerPage) - 1;
+    await this.page.keyboard.press('Escape');
+
+    if (lastPageNumber > 0) {
+      await this.page.testSubj.click(`pagination-button-${lastPageNumber}`);
+    }
+
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getDataGridFooterText(): Promise<string> {
+    const footer = this.page.testSubj.locator('unifiedDataTableFooter');
+    await footer.waitFor({ state: 'visible' });
+
+    return footer.innerText();
+  }
+
   private async openMetaFieldsSectionIfNeeded(field: string) {
     if (!META_FIELDS.has(field)) return;
 
