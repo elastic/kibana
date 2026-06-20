@@ -20,7 +20,7 @@ import { executeDashboardOperations, type DashboardOperation } from './operation
  *
  * Note: the generate core reads no attachment/state store. Prior dashboard
  * state arrives as `previousDashboardData`, and existing panel content arrives
- * already resolved via `panelConfig` panel inputs in the operations.
+ * already resolved via `source: 'config'` panel inputs in the operations.
  */
 export interface DashboardGenerationResolvers {
   /**

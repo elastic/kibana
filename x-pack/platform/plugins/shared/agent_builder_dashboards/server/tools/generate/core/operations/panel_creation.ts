@@ -26,7 +26,7 @@ export type PanelCreationRequest =
     }
   | {
       operationType: 'add_panels';
-      panelInput: Extract<AddPanelsItemInput, { kind: 'panelRequest' }>;
+      panelInput: Extract<AddPanelsItemInput, { source: 'request' }>;
       panelInputIndex: number;
       sectionId?: string;
     };
@@ -53,7 +53,7 @@ const collectPanelCreationRequests = (
         }
 
         const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.kind === 'panelRequest'
+          panelInput.source === 'request'
             ? [
                 {
                   operationType: operation.operation,
@@ -71,7 +71,7 @@ const collectPanelCreationRequests = (
       }
       case 'add_panels': {
         const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.kind === 'panelRequest'
+          panelInput.source === 'request'
             ? [
                 {
                   operationType: operation.operation,
@@ -159,9 +159,9 @@ const getResolvedPanelCreationRequests = ({
 
 /**
  * Single seam for turning a new-panel input into `AttachmentPanel` content,
- * unifying the two paths so operation handlers don't branch on `kind`:
- * - `panelConfig`: built by value from the panel type's registry definition.
- * - `panelRequest`: read from the up-front parallel resolution for this
+ * unifying the two paths so operation handlers don't branch on `source`:
+ * - `source: 'config'`: built by value from the panel type's registry definition.
+ * - `source: 'request'`: read from the up-front parallel resolution for this
  *   operation (keyed by panel input index).
  *
  * Returns `undefined` when a panel request failed to resolve, recording the
@@ -186,7 +186,7 @@ export const createPanelInputMaterializer = ({
   );
 
   return (item, panelInputIndex) => {
-    if (item.kind === 'panelConfig') {
+    if (item.source === 'config') {
       return PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config);
     }
 

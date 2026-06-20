@@ -13,10 +13,11 @@ import type { PanelTypeDefinition } from '../panel_type';
 /**
  * Home for markdown panel logic.
  *
- * Markdown is authored as a `panelConfig` (`type: 'markdown'`) whose `config` is
- * passed through to the embeddable unchanged, exactly like a Lens `panelConfig`.
+ * Markdown is authored with `source: 'config'` (`type: 'markdown'`) whose
+ * `config` is passed through to the embeddable unchanged, exactly like a Lens
+ * `config`-source panel.
  * This module owns the markdown embeddable-type identity, the markdown by-value
- * config contract, and the markdown `panelConfig` input schema, and is the place
+ * config contract, and the markdown `config`-source input schema, and is the place
  * for future markdown-specific behavior (e.g. a markdown generation prompt that
  * authors the content).
  */
@@ -43,11 +44,11 @@ export const markdownPanelConfigSchema = z.object({
 export type MarkdownPanelConfig = z.infer<typeof markdownPanelConfigSchema>;
 
 /**
- * The markdown variant of a `panelConfig` panel input, discriminated by
+ * The markdown variant of a `config`-source panel input, discriminated by
  * `type: 'markdown'`.
  */
 export const markdownPanelConfigInputSchema = z.object({
-  kind: z.literal('panelConfig'),
+  source: z.literal('config'),
   type: z.literal('markdown'),
   grid: panelGridSchema,
   config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
@@ -58,7 +59,7 @@ export type MarkdownPanelConfigInput = z.infer<typeof markdownPanelConfigInputSc
 /**
  * The markdown variant of an `edit_panels` item: targets an existing markdown
  * panel by id and replaces its config. Derived from the add schema so the
- * `kind`/`type`/`config` shape stays in sync.
+ * `source`/`type`/`config` shape stays in sync.
  */
 export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
   .omit({ grid: true })
@@ -84,6 +85,6 @@ export const markdownPanelDefinition: PanelTypeDefinition = {
       ? { ok: true }
       : {
           ok: false,
-          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as markdown. Use kind: "panelRequest" for ES|QL-backed Lens panels.`,
+          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as markdown. Use source: "request" for ES|QL-backed Lens panels.`,
         },
 };

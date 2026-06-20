@@ -117,13 +117,13 @@ describe('executeDashboardOperations', () => {
         operation: 'add_panels',
         panels: [
           {
-            kind: 'panelConfig',
+            source: 'config',
             type: 'vis',
             config: { type: 'metric' },
             grid: { x: 0, y: 0, w: 24, h: 9 },
           },
           {
-            kind: 'panelConfig',
+            source: 'config',
             type: 'markdown',
             config: { content: '### Updated summary' },
             grid: { x: 0, y: 9, w: 48, h: 5 },
@@ -152,7 +152,7 @@ describe('executeDashboardOperations', () => {
     ]);
   });
 
-  it('adds panelConfig panels successfully', async () => {
+  it('adds config-source panels successfully', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
@@ -164,13 +164,13 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -181,7 +181,7 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 9, w: 12, h: 5 },
@@ -224,31 +224,31 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'markdown',
               config: { content: '### Summary' },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               sectionId: 'section-a',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show total requests',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 9, w: 24, h: 9 },
             },
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show p95 latency',
               sectionId: 'section-a',
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -317,7 +317,7 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 0, w: 12, h: 5 },
@@ -383,12 +383,12 @@ describe('executeDashboardOperations', () => {
           grid: { y: 12 },
           panels: [
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -447,12 +447,12 @@ describe('executeDashboardOperations', () => {
           grid: { y: 12 },
           panels: [
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show p95 latency',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -514,13 +514,13 @@ describe('executeDashboardOperations', () => {
           grid: { y: 12 },
           panels: [
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'markdown',
               config: { content: '### Section Summary' },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -573,7 +573,7 @@ describe('executeDashboardOperations', () => {
           grid: { y: 0 },
           panels: [
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -585,7 +585,7 @@ describe('executeDashboardOperations', () => {
           grid: { y: 1 },
           panels: [
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -668,7 +668,7 @@ describe('executeDashboardOperations', () => {
           grid: { y: 0 },
           panels: [
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -678,7 +678,7 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'panelRequest',
+              source: 'request',
               query: 'show error rate',
               grid: { x: 0, y: 1, w: 24, h: 9 },
             },
@@ -748,7 +748,7 @@ describe('executeDashboardOperations', () => {
             grid: { y: 0 },
             panels: [
               {
-                kind: 'panelRequest',
+                source: 'request',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
@@ -758,7 +758,7 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'panelRequest',
+                source: 'request',
                 query: 'show error rate',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -770,7 +770,7 @@ describe('executeDashboardOperations', () => {
     ).rejects.toThrow('Inline panel resolver is required for panel creation operations.');
   });
 
-  it('adds panelConfig panels into a target section when sectionId is provided', async () => {
+  it('adds config-source panels into a target section when sectionId is provided', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
@@ -782,7 +782,7 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'vis',
               config: { type: 'metric' },
               sectionId: 'section-a',
@@ -893,7 +893,7 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'panelConfig',
+              source: 'config',
               type: 'markdown',
               config: { content: '### Section Summary' },
               grid: { x: 0, y: 0, w: 24, h: 4 },
@@ -1062,12 +1062,12 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'panelRequest',
+                source: 'request',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
-                kind: 'panelRequest',
+                source: 'request',
                 query: 'show error rate',
                 sectionId: 'section-a',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -1121,9 +1121,9 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'panelRequest', panelId: 'panel-1', query: 'turn this into a bar chart' },
+              { source: 'request', panelId: 'panel-1', query: 'turn this into a bar chart' },
               {
-                kind: 'panelRequest',
+                source: 'request',
                 panelId: 'section-panel-1',
                 query: 'turn this into a line chart',
               },
@@ -1174,12 +1174,12 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'panelRequest', panelId: 'panel-1', query: 'make this a bar chart' }],
+            panels: [{ source: 'request', panelId: 'panel-1', query: 'make this a bar chart' }],
           },
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'panelRequest', panelId: 'panel-1', query: 'now make this a line chart' },
+              { source: 'request', panelId: 'panel-1', query: 'now make this a line chart' },
             ],
           },
         ],
@@ -1237,7 +1237,7 @@ describe('executeDashboardOperations', () => {
           { operation: 'remove_panels', panelIds: ['panel-1'] },
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'panelRequest', panelId: 'panel-1', query: 'make this a bar chart' }],
+            panels: [{ source: 'request', panelId: 'panel-1', query: 'make this a bar chart' }],
           },
         ],
         logger,
@@ -1267,12 +1267,12 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'panelRequest',
+                source: 'request',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
-                kind: 'panelRequest',
+                source: 'request',
                 query: 'show p95 latency',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1323,7 +1323,7 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'panelRequest', panelId: 'panel-1', query: 'refine this analysis' }],
+            panels: [{ source: 'request', panelId: 'panel-1', query: 'refine this analysis' }],
           },
         ],
         logger,
@@ -1388,8 +1388,8 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'panelRequest', panelId: 'panel-1', query: 'make this a bar chart' },
-              { kind: 'panelRequest', panelId: 'panel-2', query: 'make this a line chart' },
+              { source: 'request', panelId: 'panel-1', query: 'make this a bar chart' },
+              { source: 'request', panelId: 'panel-2', query: 'make this a line chart' },
             ],
           },
         ],
@@ -1446,9 +1446,9 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'panelRequest', panelId: 'panel-1', query: 'first edit' },
-              { kind: 'panelRequest', panelId: 'panel-2', query: 'edit a different panel' },
-              { kind: 'panelRequest', panelId: 'panel-1', query: 'second edit of same panel' },
+              { source: 'request', panelId: 'panel-1', query: 'first edit' },
+              { source: 'request', panelId: 'panel-2', query: 'edit a different panel' },
+              { source: 'request', panelId: 'panel-1', query: 'second edit of same panel' },
             ],
           },
         ],
@@ -1507,7 +1507,7 @@ describe('executeDashboardOperations', () => {
             operation: 'edit_panels',
             panels: [
               {
-                kind: 'panelConfig',
+                source: 'config',
                 type: 'markdown',
                 panelId: 'md-1',
                 config: { content: '### Updated summary' },
@@ -1533,7 +1533,7 @@ describe('executeDashboardOperations', () => {
       );
     });
 
-    it('records a failure when a markdown panelConfig edit targets a non-markdown panel', async () => {
+    it('records a failure when a markdown config-source edit targets a non-markdown panel', async () => {
       const resolvePanelContent = jest.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
@@ -1550,7 +1550,7 @@ describe('executeDashboardOperations', () => {
             operation: 'edit_panels',
             panels: [
               {
-                kind: 'panelConfig',
+                source: 'config',
                 type: 'markdown',
                 panelId: 'panel-1',
                 config: { content: 'new text' },
@@ -1567,7 +1567,7 @@ describe('executeDashboardOperations', () => {
         {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
-          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as markdown. Use kind: "panelRequest" for ES|QL-backed Lens panels.`,
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as markdown. Use source: "request" for ES|QL-backed Lens panels.`,
         },
       ]);
 
@@ -1599,12 +1599,12 @@ describe('executeDashboardOperations', () => {
             operation: 'edit_panels',
             panels: [
               {
-                kind: 'panelConfig',
+                source: 'config',
                 type: 'markdown',
                 panelId: 'md-1',
                 config: { content: '### New summary' },
               },
-              { kind: 'panelRequest', panelId: 'panel-1', query: 'turn into a bar chart' },
+              { source: 'request', panelId: 'panel-1', query: 'turn into a bar chart' },
             ],
           },
         ],
@@ -1653,7 +1653,7 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'panelConfig',
+                source: 'config',
                 type: 'markdown',
                 config: { content: '### Summary' },
                 grid: { x: 0, y: 0, w: 48, h: 5 },
@@ -1667,12 +1667,12 @@ describe('executeDashboardOperations', () => {
     ).rejects.toThrow('Section "nonexistent-section" not found.');
   });
 
-  it('accepts a markdown panelConfig with content and optional settings', () => {
+  it('accepts a markdown config-source panel with content and optional settings', () => {
     const result = dashboardOperationSchema.safeParse({
       operation: 'add_panels',
       panels: [
         {
-          kind: 'panelConfig',
+          source: 'config',
           type: 'markdown',
           config: { content: '## Hi', settings: { open_links_in_new_tab: true } },
           grid: { x: 0, y: 0, w: 48, h: 5 },
@@ -1683,12 +1683,12 @@ describe('executeDashboardOperations', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects a markdown panelConfig whose config is missing content', () => {
+  it('rejects a markdown config-source panel whose config is missing content', () => {
     const result = dashboardOperationSchema.safeParse({
       operation: 'add_panels',
       panels: [
         {
-          kind: 'panelConfig',
+          source: 'config',
           type: 'markdown',
           config: { settings: { open_links_in_new_tab: false } },
           grid: { x: 0, y: 0, w: 48, h: 5 },

@@ -33,7 +33,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 
 1. **Resolve inputs**:
    - To work with a saved dashboard, search for it with \`platform.core.sml_search\`, then attach it with \`platform.core.sml_attach\` using the exact \`chunk_id\` from the search result. The attached \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment is your editable working copy; pass its \`attachment_id\` to generation as \`dashboardAttachmentId\`.
-   - To put an existing visualization onto a dashboard, read that visualization attachment's content with \`${attachmentTools.read}\` and pass its configuration as a \`panelConfig\` panel input (with panel \`type: "vis"\` and \`config\`). The generation core never reads attachments itself, so the visualization config must be passed by value here.
+   - To put an existing visualization onto a dashboard, read that visualization attachment's content with \`${attachmentTools.read}\` and pass its configuration as a \`source: "config"\` panel input (with panel \`type: "vis"\` and \`config\`). The generation core never reads attachments itself, so the visualization config must be passed by value here.
 2. **Generate** (persists automatically):
    - Call ${dashboardTools.generateDashboard} with \`dashboardAttachmentId\` set to the dashboard you are editing (omit it for a new dashboard) and your batched \`operations\`. The tool reads the current payload from that reference, applies the operations, and persists the result as a \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment for you.
    - It returns \`data.attachment_id\`, \`data.version\`, a compact \`data.dashboard\` summary, and optional \`data.failures\`. Do **not** pass the dashboard payload back into any tool — reference \`data.attachment_id\` instead.

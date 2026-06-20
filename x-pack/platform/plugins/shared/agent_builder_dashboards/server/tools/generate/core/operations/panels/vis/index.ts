@@ -14,10 +14,10 @@ import type { PanelTypeDefinition } from '../panel_type';
 /**
  * Home for Lens visualization panel logic.
  *
- * A visualization reaches a dashboard two ways: as a `panelConfig`
+ * A visualization reaches a dashboard two ways: with `source: 'config'`
  * (`type: 'vis'`) whose already-resolved Lens config is passed through by value,
- * or as a `panelRequest` that is resolved from a natural-language / ES|QL query
- * into Lens config by the inline panel resolver. This module owns the Lens
+ * or with `source: 'request'` that is resolved from a natural-language / ES|QL
+ * query into Lens config by the inline panel resolver. This module owns the Lens
  * embeddable-type identity, the by-value config contract, and the vis input
  * schemas (add + edit), and is the place for future vis-specific behavior.
  */
@@ -39,26 +39,26 @@ export const visPanelConfigSchema = z.record(z.string().max(256), z.unknown());
 export type VisPanelConfig = z.infer<typeof visPanelConfigSchema>;
 
 /**
- * The vis variant of a `panelConfig` panel input, discriminated by
+ * The vis variant of a `config`-source panel input, discriminated by
  * `type: 'vis'`.
  */
 export const visPanelConfigInputSchema = z.object({
-  kind: z.literal('panelConfig'),
+  source: z.literal('config'),
   type: z.literal('vis'),
   grid: panelGridSchema,
   config: visPanelConfigSchema.describe(
-    'Already-resolved Lens config, passed by value (e.g. read from a visualization attachment). Do not hand-build a Lens config for a new visualization here — use kind: "panelRequest" instead.'
+    'Already-resolved Lens config, passed by value (e.g. read from a visualization attachment). Do not hand-build a Lens config for a new visualization here — use source: "request" instead.'
   ),
 });
 
 export type VisPanelConfigInput = z.infer<typeof visPanelConfigInputSchema>;
 
 /**
- * A `panelRequest` creates a Lens visualization from a natural-language (or
- * ES|QL) query. The inline panel resolver turns it into Lens panel content.
+ * A `request`-source input creates a Lens visualization from a natural-language
+ * (or ES|QL) query. The inline panel resolver turns it into Lens panel content.
  */
 export const panelRequestSchema = z.object({
-  kind: z.literal('panelRequest'),
+  source: z.literal('request'),
   grid: panelGridSchema,
   query: z.string().describe('A natural language query describing the desired visualization.'),
   index: z
@@ -99,8 +99,8 @@ export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 
 /**
  * Registry entry for the `vis` panel type. Vis is not editable via a
- * `panelConfig` (edits go through a `panelRequest`), so `validateConfigEdit` is
- * intentionally omitted.
+ * `source: 'config'` edit (edits go through `source: 'request'`), so
+ * `validateConfigEdit` is intentionally omitted.
  */
 export const visPanelDefinition: PanelTypeDefinition = {
   embeddableType: LENS_EMBEDDABLE_TYPE,

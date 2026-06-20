@@ -21,19 +21,19 @@ export type ConfigEditValidation = { ok: true } | { ok: false; error: string };
  * branching on the literal type, and adding a panel type means adding its module
  * plus a registry entry — no operation edits.
  *
- * This covers the *by-value config* path only (`panelConfig` add/edit). Creating
- * a panel from an async request (e.g. natural language / ES|QL) is a separate
- * seam handled by the panel resolver dispatcher.
+ * This covers the *by-value config* path only (`source: 'config'` add/edit).
+ * Creating a panel from an async request (e.g. natural language / ES|QL) is a
+ * separate seam handled by the panel resolver dispatcher.
  */
 export interface PanelTypeDefinition {
   /** Embeddable type id panels of this type map to. */
   readonly embeddableType: string;
-  /** Builds panel content from an already-resolved `panelConfig` config. */
+  /** Builds panel content from an already-resolved `source: 'config'` config. */
   readonly buildPanelContent: (config: AttachmentPanel['config']) => PanelContent;
   /**
-   * Validates that an existing panel may be replaced via a `panelConfig` edit of
-   * this type. Omit for types that are not editable by config (e.g. `vis`, which
-   * edits through a `panelRequest` instead).
+   * Validates that an existing panel may be replaced via a `source: 'config'`
+   * edit of this type. Omit for types that are not editable by config (e.g.
+   * `vis`, which edits through `source: 'request'` instead).
    */
   readonly validateConfigEdit?: (existingPanel: AttachmentPanel) => ConfigEditValidation;
 }

@@ -19,8 +19,9 @@ import {
 import { defineOperation } from './types';
 
 /**
- * An edit that passed validation. `existingPanel` is only carried for panel
- * request edits (the resolver needs it); `panelConfig` edits don't have one.
+ * An edit that passed validation. `existingPanel` is only carried for
+ * `source: 'request'` edits (the resolver needs it); `source: 'config'` edits
+ * don't have one.
  */
 interface ValidEdit {
   panelInput: EditPanelItem;
@@ -37,7 +38,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (kind: "panelRequest") and markdown panels (kind: "panelConfig", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (source: "request") and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -50,7 +51,7 @@ export const editPanelsOperation = defineOperation({
     };
 
     const hasPanelRequestEdits = operation.panels.some(
-      (panelInput): panelInput is EditPanelRequestInput => panelInput.kind === 'panelRequest'
+      (panelInput): panelInput is EditPanelRequestInput => panelInput.source === 'request'
     );
     if (hasPanelRequestEdits && !resolvePanelContent) {
       throw new Error(missingPanelResolverError);
@@ -81,7 +82,7 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      if (panelInput.kind === 'panelConfig') {
+      if (panelInput.source === 'config') {
         const validation = PANEL_TYPE_DEFINITIONS[panelInput.type].validateConfigEdit?.(
           existingPanel
         ) ?? { ok: true };
@@ -101,7 +102,7 @@ export const editPanelsOperation = defineOperation({
     // Resolve valid panel request edits in parallel from the entry-time snapshot.
     const validPanelRequestEdits = validEdits.filter(
       (validEdit): validEdit is ValidEdit & { panelInput: EditPanelRequestInput } =>
-        validEdit.panelInput.kind === 'panelRequest'
+        validEdit.panelInput.source === 'request'
     );
 
     const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
@@ -131,7 +132,7 @@ export const editPanelsOperation = defineOperation({
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
     for (const { panelInput } of validEdits) {
-      if (panelInput.kind === 'panelConfig') {
+      if (panelInput.source === 'config') {
         const panelContent = PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(
           panelInput.config
         );
