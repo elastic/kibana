@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENRICHMENT_DESTINATION_PATH, DEFAULT_INDICATOR_SOURCE_PATH } from '../constants';
+import { DEFAULT_INDICATOR_SOURCE_PATH, ENRICHMENT_DESTINATION_PATH } from '../constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
@@ -42,6 +42,7 @@ export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
   'source.ip': `${DEFAULT_INDICATOR_SOURCE_PATH}.ip`,
   'destination.ip': `${DEFAULT_INDICATOR_SOURCE_PATH}.ip`,
   'url.full': `${DEFAULT_INDICATOR_SOURCE_PATH}.url.full`,
+  'url.domain': `${DEFAULT_INDICATOR_SOURCE_PATH}.url.domain`,
   'registry.path': `${DEFAULT_INDICATOR_SOURCE_PATH}.registry.path`,
 };
 
