@@ -18,12 +18,14 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 export const getServicesRequestSchema = z.object({
   start: z
     .string()
+    .max(100)
     .describe(
       `The start time of the query window using Elasticsearch date math. Examples: "now-24h", "now-15m". Defaults to ${DEFAULT_TIME_RANGE.start}.`
     )
     .default(DEFAULT_TIME_RANGE.start),
   end: z
     .string()
+    .max(100)
     .describe(
       `The end time of the query window using Elasticsearch date math. Example: "now". Defaults to ${DEFAULT_TIME_RANGE.end}.`
     )
@@ -45,6 +47,7 @@ export const getServicesRequestSchema = z.object({
     ),
   kqlFilter: z
     .string()
+    .max(1000)
     .optional()
     .describe(
       'KQL filter to narrow down services. Examples: "host.name: web-server-01", "service.name: frontend".'
