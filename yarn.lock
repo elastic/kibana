@@ -37395,10 +37395,10 @@ xml-crypto@6.1.2:
     "@xmldom/xmldom" "^0.8.10"
     xpath "^0.0.33"
 
-xml-formatter@3.6.7:
-  version "3.6.7"
-  resolved "https://registry.yarnpkg.com/xml-formatter/-/xml-formatter-3.6.7.tgz#75d140e6dbe19b3e956ef20ef55f421c52ef8cc0"
-  integrity sha512-IsfFYJQuoDqtUlKhm4EzeoBOb+fQwzQVeyxxAQ0sThn/nFnQmyLPTplqq4yRhaOENH/tAyujD2TBfIYzUKB6hg==
+xml-formatter@3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/xml-formatter/-/xml-formatter-3.7.0.tgz#ac6f8c02e2388759652e9d0c8a4b5b3dfc0694e5"
+  integrity sha512-+8qTc3zv2UcJ1v9IsSIce37Dl4MQG14Cp7tWrwmy202UaI1wqRukw5QMX1JHsV+DX64yw77EgGsj2s5wGvuMbQ==
   dependencies:
     xml-parser-xo "^4.1.5"
 
