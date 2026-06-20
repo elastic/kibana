@@ -8,7 +8,7 @@
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
-import type { PanelTypeDefinition } from '../panel_type';
+import { definePanelType } from '../panel_type';
 
 /**
  * Home for markdown panel logic.
@@ -77,9 +77,8 @@ export type EditMarkdownPanelConfigInput = z.infer<typeof editMarkdownPanelConfi
  * (content is replaced in place), so it provides `validateConfigEdit` to reject
  * edits that target a non-markdown panel.
  */
-export const markdownPanelDefinition: PanelTypeDefinition = {
+export const markdownPanelDefinition = definePanelType({
   embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
-  buildPanelContent: (config) => ({ type: MARKDOWN_EMBEDDABLE_TYPE, config }),
   validateConfigEdit: (existingPanel) =>
     existingPanel.type === MARKDOWN_EMBEDDABLE_TYPE
       ? { ok: true }
@@ -87,4 +86,4 @@ export const markdownPanelDefinition: PanelTypeDefinition = {
           ok: false,
           error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as markdown. Use source: "request" for ES|QL-backed Lens panels.`,
         },
-};
+});

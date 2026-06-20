@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelTypeDefinition } from '../panel_type';
+import { definePanelType } from '../panel_type';
 
 /**
  * Home for Lens visualization panel logic.
@@ -106,7 +106,4 @@ export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
  * `source: 'config'` edit (edits go through `source: 'request'`), so
  * `validateConfigEdit` is intentionally omitted.
  */
-export const visPanelDefinition: PanelTypeDefinition = {
-  embeddableType: LENS_EMBEDDABLE_TYPE,
-  buildPanelContent: (config) => ({ type: LENS_EMBEDDABLE_TYPE, config }),
-};
+export const visPanelDefinition = definePanelType({ embeddableType: LENS_EMBEDDABLE_TYPE });

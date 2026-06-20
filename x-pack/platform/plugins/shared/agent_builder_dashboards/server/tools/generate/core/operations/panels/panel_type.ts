@@ -37,3 +37,20 @@ export interface PanelTypeDefinition {
    */
   readonly validateConfigEdit?: (existingPanel: AttachmentPanel) => ConfigEditValidation;
 }
+
+/**
+ * Builds a {@link PanelTypeDefinition} from a panel type's `embeddableType`,
+ * keeping it the single source of truth: `buildPanelContent` defaults to passing
+ * the config through to that embeddable, so a type only declares its embeddable
+ * id (plus `validateConfigEdit` when editable by config). Pass `buildPanelContent`
+ * to override for a type that needs to transform its config.
+ */
+export const definePanelType = ({
+  embeddableType,
+  buildPanelContent = (config) => ({ type: embeddableType, config }),
+  validateConfigEdit,
+}: {
+  embeddableType: string;
+  buildPanelContent?: (config: AttachmentPanel['config']) => PanelContent;
+  validateConfigEdit?: (existingPanel: AttachmentPanel) => ConfigEditValidation;
+}): PanelTypeDefinition => ({ embeddableType, buildPanelContent, validateConfigEdit });
