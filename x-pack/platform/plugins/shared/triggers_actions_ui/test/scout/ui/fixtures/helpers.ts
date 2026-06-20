@@ -132,7 +132,7 @@ export const defineIndexThresholdRule = async (
 
 export const makeEsQueryRule = (namePrefix: string) => ({
   name: `${namePrefix}-rule-${Date.now()}`,
-  ruleTypeId: '.es-query',
+  rule_type_id: '.es-query',
   consumer: 'stackAlerts',
   params: {
     searchType: 'esQuery' as const,

@@ -605,7 +605,11 @@ test.describe('backfill schedule API', { tag: tags.stateful.classic }, () => {
     createdRuleIds.push(ruleId);
 
     const response = await page.context().request.post(kbnUrl.get(BACKFILL_SCHEDULE_PATH), {
-      headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
+      headers: {
+        'kbn-xsrf': 'scout',
+        'x-elastic-internal-origin': 'scout',
+        'Content-Type': 'application/json',
+      },
       data: JSON.stringify([
         { rule_id: ruleId, ranges: [{ start: daysAgoIso(7), end: daysAgoIso(1) }] },
       ]),
@@ -641,7 +645,11 @@ test.describe('backfill schedule API', { tag: tags.stateful.classic }, () => {
     createdRuleIds.push(ruleId);
 
     const response = await page.context().request.post(kbnUrl.get(BACKFILL_SCHEDULE_PATH), {
-      headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
+      headers: {
+        'kbn-xsrf': 'scout',
+        'x-elastic-internal-origin': 'scout',
+        'Content-Type': 'application/json',
+      },
       data: JSON.stringify([
         { rule_id: ruleId, ranges: [{ start: daysAgoIso(7), end: daysAgoIso(1) }] },
       ]),
