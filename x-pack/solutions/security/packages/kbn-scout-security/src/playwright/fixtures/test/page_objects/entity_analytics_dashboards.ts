@@ -10,13 +10,14 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 const PAGE_URL = 'security/entity_analytics';
 
 export class EntityAnalyticsDashboardsPage {
-  public entityStoreEnablementPanel: Locator;
-  public entityStoreEnablementButton: Locator;
-  public entityStoreEnablementModal: Locator;
-  public enablementRiskScoreSwitch: Locator;
-  public enablementEntityStoreSwitch: Locator;
-  public entitiesListPanel: Locator;
-  public entityStoreEnablementModalButton: Locator;
+  public readonly entityStoreEnablementPanel: Locator;
+  public readonly entityStoreEnablementButton: Locator;
+  public readonly entityStoreEnablementModal: Locator;
+  public readonly enablementRiskScoreSwitch: Locator;
+  public readonly enablementEntityStoreSwitch: Locator;
+  public readonly entitiesListPanel: Locator;
+  public readonly entityStoreEnablementModalButton: Locator;
+  public readonly paywallDescription: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.entityStoreEnablementPanel = this.page.testSubj.locator('entityStoreEnablementPanel');
@@ -28,6 +29,7 @@ export class EntityAnalyticsDashboardsPage {
     this.entityStoreEnablementModalButton = this.page.testSubj.locator(
       'entityStoreEnablementModalButton'
     );
+    this.paywallDescription = this.page.testSubj.locator('paywallCardDescription');
   }
 
   async navigate() {
