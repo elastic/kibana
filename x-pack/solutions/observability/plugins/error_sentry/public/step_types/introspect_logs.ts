@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { createGithubIssueCommonDefinition } from '../../common/step_types/create_github_issue';
+import { introspectLogsCommonDefinition } from '../../common/step_types/introspect_logs';
 
-export const createGithubIssueStepDefinition = createPublicStepDefinition({
-  ...createGithubIssueCommonDefinition,
+export const introspectLogsStepDefinition = createPublicStepDefinition({
+  ...introspectLogsCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/logo_github').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/inspect').then(({ icon }) => ({
       default: icon,
     }))
   ),

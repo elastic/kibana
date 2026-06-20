@@ -10,17 +10,14 @@ import type { estypes } from '@elastic/elasticsearch';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { collectLogPatternsCommonDefinition } from '../../common/step_types/collect_log_patterns';
 
-// Fields a log level may be mapped under: match as a term OR so detection works whether
-// `log.level` is a keyword or has a `.keyword` subfield (mirrors the tracker's bool filter).
 const LOG_LEVEL_FIELDS = ['log.level.keyword', 'log.level'] as const;
 
-/** Map an occurrence count to a case severity. */
-function severityForCount(docCount: number): 'low' | 'medium' | 'high' | 'critical' {
+const severityForCount = (docCount: number): 'low' | 'medium' | 'high' | 'critical' => {
   if (docCount >= 10000) return 'critical';
   if (docCount >= 1000) return 'high';
   if (docCount >= 100) return 'medium';
   return 'low';
-}
+};
 
 interface CategorizeTextBucket {
   key: string;
@@ -35,13 +32,22 @@ interface CategorizeTextBucket {
 export const collectLogPatternsStepDefinition = createServerStepDefinition({
   ...collectLogPatternsCommonDefinition,
   handler: async (context) => {
-    const { index, lookbackDays, categoryField, timestampField, minDocCount, size, logLevels, samplingProbability } =
-      context.input;
+    const {
+      index,
+      lookbackDays,
+      categoryField,
+      timestampField,
+      minDocCount,
+      size,
+      logLevels,
+      samplingProbability,
+    } = context.input;
     const esClient = context.contextManager.getScopedEsClient();
 
     const filter: estypes.QueryDslQueryContainer[] = [
       { range: { [timestampField]: { gte: `now-${lookbackDays}d`, lte: 'now' } } },
     ];
+
     if (logLevels && logLevels.length > 0) {
       filter.push({
         bool: {
@@ -51,7 +57,6 @@ export const collectLogPatternsStepDefinition = createServerStepDefinition({
       });
     }
 
-    // The categorize_text aggregation, with a top_hits sub-agg for a representative message.
     const categorizeAgg: estypes.AggregationsAggregationContainer = {
       categorize_text: { field: categoryField, size },
       aggs: {
@@ -59,11 +64,14 @@ export const collectLogPatternsStepDefinition = createServerStepDefinition({
       },
     };
 
-    // Optionally wrap in random_sampler for affordability on busy/broad indices. random_sampler
-    // auto-scales the nested doc counts by 1/probability, so bucket counts stay meaningful.
     const aggs: Record<string, estypes.AggregationsAggregationContainer> =
       samplingProbability != null
-        ? { sampled: { random_sampler: { probability: samplingProbability }, aggs: { patterns: categorizeAgg } } }
+        ? {
+            sampled: {
+              random_sampler: { probability: samplingProbability },
+              aggs: { patterns: categorizeAgg },
+            },
+          }
         : { patterns: categorizeAgg };
 
     const response = await esClient.search(
@@ -83,6 +91,7 @@ export const collectLogPatternsStepDefinition = createServerStepDefinition({
           sampled?: { patterns?: { buckets?: CategorizeTextBucket[] } };
         }
       | undefined;
+
     const buckets =
       (samplingProbability != null
         ? aggregations?.sampled?.patterns?.buckets

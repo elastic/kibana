@@ -4,28 +4,29 @@
     "outDir": "target/types"
   },
   "include": [
-    "index.ts",
-    "common/**/*.ts",
-    "public/**/*.ts",
-    "public/**/*.tsx",
-    "server/**/*.ts",
-    "../../../../../typings/**/*"
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-http-server",
-    "@kbn/core-http-server-utils",
-    "@kbn/workflows-extensions",
-    "@kbn/workflows-management-plugin",
-    "@kbn/workflows",
-    "@kbn/zod",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/actions-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query",
+    "@kbn/utility-types",
+    "@kbn/discover-plugin"
   ]
 }

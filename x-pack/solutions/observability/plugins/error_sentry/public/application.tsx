@@ -8,17 +8,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { ErrorSentryApp } from './components/app';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ErrorSentryPublicStartDeps } from './plugin';
+import { Overview } from './components/overview';
+
+const queryClient = new QueryClient();
 
 export const renderApp = (
   core: CoreStart,
-  plugins: ErrorSentryPublicStartDeps,
-  { element }: AppMountParameters
+  { element }: AppMountParameters,
+  startPlugins: ErrorSentryPublicStartDeps
 ): (() => void) => {
   ReactDOM.render(
     core.rendering.addContext(
-      <ErrorSentryApp core={core} agentBuilder={plugins.agentBuilder} />
+      <QueryClientProvider client={queryClient}>
+        <Overview
+          http={core.http}
+          notifications={core.notifications}
+          discover={startPlugins.discover}
+        />
+      </QueryClientProvider>
     ),
     element
   );

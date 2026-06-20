@@ -7,15 +7,13 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { collectLogPatternsStepDefinition } from './collect_log_patterns';
-import {
-  getCreateGithubIssueStepDefinition,
-  type CreateGithubIssueStepDeps,
-} from './create_github_issue';
+import { introspectLogsStepDefinition } from './introspect_logs';
+import { readCaptureConfigStepDefinition } from './read_capture_config';
 
 export const registerStepDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  deps: CreateGithubIssueStepDeps
-) => {
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+): void => {
   workflowsExtensions.registerStepDefinition(collectLogPatternsStepDefinition);
-  workflowsExtensions.registerStepDefinition(getCreateGithubIssueStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(introspectLogsStepDefinition);
+  workflowsExtensions.registerStepDefinition(readCaptureConfigStepDefinition);
 };

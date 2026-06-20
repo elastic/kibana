@@ -13,7 +13,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 export const CollectLogPatternsStepTypeId = 'error-sentry.collectLogPatterns' as const;
 
 export const InputSchema = z.object({
-  index: z.string().describe('Index, alias or data stream to search (e.g. "logs-*").'),
+  index: z.string().describe('Index, alias or data stream to search (e.g. "logs.otel").'),
   lookbackDays: z
     .number()
     .int()
@@ -22,8 +22,8 @@ export const InputSchema = z.object({
     .describe('How many days back from now to search.'),
   categoryField: z
     .string()
-    .default('message')
-    .describe('Text field to categorize (e.g. "message").'),
+    .default('body.text')
+    .describe('Text field to categorize (e.g. "body.text").'),
   timestampField: z
     .string()
     .default('@timestamp')
@@ -32,7 +32,7 @@ export const InputSchema = z.object({
     .number()
     .int()
     .nonnegative()
-    .default(50)
+    .default(10)
     .describe('Drop categories with fewer than this many occurrences.'),
   size: z
     .number()
@@ -45,7 +45,7 @@ export const InputSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      'Restrict to these log levels (matched on log.level.keyword / log.level), e.g. ["ERROR","FATAL"]. Omit to categorize all messages.'
+      'Restrict to these log levels matched on log.level, e.g. ["ERROR","FATAL"]. Omit to categorize all messages.'
     ),
   samplingProbability: z
     .number()
@@ -53,7 +53,7 @@ export const InputSchema = z.object({
     .max(0.5)
     .optional()
     .describe(
-      'When set (0–0.5], wrap categorize_text in a random_sampler so the query stays affordable on busy/broad indices. Doc counts are auto-scaled by 1/probability.'
+      'When set (0-0.5], wrap categorize_text in a random_sampler so the query stays affordable on busy indices. Doc counts are auto-scaled by 1/probability.'
     ),
 });
 
@@ -61,7 +61,9 @@ export const PatternSchema = z.object({
   key: z.string().describe('The categorized log pattern (tokens common to the group).'),
   hash: z
     .string()
-    .describe('Stable short fingerprint of the pattern, suitable as a dedup marker (e.g. a case tag).'),
+    .describe(
+      'Stable short fingerprint of the pattern, suitable as a dedup marker (e.g. a case tag).'
+    ),
   docCount: z.number().describe('Number of documents matching this pattern in the window.'),
   severity: z
     .enum(['low', 'medium', 'high', 'critical'])
@@ -83,15 +85,15 @@ export const collectLogPatternsCommonDefinition: CommonStepDefinition<
 > = {
   id: CollectLogPatternsStepTypeId,
   category: StepCategory.Elasticsearch,
-  label: i18n.translate('errorSentry.collectLogPatterns.label', {
+  label: i18n.translate('xpack.errorSentry.collectLogPatterns.label', {
     defaultMessage: 'Collect log patterns',
   }),
-  description: i18n.translate('errorSentry.collectLogPatterns.description', {
+  description: i18n.translate('xpack.errorSentry.collectLogPatterns.description', {
     defaultMessage:
       'Finds recurring log patterns using the Elasticsearch categorize_text aggregation.',
   }),
   documentation: {
-    details: i18n.translate('errorSentry.collectLogPatterns.documentation.details', {
+    details: i18n.translate('xpack.errorSentry.collectLogPatterns.documentation.details', {
       defaultMessage:
         'Runs the categorize_text aggregation over {index} for the last {lookbackDays} days and returns the recurring patterns. Iterate the result with a foreach step over {ref}.',
       values: {
@@ -101,17 +103,7 @@ export const collectLogPatternsCommonDefinition: CommonStepDefinition<
       },
     }),
     examples: [
-      `## Collect recurring error patterns
-\`\`\`yaml
-- name: collect
-  type: ${CollectLogPatternsStepTypeId}
-  with:
-    index: "logs-*"
-    lookbackDays: 7
-    categoryField: "message"
-    minDocCount: 50
-    size: 20
-\`\`\``,
+      `## Collect recurring error patterns\n\`\`\`yaml\n- name: collect\n  type: ${CollectLogPatternsStepTypeId}\n  with:\n    index: "logs.otel"\n    lookbackDays: 7\n    categoryField: "body.text"\n    minDocCount: 10\n    size: 20\n\`\`\``,
     ],
   },
   inputSchema: InputSchema,

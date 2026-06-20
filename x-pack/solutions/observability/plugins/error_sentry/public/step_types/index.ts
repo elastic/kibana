@@ -6,14 +6,14 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { collectLogPatternsStepDefinition } from './collect_log_patterns';
+import { introspectLogsStepDefinition } from './introspect_logs';
+import { readCaptureConfigStepDefinition } from './read_capture_config';
 
 export const registerStepDefinitions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
-) => {
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./collect_log_patterns').then((m) => m.collectLogPatternsStepDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./create_github_issue').then((m) => m.createGithubIssueStepDefinition)
-  );
+): void => {
+  workflowsExtensions.registerStepDefinition(collectLogPatternsStepDefinition);
+  workflowsExtensions.registerStepDefinition(introspectLogsStepDefinition);
+  workflowsExtensions.registerStepDefinition(readCaptureConfigStepDefinition);
 };

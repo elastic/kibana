@@ -8,101 +8,116 @@
 import type {
   CoreSetup,
   CoreStart,
-  Logger,
   Plugin,
   PluginInitializerContext,
+  Logger,
 } from '@kbn/core/server';
-import type { FakeRawRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type {
+  WorkflowsServerPluginSetup,
   WorkflowsManagementApi,
-  WorkflowsServerPluginSetup as WorkflowsManagementSetup,
 } from '@kbn/workflows-management-plugin/server';
-import type { ErrorSentryConfig } from './config';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { CasesServerStart } from '@kbn/cases-plugin/server';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { registerStepDefinitions } from './step_types';
-import {
-  ERROR_SENTRY_CAPTURE_WORKFLOW_ID,
-  errorSentryCaptureWorkflowYaml,
-} from './workflows/capture_errors_workflow';
+import { registerGetStatusRoute } from './routes/get_status';
+import { registerGetCasesStatsRoute } from './routes/get_cases_stats';
+import { registerGetCaptureTimingRoute } from './routes/get_capture_timing';
+import { registerInstallRoutes } from './routes/install';
+import { registerRunCaptureRoute } from './routes/run_capture';
 
-const DEFAULT_SPACE_ID = 'default';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ErrorSentryServerSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ErrorSentryServerStart {}
-
-export interface ErrorSentryServerSetupDeps {
+export interface ErrorSentryServerPluginSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  workflowsManagement: WorkflowsManagementSetup;
+  workflowsManagement: WorkflowsServerPluginSetup;
+  cases: unknown;
+  actions?: unknown;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ErrorSentryServerStartDeps {}
+export interface ErrorSentryServerPluginStartDeps {
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  cases: CasesServerStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  actions?: ActionsPluginStart;
+}
 
 export class ErrorSentryServerPlugin
-  implements
-    Plugin<
-      ErrorSentryServerSetup,
-      ErrorSentryServerStart,
-      ErrorSentryServerSetupDeps,
-      ErrorSentryServerStartDeps
-    >
+  implements Plugin<void, void, ErrorSentryServerPluginSetupDeps, ErrorSentryServerPluginStartDeps>
 {
   private readonly logger: Logger;
-  private readonly initializerContext: PluginInitializerContext;
+  private managedClient?: PluginScopedManagedWorkflowsApi;
   private workflowsManagementApi?: WorkflowsManagementApi;
+  private workflowsExtensionsStart?: WorkflowsExtensionsServerPluginStart;
+  private casesStart?: CasesServerStart;
+  private agentBuilderStart?: AgentBuilderPluginStart;
+  private actionsStart?: ActionsPluginStart;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
-    this.logger = initializerContext.logger.get();
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
   }
 
-  public setup(_core: CoreSetup, plugins: ErrorSentryServerSetupDeps): ErrorSentryServerSetup {
-    registerStepDefinitions(plugins.workflowsExtensions, {
-      getGithubConfig: () => this.initializerContext.config.get<ErrorSentryConfig>().github,
-    });
-
+  setup(core: CoreSetup, plugins: ErrorSentryServerPluginSetupDeps): void {
     this.workflowsManagementApi = plugins.workflowsManagement.management;
+    registerStepDefinitions(plugins.workflowsExtensions);
+    plugins.workflowsExtensions.registerManagedWorkflowOwner('errorSentry');
 
-    return {};
+    const router = core.http.createRouter();
+    registerGetStatusRoute(router, () => {
+      if (!this.managedClient || !this.workflowsExtensionsStart) {
+        throw new Error('ErrorSentry plugin services not yet available');
+      }
+      return {
+        managedClient: this.managedClient,
+        workflowsExtensionsStart: this.workflowsExtensionsStart,
+        agentBuilder: this.agentBuilderStart,
+        actions: this.actionsStart,
+      };
+    });
+    registerGetCasesStatsRoute(router, () => {
+      if (!this.casesStart) {
+        throw new Error('ErrorSentry cases service not yet available');
+      }
+      return this.casesStart;
+    });
+    registerInstallRoutes(router, () => {
+      if (!this.managedClient) {
+        throw new Error('ErrorSentry managed client not yet available');
+      }
+      return { managedClient: this.managedClient, agentBuilder: this.agentBuilderStart };
+    });
+    registerRunCaptureRoute(router, () => {
+      if (!this.managedClient) {
+        throw new Error('ErrorSentry managed client not yet available');
+      }
+      return { managedClient: this.managedClient };
+    });
+    registerGetCaptureTimingRoute(router, () => {
+      if (!this.workflowsManagementApi) {
+        throw new Error('ErrorSentry workflows management API not yet available');
+      }
+      return this.workflowsManagementApi;
+    });
   }
 
-  public start(_core: CoreStart, _plugins: ErrorSentryServerStartDeps): ErrorSentryServerStart {
-    void this.ensureCaptureWorkflow();
-    return {};
-  }
-
-  public stop() {}
-
-  /**
-   * Idempotently create the capture-errors workflow as a normal (unmanaged) workflow so it is
-   * browsable in the Workflows app. Best-effort: failures are logged but never block startup.
-   */
-  private async ensureCaptureWorkflow(): Promise<void> {
-    const api = this.workflowsManagementApi;
-    if (!api) {
-      return;
-    }
-
-    const request = kibanaRequestFactory({ headers: {}, path: '/' } as FakeRawRequest);
+  async start(_core: CoreStart, plugins: ErrorSentryServerPluginStartDeps): Promise<void> {
+    this.workflowsExtensionsStart = plugins.workflowsExtensions;
+    this.casesStart = plugins.cases;
+    this.agentBuilderStart = plugins.agentBuilder;
+    this.actionsStart = plugins.actions;
 
     try {
-      const existing = await api.getWorkflow(ERROR_SENTRY_CAPTURE_WORKFLOW_ID, DEFAULT_SPACE_ID);
-      if (existing) {
-        this.logger.debug('Error Sentry: capture-errors workflow already present');
-        return;
-      }
-
-      await api.createWorkflow(
-        { id: ERROR_SENTRY_CAPTURE_WORKFLOW_ID, yaml: errorSentryCaptureWorkflowYaml },
-        DEFAULT_SPACE_ID,
-        request
+      this.managedClient = await plugins.workflowsExtensions.initManagedWorkflowsClient(
+        'errorSentry'
       );
-      this.logger.info('Error Sentry: capture-errors workflow created');
-    } catch (error) {
-      this.logger.warn('Error Sentry: failed to ensure capture-errors workflow', { error });
+      await this.managedClient.ready();
+    } catch (err) {
+      this.logger.error(`Failed to initialize Error Sentry managed workflows client: ${err}`);
     }
   }
+
+  stop(): void {}
 }

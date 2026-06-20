@@ -42,6 +42,7 @@
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
+    "xpack.errorSentry": "solutions/observability/plugins/error_sentry",
     "xpack.features": "platform/plugins/shared/features",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
@@ -158,7 +159,6 @@
     "xpack.watcher": "platform/plugins/private/watcher",
     "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
     "xpack.notificationCenter": "platform/plugins/shared/notification_center"
-    
   },
   "exclude": ["examples"],
   "translations": [

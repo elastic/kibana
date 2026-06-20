@@ -6,11 +6,9 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-
 export { config } from './config';
-export type { ErrorSentryConfig } from './config';
 
-export const plugin = async (initializerContext: PluginInitializerContext) => {
+export const plugin = async (context: PluginInitializerContext) => {
   const { ErrorSentryServerPlugin } = await import('./plugin');
-  return new ErrorSentryServerPlugin(initializerContext);
+  return new ErrorSentryServerPlugin(context);
 };
