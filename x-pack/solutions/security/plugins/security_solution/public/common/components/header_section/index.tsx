@@ -43,6 +43,9 @@ const useStyles = (border?: boolean, height?: number) => {
         margin-bottom: 0 !important;
       }
     `,
+    tooltipWrapper: css`
+      margin-left: ${euiTheme.size.s};
+    `,
   };
 };
 
@@ -177,16 +180,16 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                         <h2 data-test-subj="header-section-title">
                           <span className="eui-textBreakNormal">{title}</span>
                           {tooltip && (
-                            <>
+                            <span css={styles.tooltipWrapper}>
                               <EuiIconTip
                                 color="subdued"
                                 title={tooltipTitle}
                                 content={tooltip}
                                 iconProps={tooltipIconProps}
-                                size="l"
+                                size="s"
                                 type="info"
                               />
-                            </>
+                            </span>
                           )}
                         </h2>
                       </EuiTitle>
