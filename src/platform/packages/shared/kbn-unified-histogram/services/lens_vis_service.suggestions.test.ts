@@ -9,8 +9,9 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { XYVisualizationState } from '@kbn/lens-plugin/public';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { allSuggestionsMock } from '../__mocks__/suggestions';
+import { allSuggestionsMock, histogramESQLSuggestionMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { UnifiedHistogramSuggestionType } from '../types';
@@ -429,5 +430,131 @@ describe('LensVisService suggestions', () => {
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+  });
+
+  describe('Legend positioning overrides for ES|QL in Discover', () => {
+    test('should force right legend position in getAllSuggestions for transformational ES|QL', async () => {
+      // Create a mock XY suggestion with bottom legend position (like Dashboard default)
+      const mockXYSuggestionWithBottomLegend = {
+        ...histogramESQLSuggestionMock,
+        visualizationState: {
+          ...(histogramESQLSuggestionMock.visualizationState as XYVisualizationState),
+          legend: {
+            isVisible: true,
+            position: 'bottom' as const, // Start with bottom (Dashboard default)
+            layout: 'list' as const,
+          },
+        },
+      };
+
+      const lensVis = await getLensVisMock({
+        filters: [],
+        query: { esql: 'from the-data-view | STATS count = COUNT(*) BY category' },
+        dataView: dataViewMock,
+        timeInterval: 'auto',
+        breakdownField: undefined,
+        columns: [
+          {
+            id: 'category',
+            name: 'category',
+            meta: { type: 'string' },
+          },
+          {
+            id: 'count',
+            name: 'count',
+            meta: { type: 'number' },
+          },
+        ],
+        isPlainRecord: true,
+        allSuggestions: [mockXYSuggestionWithBottomLegend],
+        isTransformationalESQL: true,
+      });
+
+      // Should force legend position to right for ES|QL in Discover
+      const xyState = lensVis.currentSuggestionContext?.suggestion?.visualizationState as XYVisualizationState;
+      expect(xyState.legend.position).toBe('right');
+      expect(xyState.legend.isVisible).toBe(true);
+    });
+
+    test('should force right legend position in getHistogramSuggestionForESQL for non-transformational ES|QL', async () => {
+      // Create a mock XY suggestion with bottom legend position
+      const mockXYSuggestionWithBottomLegend = {
+        ...histogramESQLSuggestionMock,
+        visualizationState: {
+          ...(histogramESQLSuggestionMock.visualizationState as XYVisualizationState),
+          legend: {
+            isVisible: true,
+            position: 'bottom' as const, // Start with bottom (Dashboard default)
+            layout: 'list' as const,
+          },
+        },
+      };
+
+      const lensVis = await getLensVisMock({
+        filters: [],
+        query: { esql: 'from the-data-view | limit 100' },
+        dataView: dataViewMock,
+        timeInterval: 'auto',
+        breakdownField: undefined,
+        columns: [],
+        isPlainRecord: true,
+        allSuggestions: [mockXYSuggestionWithBottomLegend],
+        isTransformationalESQL: false,
+      });
+
+      // Should force legend position to right for ES|QL histogram in Discover
+      expect(lensVis.currentSuggestionContext?.type).toBe(
+        UnifiedHistogramSuggestionType.histogramForESQL
+      );
+      const xyState = lensVis.currentSuggestionContext?.suggestion?.visualizationState as XYVisualizationState;
+      expect(xyState.legend.position).toBe('right');
+      expect(xyState.legend.isVisible).toBe(true);
+    });
+
+    test('should not modify non-XY suggestions', async () => {
+      const mockDatatableSuggestion = {
+        title: 'Table',
+        score: 0.5,
+        hide: false,
+        previewIcon: 'table',
+        visualizationId: 'lnsDatatable',
+        visualizationState: {
+          columns: [],
+        },
+        datasourceState: {},
+        keptLayerIds: [],
+        changeType: 'initial' as const,
+        columns: 2,
+      };
+
+      const lensVis = await getLensVisMock({
+        filters: [],
+        query: { esql: 'from the-data-view | STATS count = COUNT(*) BY category' },
+        dataView: dataViewMock,
+        timeInterval: 'auto',
+        breakdownField: undefined,
+        columns: [
+          {
+            id: 'category',
+            name: 'category',
+            meta: { type: 'string' },
+          },
+          {
+            id: 'count',
+            name: 'count',
+            meta: { type: 'number' },
+          },
+        ],
+        isPlainRecord: true,
+        allSuggestions: [mockDatatableSuggestion],
+        isTransformationalESQL: true,
+      });
+
+      // Should not modify datatable suggestions
+      expect(lensVis.currentSuggestionContext?.suggestion?.visualizationId).toBe('lnsDatatable');
+      expect(lensVis.currentSuggestionContext?.suggestion?.visualizationState).not.toHaveProperty(
+        'legend'
+      );
+    });
   });
 });
