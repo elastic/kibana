@@ -25,7 +25,8 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 const defaultExecutionIndexConfig = {
   executionIndexRolloverTaskInterval: DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL,
   executionIndexRolloverMaxAge: DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE,
-  executionIndexRolloverMaxPrimaryShardSize: DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE,
+  executionIndexRolloverMaxPrimaryShardSize:
+    DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE,
   executionIndexCleanupTaskInterval: DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
   executionIndexCleanupMinIndexAge: DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE,
 } as const;
