@@ -59,6 +59,10 @@ export type VisPanelConfigInput = z.infer<typeof visPanelConfigInputSchema>;
  */
 export const panelRequestSchema = z.object({
   source: z.literal('request'),
+  type: z
+    .literal('vis')
+    .default('vis')
+    .describe('Panel type to resolve. Only "vis" (Lens) is currently resolvable from a request.'),
   grid: panelGridSchema,
   query: z.string().describe('A natural language query describing the desired visualization.'),
   index: z

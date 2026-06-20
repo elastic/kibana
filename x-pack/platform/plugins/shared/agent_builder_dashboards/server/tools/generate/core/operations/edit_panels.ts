@@ -114,7 +114,7 @@ export const editPanelsOperation = defineOperation({
       const attempts = await Promise.all(
         validPanelRequestEdits.map(({ panelInput, existingPanel }) =>
           resolvePanelContent({
-            type: 'vis',
+            type: panelInput.type,
             operationType: operation.operation,
             identifier: panelInput.panelId,
             nlQuery: panelInput.query,

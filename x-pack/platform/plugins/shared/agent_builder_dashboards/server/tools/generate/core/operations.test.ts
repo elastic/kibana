@@ -238,6 +238,7 @@ describe('executeDashboardOperations', () => {
             },
             {
               source: 'request',
+              type: 'vis',
               query: 'show total requests',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -249,6 +250,7 @@ describe('executeDashboardOperations', () => {
             },
             {
               source: 'request',
+              type: 'vis',
               query: 'show p95 latency',
               sectionId: 'section-a',
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -384,11 +386,13 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               source: 'request',
+              type: 'vis',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
+              type: 'vis',
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -448,11 +452,13 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               source: 'request',
+              type: 'vis',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
+              type: 'vis',
               query: 'show p95 latency',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -574,6 +580,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               source: 'request',
+              type: 'vis',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -586,6 +593,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               source: 'request',
+              type: 'vis',
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -602,6 +610,7 @@ describe('executeDashboardOperations', () => {
     expect(resolvePanelContent).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
+        type: 'vis',
         operationType: 'add_section',
         identifier: 'show total requests',
       })
@@ -609,6 +618,7 @@ describe('executeDashboardOperations', () => {
     expect(resolvePanelContent).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
+        type: 'vis',
         operationType: 'add_section',
         identifier: 'show error rate',
       })
@@ -669,6 +679,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               source: 'request',
+              type: 'vis',
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -679,6 +690,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               source: 'request',
+              type: 'vis',
               query: 'show error rate',
               grid: { x: 0, y: 1, w: 24, h: 9 },
             },
@@ -749,6 +761,7 @@ describe('executeDashboardOperations', () => {
             panels: [
               {
                 source: 'request',
+                type: 'vis',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
@@ -759,6 +772,7 @@ describe('executeDashboardOperations', () => {
             panels: [
               {
                 source: 'request',
+                type: 'vis',
                 query: 'show error rate',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1063,11 +1077,13 @@ describe('executeDashboardOperations', () => {
             panels: [
               {
                 source: 'request',
+                type: 'vis',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
+                type: 'vis',
                 query: 'show error rate',
                 sectionId: 'section-a',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -1121,9 +1137,15 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { source: 'request', panelId: 'panel-1', query: 'turn this into a bar chart' },
               {
                 source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'turn this into a bar chart',
+              },
+              {
+                source: 'request',
+                type: 'vis',
                 panelId: 'section-panel-1',
                 query: 'turn this into a line chart',
               },
@@ -1174,12 +1196,24 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ source: 'request', panelId: 'panel-1', query: 'make this a bar chart' }],
+            panels: [
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'make this a bar chart',
+              },
+            ],
           },
           {
             operation: 'edit_panels',
             panels: [
-              { source: 'request', panelId: 'panel-1', query: 'now make this a line chart' },
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'now make this a line chart',
+              },
             ],
           },
         ],
@@ -1237,7 +1271,14 @@ describe('executeDashboardOperations', () => {
           { operation: 'remove_panels', panelIds: ['panel-1'] },
           {
             operation: 'edit_panels',
-            panels: [{ source: 'request', panelId: 'panel-1', query: 'make this a bar chart' }],
+            panels: [
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'make this a bar chart',
+              },
+            ],
           },
         ],
         logger,
@@ -1268,11 +1309,13 @@ describe('executeDashboardOperations', () => {
             panels: [
               {
                 source: 'request',
+                type: 'vis',
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
+                type: 'vis',
                 query: 'show p95 latency',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1323,7 +1366,9 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ source: 'request', panelId: 'panel-1', query: 'refine this analysis' }],
+            panels: [
+              { source: 'request', type: 'vis', panelId: 'panel-1', query: 'refine this analysis' },
+            ],
           },
         ],
         logger,
@@ -1388,8 +1433,18 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { source: 'request', panelId: 'panel-1', query: 'make this a bar chart' },
-              { source: 'request', panelId: 'panel-2', query: 'make this a line chart' },
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'make this a bar chart',
+              },
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-2',
+                query: 'make this a line chart',
+              },
             ],
           },
         ],
@@ -1446,9 +1501,19 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { source: 'request', panelId: 'panel-1', query: 'first edit' },
-              { source: 'request', panelId: 'panel-2', query: 'edit a different panel' },
-              { source: 'request', panelId: 'panel-1', query: 'second edit of same panel' },
+              { source: 'request', type: 'vis', panelId: 'panel-1', query: 'first edit' },
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-2',
+                query: 'edit a different panel',
+              },
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'second edit of same panel',
+              },
             ],
           },
         ],
@@ -1604,7 +1669,12 @@ describe('executeDashboardOperations', () => {
                 panelId: 'md-1',
                 config: { content: '### New summary' },
               },
-              { source: 'request', panelId: 'panel-1', query: 'turn into a bar chart' },
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'turn into a bar chart',
+              },
             ],
           },
         ],

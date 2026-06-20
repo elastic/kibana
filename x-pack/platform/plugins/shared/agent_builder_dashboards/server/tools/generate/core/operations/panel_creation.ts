@@ -128,7 +128,7 @@ export const resolvePanelCreationRequests = async ({
             requests.map(async (request) => ({
               request,
               resolvedPanel: await resolvePanelContent({
-                type: 'vis',
+                type: request.panelInput.type,
                 operationType: request.operationType,
                 identifier: request.panelInput.query,
                 nlQuery: request.panelInput.query,

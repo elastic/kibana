@@ -32,6 +32,17 @@ import {
  * `type` -> definition registry. Operations import from here and never reach into
  * a specific panel implementation, so adding a panel type means adding its module
  * plus an entry here.
+ *
+ * Panel inputs have two orthogonal axes:
+ * - `source`: where the content comes from — `'config'` (already-resolved,
+ *   passed by value) or `'request'` (resolved asynchronously from a query).
+ * - `type`: which panel type it is — `'vis'`, `'markdown'`, … (maps to an
+ *   embeddable and a {@link PanelTypeDefinition}).
+ *
+ * Both axes carry a `type`, so the two are independent. Today `source: 'request'`
+ * only resolves `type: 'vis'`; a second resolvable type (or a markdown-from-query
+ * path) is purely additive — add its request schema, resolver, and registry entry
+ * without touching the operation handlers.
  */
 export type { PanelRequestInput, EditPanelRequestInput } from './vis';
 export type { PanelContent, PanelTypeDefinition } from './panel_type';
