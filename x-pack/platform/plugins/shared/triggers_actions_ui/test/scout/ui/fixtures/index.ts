@@ -45,6 +45,7 @@ export {
 export {
   makeEsQueryRule,
   makeIndexThresholdRule,
+  makeBackfillRule,
   fillIndexThresholdForm,
   defineIndexThresholdRule,
   THRESHOLD_TEST_INDEX,

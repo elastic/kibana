@@ -95,8 +95,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 63,
+        "column": 9
       }
     },
     {
@@ -109,8 +109,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 81,
-        "column": 7
+        "line": 85,
+        "column": 22
       }
     },
     {

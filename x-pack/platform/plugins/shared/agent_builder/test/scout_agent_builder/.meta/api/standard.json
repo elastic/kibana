@@ -1127,8 +1127,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/plugins_installation_api.spec.ts",
-        "line": 62,
-        "column": 12
+        "line": 64,
+        "column": 21
       }
     },
     {

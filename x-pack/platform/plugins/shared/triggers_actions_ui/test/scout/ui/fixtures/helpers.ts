@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -151,6 +152,51 @@ export const makeEsQueryRule = (namePrefix: string) => ({
   },
   schedule: { interval: '1m' },
   tags: [namePrefix],
+});
+
+/**
+ * Creates a minimal SIEM query rule body suitable for backfill scheduling tests.
+ * siem.queryRule has autoRecoverAlerts:false so it is a non-lifecycle rule
+ * and is therefore supported by the backfill API (unlike .es-query / .index-threshold).
+ * Each call generates a unique SIEM ruleId so multiple rules can coexist.
+ */
+export const makeBackfillRule = (namePrefix = 'scout-backfill') => ({
+  name: `${namePrefix}-${Date.now()}`,
+  rule_type_id: 'siem.queryRule',
+  consumer: 'siem',
+  enabled: true,
+  actions: [],
+  schedule: { interval: '12h' },
+  tags: ['backfill-test'],
+  params: {
+    author: [],
+    description: 'Scout backfill test rule',
+    falsePositives: [],
+    from: 'now-86460s',
+    ruleId: uuidv4(),
+    immutable: false,
+    license: '',
+    outputIndex: '',
+    meta: {},
+    maxSignals: 100,
+    riskScore: 21,
+    riskScoreMapping: [],
+    severity: 'low',
+    severityMapping: [],
+    threat: [],
+    to: 'now',
+    references: [],
+    version: 1,
+    exceptionsList: [],
+    relatedIntegrations: [],
+    requiredFields: [],
+    setup: '',
+    type: 'query',
+    language: 'kuery',
+    index: ['.kibana'],
+    query: '*',
+    filters: [],
+  },
 });
 
 export const makeIndexThresholdRule = (namePrefix: string) => ({

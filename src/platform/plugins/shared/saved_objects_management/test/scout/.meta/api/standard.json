@@ -575,8 +575,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 62,
-        "column": 10
+        "line": 63,
+        "column": 20
       }
     },
     {
@@ -589,8 +589,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 80,
-        "column": 10
+        "line": 81,
+        "column": 20
       }
     },
     {
@@ -603,8 +603,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 98,
-        "column": 10
+        "line": 99,
+        "column": 20
       }
     },
     {
@@ -617,8 +617,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 116,
-        "column": 10
+        "line": 117,
+        "column": 20
       }
     },
     {
@@ -1111,8 +1111,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_large.spec.ts",
-        "line": 86,
-        "column": 10
+        "line": 88,
+        "column": 16
       }
     },
     {

@@ -36,8 +36,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 120,
-        "column": 7
+        "line": 122,
+        "column": 5
       }
     },
     {
@@ -49,8 +49,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 144,
+        "column": 20
       }
     },
     {
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 161,
-        "column": 7
+        "line": 162,
+        "column": 20
       }
     },
     {
