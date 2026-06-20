@@ -32,6 +32,29 @@ if (!process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION) {
       requiredVersion +
       '.';
 
+    // In development (repo checkout), add actionable guidance.
+    // .nvmrc only exists in the repo, not in production builds.
+    var isDev = false;
+    try {
+      require('fs').accessSync(require('path').resolve(__dirname, '..', '..', '.nvmrc'));
+      isDev = true;
+    } catch (e) {
+      /* not in repo / production build */
+    }
+
+    if (isDev) {
+      errorMessage +=
+        '\n\nTo fix, run your command with the setup script:' +
+        '\n  source scripts/ensure_llm_sandbox_env.sh && <your command>' +
+        '\n\nOr manually switch Node.js via nvm:' +
+        '\n  export NVM_DIR="$HOME/.nvm"' +
+        '\n  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' +
+        '\n  nvm install' +
+        '\n  nvm use' +
+        '\n\nIf nvm is not available, you can bypass this check (unsafe):' +
+        '\n  export UNSAFE_DISABLE_NODE_VERSION_VALIDATION=1';
+    }
+
     // Actions to apply when validation fails: error report + exit.
     console.error(errorMessage);
     process.exit(1);
