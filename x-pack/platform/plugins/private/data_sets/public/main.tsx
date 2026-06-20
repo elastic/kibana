@@ -214,11 +214,16 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
       setSelectedItems([]);
       setPendingDeleteDataSource(null);
     } catch (e) {
-      setDeleteDataSourceError(getFlyoutSaveErrorMessage(e));
+      const message = getFlyoutSaveErrorMessage(e);
+      setDeleteDataSourceError(message);
+      toasts.addDanger({
+        title: mainTranslations.confirmDeleteDataSource.errorTitle,
+        text: message,
+      });
     } finally {
       setIsDeletingDataSource(false);
     }
-  }, [dataClient, pendingDeleteDataSource]);
+  }, [dataClient, pendingDeleteDataSource, toasts]);
 
   const cancelDeleteDataSource = useCallback(() => {
     if (isDeletingDataSource) {
@@ -266,11 +271,16 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
       setSelectedDataSets([]);
       setPendingDeleteDataSet(null);
     } catch (e) {
-      setDeleteDataSetError(getFlyoutSaveErrorMessage(e));
+      const message = getFlyoutSaveErrorMessage(e);
+      setDeleteDataSetError(message);
+      toasts.addDanger({
+        title: mainTranslations.confirmDeleteDataSet.errorTitle,
+        text: message,
+      });
     } finally {
       setIsDeletingDataSet(false);
     }
-  }, [dataSetsClient, pendingDeleteDataSet]);
+  }, [dataSetsClient, pendingDeleteDataSet, toasts]);
 
   const cancelDeleteDataSet = useCallback(() => {
     if (isDeletingDataSet) {
@@ -448,9 +458,16 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
                       iconType="trash"
                       onClick={() => {
                         void (async () => {
-                          await dataSetsClient.delete(selectedDataSets.map((item) => item.name));
-                          setDataSetsRaw(await dataSetsClient.get());
-                          setSelectedDataSets([]);
+                          try {
+                            await dataSetsClient.delete(selectedDataSets.map((item) => item.name));
+                            setDataSetsRaw(await dataSetsClient.get());
+                            setSelectedDataSets([]);
+                          } catch (e) {
+                            toasts.addDanger({
+                              title: mainTranslations.confirmDeleteDataSet.errorTitle,
+                              text: getFlyoutSaveErrorMessage(e),
+                            });
+                          }
                         })();
                       }}
                     >
@@ -533,9 +550,16 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
                       iconType="trash"
                       onClick={() => {
                         void (async () => {
-                          await dataClient.delete(selectedItems.map((item) => item.name));
-                          setItems(await dataClient.get());
-                          setSelectedItems([]);
+                          try {
+                            await dataClient.delete(selectedItems.map((item) => item.name));
+                            setItems(await dataClient.get());
+                            setSelectedItems([]);
+                          } catch (e) {
+                            toasts.addDanger({
+                              title: mainTranslations.confirmDeleteDataSource.errorTitle,
+                              text: getFlyoutSaveErrorMessage(e),
+                            });
+                          }
                         })();
                       }}
                     >
@@ -586,6 +610,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
       items,
       selectedDataSets,
       selectedItems,
+      toasts,
     ]
   );
 
