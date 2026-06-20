@@ -18,11 +18,19 @@ import { format } from 'util';
  * @param logLevel The {@link LogLevelId} to set the Diag logger to.
  */
 export function setDiagLogger(logger: Logger, logLevel?: LogLevelId) {
+  let lastExportTimeout = 0;
   const diagLogger: DiagLogger = {
     debug: (message, ...args) => {
       return logger.debug(() => format(message, ...args));
     },
     error: (message, ...args) => {
+      // We're OK with random export timeout errors. It could mean that Kibana is under heavy load.
+      // However, if it happens repeatedly within a short period of time, it's likely a problem, and we want to log it.
+      if (message.includes('Export took longer than') && Date.now() - lastExportTimeout > 60_000) {
+        lastExportTimeout = Date.now();
+        return;
+      }
+
       return logger.error(() => format(message, ...args));
     },
     info: (message, ...args) => {
