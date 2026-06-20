@@ -14,7 +14,7 @@ import { getServicesRequestSchema } from '../../agent_builder/services/get_servi
 import type { GetServicesResponse } from '../../agent_builder/services/get_services';
 
 const getServicesRoute = createApmAgentBuilderRoute({
-  endpoint: 'GET /api/apm/agent_builder/services 2023-10-31',
+  endpoint: 'GET /api/apm/services 2023-10-31',
   params: z.object({
     query: getServicesRequestSchema,
   }),

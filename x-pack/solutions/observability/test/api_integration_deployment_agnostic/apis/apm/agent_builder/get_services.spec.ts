@@ -15,13 +15,13 @@ const APM_SERVICE_2 = 'agent-builder-svc-2';
 const START = new Date('2024-01-01T00:00:00.000Z');
 const END = new Date('2024-01-01T00:15:00.000Z');
 
-const ENDPOINT = '/api/apm/agent_builder/services';
+const ENDPOINT = '/api/apm/services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
 
-  describe('GET /api/apm/agent_builder/services', () => {
+  describe('GET /api/apm/services', () => {
     describe('when there is no data', () => {
       it('returns an empty services list', async () => {
         const supertest = await roleScopedSupertest.getSupertestWithRoleScope('editor');
