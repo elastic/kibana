@@ -84,8 +84,9 @@ export const panelRequestSchema = z.object({
   source: z.literal('request'),
   type: z
     .literal('vis')
-    .default('vis')
-    .describe('Panel type to resolve. Only "vis" (Lens) is currently resolvable from a request.'),
+    .describe(
+      'Resolve a Lens visualization. Use "vis" for standard charts (metric, xy, bar, line, area, pie, table, gauge, heatmap, …). For visualizations Lens cannot express (small multiples / faceting, repeated layers, bespoke encodings), use type: "vega" instead.'
+    ),
   grid: panelGridSchema,
   query: z
     .string()

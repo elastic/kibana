@@ -99,6 +99,58 @@ describe('executeDashboardOperations', () => {
       createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } });
   };
 
+  it('resolves a vega request panel and appends the resolved content', async () => {
+    const VEGA_EMBEDDABLE_TYPE = 'vega';
+    const resolvedRequests: Array<{ type: string; identifier: string; nlQuery: string }> = [];
+    const resolvePanelContent: ResolvePanelContent = async (request) => {
+      resolvedRequests.push({
+        type: request.type,
+        identifier: request.identifier,
+        nlQuery: request.nlQuery,
+      });
+      return createResolvedPanelContent({
+        type: VEGA_EMBEDDABLE_TYPE,
+        config: { spec: '{"mark":"bar"}' },
+      });
+    };
+
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Dash', description: '', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vega',
+              query: 'small multiples of cpu per host',
+              grid: { x: 0, y: 0, w: 48, h: 12 },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent,
+    });
+
+    expect(resolvedRequests).toEqual([
+      {
+        type: 'vega',
+        identifier: 'small multiples of cpu per host',
+        nlQuery: 'small multiples of cpu per host',
+      },
+    ]);
+    expect(result.failures).toEqual([]);
+    const panels = getPanelsOnly(result.dashboardData.panels);
+    expect(panels).toHaveLength(1);
+    expect(panels[0]).toEqual(
+      expect.objectContaining({
+        type: VEGA_EMBEDDABLE_TYPE,
+        config: { spec: '{"mark":"bar"}' },
+      })
+    );
+  });
+
   it('executes operations in order', async () => {
     const baseDashboardData: DashboardAttachmentData = {
       title: 'Original title',

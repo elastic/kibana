@@ -9,6 +9,11 @@ export {
   buildVisualizationConfig,
   type BuildVisualizationConfigParams,
 } from './visualization/build_visualization_config';
+export {
+  buildVegaConfig,
+  type BuildVegaConfigParams,
+  type BuildVegaConfigResult,
+} from './visualization/build_vega_config';
 export { getChartTypeSelectionPromptContent } from './visualization/chart_type_guidance';
 export type { VisualizationConfig } from './visualization/types';
 export { getExecutionState, getWorkflowOutput, type WorkflowExecutionState } from './workflows';

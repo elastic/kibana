@@ -13,8 +13,9 @@ import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import {
   PANEL_TYPE_DEFINITIONS,
   editPanelItemSchema,
+  toEditPanelResolutionRequest,
   type EditPanelItem,
-  type EditPanelRequestInput,
+  type EditRequestPanelInput,
 } from './panels';
 import { defineOperation } from './types';
 
@@ -38,7 +39,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (source: "request") and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (source: "request", type: "vis"), Vega visualization panels (source: "request", type: "vega"), and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -51,7 +52,7 @@ export const editPanelsOperation = defineOperation({
     };
 
     const hasPanelRequestEdits = operation.panels.some(
-      (panelInput): panelInput is EditPanelRequestInput => panelInput.source === 'request'
+      (panelInput): panelInput is EditRequestPanelInput => panelInput.source === 'request'
     );
     if (hasPanelRequestEdits && !resolvePanelContent) {
       throw new Error(missingPanelResolverError);
@@ -101,8 +102,12 @@ export const editPanelsOperation = defineOperation({
 
     // Resolve valid panel request edits in parallel from the entry-time snapshot.
     const validPanelRequestEdits = validEdits.filter(
-      (validEdit): validEdit is ValidEdit & { panelInput: EditPanelRequestInput } =>
-        validEdit.panelInput.source === 'request'
+      (
+        validEdit
+      ): validEdit is ValidEdit & {
+        panelInput: EditRequestPanelInput;
+        existingPanel: AttachmentPanel;
+      } => validEdit.panelInput.source === 'request' && validEdit.existingPanel !== undefined
     );
 
     const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
@@ -113,15 +118,9 @@ export const editPanelsOperation = defineOperation({
 
       const attempts = await Promise.all(
         validPanelRequestEdits.map(({ panelInput, existingPanel }) =>
-          resolvePanelContent({
-            type: panelInput.type,
-            operationType: operation.operation,
-            identifier: panelInput.panelId,
-            nlQuery: panelInput.query,
-            chartType: panelInput.chartType,
-            esql: panelInput.esql,
-            existingPanel,
-          })
+          resolvePanelContent(
+            toEditPanelResolutionRequest(panelInput, operation.operation, existingPanel)
+          )
         )
       );
       validPanelRequestEdits.forEach(({ panelInput }, i) => {
