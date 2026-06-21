@@ -129,11 +129,13 @@ export interface MenuItem {
 }
 
 /**
- * The complete navigation structure containing primary and footer items.
+ * The complete navigation structure containing primary, overflow, and footer items.
  */
 export interface NavigationStructure {
   /** Items displayed in the footer area of the navigation. */
   footerItems: MenuItem[];
+  /** Items that are always placed in the overflow ("More") menu. */
+  overflowItems?: MenuItem[];
   /** Items displayed in the primary/main area of the navigation. */
   primaryItems: MenuItem[];
 }
@@ -160,8 +162,10 @@ export interface SideNavLogo {
 export interface NavigationProps {
   /** The active item ID, used for highlighting the current item. */
   activeItemId?: string;
-  /** Whether the navigation is collapsed. */
+  /** Whether the secondary navigation side panel is collapsed. */
   isCollapsed: boolean;
+  /** Whether primary navigation labels are hidden (icon-only mode). Defaults to false. */
+  hidePrimaryLabels?: boolean;
   /** The navigation structure containing primary, secondary, and footer items. */
   items: NavigationStructure;
   /** The logo object containing the route ID, href, label, and type. */

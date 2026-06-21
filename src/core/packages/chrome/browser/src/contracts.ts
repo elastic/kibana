@@ -303,6 +303,21 @@ export interface ChromeStart {
     setIsCollapsed(isCollapsed: boolean): void;
 
     /**
+     * Get an observable of whether primary navigation labels are hidden.
+     */
+    getHidePrimaryLabels$(): Observable<boolean>;
+
+    /**
+     * Get whether primary navigation labels are hidden synchronously.
+     */
+    getHidePrimaryLabels(): boolean;
+
+    /**
+     * Set whether primary navigation labels are hidden.
+     */
+    setHidePrimaryLabels(hidePrimaryLabels: boolean): void;
+
+    /**
      * Get an observable of the current width of the side nav.
      */
     getWidth$(): Observable<number>;

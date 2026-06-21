@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import { euiCanAnimate } from '@elastic/eui';
 import type { LayoutState } from './layout.types';
 
 const cssProp = css`
@@ -30,9 +31,19 @@ const cssProp = css`
     'footer footer footer';
 `;
 
+const getGridTransitionStyles = (navigationWidthTransition?: string) =>
+  navigationWidthTransition
+    ? css`
+        ${euiCanAnimate} {
+          transition: grid-template-columns ${navigationWidthTransition};
+        }
+      `
+    : undefined;
+
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
-  const { navigationWidth, sidebarWidth, bannerHeight, headerHeight, footerHeight } = layoutState;
+  const { navigationWidth, sidebarWidth, bannerHeight, headerHeight, footerHeight, navigationWidthTransition } =
+    layoutState;
 
   const style = {
     gridTemplateColumns: `
@@ -49,7 +60,7 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
   };
 
   return {
-    css: cssProp,
+    css: [cssProp, getGridTransitionStyles(navigationWidthTransition)],
     style,
   };
 };

@@ -24,7 +24,7 @@ export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
   hasContent?: boolean;
   href?: string;
   iconType: IconType;
-  isCollapsed: boolean;
+  hidePrimaryLabels: boolean;
   isCurrent?: boolean;
   isHighlighted: boolean;
   isHorizontal?: boolean;
@@ -46,7 +46,7 @@ export const PrimaryMenuItem = forwardRef<
       href,
       iconType,
       id,
-      isCollapsed,
+      hidePrimaryLabels,
       isCurrent,
       isHighlighted,
       isHorizontal,
@@ -78,8 +78,8 @@ export const PrimaryMenuItem = forwardRef<
 
     const getTooltipContent = () => {
       if (hasContent) return null;
-      if (isCollapsed) return badgeType ? getBadgeContent(children) : children;
-      if (!isCollapsed && badgeType) return getBadgeContent();
+      if (hidePrimaryLabels) return badgeType ? getBadgeContent(children) : children;
+      if (!hidePrimaryLabels && badgeType) return getBadgeContent();
 
       return null;
     };
@@ -94,7 +94,7 @@ export const PrimaryMenuItem = forwardRef<
         id={id}
         isCurrent={isCurrent}
         isHighlighted={isHighlighted}
-        isLabelVisible={!isCollapsed}
+        isLabelVisible={!hidePrimaryLabels}
         isNew={isNew}
         ref={ref}
         {...props}

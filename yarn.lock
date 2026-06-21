@@ -5401,6 +5401,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-browser-navigation-utils@link:src/core/packages/chrome/navigation-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-browser@link:src/core/packages/chrome/browser":
   version "0.0.0"
   uid ""
@@ -5418,6 +5422,10 @@
   uid ""
 
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-navigation-customization@link:src/core/packages/chrome/navigation-customization":
   version "0.0.0"
   uid ""
 
@@ -8014,6 +8022,10 @@
   uid ""
 
 "@kbn/moon@link:packages/kbn-moon":
+  version "0.0.0"
+  uid ""
+
+"@kbn/navigation-customization-components@link:src/platform/packages/shared/navigation-customization-components":
   version "0.0.0"
   uid ""
 

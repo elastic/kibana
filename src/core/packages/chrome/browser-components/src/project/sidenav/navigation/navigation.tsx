@@ -28,6 +28,7 @@ import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
+  hidePrimaryLabels: boolean;
   setWidth: (width: number) => void;
   onToggleCollapsed?: (isCollapsed: boolean) => void;
 }
@@ -37,6 +38,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const isNextChrome = useIsNextChrome();
   const [clickedActiveItemId, setClickedActiveItemId] = useState<string | undefined>();
   const [, rerenderNestedPanels] = useState(0);
+  const onCustomizeNavigation = useCustomizeNavigation();
 
   useEffect(() => {
     return subscribeSidePanelNestedPanelRenderers(() => {
@@ -90,11 +92,13 @@ export const Navigation = (props: ChromeNavigationProps) => {
         items={navItems}
         logo={logoItem}
         isCollapsed={props.isCollapsed}
+        hidePrimaryLabels={props.hidePrimaryLabels}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={clickedActiveItemId ?? activeItemId}
         onItemClick={handleItemClick}
         renderSidePanelNestedPanel={renderSidePanelNestedPanel}
+        onCustomizeNavigation={onCustomizeNavigation}
         showTopSeparator={isNextChrome}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
@@ -123,6 +127,7 @@ const useNavigationItems = (): (NavigationItems & {
         const navigationItems = toNavigationItems(
           nav.navigationTree,
           nav.activeNodes,
+          nav.overflowItemIds,
           panelStateManager,
           isNextChrome
         );
@@ -139,4 +144,11 @@ const useNavigationItems = (): (NavigationItems & {
   }, [chrome, basePath, isNextChrome, panelStateManager]);
 
   return useObservable(items$, null);
+};
+
+const useCustomizeNavigation = (): (() => void) | undefined => {
+  const chrome = useChromeService();
+  const handler$ = useMemo(() => chrome.project.getCustomizeNavigationHandler$(), [chrome]);
+  const handler = useObservable(handler$, null);
+  return handler ?? undefined;
 };

@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PRIMARY_NAVIGATION_ID } from '../constants';
+import { SIDE_PANEL_ID } from '../constants';
 
 interface Props {
   isCollapsed: boolean;
@@ -37,7 +37,7 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
 };
 
 /**
- * Collapse button for the side navigation
+ * Collapse button for the secondary navigation side panel.
  */
 export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
   const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
@@ -75,7 +75,7 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
           }
           aria-pressed={!isCollapsed}
           aria-expanded={!isCollapsed}
-          aria-controls={PRIMARY_NAVIGATION_ID}
+          aria-controls={SIDE_PANEL_ID}
           onClick={() => toggle(!isCollapsed)}
         />
       </EuiToolTip>

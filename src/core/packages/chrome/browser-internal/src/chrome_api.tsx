@@ -79,6 +79,11 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    setNavigationCustomization: (customization) =>
+      projectNavigation.setNavigationCustomization(customization),
+    getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
+    registerCustomizeNavigationHandler: (handler) =>
+      projectNavigation.registerCustomizeNavigationHandler(handler),
   };
 
   let appHeaderRegistrationId = 0;
@@ -170,6 +175,9 @@ export function createChromeApi({
       getIsCollapsed$: () => state.sideNav.collapsed.$,
       getIsCollapsed: () => state.sideNav.collapsed.get(),
       setIsCollapsed: state.sideNav.collapsed.set,
+      getHidePrimaryLabels$: () => state.sideNav.hidePrimaryLabels.$,
+      getHidePrimaryLabels: () => state.sideNav.hidePrimaryLabels.get(),
+      setHidePrimaryLabels: state.sideNav.hidePrimaryLabels.set,
       getWidth$: () => state.sideNav.width.$,
       getWidth: () => state.sideNav.width.get(),
       setWidth: state.sideNav.width.set,
