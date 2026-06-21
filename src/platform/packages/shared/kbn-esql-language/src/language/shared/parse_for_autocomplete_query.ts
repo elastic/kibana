@@ -18,11 +18,16 @@ import {
 } from '../../commands/definitions/utils/ast';
 import { getCursorContext } from './get_cursor_context';
 import { getEsqlLexerTokens, type EsqlLexerToken } from './lexer_scope';
+import {
+  resolveCommandTextBeforeCursor,
+  type CommandSegment,
+} from './resolve_command_text_before_cursor';
 
 interface ParsedAutocompleteQuery {
   innerText: string;
   root: ESQLAstQueryExpression;
   tokens: EsqlLexerToken[];
+  commandSegment: CommandSegment;
 }
 
 /**
@@ -36,10 +41,13 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
 
+  const rootWithoutMarkers = removeAutocompleteMarkers(root);
+
   return {
     innerText,
-    root: removeAutocompleteMarkers(root),
+    root: rootWithoutMarkers,
     tokens,
+    commandSegment: resolveCommandTextBeforeCursor(innerText, offset, rootWithoutMarkers, tokens),
   };
 }
 
