@@ -139,13 +139,21 @@ describe('buildRawIdentifiersEsqlQuery', () => {
         rules: DEFAULT_DIRECT_EUID_RULES,
         namespace: 'default',
       });
-      expect(query).toContain('EVAL rawKey0 = entity.relationships.administers.raw_identifiers.host.name');
+      expect(query).toContain(
+        'EVAL rawKey0 = entity.relationships.administers.raw_identifiers.host.name'
+      );
       expect(query).toContain('EVAL t0 = CONCAT("host:", rawKey0)');
-      expect(query).toContain('EVAL rawKey1 = entity.relationships.administers.raw_identifiers.user.email');
+      expect(query).toContain(
+        'EVAL rawKey1 = entity.relationships.administers.raw_identifiers.user.email'
+      );
       expect(query).toContain('EVAL t1 = CONCAT("user:", rawKey1)');
-      expect(query).toContain('EVAL rawKey2 = entity.relationships.administers.raw_identifiers.user.name');
+      expect(query).toContain(
+        'EVAL rawKey2 = entity.relationships.administers.raw_identifiers.user.name'
+      );
       expect(query).toContain('EVAL t2 = CONCAT("user:", rawKey2)');
-      expect(query).toContain('EVAL rawKey3 = entity.relationships.administers.raw_identifiers.service.name');
+      expect(query).toContain(
+        'EVAL rawKey3 = entity.relationships.administers.raw_identifiers.service.name'
+      );
       expect(query).toContain('EVAL t3 = CONCAT("service:", rawKey3)');
       expect(query).toContain('MV_APPEND(t0, t1, t2, t3)');
     });
