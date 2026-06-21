@@ -34,7 +34,7 @@ import { starredDashboardsRefresh$ } from './starred_dashboards_refresh';
 import type { DashboardNavigationPanelItem } from './types';
 import { toAbsoluteNavHref } from './to_absolute_nav_href';
 
-const RECENT_DASHBOARDS_LIMIT = 5;
+const RECENT_DASHBOARDS_LIMIT = 7;
 /** Delay before reordering recent dashboards in the side nav after a visit is recorded. */
 export const RECENT_DASHBOARDS_REORDER_DELAY_MS = 1200;
 
