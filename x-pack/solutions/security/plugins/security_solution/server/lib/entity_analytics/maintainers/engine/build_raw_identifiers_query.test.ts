@@ -18,9 +18,12 @@ describe('buildRawIdentifiersEsqlQuery', () => {
       rules: [{ field: 'host.name', euidType: 'host' }],
       namespace: 'default',
     });
+    // MV_EXPAND must precede CONCAT so multi-valued fields don't silently produce NULL.
     expect(query).toContain(
-      'EVAL t0 = CONCAT("host:", entity.relationships.administers.raw_identifiers.host.name)'
+      'EVAL rawKey0 = entity.relationships.administers.raw_identifiers.host.name'
     );
+    expect(query).toContain('MV_EXPAND rawKey0');
+    expect(query).toContain('EVAL t0 = CONCAT("host:", rawKey0)');
     expect(query).toContain('EVAL targetEntityId = t0');
     expect(query).not.toContain('MV_APPEND');
     // STATS column is named after the relationship key.
@@ -37,15 +40,22 @@ describe('buildRawIdentifiersEsqlQuery', () => {
       ],
       namespace: 'default',
     });
+    // Each rule: expand raw field first, then CONCAT.
     expect(query).toContain(
-      'EVAL t0 = CONCAT("host:", entity.relationships.administers.raw_identifiers.host.name)'
+      'EVAL rawKey0 = entity.relationships.administers.raw_identifiers.host.name'
     );
+    expect(query).toContain('MV_EXPAND rawKey0');
+    expect(query).toContain('EVAL t0 = CONCAT("host:", rawKey0)');
     expect(query).toContain(
-      'EVAL t1 = CONCAT("user:", entity.relationships.administers.raw_identifiers.user.email)'
+      'EVAL rawKey1 = entity.relationships.administers.raw_identifiers.user.email'
     );
+    expect(query).toContain('MV_EXPAND rawKey1');
+    expect(query).toContain('EVAL t1 = CONCAT("user:", rawKey1)');
     expect(query).toContain(
-      'EVAL t2 = CONCAT("service:", entity.relationships.administers.raw_identifiers.service.name)'
+      'EVAL rawKey2 = entity.relationships.administers.raw_identifiers.service.name'
     );
+    expect(query).toContain('MV_EXPAND rawKey2');
+    expect(query).toContain('EVAL t2 = CONCAT("service:", rawKey2)');
     expect(query).toContain('EVAL targetEntityId = MV_APPEND(t0, t1, t2)');
     expect(query).toContain(
       'entity.relationships.administers.raw_identifiers.host.name IS NOT NULL OR ' +
@@ -61,8 +71,9 @@ describe('buildRawIdentifiersEsqlQuery', () => {
       namespace: 'default',
     });
     expect(query).toContain(
-      'EVAL t0 = CONCAT("host:", entity.relationships.depends_on.raw_identifiers.host.name)'
+      'EVAL rawKey0 = entity.relationships.depends_on.raw_identifiers.host.name'
     );
+    expect(query).toContain('EVAL t0 = CONCAT("host:", rawKey0)');
     expect(query).toContain('STATS depends_on = VALUES(targetEntityId) BY actorUserId');
   });
 
@@ -122,24 +133,20 @@ describe('buildRawIdentifiersEsqlQuery', () => {
       expect(fields).not.toContain('user.id');
     });
 
-    it('produces a query that unions all default fields', () => {
+    it('produces a query that unions all default fields with expand-before-concat', () => {
       const query = buildRawIdentifiersEsqlQuery({
         relationshipKey: 'administers',
         rules: DEFAULT_DIRECT_EUID_RULES,
         namespace: 'default',
       });
-      expect(query).toContain(
-        'CONCAT("host:", entity.relationships.administers.raw_identifiers.host.name)'
-      );
-      expect(query).toContain(
-        'CONCAT("user:", entity.relationships.administers.raw_identifiers.user.email)'
-      );
-      expect(query).toContain(
-        'CONCAT("user:", entity.relationships.administers.raw_identifiers.user.name)'
-      );
-      expect(query).toContain(
-        'CONCAT("service:", entity.relationships.administers.raw_identifiers.service.name)'
-      );
+      expect(query).toContain('EVAL rawKey0 = entity.relationships.administers.raw_identifiers.host.name');
+      expect(query).toContain('EVAL t0 = CONCAT("host:", rawKey0)');
+      expect(query).toContain('EVAL rawKey1 = entity.relationships.administers.raw_identifiers.user.email');
+      expect(query).toContain('EVAL t1 = CONCAT("user:", rawKey1)');
+      expect(query).toContain('EVAL rawKey2 = entity.relationships.administers.raw_identifiers.user.name');
+      expect(query).toContain('EVAL t2 = CONCAT("user:", rawKey2)');
+      expect(query).toContain('EVAL rawKey3 = entity.relationships.administers.raw_identifiers.service.name');
+      expect(query).toContain('EVAL t3 = CONCAT("service:", rawKey3)');
       expect(query).toContain('MV_APPEND(t0, t1, t2, t3)');
     });
   });
