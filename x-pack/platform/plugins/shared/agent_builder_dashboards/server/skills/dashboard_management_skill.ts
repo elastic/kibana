@@ -33,8 +33,8 @@ ${dashboardGeneration.guidance}
 ${kibanaRendering.guidance}
 `,
   referencedContent: [
-    ...dashboardGeneration.referencedContent,
-    ...kibanaRendering.referencedContent,
+    ...(dashboardGeneration.referencedContent ?? []),
+    ...(kibanaRendering.referencedContent ?? []),
   ],
   getInlineTools: () => [generateDashboardTool()],
 });

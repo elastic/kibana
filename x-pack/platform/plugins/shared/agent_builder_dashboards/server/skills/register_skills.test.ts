@@ -27,19 +27,8 @@ describe('registerSkills', () => {
     expect(dashboardManagementSkill.content).toContain('platform.core.sml_attach');
   });
 
-  it('lazily exposes the dashboard design guidance via referenced content rather than the skill body', () => {
-    const designReference = dashboardManagementSkill.referencedContent?.find(
-      (reference) => reference.name === 'dashboard-design'
-    );
-
-    expect(designReference).toBeDefined();
-    // Both composition and layout detail live in the referenced file...
-    expect(designReference?.content).toContain('Dashboard Composition Guidelines');
-    expect(designReference?.content).toContain('Grid Packing Rules');
-    // ...and are not inlined up front in the skill body.
-    expect(dashboardManagementSkill.content).not.toContain('Dashboard Composition Guidelines');
-    expect(dashboardManagementSkill.content).not.toContain('Grid Packing Rules');
-    // The skill body still points the agent at the referenced file.
-    expect(dashboardManagementSkill.content).toContain('dashboard-design.md');
+  it('inlines the dashboard design guidance directly in the skill body', () => {
+    expect(dashboardManagementSkill.content).toContain('Dashboard Composition Guidelines');
+    expect(dashboardManagementSkill.content).toContain('Grid Packing Rules');
   });
 });

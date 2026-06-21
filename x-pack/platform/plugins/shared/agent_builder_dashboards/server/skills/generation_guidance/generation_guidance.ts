@@ -7,7 +7,7 @@
 
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
-import { dashboardDesignGuidancePrompt, dashboardDesignReferenceName } from './design';
+import { dashboardDesignGuidancePrompt } from './design';
 
 const guidance = `## Building a Dashboard
 
@@ -36,9 +36,7 @@ For an existing dashboard:
 - Use \`source: "request"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
 - Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
 
-## Dashboard Design
-
-Composition guidance (how to structure a coherent dashboard, when to use sections) and panel layout rules (the 48-column grid, sizing per chart type, packing, positioning, section coordinates, and reflow) live in the \`${dashboardDesignReferenceName}.md\` referenced file. **Before you compose a dashboard or add, move, or resize panels, read \`${dashboardDesignReferenceName}.md\` (listed in this skill's referenced files) and follow it.**
+${dashboardDesignGuidancePrompt}
 
 ## Generation Edge Cases
 
@@ -52,23 +50,13 @@ Composition guidance (how to structure a coherent dashboard, when to use section
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * The `guidance` describes how to build a dashboard. It deliberately says nothing about how the
+ * The `guidance` describes how to build a dashboard, including the detailed design guidance
+ * (composition + panel layout) inlined directly. It deliberately says nothing about how the
  * current dashboard is referenced or how the result is returned/surfaced. Those are
  * environment-specific and avoided here so the block can be reused across environments. Pair it with
  * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
  * generated dashboard is surfaced.
- *
- * The detailed design guidance (composition + panel layout) is large and only needed while actually
- * composing or laying out a dashboard, so it is not inlined. It is offered lazily via
- * `referencedContent` (a file the agent reads on demand) and the `guidance` only points at it.
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
-  referencedContent: [
-    {
-      name: dashboardDesignReferenceName,
-      relativePath: '.',
-      content: dashboardDesignGuidancePrompt,
-    },
-  ],
 };

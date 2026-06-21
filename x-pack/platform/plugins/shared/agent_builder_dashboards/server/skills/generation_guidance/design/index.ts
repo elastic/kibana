@@ -9,13 +9,10 @@ import { dashboardCompositionPrompt } from './composition';
 import { gridLayoutPrompt } from './grid_layout';
 
 /**
- * Name of the referenced-content file (`<name>.md`) that holds the dashboard design
- * guidance (composition + panel layout). The skill exposes this content lazily via
- * `referencedContent` so the agent only pulls it in (with `read_file`) when it actually
- * composes or lays out a dashboard, instead of carrying it in the skill body up front.
+ * Dashboard design guidance (composition + panel layout) inlined directly into the dashboard
+ * generation guidance so the agent always has the composition and layout rules available while
+ * building or editing a dashboard.
  */
-export const dashboardDesignReferenceName = 'dashboard-design';
-
 export const dashboardDesignGuidancePrompt = `${dashboardCompositionPrompt}
 
 ${gridLayoutPrompt}`;

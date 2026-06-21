@@ -9,5 +9,5 @@ import type { ReferencedContent } from '@kbn/agent-builder-server/skills/type_de
 
 export interface DashboardGuidanceModule {
   guidance: string;
-  referencedContent: ReferencedContent[];
+  referencedContent?: ReferencedContent[];
 }
