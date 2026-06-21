@@ -62,12 +62,12 @@ const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfi
     return acc;
   }, new Map<string, UserProfileWithAvatar>());
 
-const getExecutedByLabel = (executedBy: string, profile?: UserProfileWithAvatar): string => {
+const getExecutedByLabel = (profile?: UserProfileWithAvatar): string | undefined => {
   if (!profile?.user) {
-    return executedBy;
+    return undefined;
   }
 
-  return getUserDisplayName(profile.user) || executedBy;
+  return getUserDisplayName(profile.user) || undefined;
 };
 
 const useExecutedByUserProfiles = ({ enabled, uids }: { enabled: boolean; uids: string[] }) => {
@@ -121,10 +121,11 @@ export const WorkflowExecutionList = ({
     });
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
-    return executedByValuesToResolve.map((executedBy) => ({
-      label: getExecutedByLabel(executedBy, executedByUserProfiles.get(executedBy)),
-      value: executedBy,
-    }));
+    return executedByValuesToResolve.flatMap((executedBy) => {
+      const label = getExecutedByLabel(executedByUserProfiles.get(executedBy));
+
+      return label ? [{ label, value: executedBy }] : [];
+    });
   }, [executedByUserProfiles, executedByValuesToResolve]);
 
   useEffect(() => {
@@ -206,7 +207,6 @@ export const WorkflowExecutionList = ({
                   isTestRun={execution.isTestRun}
                   startedAt={toValidDate(execution.startedAt)}
                   duration={execution.duration}
-                  executedBy={execution.executedBy}
                   executedByProfile={
                     execution.executedBy
                       ? executedByUserProfiles.get(execution.executedBy)

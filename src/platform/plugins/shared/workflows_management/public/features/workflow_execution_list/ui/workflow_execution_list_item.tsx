@@ -47,7 +47,6 @@ interface WorkflowExecutionListItemProps {
   isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
-  executedBy?: string;
   executedByProfile?: UserProfileWithAvatar;
   triggeredBy?: string;
   showExecutor?: boolean;
@@ -60,7 +59,6 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     isTestRun,
     startedAt,
     duration,
-    executedBy,
     executedByProfile,
     triggeredBy,
     showExecutor = false,
@@ -72,8 +70,8 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     const getFormattedDate = useGetFormattedDateTime();
     const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
     const executedByDisplayName = executedByProfile?.user
-      ? getUserDisplayName(executedByProfile.user) || executedBy
-      : executedBy;
+      ? getUserDisplayName(executedByProfile.user)
+      : undefined;
     const formattedDuration = useMemo(() => {
       if (duration) {
         return formatDuration(duration);
@@ -156,29 +154,27 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   />
                 </EuiFlexItem>
               )}
-              {showExecutor && (
+              {showExecutor && executedByProfile?.user && executedByDisplayName && (
                 <EuiFlexItem grow={false} css={styles.executedByContainer}>
-                  {executedBy && (
-                    <EuiFlexGroup
-                      alignItems="center"
-                      justifyContent="flexEnd"
-                      gutterSize="xs"
-                      wrap={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <UserAvatar
-                          user={executedByProfile?.user ?? { username: executedBy }}
-                          avatar={executedByProfile?.data?.avatar}
-                          size="s"
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued">
-                          {executedByDisplayName}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <UserAvatar
+                        user={executedByProfile.user}
+                        avatar={executedByProfile.data?.avatar}
+                        size="s"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {executedByDisplayName}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false} css={styles.durationContainer}>
