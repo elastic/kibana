@@ -14,6 +14,7 @@ import { LensConfigBuilder, type LensAttributes } from '@kbn/lens-embeddable-uti
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
+import { convertLegacyVisPanelToVegaPanel, isLegacyVisVegaPanel } from './vega_to_legacy_vis';
 
 /**
  * Type guard to check if attributes are in LensAttributes format (internal).
@@ -40,6 +41,13 @@ export const isLensAttributesPanel = (
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
+  // TEMPORARY: recover the canonical Vega panel shape from the legacy visualize
+  // panel we currently render Vega as, so round-tripping a dashboard keeps Vega
+  // panels editable. Remove with the rest of the Vega<->legacy_vis converter.
+  if (isLegacyVisVegaPanel(panel)) {
+    return convertLegacyVisPanelToVegaPanel(panel);
+  }
+
   if (isLensAttributesPanel(panel)) {
     const { attributes, ...restConfig } = panel.config;
     try {

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { AttachmentPanel } from '../types';
 import {
   convertVegaPanelToLegacyVisPanel,
+  convertLegacyVisPanelToVegaPanel,
+  isLegacyVisVegaPanel,
   isVegaAttachmentPanel,
   VEGA_PANEL_TYPE,
 } from './vega_to_legacy_vis';
@@ -70,6 +73,48 @@ describe('vega_to_legacy_vis converter', () => {
         params: { spec: '{"mark":"bar"}' },
         uiState: {},
         data: { aggs: [], searchSource: {} },
+      },
+    });
+  });
+
+  it('detects a Vega panel stored as a legacy visualize panel', () => {
+    const legacyVisVegaPanel = convertVegaPanelToLegacyVisPanel(vegaPanel) as DashboardPanel;
+
+    expect(isLegacyVisVegaPanel(legacyVisVegaPanel)).toBe(true);
+    expect(isLegacyVisVegaPanel({ type: 'legacy_vis', config: {} })).toBe(false);
+    expect(
+      isLegacyVisVegaPanel({ type: 'legacy_vis', config: { savedVis: { type: 'markdown' } } })
+    ).toBe(false);
+    expect(isLegacyVisVegaPanel({ type: 'lens', config: {} })).toBe(false);
+  });
+
+  it('round-trips a Vega panel back to the canonical vega shape', () => {
+    const legacyVisVegaPanel = convertVegaPanelToLegacyVisPanel(vegaPanel) as DashboardPanel;
+
+    expect(convertLegacyVisPanelToVegaPanel(legacyVisVegaPanel)).toEqual(vegaPanel);
+  });
+
+  it('recovers the spec from a legacy Vega saved object missing top-level title/description', () => {
+    const legacyVisVegaPanel: DashboardPanel = {
+      id: 'panel-3',
+      type: 'legacy_vis',
+      grid,
+      config: {
+        savedVis: {
+          title: 'From saved vis',
+          type: 'vega',
+          params: { spec: '{"mark":"point"}' },
+        },
+      },
+    } as unknown as DashboardPanel;
+
+    expect(convertLegacyVisPanelToVegaPanel(legacyVisVegaPanel)).toEqual({
+      type: VEGA_PANEL_TYPE,
+      id: 'panel-3',
+      grid,
+      config: {
+        title: 'From saved vis',
+        spec: '{"mark":"point"}',
       },
     });
   });

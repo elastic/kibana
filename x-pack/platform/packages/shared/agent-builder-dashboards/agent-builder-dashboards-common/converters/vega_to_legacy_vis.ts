@@ -39,9 +39,34 @@ interface VegaAttachmentPanelConfig {
   spec?: unknown;
 }
 
+/** Shape of the by-value legacy visualize config a Vega panel is rendered as. */
+interface LegacyVisVegaPanelConfig {
+  savedVis?: {
+    title?: string;
+    description?: string;
+    type?: string;
+    params?: { spec?: unknown };
+  };
+  title?: string;
+  description?: string;
+}
+
 /** Whether an attachment panel is a (new-shape) Vega panel. */
 export const isVegaAttachmentPanel = (panel: AttachmentPanel): boolean =>
   panel.type === VEGA_PANEL_TYPE;
+
+/**
+ * Whether a dashboard panel is a Vega visualization stored as a by-value legacy
+ * visualize panel (`legacy_vis` with `savedVis.type: 'vega'`) — i.e. the output
+ * of {@link convertVegaPanelToLegacyVisPanel} or a legacy Vega saved object.
+ */
+export const isLegacyVisVegaPanel = (panel: Pick<DashboardPanel, 'type' | 'config'>): boolean => {
+  if (panel.type !== LEGACY_VIS_EMBEDDABLE_TYPE) {
+    return false;
+  }
+  const { savedVis } = (panel.config ?? {}) as LegacyVisVegaPanelConfig;
+  return savedVis?.type === VEGA_VIS_TYPE;
+};
 
 /**
  * Convert a Vega attachment panel into a by-value legacy visualize dashboard
@@ -69,6 +94,39 @@ export const convertVegaPanelToLegacyVisPanel = ({
       },
       ...(title !== undefined ? { title } : {}),
       ...(description !== undefined ? { description } : {}),
+    },
+  };
+};
+
+/**
+ * Inverse of {@link convertVegaPanelToLegacyVisPanel}: recover the Vega
+ * attachment panel (dedicated Vega embeddable API shape) from a by-value legacy
+ * visualize panel. Applied when importing/round-tripping a dashboard so stored
+ * Vega panels stay in the canonical `vega` shape and remain editable.
+ */
+export const convertLegacyVisPanelToVegaPanel = ({
+  id,
+  grid,
+  config,
+}: DashboardPanel): AttachmentPanel => {
+  const {
+    savedVis,
+    title: panelTitle,
+    description: panelDescription,
+  } = (config ?? {}) as LegacyVisVegaPanelConfig;
+
+  const spec = savedVis?.params?.spec;
+  const title = panelTitle ?? savedVis?.title;
+  const description = panelDescription ?? savedVis?.description;
+
+  return {
+    type: VEGA_PANEL_TYPE,
+    id: id ?? '',
+    grid,
+    config: {
+      ...(title ? { title } : {}),
+      ...(description !== undefined ? { description } : {}),
+      spec: typeof spec === 'string' ? spec : JSON.stringify(spec ?? {}, null, 2),
     },
   };
 };
