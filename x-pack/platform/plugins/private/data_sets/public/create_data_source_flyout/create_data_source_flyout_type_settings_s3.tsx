@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFieldPassword,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
@@ -173,6 +182,10 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const advancedId = useGeneratedHtmlId({ prefix: 'createDataSourceFlyoutS3FederatedAdvanced' });
+
   const { field: roleArnField, fieldState: roleArnState } = useController({
     name: 'settings.role_arn',
     control,
@@ -216,6 +229,14 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
     control,
   });
 
+  const hasAdvancedError = useMemo(() => Boolean(jwtAudienceState.error), [jwtAudienceState.error]);
+
+  useEffect(() => {
+    if (hasAdvancedError) {
+      setIsAdvancedOpen(true);
+    }
+  }, [hasAdvancedError]);
+
   useEffect(() => {
     return () => {
       unregister('settings.role_arn');
@@ -247,73 +268,99 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           inputRef={roleArnField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.jwtAudience', {
-          defaultMessage: 'JWT audience',
-        })}
-        fullWidth
-        isInvalid={Boolean(jwtAudienceState.error)}
-        error={jwtAudienceState.error?.message}
+      <EuiButtonEmpty
+        size="s"
+        flush="left"
+        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
+        aria-expanded={isAdvancedOpen}
+        aria-controls={advancedId}
+        onClick={() => setIsAdvancedOpen((value) => !value)}
+        data-test-subj="createDataSourceFlyoutS3FederatedAdvancedToggle"
       >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutS3FederatedJwtAudience"
+        {isAdvancedOpen
+          ? i18n.translate('dataSets.createFlyout.s3.federated.advanced.hide', {
+              defaultMessage: 'Hide optional authentication settings',
+            })
+          : i18n.translate('dataSets.createFlyout.s3.federated.advanced.show', {
+              defaultMessage: 'Show optional authentication settings',
+            })}
+      </EuiButtonEmpty>
+      <div
+        id={advancedId}
+        hidden={!isAdvancedOpen}
+        css={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      >
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label={i18n.translate('dataSets.createFlyout.s3.fields.jwtAudience', {
+            defaultMessage: 'JWT audience',
+          })}
           fullWidth
-          autoComplete="off"
           isInvalid={Boolean(jwtAudienceState.error)}
-          value={jwtAudienceField.value}
-          onChange={(e) => jwtAudienceField.onChange(e.target.value)}
-          name={jwtAudienceField.name}
-          inputRef={jwtAudienceField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.roleSessionName', {
-          defaultMessage: 'Role session name',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutS3FederatedRoleSessionName"
+          error={jwtAudienceState.error?.message}
+        >
+          <EuiFieldText
+            data-test-subj="createDataSourceFlyoutS3FederatedJwtAudience"
+            fullWidth
+            autoComplete="off"
+            isInvalid={Boolean(jwtAudienceState.error)}
+            value={jwtAudienceField.value}
+            onChange={(e) => jwtAudienceField.onChange(e.target.value)}
+            name={jwtAudienceField.name}
+            inputRef={jwtAudienceField.ref}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('dataSets.createFlyout.s3.fields.roleSessionName', {
+            defaultMessage: 'Role session name',
+          })}
           fullWidth
-          autoComplete="off"
-          value={roleSessionNameField.value}
-          onChange={(e) => roleSessionNameField.onChange(e.target.value)}
-          name={roleSessionNameField.name}
-          inputRef={roleSessionNameField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.stsEndpoint', {
-          defaultMessage: 'STS endpoint',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutS3FederatedStsEndpoint"
+        >
+          <EuiFieldText
+            data-test-subj="createDataSourceFlyoutS3FederatedRoleSessionName"
+            fullWidth
+            autoComplete="off"
+            value={roleSessionNameField.value}
+            onChange={(e) => roleSessionNameField.onChange(e.target.value)}
+            name={roleSessionNameField.name}
+            inputRef={roleSessionNameField.ref}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('dataSets.createFlyout.s3.fields.stsEndpoint', {
+            defaultMessage: 'STS endpoint',
+          })}
           fullWidth
-          autoComplete="off"
-          value={stsEndpointField.value}
-          onChange={(e) => stsEndpointField.onChange(e.target.value)}
-          name={stsEndpointField.name}
-          inputRef={stsEndpointField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.stsRegion', {
-          defaultMessage: 'STS region',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutS3FederatedStsRegion"
+        >
+          <EuiFieldText
+            data-test-subj="createDataSourceFlyoutS3FederatedStsEndpoint"
+            fullWidth
+            autoComplete="off"
+            value={stsEndpointField.value}
+            onChange={(e) => stsEndpointField.onChange(e.target.value)}
+            name={stsEndpointField.name}
+            inputRef={stsEndpointField.ref}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('dataSets.createFlyout.s3.fields.stsRegion', {
+            defaultMessage: 'STS region',
+          })}
           fullWidth
-          autoComplete="off"
-          value={stsRegionField.value}
-          onChange={(e) => stsRegionField.onChange(e.target.value)}
-          name={stsRegionField.name}
-          inputRef={stsRegionField.ref}
-        />
-      </EuiFormRow>
+        >
+          <EuiFieldText
+            data-test-subj="createDataSourceFlyoutS3FederatedStsRegion"
+            fullWidth
+            autoComplete="off"
+            value={stsRegionField.value}
+            onChange={(e) => stsRegionField.onChange(e.target.value)}
+            name={stsRegionField.name}
+            inputRef={stsRegionField.ref}
+          />
+        </EuiFormRow>
+      </div>
     </>
   );
 }

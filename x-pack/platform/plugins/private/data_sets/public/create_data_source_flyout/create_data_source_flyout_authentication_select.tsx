@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFormRow, EuiSelect, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import type { DataSourceType } from '../../common/datasource_types';
 import {
@@ -25,6 +26,7 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
   authenticationMode: CreateDataSourceAuthenticationMode;
   onAuthenticationModeChange: (mode: CreateDataSourceAuthenticationMode) => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   const options = useMemo(
     () => getCreateDataSourceAuthenticationOptions(dataSourceType),
     [dataSourceType]
