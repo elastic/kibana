@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 70,
-        "column": 18
+        "line": 66,
+        "column": 10
       }
     },
     {
@@ -137,8 +137,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 88,
-        "column": 20
+        "line": 82,
+        "column": 10
       }
     },
     {
@@ -151,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 114,
-        "column": 64
+        "line": 111,
+        "column": 10
       }
     },
     {
@@ -165,8 +165,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 144,
-        "column": 64
+        "line": 141,
+        "column": 10
       }
     },
     {
@@ -179,8 +179,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 182,
-        "column": 64
+        "line": 179,
+        "column": 10
       }
     },
     {
@@ -193,8 +193,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 223,
-        "column": 25
+        "line": 219,
+        "column": 10
       }
     },
     {
@@ -207,8 +207,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 261,
-        "column": 18
+        "line": 257,
+        "column": 10
       }
     },
     {
@@ -221,8 +221,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 301,
-        "column": 62
+        "line": 300,
+        "column": 10
       }
     },
     {
@@ -263,8 +263,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 67,
-        "column": 20
+        "line": 61,
+        "column": 10
       }
     },
     {
@@ -277,8 +277,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 122,
-        "column": 64
+        "line": 119,
+        "column": 10
       }
     },
     {
@@ -291,8 +291,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 161,
-        "column": 62
+        "line": 160,
+        "column": 10
       }
     },
     {
@@ -305,8 +305,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 172,
-        "column": 23
+        "line": 170,
+        "column": 10
       }
     },
     {
@@ -417,8 +417,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
-        "line": 34,
-        "column": 18
+        "line": 30,
+        "column": 10
       }
     },
     {
@@ -431,8 +431,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
-        "line": 70,
-        "column": 16
+        "line": 68,
+        "column": 10
       }
     },
     {
@@ -445,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
-        "line": 87,
-        "column": 18
+        "line": 83,
+        "column": 10
       }
     },
     {
