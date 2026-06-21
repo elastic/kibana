@@ -135,7 +135,6 @@ async function main() {
   }
 
   writeFileSync(outputPath, `${body}\n`, 'utf8');
-  process.stdout.write(`${body}\n`);
 }
 
 main().catch((error) => {

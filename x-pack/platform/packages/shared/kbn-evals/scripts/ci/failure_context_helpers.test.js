@@ -172,56 +172,60 @@ describe('failure_context_helpers', () => {
     expect(connectorIdToLitellmModel('litellm-llm-gateway-gpt-4o')).toBe('llm-gateway/gpt-4o');
   });
 
-  it('builds litellm connector from vault config', () => {
-    const previousConfig = process.env.KBN_EVALS_CONFIG_B64;
-    process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
-      JSON.stringify({
-        evaluationConnectorId: 'litellm-llm-gateway-gpt-4o',
-        litellm: {
-          baseUrl: 'https://litellm.example',
-          virtualKey: 'sk-test',
-        },
-      }),
-      'utf8'
-    ).toString('base64');
+  describe('buildLitellmConnectorFromVault', () => {
+    let previousConfig;
+    let previousBaseUrl;
+    let previousKey;
 
-    const connector = buildLitellmConnectorFromVault('litellm-llm-gateway-gpt-4o');
-    expect(connector.config.apiUrl).toBe('https://litellm.example/v1/chat/completions');
-    expect(connector.config.defaultModel).toBe('llm-gateway/gpt-4o');
-    expect(connector.secrets.apiKey).toBe('sk-test');
+    const restoreEnv = (key, value) => {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    };
 
-    if (previousConfig) {
-      process.env.KBN_EVALS_CONFIG_B64 = previousConfig;
-    } else {
+    beforeEach(() => {
+      previousConfig = process.env.KBN_EVALS_CONFIG_B64;
+      previousBaseUrl = process.env.LITELLM_BASE_URL;
+      previousKey = process.env.LITELLM_VIRTUAL_KEY;
       delete process.env.KBN_EVALS_CONFIG_B64;
-    }
-  });
-
-  it('builds litellm connector from LITELLM env vars', () => {
-    const previousConfig = process.env.KBN_EVALS_CONFIG_B64;
-    const previousBaseUrl = process.env.LITELLM_BASE_URL;
-    const previousKey = process.env.LITELLM_VIRTUAL_KEY;
-    delete process.env.KBN_EVALS_CONFIG_B64;
-    process.env.LITELLM_BASE_URL = 'https://litellm.example';
-    process.env.LITELLM_VIRTUAL_KEY = 'sk-env';
-
-    const connector = buildLitellmConnectorFromVault('litellm-llm-gateway-gpt-4o');
-    expect(connector.config.apiUrl).toBe('https://litellm.example/v1/chat/completions');
-    expect(connector.secrets.apiKey).toBe('sk-env');
-
-    if (previousConfig) {
-      process.env.KBN_EVALS_CONFIG_B64 = previousConfig;
-    }
-    if (previousBaseUrl) {
-      process.env.LITELLM_BASE_URL = previousBaseUrl;
-    } else {
       delete process.env.LITELLM_BASE_URL;
-    }
-    if (previousKey) {
-      process.env.LITELLM_VIRTUAL_KEY = previousKey;
-    } else {
       delete process.env.LITELLM_VIRTUAL_KEY;
-    }
+    });
+
+    afterEach(() => {
+      restoreEnv('KBN_EVALS_CONFIG_B64', previousConfig);
+      restoreEnv('LITELLM_BASE_URL', previousBaseUrl);
+      restoreEnv('LITELLM_VIRTUAL_KEY', previousKey);
+    });
+
+    it('builds litellm connector from vault config', () => {
+      process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
+        JSON.stringify({
+          evaluationConnectorId: 'litellm-llm-gateway-gpt-4o',
+          litellm: {
+            baseUrl: 'https://litellm.example',
+            virtualKey: 'sk-test',
+          },
+        }),
+        'utf8'
+      ).toString('base64');
+
+      const connector = buildLitellmConnectorFromVault('litellm-llm-gateway-gpt-4o');
+      expect(connector.config.apiUrl).toBe('https://litellm.example/v1/chat/completions');
+      expect(connector.config.defaultModel).toBe('llm-gateway/gpt-4o');
+      expect(connector.secrets.apiKey).toBe('sk-test');
+    });
+
+    it('builds litellm connector from LITELLM env vars', () => {
+      process.env.LITELLM_BASE_URL = 'https://litellm.example';
+      process.env.LITELLM_VIRTUAL_KEY = 'sk-env';
+
+      const connector = buildLitellmConnectorFromVault('litellm-llm-gateway-gpt-4o');
+      expect(connector.config.apiUrl).toBe('https://litellm.example/v1/chat/completions');
+      expect(connector.secrets.apiKey).toBe('sk-env');
+    });
   });
 
   describe('resolveTriageModelId', () => {

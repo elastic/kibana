@@ -425,6 +425,7 @@ steps:
     command: bash .buildkite/scripts/steps/evals/weekly_build_slack_summary.sh
     depends_on: llm-evals-weekly
     allow_dependency_failure: true
+    soft_fail: true
     timeout_in_minutes: 5
     env:
       KBN_EVALS: '1'

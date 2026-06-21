@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+annotation_file=""
+context_file=""
+slack_body_file=""
+cleanup() {
+  rm -f "${annotation_file}" "${context_file}" "${slack_body_file}" 2>/dev/null || true
+}
+trap cleanup EXIT
+
 if [[ "${KBN_EVALS_WEEKLY:-}" != "1" ]] && [[ "${KBN_EVALS_WEEKLY:-}" != "true" ]]; then
   echo "weekly_build_slack_summary.sh is only for weekly evals (KBN_EVALS_WEEKLY=1)"
   exit 0
@@ -154,7 +162,6 @@ else
 fi
 
 annotation_body="$(cat "$annotation_file")"
-rm -f "$annotation_file" "$context_file" "$slack_body_file"
 
 # Buildkite annotation metadata limit is ~100KB; keep the full detail but cap it.
 if [[ "${#annotation_body}" -gt 95000 ]]; then

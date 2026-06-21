@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+SLACK_FILE=""
+GITHUB_FILE=""
+NOTIFY_PIPELINE_FILE=""
+cleanup() {
+  rm -f "${SLACK_FILE}" "${GITHUB_FILE}" "${NOTIFY_PIPELINE_FILE}" 2>/dev/null || true
+}
+trap cleanup EXIT
+
 EVAL_SUITE_ID="${EVAL_SUITE_ID:-}"
 if [[ -z "${EVAL_SUITE_ID}" ]]; then
   echo "EVAL_SUITE_ID is required"
@@ -72,8 +80,8 @@ fi
 
 echo "--- Preparing model connector for triage summary"
 if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-  source .buildkite/scripts/steps/evals/setup_triage_connectors.sh || {
-    echo "WARNING: setup_triage_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
+  source .buildkite/scripts/steps/evals/setup_connectors.sh || {
+    echo "WARNING: setup_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
   }
 else
   echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault LiteLLM env vars"
@@ -82,8 +90,6 @@ fi
 FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
 # Build the renderings we actually need (one LLM call inside the builder).
-SLACK_FILE=""
-GITHUB_FILE=""
 if [[ -n "${slack_channel}" ]]; then
   SLACK_FILE="$(mktemp -t kbn-evals-triage-slack.XXXXXX.md)"
 fi
@@ -167,5 +173,4 @@ if [[ -n "${pr_number}" && -n "${GITHUB_FILE}" && -f "${GITHUB_FILE}" ]]; then
   fi
 fi
 
-rm -f "${SLACK_FILE}" "${GITHUB_FILE}" 2>/dev/null || true
 exit 0
