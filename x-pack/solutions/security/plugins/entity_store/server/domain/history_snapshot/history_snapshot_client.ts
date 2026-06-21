@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { entityStoreMetrics } from '../../monitor/metrics';
 import moment from 'moment';
+import { entityStoreMetrics } from '../../monitor/metrics';
 import type { EntityStoreGlobalState } from '../saved_objects';
 import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
