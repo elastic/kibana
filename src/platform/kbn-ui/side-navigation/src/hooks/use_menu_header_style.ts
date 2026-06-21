@@ -21,7 +21,7 @@ export function useMenuHeaderStyle() {
     position: sticky;
     top: 0;
     z-index: calc(${euiTheme.levels.content} + 1);
-    padding: 16px 16px 0 20px;
+    padding: 12px 12px 0 12px;
     margin: 0 1px;
     min-height: var(--secondary-menu-header-height);
   `;
