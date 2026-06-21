@@ -185,7 +185,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                 {formattedDuration && (
                   <EuiFlexGroup
                     alignItems="center"
-                    justifyContent="flexEnd"
+                    justifyContent="flexStart"
                     gutterSize="xs"
                     wrap={false}
                   >
@@ -231,7 +231,8 @@ const componentStyles = {
     justifyContent: 'flex-end',
   }),
   durationContainer: css({
-    minWidth: '70px',
-    justifyContent: 'flex-end',
+    minWidth: '112px',
+    width: '112px',
+    justifyContent: 'flex-start',
   }),
 };
