@@ -14,16 +14,10 @@ const {
   buildLitellmChatRequest,
   connectorIdToLitellmModel,
   buildLitellmConnectorFromVault,
-  evaluationConnectorMetadataKey,
-  resolveEvaluationConnectorId,
   parseLitellmChatContent,
   resolveTriageModelId,
-  listLitellmConnectorIds,
   DEFAULT_TRIAGE_MODEL_ID,
 } = require('./failure_context_helpers');
-
-const encodeConnectors = (connectors) =>
-  Buffer.from(JSON.stringify(connectors), 'utf8').toString('base64');
 
 describe('failure_context_helpers', () => {
   it('builds failure log metadata keys', () => {
@@ -210,77 +204,6 @@ describe('failure_context_helpers', () => {
     }
   });
 
-  it('prefers EVALUATION_CONNECTOR_ID env over vault (same as eval LLM-as-a-judge)', () => {
-    const previousConfig = process.env.KBN_EVALS_CONFIG_B64;
-    const previousEnv = process.env.EVALUATION_CONNECTOR_ID;
-    const previousSuiteId = process.env.EVAL_SUITE_ID;
-    delete process.env.EVAL_SUITE_ID;
-    process.env.EVALUATION_CONNECTOR_ID = 'eis-openai-gpt-5-4';
-    process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
-      JSON.stringify({ evaluationConnectorId: 'litellm-llm-gateway-gpt-4o' }),
-      'utf8'
-    ).toString('base64');
-
-    expect(resolveEvaluationConnectorId()).toBe('eis-openai-gpt-5-4');
-
-    if (previousConfig) {
-      process.env.KBN_EVALS_CONFIG_B64 = previousConfig;
-    } else {
-      delete process.env.KBN_EVALS_CONFIG_B64;
-    }
-    if (previousEnv) {
-      process.env.EVALUATION_CONNECTOR_ID = previousEnv;
-    } else {
-      delete process.env.EVALUATION_CONNECTOR_ID;
-    }
-    if (previousSuiteId) {
-      process.env.EVAL_SUITE_ID = previousSuiteId;
-    } else {
-      delete process.env.EVAL_SUITE_ID;
-    }
-  });
-
-  it('builds evaluation connector metadata key', () => {
-    expect(evaluationConnectorMetadataKey('observability-ai')).toBe(
-      'kbn-evals:evaluation-connector-id:observability-ai'
-    );
-  });
-
-  it('resolves evaluation connector id from build metadata before vault', () => {
-    const previousConfig = process.env.KBN_EVALS_CONFIG_B64;
-    const previousEnv = process.env.EVALUATION_CONNECTOR_ID;
-    const previousSuiteId = process.env.EVAL_SUITE_ID;
-    delete process.env.EVALUATION_CONNECTOR_ID;
-    process.env.EVAL_SUITE_ID = 'agent-builder';
-    process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
-      JSON.stringify({ evaluationConnectorId: 'litellm-llm-gateway-gpt-4o' }),
-      'utf8'
-    ).toString('base64');
-
-    expect(
-      resolveEvaluationConnectorId({
-        readMetadata: (key) =>
-          key === 'kbn-evals:evaluation-connector-id:agent-builder'
-            ? 'litellm-llm-gateway-claude-4'
-            : '',
-      })
-    ).toBe('litellm-llm-gateway-claude-4');
-
-    if (previousConfig) {
-      process.env.KBN_EVALS_CONFIG_B64 = previousConfig;
-    } else {
-      delete process.env.KBN_EVALS_CONFIG_B64;
-    }
-    if (previousEnv) {
-      process.env.EVALUATION_CONNECTOR_ID = previousEnv;
-    }
-    if (previousSuiteId) {
-      process.env.EVAL_SUITE_ID = previousSuiteId;
-    } else {
-      delete process.env.EVAL_SUITE_ID;
-    }
-  });
-
   it('builds litellm connector from LITELLM env vars', () => {
     const previousConfig = process.env.KBN_EVALS_CONFIG_B64;
     const previousBaseUrl = process.env.LITELLM_BASE_URL;
@@ -308,126 +231,30 @@ describe('failure_context_helpers', () => {
     }
   });
 
-  it('resolves evaluation connector id from vault config', () => {
-    const previousConfig = process.env.KBN_EVALS_CONFIG_B64;
-    const previousEnv = process.env.EVALUATION_CONNECTOR_ID;
-    const previousSuiteId = process.env.EVAL_SUITE_ID;
-    delete process.env.EVALUATION_CONNECTOR_ID;
-    delete process.env.EVAL_SUITE_ID;
-    process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
-      JSON.stringify({ evaluationConnectorId: 'litellm-llm-gateway-gpt-4o' }),
-      'utf8'
-    ).toString('base64');
-
-    expect(resolveEvaluationConnectorId({ readMetadata: () => '' })).toBe(
-      'litellm-llm-gateway-gpt-4o'
-    );
-
-    if (previousConfig) {
-      process.env.KBN_EVALS_CONFIG_B64 = previousConfig;
-    } else {
-      delete process.env.KBN_EVALS_CONFIG_B64;
-    }
-    if (previousEnv) {
-      process.env.EVALUATION_CONNECTOR_ID = previousEnv;
-    }
-    if (previousSuiteId) {
-      process.env.EVAL_SUITE_ID = previousSuiteId;
-    }
-  });
-
   describe('resolveTriageModelId', () => {
-    const ENV_KEYS = [
-      'EVAL_TRIAGE_MODEL_ID',
-      'EVALUATION_CONNECTOR_ID',
-      'EVAL_SUITE_ID',
-      'KBN_EVALS_CONFIG_B64',
-      'KIBANA_TESTING_AI_CONNECTORS',
-    ];
-
-    const noMetadata = { readMetadata: () => '' };
-    let previousEnv;
+    let previousOverride;
 
     beforeEach(() => {
-      previousEnv = {};
-      for (const key of ENV_KEYS) {
-        previousEnv[key] = process.env[key];
-        delete process.env[key];
-      }
+      previousOverride = process.env.EVAL_TRIAGE_MODEL_ID;
+      delete process.env.EVAL_TRIAGE_MODEL_ID;
     });
 
     afterEach(() => {
-      for (const key of ENV_KEYS) {
-        if (previousEnv[key] === undefined) {
-          delete process.env[key];
-        } else {
-          process.env[key] = previousEnv[key];
-        }
+      if (previousOverride === undefined) {
+        delete process.env.EVAL_TRIAGE_MODEL_ID;
+      } else {
+        process.env.EVAL_TRIAGE_MODEL_ID = previousOverride;
       }
     });
 
     it('prefers the EVAL_TRIAGE_MODEL_ID override', () => {
       process.env.EVAL_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-4';
-      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
 
-      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-claude-4');
+      expect(resolveTriageModelId()).toBe('litellm-llm-gateway-claude-4');
     });
 
-    it('uses the configured connector when it is already LiteLLM-backed', () => {
-      process.env.EVALUATION_CONNECTOR_ID = 'litellm-llm-gateway-gpt-4o';
-
-      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-gpt-4o');
-    });
-
-    it('uses the default LiteLLM model when it is among available connectors', () => {
-      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
-      process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
-        'litellm-llm-gateway-claude-4': { config: {} },
-        [DEFAULT_TRIAGE_MODEL_ID]: { config: {} },
-        'eis-google-gemini-2-5-flash': { config: {} },
-      });
-
-      expect(resolveTriageModelId(noMetadata)).toBe(DEFAULT_TRIAGE_MODEL_ID);
-    });
-
-    it('falls back to the first available LiteLLM connector for an EIS configured connector', () => {
-      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
-      process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
-        'litellm-llm-gateway-zeta': { config: {} },
-        'litellm-llm-gateway-alpha': { config: {} },
-        'eis-google-gemini-2-5-flash': { config: {} },
-      });
-
-      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-alpha');
-    });
-
-    it('uses the vault LiteLLM model when no connectors are available', () => {
-      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
-      process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
-        JSON.stringify({ evaluationConnectorId: 'litellm-llm-gateway-vault-model' }),
-        'utf8'
-      ).toString('base64');
-
-      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-vault-model');
-    });
-
-    it('falls back to the default triage model id when nothing else resolves', () => {
-      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
-
-      expect(resolveTriageModelId(noMetadata)).toBe(DEFAULT_TRIAGE_MODEL_ID);
-    });
-
-    it('lists only LiteLLM connector ids, sorted', () => {
-      process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
-        'litellm-llm-gateway-zeta': { config: {} },
-        'eis-google-gemini-2-5-flash': { config: {} },
-        'litellm-llm-gateway-alpha': { config: {} },
-      });
-
-      expect(listLitellmConnectorIds()).toEqual([
-        'litellm-llm-gateway-alpha',
-        'litellm-llm-gateway-zeta',
-      ]);
+    it('falls back to the default triage model id', () => {
+      expect(resolveTriageModelId()).toBe(DEFAULT_TRIAGE_MODEL_ID);
     });
   });
 });

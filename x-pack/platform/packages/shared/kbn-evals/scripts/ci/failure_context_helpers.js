@@ -6,16 +6,12 @@
  * 2.0.
  */
 
-const { execFileSync } = require('child_process');
 const { suiteKeySafe } = require('./suite_key_safe');
 
 const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 
-// Triage/summary text is always generated with a LiteLLM model (the
-// suite_owner_notify step has no ES cluster with EIS inference privileges, so EIS
-// models cannot be called there).
-// Used only as a last resort when no LiteLLM connectors can be discovered.
+// Triage/summary text is always generated with a small, low-cost LiteLLM model.
 const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-haiku-4-5';
 
 /**
@@ -308,60 +304,6 @@ function buildLitellmConnectorFromVault(modelConnectorId) {
 }
 
 /**
- * @param {string} suiteId
- * @returns {string}
- */
-function evaluationConnectorMetadataKey(suiteId) {
-  return `kbn-evals:evaluation-connector-id:${suiteKeySafe(suiteId)}`;
-}
-
-/**
- * @param {string} metadataKey
- * @returns {string}
- */
-function readBuildkiteMetadata(metadataKey) {
-  try {
-    const stdout = execFileSync(
-      'buildkite-agent',
-      ['meta-data', 'get', metadataKey, '--default', ''],
-      {
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'ignore'],
-      }
-    );
-    return String(stdout).trim();
-  } catch {
-    return '';
-  }
-}
-
-/**
- * Same resolution order as eval LLM-as-a-judge: env, build metadata, vault.
- *
- * @param {{ readMetadata?: (key: string) => string }} [options]
- * @returns {string}
- */
-function resolveEvaluationConnectorId(options = {}) {
-  const readMetadata = options.readMetadata ?? readBuildkiteMetadata;
-
-  const fromEnv = process.env.EVALUATION_CONNECTOR_ID || '';
-  if (fromEnv) {
-    return fromEnv;
-  }
-
-  const suiteId = process.env.EVAL_SUITE_ID || '';
-  if (suiteId) {
-    const fromMetadata = readMetadata(evaluationConnectorMetadataKey(suiteId));
-    if (fromMetadata) {
-      return fromMetadata;
-    }
-  }
-
-  const config = parseVaultConfig();
-  return typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
-}
-
-/**
  * Decode KIBANA_TESTING_AI_CONNECTORS (base64-encoded JSON in CI, raw JSON locally).
  *
  * @returns {Record<string, { config?: Record<string, unknown>; secrets?: Record<string, unknown> }>}
@@ -395,57 +337,13 @@ function decodeAiConnectors() {
 }
 
 /**
- * Sorted list of LiteLLM connector ids available in KIBANA_TESTING_AI_CONNECTORS.
+ * Resolve the LiteLLM model used to generate Slack/GitHub triage text.
+ * override with `EVAL_TRIAGE_MODEL_ID`.
  *
- * @returns {string[]}
- */
-function listLitellmConnectorIds() {
-  return Object.keys(decodeAiConnectors())
-    .filter((id) => id.startsWith('litellm-'))
-    .sort();
-}
-
-/**
- * Resolve the LiteLLM model used to generate Slack triage/summary text. A
- * LiteLLM model is always used because the suite_owner_notify step has no ES
- * cluster with EIS inference privileges. Resolution order:
- * 1. `EVAL_TRIAGE_MODEL_ID` env override.
- * 2. The configured LiteLLM connector when one is available.
- * 3. The default LiteLLM model when present among available connectors.
- * 4. The first available LiteLLM connector.
- * 5. The configured LiteLLM connector from vault.
- * 6. The default LiteLLM model id (constructed from vault LiteLLM credentials).
- *
- * @param {{ readMetadata?: (key: string) => string }} [options]
  * @returns {string}
  */
-function resolveTriageModelId(options = {}) {
-  const override = process.env.EVAL_TRIAGE_MODEL_ID || '';
-  if (override) {
-    return override;
-  }
-
-  const configuredModel = resolveEvaluationConnectorId(options);
-  if (configuredModel.startsWith('litellm-')) {
-    return configuredModel;
-  }
-
-  const litellmConnectorIds = listLitellmConnectorIds();
-  if (litellmConnectorIds.includes(DEFAULT_TRIAGE_MODEL_ID)) {
-    return DEFAULT_TRIAGE_MODEL_ID;
-  }
-  if (litellmConnectorIds.length > 0) {
-    return litellmConnectorIds[0];
-  }
-
-  const config = parseVaultConfig();
-  const vaultModel =
-    typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
-  if (vaultModel.startsWith('litellm-')) {
-    return vaultModel;
-  }
-
-  return DEFAULT_TRIAGE_MODEL_ID;
+function resolveTriageModelId() {
+  return process.env.EVAL_TRIAGE_MODEL_ID || DEFAULT_TRIAGE_MODEL_ID;
 }
 
 function parseLitellmChatContent(responseJson) {
@@ -470,7 +368,6 @@ module.exports = {
   MAX_CONTEXT_JSON_BYTES,
   DEFAULT_TRIAGE_MODEL_ID,
   decodeAiConnectors,
-  listLitellmConnectorIds,
   resolveTriageModelId,
   failureLogMetadataKey,
   truncateText,
@@ -482,8 +379,5 @@ module.exports = {
   parseVaultConfig,
   connectorIdToLitellmModel,
   buildLitellmConnectorFromVault,
-  evaluationConnectorMetadataKey,
-  readBuildkiteMetadata,
-  resolveEvaluationConnectorId,
   parseLitellmChatContent,
 };
