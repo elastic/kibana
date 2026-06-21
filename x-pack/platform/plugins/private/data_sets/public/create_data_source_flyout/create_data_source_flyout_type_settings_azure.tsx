@@ -73,16 +73,6 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
     );
   }
 
-  if (authenticationMode === 'connection_string') {
-    return (
-      <CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField
-        areFieldsRequired={areFieldsRequired}
-        control={control}
-        unregister={unregister}
-      />
-    );
-  }
-
   if (authenticationMode === 'federated_identity') {
     return (
       <CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields
@@ -93,13 +83,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
     );
   }
 
-  return (
-    <CreateDataSourceFlyoutTypeSettingsAzureSasTokenField
-      areFieldsRequired={areFieldsRequired}
-      control={control}
-      unregister={unregister}
-    />
-  );
+  return null;
 }
 
 function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
@@ -314,113 +298,5 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
         />
       </EuiFormRow>
     </>
-  );
-}
-
-function CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField({
-  areFieldsRequired,
-  control,
-  unregister,
-}: {
-  areFieldsRequired: boolean;
-  control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
-}) {
-  const { field: connectionStringField, fieldState: connectionStringState } = useController({
-    name: 'settings.connection_string',
-    control,
-    rules: areFieldsRequired
-      ? {
-          validate: (value?: string) =>
-            value?.trim()
-              ? true
-              : i18n.translate('dataSets.createFlyout.azure.fields.connectionStringRequired', {
-                  defaultMessage: 'Connection string is required.',
-                }),
-        }
-      : undefined,
-  });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.connection_string');
-    };
-  }, [unregister]);
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('dataSets.createFlyout.azure.fields.connectionString', {
-        defaultMessage: 'Connection string',
-      })}
-      fullWidth
-      isInvalid={Boolean(connectionStringState.error)}
-      error={connectionStringState.error?.message}
-    >
-      <EuiFieldPassword
-        type="dual"
-        data-test-subj="createDataSourceFlyoutAzureConnectionString"
-        fullWidth
-        autoComplete="off"
-        isInvalid={Boolean(connectionStringState.error)}
-        value={connectionStringField.value}
-        onChange={(e) => connectionStringField.onChange(e.target.value)}
-        name={connectionStringField.name}
-        inputRef={connectionStringField.ref}
-      />
-    </EuiFormRow>
-  );
-}
-
-function CreateDataSourceFlyoutTypeSettingsAzureSasTokenField({
-  areFieldsRequired,
-  control,
-  unregister,
-}: {
-  areFieldsRequired: boolean;
-  control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
-}) {
-  const { field: sasTokenField, fieldState: sasTokenState } = useController({
-    name: 'settings.sas_token',
-    control,
-    rules: areFieldsRequired
-      ? {
-          validate: (value?: string) =>
-            value?.trim()
-              ? true
-              : i18n.translate('dataSets.createFlyout.azure.fields.sasTokenRequired', {
-                  defaultMessage: 'SAS token is required.',
-                }),
-        }
-      : undefined,
-  });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.sas_token');
-    };
-  }, [unregister]);
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('dataSets.createFlyout.azure.fields.sasToken', {
-        defaultMessage: 'SAS token',
-      })}
-      fullWidth
-      isInvalid={Boolean(sasTokenState.error)}
-      error={sasTokenState.error?.message}
-    >
-      <EuiFieldPassword
-        type="dual"
-        data-test-subj="createDataSourceFlyoutAzureSasToken"
-        fullWidth
-        autoComplete="off"
-        isInvalid={Boolean(sasTokenState.error)}
-        value={sasTokenField.value}
-        onChange={(e) => sasTokenField.onChange(e.target.value)}
-        name={sasTokenField.name}
-        inputRef={sasTokenField.ref}
-      />
-    </EuiFormRow>
   );
 }

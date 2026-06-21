@@ -77,12 +77,6 @@ export const authenticationModeFromDataSource = (
     if (hasFederatedIdentity) {
       return 'federated_identity';
     }
-    if (typeof settings.connection_string === 'string' && settings.connection_string.trim()) {
-      return 'connection_string';
-    }
-    if (typeof settings.sas_token === 'string' && settings.sas_token.trim()) {
-      return 'sas_token';
-    }
     if (
       (typeof settings.key === 'string' && settings.key.trim()) ||
       (typeof settings.account === 'string' && settings.account.trim())

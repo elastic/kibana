@@ -16,11 +16,7 @@ export type S3AuthenticationMode = 'access_and_secret_keys' | 'federated_identit
 export type GcsAuthenticationMode = 'access_and_secret_keys' | 'federated_identity';
 
 /** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
-export type AzureAuthenticationMode =
-  | 'credentials'
-  | 'connection_string'
-  | 'sas_token'
-  | 'federated_identity';
+export type AzureAuthenticationMode = 'credentials' | 'federated_identity';
 
 export type CreateDataSourceAuthenticationMode =
   | S3AuthenticationMode
@@ -54,18 +50,6 @@ export const getCreateDataSourceAuthenticationOptions = (
         value: 'credentials',
         text: i18n.translate('dataSets.createFlyout.authentication.azure.credentials', {
           defaultMessage: 'Credentials',
-        }),
-      },
-      {
-        value: 'connection_string',
-        text: i18n.translate('dataSets.createFlyout.authentication.azure.connectionString', {
-          defaultMessage: 'Connection String',
-        }),
-      },
-      {
-        value: 'sas_token',
-        text: i18n.translate('dataSets.createFlyout.authentication.azure.sasToken', {
-          defaultMessage: 'SAS Token',
         }),
       },
       {
@@ -126,12 +110,7 @@ export const showsAuthenticationCredentialFields = (
   dataSourceType: DataSourceType
 ): boolean => {
   if (dataSourceType === 'azure') {
-    return (
-      mode === 'credentials' ||
-      mode === 'connection_string' ||
-      mode === 'sas_token' ||
-      mode === 'federated_identity'
-    );
+    return mode === 'credentials' || mode === 'federated_identity';
   }
   if (dataSourceType === 's3') {
     return mode === 'access_and_secret_keys' || mode === 'federated_identity';
@@ -223,9 +202,7 @@ export const applyAuthenticationModeToDataSource = (
     case 'azure': {
       const {
         account: _account,
-        connection_string: _connectionString,
         key: _key,
-        sas_token: _sasToken,
         tenant_id: _tenantId,
         client_id: _clientId,
         jwt_audience: _jwtAudience,
@@ -242,24 +219,6 @@ export const applyAuthenticationModeToDataSource = (
             ...base,
             account: data.settings.account,
             key: data.settings.key,
-          },
-        };
-      }
-      if (mode === 'connection_string') {
-        return {
-          ...data,
-          settings: {
-            ...base,
-            connection_string: data.settings.connection_string,
-          },
-        };
-      }
-      if (mode === 'sas_token') {
-        return {
-          ...data,
-          settings: {
-            ...base,
-            sas_token: data.settings.sas_token,
           },
         };
       }
