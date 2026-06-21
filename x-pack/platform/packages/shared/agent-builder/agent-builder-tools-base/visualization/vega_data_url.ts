@@ -52,3 +52,38 @@ export const buildEsqlDataUrl = ({
 
   return dataUrl;
 };
+
+/**
+ * Recover the ES|QL query embedded in a Vega spec's `data[].url` (the inverse of
+ * {@link buildEsqlDataUrl}). Used when editing an existing Vega panel so the
+ * established query/data binding is reused instead of regenerating ES|QL (which
+ * would require re-discovering an index). Returns `undefined` when the spec has
+ * no Kibana ES|QL data url.
+ */
+export const extractEsqlQueryFromSpec = (spec: string): string | undefined => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(spec);
+  } catch {
+    return undefined;
+  }
+
+  const dataSets = (parsed as { data?: unknown })?.data;
+  if (!Array.isArray(dataSets)) {
+    return undefined;
+  }
+
+  for (const dataSet of dataSets) {
+    const url = (dataSet as { url?: unknown })?.url;
+    if (
+      url &&
+      typeof url === 'object' &&
+      (url as KibanaEsqlDataUrl)['%type%'] === 'esql' &&
+      typeof (url as KibanaEsqlDataUrl).query === 'string'
+    ) {
+      return (url as KibanaEsqlDataUrl).query;
+    }
+  }
+
+  return undefined;
+};

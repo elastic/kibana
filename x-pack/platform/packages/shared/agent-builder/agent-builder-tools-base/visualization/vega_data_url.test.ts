@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsqlDataUrl } from './vega_data_url';
+import { buildEsqlDataUrl, extractEsqlQueryFromSpec } from './vega_data_url';
 
 describe('buildEsqlDataUrl', () => {
   it('builds a Kibana ES|QL data url with context applied', () => {
@@ -46,5 +46,26 @@ describe('buildEsqlDataUrl', () => {
     });
 
     expect(url['%timefield%']).toBe('@timestamp');
+  });
+});
+
+describe('extractEsqlQueryFromSpec', () => {
+  it('recovers the ES|QL query from the data url', () => {
+    const spec = JSON.stringify({
+      data: [
+        { name: 'parsed', source: 'source' },
+        { name: 'source', url: { '%type%': 'esql', '%context%': true, query: 'FROM logs' } },
+      ],
+    });
+
+    expect(extractEsqlQueryFromSpec(spec)).toBe('FROM logs');
+  });
+
+  it('returns undefined when there is no ES|QL data url', () => {
+    expect(
+      extractEsqlQueryFromSpec(JSON.stringify({ data: [{ name: 'source', values: [] }] }))
+    ).toBeUndefined();
+    expect(extractEsqlQueryFromSpec('not json')).toBeUndefined();
+    expect(extractEsqlQueryFromSpec(JSON.stringify({ marks: [] }))).toBeUndefined();
   });
 });
