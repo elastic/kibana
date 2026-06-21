@@ -40,13 +40,13 @@ export interface OperationDefinition<
   handler: OperationHandler<TOperation>;
 }
 
+/**
+ * Pairs an operation schema with its handler. The handler body is type-checked
+ * against `z.infer<TSchema>`; at dispatch time the operation has already been
+ * parsed against the discriminated union (see `registry.ts`), so it is passed
+ * through to the matching handler without re-parsing.
+ */
 export const defineOperation = <TSchema extends OperationSchema>(
   definition: OperationDefinition<TSchema>
-): OperationDefinition<TSchema, unknown> => ({
-  schema: definition.schema,
-  handler: ({ operation, ...params }) =>
-    definition.handler({
-      ...params,
-      operation: definition.schema.parse(operation),
-    }),
-});
+): OperationDefinition<TSchema, unknown> =>
+  definition as OperationDefinition<TSchema, unknown>;

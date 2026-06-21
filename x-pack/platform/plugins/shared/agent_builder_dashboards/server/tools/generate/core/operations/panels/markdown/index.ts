@@ -28,7 +28,7 @@ export { MARKDOWN_EMBEDDABLE_TYPE };
  * by-value state. `settings` is optional here; the embeddable defaults
  * `open_links_in_new_tab` to `true` when omitted.
  */
-export const markdownPanelConfigSchema = z.object({
+const markdownPanelConfigSchema = z.object({
   content: z.string().describe('Markdown text to render in the panel.'),
   settings: z
     .object({
