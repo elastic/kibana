@@ -94,6 +94,7 @@ describe('types/utils', () => {
       const inProgress = new Set([
         ExecutionStatus.RUNNING,
         ExecutionStatus.PENDING,
+        ExecutionStatus.QUEUED,
         ExecutionStatus.WAITING,
         ExecutionStatus.WAITING_FOR_INPUT,
         ExecutionStatus.WAITING_FOR_CHILD,

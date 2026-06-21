@@ -72,6 +72,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   > {
     switch (status) {
       case ExecutionStatus.PENDING:
+      case ExecutionStatus.QUEUED:
       case ExecutionStatus.RUNNING:
       case ExecutionStatus.WAITING:
       case ExecutionStatus.WAITING_FOR_INPUT:
