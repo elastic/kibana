@@ -48,13 +48,13 @@ export type { PanelContent } from './panel_type';
  * The tool never reads a store, so the config must be supplied directly rather
  * than as an attachment ID.
  */
-const panelConfigPanelInputSchema = z.discriminatedUnion('type', [
+const configPanelInputSchema = z.discriminatedUnion('type', [
   visPanelConfigInputSchema,
   markdownPanelConfigInputSchema,
 ]);
 
-export type PanelConfigPanelInput = z.infer<typeof panelConfigPanelInputSchema>;
-export type PanelType = PanelConfigPanelInput['type'];
+export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
+export type PanelType = ConfigPanelInput['type'];
 
 /** Per-type behavior, keyed by model-facing panel `type`. */
 export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
@@ -83,7 +83,7 @@ export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 
 /** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
-  panelConfigPanelInputSchema,
+  configPanelInputSchema,
   panelRequestSchema,
 ]);
 
