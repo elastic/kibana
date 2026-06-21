@@ -76,17 +76,14 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
 /**
  * Kibana dashboard generation tool.
  *
- * It wraps the environment-agnostic {@link executeDashboardOperations} core with Kibana's
- * attachment persistence so the LLM works exclusively against a lightweight
- * reference:
- * - the prior dashboard payload is read server-side from `dashboardAttachmentId`
- *   (not passed in by value),
- * - the generated payload is persisted as a `dashboard` attachment server-side,
+ * Wraps the environment-agnostic {@link executeDashboardOperations} core with
+ * Kibana attachment persistence so the LLM works against a lightweight reference:
+ * - the prior payload is read server-side from `dashboardAttachmentId`,
+ * - the generated payload is persisted as a `dashboard` attachment,
  * - the result returns only the attachment id, version, and a compact summary.
  *
- * This keeps the heavy dashboard payload out of the LLM transcript: the model
- * references the attachment id to render it (e.g. `<render_attachment>`) instead
- * of copying the payload into the next tool call.
+ * This keeps the heavy payload out of the LLM transcript — the model references
+ * the attachment id to render it rather than copying it into the next tool call.
  */
 export const generateDashboardTool = (): BuiltinSkillBoundedTool<
   typeof generateDashboardSchema

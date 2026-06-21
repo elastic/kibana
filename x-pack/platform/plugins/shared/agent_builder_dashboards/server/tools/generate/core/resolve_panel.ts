@@ -9,15 +9,11 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { PanelFailure } from './utils';
 
 /**
- * Generic primitives for inline panel content resolution.
- *
- * The generate core turns inline panel requests into panel content without
- * depending on any environment-specific implementation. This module owns the
- * type-agnostic pieces: the resolution result, the failure helper, and the
- * request fields shared by every panel type. Each panel type contributes its
- * own request shape (see `operations/panels/<type>`), and the panels barrel
- * aggregates them into the `ResolvePanelContent` contract that the host (e.g.
- * Kibana) implements — see `vis_panel_resolver.ts`.
+ * Type-agnostic primitives for inline panel content resolution: the resolution
+ * result, the failure helper, and the request fields shared by every panel type.
+ * Each panel type contributes its own request shape (see `operations/panels/<type>`),
+ * and the panels barrel aggregates them into the host-implemented
+ * `ResolvePanelContent` contract (see `vis_panel_resolver.ts`).
  */
 export type PanelContentAttempt =
   | {

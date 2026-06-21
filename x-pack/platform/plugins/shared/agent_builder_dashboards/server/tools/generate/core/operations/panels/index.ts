@@ -22,37 +22,31 @@ import {
 } from './markdown';
 
 /**
- * Panel registry.
+ * Panel registry barrel.
  *
  * Each panel type lives in its own module under `./<type>` and owns its
- * embeddable-type identity, config contract, input schemas, and by-value
- * behavior (its {@link PanelTypeDefinition}). This barrel is the single place
- * that combines those per-type pieces into the shapes the operations consume:
- * the discriminated input unions, the per-operation panel item schemas, and the
- * `type` -> definition registry. Operations import from here and never reach into
- * a specific panel implementation, so adding a panel type means adding its module
- * plus an entry here.
+ * embeddable identity, config contract, input schemas, and by-value behavior
+ * (its {@link PanelTypeDefinition}). This barrel combines those per-type pieces
+ * into the shapes operations consume — the discriminated input unions, the
+ * per-operation item schemas, and the `type` -> definition registry — so adding a
+ * panel type means adding its module plus an entry here.
  *
- * Panel inputs have two orthogonal axes:
- * - `source`: where the content comes from — `'config'` (already-resolved,
- *   passed by value) or `'request'` (resolved asynchronously from a query).
- * - `type`: which panel type it is — `'vis'`, `'markdown'`, … (maps to an
- *   embeddable and a {@link PanelTypeDefinition}).
+ * Panel inputs have two orthogonal axes, each carrying a `type`:
+ * - `source`: `'config'` (resolved, passed by value) or `'request'` (resolved
+ *   asynchronously from a query).
+ * - `type`: which panel type — `'vis'`, `'markdown'`, … (maps to an embeddable).
  *
- * Both axes carry a `type`, so the two are independent. Today `source: 'request'`
- * only resolves `type: 'vis'`; a second resolvable type (or a markdown-from-query
- * path) is purely additive — add its request schema, resolver, and registry entry
- * without touching the operation handlers.
+ * Today `source: 'request'` only resolves `type: 'vis'`; adding another
+ * resolvable type is additive and needs no operation-handler changes.
  */
 export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
 export type { PanelContent } from './panel_type';
 
 /**
- * A `source: 'config'` panel adds a panel from an already-resolved configuration
- * passed by value. It is discriminated by `type`, so each panel type owns its
- * own `config` shape (see the per-type modules). The generation tool never reads
- * an attachment or saved-object store, so the config must be supplied directly
- * rather than as an attachment ID.
+ * A `source: 'config'` panel adds a panel from an already-resolved config passed
+ * by value, discriminated by `type` (each panel type owns its `config` shape).
+ * The tool never reads a store, so the config must be supplied directly rather
+ * than as an attachment ID.
  */
 const panelConfigPanelInputSchema = z.discriminatedUnion('type', [
   visPanelConfigInputSchema,

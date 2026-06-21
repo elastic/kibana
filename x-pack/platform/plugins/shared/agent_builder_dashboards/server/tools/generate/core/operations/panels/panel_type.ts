@@ -16,14 +16,10 @@ export type ConfigEditValidation = { ok: true } | { ok: false; error: string };
 /**
  * Static, host-agnostic behavior for a single panel `type`.
  *
- * Each type's module (`panels/<type>`) exports one of these so the operations
- * can stay type-agnostic: they look the definition up in the registry instead of
- * branching on the literal type, and adding a panel type means adding its module
- * plus a registry entry — no operation edits.
- *
- * This covers the *by-value config* path only (`source: 'config'` add/edit).
- * Creating a panel from an async request (e.g. natural language / ES|QL) is a
- * separate seam handled by the panel resolver dispatcher.
+ * Each type's module (`panels/<type>`) exports one of these so operations stay
+ * type-agnostic: they look the definition up in the registry instead of branching
+ * on the literal type. Covers the by-value config path only (`source: 'config'`);
+ * async-request creation is a separate seam handled by the panel resolver.
  */
 export interface PanelTypeDefinition {
   /** Embeddable type id panels of this type map to. */

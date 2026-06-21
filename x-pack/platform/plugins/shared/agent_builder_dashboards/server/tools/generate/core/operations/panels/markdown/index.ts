@@ -11,15 +11,13 @@ import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
 
 /**
- * Home for markdown panel logic.
+ * Markdown panel logic.
  *
  * Markdown is authored with `source: 'config'` (`type: 'markdown'`) whose
- * `config` is passed through to the embeddable unchanged, exactly like a Lens
- * `config`-source panel.
- * This module owns the markdown embeddable-type identity, the markdown by-value
- * config contract, and the markdown `config`-source input schema, and is the place
- * for future markdown-specific behavior (e.g. a markdown generation prompt that
- * authors the content).
+ * `config` is passed through to the embeddable unchanged, like a Lens
+ * `config`-source panel. This module owns the markdown embeddable identity, the
+ * by-value config contract, and the `config`-source input schema, and is where
+ * future markdown-specific behavior would live.
  */
 
 /**

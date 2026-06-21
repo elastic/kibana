@@ -13,16 +13,14 @@ import { definePanelType } from '../panel_type';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
 
 /**
- * Home for Lens visualization panel logic.
+ * Lens visualization panel logic.
  *
- * A visualization reaches a dashboard two ways: with `source: 'config'`
- * (`type: 'vis'`) whose already-resolved Lens config is passed through by value,
- * or with `source: 'request'` that is resolved from a natural-language / ES|QL
- * query into Lens config. This module owns the Lens embeddable-type identity,
- * the by-value config contract, the vis input schemas (add + edit), and the
- * vis resolution-request contract. The concrete resolver that turns a request
- * into Lens panel content is host-specific and lives outside `core/` (see
- * `vis_panel_resolver.ts`).
+ * A visualization reaches a dashboard either via `source: 'config'` (its
+ * already-resolved Lens config passed by value) or `source: 'request'` (resolved
+ * from a natural-language / ES|QL query). This module owns the Lens embeddable
+ * identity, the by-value config contract, the vis input schemas (add + edit), and
+ * the vis resolution-request contract. The concrete resolver is host-specific and
+ * lives outside `core/` (see `vis_panel_resolver.ts`).
  */
 
 /**

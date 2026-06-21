@@ -37,8 +37,8 @@ export interface ResolvedPanelCreationRequest {
 }
 
 /**
- * Collect inline panel creation work by operation index so it can be
- * resolved up front in parallel and then applied later in original operation order.
+ * Collect inline panel creation work, keyed by operation index, so it can be
+ * resolved up front in parallel and applied later in operation order.
  */
 const collectPanelCreationRequests = (
   operations: DashboardOperation[]
@@ -158,14 +158,13 @@ const getResolvedPanelCreationRequests = ({
 }): ResolvedPanelCreationRequest[] => resolvedRequestsByOperationIndex.get(operationIndex) ?? [];
 
 /**
- * Single seam for turning a new-panel input into `AttachmentPanel` content,
- * unifying the two paths so operation handlers don't branch on `source`:
+ * Turns a new-panel input into panel content so operation handlers don't branch
+ * on `source`:
  * - `source: 'config'`: built by value from the panel type's registry definition.
- * - `source: 'request'`: read from the up-front parallel resolution for this
- *   operation (keyed by panel input index).
+ * - `source: 'request'`: read from the up-front parallel resolution (keyed by
+ *   panel input index).
  *
- * Returns `undefined` when a panel request failed to resolve, recording the
- * failure so the caller can simply skip that item.
+ * Returns `undefined` and records a failure when a panel request didn't resolve.
  */
 export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests,
