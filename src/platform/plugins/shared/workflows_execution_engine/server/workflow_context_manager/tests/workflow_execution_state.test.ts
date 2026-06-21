@@ -1189,7 +1189,8 @@ describe('WorkflowExecutionState', () => {
         expect.objectContaining({
           id: 'test-workflow-execution-id',
           usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 },
-        })
+        }),
+        {}
       );
     });
 
