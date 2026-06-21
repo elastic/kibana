@@ -74,7 +74,7 @@ function truncateContextJson(context, maxBytes = MAX_CONTEXT_JSON_BYTES) {
  */
 function buildTriageUserPrompt(context, header) {
   const lines = [
-    'Explain why this LLM evaluation suite failed in CI, using only the run-log excerpts below, so an engineer can quickly understand and verify what happened.',
+    'Triage why this LLM evaluation suite failed in CI using only the run-log excerpts below.',
     '',
     `Suite: ${header.suiteName} (${header.suiteId})`,
     `Failing models: ${header.failingProjects.map((p) => `\`${p}\``).join(', ')}`,
@@ -92,13 +92,15 @@ function buildTriageUserPrompt(context, header) {
     'Failure context (JSON, includes each model log excerpt):',
     truncateContextJson(context),
     '',
-    'Instructions:',
-    '- Base everything on the log excerpts above. If they do not show a clear cause, say so plainly instead of guessing.',
-    '- Start with one sentence stating what failed.',
-    '- Quote the most relevant error line(s) from the log verbatim (trimmed) so the engineer can find them.',
-    '- Then give the most likely cause in plain terms (say "likely"/"appears", not a definitive root cause). If the errors look transient (rate limits, timeouts, provider 5xx), note that a retry may resolve it.',
-    '- If several models failed with the same error, group them instead of repeating per model.',
-    '- Portable markdown only: short bullets starting with "- " and inline `code` are fine; do not use bold, headings, links, or code fences. Keep the response under 1500 characters.'
+    'Output exactly this structure, nothing else:',
+    `- Verdict line (no bullet): "${header.suiteId} failed — <model id, or "N models, M errors" when more than one error>".`,
+    '- Then one group per distinct error, each exactly two lines:',
+    '    1. "- `<error line, verbatim from the excerpts, one line, … to elide if long>` — <file:line / test or scenario, if shown> — <affected model id(s)>"',
+    '    2. "  Root cause: <short cause>. <one short action>" (two leading spaces, no bullet)',
+    '- Merge the same failure (same message/location) into one group listing all its models. At most 3 groups; if more, add "- +N more errors — see build log".',
+    `- If no clear error is in the excerpts, output only "${header.suiteId} failed — cause not evident from logs".`,
+    '',
+    'Constraints: ground every line in the excerpts (never invent errors, paths, line numbers, or causes); no second person, greetings, narration, or prose outside the structure; do not classify failures as deterministic/transient; portable markdown only (bullets, "  Root cause:" continuations, inline `code`; no bold, headings, links, or code fences); keep each line short and stay under 1500 characters.'
   );
 
   return lines.join('\n');
@@ -166,8 +168,7 @@ function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
  */
 function buildWeeklyRollupUserPrompt(suites, meta = {}) {
   const lines = [
-    'Write a short executive summary of a weekly LLM-evaluation CI run that had failing suites, for the evals maintainers in a shared Slack channel.',
-    'Base it only on the per-suite triage below; do not add failures it does not mention.',
+    'Summarize a weekly LLM-evaluation CI run that had failing suites, for the evals maintainers in a shared Slack channel.',
     '',
     `Failing suites: ${suites.length}`,
   ];
@@ -192,11 +193,13 @@ function buildWeeklyRollupUserPrompt(suites, meta = {}) {
 
   lines.push(
     '',
-    'Instructions:',
-    '- Lead with how many suites look transient/retryable vs how many need a team to investigate.',
-    '- Group suites that share the same likely cause (e.g. "3 suites hit the same gpt-5.4 timeout").',
-    '- Call out which suites need action and which can simply be retried.',
-    '- Slack-friendly markdown: 3-5 short bullets, no headings or code fences. Keep under 900 characters.'
+    'Output exactly these bullets, in this order, and nothing else:',
+    '- Overall: <X> suites likely retryable, <Y> need a team to investigate.',
+    '- Shared causes: group suites that share the same likely cause (e.g. "3 suites hit the same gpt-5.4 timeout"); omit this bullet if no cause is shared.',
+    '- Needs action: list suite ids that need investigation, each with a one-line cause.',
+    '- Retry: list suite ids that can simply be retried.',
+    '',
+    'Constraints: base everything on the per-suite triage above (do not invent suites, models, or causes); no second person, narration, or preamble; portable markdown only (bullets and inline `code`; no bold, headings, links, or code fences); stay under 900 characters.'
   );
 
   return lines.join('\n');

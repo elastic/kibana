@@ -75,7 +75,7 @@ function renderSlack(triage) {
   if (buildUrl) {
     lines.push('', `<${buildUrl}|View build>`);
   }
-  lines.push('', `*Triage summary (model: \`${triage.modelId}\`):*`, triage.body);
+  lines.push('', '*Triage summary:*', triage.body);
   return `${lines.join('\n')}\n`;
 }
 
@@ -95,7 +95,7 @@ function renderGithub(triage) {
   if (buildUrl) {
     lines.push('', `[View build](${buildUrl})`);
   }
-  lines.push('', `**Triage summary (model: \`${triage.modelId}\`):**`, '', triage.body);
+  lines.push('', '**Triage summary:**', '', triage.body);
   return `${lines.join('\n')}\n`;
 }
 

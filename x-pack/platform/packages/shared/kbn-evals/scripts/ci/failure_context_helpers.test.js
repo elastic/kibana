@@ -56,15 +56,17 @@ describe('failure_context_helpers', () => {
     expect(prompt).toContain('timeout');
   });
 
-  it('grounds the triage prompt in the log excerpts and asks for verifiable evidence', () => {
+  it('grounds the triage prompt in the log excerpts and asks for the compact error-grouped format', () => {
     const prompt = buildTriageUserPrompt(
       { models: {} },
       { suiteName: 'Streams', suiteId: 'streams', failingProjects: ['eis-gpt-5.4'] }
     );
 
     expect(prompt).toContain('using only the run-log excerpts');
-    expect(prompt).toContain('Quote the most relevant error line(s)');
-    expect(prompt).toContain('do not show a clear cause, say so');
+    expect(prompt).toContain('verbatim from the excerpts');
+    expect(prompt).toContain('Root cause:');
+    expect(prompt).toContain('streams failed —');
+    expect(prompt).toContain('do not classify failures as deterministic/transient');
     expect(prompt).not.toContain('regression');
   });
 

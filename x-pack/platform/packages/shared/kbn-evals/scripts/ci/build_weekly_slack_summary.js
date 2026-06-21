@@ -104,11 +104,9 @@ async function main() {
     lines.push('', `<${buildUrl}|${pipelineName} #${buildNumber}>`);
   }
 
-  let modelId = 'unknown';
   try {
     const result = await summarizeWeeklyFailures(suites, { buildUrl });
-    modelId = result.modelId;
-    lines.push('', `*Executive summary (model: \`${modelId}\`):*`, result.summary);
+    lines.push('', '*Executive summary:*', result.summary);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`--- Weekly executive summary failed: ${message}`);
