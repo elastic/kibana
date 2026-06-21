@@ -24,3 +24,10 @@ export {
   MAX_TITLE_LENGTH,
   MAX_TEXT_LENGTH,
 } from './constants';
+export {
+  investigationInputSchema,
+  investigationResultSchema,
+  type InvestigationInput,
+  type InvestigationResult,
+  type AlternativeRuledOut,
+} from './investigations';

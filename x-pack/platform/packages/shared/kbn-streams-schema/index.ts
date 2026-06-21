@@ -289,6 +289,11 @@ export {
   type KnowledgeIndicator,
   type SigEventStatus,
   type SigEventImpact,
+  investigationInputSchema,
+  investigationResultSchema,
+  type InvestigationInput,
+  type InvestigationResult,
+  type AlternativeRuledOut,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,

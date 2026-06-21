@@ -19,6 +19,7 @@ import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
+import { registerInvestigationAgents } from './agents/investigation';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -52,6 +53,7 @@ export const registerStreamsAgentBuilder = async ({
   logger,
   telemetry,
   streamsKIsOnboardingClient,
+  investigationEnabled = false,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   agentContextLayer?: AgentContextLayerPluginSetup;
@@ -60,10 +62,14 @@ export const registerStreamsAgentBuilder = async ({
   logger: Logger;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
+  investigationEnabled?: boolean;
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
+  if (investigationEnabled) {
+    registerInvestigationAgents(agentBuilder);
+  }
 };
