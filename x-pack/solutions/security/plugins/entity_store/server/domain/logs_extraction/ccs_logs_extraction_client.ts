@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { entityStoreMetrics } from '../../monitor/metrics';
 import moment from 'moment';
 import { unflattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
@@ -157,10 +158,21 @@ export class CcsLogsExtractionClient {
         skipStateUpdates: true,
       });
       if (result.logsCapApplied) {
+        entityStoreMetrics.extractionLogsCapApplied.add(1, {
+          entity_type: type,
+          namespace: this.namespace,
+          behavior: maxLogsPerWindowCapBehavior,
+          ccs: true,
+        });
         this.logger.warn(
           `CCS extraction volume cap reached for entity type "${type}" (manual run): processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
         );
       }
+      entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed ?? 0, {
+        entity_type: type,
+        namespace: this.namespace,
+        ccs: true,
+      });
       return result;
     }
 
@@ -211,6 +223,17 @@ export class CcsLogsExtractionClient {
       totalLogs += subResult.logsProcessed ?? 0;
 
       if (subResult.logsCapApplied) {
+        entityStoreMetrics.extractionLogsCapApplied.add(1, {
+          entity_type: type,
+          namespace: this.namespace,
+          behavior: maxLogsPerWindowCapBehavior,
+          ccs: true,
+        });
+        entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
+          entity_type: type,
+          namespace: this.namespace,
+          ccs: true,
+        });
         this.logger.warn(
           `CCS extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
         );
@@ -230,6 +253,12 @@ export class CcsLogsExtractionClient {
           logsCapApplied: true,
         };
       }
+
+      entityStoreMetrics.extractionLogsProcessed.record(subResult.logsProcessed ?? 0, {
+        entity_type: type,
+        namespace: this.namespace,
+        ccs: true,
+      });
 
       // if the window was capped we consider we have a next page
       hasNextPage = isCapped;
@@ -319,6 +348,11 @@ export class CcsLogsExtractionClient {
       );
       if (bumpedSliceEnd) {
         sliceEnd = bumpedSliceEnd;
+        entityStoreMetrics.extractionLogsPerPageDropped.add(1, {
+          entity_type: type,
+          namespace: this.namespace,
+          ccs: true,
+        });
       } else {
         totalLogs += logPaginationCursor.sliceLogCount;
 
@@ -416,10 +450,16 @@ export class CcsLogsExtractionClient {
       }`
     );
 
+    const probeStart = Date.now();
     const probeResponse = await executeEsqlQuery({
       esClient: this.esClient,
       query: probeQuery,
       abortController,
+    });
+    entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
+      entity_type: type,
+      namespace: this.namespace,
+      ccs: true,
     });
 
     return interpretLogPaginationCursorRows(
@@ -497,10 +537,16 @@ export class CcsLogsExtractionClient {
         }`
       );
 
+      const queryStart = Date.now();
       const esqlResponse = await executeEsqlQuery({
         esClient: this.esClient,
         query,
         abortController,
+      });
+      entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
+        entity_type: type,
+        namespace: this.namespace,
+        ccs: true,
       });
 
       count += esqlResponse.values.length;
@@ -508,6 +554,12 @@ export class CcsLogsExtractionClient {
 
       if (esqlResponse.values.length > 0) {
         pages++;
+        entityStoreMetrics.extractionEntitiesUpserted.add(esqlResponse.values.length, {
+          entity_type: type,
+          namespace: this.namespace,
+          ccs: true,
+        });
+        const ingestStart = Date.now();
         await ingestEntities({
           esClient: this.esClient,
           esqlResponse,
@@ -517,6 +569,17 @@ export class CcsLogsExtractionClient {
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
           transformDocument: this.buildTransformDocument(type),
           refresh: false,
+          onDropped: () =>
+            entityStoreMetrics.extractionBulkDropped.add(1, {
+              entity_type: type,
+              namespace: this.namespace,
+              ccs: true,
+            }),
+        });
+        entityStoreMetrics.extractionIngestDurationMs.record(Date.now() - ingestStart, {
+          entity_type: type,
+          namespace: this.namespace,
+          ccs: true,
         });
       }
 

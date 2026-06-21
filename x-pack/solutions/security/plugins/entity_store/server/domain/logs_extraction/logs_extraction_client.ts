@@ -835,6 +835,12 @@ export class LogsExtractionClient {
         logger: this.logger,
         abortController: opts?.abortController,
         refresh: true,
+        onDropped: () =>
+          entityStoreMetrics.extractionBulkDropped.add(1, {
+            entity_type: type,
+            namespace: this.namespace,
+            ccs: false,
+          }),
       });
       entityStoreMetrics.extractionIngestDurationMs.record(Date.now() - ingestStart, {
         entity_type: type,
