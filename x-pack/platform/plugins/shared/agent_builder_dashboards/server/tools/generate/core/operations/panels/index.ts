@@ -118,7 +118,7 @@ export type PanelResolutionRequest = VisPanelResolutionRequest;
 /**
  * Contract for inline panel content resolution. The generate core consumes this
  * to turn a panel resolution request into panel content; the host supplies the
- * concrete dispatcher (see `panel_resolver.ts`) that routes each request to the
- * resolver for its `type`.
+ * concrete resolver (see `generate_dashboard_tool.ts`) that routes each request
+ * to the resolver for its `type`.
  */
 export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;

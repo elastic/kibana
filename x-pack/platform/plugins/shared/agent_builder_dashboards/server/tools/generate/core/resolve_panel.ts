@@ -17,7 +17,7 @@ import type { PanelFailure } from './utils';
  * request fields shared by every panel type. Each panel type contributes its
  * own request shape and resolver (see `operations/panels/<type>`), and the
  * panels barrel aggregates them into the `ResolvePanelContent` contract that the
- * host (e.g. Kibana) implements — see `panel_resolver.ts`.
+ * host (e.g. Kibana) implements — see `generate_dashboard_tool.ts`.
  */
 export type PanelContentAttempt =
   | {
