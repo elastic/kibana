@@ -112,12 +112,20 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
       });
 
       apiTest(
-        `resolves ${relationshipKey}.ids on the first run (no watermark — full scan)`,
+        `resolves ${relationshipKey}.ids for a freshly-seen actor`,
         async ({ apiClient, esClient }) => {
           const tEmail = targetEmail('fresh');
           const target = userId(tEmail);
           const aEmail = actorEmail('fresh');
           const actor = userId(aEmail);
+
+          // The maintainer task auto-runs once on registration (ensureScheduled with
+          // an interval schedules the first run ~immediately), persisting a watermark
+          // before this test seeds anything. So we cannot rely on a pristine "no
+          // watermark" state: seed the actor with a FUTURE last_seen so it is always
+          // past whatever watermark the startup run left, and trigger synchronously
+          // so the run completes before we poll.
+          const futureTs = new Date(Date.now() + 3_600_000).toISOString();
 
           await seedUserEntity(esClient, { entityId: target, namespace, email: tEmail });
           await seedUserEntity(esClient, {
@@ -126,9 +134,11 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
             email: aEmail,
             entitySource: requiredEntitySource,
             relationship: { key: relationshipKey, userEmails: [tEmail] },
+            lastSeen: futureTs,
+            firstSeen: futureTs,
           });
 
-          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId);
+          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
 
           await waitForRelationshipIds(esClient, relationshipKey, actor, target);
         }
