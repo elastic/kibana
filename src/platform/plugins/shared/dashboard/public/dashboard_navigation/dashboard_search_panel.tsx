@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldSearch,
   EuiHighlight,
   EuiLoadingSpinner,
@@ -71,6 +72,7 @@ const fetchAllDashboards = async (search?: string): Promise<DashboardSearchResul
 };
 
 export const DashboardSearchPanel = ({
+  onGoBack,
   onItemClick,
 }: SidePanelNestedPanelRenderProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -139,16 +141,13 @@ export const DashboardSearchPanel = ({
 
   const isInitialLoading = isLoading && !hasLoadedOnce;
 
-  const searchBoxStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-  `;
-
-  const statusStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-  `;
-
-  const resultsListStyles = css`
-    padding-inline: ${euiTheme.size.m};
+  const panelWrapperStyles = css`
+    display: flex;
+    flex-direction: column;
+    gap: ${euiTheme.size.m};
+    padding: ${euiTheme.size.m};
+    position: relative;
+    width: 100%;
   `;
 
   const resultButtonStyles = css`
@@ -167,39 +166,60 @@ export const DashboardSearchPanel = ({
     white-space: nowrap;
   `;
 
+  const handleResultClick = useCallback(
+    (dashboard: DashboardSearchResult, href: string) => {
+      onGoBack?.();
+      onItemClick({
+        href,
+        id: `recent_${dashboard.id}`,
+        label: dashboard.title,
+        panelId: DASHBOARD_APP_ID,
+      });
+    },
+    [onGoBack, onItemClick]
+  );
+
   return (
-    <>
-      <div css={searchBoxStyles}>
-        <EuiFieldSearch
-          aria-label={i18n.translate('dashboard.nav.findDashboardInputAriaLabel', {
-            defaultMessage: 'Find dashboard',
-          })}
-          compressed
-          data-test-subj="dashboardNavSearchInput"
-          fullWidth
-          inputRef={setSearchInputRef}
-          isLoading={isLoading}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={i18n.translate('dashboard.nav.findDashboardPlaceholder', {
-            defaultMessage: 'Type text',
-          })}
-          value={query}
-        />
-      </div>
+    <div css={panelWrapperStyles} role="group">
+      <EuiFieldSearch
+        aria-label={i18n.translate('dashboard.nav.findDashboardInputAriaLabel', {
+          defaultMessage: 'Find dashboard',
+        })}
+        compressed
+        data-test-subj="dashboardNavSearchInput"
+        fullWidth
+        inputRef={setSearchInputRef}
+        isLoading={isLoading}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder={i18n.translate('dashboard.nav.findDashboardPlaceholder', {
+          defaultMessage: 'Type text',
+        })}
+        prepend={
+          onGoBack ? (
+            <EuiButtonIcon
+              aria-label={i18n.translate('dashboard.nav.searchGoBack', {
+                defaultMessage: 'Go back',
+              })}
+              color="text"
+              data-test-subj="dashboardNavSearchGoBack"
+              display="empty"
+              iconType="chevronSingleLeft"
+              onClick={onGoBack}
+            />
+          ) : undefined
+        }
+        value={query}
+      />
       {isInitialLoading ? (
-        <div css={statusStyles}>
-          <EuiLoadingSpinner size="m" />
-        </div>
+        <EuiLoadingSpinner size="m" />
       ) : !isLoading && results.length === 0 ? (
-        <div css={statusStyles}>
-          <EuiText color="subdued" size="s">
-            {i18n.translate('dashboard.nav.searchDashboardsEmpty', {
-              defaultMessage: 'No dashboards found',
-            })}
-          </EuiText>
-        </div>
+        <EuiText color="subdued" size="s">
+          {i18n.translate('dashboard.nav.searchDashboardsEmpty', {
+            defaultMessage: 'No dashboards found',
+          })}
+        </EuiText>
       ) : (
-        <ul css={resultsListStyles} role="none">
+        <ul role="none">
           {results.map((dashboard) => {
             const itemId = `dashboard_search_${dashboard.id}`;
             const href = toAbsoluteNavHref(
@@ -216,13 +236,7 @@ export const DashboardSearchPanel = ({
                   data-test-subj={`dashboardNavSearchResult-${dashboard.id}`}
                   href={href}
                   id={itemId}
-                  onClick={() =>
-                    onItemClick({
-                      href,
-                      id: itemId,
-                      label: dashboard.title,
-                    })
-                  }
+                  onClick={() => handleResultClick(dashboard, href)}
                   size="s"
                   textProps={false}
                 >
@@ -235,6 +249,6 @@ export const DashboardSearchPanel = ({
           })}
         </ul>
       )}
-    </>
+    </div>
   );
 };

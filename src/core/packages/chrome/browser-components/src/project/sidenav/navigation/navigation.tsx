@@ -15,6 +15,8 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import {
   renderSidePanelNestedPanel as renderRegisteredSidePanelNestedPanel,
   subscribeSidePanelNestedPanelRenderers,
+  type SidePanelNestedPanelItemClickParams,
+  type SidePanelNestedPanelRenderProps,
 } from '@kbn/core-chrome-browser';
 import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-side-navigation/types';
 import { useObservable } from '@kbn/use-observable';
@@ -51,7 +53,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   }, [state?.activeItemId]);
 
   const handleItemClick = useCallback(
-    (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
+    (item: MenuItem | SecondaryMenuItem | SideNavLogo | SidePanelNestedPanelItemClickParams) => {
       setClickedActiveItemId(item.id);
 
       const navItems = state?.navItemsRef.current;
@@ -68,14 +70,20 @@ export const Navigation = (props: ChromeNavigationProps) => {
         state.panelStateManager.setPanelLastActive(panel.id, item.id);
         return;
       }
+
+      if ('panelId' in item && item.panelId) {
+        state.panelStateManager.setPanelLastActive(item.panelId, item.id);
+      }
     },
     [state]
   );
 
   const renderSidePanelNestedPanel = useCallback(
-    (panelId: string) =>
+    (panelId: string, options?: Pick<SidePanelNestedPanelRenderProps, 'onGoBack'>) =>
       renderRegisteredSidePanelNestedPanel(panelId, {
-        onItemClick: (item: { href: string; id: string; label: string }) => handleItemClick(item),
+        onItemClick: (nestedPanelItem: SidePanelNestedPanelItemClickParams) =>
+          handleItemClick(nestedPanelItem),
+        ...options,
       }),
     [handleItemClick]
   );

@@ -10,8 +10,17 @@
 import type { ReactNode } from 'react';
 
 /** @public */
+export interface SidePanelNestedPanelItemClickParams {
+  href: string;
+  id: string;
+  label: string;
+  panelId?: string;
+}
+
+/** @public */
 export interface SidePanelNestedPanelRenderProps {
-  onItemClick: (item: { href: string; id: string; label: string }) => void;
+  onItemClick: (item: SidePanelNestedPanelItemClickParams) => void;
+  onGoBack?: () => void;
 }
 
 /** @public */

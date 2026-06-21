@@ -37,14 +37,6 @@ describe('createDashboardsNavigationNode', () => {
       renderAs: 'panelOpener',
       icon: 'productDashboard',
       link: DASHBOARD_ALL_NAV_LINK,
-      panelHeaderActions: [
-        {
-          id: 'dashboards_search',
-          iconType: 'search',
-          opensNestedPanel: 'dashboards_search',
-          ariaLabel: 'Find dashboard',
-        },
-      ],
       panelNestedPanels: [
         {
           id: 'dashboards_search',
@@ -67,6 +59,14 @@ describe('createDashboardsNavigationNode', () => {
               id: DASHBOARD_ALL_NAV_ITEM_ID,
               link: DASHBOARD_ALL_NAV_LINK,
               title: 'All dashboards',
+              itemActions: [
+                {
+                  id: 'dashboards_search',
+                  iconType: 'search',
+                  opensNestedPanel: 'dashboards_search',
+                  ariaLabel: 'Find dashboard',
+                },
+              ],
               getIsActive: expect.any(Function),
             },
           ],
@@ -150,15 +150,6 @@ describe('createDashboardsNavigationNode', () => {
 
     expect(dashboardsItem?.href).toBe('/foo/app/dashboards#/list');
 
-    expect(dashboardsItem?.panelHeaderActions).toEqual([
-      expect.objectContaining({
-        id: 'dashboards_search',
-        iconType: 'search',
-        opensNestedPanel: 'dashboards_search',
-        'aria-label': 'Find dashboard',
-      }),
-    ]);
-
     expect(dashboardsItem?.panelNestedPanels).toEqual([
       {
         id: 'dashboards_search',
@@ -184,6 +175,14 @@ describe('createDashboardsNavigationNode', () => {
             id: DASHBOARD_ALL_NAV_ITEM_ID,
             label: 'All dashboards',
             href: '/foo/app/dashboards#/list',
+            itemActions: [
+              expect.objectContaining({
+                id: 'dashboards_search',
+                iconType: 'search',
+                opensNestedPanel: 'dashboards_search',
+                'aria-label': 'Find dashboard',
+              }),
+            ],
           }),
         ],
       },

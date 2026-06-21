@@ -114,6 +114,10 @@ export interface SecondaryMenuItem {
    * (optional) Whether the link opens in a new tab.
    */
   isExternal?: boolean;
+  /**
+   * (optional) Icon buttons rendered on the trailing edge of this menu item row.
+   */
+  itemActions?: PanelHeaderAction[];
 }
 
 /**

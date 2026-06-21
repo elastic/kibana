@@ -9,10 +9,11 @@
 
 import React, { useCallback, type KeyboardEventHandler } from 'react';
 
+import type { SidePanelNestedPanelRenderProps } from '@kbn/core-chrome-browser';
 import type { MenuItem, SecondaryMenuItem } from '../../types';
-import { usePanelHeaderActions } from '../hooks/use_panel_header_actions';
 import { SideNav } from './side_nav';
 import { useNestedMenu } from './nested_secondary_menu/use_nested_menu';
+import { NestedPanelContent } from './nested_panel_content';
 import { handleRovingIndex } from '../utils/handle_roving_index';
 
 export interface PanelMenuContentProps {
@@ -22,12 +23,15 @@ export interface PanelMenuContentProps {
   navigationInstructionsId?: string;
   onItemClick?: (item: MenuItem | SecondaryMenuItem) => void;
   onSubItemClick?: (subItem: SecondaryMenuItem) => void;
-  renderNestedPanel?: (panelId: string) => React.ReactNode;
+  renderNestedPanel?: (
+    panelId: string,
+    options?: Pick<SidePanelNestedPanelRenderProps, 'onGoBack'>
+  ) => React.ReactNode;
   testSubjPrefix: string;
   visuallyActiveSubpageId?: string;
 }
 
-const PanelMenuMainPanel = ({
+const PanelMenuSections = ({
   actualActiveItemId,
   getIsNewSecondary,
   item,
@@ -36,17 +40,10 @@ const PanelMenuMainPanel = ({
   testSubjPrefix,
   visuallyActiveSubpageId,
 }: PanelMenuContentProps): JSX.Element => {
-  const panelHeaderActions = usePanelHeaderActions(item.panelHeaderActions);
   const firstNonEmptySectionIndex = item.sections?.findIndex((section) => section.items.length > 0);
 
   return (
-    <SideNav.SecondaryMenu
-      badgeType={item.badgeType}
-      isPanel
-      panelHeaderActions={panelHeaderActions}
-      title={item.label}
-      isNew={getIsNewSecondary(item.id)}
-    >
+    <>
       {item.sections?.map((section, sectionIndex) => (
         <SideNav.SecondaryMenu.Section
           key={section.id}
@@ -74,13 +71,28 @@ const PanelMenuMainPanel = ({
           })}
         </SideNav.SecondaryMenu.Section>
       ))}
+    </>
+  );
+};
+
+const PanelMenuMainPanel = (props: PanelMenuContentProps): JSX.Element => {
+  const { getIsNewSecondary, item } = props;
+
+  return (
+    <SideNav.SecondaryMenu
+      badgeType={item.badgeType}
+      isPanel
+      title={item.label}
+      isNew={getIsNewSecondary(item.id)}
+    >
+      <PanelMenuSections {...props} />
     </SideNav.SecondaryMenu>
   );
 };
 
 const PanelMenuNestedPanels = (props: PanelMenuContentProps): JSX.Element => {
   const { canGoBack, goBack } = useNestedMenu();
-  const { item, renderNestedPanel } = props;
+  const { getIsNewSecondary, item, renderNestedPanel } = props;
 
   const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
     (event) => {
@@ -97,22 +109,23 @@ const PanelMenuNestedPanels = (props: PanelMenuContentProps): JSX.Element => {
 
   return (
     <div onKeyDown={handleKeyDown}>
-      <SideNav.NestedSecondaryMenu.Panel id={item.id}>
-        {() => <PanelMenuMainPanel {...props} />}
-      </SideNav.NestedSecondaryMenu.Panel>
-      {item.panelNestedPanels?.map((panel) => (
-        <SideNav.NestedSecondaryMenu.Panel key={panel.id} id={panel.id}>
+      <SideNav.SecondaryMenu
+        badgeType={item.badgeType}
+        isPanel
+        title={item.label}
+        isNew={getIsNewSecondary(item.id)}
+      >
+        <SideNav.NestedSecondaryMenu.Panel id={item.id}>
           {({ panelNavigationInstructionsId }) => (
-            <>
-              <SideNav.NestedSecondaryMenu.Header
-                title={panel.title}
-                aria-describedby={panelNavigationInstructionsId}
-              />
-              {renderNestedPanel?.(panel.id)}
-            </>
+            <PanelMenuSections {...props} navigationInstructionsId={panelNavigationInstructionsId} />
           )}
         </SideNav.NestedSecondaryMenu.Panel>
-      ))}
+        {item.panelNestedPanels?.map((panel) => (
+          <SideNav.NestedSecondaryMenu.Panel key={panel.id} id={panel.id}>
+            {() => <NestedPanelContent panelId={panel.id} renderNestedPanel={renderNestedPanel} />}
+          </SideNav.NestedSecondaryMenu.Panel>
+        ))}
+      </SideNav.SecondaryMenu>
     </div>
   );
 };

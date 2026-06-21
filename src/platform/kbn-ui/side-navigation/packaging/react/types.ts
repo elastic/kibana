@@ -42,6 +42,8 @@ export interface SecondaryMenuItem {
   badgeType?: BadgeType;
   /** If true, opens link in a new tab with an external icon. */
   isExternal?: boolean;
+  /** Optional icon buttons rendered on the trailing edge of this menu item row. */
+  itemActions?: PanelHeaderAction[];
 }
 
 /**

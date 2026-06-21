@@ -206,6 +206,14 @@ export const toNavigationItems = (
     // Helper function to convert a node to a secondary menu item
     const createSecondaryMenuItem = (child: ChromeProjectNavigationNode): SecondaryMenuItem => {
       maybeMarkActive(child, 2, navNode);
+      const itemActions = child.itemActions?.map((action) => ({
+        id: action.id,
+        iconType: action.iconType,
+        'aria-label': action.ariaLabel,
+        'data-test-subj': getTestSubj(child, [`item-action-${action.id}`]),
+        ...(action.opensNestedPanel ? { opensNestedPanel: action.opensNestedPanel } : {}),
+      }));
+
       return {
         id: child.id,
         label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
@@ -213,6 +221,7 @@ export const toNavigationItems = (
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
         badgeType: child.badgeType,
+        ...(itemActions?.length ? { itemActions } : {}),
       };
     };
 

@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem, PanelFooterAction } from '../../types';
+import type { SidePanelNestedPanelRenderProps } from '@kbn/core-chrome-browser';
 import {
   MAIN_PANEL_ID,
   MAX_FOOTER_ITEMS,
@@ -34,6 +35,7 @@ import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
 import { SecondaryMenuPanelFooter } from './secondary_menu/panel_footer';
 import { PanelMenuContent } from './panel_menu_content';
+import { NestedPanelContent } from './nested_panel_content';
 
 const navigationWrapperStyles = css`
   display: flex;
@@ -110,7 +112,10 @@ export interface NavigationProps {
   /**
    * (optional) Renders content for nested side panels opened from panel header actions.
    */
-  renderSidePanelNestedPanel?: (panelId: string) => ReactNode;
+  renderSidePanelNestedPanel?: (
+    panelId: string,
+    options?: Pick<SidePanelNestedPanelRenderProps, 'onGoBack'>
+  ) => ReactNode;
   /**
    * When true, renders a centered horizontal separator at the top of the side nav,
    * between the global header and the logo/primary menu.
@@ -442,7 +447,10 @@ export const Navigation = ({
                                   title={panel.title}
                                   aria-describedby={panelNavigationInstructionsId}
                                 />
-                                {renderSidePanelNestedPanel?.(panel.id)}
+                                <NestedPanelContent
+                                  panelId={panel.id}
+                                  renderNestedPanel={renderSidePanelNestedPanel}
+                                />
                               </>
                             )}
                           </SideNav.NestedSecondaryMenu.Panel>

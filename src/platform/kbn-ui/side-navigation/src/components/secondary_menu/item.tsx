@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -19,8 +19,10 @@ import { useSidePanelWidthValue } from '../../context/side_panel_width_context';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
+import { useNestedPanelActions } from '../../hooks/use_panel_header_actions';
 import {
   BADGE_SPACING_OFFSET,
+  ITEM_ACTION_SPACING_OFFSET,
   ITEM_HORIZONTAL_SPACING_OFFSET,
   NAVIGATION_SELECTOR_PREFIX,
   SUB_MENU_ICON_SPACING_OFFSET,
@@ -54,6 +56,7 @@ export const SecondaryMenuItemComponent = ({
   isExternal,
   isHighlighted,
   isNew = false,
+  itemActions,
   testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -62,6 +65,8 @@ export const SecondaryMenuItemComponent = ({
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
   const sidePanelWidth = useSidePanelWidthValue();
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
+  const resolvedItemActions = useNestedPanelActions(itemActions);
+  const hasItemActions = Boolean(resolvedItemActions?.length);
 
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
@@ -77,6 +82,9 @@ export const SecondaryMenuItemComponent = ({
     // 6px comes from Figma, no token
     padding-block: 6px;
     padding-inline: ${buttonPaddingInline};
+    ${hasItemActions
+      ? `padding-inline-end: calc(${buttonPaddingInline} + ${ITEM_ACTION_SPACING_OFFSET}px);`
+      : ''}
     width: 100%;
 
     > span {
@@ -91,6 +99,21 @@ export const SecondaryMenuItemComponent = ({
       ? euiTheme.colors.textPrimary
       : euiTheme.colors.textParagraph};
     ${highContrastModeStyles};
+  `;
+
+  const itemWrapperStyles = css`
+    position: relative;
+    width: 100%;
+  `;
+
+  const itemActionsInsideStyles = css`
+    align-items: center;
+    display: flex;
+    gap: ${euiTheme.size.xxs};
+    position: absolute;
+    right: ${euiTheme.size.xs};
+    top: 50%;
+    transform: translateY(-50%);
   `;
 
   const labelAndBadgeStyles = css`
@@ -114,6 +137,10 @@ export const SecondaryMenuItemComponent = ({
     if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
     // Secondary item label + right arrow (More menu)
     if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
+    // Secondary item label + trailing item actions
+    if (hasItemActions) {
+      maxWidth -= ITEM_ACTION_SPACING_OFFSET * (resolvedItemActions?.length ?? 0);
+    }
     return maxWidth;
   };
 
@@ -141,40 +168,64 @@ export const SecondaryMenuItemComponent = ({
     </div>
   );
 
+  const linkButton = isHighlighted ? (
+    <EuiButton
+      id={id}
+      aria-current={isCurrent ? 'page' : undefined}
+      css={buttonStyles}
+      data-highlighted="true"
+      data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
+      fullWidth
+      href={hasSubmenu ? undefined : href}
+      size="s"
+      textProps={false}
+      {...iconProps}
+      {...props}
+    >
+      {content}
+    </EuiButton>
+  ) : (
+    <EuiButtonEmpty
+      id={id}
+      aria-current={isCurrent ? 'page' : undefined}
+      color="text"
+      css={buttonStyles}
+      data-highlighted="false"
+      data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
+      fullWidth
+      href={hasSubmenu ? undefined : href}
+      size="s"
+      textProps={false}
+      {...iconProps}
+      {...props}
+    >
+      {content}
+    </EuiButtonEmpty>
+  );
+
   return (
     <li ref={activeItemRef} role="none">
-      {isHighlighted ? (
-        <EuiButton
-          id={id}
-          aria-current={isCurrent ? 'page' : undefined}
-          css={buttonStyles}
-          data-highlighted="true"
-          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-          fullWidth
-          href={hasSubmenu ? undefined : href}
-          size="s"
-          textProps={false}
-          {...iconProps}
-          {...props}
-        >
-          {content}
-        </EuiButton>
+      {hasItemActions ? (
+        <div css={itemWrapperStyles}>
+          {linkButton}
+          <div css={itemActionsInsideStyles}>
+            {resolvedItemActions?.map((action) => (
+              <EuiButtonIcon
+                key={action.id}
+                id={action.id}
+                aria-label={action['aria-label']}
+                color="primary"
+                data-test-subj={action['data-test-subj']}
+                display="base"
+                iconType={action.iconType}
+                onClick={action.onClick}
+                size="xs"
+              />
+            ))}
+          </div>
+        </div>
       ) : (
-        <EuiButtonEmpty
-          id={id}
-          aria-current={isCurrent ? 'page' : undefined}
-          color="text"
-          css={buttonStyles}
-          data-highlighted="false"
-          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-          href={hasSubmenu ? undefined : href}
-          size="s"
-          textProps={false}
-          {...iconProps}
-          {...props}
-        >
-          {content}
-        </EuiButtonEmpty>
+        linkButton
       )}
     </li>
   );

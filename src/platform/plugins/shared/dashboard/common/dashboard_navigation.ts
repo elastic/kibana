@@ -75,6 +75,16 @@ export const createDashboardsNavigationNode = (
           title: i18n.translate('dashboard.nav.allDashboards', {
             defaultMessage: 'All dashboards',
           }),
+          itemActions: [
+            {
+              id: 'dashboards_search',
+              iconType: 'search',
+              opensNestedPanel: 'dashboards_search',
+              ariaLabel: i18n.translate('dashboard.nav.findDashboard', {
+                defaultMessage: 'Find dashboard',
+              }),
+            },
+          ],
           getIsActive: ({ pathNameSerialized, prepend }) =>
             isDashboardsListingPath(pathNameSerialized, prepend),
         },
@@ -113,16 +123,6 @@ export const createDashboardsNavigationNode = (
     renderAs: 'panelOpener',
     icon: 'productDashboard',
     link: DASHBOARD_ALL_NAV_LINK,
-    panelHeaderActions: [
-      {
-        id: 'dashboards_search',
-        iconType: 'search',
-        opensNestedPanel: 'dashboards_search',
-        ariaLabel: i18n.translate('dashboard.nav.findDashboard', {
-          defaultMessage: 'Find dashboard',
-        }),
-      },
-    ],
     panelNestedPanels: [
       {
         id: 'dashboards_search',

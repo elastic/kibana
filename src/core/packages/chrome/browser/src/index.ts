@@ -72,6 +72,7 @@ export type {
 } from './project_navigation';
 
 export type {
+  SidePanelNestedPanelItemClickParams,
   SidePanelNestedPanelRenderProps,
   SidePanelNestedPanelRenderer,
 } from './side_panel_nested_panels';

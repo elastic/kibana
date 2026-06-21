@@ -67,6 +67,7 @@ export type {
   RenderAs,
   SolutionId,
   PanelNestedPanelDefinition,
+  SidePanelNestedPanelItemClickParams,
   SidePanelNestedPanelRenderProps,
   SidePanelNestedPanelRenderer,
   SidebarApp,

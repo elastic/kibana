@@ -121,6 +121,9 @@ export interface PanelHeaderActionDefinition {
   opensNestedPanel?: string;
 }
 
+/** @public */
+export type ItemActionDefinition = PanelHeaderActionDefinition;
+
 export interface PanelNestedPanelDefinition {
   id: string;
   title: string;
@@ -206,6 +209,11 @@ interface NodeDefinitionBase {
    * (optional) Animate list item reordering within this section's side nav panel.
    */
   animateItemReorder?: boolean;
+
+  /**
+   * (optional) Icon buttons rendered on the trailing edge of this side nav item row.
+   */
+  itemActions?: ItemActionDefinition[];
 }
 
 /** @public */

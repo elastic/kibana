@@ -14,17 +14,21 @@ import { useOptionalNestedMenu } from '../components/nested_secondary_menu/use_n
 
 export const usePanelHeaderActions = (
   panelHeaderActions: PanelHeaderAction[] | undefined
+): PanelHeaderAction[] | undefined => useNestedPanelActions(panelHeaderActions);
+
+export const useNestedPanelActions = (
+  actions: PanelHeaderAction[] | undefined
 ): PanelHeaderAction[] | undefined => {
   const nestedMenu = useOptionalNestedMenu();
 
   return useMemo(
     () =>
-      panelHeaderActions?.map((action) => ({
+      actions?.map((action) => ({
         ...action,
         onClick: action.opensNestedPanel
           ? () => nestedMenu?.goToPanel(action.opensNestedPanel!, action.id)
           : action.onClick,
       })),
-    [nestedMenu, panelHeaderActions]
+    [actions, nestedMenu]
   );
 };
