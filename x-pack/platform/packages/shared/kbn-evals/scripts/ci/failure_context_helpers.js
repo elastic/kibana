@@ -159,7 +159,7 @@ function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
  * from real regressions teams must fix.
  *
  * @param {Array<{ suiteId: string; suiteName?: string; failingProjects?: string[]; triageBody?: string }>} suites
- * @param {{ buildUrl?: string; totalSuites?: number }} [meta]
+ * @param {{ buildUrl?: string }} [meta]
  * @returns {string}
  */
 function buildWeeklyRollupUserPrompt(suites, meta = {}) {
@@ -167,9 +167,7 @@ function buildWeeklyRollupUserPrompt(suites, meta = {}) {
     'Write a short executive summary for a weekly LLM-evaluation CI run that had failing suites.',
     'The audience is the evals maintainers in a shared Slack channel; the goal is to tell at a glance which failures are non-actionable provider/infra noise vs real eval regressions a team must fix.',
     '',
-    `Failing suites: ${suites.length}${
-      typeof meta.totalSuites === 'number' ? ` of ${meta.totalSuites}` : ''
-    }`,
+    `Failing suites: ${suites.length}`,
   ];
 
   if (meta.buildUrl) {
@@ -363,6 +361,43 @@ function parseLitellmChatContent(responseJson) {
   return content.trim();
 }
 
+/**
+ * POST a built LiteLLM chat request and return the message content.
+ *
+ * @param {{ url: string; headers: Record<string, string>; body: Record<string, unknown> }} request
+ * @returns {Promise<string>}
+ */
+async function postLitellmChatRequest({ url, headers, body }) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    let detail = text.slice(0, 500);
+    try {
+      const json = JSON.parse(text);
+      if (json && typeof json === 'object' && 'error' in json) {
+        detail = JSON.stringify(json.error);
+      }
+    } catch {
+      // keep text slice
+    }
+    throw new Error(`Inference request failed (${response.status}): ${detail}`);
+  }
+
+  let json = null;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    throw new Error('Inference response was not JSON');
+  }
+
+  return parseLitellmChatContent(json);
+}
+
 module.exports = {
   MAX_LOG_EXCERPT_CHARS,
   MAX_CONTEXT_JSON_BYTES,
@@ -380,4 +415,5 @@ module.exports = {
   connectorIdToLitellmModel,
   buildLitellmConnectorFromVault,
   parseLitellmChatContent,
+  postLitellmChatRequest,
 };

@@ -11,48 +11,11 @@ const {
   buildLitellmChatRequest,
   buildLitellmConnectorFromVault,
   resolveTriageModelId,
-  parseLitellmChatContent,
+  postLitellmChatRequest,
   decodeAiConnectors,
 } = require('./failure_context_helpers');
 
 const maxOutputChars = Number(process.env.EVAL_TRIAGE_MAX_CHARS || '1500');
-
-/**
- * @param {string} url
- * @param {Record<string, string>} headers
- * @param {Record<string, unknown>} body
- * @returns {Promise<string>}
- */
-async function postForContent(url, headers, body) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  const text = await response.text();
-  if (!response.ok) {
-    let detail = text.slice(0, 500);
-    try {
-      const json = JSON.parse(text);
-      if (json && typeof json === 'object' && 'error' in json) {
-        detail = JSON.stringify(json.error);
-      }
-    } catch {
-      // keep text slice
-    }
-    throw new Error(`Inference request failed (${response.status}): ${detail}`);
-  }
-
-  let json = null;
-  try {
-    json = text ? JSON.parse(text) : null;
-  } catch {
-    throw new Error('Inference response was not JSON');
-  }
-
-  return parseLitellmChatContent(json);
-}
 
 /**
  * @param {Record<string, unknown>} context
@@ -102,8 +65,7 @@ async function summarizeFailuresWithModel(context) {
     throw new Error(`Unsupported model connector id for triage: ${modelId}`);
   }
 
-  const request = buildLitellmChatRequest(connector, messages);
-  let summary = await postForContent(request.url, request.headers, request.body);
+  let summary = await postLitellmChatRequest(buildLitellmChatRequest(connector, messages));
 
   if (summary.length > maxOutputChars) {
     summary = `${summary.slice(0, maxOutputChars - 1)}…`;

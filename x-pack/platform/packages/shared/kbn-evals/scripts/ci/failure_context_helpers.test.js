@@ -131,21 +131,14 @@ describe('failure_context_helpers', () => {
     it('includes each failing suite, its models, and its triage body', () => {
       const prompt = buildWeeklyRollupUserPrompt(suites, {
         buildUrl: 'https://buildkite.com/build/9',
-        totalSuites: 15,
       });
 
-      expect(prompt).toContain('Failing suites: 2 of 15');
+      expect(prompt).toContain('Failing suites: 2');
       expect(prompt).toContain('Streams (streams)');
       expect(prompt).toContain('eis-claude-4.6-sonnet, eis-gemini-3.1-pro');
       expect(prompt).toContain('Observability AI (observability-ai)');
       expect(prompt).toContain('Provider issue: 529 overloaded.');
       expect(prompt).toContain('https://buildkite.com/build/9');
-    });
-
-    it('omits the total-suite count when not provided', () => {
-      const prompt = buildWeeklyRollupUserPrompt(suites);
-      expect(prompt).toContain('Failing suites: 2');
-      expect(prompt).not.toContain(' of ');
     });
   });
 

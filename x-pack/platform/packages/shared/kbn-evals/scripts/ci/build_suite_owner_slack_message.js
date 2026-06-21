@@ -26,16 +26,7 @@ const githubOutputPath = process.env.EVAL_TRIAGE_GITHUB_OUT || '';
 // - 'weekly': scheduled run alert for the owning team.
 function resolveNotifyMode() {
   const explicit = (process.argv[4] || process.env.EVAL_NOTIFY_MODE || '').toLowerCase();
-  if (explicit === 'on-demand' || explicit === 'weekly') {
-    return explicit;
-  }
-  if (/^(1|true)$/i.test(process.env.KBN_EVALS_ON_DEMAND || '')) {
-    return 'on-demand';
-  }
-  if (/^(1|true)$/i.test(process.env.KBN_EVALS_WEEKLY || '')) {
-    return 'weekly';
-  }
-  return 'weekly';
+  return explicit === 'on-demand' ? 'on-demand' : 'weekly';
 }
 
 const notifyMode = resolveNotifyMode();

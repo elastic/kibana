@@ -40,4 +40,4 @@ function fromRoot(relativePath) {
   return resolve(resolveRepoRoot(), relativePath);
 }
 
-module.exports = { resolveRepoRoot, fromRoot };
+module.exports = { fromRoot };

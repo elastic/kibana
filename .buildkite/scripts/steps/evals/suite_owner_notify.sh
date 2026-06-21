@@ -32,7 +32,6 @@ if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]]; then
 else
   EVAL_NOTIFY_MODE="on-demand"
 fi
-export EVAL_NOTIFY_MODE
 
 # --- Resolve destinations -------------------------------------------------
 # Slack: weekly -> the suite's team channel; otherwise -> EVAL_SLACK_NOTIFICATION_CHANNEL
@@ -40,12 +39,6 @@ export EVAL_NOTIFY_MODE
 slack_channel=""
 if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
   slack_channel="${EVAL_SUITE_SLACK_CHANNEL:-}"
-  if [[ -z "${slack_channel}" ]]; then
-    suites_json="${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}/.buildkite/pipelines/evals/evals.suites.json"
-    slack_channel="$(
-      jq -r --arg id "$EVAL_SUITE_ID" '.suites[] | select(.id == $id) | .slackChannel // empty' "$suites_json" 2>/dev/null || true
-    )"
-  fi
 else
   slack_channel="${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
 fi

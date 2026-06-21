@@ -134,14 +134,12 @@ jq -n \
   --arg buildUrl "${BUILDKITE_BUILD_URL:-}" \
   --arg pipelineName "${BUILDKITE_PIPELINE_NAME:-Buildkite}" \
   --arg buildNumber "${BUILDKITE_BUILD_NUMBER:-}" \
-  --arg totalSuites "${EVAL_WEEKLY_TOTAL_SUITES:-}" \
   '{
      buildUrl: $buildUrl,
      pipelineName: $pipelineName,
      buildNumber: $buildNumber,
      suites: $suites
-   }
-   + (if ($totalSuites | length) > 0 then { totalSuites: ($totalSuites | tonumber) } else {} end)' \
+   }' \
   >"$context_file"
 
 slack_body_file="$(mktemp -t kbn-evals-weekly-slack.XXXXXX.md)"

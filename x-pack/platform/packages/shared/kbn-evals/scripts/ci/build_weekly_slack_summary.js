@@ -92,18 +92,12 @@ async function main() {
   const pipelineName =
     typeof context.pipelineName === 'string' ? context.pipelineName : 'Buildkite';
   const buildNumber = typeof context.buildNumber === 'string' ? context.buildNumber : '';
-  const totalSuites = typeof context.totalSuites === 'number' ? context.totalSuites : undefined;
-  const failingModelCount =
-    typeof context.failingModelCount === 'number'
-      ? context.failingModelCount
-      : suites.reduce(
-          (sum, suite) =>
-            sum + (Array.isArray(suite.failingProjects) ? suite.failingProjects.length : 0),
-          0
-        );
+  const failingModelCount = suites.reduce(
+    (sum, suite) => sum + (Array.isArray(suite.failingProjects) ? suite.failingProjects.length : 0),
+    0
+  );
 
-  const countSuffix = typeof totalSuites === 'number' ? ` of ${totalSuites}` : '';
-  const header = `:rotating_light: *Weekly LLM evals* — ${suites.length}${countSuffix} suites failed (${failingModelCount} model runs)`;
+  const header = `:rotating_light: *Weekly LLM evals* — ${suites.length} suites failed (${failingModelCount} model runs)`;
 
   const lines = [header];
   if (buildUrl) {
@@ -112,7 +106,7 @@ async function main() {
 
   let modelId = 'unknown';
   try {
-    const result = await summarizeWeeklyFailures(suites, { buildUrl, totalSuites });
+    const result = await summarizeWeeklyFailures(suites, { buildUrl });
     modelId = result.modelId;
     lines.push('', `*Executive summary (model: \`${modelId}\`):*`, result.summary);
   } catch (error) {
