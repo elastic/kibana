@@ -19,6 +19,7 @@ import type * as types from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { wrapTaskRun } from '../telemetry/traces';
+import { entityStoreMetrics } from '../monitor/metrics';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -56,6 +57,8 @@ async function runTask({
     };
   }
 
+  let ccs = false;
+
   try {
     const { logsExtractionClient } = await createLogsExtractionClient({
       core,
@@ -70,6 +73,8 @@ async function runTask({
     });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
+    ccs = extractionResult.success && extractionResult.isCcs;
+
     if (!extractionResult.success) {
       logger.error(
         `Logs extraction failed for ${entityType}: ${extractionResult.error.message}, took ${extractionDuration}ms`
@@ -79,6 +84,8 @@ async function runTask({
         `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
       );
     }
+
+    entityStoreMetrics.extractionTaskSuccess.add(1, { entity_type: entityType, namespace, ccs });
 
     const updatedState = {
       namespace,
@@ -94,6 +101,18 @@ async function runTask({
     };
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);
+
+    if (abortController?.signal.aborted) {
+      entityStoreMetrics.extractionTaskAborted.add(1, { entity_type: entityType, namespace, ccs });
+    } else {
+      entityStoreMetrics.extractionTaskError.add(1, {
+        entity_type: entityType,
+        namespace,
+        error_type: e.name ?? 'UnknownError',
+        ccs,
+      });
+    }
+
     return {
       state: {
         ...currentState,
