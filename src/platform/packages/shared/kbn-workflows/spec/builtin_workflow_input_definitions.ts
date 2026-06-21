@@ -22,8 +22,11 @@ import type { JsonSchema } from './schema/common/json_model_shape_schema';
 export const KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX = '#/kibana/definitions/' as const;
 
 /**
- * Alerting v2 notification group payload dispatched to workflows.
- * Use as a workflow **input** when a step should receive the grouped notification context.
+ * JSON Schema mirror of the alerting v2 action-policy dispatch payload for workflow input authoring.
+ * Use as a workflow **input** when a step should receive the grouped notification context
+ * (e.g. `inputs.payload` on workflows triggered by `action_policy`).
+ *
+ * @see ActionPolicyWorkflowPayload
  */
 const alertingV2NotificationGroup: JsonSchema = {
   type: 'object',
