@@ -26,12 +26,6 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelContent?: ResolvePanelContent;
 }
 
-const createEmptyDashboardData = (): DashboardAttachmentData => ({
-  title: 'User Dashboard',
-  description: undefined,
-  panels: [],
-});
-
 /**
  * Environment-agnostic dashboard generation.
  *
@@ -50,7 +44,13 @@ export const executeDashboardOperations = async ({
   dashboardData: DashboardAttachmentData;
   failures: PanelFailure[];
 }> => {
-  let nextDashboardData = structuredClone(dashboardData ?? createEmptyDashboardData());
+  let nextDashboardData = structuredClone(
+    dashboardData ?? {
+      title: 'User Dashboard',
+      description: undefined,
+      panels: [],
+    }
+  );
   const failures: PanelFailure[] = [];
 
   const context = await prepareOperationExecution({

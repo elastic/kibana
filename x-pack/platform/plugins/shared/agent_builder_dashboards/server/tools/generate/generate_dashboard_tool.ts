@@ -120,18 +120,17 @@ Use operations[] to:
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const resolvePanelContent = createVisPanelResolver({
-          logger,
-          modelProvider,
-          events,
-          esClient,
-        });
 
         const { dashboardData, failures } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvePanelContent,
+          resolvePanelContent: createVisPanelResolver({
+            logger,
+            modelProvider,
+            events,
+            esClient,
+          }),
         });
 
         const description = `Dashboard: ${dashboardData.title}`;
