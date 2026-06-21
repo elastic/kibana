@@ -56,9 +56,6 @@ export class QueryRuleOrchestrator {
       if (!current) {
         const ruleBacked = !isStats;
         const link: QueryLink = {
-          'asset.uuid': query.id,
-          'asset.type': 'query',
-          'asset.id': query.id,
           stream_name: stream,
           rule_backed: ruleBacked,
           rule_id: ruleId,
@@ -73,9 +70,6 @@ export class QueryRuleOrchestrator {
         allNext.push({ query, rule_backed: false, rule_id: current.rule_id });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
-          'asset.uuid': query.id,
-          'asset.type': 'query',
-          'asset.id': query.id,
           stream_name: stream,
           rule_backed: true,
           rule_id: ruleId,
