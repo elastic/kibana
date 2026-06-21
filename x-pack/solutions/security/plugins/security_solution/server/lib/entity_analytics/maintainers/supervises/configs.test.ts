@@ -1,0 +1,245 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS, buildSupervisesConfigs } from './configs';
+import { buildActorDiscoveryQuery } from '../engine/build_actor_discovery_query';
+import { buildTargetsPerActorQuery } from '../engine/build_targets_per_actor_query';
+import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
+import type { OverrideRelationshipIntegrationConfig } from '../engine/types';
+
+const overrideConfigs = SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
+  (c): c is OverrideRelationshipIntegrationConfig => c.kind === 'override'
+);
+
+describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
+  it('ships exactly the one expected integration', () => {
+    expect(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
+      'entityanalytics_okta',
+    ]);
+  });
+
+  it('declares kind: "override" on every supervises config', () => {
+    for (const config of SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS) {
+      expect(config.kind).toBe('override');
+    }
+    expect(overrideConfigs).toHaveLength(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.length);
+  });
+
+  it('declares relationshipKey "supervises" on every config', () => {
+    for (const config of overrideConfigs) {
+      expect(config.relationshipKey).toBe('supervises');
+    }
+  });
+
+  it('declares targetEntityType "user" on every config (user → user)', () => {
+    for (const config of SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS) {
+      expect(config.targetEntityType).toBe('user');
+    }
+  });
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: builds a syntactically-locked actor discovery query',
+    (config) => {
+      const query = buildActorDiscoveryQuery(config, undefined) as {
+        size: number;
+        query: { bool: { filter: unknown[] } };
+        aggs: { users: { composite: { size: number; sources: unknown[] } } };
+      };
+      expect(query.size).toBe(0);
+      expect(query.query.bool.filter.length).toBeGreaterThanOrEqual(2);
+      expect(query.aggs.users.composite.size).toBe(COMPOSITE_PAGE_SIZE);
+    }
+  );
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: indexPattern points to the entity index (not a log index)',
+    (config) => {
+      expect(config.indexPattern('myns')).toContain('.entities.v2.latest.security_myns');
+      expect(config.indexPattern('default')).not.toContain('myns');
+    }
+  );
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: override query picks ONE raw field per actor by EUID rank (email → id → name)',
+    (config) => {
+      const query = buildTargetsPerActorQuery(config, 'default');
+      // CASE falls through email → id → name; it must NOT union email+id
+      // (that would emit two EUIDs per report, double-counting the entity).
+      const emailIdx = query.indexOf(
+        'MV_COUNT(entity.relationships.supervises.raw_identifiers.user.email) > 0'
+      );
+      const idIdx = query.indexOf(
+        'MV_COUNT(entity.relationships.supervises.raw_identifiers.user.id) > 0'
+      );
+      expect(emailIdx).toBeGreaterThanOrEqual(0);
+      expect(idIdx).toBeGreaterThanOrEqual(0);
+      // Email is checked before id (rank-1 before rank-2).
+      expect(emailIdx).toBeLessThan(idIdx);
+      // The name field is the final fallback branch of the CASE.
+      expect(query).toContain('entity.relationships.supervises.raw_identifiers.user.name\n  )');
+      // Must not union email + id (the double-counting bug).
+      expect(query).not.toContain('MV_APPEND(');
+    }
+  );
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: override query MV_EXPANDs the chosen key BEFORE CONCAT (CONCAT is null on multi-valued input)',
+    (config) => {
+      const query = buildTargetsPerActorQuery(config, 'default');
+      const expandIdx = query.indexOf('MV_EXPAND rawTargetKey');
+      const concatIdx = query.indexOf('CONCAT("user:", rawTargetKey, "@okta")');
+      expect(expandIdx).toBeGreaterThanOrEqual(0);
+      expect(concatIdx).toBeGreaterThanOrEqual(0);
+      // The expand must come first, or CONCAT collapses the multi-valued field to null.
+      expect(expandIdx).toBeLessThan(concatIdx);
+    }
+  );
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: override query builds the user EUID with the @okta namespace suffix',
+    (config) => {
+      const query = buildTargetsPerActorQuery(config, 'default');
+      expect(query).toContain('CONCAT("user:", rawTargetKey, "@okta")');
+    }
+  );
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: override query guards against non-EUID and namespace-only target values',
+    (config) => {
+      const query = buildTargetsPerActorQuery(config, 'default');
+      // Rejects empty/prefix-only values like "user:@okta" from a blank raw field,
+      // and requires a namespace-suffixed user EUID shape.
+      expect(query).toContain('targetEntityId != "user:@okta"');
+      expect(query).toContain('targetEntityId RLIKE ".+:.+@.+"');
+    }
+  );
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: override query does NOT filter by entity.type (actor discovered by entity.id)',
+    (config) => {
+      const query = buildTargetsPerActorQuery(config, 'default');
+      expect(query).not.toContain('entity.type ==');
+    }
+  );
+
+  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: override query sets actorUserId from entity.id (already EUID-prefixed)',
+    (config) => {
+      const query = buildTargetsPerActorQuery(config, 'default');
+      expect(query).toContain('actorUserId = entity.id');
+    }
+  );
+
+  describe('lookback window', () => {
+    it('declares disableLookbackWindow on every config (entity-index source)', () => {
+      for (const config of SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS) {
+        expect(config.disableLookbackWindow).toBe(true);
+      }
+    });
+
+    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+      '$id: Step 1 actor discovery query omits the @timestamp lookback range',
+      (config) => {
+        const query = buildActorDiscoveryQuery(config, undefined) as {
+          query: { bool: { filter: unknown[] } };
+        };
+        const hasTimestampRange = query.query.bool.filter.some((f) =>
+          JSON.stringify(f).includes('"@timestamp"')
+        );
+        expect(hasTimestampRange).toBe(false);
+      }
+    );
+  });
+
+  describe('actor existence gate', () => {
+    it('captures actors that carry supervises raw_identifiers under user.email, user.id, or user.name', () => {
+      const config = buildSupervisesConfigs()[0];
+      const filters = config.compositeAggAdditionalFilters ?? [];
+      const existenceGate = filters.find((f) =>
+        JSON.stringify(f).includes('raw_identifiers.user.email')
+      );
+      expect(existenceGate).toBeDefined();
+      const serialized = JSON.stringify(existenceGate);
+      expect(serialized).toContain('entity.relationships.supervises.raw_identifiers.user.email');
+      expect(serialized).toContain('entity.relationships.supervises.raw_identifiers.user.id');
+      expect(serialized).toContain('entity.relationships.supervises.raw_identifiers.user.name');
+    });
+  });
+
+  describe('entity.source filter', () => {
+    // entity.source is the full data_stream.dataset (`entityanalytics_okta.user`)
+    // when the integration ships no event.module — NOT the bare integration name.
+    const OKTA_SOURCE = 'entityanalytics_okta.user';
+
+    it(`Step 1 composite agg filters include an entity.source term for ${OKTA_SOURCE}`, () => {
+      const config = buildSupervisesConfigs()[0];
+      const filters = config.compositeAggAdditionalFilters ?? [];
+      const sourceFilter = filters.find((f) => JSON.stringify(f).includes('entity.source'));
+      expect(sourceFilter).toEqual({ term: { 'entity.source': OKTA_SOURCE } });
+    });
+
+    it(`Step 2 ES|QL override filters on entity.source == "${OKTA_SOURCE}"`, () => {
+      const config = buildSupervisesConfigs()[0] as OverrideRelationshipIntegrationConfig;
+      const query = config.esqlQueryOverride('default');
+      expect(query).toContain(`entity.source == "${OKTA_SOURCE}"`);
+    });
+  });
+
+  describe('watermark behaviour', () => {
+    const WATERMARK_FIELD = 'entity.lifecycle.last_seen';
+
+    it('with no watermark: query does NOT contain a last_seen filter', () => {
+      const config = buildSupervisesConfigs()[0] as OverrideRelationshipIntegrationConfig;
+      const query = config.esqlQueryOverride('default');
+      expect(query).not.toContain(`${WATERMARK_FIELD} >`);
+    });
+
+    it('with watermark: query filters on entity.lifecycle.last_seen after the watermark value', () => {
+      const ts = '2026-06-01T00:00:00.000Z';
+      const config = buildSupervisesConfigs(ts)[0] as OverrideRelationshipIntegrationConfig;
+      const query = config.esqlQueryOverride('default');
+      expect(query).toContain(`${WATERMARK_FIELD} > "${ts}"`);
+      // The entity index @timestamp must NOT be used as the incremental signal.
+      expect(query).not.toContain('@timestamp >');
+    });
+
+    it('with watermark: composite agg filters include an entity.lifecycle.last_seen range', () => {
+      const ts = '2026-06-01T00:00:00.000Z';
+      const config = buildSupervisesConfigs(ts)[0];
+      const filters = config.compositeAggAdditionalFilters ?? [];
+      const rangeFilters = filters.filter((f) => JSON.stringify(f).includes(WATERMARK_FIELD));
+      expect(rangeFilters.length).toBe(1);
+      expect(JSON.stringify(rangeFilters[0])).toContain(ts);
+      // Guard against a regression back to @timestamp on the entity index.
+      const tsFilters = filters.filter((f) => JSON.stringify(f).includes('@timestamp'));
+      expect(tsFilters.length).toBe(0);
+    });
+
+    it('with no watermark: composite agg filters do NOT include a last_seen range', () => {
+      const config = buildSupervisesConfigs()[0];
+      const filters = config.compositeAggAdditionalFilters ?? [];
+      const rangeFilters = filters.filter((f) => JSON.stringify(f).includes(WATERMARK_FIELD));
+      expect(rangeFilters.length).toBe(0);
+    });
+  });
+
+  describe('golden snapshots', () => {
+    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+      '$id: targets-per-actor ES|QL is locked (no watermark)',
+      (config) => {
+        expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
+      }
+    );
+
+    it('entityanalytics_okta: targets-per-actor ES|QL with watermark is locked', () => {
+      const config = buildSupervisesConfigs(
+        '2026-06-01T00:00:00.000Z'
+      )[0] as OverrideRelationshipIntegrationConfig;
+      expect(config.esqlQueryOverride('__namespace__')).toMatchSnapshot();
+    });
+  });
+});

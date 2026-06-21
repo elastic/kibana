@@ -87,14 +87,76 @@ interface SeedUserEntityOptions {
   entityId: string;
   namespace: string;
   email: string | string[];
+  /** entity.lifecycle.last_seen (the watermark field). Defaults to `timestamp` or now. */
+  lastSeen?: string;
+  /** entity.lifecycle.first_seen. Defaults to `lastSeen`. */
+  firstSeen?: string;
+  /** Back-compat alias used when lastSeen/firstSeen are not provided. */
   timestamp?: string;
+  /**
+   * Written to entity.source. Mirrors how extraction populates the field from
+   * event.module / data_stream.dataset (e.g. 'entityanalytics_okta'). Maintainers
+   * that filter by entity.source (like the supervises maintainer) will skip
+   * entities whose source does not match.
+   */
+  entitySource?: string;
+  /**
+   * Optional relationship raw_identifier bag to seed under
+   * `entity.relationships.<key>.raw_identifiers.{user.{email,id},host.name}`.
+   *
+   * - `userEmails` / `userIds` → user → user maintainers (supervises, …),
+   *   resolved into `<key>.ids` as `user:<value>@<namespace>`.
+   * - `hostNames` → user → host maintainers (administers, …), resolved into
+   *   `<key>.ids` as a namespace-less `host:<name>`. Use this to seed a USER
+   *   actor that points at a HOST target.
+   */
+  relationship?: {
+    /** The relationship key, e.g. 'supervises' | 'administers'. */
+    key: string;
+    /** Raw user emails placed under raw_identifiers.user.email. */
+    userEmails?: string[];
+    /** Raw user ids placed under raw_identifiers.user.id. */
+    userIds?: string[];
+    /** Raw host names placed under raw_identifiers.host.name (user → host targets). */
+    hostNames?: string[];
+  };
 }
 
 export const seedUserEntity = async (
   esClient: EsClient,
-  { entityId, namespace, email, timestamp }: SeedUserEntityOptions
+  {
+    entityId,
+    namespace,
+    email,
+    lastSeen,
+    firstSeen,
+    timestamp,
+    entitySource,
+    relationship,
+  }: SeedUserEntityOptions
 ) => {
-  const ts = timestamp ?? new Date().toISOString();
+  const last = lastSeen ?? timestamp ?? new Date().toISOString();
+  const first = firstSeen ?? last;
+
+  const userBag: Record<string, string[]> = {};
+  if (relationship?.userEmails?.length) {
+    userBag.email = relationship.userEmails;
+  }
+  if (relationship?.userIds?.length) {
+    userBag.id = relationship.userIds;
+  }
+  const rawIdentifiers: Record<string, unknown> = {};
+  if (Object.keys(userBag).length > 0) {
+    rawIdentifiers.user = userBag;
+  }
+  if (relationship?.hostNames?.length) {
+    rawIdentifiers.host = { name: relationship.hostNames };
+  }
+  const relationships =
+    relationship && Object.keys(rawIdentifiers).length > 0
+      ? { [relationship.key]: { raw_identifiers: rawIdentifiers } }
+      : undefined;
+
   await esClient.index({
     index: LATEST_ALIAS,
     id: hashEuid(entityId),
@@ -106,16 +168,18 @@ export const seedUserEntity = async (
         name: entityId,
         EngineMetadata: { Type: 'user' },
         namespace,
+        ...(entitySource && { source: entitySource }),
         lifecycle: {
-          first_seen: ts,
-          last_seen: ts,
+          first_seen: first,
+          last_seen: last,
         },
+        ...(relationships && { relationships }),
       },
       user: {
         email,
         name: entityId,
       },
-      '@timestamp': ts,
+      '@timestamp': last,
     },
   });
 };
