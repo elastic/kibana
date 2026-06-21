@@ -17,6 +17,7 @@
  */
 
 import { tags } from '@kbn/scout';
+import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeBackfillRule } from '../fixtures';
 
@@ -66,7 +67,7 @@ test.describe('backfill find API', { tag: tags.stateful.classic }, () => {
   // ────────────────────────────────────────────────────────────────────────────
   // Helper: create two rules + two backfills, return their IDs
   // ────────────────────────────────────────────────────────────────────────────
-  async function setupTwoBackfills(kbnClient: any): Promise<{
+  async function setupTwoBackfills(kbnClient: KbnClient): Promise<{
     ruleId1: string;
     ruleId2: string;
     backfillId1: string;
