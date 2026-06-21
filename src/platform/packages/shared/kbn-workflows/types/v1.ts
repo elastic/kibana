@@ -27,7 +27,7 @@ export enum ExecutionStatus {
   WAITING_FOR_INPUT = 'waiting_for_input',
   WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
-  /** Persisted concurrency backlog — does not count toward concurrency max until promoted to pending + scheduled */
+  /** Persisted concurrency backlog - does not count toward concurrency max until promoted to pending + scheduled */
   QUEUED = 'queued',
 
   // Done
