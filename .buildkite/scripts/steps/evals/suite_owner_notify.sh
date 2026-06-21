@@ -72,7 +72,7 @@ mapfile -t failing_projects < <(
 
 cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
 
-if [[ ! -d node_modules/@elastic/elasticsearch ]] || ! node -e "require('@elastic/elasticsearch')" 2>/dev/null; then
+if ! node -e "require('yaml')" 2>/dev/null; then
   echo "--- Bootstrap (required for suite owner triage)"
   .buildkite/scripts/bootstrap.sh
 fi
@@ -150,11 +150,6 @@ fi
 
 # --- Post to Slack --------------------------------------------------------
 if [[ -n "${slack_channel}" && -n "${SLACK_FILE}" && -f "${SLACK_FILE}" ]]; then
-  if ! node -e "require('yaml')" 2>/dev/null; then
-    echo "--- Bootstrap (required for generate_suite_notify_pipeline.js)"
-    .buildkite/scripts/bootstrap.sh
-  fi
-
   NOTIFY_PIPELINE_FILE="$(mktemp -t kbn-evals-notify-pipeline.XXXXXX.yml)"
   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_suite_notify_pipeline.js \
     "$SLACK_FILE" "$slack_channel" >"$NOTIFY_PIPELINE_FILE"

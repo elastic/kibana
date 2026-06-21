@@ -6,7 +6,6 @@
  * 2.0.
  */
 
-const { readFileSync } = require('fs');
 const {
   buildTriageUserPrompt,
   buildLitellmChatRequest,
@@ -56,10 +55,10 @@ async function postForContent(url, headers, body) {
 }
 
 /**
- * @param {string} contextPath
+ * @param {Record<string, unknown>} context
  * @returns {Promise<{ summary: string; modelId: string }>}
  */
-async function summarizeFailuresWithModel(contextPath) {
+async function summarizeFailuresWithModel(context) {
   const modelId = resolveTriageModelId();
   if (!modelId) {
     throw new Error(
@@ -67,7 +66,6 @@ async function summarizeFailuresWithModel(contextPath) {
     );
   }
 
-  const context = JSON.parse(readFileSync(contextPath, 'utf8'));
   const failingProjects = Array.isArray(context.failingProjects) ? context.failingProjects : [];
 
   const connectors = decodeAiConnectors();
@@ -112,25 +110,6 @@ async function summarizeFailuresWithModel(contextPath) {
   }
 
   return { summary: summary.trim(), modelId };
-}
-
-async function main() {
-  const contextPath = process.argv[2] || process.env.EVAL_FAILURE_CONTEXT_PATH || '';
-  if (!contextPath) {
-    console.error('Usage: summarize_failures_with_model.js <failure-context.json>');
-    process.exit(1);
-  }
-
-  const { summary } = await summarizeFailuresWithModel(contextPath);
-  process.stdout.write(`${summary}\n`);
-}
-
-if (require.main === module) {
-  main().catch((error) => {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Triage summary failed: ${message}`);
-    process.exit(1);
-  });
 }
 
 module.exports = { summarizeFailuresWithModel };

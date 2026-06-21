@@ -7,12 +7,9 @@
  */
 
 const { execFileSync } = require('child_process');
-const { writeFileSync } = require('fs');
 const { suiteKeySafe } = require('./suite_key_safe');
 
-const EVALUATIONS_INDEX = 'kibana-evaluations';
 const MAX_LOG_EXCERPT_CHARS = 4000;
-const MAX_SCORE_ROWS_PER_MODEL = 10;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 
 // Triage/summary text is always generated with a LiteLLM model (the
@@ -31,19 +28,6 @@ function failureLogMetadataKey(suiteId, project) {
 }
 
 /**
- * @param {string} buildId
- * @param {string} suiteId
- * @returns {{ bool: { must: Array<Record<string, unknown>> } }}
- */
-function buildFailureScoresQuery(buildId, suiteId) {
-  return {
-    bool: {
-      must: [{ term: { 'ci.buildkite.build_id': buildId } }, { term: { 'suite.id': suiteId } }],
-    },
-  };
-}
-
-/**
  * @param {string | undefined | null} text
  * @param {number} maxChars
  * @returns {string}
@@ -54,97 +38,6 @@ function truncateText(text, maxChars) {
     return value;
   }
   return value.slice(value.length - maxChars);
-}
-
-/**
- * @param {unknown} value
- * @returns {number | null}
- */
-function scoreSortValue(value) {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-  return null;
-}
-
-/**
- * @param {Array<Record<string, unknown>>} hits
- * @param {{ maxRowsPerModel?: number }} [options]
- * @returns {Record<string, { runId: string; lowScores: Array<Record<string, unknown>> }>}
- */
-function groupLowScoresByRunId(hits, options = {}) {
-  const maxRows = options.maxRowsPerModel ?? MAX_SCORE_ROWS_PER_MODEL;
-  /** @type {Record<string, Array<Record<string, unknown>>>} */
-  const byRun = {};
-
-  for (const hit of hits) {
-    const source = hit._source ?? hit;
-    if (!source || typeof source !== 'object') {
-      continue;
-    }
-
-    const runId = typeof source.run_id === 'string' ? source.run_id : 'unknown';
-    const example = source.example && typeof source.example === 'object' ? source.example : {};
-    const dataset = example.dataset && typeof example.dataset === 'object' ? example.dataset : {};
-    const evaluator =
-      source.evaluator && typeof source.evaluator === 'object' ? source.evaluator : {};
-    const task = source.task && typeof source.task === 'object' ? source.task : {};
-    const taskModel = task.model && typeof task.model === 'object' ? task.model : {};
-
-    const row = {
-      exampleId: typeof example.id === 'string' ? example.id : undefined,
-      datasetName: typeof dataset.name === 'string' ? dataset.name : undefined,
-      evaluatorName: typeof evaluator.name === 'string' ? evaluator.name : undefined,
-      score: scoreSortValue(evaluator.score),
-      explanation:
-        typeof evaluator.explanation === 'string'
-          ? truncateText(evaluator.explanation, 500)
-          : undefined,
-      label: typeof evaluator.label === 'string' ? evaluator.label : undefined,
-      taskModelId: typeof taskModel.id === 'string' ? taskModel.id : undefined,
-    };
-
-    if (!byRun[runId]) {
-      byRun[runId] = [];
-    }
-    byRun[runId].push(row);
-  }
-
-  /** @type {Record<string, { runId: string; lowScores: Array<Record<string, unknown>> }>} */
-  const grouped = {};
-
-  for (const [runId, rows] of Object.entries(byRun)) {
-    const sorted = rows.sort((a, b) => {
-      const aScore = scoreSortValue(a.score);
-      const bScore = scoreSortValue(b.score);
-      if (aScore === null && bScore === null) {
-        return 0;
-      }
-      if (aScore === null) {
-        return -1;
-      }
-      if (bScore === null) {
-        return 1;
-      }
-      return aScore - bScore;
-    });
-
-    grouped[runId] = {
-      runId,
-      lowScores: sorted.slice(0, maxRows),
-    };
-  }
-
-  return grouped;
-}
-
-/**
- * @param {string} buildId
- * @param {string} project
- * @returns {string}
- */
-function expectedRunId(buildId, project) {
-  return `bk-${buildId}-${project}`;
 }
 
 /**
@@ -161,14 +54,6 @@ function truncateContextJson(context, maxBytes = MAX_CONTEXT_JSON_BYTES) {
   const clone = JSON.parse(serialized);
   if (clone.models && typeof clone.models === 'object') {
     for (const model of Object.values(clone.models)) {
-      if (model && typeof model === 'object' && Array.isArray(model.lowScores)) {
-        model.lowScores = model.lowScores.slice(0, 3);
-        for (const row of model.lowScores) {
-          if (row && typeof row === 'object' && typeof row.explanation === 'string') {
-            row.explanation = truncateText(row.explanation, 200);
-          }
-        }
-      }
       if (model && typeof model === 'object' && typeof model.logExcerpt === 'string') {
         model.logExcerpt = truncateText(model.logExcerpt, 1500);
       }
@@ -214,7 +99,6 @@ function buildTriageUserPrompt(context, header) {
     '- Explicitly state whether this looks like a transient model-provider issue or a real regression, and say which.',
     '- A clear signal of a real regression (not a provider issue) is the same failure across multiple unrelated providers/models; call this out when present.',
     '- Then add short bullets grouped by likely root cause, calling out per-model differences when relevant.',
-    '- If a model has a log excerpt but no score data, say it likely failed before scores were exported.',
     '- Keep the response under 1500 characters.',
     '- Do not invent failures not supported by the context.'
   );
@@ -424,30 +308,6 @@ function buildLitellmConnectorFromVault(modelConnectorId) {
 }
 
 /**
- * @param {string} outputPath
- * @param {{ suiteId: string; suiteName: string; buildId?: string; buildUrl?: string; failingProjects: string[] }} options
- */
-function writeMinimalFailureContext(outputPath, options) {
-  const models = {};
-  for (const project of options.failingProjects) {
-    models[project] = { hasScoreData: false };
-  }
-
-  writeFileSync(
-    outputPath,
-    truncateContextJson({
-      suiteId: options.suiteId,
-      suiteName: options.suiteName,
-      buildId: options.buildId || undefined,
-      buildUrl: options.buildUrl || undefined,
-      failingProjects: options.failingProjects,
-      models,
-    }),
-    'utf8'
-  );
-}
-
-/**
  * @param {string} suiteId
  * @returns {string}
  */
@@ -606,19 +466,14 @@ function parseLitellmChatContent(responseJson) {
 }
 
 module.exports = {
-  EVALUATIONS_INDEX,
   MAX_LOG_EXCERPT_CHARS,
-  MAX_SCORE_ROWS_PER_MODEL,
   MAX_CONTEXT_JSON_BYTES,
   DEFAULT_TRIAGE_MODEL_ID,
   decodeAiConnectors,
   listLitellmConnectorIds,
   resolveTriageModelId,
   failureLogMetadataKey,
-  buildFailureScoresQuery,
   truncateText,
-  groupLowScoresByRunId,
-  expectedRunId,
   truncateContextJson,
   buildTriageUserPrompt,
   buildWeeklyRollupUserPrompt,
@@ -627,7 +482,6 @@ module.exports = {
   parseVaultConfig,
   connectorIdToLitellmModel,
   buildLitellmConnectorFromVault,
-  writeMinimalFailureContext,
   evaluationConnectorMetadataKey,
   readBuildkiteMetadata,
   resolveEvaluationConnectorId,

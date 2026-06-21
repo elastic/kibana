@@ -26,9 +26,6 @@ steps:
 
   - label: 'LLM Evals: On-demand'
     key: kbn-evals-on-demand
-    # Uploads one run_suite.sh step per suite (EVAL_SUITE_ID may be a single id or
-    # a comma-separated list). This step only generates pipeline steps, so it stays
-    # light; the per-suite steps it uploads do the bootstrap + per-model fanout.
     command: bash .buildkite/scripts/steps/evals/on_demand.sh
     env:
       FTR_EIS_CCM: '1'

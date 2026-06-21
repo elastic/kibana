@@ -6,13 +6,11 @@
  * 2.0.
  */
 
-const { execFileSync } = require('child_process');
-const { readFileSync, writeFileSync, mkdtempSync, rmSync } = require('fs');
-const { tmpdir } = require('os');
-const { join } = require('path');
+const { readFileSync, writeFileSync } = require('fs');
 const { fromRoot } = require('./repo_root');
-const { writeMinimalFailureContext, resolveTriageModelId } = require('./failure_context_helpers');
+const { resolveTriageModelId } = require('./failure_context_helpers');
 const { summarizeFailuresWithModel } = require('./summarize_failures_with_model');
+const { collectFailureContext } = require('./collect_failure_context');
 
 const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
 const failingProjectsArg = process.argv[3] || process.env.EVAL_FAILING_PROJECTS || '';
@@ -118,43 +116,24 @@ function formatTriageError(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function collectFailureContext(contextPath) {
-  try {
-    execFileSync(
-      process.execPath,
-      [
-        fromRoot('x-pack/platform/packages/shared/kbn-evals/scripts/ci/collect_failure_context.js'),
-        suiteId,
-        contextPath,
-        failingProjectsArg,
-      ],
-      { stdio: 'inherit', env: process.env }
-    );
-  } catch {
-    writeMinimalFailureContext(contextPath, {
-      suiteId,
-      suiteName,
-      buildId: process.env.BUILDKITE_BUILD_ID,
-      buildUrl,
-      failingProjects,
-    });
-  }
-}
-
 async function main() {
   const fallbackModelId = resolveTriageModelId() || 'unknown';
-  const tempDir = mkdtempSync(join(tmpdir(), 'kbn-evals-triage-'));
-  const contextPath = join(tempDir, 'failure-context.json');
 
   // Single LLM call; both renderings reuse the same triage body (the prompt asks
   // for portable markdown that renders in Slack and GitHub).
   let triage = { modelId: fallbackModelId, body: '' };
   try {
     console.error('--- Collecting failure context for triage summary');
-    await collectFailureContext(contextPath);
+    const context = collectFailureContext({
+      suiteId,
+      suiteName,
+      failingProjects,
+      buildId: process.env.BUILDKITE_BUILD_ID,
+      buildUrl,
+    });
 
     console.error(`--- Generating triage summary (model: ${fallbackModelId})`);
-    const { summary, modelId } = await summarizeFailuresWithModel(contextPath);
+    const { summary, modelId } = await summarizeFailuresWithModel(context);
     triage = { modelId, body: summary };
   } catch (error) {
     const message = formatTriageError(error);
@@ -163,8 +142,6 @@ async function main() {
       modelId: fallbackModelId,
       body: `_Triage summary could not be generated: ${message}. See the suite owner notify Buildkite step for details._`,
     };
-  } finally {
-    rmSync(tempDir, { recursive: true, force: true });
   }
 
   if (slackOutputPath) {

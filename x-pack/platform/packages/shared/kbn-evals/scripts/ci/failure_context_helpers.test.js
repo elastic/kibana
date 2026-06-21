@@ -7,9 +7,6 @@
 
 const {
   failureLogMetadataKey,
-  buildFailureScoresQuery,
-  groupLowScoresByRunId,
-  expectedRunId,
   truncateContextJson,
   buildTriageUserPrompt,
   buildWeeklyRollupUserPrompt,
@@ -35,54 +32,11 @@ describe('failure_context_helpers', () => {
     );
   });
 
-  it('builds ES query for build and suite', () => {
-    expect(buildFailureScoresQuery('build-123', 'agent-builder')).toEqual({
-      bool: {
-        must: [
-          { term: { 'ci.buildkite.build_id': 'build-123' } },
-          { term: { 'suite.id': 'agent-builder' } },
-        ],
-      },
-    });
-  });
-
-  it('groups lowest scores per run id', () => {
-    const grouped = groupLowScoresByRunId(
-      [
-        {
-          _source: {
-            run_id: 'bk-1-eis-gpt-4.1',
-            example: { id: 'ex-1', dataset: { name: 'ds-a' } },
-            evaluator: { name: 'Correctness', score: 0.2, explanation: 'bad answer' },
-            task: { model: { id: 'eis-gpt-4.1' } },
-          },
-        },
-        {
-          _source: {
-            run_id: 'bk-1-eis-gpt-4.1',
-            example: { id: 'ex-2', dataset: { name: 'ds-a' } },
-            evaluator: { name: 'Correctness', score: 0.9, explanation: 'good' },
-            task: { model: { id: 'eis-gpt-4.1' } },
-          },
-        },
-      ],
-      { maxRowsPerModel: 1 }
-    );
-
-    expect(grouped['bk-1-eis-gpt-4.1'].lowScores).toHaveLength(1);
-    expect(grouped['bk-1-eis-gpt-4.1'].lowScores[0].score).toBe(0.2);
-  });
-
-  it('formats expected run ids', () => {
-    expect(expectedRunId('build-9', 'eis-claude')).toBe('bk-build-9-eis-claude');
-  });
-
   it('truncates oversized context json', () => {
     const huge = {
       models: {
         'model-a': {
           logExcerpt: 'x'.repeat(50_000),
-          lowScores: [{ explanation: 'y'.repeat(10_000), score: 0 }],
         },
       },
     };
@@ -93,7 +47,7 @@ describe('failure_context_helpers', () => {
 
   it('builds triage user prompt with suite header', () => {
     const prompt = buildTriageUserPrompt(
-      { models: { 'eis-gpt-4.1': { hasScoreData: false, logExcerpt: 'timeout' } } },
+      { models: { 'eis-gpt-4.1': { logExcerpt: 'timeout' } } },
       {
         suiteName: 'Agent Builder',
         suiteId: 'agent-builder',
