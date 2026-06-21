@@ -16,7 +16,7 @@ import { addSectionPanelItemSchema } from './panels';
 export const addSectionOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_section'),
-    title: z.string().describe('Section title.'),
+    title: z.string().max(256).describe('Section title.'),
     grid: sectionGridSchema,
     panels: z
       .array(addSectionPanelItemSchema)

@@ -26,7 +26,7 @@ import { definePanelType } from '../panel_type';
  * `open_links_in_new_tab` to `true` when omitted.
  */
 export const markdownPanelConfigSchema = z.object({
-  content: z.string().describe('Markdown text to render in the panel.'),
+  content: z.string().max(50000).describe('Markdown text to render in the panel.'),
   settings: z
     .object({
       open_links_in_new_tab: z
@@ -57,7 +57,7 @@ export const markdownPanelConfigInputSchema = z.object({
 export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
   .omit({ grid: true })
   .extend({
-    panelId: z.string().describe('Existing markdown panel id to update.'),
+    panelId: z.string().max(256).describe('Existing markdown panel id to update.'),
     config: markdownPanelConfigSchema.describe(
       'New markdown panel config (e.g. { content }). Fully replaces the existing config.'
     ),

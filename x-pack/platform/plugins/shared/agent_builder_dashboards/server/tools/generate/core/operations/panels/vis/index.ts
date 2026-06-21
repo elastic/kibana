@@ -71,9 +71,13 @@ export const panelRequestSchema = z.object({
     .default('vis')
     .describe('Panel type to resolve. Only "vis" (Lens) is currently resolvable from a request.'),
   grid: panelGridSchema,
-  query: z.string().describe('A natural language query describing the desired visualization.'),
+  query: z
+    .string()
+    .max(2048)
+    .describe('A natural language query describing the desired visualization.'),
   index: z
     .string()
+    .max(256)
     .optional()
     .describe(
       '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
@@ -86,6 +90,7 @@ export const panelRequestSchema = z.object({
     ),
   esql: z
     .string()
+    .max(4096)
     .optional()
     .describe(
       '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
@@ -102,8 +107,11 @@ export type PanelRequestInput = z.infer<typeof panelRequestSchema>;
 export const editPanelRequestInputSchema = panelRequestSchema
   .omit({ grid: true, index: true })
   .extend({
-    panelId: z.string().describe('Existing Lens panel id to update.'),
-    query: z.string().describe('A natural language query describing how to update the panel.'),
+    panelId: z.string().max(256).describe('Existing Lens panel id to update.'),
+    query: z
+      .string()
+      .max(2048)
+      .describe('A natural language query describing how to update the panel.'),
   });
 
 export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;

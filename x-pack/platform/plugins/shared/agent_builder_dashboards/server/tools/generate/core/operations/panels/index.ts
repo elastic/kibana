@@ -64,6 +64,7 @@ export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
 
 const sectionIdField = z
   .string()
+  .max(256)
   .optional()
   .describe(
     'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
