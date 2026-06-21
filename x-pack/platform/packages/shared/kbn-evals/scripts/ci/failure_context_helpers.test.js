@@ -56,16 +56,16 @@ describe('failure_context_helpers', () => {
     expect(prompt).toContain('timeout');
   });
 
-  it('asks the triage prompt to classify provider vs regression vs test bug', () => {
+  it('grounds the triage prompt in the log excerpts and asks for verifiable evidence', () => {
     const prompt = buildTriageUserPrompt(
       { models: {} },
       { suiteName: 'Streams', suiteId: 'streams', failingProjects: ['eis-gpt-5.4'] }
     );
 
-    expect(prompt).toContain('provider/infra issue');
-    expect(prompt).toContain('eval-quality regression');
-    expect(prompt).toContain('test/harness bug');
-    expect(prompt).toContain('multiple unrelated providers/models');
+    expect(prompt).toContain('using only the run-log excerpts');
+    expect(prompt).toContain('Quote the most relevant error line(s)');
+    expect(prompt).toContain('do not show a clear cause, say so');
+    expect(prompt).not.toContain('regression');
   });
 
   describe('extractSuiteRootCauseLine', () => {

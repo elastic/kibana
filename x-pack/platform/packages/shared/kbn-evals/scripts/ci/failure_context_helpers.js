@@ -14,6 +14,9 @@ const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 // Triage/summary text is always generated with a small, low-cost LiteLLM model.
 const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-haiku-4-5';
 
+const TRIAGE_SYSTEM_PROMPT =
+  'You are an SRE assistant triaging failed LLM evaluation CI runs. Be concise and factual, and base every statement on the provided context.';
+
 /**
  * @param {string} suiteId
  * @param {string} project
@@ -71,7 +74,7 @@ function truncateContextJson(context, maxBytes = MAX_CONTEXT_JSON_BYTES) {
  */
 function buildTriageUserPrompt(context, header) {
   const lines = [
-    'Summarize why this LLM evaluation suite failed in CI for a Slack notification.',
+    'Explain why this LLM evaluation suite failed in CI, using only the run-log excerpts below, so an engineer can quickly understand and verify what happened.',
     '',
     `Suite: ${header.suiteName} (${header.suiteId})`,
     `Failing models: ${header.failingProjects.map((p) => `\`${p}\``).join(', ')}`,
@@ -86,17 +89,16 @@ function buildTriageUserPrompt(context, header) {
 
   lines.push(
     '',
-    'Failure context (JSON):',
+    'Failure context (JSON, includes each model log excerpt):',
     truncateContextJson(context),
     '',
     'Instructions:',
-    '- Use plain, portable markdown so it renders in both Slack and GitHub: short bullets starting with "- ", and do not use bold, headings, links, or code fences.',
-    '- Start with a one-line verdict that classifies the failure as one of: provider/infra issue (NOT actionable by the team, e.g. provider outage, 429/529 rate limits, gateway/timeout), eval-quality regression (action needed), or test/harness bug (action needed).',
-    '- Explicitly state whether this looks like a transient model-provider issue or a real regression, and say which.',
-    '- A clear signal of a real regression (not a provider issue) is the same failure across multiple unrelated providers/models; call this out when present.',
-    '- Then add short bullets grouped by likely root cause, calling out per-model differences when relevant.',
-    '- Keep the response under 1500 characters.',
-    '- Do not invent failures not supported by the context.'
+    '- Base everything on the log excerpts above. If they do not show a clear cause, say so plainly instead of guessing.',
+    '- Start with one sentence stating what failed.',
+    '- Quote the most relevant error line(s) from the log verbatim (trimmed) so the engineer can find them.',
+    '- Then give the most likely cause in plain terms (say "likely"/"appears", not a definitive root cause). If the errors look transient (rate limits, timeouts, provider 5xx), note that a retry may resolve it.',
+    '- If several models failed with the same error, group them instead of repeating per model.',
+    '- Portable markdown only: short bullets starting with "- " and inline `code` are fine; do not use bold, headings, links, or code fences. Keep the response under 1500 characters.'
   );
 
   return lines.join('\n');
@@ -155,8 +157,8 @@ function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
 /**
  * Build the user prompt for the weekly cross-suite executive summary. Input is
  * the set of failing suites with their per-suite triage bodies; output asks the
- * model for a short roll-up that separates non-actionable provider/infra noise
- * from real regressions teams must fix.
+ * model for a short roll-up grouped by shared cause, flagging which suites can
+ * be retried and which need a team to investigate.
  *
  * @param {Array<{ suiteId: string; suiteName?: string; failingProjects?: string[]; triageBody?: string }>} suites
  * @param {{ buildUrl?: string }} [meta]
@@ -164,8 +166,8 @@ function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
  */
 function buildWeeklyRollupUserPrompt(suites, meta = {}) {
   const lines = [
-    'Write a short executive summary for a weekly LLM-evaluation CI run that had failing suites.',
-    'The audience is the evals maintainers in a shared Slack channel; the goal is to tell at a glance which failures are non-actionable provider/infra noise vs real eval regressions a team must fix.',
+    'Write a short executive summary of a weekly LLM-evaluation CI run that had failing suites, for the evals maintainers in a shared Slack channel.',
+    'Base it only on the per-suite triage below; do not add failures it does not mention.',
     '',
     `Failing suites: ${suites.length}`,
   ];
@@ -191,12 +193,10 @@ function buildWeeklyRollupUserPrompt(suites, meta = {}) {
   lines.push(
     '',
     'Instructions:',
-    '- Use Slack-friendly markdown (3-5 short bullets, no code fences, no headers).',
-    '- Lead with counts: how many suites are non-actionable provider/infra issues vs real regressions/test bugs.',
-    '- Group suites by shared root cause (e.g. "3 suites failed from the same gpt-5.4 provider outage").',
-    '- Explicitly flag which suites need team action and which can simply be retried.',
-    '- Keep the whole response under 900 characters.',
-    '- Do not invent failures not supported by the per-suite triage.'
+    '- Lead with how many suites look transient/retryable vs how many need a team to investigate.',
+    '- Group suites that share the same likely cause (e.g. "3 suites hit the same gpt-5.4 timeout").',
+    '- Call out which suites need action and which can simply be retried.',
+    '- Slack-friendly markdown: 3-5 short bullets, no headings or code fences. Keep under 900 characters.'
   );
 
   return lines.join('\n');
@@ -398,10 +398,46 @@ async function postLitellmChatRequest({ url, headers, body }) {
   return parseLitellmChatContent(json);
 }
 
+/**
+ * Resolve the LiteLLM connector, send the shared system prompt + the given user
+ * prompt, and return the trimmed summary and the model id used. This is the
+ * shared core behind the per-suite and weekly summaries.
+ *
+ * @param {string} userPrompt
+ * @param {{ maxChars?: number }} [options]
+ * @returns {Promise<{ summary: string; modelId: string }>}
+ */
+async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
+  const modelId = resolveTriageModelId();
+  if (!modelId.startsWith('litellm-')) {
+    throw new Error(`Unsupported triage model connector id (expected litellm-): ${modelId}`);
+  }
+
+  const connector = decodeAiConnectors()[modelId] ?? buildLitellmConnectorFromVault(modelId);
+  if (!connector) {
+    throw new Error(
+      `Model connector ${modelId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
+    );
+  }
+
+  const messages = [
+    { role: 'system', content: TRIAGE_SYSTEM_PROMPT },
+    { role: 'user', content: userPrompt },
+  ];
+
+  let summary = await postLitellmChatRequest(buildLitellmChatRequest(connector, messages));
+  if (summary.length > maxChars) {
+    summary = `${summary.slice(0, maxChars - 1)}…`;
+  }
+
+  return { summary: summary.trim(), modelId };
+}
+
 module.exports = {
   MAX_LOG_EXCERPT_CHARS,
   MAX_CONTEXT_JSON_BYTES,
   DEFAULT_TRIAGE_MODEL_ID,
+  TRIAGE_SYSTEM_PROMPT,
   decodeAiConnectors,
   resolveTriageModelId,
   failureLogMetadataKey,
@@ -416,4 +452,5 @@ module.exports = {
   buildLitellmConnectorFromVault,
   parseLitellmChatContent,
   postLitellmChatRequest,
+  runTriageModel,
 };
