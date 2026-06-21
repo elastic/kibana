@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-playground-plugin",
+  "owner": "@elastic/security-threat-hunting-investigations",
+  "description": "Security Sample Data Playground PoC — provisions a demo space with the Ransomware Kill Chain scenario",
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "securityPlayground",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "spaces",
+      "alerting"
+    ]
+  }
+}

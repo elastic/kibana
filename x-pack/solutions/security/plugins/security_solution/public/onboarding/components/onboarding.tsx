@@ -16,6 +16,7 @@ import { OnboardingContextProvider } from './onboarding_context';
 import { OnboardingRouter } from './onboarding_router';
 import { OnboardingFooter } from './onboarding_footer';
 import { useOnboardingStyles } from './onboarding.styles';
+import { PlaygroundBanner } from './playground_banner';
 
 export const OnboardingPage = React.memo(() => {
   const spaceId = useSpaceId();
@@ -36,6 +37,14 @@ export const OnboardingPage = React.memo(() => {
         data-test-subj="onboarding-hub-page"
         className={styles}
       >
+        <KibanaPageTemplate.Section
+          grow={false}
+          restrictWidth={PAGE_CONTENT_WIDTH}
+          paddingSize="xl"
+          className="onboardingSection"
+        >
+          <PlaygroundBanner />
+        </KibanaPageTemplate.Section>
         <KibanaPageTemplate.Section
           grow={true}
           restrictWidth={PAGE_CONTENT_WIDTH}

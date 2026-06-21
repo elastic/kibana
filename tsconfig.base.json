@@ -2190,6 +2190,8 @@
       "@kbn/security-hardening/*": ["src/platform/packages/shared/kbn-security-hardening/*"],
       "@kbn/security-labs-artifact-builder": ["x-pack/packages/ai-infra/security-labs-artifact-builder"],
       "@kbn/security-labs-artifact-builder/*": ["x-pack/packages/ai-infra/security-labs-artifact-builder/*"],
+      "@kbn/security-playground-plugin": ["x-pack/solutions/security/plugins/security_playground"],
+      "@kbn/security-playground-plugin/*": ["x-pack/solutions/security/plugins/security_playground/*"],
       "@kbn/security-plugin": ["x-pack/platform/plugins/shared/security"],
       "@kbn/security-plugin/*": ["x-pack/platform/plugins/shared/security/*"],
       "@kbn/security-plugin-types-common": ["x-pack/platform/packages/shared/security/plugin_types_common"],

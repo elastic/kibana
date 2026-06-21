@@ -8865,6 +8865,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-playground-plugin@link:x-pack/solutions/security/plugins/security_playground":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-plugin-types-common@link:x-pack/platform/packages/shared/security/plugin_types_common":
   version "0.0.0"
   uid ""
