@@ -50,6 +50,22 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
+/**
+ * A rule preview runs the rule once per invocation across the preview time range, and every
+ * invocation that hits the same condition (e.g. the max alerts limit) reports an identical
+ * message. Without de-duplication the UI renders one callout per occurrence, so the same
+ * warning can appear many times. This keeps only the first occurrence of each message so a
+ * single consolidated callout is shown.
+ */
+const dedupeLogs = (logs: string[], seen: Set<string>): string[] =>
+  logs.filter((log) => {
+    if (seen.has(log)) {
+      return false;
+    }
+    seen.add(log);
+    return true;
+  });
+
 const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({
   logs,
   hasNoiseWarning,
@@ -57,20 +73,25 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({
   showElasticsearchRequests,
   ruleType,
 }) => {
-  const sortedLogs = useMemo(
-    () =>
-      logs.reduce<{
-        errors: SortedLogs[];
-        warnings: SortedLogs[];
-      }>(
-        ({ errors, warnings }, curr) => ({
-          errors: addLogs(curr.startedAt, curr.errors, curr.duration, errors),
-          warnings: addLogs(curr.startedAt, curr.warnings, curr.duration, warnings),
-        }),
-        { errors: [], warnings: [] }
-      ),
-    [logs]
-  );
+  const sortedLogs = useMemo(() => {
+    const seenErrors = new Set<string>();
+    const seenWarnings = new Set<string>();
+    return logs.reduce<{
+      errors: SortedLogs[];
+      warnings: SortedLogs[];
+    }>(
+      ({ errors, warnings }, curr) => ({
+        errors: addLogs(curr.startedAt, dedupeLogs(curr.errors, seenErrors), curr.duration, errors),
+        warnings: addLogs(
+          curr.startedAt,
+          dedupeLogs(curr.warnings, seenWarnings),
+          curr.duration,
+          warnings
+        ),
+      }),
+      { errors: [], warnings: [] }
+    );
+  }, [logs]);
   return (
     <>
       <EuiSpacer size="s" />
