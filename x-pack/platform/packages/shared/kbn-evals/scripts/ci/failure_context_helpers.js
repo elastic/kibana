@@ -92,15 +92,16 @@ function buildTriageUserPrompt(context, header) {
     'Failure context (JSON, includes each model log excerpt):',
     truncateContextJson(context),
     '',
-    'Output exactly this structure, nothing else:',
-    `- Verdict line (no bullet): "${header.suiteId} failed — <model id, or "N models, M errors" when more than one error>".`,
-    '- Then one group per distinct error, each exactly two lines:',
-    '    1. "- `<error line, verbatim from the excerpts, one line, … to elide if long>` — <file:line / test or scenario, if shown> — <affected model id(s)>"',
-    '    2. "  Root cause: <short cause>. <one short action>" (two leading spaces, no bullet)',
-    '- Merge the same failure (same message/location) into one group listing all its models. At most 3 groups; if more, add "- +N more errors — see build log".',
-    `- If no clear error is in the excerpts, output only "${header.suiteId} failed — cause not evident from logs".`,
+    'Return ONLY a JSON object of this shape (no prose, no markdown, no code fences):',
+    '{"groups":[{"error":"<most relevant error line, verbatim from the excerpts, one line>","location":"<file:line / test or scenario if shown, else empty>","models":["<affected model id>"],"rootCause":"<short cause + one short action>"}]}',
     '',
-    'Constraints: ground every line in the excerpts (never invent errors, paths, line numbers, or causes); no second person, greetings, narration, or prose outside the structure; do not classify failures as deterministic/transient; portable markdown only (bullets, "  Root cause:" continuations, inline `code`; no bold, headings, links, or code fences); keep each line short and stay under 1500 characters.'
+    'Rules:',
+    '- One group per distinct error. Merge the same failure (same message/location) into one group and list all its affected models.',
+    '- Quote "error" verbatim from the excerpts; do not invent errors, file names, line numbers, or causes.',
+    '- Set "location" only if the excerpts show it; otherwise use an empty string.',
+    '- Keep "rootCause" to one short sentence plus one short action.',
+    '- If the excerpts show no clear error, return {"groups": []}.',
+    '- Output valid JSON only: no prose before or after, no comments, no trailing commas, no code fences.'
   );
 
   return lines.join('\n');
@@ -402,15 +403,13 @@ async function postLitellmChatRequest({ url, headers, body }) {
 }
 
 /**
- * Resolve the LiteLLM connector, send the shared system prompt + the given user
- * prompt, and return the trimmed summary and the model id used. This is the
- * shared core behind the per-suite and weekly summaries.
+ * Resolve the LiteLLM triage connector and its model id (shared by the text and
+ * structured triage paths). Enforces the `litellm-` guard and falls back to the
+ * vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
  *
- * @param {string} userPrompt
- * @param {{ maxChars?: number }} [options]
- * @returns {Promise<{ summary: string; modelId: string }>}
+ * @returns {{ connector: Record<string, unknown>; modelId: string }}
  */
-async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
+function resolveTriageConnector() {
   const modelId = resolveTriageModelId();
   if (!modelId.startsWith('litellm-')) {
     throw new Error(`Unsupported triage model connector id (expected litellm-): ${modelId}`);
@@ -423,6 +422,56 @@ async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
     );
   }
 
+  return { connector, modelId };
+}
+
+/**
+ * Parse the structured triage groups returned by the model. Tolerates an
+ * optional ```json fenced wrapper, normalizes each group to a known shape, and
+ * drops empty groups. Throws when the payload is not valid JSON.
+ *
+ * @param {string | undefined | null} rawText
+ * @returns {Array<{ error: string; location: string; models: string[]; rootCause: string }>}
+ */
+function parseTriageGroups(rawText) {
+  const text = String(rawText ?? '').trim();
+  const unfenced = text
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(unfenced);
+  } catch {
+    throw new Error('Triage model did not return valid JSON');
+  }
+
+  const groups = Array.isArray(parsed?.groups) ? parsed.groups : [];
+  return groups
+    .map((group) => ({
+      error: String(group?.error ?? '').trim(),
+      location: String(group?.location ?? '').trim(),
+      models: Array.isArray(group?.models)
+        ? group.models.map((model) => String(model).trim()).filter(Boolean)
+        : [],
+      rootCause: String(group?.rootCause ?? '').trim(),
+    }))
+    .filter((group) => group.error || group.rootCause);
+}
+
+/**
+ * Resolve the LiteLLM connector, send the shared system prompt + the given user
+ * prompt, and return the trimmed summary and the model id used. This is the
+ * shared core behind the weekly text summary.
+ *
+ * @param {string} userPrompt
+ * @param {{ maxChars?: number }} [options]
+ * @returns {Promise<{ summary: string; modelId: string }>}
+ */
+async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
+  const { connector, modelId } = resolveTriageConnector();
+
   const messages = [
     { role: 'system', content: TRIAGE_SYSTEM_PROMPT },
     { role: 'user', content: userPrompt },
@@ -434,6 +483,27 @@ async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
   }
 
   return { summary: summary.trim(), modelId };
+}
+
+/**
+ * Resolve the LiteLLM connector, send the shared system prompt + the given user
+ * prompt, and return the parsed structured triage groups and the model id used.
+ * Used by the per-suite triage, which renders the message deterministically.
+ *
+ * @param {string} userPrompt
+ * @returns {Promise<{ groups: Array<{ error: string; location: string; models: string[]; rootCause: string }>; modelId: string }>}
+ */
+async function runTriageModelStructured(userPrompt) {
+  const { connector, modelId } = resolveTriageConnector();
+
+  const messages = [
+    { role: 'system', content: TRIAGE_SYSTEM_PROMPT },
+    { role: 'user', content: userPrompt },
+  ];
+
+  const raw = await postLitellmChatRequest(buildLitellmChatRequest(connector, messages));
+
+  return { groups: parseTriageGroups(raw), modelId };
 }
 
 module.exports = {
@@ -455,5 +525,8 @@ module.exports = {
   buildLitellmConnectorFromVault,
   parseLitellmChatContent,
   postLitellmChatRequest,
+  resolveTriageConnector,
+  parseTriageGroups,
   runTriageModel,
+  runTriageModelStructured,
 };

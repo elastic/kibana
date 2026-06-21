@@ -6,13 +6,11 @@
  * 2.0.
  */
 
-const { buildTriageUserPrompt, runTriageModel } = require('./failure_context_helpers');
-
-const maxOutputChars = Number(process.env.EVAL_TRIAGE_MAX_CHARS || '1500');
+const { buildTriageUserPrompt, runTriageModelStructured } = require('./failure_context_helpers');
 
 /**
  * @param {Record<string, unknown>} context
- * @returns {Promise<{ summary: string; modelId: string }>}
+ * @returns {Promise<{ groups: Array<{ error: string; location: string; models: string[]; rootCause: string }>; modelId: string }>}
  */
 async function summarizeFailuresWithModel(context) {
   const failingProjects = Array.isArray(context.failingProjects) ? context.failingProjects : [];
@@ -25,7 +23,7 @@ async function summarizeFailuresWithModel(context) {
     failingProjects,
   });
 
-  return runTriageModel(userPrompt, { maxChars: maxOutputChars });
+  return runTriageModelStructured(userPrompt);
 }
 
 module.exports = { summarizeFailuresWithModel };

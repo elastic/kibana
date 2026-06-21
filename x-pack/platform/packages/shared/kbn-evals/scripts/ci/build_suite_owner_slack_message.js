@@ -60,9 +60,58 @@ const headerLabel = notifyMode === 'on-demand' ? 'On-demand LLM eval' : 'Weekly 
 const headerEmoji = notifyMode === 'on-demand' ? ':test_tube:' : ':rotating_light:';
 
 /**
+ * @typedef {{ error: string; location: string; models: string[]; rootCause: string }} TriageGroup
+ * @typedef {{ modelId: string; groups?: TriageGroup[]; error?: string }} Triage
+ */
+
+/**
+ * Deterministically render the structured triage groups. The error log goes in a
+ * fenced code block (plain ``` for Slack, ```sh for GitHub) and the location and
+ * model ids render as inline `code`. Only the grouping and root cause come from
+ * the model; all formatting is owned here.
+ *
+ * @param {Triage} triage
+ * @param {string} openFence
+ * @returns {string}
+ */
+function renderTriageBody(triage, openFence) {
+  if (triage.error) {
+    return `_Triage summary could not be generated: ${triage.error}. See the suite owner notify Buildkite step for details._`;
+  }
+
+  const groups = Array.isArray(triage.groups) ? triage.groups : [];
+  if (groups.length === 0) {
+    return '_No clear error found in the logs; see the build for details._';
+  }
+
+  return groups
+    .map((group) => {
+      const block = [];
+      if (group.error) {
+        block.push(openFence, group.error, '```');
+      }
+      const meta = [];
+      if (group.location) {
+        meta.push(`\`${group.location}\``);
+      }
+      if (Array.isArray(group.models) && group.models.length > 0) {
+        meta.push(group.models.map((model) => `\`${model}\``).join(', '));
+      }
+      if (meta.length > 0) {
+        block.push(meta.join(' — '));
+      }
+      if (group.rootCause) {
+        block.push(`Root cause: ${group.rootCause}`);
+      }
+      return block.join('\n');
+    })
+    .join('\n\n');
+}
+
+/**
  * Render the message in Slack mrkdwn (`*bold*`, `<url|text>`).
  *
- * @param {{ modelId: string; body: string }} triage
+ * @param {Triage} triage
  * @returns {string}
  */
 function renderSlack(triage) {
@@ -75,14 +124,14 @@ function renderSlack(triage) {
   if (buildUrl) {
     lines.push('', `<${buildUrl}|View build>`);
   }
-  lines.push('', '*Triage summary:*', triage.body);
+  lines.push('', '*Triage summary:*', renderTriageBody(triage, '```'));
   return `${lines.join('\n')}\n`;
 }
 
 /**
  * Render the message in GitHub-flavored markdown (`**bold**`, `[text](url)`).
  *
- * @param {{ modelId: string; body: string }} triage
+ * @param {Triage} triage
  * @returns {string}
  */
 function renderGithub(triage) {
@@ -95,7 +144,7 @@ function renderGithub(triage) {
   if (buildUrl) {
     lines.push('', `[View build](${buildUrl})`);
   }
-  lines.push('', '**Triage summary:**', '', triage.body);
+  lines.push('', '**Triage summary:**', '', renderTriageBody(triage, '```sh'));
   return `${lines.join('\n')}\n`;
 }
 
@@ -110,9 +159,10 @@ function formatTriageError(error) {
 async function main() {
   const fallbackModelId = resolveTriageModelId() || 'unknown';
 
-  // Single LLM call; both renderings reuse the same triage body (the prompt asks
-  // for portable markdown that renders in Slack and GitHub).
-  let triage = { modelId: fallbackModelId, body: '' };
+  // Single LLM call returns structured groups; both renderings format them
+  // deterministically for Slack and GitHub.
+  /** @type {Triage} */
+  let triage = { modelId: fallbackModelId, groups: [] };
   try {
     console.error('--- Collecting failure context for triage summary');
     const context = collectFailureContext({
@@ -124,15 +174,12 @@ async function main() {
     });
 
     console.error(`--- Generating triage summary (model: ${fallbackModelId})`);
-    const { summary, modelId } = await summarizeFailuresWithModel(context);
-    triage = { modelId, body: summary };
+    const { groups, modelId } = await summarizeFailuresWithModel(context);
+    triage = { modelId, groups };
   } catch (error) {
     const message = formatTriageError(error);
     console.error(`--- Triage summary failed: ${message}`);
-    triage = {
-      modelId: fallbackModelId,
-      body: `_Triage summary could not be generated: ${message}. See the suite owner notify Buildkite step for details._`,
-    };
+    triage = { modelId: fallbackModelId, error: message };
   }
 
   if (slackOutputPath) {

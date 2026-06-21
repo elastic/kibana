@@ -15,6 +15,7 @@ const {
   connectorIdToLitellmModel,
   buildLitellmConnectorFromVault,
   parseLitellmChatContent,
+  parseTriageGroups,
   resolveTriageModelId,
   DEFAULT_TRIAGE_MODEL_ID,
 } = require('./failure_context_helpers');
@@ -56,17 +57,21 @@ describe('failure_context_helpers', () => {
     expect(prompt).toContain('timeout');
   });
 
-  it('grounds the triage prompt in the log excerpts and asks for the compact error-grouped format', () => {
+  it('grounds the triage prompt in the log excerpts and asks for structured JSON', () => {
     const prompt = buildTriageUserPrompt(
       { models: {} },
       { suiteName: 'Streams', suiteId: 'streams', failingProjects: ['eis-gpt-5.4'] }
     );
 
     expect(prompt).toContain('using only the run-log excerpts');
+    expect(prompt).toContain('Return ONLY a JSON object');
+    expect(prompt).toContain('"groups"');
+    expect(prompt).toContain('"error"');
+    expect(prompt).toContain('"location"');
+    expect(prompt).toContain('"models"');
+    expect(prompt).toContain('"rootCause"');
     expect(prompt).toContain('verbatim from the excerpts');
-    expect(prompt).toContain('Root cause:');
-    expect(prompt).toContain('streams failed —');
-    expect(prompt).toContain('do not classify failures as deterministic/transient');
+    expect(prompt).toContain('{"groups": []}');
     expect(prompt).not.toContain('regression');
   });
 
@@ -172,6 +177,64 @@ describe('failure_context_helpers', () => {
 
   it('maps litellm connector ids to model groups', () => {
     expect(connectorIdToLitellmModel('litellm-llm-gateway-gpt-4o')).toBe('llm-gateway/gpt-4o');
+  });
+
+  describe('parseTriageGroups', () => {
+    it('parses plain JSON groups', () => {
+      const groups = parseTriageGroups(
+        JSON.stringify({
+          groups: [
+            {
+              error: 'expect(received).toBe(expected)',
+              location: 'test.spec.ts:127:66',
+              models: ['eis-openai-gpt-5-4'],
+              rootCause: 'Assertion failure in smoke test.',
+            },
+          ],
+        })
+      );
+
+      expect(groups).toEqual([
+        {
+          error: 'expect(received).toBe(expected)',
+          location: 'test.spec.ts:127:66',
+          models: ['eis-openai-gpt-5-4'],
+          rootCause: 'Assertion failure in smoke test.',
+        },
+      ]);
+    });
+
+    it('parses JSON wrapped in a ```json fence', () => {
+      const raw = ['```json', '{"groups":[{"error":"boom","rootCause":"because"}]}', '```'].join(
+        '\n'
+      );
+
+      expect(parseTriageGroups(raw)).toEqual([
+        { error: 'boom', location: '', models: [], rootCause: 'because' },
+      ]);
+    });
+
+    it('defaults missing fields and drops empty groups', () => {
+      const groups = parseTriageGroups(
+        JSON.stringify({
+          groups: [
+            { error: 'only-error' },
+            { models: ['eis-gpt-5.4'] },
+            { error: '', rootCause: '' },
+          ],
+        })
+      );
+
+      expect(groups).toEqual([{ error: 'only-error', location: '', models: [], rootCause: '' }]);
+    });
+
+    it('returns an empty array for an explicitly empty groups payload', () => {
+      expect(parseTriageGroups('{"groups": []}')).toEqual([]);
+    });
+
+    it('throws on invalid JSON', () => {
+      expect(() => parseTriageGroups('not json')).toThrow('Triage model did not return valid JSON');
+    });
   });
 
   describe('buildLitellmConnectorFromVault', () => {
