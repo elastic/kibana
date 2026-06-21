@@ -40,12 +40,28 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   esql?: string;
 }
 
-/**
- * By-value Lens panel config. Currently passed through to the embeddable
- * unvalidated; typed as an opaque record so the model supplies a config it read
- * from an existing visualization rather than hand-building one.
- */
-const visPanelConfigSchema = z.record(z.string().max(256), z.unknown());
+const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
+  const config = ctx.value;
+
+  if ('visualization' in config) {
+    ctx.issues.push({
+      code: 'custom',
+      message:
+        'config looks like a whole visualization attachment. Pass only its `visualization` field (the Lens API config), not the entire attachment.',
+      input: config,
+    });
+    return;
+  }
+
+  if (!('type' in config)) {
+    ctx.issues.push({
+      code: 'custom',
+      message:
+        'config is not a Lens API config (missing a top-level `type`). Pass the `visualization` field read from a visualization attachment.',
+      input: config,
+    });
+  }
+});
 
 /**
  * The vis variant of a `config`-source panel input, discriminated by

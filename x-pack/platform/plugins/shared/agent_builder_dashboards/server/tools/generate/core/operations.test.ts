@@ -1768,4 +1768,57 @@ describe('executeDashboardOperations', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('accepts a vis config-source panel whose config is a Lens API config', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { type: 'metric', title: 'Total requests' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a vis config-source panel whose config is the whole visualization attachment', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: {
+            query: 'count of requests',
+            visualization: { type: 'metric', title: 'Total requests' },
+            chart_type: 'metric',
+            esql: 'FROM logs | STATS count = COUNT(*)',
+          },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a vis config-source panel whose config is not a Lens API config', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { title: 'Total requests' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
 });
