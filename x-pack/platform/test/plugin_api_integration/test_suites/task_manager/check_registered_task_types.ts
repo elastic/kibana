@@ -266,6 +266,7 @@ export default function ({ getService }: FtrProviderContext) {
         'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'unusedUrlsCleanupTask',
+        'workflow:drain-concurrency-queues',
         'workflow:resume',
         'workflow:run',
         'workflow:scheduled',
