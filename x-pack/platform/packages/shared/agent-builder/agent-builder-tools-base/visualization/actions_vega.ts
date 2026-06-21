@@ -35,6 +35,8 @@ export interface ValidateVegaSpecAction {
   spec?: string;
   attempt: number;
   error?: string;
+  /** Non-fatal Vega warnings surfaced as soft feedback to later attempts. */
+  warnings?: string[];
 }
 
 export type VegaAction = GenerateVegaEsqlAction | GenerateVegaSpecAction | ValidateVegaSpecAction;
