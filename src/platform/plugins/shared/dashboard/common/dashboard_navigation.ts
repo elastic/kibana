@@ -98,6 +98,7 @@ export const createDashboardsNavigationNode = (
       title: i18n.translate('dashboard.nav.recent', {
         defaultMessage: 'Recent',
       }),
+      animateItemReorder: true,
       children: options.recentDashboards.map(createDashboardPanelItem),
     });
   }

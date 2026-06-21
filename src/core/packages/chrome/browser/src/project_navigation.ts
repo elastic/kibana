@@ -201,6 +201,11 @@ interface NodeDefinitionBase {
    * (optional) Actions rendered at the bottom of the side panel for panel opener nodes.
    */
   panelFooterActions?: PanelFooterActionDefinition[];
+
+  /**
+   * (optional) Animate list item reordering within this section's side nav panel.
+   */
+  animateItemReorder?: boolean;
 }
 
 /** @public */

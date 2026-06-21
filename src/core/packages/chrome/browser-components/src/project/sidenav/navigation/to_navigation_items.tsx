@@ -261,6 +261,7 @@ export const toNavigationItems = (
               id: child.id,
               label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
+              ...(child.animateItemReorder ? { animateItemReorder: true } : {}),
             };
           })
         ).filter((section) => section.items.length > 0); // Filter out empty sections;

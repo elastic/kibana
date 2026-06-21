@@ -407,6 +407,7 @@ export const Navigation = ({
                               {item.sections?.map((section) => (
                                 <SideNav.NestedSecondaryMenu.Section
                                   key={section.id}
+                                  animateItemReorder={section.animateItemReorder}
                                   label={section.label}
                                 >
                                   {section.items.map((subItem) => (

@@ -48,7 +48,11 @@ const PanelMenuMainPanel = ({
       isNew={getIsNewSecondary(item.id)}
     >
       {item.sections?.map((section, sectionIndex) => (
-        <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+        <SideNav.SecondaryMenu.Section
+          key={section.id}
+          animateItemReorder={section.animateItemReorder}
+          label={section.label}
+        >
           {section.items.map((subItem, subItemIndex) => {
             const isFirstItem = sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
             const ariaDescribedBy = isFirstItem ? navigationInstructionsId : undefined;

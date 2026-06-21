@@ -133,6 +133,10 @@ export interface SecondaryMenuSection {
    * (optional) The label to display for the secondary menu section.
    */
   label?: string;
+  /**
+   * (optional) Animate list item reordering within this section.
+   */
+  animateItemReorder?: boolean;
 }
 
 /**

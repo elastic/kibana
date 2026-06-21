@@ -54,6 +54,8 @@ export interface SecondaryMenuSection {
   items: SecondaryMenuItem[];
   /** Optional section header label (omit for unlabeled sections). */
   label?: string;
+  /** Optional animation when items in this section are reordered. */
+  animateItemReorder?: boolean;
 }
 
 /**
