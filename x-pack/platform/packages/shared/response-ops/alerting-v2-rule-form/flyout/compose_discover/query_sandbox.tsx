@@ -18,7 +18,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSuperDatePicker,
-  EuiTab,
   EuiTabs,
   EuiText,
   EuiToolTip,
@@ -32,8 +31,14 @@ import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
-import { ComposeDiscoverTabs, TAB_DEFINITIONS } from './compose_discover_tabs';
+import {
+  ComposeDiscoverTabs,
+  QueryTabButton,
+  TAB_DEFINITIONS,
+  isAlertTabDisabled,
+} from './compose_discover_tabs';
 import type { QueryTab } from './types';
+import { CpsPicker } from './cps_picker';
 
 /**
  * Self-contained ES|QL sandbox that handles data fetching and renders the full
@@ -105,6 +110,15 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     if (!tabProps?.tabs?.length) return [];
     return TAB_DEFINITIONS.filter((t) => tabProps.tabs.includes(t.id));
   }, [tabProps?.tabs]);
+
+  useEffect(() => {
+    if (!tabProps?.tabs.includes('alert')) {
+      return;
+    }
+    if (isAlertTabDisabled(tabProps.tabs, tabProps.baseQuery) && tabProps.activeTab === 'alert') {
+      tabProps.onTabChange('base');
+    }
+  }, [tabProps]);
 
   const timeRange = useMemo(
     () => ({ from: dateRange.dateStart, to: dateRange.dateEnd }),
@@ -226,6 +240,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   return (
     <div data-test-subj="querySandbox">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+        <CpsPicker />
         <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
           <EuiSelect
             options={timeFieldOptions}
@@ -282,14 +297,23 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         <>
           <EuiTabs>
             {splitTabs.map((tab) => (
-              <EuiTab
+              <QueryTabButton
                 key={tab.id}
+                tab={tab}
                 isSelected={tabProps.activeTab === tab.id}
-                onClick={() => tabProps.onTabChange(tab.id)}
-                data-test-subj={`querySandboxTab-${tab.id}`}
-              >
-                {tab.label}
-              </EuiTab>
+                onSelect={(selectedTab) => {
+                  if (
+                    selectedTab === 'alert' &&
+                    isAlertTabDisabled(tabProps.tabs, tabProps.baseQuery)
+                  ) {
+                    return;
+                  }
+                  tabProps.onTabChange(selectedTab);
+                }}
+                baseQuery={tabProps.baseQuery}
+                tabs={tabProps.tabs}
+                dataTestSubjPrefix="querySandboxTab"
+              />
             ))}
           </EuiTabs>
           <EuiSpacer size="s" />
