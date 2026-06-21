@@ -165,11 +165,6 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
       # to avoid recursive fanout.
       group_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
 
-      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
-        buildkite-agent meta-data set "kbn-evals:evaluation-connector-id:${group_key_safe}" \
-          "${EVALUATION_CONNECTOR_ID}" >/dev/null 2>&1 || true
-      fi
-
       # NOTE: Avoid building YAML via command substitution, because it strips trailing newlines.
       # That can accidentally concatenate lines (producing invalid YAML) when appending blocks.
       FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-fanout.XXXXXX.yml)"
@@ -259,7 +254,6 @@ EOF
         env:
           KBN_EVALS: "1"
           KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
-          KBN_EVALS_ON_DEMAND: "${KBN_EVALS_ON_DEMAND:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
@@ -267,9 +261,6 @@ EOF
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
           KBN_EVALS_SUITE_OWNER_NOTIFY: "1"
-          FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
-          EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
-          KBN_EVALS_EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do

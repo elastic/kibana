@@ -3,14 +3,6 @@
 set -euo pipefail
 
 # On-demand evals entry point.
-#
-# Accepts EVAL_SUITE_ID as a single suite id or a comma-separated list, and
-# uploads one `run_suite.sh` step per suite (each with EVAL_FANOUT=1 so it runs
-# its own per-model fanout and posts its own per-suite Slack message).
-#
-# This keeps suite enumeration at the pipeline layer (consistent with the weekly
-# pipeline and the PR eval_pipeline.ts generator), so run_suite.sh stays a
-# single-suite runner.
 
 EVAL_SUITE_ID="${EVAL_SUITE_ID:-}"
 if [[ -z "$EVAL_SUITE_ID" ]]; then
@@ -23,12 +15,11 @@ if ! command -v buildkite-agent >/dev/null 2>&1; then
   exit 1
 fi
 
-IFS=',' read -r -a requested_suites <<<"$EVAL_SUITE_ID"
 FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-on-demand.XXXXXX.yml)"
+trap 'rm -f "$FANOUT_PIPELINE_FILE"' EXIT
 echo "steps:" >"$FANOUT_PIPELINE_FILE"
 
-# Track seen suites in a space-delimited string to dedupe without requiring bash
-# 4+ associative arrays (keeps the script runnable on macOS bash 3.2).
+IFS=',' read -r -a requested_suites <<<"$EVAL_SUITE_ID"
 seen_suites=" "
 suite_count=0
 for raw_suite in "${requested_suites[@]}"; do
@@ -73,7 +64,6 @@ done
 
 if [[ "$suite_count" -eq 0 ]]; then
   echo "No valid suite ids parsed from EVAL_SUITE_ID='${EVAL_SUITE_ID}'"
-  rm -f "$FANOUT_PIPELINE_FILE"
   exit 1
 fi
 
@@ -82,8 +72,6 @@ cat "$FANOUT_PIPELINE_FILE"
 if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
   echo "On-demand pipeline upload failed. Dumping generated YAML with line numbers:"
   nl -ba "$FANOUT_PIPELINE_FILE" || true
-  rm -f "$FANOUT_PIPELINE_FILE"
   exit 1
 fi
-rm -f "$FANOUT_PIPELINE_FILE"
-echo "On-demand suite steps uploaded. Exiting."
+echo "On-demand suite steps uploaded."
