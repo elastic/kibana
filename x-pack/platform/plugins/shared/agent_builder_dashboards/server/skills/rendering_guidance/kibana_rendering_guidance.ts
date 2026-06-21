@@ -45,5 +45,5 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - If generation fails, surface the returned error message rather than retrying blindly.`;
 
 export const kibanaRendering: DashboardGuidanceModule = {
-  guidance
+  guidance,
 };
