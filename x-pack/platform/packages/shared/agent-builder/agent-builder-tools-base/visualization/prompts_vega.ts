@@ -24,67 +24,64 @@ export const createGenerateVegaSpecPrompt = ({
   nlQuery,
   esqlQuery,
   columns,
-  dataUrl,
   existingSpec,
   additionalContext,
 }: {
   nlQuery: string;
   esqlQuery: string;
   columns: EsqlEsqlColumnInfo[] | undefined;
-  /** The exact Kibana ES|QL `data.url` object the spec must use, as JSON. */
-  dataUrl: string;
   existingSpec?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
   return [
     [
       'system',
-      `You are a Kibana Vega-Lite visualization expert. Author a single Vega-Lite v5 specification for a custom visualization that Kibana Lens cannot express (for example small multiples / faceting, repeated layers, or bespoke encodings).
+      `You are a Kibana Vega visualization expert. Author a single raw Vega v5 specification (NOT Vega-Lite) for a custom visualization that Kibana Lens cannot express — for example Sankey/flow diagrams, small multiples, network/arc/chord diagrams, or other bespoke layouts.
 
-Prefer Lens for ordinary charts; you are being used precisely because the requested visualization is NOT a standard Lens chart. Lean into Vega-Lite features such as "facet", "repeat", "concat", "layer", and custom transforms when they serve the request.
+You are using raw Vega (not Vega-Lite) on purpose: it scales to fill the dashboard panel and can express visualizations Vega-Lite cannot.
 
-SCHEMA RULES:
-- The top-level "$schema" MUST be "https://vega.github.io/schema/vega-lite/v5.json".
-- Produce Vega-Lite (not raw Vega). Use "mark"/"encoding", or composition operators ("facet", "repeat", "layer", "concat", "vconcat", "hconcat").
+SCHEMA:
+- The top-level "$schema" MUST be "https://vega.github.io/schema/vega/v5.json".
+- Use raw Vega structure: top-level "data" (an ARRAY of data sets), "scales", "axes" and/or "legends", "marks", and optional "signals". Do NOT use Vega-Lite "mark"/"encoding"/"layer"/"facet" — those are Vega-Lite only.
 
-DATA RULES:
-- Use EXACTLY this top-level "data" object (Kibana resolves it against Elasticsearch via ES|QL); do not add, rename, or invent other data sources:
-<data>
-{ "url": ${dataUrl} }
-</data>
-- Bind encodings ONLY to the columns produced by the ES|QL query (listed below). Use the column names verbatim, including spaces and capitalization.
-- Choose Vega-Lite field "type" ("quantitative", "temporal", "nominal", "ordinal") appropriate to each column's Elasticsearch type.
-- DOTS IN FIELD NAMES: Vega-Lite treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. So whenever a column name contains a dot (e.g. "geo.src"), you MUST backslash-escape every dot in EVERY reference to it — in "field", "groupby", and "sort.field" — e.g. write "field": "geo\\.src" (not "geo.src"). Do NOT escape dots inside "filter"/"expr" expression strings.
+DATA (critical):
+- The top-level "data" array MUST contain a base data set named EXACTLY "source". Do NOT give "source" a "url" or "values" — Kibana injects the ES|QL query results into it for you.
+- The injected data is an ARRAY OF ROW OBJECTS, one object per ES|QL result row, keyed by column name. Example row: { "Source": "US", "Destination": "DE", "Count": 42 }.
+- Derive every other data set FROM "source", e.g. { "name": "nodes", "source": "source", "transform": [ ... ] }. Never invent another "url", index, or query.
+- Reference column values by their EXACT name (including spaces and capitalization): use { "field": "Count" } in scale domains and mark encodings, and datum['Count'] in expression strings.
 
-ES|QL query backing the data:
+ES|QL query backing "source":
 <esql>
 ${esqlQuery}
 </esql>
 
-Available result columns:
+Columns available in "source":
 <columns>
 ${formatColumns(columns)}
 </columns>
 
+DOTS IN FIELD NAMES:
+- Vega treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. For a column whose name contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field"/"groupby" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']). Prefer dot-free column names.
+
+SIZING / RESPONSIVENESS (critical):
+- Do NOT set top-level "width" or "height". Kibana sizes the chart to the panel and exposes "width" and "height" signals automatically.
+- Make the chart fill the panel by binding scale ranges to the view size: use "range": "width" for horizontal scales and "range": "height" for vertical scales (or reference the "width"/"height" signals in expressions). This is what makes the visualization responsive.
+
+DESIGN:
+- Make the chart self-explanatory: set a top-level "title" and give axes/legends clear titles.
+- Keep the spec minimal: include only the data sets, scales, axes, marks, and signals needed to render the requested visualization.
+- SCALES: define EVERY scale in the top-level "scales" array. Any scale name referenced by an axis ("scale": "x"), a legend ("fill": "color"), or a mark encoding ({ "scale": "color" }) MUST be defined there. Do NOT put scales under any other key (e.g. no "_secondary_scales") and do NOT reference a scale that is not in "scales" — Vega fails with "Unrecognized scale name". For a color legend, define an ordinal color scale in "scales" and point the legend's "fill"/"stroke" at it.
+- LEGENDS: prefer a plain legend bound to a scale (e.g. { "fill": "color" }). Inside "legends[].encode.symbols", the "size" and "strokeWidth" channels MUST be a single value/signal object (e.g. { "value": 100 }) — never a conditional/production-rule array of { "test": ... } entries (Vega uses them to lay out the symbol and fails to parse). If you need per-entry symbol styling, build a custom legend from ordinary marks instead.
 ${
   existingSpec
-    ? `Existing spec to modify (keep what still applies, change only what the request asks for):
+    ? `
+Existing spec to modify (keep what still applies, change only what the request asks for):
 <existing_spec>
 ${existingSpec}
 </existing_spec>
 `
     : ''
 }
-
-DESIGN RULES:
-- Make the chart self-explanatory: include a concise "title" and clear axis/legend titles.
-- SIZING: "width": "container" / "height": "container" works ONLY for single-view and layered specs — set it there (and do NOT add fixed pixel sizes) so the chart fills the panel. For composed specs ("facet"/"repeat"/"concat") container is NOT supported, so OMIT "container" entirely and set explicit numeric "width"/"height" on the inner "spec" (e.g. a fixed height per small-multiple row). Prefer single-view or "layer" designs when you want the chart to fill the panel.
-- ORDERED DISCRETE CHANNELS: when binding a discrete field to "opacity" or "size", set its "type" to "ordinal" and give it an explicit order (a "sort" array, or a "scale.domain"); Vega-Lite warns ("should not be used with an unsorted discrete field") when "opacity"/"size" is bound to an unsorted nominal field.
-- SHARED SCALES IN LAYERED SPECS: layers share ONE scale (and legend) per channel by default. This causes "Conflicting scale property"/"Conflicting legend property" warnings when layers disagree. Follow these rules:
-  - When layers SHARE a channel (the same positional "x"/"y" axis, or color by the same field), define that scale and legend EXACTLY ONCE on the top-level "encoding". Do NOT also set a different "scale" (e.g. a different "domain") or a conflicting "legend" (e.g. "legend": null on one layer and a legend object on another) inside the individual layers — let them inherit the shared definition.
-  - Only when layers genuinely encode DIFFERENT fields on the same channel, make that channel independent with a top-level "resolve", e.g. "resolve": { "scale": { "color": "independent" }, "legend": { "color": "independent" } }. Do NOT make a shared positional axis independent — that misaligns the layers.
-- Keep the spec minimal: only include properties needed to render the requested visualization.
-
 User request:
 <user_query>
 ${nlQuery}
@@ -93,14 +90,15 @@ ${nlQuery}
 IMPORTANT: Return ONLY the JSON spec wrapped in a single markdown code block:
 \`\`\`json
 {
-  // your Vega-Lite spec here
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "data": [{ "name": "source" }]
 }
 \`\`\`
 
 ${additionalContext ?? ''}`,
     ],
     // Human message required for Bedrock to work properly
-    ['human', 'Generate the Vega-Lite specification.'],
+    ['human', 'Generate the Vega specification.'],
   ];
 };
 
@@ -109,13 +107,13 @@ ${additionalContext ?? ''}`,
  * implicit Lens framework, so time filtering must be explicit in the query.
  */
 export const vegaEsqlAdditionalInstructions = `
-You are generating an ES|QL query that will back a Kibana Vega-Lite visualization.
+You are generating an ES|QL query that will back a Kibana Vega visualization.
 
 ## Human-readable column aliases
-Use human-readable column aliases in STATS/EVAL (e.g. \`Average Latency\` not \`avg_latency\`). Wrap multi-word aliases in backticks. These names become Vega encoding fields, so keep them stable and descriptive.
+Use human-readable column aliases in STATS/EVAL (e.g. \`Average Latency\` not \`avg_latency\`). Wrap multi-word aliases in backticks. These names become Vega field references, so keep them stable and descriptive.
 
 ## Avoid dots in column names
-Vega-Lite treats a dot in a field name as nested-object access, so a column literally named \`geo.src\` breaks rendering. Whenever you group by or output a field whose name contains a dot, alias it to a dot-free, human-readable name (e.g. STATS \`Count\` = COUNT(*) BY \`Source\` = geo.src, \`Destination\` = geo.dest). Never leave a dotted field name in the output columns.
+Vega treats a dot in a field name as nested-object access, so a column literally named \`geo.src\` breaks rendering. Whenever you group by or output a field whose name contains a dot, alias it to a dot-free, human-readable name (e.g. STATS \`Count\` = COUNT(*) BY \`Source\` = geo.src, \`Destination\` = geo.dest). Never leave a dotted field name in the output columns.
 
 ## Time picker compatibility
 If a time field exists, make the query respond to the dashboard time picker by referencing \`?_tstart\` and \`?_tend\`.
@@ -124,4 +122,4 @@ If a time field exists, make the query respond to the dashboard time picker by r
 Never hardcode absolute times or now()-based ranges.
 
 ## Small multiples
-When the request implies small multiples / faceting, keep the grouping (category) column in the output alongside the metric and time/bucket columns so Vega can facet on it. Avoid collapsing the facet dimension away.`;
+When the request implies small multiples / per-category panels, keep the grouping (category) column in the output alongside the metric and time/bucket columns so Vega can split marks by it. Avoid collapsing the grouping dimension away.`;

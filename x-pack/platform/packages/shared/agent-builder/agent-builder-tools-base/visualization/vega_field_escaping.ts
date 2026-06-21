@@ -8,7 +8,7 @@
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * Vega-Lite treats an unescaped dot in a field name as nested-object access:
+ * Vega treats an unescaped dot in a field name as nested-object access:
  * `"field": "geo.src"` is read as `datum.geo.src`. ES|QL result columns are flat
  * (a column is literally named `geo.src`), so an unescaped reference throws
  * "Cannot read properties of undefined (reading 'src')" at render time. The fix
@@ -58,9 +58,9 @@ const walk = (value: unknown, columnNames: ReadonlySet<string>): unknown => {
 };
 
 /**
- * Return a deep copy of a Vega-Lite spec where every `field` / `groupby`
- * reference that exactly matches a dotted ES|QL result column name has its dots
- * backslash-escaped, so Vega-Lite reads the flat column instead of attempting
+ * Return a deep copy of a Vega spec where every `field` / `groupby` reference
+ * that exactly matches a dotted ES|QL result column name has its dots
+ * backslash-escaped, so Vega reads the flat column instead of attempting
  * nested-object access. References to columns without dots, expression strings,
  * and computed fields are left untouched.
  */
