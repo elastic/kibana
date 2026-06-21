@@ -10,6 +10,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+
 const buildSpaceFilterQuery = (spaceId: string): QueryDslQueryContainer => ({
   bool: {
     should: [{ term: { spaceId } }, { bool: { must_not: { exists: { field: 'spaceId' } } } }],
