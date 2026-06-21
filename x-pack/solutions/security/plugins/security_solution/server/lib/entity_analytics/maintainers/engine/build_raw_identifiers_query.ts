@@ -93,9 +93,16 @@ export function buildRawIdentifiersEsqlQuery({
     .map((r) => `${rawIdentifiersPrefix}.${r.field} IS NOT NULL`)
     .join(' OR ');
 
-  // Prefix each field's values with its EUID type, then union into one column.
-  const perFieldEvals = rules
-    .map((r, i) => `EVAL t${i} = CONCAT("${r.euidType}:", ${rawIdentifiersPrefix}.${r.field})`)
+  // MV_EXPAND each raw field BEFORE CONCAT so that multi-valued fields are
+  // expanded to single values first. ES|QL CONCAT returns NULL when any argument
+  // is multi-valued, so CONCAT-before-expand silently drops all targets for actors
+  // that administer more than one entity. Each rule gets its own rawKey + expand
+  // step so values keep their correct type prefix through the CONCAT.
+  const perFieldSteps = rules
+    .map(
+      (r, i) =>
+        `EVAL rawKey${i} = ${rawIdentifiersPrefix}.${r.field}\n| MV_EXPAND rawKey${i}\n| EVAL t${i} = CONCAT("${r.euidType}:", rawKey${i})`
+    )
     .join('\n| ');
   const unionExpr =
     rules.length === 1 ? `t0` : `MV_APPEND(${rules.map((_, i) => `t${i}`).join(', ')})`;
@@ -103,9 +110,8 @@ export function buildRawIdentifiersEsqlQuery({
   return `FROM ${entityIndex}
 | WHERE (${existenceClause})${entitySourceClause}${watermarkClause}
 | EVAL ${ENGINE_COLUMNS.actor} = entity.id
-| ${perFieldEvals}
+| ${perFieldSteps}
 | EVAL targetEntityId = ${unionExpr}
-| MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, "") != "" AND targetEntityId RLIKE ".+:.+"
 | STATS ${relationshipKey} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""

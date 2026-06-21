@@ -6,9 +6,10 @@ FROM .entities.v2.latest.security___namespace__-*
 | WHERE (entity.relationships.administers.raw_identifiers.host.name IS NOT NULL)
     AND entity.source == \\"entityanalytics_ad\\"
 | EVAL actorUserId = entity.id
-| EVAL t0 = CONCAT(\\"host:\\", entity.relationships.administers.raw_identifiers.host.name)
+| EVAL rawKey0 = entity.relationships.administers.raw_identifiers.host.name
+| MV_EXPAND rawKey0
+| EVAL t0 = CONCAT(\\"host:\\", rawKey0)
 | EVAL targetEntityId = t0
-| MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\" AND targetEntityId RLIKE \\".+:.+\\"
 | STATS administers = VALUES(targetEntityId) BY actorUserId
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
@@ -21,9 +22,10 @@ exports[`ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityana
     AND entity.source == \\"entityanalytics_ad\\"
     AND entity.lifecycle.last_seen > \\"2026-06-01T00:00:00.000Z\\"
 | EVAL actorUserId = entity.id
-| EVAL t0 = CONCAT(\\"host:\\", entity.relationships.administers.raw_identifiers.host.name)
+| EVAL rawKey0 = entity.relationships.administers.raw_identifiers.host.name
+| MV_EXPAND rawKey0
+| EVAL t0 = CONCAT(\\"host:\\", rawKey0)
 | EVAL targetEntityId = t0
-| MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\" AND targetEntityId RLIKE \\".+:.+\\"
 | STATS administers = VALUES(targetEntityId) BY actorUserId
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"

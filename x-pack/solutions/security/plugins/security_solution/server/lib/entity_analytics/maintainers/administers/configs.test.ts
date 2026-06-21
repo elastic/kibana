@@ -64,21 +64,14 @@ describe('ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   );
 
   it.each(ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query constructs host EUIDs from host.name via type-prefixed CONCAT',
+    '$id: override query expands raw host.name before CONCAT to handle multi-valued fields',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
-      expect(query).toContain(
-        'CONCAT("host:", entity.relationships.administers.raw_identifiers.host.name)'
-      );
-    }
-  );
-
-  it.each(ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query expands the unioned target column via MV_EXPAND',
-    (config) => {
-      const query = buildTargetsPerActorQuery(config, 'default');
+      // MV_EXPAND must precede CONCAT so actors with multiple host.name values
+      // (administers multiple hosts) resolve all targets instead of returning NULL.
       expect(query).toContain('raw_identifiers.host.name');
-      expect(query).toContain('MV_EXPAND targetEntityId');
+      expect(query).toContain('MV_EXPAND rawKey0');
+      expect(query).toContain('CONCAT("host:", rawKey0)');
     }
   );
 

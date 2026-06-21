@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
 import { getToolCallEntryPath } from '../../runner/store/volumes/tool_results/utils';
-import type { ProcessedConversation } from './prepare_conversation';
+import type { ToolCallResultTransformer } from './tool_summarization';
+import {
+  areAllResultsCleaned,
+  isSummaryResult,
+  markResultAsCleaned,
+  tryToolSummarization,
+} from './tool_summarization';
 
 /**
  * Conversation token threshold for file reference substitution.
@@ -26,66 +31,7 @@ export const FS_CONTEXT_TOKEN_THRESHOLD = 50_000;
  */
 export const FS_TOOL_CALL_TOKEN_THRESHOLD = 1_000;
 
-/**
- * Marker to identify cleaned/transformed tool results.
- * Prevents double-processing if results are transformed multiple times.
- */
-const SUMMARY_MARKER = '_summary';
-
-/**
- * Checks if a result has already been summarized/transformed.
- */
-const isSummaryResult = (data: unknown): boolean => {
-  return (
-    typeof data === 'object' &&
-    data !== null &&
-    SUMMARY_MARKER in data &&
-    (data as Record<string, unknown>)[SUMMARY_MARKER] === true
-  );
-};
-
-/**
- * Checks if all results in a tool call have already been cleaned.
- */
-const areAllResultsCleaned = (results: ToolResult[]): boolean => {
-  return results.every((result) => {
-    if ('data' in result) {
-      return isSummaryResult(result.data);
-    }
-    return false;
-  });
-};
-
-/**
- * Marks a result as cleaned by adding the cleaned marker to its data.
- */
-const markResultAsCleaned = (result: ToolResult): ToolResult => {
-  if ('data' in result && typeof result.data === 'object' && result.data !== null) {
-    const data = result.data as Record<string, unknown>;
-    if (!isSummaryResult(data)) {
-      return {
-        ...result,
-        data: {
-          ...data,
-          [SUMMARY_MARKER]: true,
-        },
-      } as ToolResult;
-    }
-  }
-  return result;
-};
-
-/**
- * Function type for transforming all results from a tool call.
- * Works at the tool-call level to allow aggregation/summarization across results.
- */
-export type ToolCallResultTransformer = (toolCall: ToolCallWithResult) => Promise<ToolResult[]>;
-
 export interface CreateResultTransformerOptions {
-  /**
-   * Conversation processed for the round.
-   */
-  processedConversation: ProcessedConversation;
   /**
    * Tool registry to look up tool-specific summarization functions.
    * Used as a fallback when the tool is not found in the tool manager
@@ -107,49 +53,42 @@ export interface CreateResultTransformerOptions {
    */
   filestoreEnabled: boolean;
   /**
+   * Unified, summarization-aware conversation token estimate. Gates filestore
+   * substitution and is computed once per turn so it matches the compaction trigger.
+   */
+  conversationTokenEstimate: number;
+  /**
    * Token count threshold above which results are substituted with file references.
-   * Defaults to FILE_REFERENCE_TOKEN_THRESHOLD.
+   * Defaults to FS_TOOL_CALL_TOKEN_THRESHOLD.
    */
   toolCallTokenThreshold?: number;
   /**
-   * Token count threshold above which results are substituted with file references.
-   * Defaults to CONVERSATION_TOKEN_THRESHOLD.
+   * Conversation token threshold above which filestore substitution is enabled.
+   * Defaults to FS_CONTEXT_TOKEN_THRESHOLD.
    */
   conversationTokenThreshold?: number;
 }
-
-const estimateConversationTokens = (conversation: ProcessedConversation): number => {
-  return estimateTokens(
-    JSON.stringify(
-      conversation.previousRounds.map((round) => {
-        return { input: round.input, response: round.response, steps: round.steps };
-      })
-    )
-  );
-};
 
 /**
  * Creates a unified result transformer that:
  * 1. Applies tool-specific summarization (via `summarizeToolReturn`) if defined
  * 2. For results not summarized, applies file reference substitution if enabled and above threshold
  *
- * This consolidates the two previous mechanisms (cleanToolCallHistory and createFilestoreResultTransformer)
- * into a single transformation pipeline.
+ * Step 2 is gated on the conversation token estimate, but callers (e.g. intra-round
+ * compaction) can force it on per call via `forceFilestoreSubstitution`.
  */
 export const createResultTransformer = ({
-  processedConversation,
   toolRegistry,
   toolManager,
   filestore,
   filestoreEnabled,
+  conversationTokenEstimate,
   toolCallTokenThreshold = FS_TOOL_CALL_TOKEN_THRESHOLD,
   conversationTokenThreshold = FS_CONTEXT_TOKEN_THRESHOLD,
 }: CreateResultTransformerOptions): ToolCallResultTransformer => {
-  // check if we should perform filestore substitution based on the current token usage
-  const conversationTokenEstimate = estimateConversationTokens(processedConversation);
   const filestoreSubstitutionEnabled = conversationTokenEstimate > conversationTokenThreshold;
 
-  return async (toolCall: ToolCallWithResult): Promise<ToolResult[]> => {
+  return async (toolCall, options) => {
     // Skip if no results or all already cleaned
     if (toolCall.results.length === 0 || areAllResultsCleaned(toolCall.results)) {
       return toolCall.results;
@@ -161,9 +100,14 @@ export const createResultTransformer = ({
       return summarized.map(markResultAsCleaned);
     }
 
-    // Step 2: Apply file reference substitution if enabled
-    if (filestoreEnabled && filestoreSubstitutionEnabled) {
-      const transformed = await Promise.all(
+    // Step 2: Apply file reference substitution when the conversation is large enough,
+    // or when the caller forces it (intra-round compaction, where pressure comes from
+    // the in-flight round rather than conversation history).
+    const useFilestore =
+      filestoreEnabled &&
+      (filestoreSubstitutionEnabled || options?.forceFilestoreSubstitution === true);
+    if (useFilestore) {
+      return Promise.all(
         toolCall.results.map((result) =>
           tryFilestoreSubstitution({
             result,
@@ -174,43 +118,11 @@ export const createResultTransformer = ({
           })
         )
       );
-      return transformed;
     }
 
     // No transformation applied
     return toolCall.results;
   };
-};
-
-/**
- * Attempts to apply tool-specific summarization using the tool's `summarizeToolReturn` function.
- * Checks the tool manager first (has all active tools including internal ones like filestore tools),
- * then falls back to the tool registry (for evicted dynamic tools from previous rounds).
- * Returns the summarized results, or undefined if no summarization is available/applicable.
- */
-const tryToolSummarization = async (
-  toolCall: ToolCallWithResult,
-  toolManager: ToolManager,
-  toolRegistry: ToolRegistry
-): Promise<ToolResult[] | undefined> => {
-  const managerSummarizer = toolManager.getSummarizer(toolCall.tool_id);
-  if (managerSummarizer) {
-    const summarizedResults = managerSummarizer(toolCall);
-    return summarizedResults ?? undefined;
-  }
-
-  try {
-    const tool = await toolRegistry.get(toolCall.tool_id);
-    if (!tool?.summarizeToolReturn) {
-      return undefined;
-    }
-
-    const summarizedResults = tool.summarizeToolReturn(toolCall);
-    return summarizedResults ?? undefined;
-  } catch {
-    // Tool not found or error - skip summarization
-    return undefined;
-  }
 };
 
 /**
