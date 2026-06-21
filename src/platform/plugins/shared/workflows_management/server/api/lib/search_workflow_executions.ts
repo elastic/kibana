@@ -47,6 +47,9 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
   'executedBy',
   'createdBy',
   'concurrencyGroupKey',
+  'managed',
+  'workflowDefinition.name',
+  'workflowDefinition.tags',
 ] as const;
 
 export const searchWorkflowExecutions = async ({

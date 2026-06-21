@@ -29,12 +29,10 @@ import {
 } from '@kbn/workflows';
 import { formatExecutionTriggerLabel } from './format_execution_table_values';
 import { formatDuration } from '../../shared/lib/format_duration';
-import {
-  FormattedRelativeEnhanced,
-  getExecutionStatusIcon,
-  ManagedWorkflowBadge,
-  useGetFormattedDateTime,
-} from '../../shared/ui';
+import { FormattedRelativeEnhanced } from '../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
+import { ManagedWorkflowBadge } from '../../shared/ui/managed_workflow_badge';
+import { getExecutionStatusIcon } from '../../shared/ui/status_badge';
+import { useGetFormattedDateTime } from '../../shared/ui/use_formatted_date';
 
 const MAX_VISIBLE_TAGS = 2;
 
