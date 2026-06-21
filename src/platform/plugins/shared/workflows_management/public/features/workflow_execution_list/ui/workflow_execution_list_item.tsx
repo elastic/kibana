@@ -9,7 +9,6 @@
 
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
-  EuiAvatar,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +24,8 @@ import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
@@ -47,6 +48,7 @@ interface WorkflowExecutionListItemProps {
   startedAt: Date | null;
   duration: number | null;
   executedBy?: string;
+  executedByProfile?: UserProfileWithAvatar;
   triggeredBy?: string;
   showExecutor?: boolean;
   selected?: boolean;
@@ -59,6 +61,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     startedAt,
     duration,
     executedBy,
+    executedByProfile,
     triggeredBy,
     showExecutor = false,
     selected,
@@ -68,6 +71,9 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
     const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
+    const executedByDisplayName = executedByProfile?.user
+      ? getUserDisplayName(executedByProfile.user) || executedBy
+      : executedBy;
     const formattedDuration = useMemo(() => {
       if (duration) {
         return formatDuration(duration);
@@ -160,11 +166,15 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                       wrap={false}
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiAvatar name={executedBy} size="s" />
+                        <UserAvatar
+                          user={executedByProfile?.user ?? { username: executedBy }}
+                          avatar={executedByProfile?.data?.avatar}
+                          size="s"
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs" color="subdued">
-                          {executedBy}
+                          {executedByDisplayName}
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>

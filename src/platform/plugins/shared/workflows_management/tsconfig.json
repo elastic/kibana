@@ -102,6 +102,7 @@
     "@kbn/std",
     "@kbn/use-observable",
     "@kbn/cloud-plugin",
+    "@kbn/user-profile-components",
     "@kbn/kbn-client",
     "@kbn/rule-data-utils",
     "@kbn/std",
