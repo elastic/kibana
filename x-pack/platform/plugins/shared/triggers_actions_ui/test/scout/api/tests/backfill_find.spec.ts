@@ -168,7 +168,7 @@ apiTest.describe('backfill find API', { tag: tags.stateful.classic }, () => {
         data: Array<Record<string, unknown>>;
       }>({
         method: 'POST',
-        path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1}&rule_ids=${ruleId2}`,
+        path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1},${ruleId2}`,
         headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
       });
       expect(findBoth.data.total).toBeGreaterThanOrEqual(2);
@@ -191,7 +191,7 @@ apiTest.describe('backfill find API', { tag: tags.stateful.classic }, () => {
       data: Array<Record<string, unknown>>;
     }>({
       method: 'POST',
-      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1}&rule_ids=${ruleId2}&start=${encodeURIComponent(
+      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1},${ruleId2}&start=${encodeURIComponent(
         start1
       )}`,
       headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
@@ -207,7 +207,7 @@ apiTest.describe('backfill find API', { tag: tags.stateful.classic }, () => {
       data: Array<Record<string, unknown>>;
     }>({
       method: 'POST',
-      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1}&rule_ids=${ruleId2}&start=${encodeURIComponent(
+      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1},${ruleId2}&start=${encodeURIComponent(
         start2
       )}`,
       headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
@@ -231,9 +231,7 @@ apiTest.describe('backfill find API', { tag: tags.stateful.classic }, () => {
       data: Array<Record<string, unknown>>;
     }>({
       method: 'POST',
-      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1}&rule_ids=${ruleId2}&end=${encodeURIComponent(
-        end2
-      )}`,
+      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1},${ruleId2}&end=${encodeURIComponent(end2)}`,
       headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
     });
 
@@ -254,7 +252,7 @@ apiTest.describe('backfill find API', { tag: tags.stateful.classic }, () => {
       data: Array<Record<string, unknown>>;
     }>({
       method: 'POST',
-      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1}&initiators=user`,
+      path: `${BACKFILL_FIND_PATH}?rule_ids=${ruleId1}&initiator=user`,
       headers: { 'kbn-xsrf': 'scout', 'x-elastic-internal-origin': 'scout' },
     });
 

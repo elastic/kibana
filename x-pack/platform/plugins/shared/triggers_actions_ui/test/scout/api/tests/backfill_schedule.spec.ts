@@ -402,11 +402,15 @@ apiTest.describe('backfill schedule API', { tag: tags.stateful.classic }, () => 
       createdRuleIds.push(ruleId2);
 
       // Create a lifecycle rule (.es-query has autoRecoverAlerts:true — not backfill-supported)
+      // makeEsQueryRule uses camelCase ruleTypeId; rename to rule_type_id for raw kbnClient call
+      const { ruleTypeId: lifecycleRuleTypeId, ...lifecycleRuleBase } = makeEsQueryRule(
+        'scout-backfill-lifecycle'
+      );
       const lifecycleRuleRes = await kbnClient.request<{ id: string }>({
         method: 'POST',
         path: RULE_CREATE_PATH,
         headers: { 'kbn-xsrf': 'scout' },
-        body: { ...makeEsQueryRule('scout-backfill-lifecycle'), enabled: true },
+        body: { ...lifecycleRuleBase, rule_type_id: lifecycleRuleTypeId, enabled: true },
       });
       const lifecycleRuleId = lifecycleRuleRes.data.id;
       createdRuleIds.push(lifecycleRuleId);
