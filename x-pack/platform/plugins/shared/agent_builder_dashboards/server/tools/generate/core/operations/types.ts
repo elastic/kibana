@@ -48,5 +48,4 @@ export interface OperationDefinition<
  */
 export const defineOperation = <TSchema extends OperationSchema>(
   definition: OperationDefinition<TSchema>
-): OperationDefinition<TSchema, unknown> =>
-  definition as OperationDefinition<TSchema, unknown>;
+): OperationDefinition<TSchema, unknown> => definition as OperationDefinition<TSchema, unknown>;

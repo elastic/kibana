@@ -44,7 +44,6 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - If the user asks to update a dashboard but no \`attachment_id\` is available in conversation context, ask which dashboard they mean or offer to create a new one.
 - If generation fails, surface the returned error message rather than retrying blindly.`;
 
-
 export const kibanaRendering: DashboardGuidanceModule = {
   guidance,
   referencedContent: [],
