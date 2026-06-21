@@ -7,7 +7,6 @@
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
 import type { CreateDataSourceAuthenticationMode } from './create_data_source_flyout_authentication';
-import { getDefaultAuthenticationMode } from './create_data_source_flyout_authentication';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 
 export const emptyDataSourceFlyoutFormValues = (): CreateDataSourceFlyoutFormValues => ({
@@ -120,5 +119,6 @@ export const authenticationModeFromDataSource = (
     return 'access_and_secret_keys';
   }
 
-  return getDefaultAuthenticationMode(data.type);
+  // @ts-expect-error - typescript says this should be impossible
+  throw new Error(`Unknown data source type: ${data?.type}`);
 };
