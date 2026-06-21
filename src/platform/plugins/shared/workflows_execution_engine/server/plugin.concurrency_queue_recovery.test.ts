@@ -108,7 +108,7 @@ describe('concurrency queue recovery wiring', () => {
   });
 
   it('registers the periodic reconcile task and schedules it on start', async () => {
-    const { plugin, coreSetup } = setupPlugin();
+    const { plugin } = setupPlugin();
     const coreStart = coreMock.createStart();
     const taskManagerStart = taskManagerMock.createStart();
     taskManagerStart.ensureScheduled.mockResolvedValue({} as never);
@@ -118,6 +118,7 @@ describe('concurrency queue recovery wiring', () => {
       actions: {} as never,
       workflowsExtensions: {} as never,
       licensing: licensingMock.createStart(),
+      cloud: {} as never,
     });
 
     expect(taskDefinitions[WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE]).toBeDefined();
