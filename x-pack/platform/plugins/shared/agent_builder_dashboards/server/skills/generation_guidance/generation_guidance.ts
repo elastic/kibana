@@ -6,18 +6,10 @@
  */
 
 import { dashboardTools } from '../../../common';
-import { dashboardDesignGuidancePrompt } from './design';
+import type { DashboardGuidanceModule } from '../guidance_module';
+import { dashboardDesignGuidancePrompt, dashboardDesignReferenceName } from './design';
 
-/**
- * Environment-agnostic dashboard *generation* guidance.
- *
- * This block describes how to build a dashboard. It deliberately says nothing about how the current
- * dashboard is referenced or how the result is returned/surfaced. Those are
- * environment-specific and avoided here so the block can be reused across
- * environments. Pair it with an environment-specific rendering guidance block
- * (e.g. the Kibana one) that explains how the generated dashboard is surfaced.
- */
-export const dashboardGenerationGuidance = `## Building a Dashboard
+const guidance = `## Building a Dashboard
 
 The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
@@ -44,7 +36,9 @@ For an existing dashboard:
 - Use \`source: "request"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
 - Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
 
-${dashboardDesignGuidancePrompt}
+## Dashboard Design
+
+Composition guidance (how to structure a coherent dashboard, when to use sections) and panel layout rules (the 48-column grid, sizing per chart type, packing, positioning, section coordinates, and reflow) live in the \`${dashboardDesignReferenceName}.md\` referenced file. **Before you compose a dashboard or add, move, or resize panels, read \`${dashboardDesignReferenceName}.md\` (listed in this skill's referenced files) and follow it.**
 
 ## Generation Edge Cases
 
@@ -54,3 +48,27 @@ ${dashboardDesignGuidancePrompt}
 - A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
 - If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
 - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement operations.`;
+
+/**
+ * Environment-agnostic dashboard *generation* guidance.
+ *
+ * The `guidance` describes how to build a dashboard. It deliberately says nothing about how the
+ * current dashboard is referenced or how the result is returned/surfaced. Those are
+ * environment-specific and avoided here so the block can be reused across environments. Pair it with
+ * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
+ * generated dashboard is surfaced.
+ *
+ * The detailed design guidance (composition + panel layout) is large and only needed while actually
+ * composing or laying out a dashboard, so it is not inlined. It is offered lazily via
+ * `referencedContent` (a file the agent reads on demand) and the `guidance` only points at it.
+ */
+export const dashboardGeneration: DashboardGuidanceModule = {
+  guidance,
+  referencedContent: [
+    {
+      name: dashboardDesignReferenceName,
+      relativePath: '.',
+      content: dashboardDesignGuidancePrompt,
+    },
+  ],
+};

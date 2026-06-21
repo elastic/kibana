@@ -8,26 +8,9 @@
 import { attachmentTools } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { dashboardTools } from '../../../common';
+import type { DashboardGuidanceModule } from '../guidance_module';
 
-/**
- * Kibana-specific dashboard *rendering* guidance.
- *
- * The generation core is environment-agnostic and never touches Kibana state:
- * it receives the prior dashboard payload + resolved panel configs and returns
- * a new dashboard payload. The Kibana \`${dashboardTools.generateDashboard}\`
- * tool wraps that core with attachment persistence, so the LLM works against a
- * lightweight reference (an \`attachment_id\`) instead of the heavy payload:
- * - the prior dashboard payload is read server-side from the referenced id,
- * - the generated payload is persisted as a \`${DASHBOARD_ATTACHMENT_TYPE}\`
- *   attachment server-side,
- * - the tool returns only the \`attachment_id\`, \`version\`, and a compact summary.
- *
- * This keeps the dashboard payload out of the LLM transcript: the model renders
- * by referencing the returned \`attachment_id\` (e.g. \`<render_attachment>\`)
- * rather than copying the payload into a follow-up tool call. A different
- * environment would substitute its own persistence/rendering primitives.
- */
-export const kibanaRenderingGuidance = `## Kibana Workflow
+const guidance = `## Kibana Workflow
 
 In Kibana, a dashboard request follows three stages: resolve inputs, generate (which also persists), then render.
 
@@ -60,3 +43,9 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 
 - If the user asks to update a dashboard but no \`attachment_id\` is available in conversation context, ask which dashboard they mean or offer to create a new one.
 - If generation fails, surface the returned error message rather than retrying blindly.`;
+
+
+export const kibanaRendering: DashboardGuidanceModule = {
+  guidance,
+  referencedContent: [],
+};

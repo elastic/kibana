@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { dashboardGeneration } from './generation_guidance';
+import type { ReferencedContent } from '@kbn/agent-builder-server/skills/type_definition';
+
+export interface DashboardGuidanceModule {
+  guidance: string;
+  referencedContent: ReferencedContent[];
+}
