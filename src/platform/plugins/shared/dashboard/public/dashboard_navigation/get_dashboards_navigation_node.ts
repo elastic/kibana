@@ -11,12 +11,16 @@ import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import {
   combineLatest,
+  defer,
+  filter,
   from,
+  fromEvent,
   map,
+  merge,
   type Observable,
+  of,
   startWith,
   switchMap,
-  timer,
 } from 'rxjs';
 
 import {
@@ -25,11 +29,11 @@ import {
 } from '../../common';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import { createDashboardFavoritesClient, fetchStarredDashboards } from './fetch_starred_dashboards';
+import { starredDashboardsRefresh$ } from './starred_dashboards_refresh';
 import type { DashboardNavigationPanelItem } from './types';
 import { toAbsoluteNavHref } from './to_absolute_nav_href';
 
 const RECENT_DASHBOARDS_LIMIT = 5;
-const STARRED_DASHBOARDS_REFRESH_MS = 5000;
 
 const mapRecentDashboards = (
   core: CoreStart,
@@ -41,6 +45,11 @@ const mapRecentDashboards = (
     href: toAbsoluteNavHref(core.http.basePath.prepend(item.link.split('?')[0])),
   }));
 
+const fetchStarredDashboards$ = (
+  core: CoreStart,
+  favoritesClient: ReturnType<typeof createDashboardFavoritesClient>
+) => defer(() => from(fetchStarredDashboards(core, favoritesClient)));
+
 export const getDashboardsNavigationNode$ = (
   core: CoreStart,
   options: Omit<DashboardsNavigationNodeOptions, 'recentDashboards' | 'starredDashboards'> = {}
@@ -48,8 +57,14 @@ export const getDashboardsNavigationNode$ = (
   const recentlyAccessed = getDashboardRecentlyAccessedService();
   const favoritesClient = createDashboardFavoritesClient(core);
 
-  const starredDashboards$ = timer(0, STARRED_DASHBOARDS_REFRESH_MS).pipe(
-    switchMap(() => from(fetchStarredDashboards(core, favoritesClient)))
+  const starredDashboards$ = merge(
+    of([] as DashboardNavigationPanelItem[]),
+    fetchStarredDashboards$(core, favoritesClient),
+    starredDashboardsRefresh$.pipe(switchMap(() => fetchStarredDashboards$(core, favoritesClient))),
+    fromEvent(document, 'visibilitychange').pipe(
+      filter(() => document.visibilityState === 'visible'),
+      switchMap(() => fetchStarredDashboards$(core, favoritesClient))
+    )
   );
 
   return combineLatest([

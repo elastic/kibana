@@ -18,9 +18,24 @@ import { createDashboardEditUrl } from '../utils/urls';
 import { usageCollectionService } from '../services/kibana_services';
 import type { DashboardNavigationPanelItem } from './types';
 import { toAbsoluteNavHref } from './to_absolute_nav_href';
+import { refreshStarredDashboardsNavigation } from './starred_dashboards_refresh';
 
-export const createDashboardFavoritesClient = (core: CoreStart) =>
-  new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
+class DashboardFavoritesClient extends FavoritesClient {
+  public override async addFavorite(params: { id: string }) {
+    const result = await super.addFavorite(params);
+    refreshStarredDashboardsNavigation();
+    return result;
+  }
+
+  public override async removeFavorite(params: { id: string }) {
+    const result = await super.removeFavorite(params);
+    refreshStarredDashboardsNavigation();
+    return result;
+  }
+}
+
+export const createDashboardFavoritesClient = (core: CoreStart): FavoritesClientPublic =>
+  new DashboardFavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
     http: core.http,
     userProfile: core.userProfile,
     usageCollection: usageCollectionService,
