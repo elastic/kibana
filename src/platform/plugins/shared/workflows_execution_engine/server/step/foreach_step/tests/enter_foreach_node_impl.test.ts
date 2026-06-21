@@ -105,6 +105,17 @@ describe('EnterForeachNodeImpl', () => {
           total: 3,
         });
       });
+
+      it('should pin the foreach source for the lifetime of the loop', async () => {
+        await underTest.run();
+
+        expect(stepIoService.pinForeachSource).toHaveBeenCalledWith(
+          'testStep',
+          node.configuration.foreach
+        );
+        // The loop runs, so the pin must NOT be released on enter.
+        expect(stepIoService.unpinForeachScope).not.toHaveBeenCalled();
+      });
     });
 
     describe('when foreach configuration is an expression', () => {
@@ -253,6 +264,18 @@ describe('EnterForeachNodeImpl', () => {
           `Foreach step "testStep" has no items to iterate over. Skipping execution.`,
           { workflow: { step_id: 'testStep' } }
         );
+      });
+
+      it('should release the source pin when there are no items to iterate', async () => {
+        await underTest.run();
+
+        // Pin is taken eagerly before items are evaluated; an empty array means
+        // no iterations will run, so the pin must be released immediately.
+        expect(stepIoService.pinForeachSource).toHaveBeenCalledWith(
+          'testStep',
+          node.configuration.foreach
+        );
+        expect(stepIoService.unpinForeachScope).toHaveBeenCalledWith('testStep');
       });
     });
 
