@@ -9,7 +9,7 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, executeEsql, buildTimeRangeParams } from '@kbn/agent-builder-genai-utils';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import {
   GENERATE_VEGA_ESQL_NODE,
@@ -24,76 +24,144 @@ import {
   isValidateVegaSpecAction,
 } from './actions_vega';
 import { createGenerateVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts_vega';
-import { buildEsqlDataUrl } from './vega_data_url';
+import { buildEsqlDataUrl, extractEsqlQueryFromSpec } from './vega_data_url';
 import { escapeDottedFieldReferences } from './vega_field_escaping';
+import { validateVegaSpec } from './vega_validator';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
-const VEGA_LITE_V5_SCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
+const VEGA_V5_SCHEMA = 'https://vega.github.io/schema/vega/v5.json';
+
+/** Name of the base data set bound to the ES|QL query results. */
+const ESQL_DATA_NAME = 'source';
 
 /**
- * Top-level Vega-Lite properties that declare something to render. A valid spec
- * must contain at least one of these.
+ * Default range used only to bind `?_tstart`/`?_tend` when executing an existing
+ * query server-side (for columns + sample rows). Mirrors the ES|QL generator
+ * default; the live dashboard range is applied by Kibana at render time.
  */
-const RENDER_DIRECTIVES = [
-  'mark',
-  'layer',
-  'facet',
-  'repeat',
-  'concat',
-  'vconcat',
-  'hconcat',
-  'spec',
-] as const;
+const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
-const CONTAINER_SIZE = 'container';
+/**
+ * Drop any top-level "width"/"height" so Kibana sizes the chart to its panel.
+ *
+ * Kibana's Vega renderer resizes raw-Vega specs to fill the container (autosize
+ * "fit") and forces width/height to "container", warning when a fixed top-level
+ * size is set. Scales bound to the view size (range: "width"/"height") then
+ * follow the panel, so removing the top-level dimensions keeps the chart
+ * responsive without warnings.
+ */
+const removeTopLevelSizing = (spec: Record<string, unknown>): void => {
+  delete spec.width;
+  delete spec.height;
+};
 
-/** Recursively remove `"container"` width/height from a spec and its children. */
-const stripContainerSizing = (value: unknown): void => {
-  if (Array.isArray(value)) {
-    value.forEach(stripContainerSizing);
-    return;
+/** Shape of a raw-Vega data set entry (only the parts we touch). */
+interface VegaDataSet {
+  name?: string;
+  url?: unknown;
+  values?: unknown;
+  source?: unknown;
+}
+
+/**
+ * Bind the canonical Kibana ES|QL `url` onto the base data set named `source`
+ * (which derived data sets read from). Authoring the data binding here rather
+ * than trusting the model guarantees the query/time-range wiring is correct.
+ * Returns `false` when the spec has no `source` data set so the caller can
+ * request a retry.
+ */
+const injectEsqlDataSource = (spec: Record<string, unknown>, url: unknown): boolean => {
+  if (!Array.isArray(spec.data)) {
+    return false;
   }
-  if (value !== null && typeof value === 'object') {
-    const node = value as Record<string, unknown>;
-    if (node.width === CONTAINER_SIZE) delete node.width;
-    if (node.height === CONTAINER_SIZE) delete node.height;
-    Object.values(node).forEach(stripContainerSizing);
+
+  const source = spec.data.find(
+    (dataSet): dataSet is VegaDataSet =>
+      dataSet !== null && typeof dataSet === 'object' && dataSet.name === ESQL_DATA_NAME
+  );
+
+  if (!source) {
+    return false;
   }
+
+  source.url = url;
+  delete source.values;
+  delete source.source;
+  return true;
+};
+
+/** Convert ES|QL columnar results into Vega-style row objects keyed by column name. */
+const toRowObjects = (
+  columns: EsqlEsqlColumnInfo[] | undefined,
+  values: unknown[][] | undefined
+): Array<Record<string, unknown>> => {
+  if (!Array.isArray(columns) || !Array.isArray(values)) {
+    return [];
+  }
+  return values.map((row) => {
+    const rowObject: Record<string, unknown> = {};
+    columns.forEach((column, index) => {
+      if (column?.name) {
+        rowObject[column.name] = row[index];
+      }
+    });
+    return rowObject;
+  });
 };
 
 /**
- * Align a spec's sizing with Kibana's Vega renderer to avoid noisy warnings.
- *
- * Container sizing ("width"/"height": "container") only works for single-view
- * and layered specs — Kibana resizes those to fill the panel (autosize "fit")
- * and forces "container" anyway, so set it there (mirroring Kibana) regardless
- * of any fixed size the model emitted. Composed specs (facet/repeat/concat) do
- * NOT support container sizing, so strip any "container" width/height (top-level
- * or in their children); it is ignored by Vega-Lite and only produces "Width/
- * Height container only works for single/layered views" warnings.
+ * Legend symbol channels that Vega reads to lay out the legend symbol. A
+ * production-rule array (`[{ test, value }, …]`) is rejected at render time
+ * ("Unrecognized signal name: undefined"), so these must be a single
+ * value/signal/field object.
  */
-const normalizeContainerSizing = (spec: Record<string, unknown>): void => {
-  if (!('mark' in spec) && !('layer' in spec)) {
-    stripContainerSizing(spec);
+const FRAGILE_LEGEND_SYMBOL_CHANNELS = ['size', 'strokeWidth'] as const;
+
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+/** Collapse a production-rule array to a single rule, preferring the unconditional default. */
+const collapseProductionRule = (rules: unknown[]): unknown => {
+  const defaultRule = [...rules]
+    .reverse()
+    .find((rule) => isObjectRecord(rule) && !('test' in rule));
+  return defaultRule ?? rules[rules.length - 1];
+};
+
+/**
+ * Vega cannot parse a Kibana Vega spec in the server process (its module graph
+ * uses top-level await), so render-time errors cannot be validated here. This
+ * deterministically repairs the one fatal authoring mistake we have hit: a
+ * conditional production-rule array on a legend symbol's `size`/`strokeWidth`,
+ * which throws at render time. Each is collapsed to its unconditional value.
+ */
+const normalizeLegendSymbolEncoders = (spec: Record<string, unknown>): void => {
+  if (!Array.isArray(spec.legends)) {
     return;
   }
 
-  const { autosize } = spec;
-  const autosizeDisabled =
-    autosize === 'none' ||
-    (autosize !== null &&
-      typeof autosize === 'object' &&
-      'type' in autosize &&
-      autosize.type === 'none');
+  for (const legend of spec.legends) {
+    if (!isObjectRecord(legend) || !isObjectRecord(legend.encode)) {
+      continue;
+    }
+    const symbols = legend.encode.symbols;
+    if (!isObjectRecord(symbols)) {
+      continue;
+    }
 
-  if (autosizeDisabled) {
-    return;
+    for (const block of Object.values(symbols)) {
+      if (!isObjectRecord(block)) {
+        continue;
+      }
+      for (const channel of FRAGILE_LEGEND_SYMBOL_CHANNELS) {
+        if (Array.isArray(block[channel])) {
+          block[channel] = collapseProductionRule(block[channel] as unknown[]);
+        }
+      }
+    }
   }
-
-  spec.width = CONTAINER_SIZE;
-  spec.height = CONTAINER_SIZE;
 };
 
 const VegaStateAnnotation = Annotation.Root({
@@ -105,6 +173,8 @@ const VegaStateAnnotation = Annotation.Root({
   // internal
   esqlQuery: Annotation<string>(),
   columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
+  /** Result rows (as objects keyed by column name) used to validate the spec. */
+  rows: Annotation<Array<Record<string, unknown>> | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<VegaAction[]>({
     reducer: (a, b) => [...a, ...b],
@@ -126,14 +196,27 @@ export const createVegaGraph = (
   // Node: resolve the ES|QL query and its result columns.
   const generateEsqlNode = async (state: VegaState) => {
     let action: GenerateVegaEsqlAction;
+    let rows: Array<Record<string, unknown>> = [];
     try {
-      if (state.esql) {
-        logger.debug('Executing provided ES|QL query for Vega visualization');
-        const { columns } = await executeEsql({
-          query: state.esql,
+      // On edit, reuse the query already embedded in the existing spec so the
+      // data binding stays stable and we don't re-discover an index.
+      const existingEsql = state.existingSpec
+        ? extractEsqlQueryFromSpec(state.existingSpec)
+        : undefined;
+      const reusableEsql = state.esql ?? existingEsql;
+
+      if (reusableEsql) {
+        logger.debug('Executing existing/provided ES|QL query for Vega visualization');
+        // The query may reference the time-picker params (?_tstart/?_tend); bind
+        // a default range so it runs server-side (Kibana binds the live range at
+        // render time). The range only affects sampled rows, not the stored spec.
+        const { columns, values } = await executeEsql({
+          query: reusableEsql,
+          params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
           esClient: esClient.asCurrentUser,
         });
-        action = { type: 'generate_esql', success: true, query: state.esql, columns };
+        action = { type: 'generate_esql', success: true, query: reusableEsql, columns };
+        rows = toRowObjects(columns, values);
       } else {
         logger.debug('Generating ES|QL query for Vega visualization');
         const response = await generateEsql({
@@ -155,6 +238,7 @@ export const createVegaGraph = (
             query: response.query,
             columns: response.results?.columns,
           };
+          rows = toRowObjects(response.results?.columns, response.results?.values);
         }
       }
     } catch (error) {
@@ -165,11 +249,12 @@ export const createVegaGraph = (
     return {
       esqlQuery: action.query ?? state.esqlQuery,
       columns: action.columns,
+      rows,
       actions: [action],
     };
   };
 
-  // Node: ask the model to author a Vega-Lite spec.
+  // Node: ask the model to author a raw Vega spec.
   const generateSpecNode = async (state: VegaState) => {
     const attempt = state.currentAttempt + 1;
     logger.debug(`Generating Vega spec (attempt ${attempt}/${MAX_VEGA_RETRY_ATTEMPTS})`);
@@ -182,9 +267,13 @@ export const createVegaGraph = (
             action.success ? 'SUCCESS' : `FAILED - ${action.error}`
           }`;
         }
-        return `Validation attempt ${action.attempt}: ${
-          action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-        }`;
+        if (!action.success) {
+          return `Validation attempt ${action.attempt}: FAILED - ${action.error}`;
+        }
+        const warningSuffix = action.warnings?.length
+          ? ` (warnings to address: ${action.warnings.join('; ')})`
+          : '';
+        return `Validation attempt ${action.attempt}: SUCCESS${warningSuffix}`;
       })
       .filter(Boolean)
       .join('\n');
@@ -197,7 +286,6 @@ export const createVegaGraph = (
       nlQuery: state.nlQuery,
       esqlQuery: state.esqlQuery,
       columns: state.columns,
-      dataUrl: JSON.stringify(buildEsqlDataUrl({ query: state.esqlQuery, columns: state.columns })),
       existingSpec: state.existingSpec,
       additionalContext,
     });
@@ -240,26 +328,50 @@ export const createVegaGraph = (
       }
 
       const generatedSpec = lastGenerate.spec;
-      const hasRenderDirective = RENDER_DIRECTIVES.some((directive) => directive in generatedSpec);
-      if (!hasRenderDirective) {
+
+      const marks = generatedSpec.marks;
+      if (!Array.isArray(marks) || marks.length === 0) {
+        throw new Error('Vega spec must contain a non-empty top-level "marks" array.');
+      }
+
+      // Escape dots in field references that match dotted ES|QL columns so Vega
+      // reads the flat column instead of attempting nested-object access (e.g. a
+      // column named "geo.src" must be referenced as "geo\.src" in "field").
+      const spec = escapeDottedFieldReferences({ ...generatedSpec }, state.columns);
+
+      // Force the schema so the spec is always parsed as raw Vega.
+      spec.$schema = VEGA_V5_SCHEMA;
+
+      // Bind the canonical Kibana ES|QL url onto the base "source" data set so
+      // data binding is correct regardless of what the model emitted.
+      const dataSourceBound = injectEsqlDataSource(
+        spec,
+        buildEsqlDataUrl({ query: state.esqlQuery, columns: state.columns })
+      );
+      if (!dataSourceBound) {
         throw new Error(
-          `Spec is missing a rendering directive. Include one of: ${RENDER_DIRECTIVES.join(', ')}.`
+          `Vega spec must declare a base data set named "${ESQL_DATA_NAME}" (in the top-level "data" array) that other data sets derive from.`
         );
       }
 
-      // Escape dots in field references that match dotted ES|QL columns so
-      // Vega-Lite reads the flat column instead of attempting nested-object
-      // access (e.g. a column named "geo.src" must be referenced as "geo\.src").
-      const spec = escapeDottedFieldReferences({ ...generatedSpec }, state.columns);
+      // Let Kibana size the chart to the panel (scales use range "width"/"height").
+      removeTopLevelSizing(spec);
 
-      // Force the schema and the Kibana ES|QL data source so data binding is
-      // always correct regardless of what the model emitted.
-      spec.$schema = VEGA_LITE_V5_SCHEMA;
-      spec.data = {
-        url: buildEsqlDataUrl({ query: state.esqlQuery, columns: state.columns }),
-      };
+      // Repair known render-time-fatal authoring mistakes deterministically as a
+      // cheap first line of defense.
+      normalizeLegendSymbolEncoders(spec);
 
-      normalizeContainerSizing(spec);
+      // Compile and run the spec in a worker to catch render-time errors (and
+      // collect warnings) before it is stored. Errors trigger a retry; warnings
+      // are surfaced as soft feedback to later attempts.
+      const { error: vegaError, warnings } = await validateVegaSpec({
+        spec,
+        rows: state.rows,
+        logger,
+      });
+      if (vegaError) {
+        throw new Error(`Vega could not render the spec: ${vegaError}`);
+      }
 
       action = {
         type: 'validate_spec',
@@ -267,6 +379,7 @@ export const createVegaGraph = (
         // Pretty-print so the stored spec string stays human-readable/editable.
         spec: JSON.stringify(spec, null, 2),
         attempt,
+        warnings,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
