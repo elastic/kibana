@@ -13,4 +13,8 @@ export type { PanelFailure } from './utils';
 
 export { createPanelFailureResult } from './resolve_panel';
 export type { PanelContentAttempt } from './resolve_panel';
-export type { ResolvePanelContent } from './operations/panels';
+export type {
+  ResolvePanelContent,
+  PanelResolutionRequest,
+  VisPanelResolutionRequest,
+} from './operations/panels';

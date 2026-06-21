@@ -19,7 +19,7 @@ import {
 
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import { createVisPanelResolver } from './core/operations/panels/vis';
+import { createVisPanelResolver } from './vis_panel_resolver';
 import {
   executeDashboardOperations,
   getErrorMessage,

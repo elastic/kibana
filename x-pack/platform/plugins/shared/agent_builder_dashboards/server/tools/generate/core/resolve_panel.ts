@@ -15,9 +15,9 @@ import type { PanelFailure } from './utils';
  * depending on any environment-specific implementation. This module owns the
  * type-agnostic pieces: the resolution result, the failure helper, and the
  * request fields shared by every panel type. Each panel type contributes its
- * own request shape and resolver (see `operations/panels/<type>`), and the
- * panels barrel aggregates them into the `ResolvePanelContent` contract that the
- * host (e.g. Kibana) implements — see `generate_dashboard_tool.ts`.
+ * own request shape (see `operations/panels/<type>`), and the panels barrel
+ * aggregates them into the `ResolvePanelContent` contract that the host (e.g.
+ * Kibana) implements — see `vis_panel_resolver.ts`.
  */
 export type PanelContentAttempt =
   | {

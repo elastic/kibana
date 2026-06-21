@@ -44,7 +44,7 @@ import {
  * path) is purely additive — add its request schema, resolver, and registry entry
  * without touching the operation handlers.
  */
-export type { PanelRequestInput, EditPanelRequestInput } from './vis';
+export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
 export type { PanelContent, PanelTypeDefinition } from './panel_type';
 
 /**
@@ -118,7 +118,7 @@ export type PanelResolutionRequest = VisPanelResolutionRequest;
 /**
  * Contract for inline panel content resolution. The generate core consumes this
  * to turn a panel resolution request into panel content; the host supplies the
- * concrete resolver (see `generate_dashboard_tool.ts`) that routes each request
- * to the resolver for its `type`.
+ * concrete resolver (see `vis_panel_resolver.ts`) that routes each request to
+ * the resolver for its `type`.
  */
 export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;

@@ -10,6 +10,7 @@ import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
+import type { PanelResolutionRequestBase } from '../../../resolve_panel';
 
 /**
  * Home for Lens visualization panel logic.
@@ -17,17 +18,30 @@ import { definePanelType } from '../panel_type';
  * A visualization reaches a dashboard two ways: with `source: 'config'`
  * (`type: 'vis'`) whose already-resolved Lens config is passed through by value,
  * or with `source: 'request'` that is resolved from a natural-language / ES|QL
- * query into Lens config by the inline panel resolver. This module owns the Lens
- * embeddable-type identity, the by-value config contract, and the vis input
- * schemas (add + edit), and is the place for future vis-specific behavior.
+ * query into Lens config. This module owns the Lens embeddable-type identity,
+ * the by-value config contract, the vis input schemas (add + edit), and the
+ * vis resolution-request contract. The concrete resolver that turns a request
+ * into Lens panel content is host-specific and lives outside `core/` (see
+ * `vis_panel_resolver.ts`).
  */
 export { LENS_EMBEDDABLE_TYPE };
 
-export {
-  createVisPanelResolver,
-  type VisPanelResolutionRequest,
-  type VisPanelResolverDeps,
-} from './resolve';
+/**
+ * Request to resolve a Lens visualization panel from a natural-language / ES|QL
+ * query. This is the `vis` member of the panel resolution union; the host's
+ * resolver (see `vis_panel_resolver.ts`) turns it into Lens panel content.
+ */
+export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
+  type: 'vis';
+  /** Natural language description of the desired visualization. */
+  nlQuery: string;
+  /** Index, alias, or datastream to target; discovered when omitted. */
+  index?: string;
+  /** Preferred chart type; the LLM suggests one when omitted. */
+  chartType?: SupportedChartType;
+  /** ES|QL query to back the visualization; generated when omitted. */
+  esql?: string;
+}
 
 /**
  * By-value Lens panel config. Currently passed through to the embeddable

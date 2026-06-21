@@ -6,33 +6,16 @@
  */
 
 import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
-import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { getErrorMessage } from '../../../utils';
 import {
   createPanelFailureResult,
+  getErrorMessage,
   type PanelContentAttempt,
-  type PanelResolutionRequestBase,
-} from '../../../resolve_panel';
-
-/**
- * Request to resolve a Lens visualization panel from a natural-language / ES|QL
- * query. This is the `vis` member of the panel resolution union.
- */
-export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
-  type: 'vis';
-  /** Natural language description of the desired visualization. */
-  nlQuery: string;
-  /** Index, alias, or datastream to target; discovered when omitted. */
-  index?: string;
-  /** Preferred chart type; the LLM suggests one when omitted. */
-  chartType?: SupportedChartType;
-  /** ES|QL query to back the visualization; generated when omitted. */
-  esql?: string;
-}
+  type VisPanelResolutionRequest,
+} from './core';
 
 /** Host plumbing the vis resolver needs to call the visualization builder. */
 export interface VisPanelResolverDeps {
@@ -43,10 +26,15 @@ export interface VisPanelResolverDeps {
 }
 
 /**
+ * Kibana host implementation of the generate core's `ResolvePanelContent` seam
+ * for `vis` panels.
+ *
  * Builds inline Lens panel content from natural language / ES|QL using Kibana
- * plumbing (model provider, ES client, the visualization builder). The result
- * is returned to the generate core through the type-agnostic
- * {@link PanelContentAttempt} contract.
+ * plumbing (model provider, ES client, the visualization builder) and returns
+ * it to the core through the type-agnostic {@link PanelContentAttempt} contract.
+ * It lives outside `core/` so the generation core stays free of Kibana-only
+ * dependencies and remains reusable by third parties, which supply their own
+ * resolver.
  */
 export const createVisPanelResolver = ({
   logger,
