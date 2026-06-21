@@ -85,46 +85,56 @@ export async function drainConcurrencyQueueSlots(params: {
       );
 
       if (execution?.status === ExecutionStatus.PENDING) {
-        if (!execution.spaceId || !execution.id || !execution.triggeredBy) {
+        if (!execution.id || !execution.spaceId) {
           logger.warn(
-            `Promoted queued execution ${nextQueuedId} is missing id/spaceId/triggeredBy; reverting to queued`
+            `Promoted queued execution ${nextQueuedId} is missing id or spaceId; marking skipped`
           );
+          const skipTimestamp = new Date().toISOString();
           await workflowExecutionRepository.updateWorkflowExecution(
-            { id: nextQueuedId, status: ExecutionStatus.QUEUED },
-            { refresh: 'wait_for' }
-          );
-          return;
-        }
-
-        try {
-          await taskManager.schedule(
             {
-              id: `workflow:${execution.id}:${execution.triggeredBy}`,
-              taskType: WORKFLOW_RUN_TASK_TYPE,
-              params: {
-                workflowRunId: execution.id,
-                spaceId: execution.spaceId,
-              } satisfies StartWorkflowExecutionParams,
-              state: {
-                lastRunAt: null,
-                lastRunStatus: null,
-                lastRunError: null,
-              },
-              scope: generateExecutionTaskScope(execution as EsWorkflowExecution),
-              enabled: true,
+              id: nextQueuedId,
+              status: ExecutionStatus.SKIPPED,
+              cancelRequested: true,
+              cancellationReason:
+                'Queued promotion failed: execution document missing id or spaceId',
+              cancelledAt: skipTimestamp,
+              cancelledBy: 'system',
             },
-            { request }
-          );
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          logger.warn(
-            `Promoted queued workflow execution ${nextQueuedId} but failed to schedule workflow:run (${message}); reverting to queued`
-          );
-          await workflowExecutionRepository.updateWorkflowExecution(
-            { id: nextQueuedId, status: ExecutionStatus.QUEUED },
             { refresh: 'wait_for' }
           );
-          return;
+        } else {
+          const triggeredBy = execution.triggeredBy || 'manual';
+
+          try {
+            await taskManager.schedule(
+              {
+                id: `workflow:${execution.id}:${triggeredBy}`,
+                taskType: WORKFLOW_RUN_TASK_TYPE,
+                params: {
+                  workflowRunId: execution.id,
+                  spaceId: execution.spaceId,
+                } satisfies StartWorkflowExecutionParams,
+                state: {
+                  lastRunAt: null,
+                  lastRunStatus: null,
+                  lastRunError: null,
+                },
+                scope: generateExecutionTaskScope(execution as EsWorkflowExecution),
+                enabled: true,
+              },
+              { request }
+            );
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.warn(
+              `Promoted queued workflow execution ${nextQueuedId} but failed to schedule workflow:run (${message}); reverting to queued`
+            );
+            await workflowExecutionRepository.updateWorkflowExecution(
+              { id: nextQueuedId, status: ExecutionStatus.QUEUED },
+              { refresh: 'wait_for' }
+            );
+            return;
+          }
         }
       }
     }

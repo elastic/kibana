@@ -1056,6 +1056,38 @@ describe('WorkflowExecutionRepository', () => {
     });
   });
 
+  describe('getOldestQueuedExecutionIdByConcurrencyGroup', () => {
+    it('searches for the oldest queued execution with stable FIFO sort', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [{ _id: 'exec-oldest', _source: { id: 'exec-oldest' } }],
+        },
+      });
+
+      const result = await repository.getOldestQueuedExecutionIdByConcurrencyGroup(
+        'group-a',
+        'default'
+      );
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              { term: { concurrencyGroupKey: 'group-a' } },
+              { term: { spaceId: 'default' } },
+              { term: { status: ExecutionStatus.QUEUED } },
+            ],
+          },
+        },
+        _source: ['id'],
+        sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+      });
+      expect(result).toBe('exec-oldest');
+    });
+  });
+
   describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
     it('uses refresh wait_for so search-based slot counts observe pending before the next drain iteration', async () => {
       esClient.update.mockResolvedValue({ result: 'updated' });
