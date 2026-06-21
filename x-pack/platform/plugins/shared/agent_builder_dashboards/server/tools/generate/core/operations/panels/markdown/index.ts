@@ -21,7 +21,6 @@ import { definePanelType } from '../panel_type';
  * for future markdown-specific behavior (e.g. a markdown generation prompt that
  * authors the content).
  */
-export { MARKDOWN_EMBEDDABLE_TYPE };
 
 /**
  * By-value markdown panel config, mirroring the dashboard markdown embeddable's
@@ -41,8 +40,6 @@ const markdownPanelConfigSchema = z.object({
     .describe('Optional markdown rendering settings.'),
 });
 
-export type MarkdownPanelConfig = z.infer<typeof markdownPanelConfigSchema>;
-
 /**
  * The markdown variant of a `config`-source panel input, discriminated by
  * `type: 'markdown'`.
@@ -53,8 +50,6 @@ export const markdownPanelConfigInputSchema = z.object({
   grid: panelGridSchema,
   config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
 });
-
-export type MarkdownPanelConfigInput = z.infer<typeof markdownPanelConfigInputSchema>;
 
 /**
  * The markdown variant of an `edit_panels` item: targets an existing markdown
@@ -69,8 +64,6 @@ export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
       'New markdown panel config (e.g. { content }). Fully replaces the existing config.'
     ),
   });
-
-export type EditMarkdownPanelConfigInput = z.infer<typeof editMarkdownPanelConfigInputSchema>;
 
 /**
  * Registry entry for the `markdown` panel type. Markdown is editable by config

@@ -24,7 +24,6 @@ import type { PanelResolutionRequestBase } from '../../../resolve_panel';
  * into Lens panel content is host-specific and lives outside `core/` (see
  * `vis_panel_resolver.ts`).
  */
-export { LENS_EMBEDDABLE_TYPE };
 
 /**
  * Request to resolve a Lens visualization panel from a natural-language / ES|QL
@@ -48,9 +47,7 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
  * unvalidated; typed as an opaque record so the model supplies a config it read
  * from an existing visualization rather than hand-building one.
  */
-export const visPanelConfigSchema = z.record(z.string().max(256), z.unknown());
-
-export type VisPanelConfig = z.infer<typeof visPanelConfigSchema>;
+const visPanelConfigSchema = z.record(z.string().max(256), z.unknown());
 
 /**
  * The vis variant of a `config`-source panel input, discriminated by
@@ -64,8 +61,6 @@ export const visPanelConfigInputSchema = z.object({
     'Already-resolved Lens config, passed by value (e.g. read from a visualization attachment). Do not hand-build a Lens config for a new visualization here — use source: "request" instead.'
   ),
 });
-
-export type VisPanelConfigInput = z.infer<typeof visPanelConfigInputSchema>;
 
 /**
  * A `request`-source input creates a Lens visualization from a natural-language

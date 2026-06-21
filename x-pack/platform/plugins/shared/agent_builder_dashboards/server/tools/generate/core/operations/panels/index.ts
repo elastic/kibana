@@ -45,7 +45,7 @@ import {
  * without touching the operation handlers.
  */
 export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
-export type { PanelContent, PanelTypeDefinition } from './panel_type';
+export type { PanelContent } from './panel_type';
 
 /**
  * A `source: 'config'` panel adds a panel from an already-resolved configuration
@@ -54,7 +54,7 @@ export type { PanelContent, PanelTypeDefinition } from './panel_type';
  * an attachment or saved-object store, so the config must be supplied directly
  * rather than as an attachment ID.
  */
-export const panelConfigPanelInputSchema = z.discriminatedUnion('type', [
+const panelConfigPanelInputSchema = z.discriminatedUnion('type', [
   visPanelConfigInputSchema,
   markdownPanelConfigInputSchema,
 ]);

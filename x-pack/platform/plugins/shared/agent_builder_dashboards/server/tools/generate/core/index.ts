@@ -6,15 +6,9 @@
  */
 
 export { dashboardOperationSchema, executeDashboardOperations } from './operations';
-export type { DashboardOperation } from './operations';
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './utils';
-export type { PanelFailure } from './utils';
 
 export { createPanelFailureResult } from './resolve_panel';
 export type { PanelContentAttempt } from './resolve_panel';
-export type {
-  ResolvePanelContent,
-  PanelResolutionRequest,
-  VisPanelResolutionRequest,
-} from './operations/panels';
+export type { VisPanelResolutionRequest } from './operations/panels';

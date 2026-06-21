@@ -14,27 +14,6 @@ import { isSection } from '@kbn/agent-builder-dashboards-common';
 
 type DashboardWidget = AttachmentPanel | DashboardSection;
 
-export const findPanelById = (
-  widgets: DashboardAttachmentData['panels'],
-  panelId: string
-): AttachmentPanel | undefined => {
-  for (const widget of widgets) {
-    if (isSection(widget)) {
-      const sectionPanel = widget.panels.find((panel) => panel.id === panelId);
-      if (sectionPanel) {
-        return sectionPanel;
-      }
-      continue;
-    }
-
-    if (widget.id === panelId) {
-      return widget;
-    }
-  }
-
-  return undefined;
-};
-
 export const indexPanelsById = (
   widgets: DashboardAttachmentData['panels']
 ): Map<string, AttachmentPanel> => {
