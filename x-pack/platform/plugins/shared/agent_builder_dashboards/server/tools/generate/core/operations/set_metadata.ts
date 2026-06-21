@@ -14,11 +14,12 @@ export const setMetadataOperation = defineOperation({
     title: z
       .string()
       .min(1)
+      .max(256)
       .optional()
       .describe(
         "Non-empty dashboard title. If the current title is empty, missing, or a placeholder, invent one from the dashboard's contents."
       ),
-    description: z.string().optional(),
+    description: z.string().max(2048).optional(),
   }),
   handler: ({ dashboardData, operation, context }) => {
     if (operation.title === undefined && operation.description === undefined) {

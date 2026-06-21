@@ -12,7 +12,10 @@ import { defineOperation } from './types';
 export const removePanelsOperation = defineOperation({
   schema: z.object({
     operation: z.literal('remove_panels'),
-    panelIds: z.array(z.string()).min(1).describe('Panel ids to remove from the dashboard.'),
+    panelIds: z
+      .array(z.string().max(256))
+      .min(1)
+      .describe('Panel ids to remove from the dashboard.'),
   }),
   handler: ({ dashboardData, operation, context }) => {
     const { dashboardData: dashboardWithoutPanels, removedPanels } = removePanelsFromDashboard({

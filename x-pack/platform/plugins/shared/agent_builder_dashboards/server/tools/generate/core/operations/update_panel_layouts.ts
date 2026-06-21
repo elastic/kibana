@@ -21,12 +21,13 @@ export const updatePanelLayoutsOperation = defineOperation({
     panels: z
       .array(
         z.object({
-          panelId: z.string().describe('ID of the panel to update.'),
+          panelId: z.string().max(256).describe('ID of the panel to update.'),
           grid: panelGridSchema
             .optional()
             .describe('New grid position/size. Omit to keep the current grid.'),
           sectionId: z
             .string()
+            .max(256)
             .nullable()
             .optional()
             .describe(
