@@ -10,7 +10,11 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
-import { drainConcurrencyQueueSlots } from './concurrency_queue_drainer';
+import {
+  drainConcurrencyQueueSlots,
+  maybeDrainConcurrencyQueueAfterTerminal,
+  reconcileConcurrencyQueueBacklog,
+} from './concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 describe('drainConcurrencyQueueSlots', () => {
@@ -167,6 +171,191 @@ describe('drainConcurrencyQueueSlots', () => {
     expect(scheduleMock).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'workflow:exec-queued-1:manual' }),
       expect.any(Object)
+    );
+  });
+});
+
+describe('reconcileConcurrencyQueueBacklog', () => {
+  const scheduleMock = jest.fn().mockResolvedValue(undefined);
+  const baseParams = {
+    taskManager: { schedule: scheduleMock } as unknown as TaskManagerStartContract,
+    logger: { debug: jest.fn(), warn: jest.fn() } as unknown as Logger,
+    request: {} as unknown as KibanaRequest,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns early when no queue strategy groups have backlog', async () => {
+    const workflowExecutionRepository = {
+      findQueueStrategyGroupsWithBacklog: jest.fn().mockResolvedValue([]),
+    } as unknown as WorkflowExecutionRepository;
+
+    await reconcileConcurrencyQueueBacklog({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    expect(scheduleMock).not.toHaveBeenCalled();
+  });
+
+  it('drains each discovered queue strategy group', async () => {
+    const workflowExecutionRepository = {
+      findQueueStrategyGroupsWithBacklog: jest.fn().mockResolvedValue([
+        {
+          spaceId: 'default',
+          concurrencyGroupKey: 'g1',
+          concurrencySettings: { key: 'g1', strategy: 'queue', max: 1 },
+        },
+      ]),
+      countExecutionsByConcurrencyGroupAndStatuses: jest
+        .fn()
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(1),
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-q1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-q1',
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      }),
+      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    } as unknown as WorkflowExecutionRepository;
+
+    await reconcileConcurrencyQueueBacklog({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    expect(scheduleMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
+  const scheduleMock = jest.fn().mockResolvedValue(undefined);
+  const debugMock = jest.fn();
+  const baseParams = {
+    taskManager: { schedule: scheduleMock } as unknown as TaskManagerStartContract,
+    logger: { debug: debugMock, warn: jest.fn() } as unknown as Logger,
+    workflowRunId: 'exec-finished',
+    spaceId: 'default',
+    fakeRequest: {} as unknown as KibanaRequest,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('drains when the execution is terminal under queue concurrency', async () => {
+    const getByIdMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        id: 'exec-finished',
+        spaceId: 'default',
+        status: ExecutionStatus.FAILED,
+        concurrencyGroupKey: 'g1',
+        workflowDefinition: {
+          name: 'wf',
+          enabled: true,
+          version: '1',
+          triggers: [],
+          steps: [],
+          settings: { concurrency: { key: 'g1', strategy: 'queue', max: 1 } },
+        },
+      })
+      .mockResolvedValueOnce({
+        id: 'exec-q1',
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      });
+    const workflowExecutionRepository = {
+      getWorkflowExecutionById: getByIdMock,
+      countExecutionsByConcurrencyGroupAndStatuses: jest
+        .fn()
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(1),
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-q1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    } as unknown as WorkflowExecutionRepository;
+
+    await maybeDrainConcurrencyQueueAfterTerminal({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    expect(scheduleMock).toHaveBeenCalledTimes(1);
+    expect(debugMock).toHaveBeenCalledWith(
+      'Promoted queued execution exec-q1 to pending and scheduled workflow:run (group g1)'
+    );
+  });
+
+  it('does not drain when the execution is not terminal', async () => {
+    const workflowExecutionRepository = {
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-finished',
+        status: ExecutionStatus.QUEUED,
+        concurrencyGroupKey: 'g1',
+        workflowDefinition: {
+          settings: { concurrency: { key: 'g1', strategy: 'queue', max: 1 } },
+        },
+      }),
+    } as unknown as WorkflowExecutionRepository;
+
+    await maybeDrainConcurrencyQueueAfterTerminal({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    expect(scheduleMock).not.toHaveBeenCalled();
+    expect(debugMock).not.toHaveBeenCalled();
+  });
+
+  it('does not drain when concurrency strategy is not queue', async () => {
+    const workflowExecutionRepository = {
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-finished',
+        status: ExecutionStatus.FAILED,
+        concurrencyGroupKey: 'g1',
+        workflowDefinition: {
+          settings: { concurrency: { key: 'g1', strategy: 'drop', max: 1 } },
+        },
+      }),
+    } as unknown as WorkflowExecutionRepository;
+
+    await maybeDrainConcurrencyQueueAfterTerminal({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    expect(scheduleMock).not.toHaveBeenCalled();
+  });
+
+  it('logs debug and swallows drain errors', async () => {
+    const workflowExecutionRepository = {
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-finished',
+        status: ExecutionStatus.FAILED,
+        concurrencyGroupKey: 'g1',
+        workflowDefinition: {
+          settings: { concurrency: { key: 'g1', strategy: 'queue', max: 1 } },
+        },
+      }),
+      countExecutionsByConcurrencyGroupAndStatuses: jest
+        .fn()
+        .mockRejectedValue(new Error('ES unavailable')),
+    } as unknown as WorkflowExecutionRepository;
+
+    await maybeDrainConcurrencyQueueAfterTerminal({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    expect(debugMock).toHaveBeenCalledWith(
+      'maybeDrainConcurrencyQueueAfterTerminal: drain failed for execution exec-finished: ES unavailable'
     );
   });
 });

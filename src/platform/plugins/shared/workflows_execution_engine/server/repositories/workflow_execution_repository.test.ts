@@ -1088,6 +1088,86 @@ describe('WorkflowExecutionRepository', () => {
     });
   });
 
+  describe('findQueueStrategyGroupsWithBacklog', () => {
+    it('returns early without composite aggregation when no queued executions exist', async () => {
+      esClient.count.mockResolvedValue({ count: 0 });
+
+      const result = await repository.findQueueStrategyGroupsWithBacklog();
+
+      expect(esClient.count).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { status: ExecutionStatus.QUEUED } },
+              { exists: { field: 'concurrencyGroupKey' } },
+            ],
+          },
+        },
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
+    it('uses composite aggregation with top hits sample for queue strategy groups', async () => {
+      esClient.count.mockResolvedValue({ count: 1 });
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          groups: {
+            buckets: [
+              {
+                key: { spaceId: 'default', concurrencyGroupKey: 'group-a' },
+                sample: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          spaceId: 'default',
+                          concurrencyGroupKey: 'group-a',
+                          workflowDefinition: {
+                            settings: {
+                              concurrency: { key: 'group-a', strategy: 'queue', max: 1 },
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      const result = await repository.findQueueStrategyGroupsWithBacklog();
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          size: 0,
+          aggs: {
+            groups: expect.objectContaining({
+              composite: expect.objectContaining({
+                sources: [
+                  { spaceId: { terms: { field: 'spaceId' } } },
+                  { concurrencyGroupKey: { terms: { field: 'concurrencyGroupKey' } } },
+                ],
+              }),
+            }),
+          },
+        })
+      );
+      expect(result).toEqual([
+        {
+          spaceId: 'default',
+          concurrencyGroupKey: 'group-a',
+          concurrencySettings: { key: 'group-a', strategy: 'queue', max: 1 },
+        },
+      ]);
+    });
+  });
+
   describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
     it('uses refresh wait_for so search-based slot counts observe pending before the next drain iteration', async () => {
       esClient.update.mockResolvedValue({ result: 'updated' });

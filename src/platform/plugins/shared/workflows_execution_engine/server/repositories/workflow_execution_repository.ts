@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { ConcurrencySettings, EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
@@ -431,6 +431,127 @@ export class WorkflowExecutionRepository {
     const hit = response.hits.hits[0];
     const id = hit?._source?.id ?? hit?._id;
     return typeof id === 'string' ? id : null;
+  }
+
+  /**
+   * Distinct queue-strategy groups with `queued` backlog. Uses `_count` first; composite agg only
+   * when backlog exists.
+   */
+  public async findQueueStrategyGroupsWithBacklog(): Promise<
+    Array<{
+      spaceId: string;
+      concurrencyGroupKey: string;
+      concurrencySettings: ConcurrencySettings;
+    }>
+  > {
+    const queuedFilter: Array<Record<string, unknown>> = [
+      { term: { status: ExecutionStatus.QUEUED } },
+      { exists: { field: 'concurrencyGroupKey' } },
+    ];
+
+    const countResponse = await this.esClient.count({
+      index: this.indexName,
+      query: {
+        bool: {
+          filter: queuedFilter,
+        },
+      },
+    });
+
+    if (countResponse.count === 0) {
+      return [];
+    }
+
+    const groups: Array<{
+      spaceId: string;
+      concurrencyGroupKey: string;
+      concurrencySettings: ConcurrencySettings;
+    }> = [];
+
+    let afterKey: Record<string, string> | undefined;
+
+    do {
+      const response = await this.esClient.search<
+        void,
+        {
+          groups: {
+            after_key?: Record<string, string>;
+            buckets: Array<{
+              key: { spaceId: string; concurrencyGroupKey: string };
+              sample: {
+                hits: {
+                  hits: Array<{
+                    _source?: Pick<
+                      EsWorkflowExecution,
+                      'spaceId' | 'concurrencyGroupKey' | 'workflowDefinition'
+                    >;
+                  }>;
+                };
+              };
+            }>;
+          };
+        }
+      >({
+        index: this.indexName,
+        size: 0,
+        query: {
+          bool: {
+            filter: queuedFilter,
+          },
+        },
+        aggs: {
+          groups: {
+            composite: {
+              size: 500,
+              sources: [
+                { spaceId: { terms: { field: 'spaceId' } } },
+                { concurrencyGroupKey: { terms: { field: 'concurrencyGroupKey' } } },
+              ],
+              ...(afterKey ? { after: afterKey } : {}),
+            },
+            aggs: {
+              sample: {
+                top_hits: {
+                  size: 1,
+                  _source: {
+                    includes: [
+                      'spaceId',
+                      'concurrencyGroupKey',
+                      'workflowDefinition.settings.concurrency',
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const aggregation = response.aggregations?.groups;
+      for (const bucket of aggregation?.buckets ?? []) {
+        const sampleSource = bucket.sample.hits.hits[0]?._source;
+        const concurrency = sampleSource?.workflowDefinition?.settings?.concurrency;
+        const spaceId = sampleSource?.spaceId ?? bucket.key.spaceId;
+        const concurrencyGroupKey =
+          sampleSource?.concurrencyGroupKey ?? bucket.key.concurrencyGroupKey;
+
+        if (
+          concurrency?.strategy === 'queue' &&
+          typeof spaceId === 'string' &&
+          typeof concurrencyGroupKey === 'string'
+        ) {
+          groups.push({
+            spaceId,
+            concurrencyGroupKey,
+            concurrencySettings: concurrency,
+          });
+        }
+      }
+
+      afterKey = aggregation?.after_key;
+    } while (afterKey);
+
+    return groups;
   }
 
   /**

@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { ConcurrencySettings, EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
@@ -282,6 +282,43 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         return byCreated !== 0 ? byCreated : a.id.localeCompare(b.id);
       });
     return sorted[0]?.id ?? null;
+  }
+
+  public async findQueueStrategyGroupsWithBacklog(): Promise<
+    Array<{
+      spaceId: string;
+      concurrencyGroupKey: string;
+      concurrencySettings: ConcurrencySettings;
+    }>
+  > {
+    const groups = new Map<
+      string,
+      {
+        spaceId: string;
+        concurrencyGroupKey: string;
+        concurrencySettings: ConcurrencySettings;
+      }
+    >();
+
+    for (const exec of this.workflowExecutions.values()) {
+      const concurrency = exec.workflowDefinition?.settings?.concurrency;
+      if (
+        exec.status === ExecutionStatus.QUEUED &&
+        exec.concurrencyGroupKey &&
+        concurrency?.strategy === 'queue'
+      ) {
+        const key = `${exec.spaceId}:${exec.concurrencyGroupKey}`;
+        if (!groups.has(key)) {
+          groups.set(key, {
+            spaceId: exec.spaceId,
+            concurrencyGroupKey: exec.concurrencyGroupKey,
+            concurrencySettings: concurrency,
+          });
+        }
+      }
+    }
+
+    return Array.from(groups.values());
   }
 
   public async tryCasPromoteQueuedWorkflowExecutionToPending(params: {

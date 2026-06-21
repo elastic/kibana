@@ -13,6 +13,10 @@ export const WORKFLOW_RESUME_TASK_TYPE = 'workflow:resume';
 
 export const WORKFLOW_SCHEDULED_TASK_TYPE = 'workflow:scheduled';
 
+export const WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE = 'workflow:drain-concurrency-queues';
+
+export const WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_ID = 'workflow:drain-concurrency-queues';
+
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;

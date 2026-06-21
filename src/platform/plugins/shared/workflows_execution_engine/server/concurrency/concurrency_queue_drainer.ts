@@ -124,6 +124,9 @@ export async function drainConcurrencyQueueSlots(params: {
               },
               { request }
             );
+            logger.debug(
+              `Promoted queued execution ${execution.id} to pending and scheduled workflow:run (group ${concurrencyGroupKey})`
+            );
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             logger.warn(
@@ -137,6 +140,39 @@ export async function drainConcurrencyQueueSlots(params: {
           }
         }
       }
+    }
+  }
+}
+
+export async function reconcileConcurrencyQueueBacklog(params: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  request: KibanaRequest;
+}): Promise<void> {
+  const { workflowExecutionRepository, taskManager, logger, request } = params;
+
+  const groups = await workflowExecutionRepository.findQueueStrategyGroupsWithBacklog();
+  if (groups.length === 0) {
+    return;
+  }
+
+  for (const group of groups) {
+    try {
+      await drainConcurrencyQueueSlots({
+        workflowExecutionRepository,
+        taskManager,
+        logger,
+        spaceId: group.spaceId,
+        concurrencyGroupKey: group.concurrencyGroupKey,
+        concurrencySettings: group.concurrencySettings,
+        request,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.debug(
+        `Concurrency queue reconcile drain failed for ${group.spaceId}:${group.concurrencyGroupKey}: ${message}`
+      );
     }
   }
 }

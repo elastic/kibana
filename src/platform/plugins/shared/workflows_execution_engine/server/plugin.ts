@@ -29,7 +29,11 @@ import {
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
-import { drainConcurrencyQueueSlots } from './concurrency/concurrency_queue_drainer';
+import {
+  drainConcurrencyQueueSlots,
+  maybeDrainConcurrencyQueueAfterTerminal,
+  reconcileConcurrencyQueueBacklog,
+} from './concurrency/concurrency_queue_drainer';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
   cancelWorkflow,
@@ -81,6 +85,8 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import {
+  WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_ID,
+  WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE,
   WORKFLOW_RESUME_TASK_TYPE,
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
@@ -114,6 +120,8 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
+
+const WORKFLOW_DRAIN_CONCURRENCY_QUEUES_INTERVAL = '5m';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -246,6 +254,14 @@ export class WorkflowsExecutionEnginePlugin
               });
 
               if (interruptedOutcome === 'task_complete') {
+                await maybeDrainConcurrencyQueueAfterTerminal({
+                  workflowExecutionRepository,
+                  taskManager: pluginsStart.taskManager,
+                  logger,
+                  workflowRunId,
+                  spaceId,
+                  fakeRequest,
+                });
                 return;
               }
 
@@ -643,6 +659,45 @@ export class WorkflowsExecutionEnginePlugin
         },
       },
     });
+    plugins.taskManager.registerTaskDefinitions({
+      [WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE]: {
+        title: 'Drain Workflow Concurrency Queues',
+        description:
+          'Promotes queued workflow executions when concurrency slots are available after restart or idle backlog',
+        timeout: '2m',
+        maxAttempts: 1,
+        createTaskRunner: ({ fakeRequest }) => {
+          if (!fakeRequest) {
+            throw new Error('Cannot drain workflow concurrency queues without Kibana Request');
+          }
+
+          return {
+            run: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+              await this.initialize(coreStart);
+
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+
+              try {
+                await reconcileConcurrencyQueueBacklog({
+                  workflowExecutionRepository,
+                  taskManager: pluginsStart.taskManager,
+                  logger: this.logger.get('concurrency-queue-reconcile'),
+                  request: fakeRequest,
+                });
+              } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                this.logger
+                  .get('concurrency-queue-reconcile')
+                  .debug(`Scheduled concurrency queue reconcile failed: ${message}`);
+              }
+            },
+          };
+        },
+      },
+    });
 
     return {};
   }
@@ -665,6 +720,24 @@ export class WorkflowsExecutionEnginePlugin
       workflowTaskManager,
       workflowExecutionRepository
     );
+
+    void plugins.taskManager
+      .ensureScheduled({
+        id: WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_ID,
+        taskType: WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE,
+        params: {},
+        state: {},
+        schedule: {
+          interval: WORKFLOW_DRAIN_CONCURRENCY_QUEUES_INTERVAL,
+        },
+        scope: ['workflow'],
+      })
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(
+          `Failed to schedule workflow concurrency queue reconcile task: ${message}`
+        );
+      });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
