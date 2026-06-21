@@ -27,7 +27,7 @@ import { definePanelType } from '../panel_type';
  * by-value state. `settings` is optional here; the embeddable defaults
  * `open_links_in_new_tab` to `true` when omitted.
  */
-const markdownPanelConfigSchema = z.object({
+export const markdownPanelConfigSchema = z.object({
   content: z.string().describe('Markdown text to render in the panel.'),
   settings: z
     .object({
