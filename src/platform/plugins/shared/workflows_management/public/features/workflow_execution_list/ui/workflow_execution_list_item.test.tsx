@@ -61,7 +61,20 @@ describe('WorkflowExecutionListItem', () => {
       expect(screen.getByText('Tal Borenstein')).toBeInTheDocument();
     });
 
-    it('should not render unresolved executor values', () => {
+    it('should render unresolved executor labels when provided', () => {
+      render(
+        <WorkflowExecutionListItem
+          {...defaultProps}
+          executedByLabel="elastic"
+          executedByProfile={undefined}
+          showExecutor={true}
+        />
+      );
+
+      expect(screen.getByText('elastic')).toBeInTheDocument();
+    });
+
+    it('should not render unresolved executor values without a label', () => {
       render(
         <WorkflowExecutionListItem
           {...defaultProps}

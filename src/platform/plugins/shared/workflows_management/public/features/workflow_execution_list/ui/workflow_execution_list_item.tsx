@@ -48,6 +48,7 @@ interface WorkflowExecutionListItemProps {
   startedAt: Date | null;
   duration: number | null;
   executedByProfile?: UserProfileWithAvatar;
+  executedByLabel?: string;
   triggeredBy?: string;
   showExecutor?: boolean;
   selected?: boolean;
@@ -60,6 +61,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     startedAt,
     duration,
     executedByProfile,
+    executedByLabel,
     triggeredBy,
     showExecutor = false,
     selected,
@@ -71,7 +73,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
     const executedByDisplayName = executedByProfile?.user
       ? getUserDisplayName(executedByProfile.user)
-      : undefined;
+      : executedByLabel;
     const formattedDuration = useMemo(() => {
       if (duration) {
         return formatDuration(duration);
@@ -154,7 +156,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   />
                 </EuiFlexItem>
               )}
-              {showExecutor && executedByProfile?.user && executedByDisplayName && (
+              {showExecutor && executedByDisplayName && (
                 <EuiFlexItem grow={false} css={styles.executedByContainer}>
                   <EuiFlexGroup
                     alignItems="center"
@@ -164,8 +166,8 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   >
                     <EuiFlexItem grow={false}>
                       <UserAvatar
-                        user={executedByProfile.user}
-                        avatar={executedByProfile.data?.avatar}
+                        user={executedByProfile?.user ?? { username: executedByDisplayName }}
+                        avatar={executedByProfile?.data?.avatar}
                         size="s"
                       />
                     </EuiFlexItem>

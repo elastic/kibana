@@ -62,12 +62,13 @@ const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfi
     return acc;
   }, new Map<string, UserProfileWithAvatar>());
 
-const getExecutedByLabel = (profile?: UserProfileWithAvatar): string | undefined => {
-  if (!profile?.user) {
-    return undefined;
-  }
+const getExecutedByLabel = (
+  profile?: UserProfileWithAvatar,
+  fallbackLabel?: string
+): string | undefined => {
+  if (!profile?.user) return fallbackLabel;
 
-  return getUserDisplayName(profile.user) || undefined;
+  return getUserDisplayName(profile.user) || fallbackLabel;
 };
 
 const useExecutedByUserProfiles = ({ enabled, uids }: { enabled: boolean; uids: string[] }) => {
@@ -102,6 +103,8 @@ export const WorkflowExecutionList = ({
   onConfirmCancel,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
+  const { cloud } = useKibana().services;
+  const showUnresolvedExecutors = !cloud?.isCloudEnabled;
   const scrollableContentRef = useRef<HTMLDivElement>(null);
 
   const executedByValuesToResolve = useMemo(() => {
@@ -122,11 +125,14 @@ export const WorkflowExecutionList = ({
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     return executedByValuesToResolve.flatMap((executedBy) => {
-      const label = getExecutedByLabel(executedByUserProfiles.get(executedBy));
+      const label = getExecutedByLabel(
+        executedByUserProfiles.get(executedBy),
+        showUnresolvedExecutors ? executedBy : undefined
+      );
 
       return label ? [{ label, value: executedBy }] : [];
     });
-  }, [executedByUserProfiles, executedByValuesToResolve]);
+  }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
   useEffect(() => {
     if (scrollableContentRef.current) {
@@ -212,6 +218,7 @@ export const WorkflowExecutionList = ({
                       ? executedByUserProfiles.get(execution.executedBy)
                       : undefined
                   }
+                  executedByLabel={showUnresolvedExecutors ? execution.executedBy : undefined}
                   triggeredBy={execution.triggeredBy}
                   showExecutor={showExecutor}
                   selected={execution.id === selectedId}
