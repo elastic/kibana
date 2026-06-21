@@ -31,6 +31,7 @@ export class WorkflowTemplatingEngine {
     'memory alloc limit exceeded',
     'parse length limit exceeded',
     'render limit exceeded',
+    'template render limit exceeded',
   ]);
   private static readonly LIQUID_LIMIT_ERROR_MESSAGE = i18n.translate(
     'workflowsExecutionEngine.templatingEngine.liquidLimitExceededErrorMessage',

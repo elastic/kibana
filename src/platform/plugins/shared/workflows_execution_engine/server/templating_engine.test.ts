@@ -844,6 +844,18 @@ describe('WorkflowTemplatingEngine', () => {
         }).toThrow(liquidLimitErrorMessage);
       });
 
+      it('should reject templates exceeding render limit', () => {
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            renderLimit: 1,
+          },
+        });
+
+        expect(() => {
+          engine.render('{% for i in (1..1000000) %}{% assign value = i %}{% endfor %}', {});
+        }).toThrow(liquidLimitErrorMessage);
+      });
+
       it('should use workflow liquid settings when provided', () => {
         const template = 'x'.repeat(160_000);
         const engine = new WorkflowTemplatingEngine({
