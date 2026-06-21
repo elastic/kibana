@@ -53,12 +53,6 @@ if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" ==
   NEED_LITELLM_CONNECTORS="true"
 fi
 
-# Suite-owner notify triage summaries always use a LiteLLM model (the notify step
-# has no ES cluster with EIS inference privileges), so it always needs LiteLLM connectors.
-if [[ "${KBN_EVALS_SUITE_OWNER_NOTIFY:-}" =~ ^(1|true)$ ]]; then
-  NEED_LITELLM_CONNECTORS="true"
-fi
-
 if [[ "$NEED_LITELLM_CONNECTORS" == "true" ]]; then
   echo "--- Generating LiteLLM connectors"
 
