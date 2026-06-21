@@ -345,7 +345,7 @@ describe('schema - additional coverage', () => {
       expect(run?.description).toBe(
         'Create an XSOAR incident and optionally associate it with a playbook.'
       );
-      expect(run?.documentation).toBe('/reference/connectors-kibana/xsoar-action-type.md');
+      expect(run?.documentation).toBeUndefined();
       expect(run?.examples?.snippet).toContain('createInvestigation: true');
       expect(
         run?.paramsSchema.parse({

@@ -107,7 +107,6 @@ const getSubActionMetadata = (
   if (subActionName === 'getPlaybooks') {
     return {
       description: 'Retrieve XSOAR playbooks visible to the connector.',
-      documentation: '/reference/connectors-kibana/xsoar-action-type.md',
       examples: {
         snippet: `- name: get_xsoar_playbooks
   type: xsoar.getPlaybooks
@@ -119,7 +118,6 @@ const getSubActionMetadata = (
   if (subActionName === 'run') {
     return {
       description: 'Create an XSOAR incident and optionally associate it with a playbook.',
-      documentation: '/reference/connectors-kibana/xsoar-action-type.md',
       examples: {
         params: {
           name: 'Suspicious login detected',

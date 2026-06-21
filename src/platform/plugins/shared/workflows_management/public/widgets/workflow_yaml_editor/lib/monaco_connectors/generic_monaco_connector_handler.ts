@@ -9,7 +9,6 @@
 
 import type { monaco } from '@kbn/code-editor';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
-import { getCachedAllConnectors } from '../connectors_cache';
 import type {
   ConnectorExamples,
   ConnectorInfo,
@@ -93,9 +92,7 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     if (connectorInfo.examples) {
       return {
         params: connectorInfo.examples.params,
-        snippet:
-          connectorInfo.examples.snippet ??
-          `- name: ${connectorType.replace(/[^a-zA-Z0-9]/g, '_')}_step
+        snippet: `- name: ${connectorType.replace(/[^a-zA-Z0-9]/g, '_')}_step
   type: ${connectorType}
   with:
 ${Object.entries(connectorInfo.examples.params || {})
@@ -114,21 +111,6 @@ ${Object.entries(connectorInfo.examples.params || {})
    * Categorize connector types to provide better help
    */
   private getConnectorInfo(connectorType: string): ConnectorInfo | null {
-    const cachedConnector = getCachedAllConnectors().find(
-      (connector) => connector.type === connectorType
-    );
-    if (
-      cachedConnector &&
-      (cachedConnector.description || cachedConnector.documentation || cachedConnector.examples)
-    ) {
-      return {
-        name: cachedConnector.summary ?? cachedConnector.type,
-        description: cachedConnector.description ?? `${cachedConnector.type} connector`,
-        documentation: cachedConnector.documentation ?? undefined,
-        examples: cachedConnector.examples,
-      };
-    }
-
     // Slack connectors
     if (connectorType.includes('slack')) {
       return {
