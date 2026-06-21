@@ -52,7 +52,7 @@ API key ID
 
 ## Test connectors [xsoar-action-configuration]
 
-You can test connectors with the [run connector API](https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-connectors) or as you're creating or editing the connector in {{kib}}. For example:
+You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
 ::::{image} ../images/xsoar-params-test.png
 :alt: {{xsoar}} params test
