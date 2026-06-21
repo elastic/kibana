@@ -6,11 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { entityStoreMetrics } from '../../monitor/metrics';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   ManagedEntityDefinition,
