@@ -25,11 +25,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -69,11 +70,22 @@ import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../../../flyout_v2/document/main/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../../../flyout_v2/document/main/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
+import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
-import { buildRiskScoreStateFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getRiskFromEntityRecord,
+} from '../../../entity_details/shared/entity_store_risk_utils';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
 import { mergeLegacyIdentityWhenStoreEntityMissing, type IdentityFields } from '../../shared/utils';
 
 const USER_DETAILS_ID = 'entities-users-details';
@@ -155,6 +167,30 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     [dispatch]
   );
 
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
+
+  const filterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
+  );
+
+  const riskScoreStateFromApi = useRiskScore({
+    filterQuery,
+    riskEntity: EntityType.user,
+    timerange,
+    skip: userName == null,
+  });
+  const userRiskData =
+    riskScoreStateFromApi.data && riskScoreStateFromApi.data.length > 0
+      ? riskScoreStateFromApi.data[0]
+      : undefined;
+
   const euidApi = useEntityStoreEuidApi();
 
   const openUserPreview = useCallback(() => {
@@ -204,6 +240,14 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     ]
   );
 
+  const effectiveRiskScoreState =
+    userRiskScoreStateFromEntityStore ??
+    (riskScoreStateFromApi.data?.length ? riskScoreStateFromApi : undefined);
+
+  const isRiskScoreExist = observedUser.entityRecord
+    ? !!getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level
+    : !!userRiskData?.user?.risk;
+
   const identityFields = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
@@ -218,6 +262,33 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
   }, [userName, identityFields]);
+
+  const userCspIdentityDoc = observedUser.details;
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
+      legacyIdentityFields: userIdentityFields,
+    })
+  );
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    identityFields: userIdentityFields ?? null,
+    entityType: EntityType.user,
+    to,
+    from,
+    queryId: USER_DETAILS_INSIGHTS_ID,
+  });
+
+  const openDetailsPanel = useNavigateToUserDetails({
+    userName,
+    identityFields: userIdentityFields ?? {},
+    entityId: entityFromStoreResult?.entityRecord?.entity?.id,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isPreviewMode: true,
+    contextID: USER_DETAILS_INSIGHTS_ID,
+  });
 
   const {
     loading: isRelatedHostLoading,
@@ -393,7 +464,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             jobNameById={jobNameById}
             scopeId={scopeId}
             isFlyoutOpen={true}
-            riskScoreState={userRiskScoreStateFromEntityStore}
+            riskScoreState={effectiveRiskScoreState}
             firstSeenFromEntityStore={observedUser.firstSeen?.date ?? undefined}
             lastSeenFromEntityStore={observedUser.lastSeen?.date ?? undefined}
           />
@@ -408,11 +479,23 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           entityType={EntityType.user}
           queryId={`${USER_DETAILS_INSIGHTS_ID}-alerts-by-status`}
           direction="column"
+          onShowAlertCountDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.ALERTS,
+            })
+          }
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
           identityFields={userIdentityFields ?? {}}
           direction="column"
+          onShowMisconfigurationsDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            })
+          }
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
         />
