@@ -360,7 +360,9 @@ export class NodesFactory {
           node as WaitForApprovalGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.connectorExecutor,
+          this.dependencies
         );
       case 'atomic':
         return new AtomicStepImpl(

@@ -28,6 +28,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import { resolveExternalResumeSigningKey } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -127,6 +128,7 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private readonly externalResumeSigningKey: string;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private coreSetup?: CoreSetup<
@@ -141,6 +143,11 @@ export class WorkflowsExecutionEnginePlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.externalResumeSigningKey = resolveExternalResumeSigningKey(
+      this.config.externalResume?.signingKey,
+      this.logger,
+      'workflowsExecutionEngine.externalResume.signingKey'
+    );
   }
 
   public setup(
@@ -647,6 +654,7 @@ export class WorkflowsExecutionEnginePlugin
       taskManager: plugins.taskManager,
       workflowsExtensions: plugins.workflowsExtensions,
       config: this.config,
+      externalResumeSigningKey: this.externalResumeSigningKey,
     };
 
     // Re-check that a workflow is still enabled right before persisting an

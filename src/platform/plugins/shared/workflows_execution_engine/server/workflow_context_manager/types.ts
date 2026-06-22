@@ -26,6 +26,7 @@ export interface ContextDependencies {
   taskManager: TaskManagerStartContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   config: WorkflowsExecutionEngineConfig;
+  externalResumeSigningKey?: string;
   workflowRepository?: WorkflowRepository;
   workflowExecutionRepository?: WorkflowExecutionRepository;
   stepExecutionRepository?: StepExecutionRepository;

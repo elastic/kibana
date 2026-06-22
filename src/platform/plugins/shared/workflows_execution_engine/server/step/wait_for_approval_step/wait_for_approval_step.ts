@@ -10,10 +10,19 @@
 import {
   DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
+import {
+  buildWaitForApprovalResumeLinks,
+  hasExternalApprovalChannels,
+  sendWaitForApprovalNotifications,
+} from './send_wait_for_approval_notifications';
+import type { ConnectorExecutor } from '../../connector_executor';
+import { getKibanaUrl } from '../../utils/get_kibana_url';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
@@ -28,7 +37,9 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     private node: WaitForApprovalGraphNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger
+    private workflowLogger: IWorkflowEventLogger,
+    private connectorExecutor: ConnectorExecutor,
+    private dependencies: ContextDependencies
   ) {}
 
   async run(): Promise<void> {
@@ -62,18 +73,71 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       withConfig?.rejectLabel !== undefined
         ? ctx.renderValueAccordingToContext(withConfig.rejectLabel)
         : DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL;
+    const message =
+      withConfig?.message !== undefined
+        ? String(ctx.renderValueAccordingToContext(withConfig.message))
+        : '';
 
     this.stepExecutionRuntime.setInput({
-      ...(withConfig?.message !== undefined && {
-        message: ctx.renderValueAccordingToContext(withConfig.message),
-      }),
+      ...(message.length > 0 && { message }),
       approveLabel,
       rejectLabel,
       schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
     });
 
+    const channels = withConfig?.channels;
+    if (hasExternalApprovalChannels(channels)) {
+      await this.sendExternalNotifications({
+        channels,
+        message,
+        approveLabel,
+        rejectLabel,
+      });
+    }
+
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for approval`, {
       event: { action: 'hitl:waiting' },
+    });
+  }
+
+  private async sendExternalNotifications({
+    channels,
+    message,
+    approveLabel,
+    rejectLabel,
+  }: {
+    channels: NonNullable<
+      NonNullable<WaitForApprovalGraphNode['configuration']['with']>['channels']
+    >;
+    message: string;
+    approveLabel: string;
+    rejectLabel: string;
+  }): Promise<void> {
+    const signingKey = this.dependencies.externalResumeSigningKey;
+    const spaceId = this.dependencies.spaceId;
+    if (!signingKey || !spaceId) {
+      throw new Error('External approval notifications require a configured signing key and space');
+    }
+
+    const execution = this.workflowRuntime.getWorkflowExecution();
+    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+    const resumeLinks = buildWaitForApprovalResumeLinks({
+      kibanaUrl: getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup),
+      spaceId,
+      executionId: execution.id,
+      stepId: this.node.stepId,
+      timeout,
+      signingKey,
+    });
+
+    await sendWaitForApprovalNotifications({
+      channels,
+      message,
+      approveLabel,
+      rejectLabel,
+      resumeLinks,
+      connectorExecutor: this.connectorExecutor,
+      abortController: this.stepExecutionRuntime.abortController,
     });
   }
 

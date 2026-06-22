@@ -10,9 +10,17 @@
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
 import { WaitForApprovalStepImpl } from './wait_for_approval_step';
+import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+
+jest.mock('./send_wait_for_approval_notifications', () => ({
+  hasExternalApprovalChannels: jest.fn().mockReturnValue(false),
+  buildWaitForApprovalResumeLinks: jest.fn(),
+  sendWaitForApprovalNotifications: jest.fn(),
+}));
 
 describe('WaitForApprovalStepImpl', () => {
   let underTest: WaitForApprovalStepImpl;
@@ -20,6 +28,8 @@ describe('WaitForApprovalStepImpl', () => {
   let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let workflowLogger: IWorkflowEventLogger;
+  let connectorExecutor: ConnectorExecutor;
+  let dependencies: ContextDependencies;
 
   beforeEach(() => {
     node = {
@@ -59,11 +69,19 @@ describe('WaitForApprovalStepImpl', () => {
       logDebug: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
+    connectorExecutor = { execute: jest.fn() } as unknown as ConnectorExecutor;
+    dependencies = {
+      externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
+      spaceId: 'default',
+    } as ContextDependencies;
+
     underTest = new WaitForApprovalStepImpl(
       node,
       mockStepExecutionRuntime,
       mockWorkflowRuntime,
-      workflowLogger
+      workflowLogger,
+      connectorExecutor,
+      dependencies
     );
   });
 
