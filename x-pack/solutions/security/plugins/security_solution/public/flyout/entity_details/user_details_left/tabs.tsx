@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getBehavioralAnomaliesTab,
   getBehavioralAnomaliesV2Tab,
+  getBehavioralAnomaliesV3Tab,
   getInsightsInputTab,
   getResolutionGroupTab,
   getRiskInputTab,
@@ -61,9 +62,10 @@ export const useTabs = (
       );
     }
 
-    // Prototype: v.2 (renamed "Behavioral anomalies-v.2") leads, the
-    // original v.1 (renamed "BA-v.1") follows. Drop either line + its
-    // import to remove that version.
+    // Prototype tab order: v.3 ("Behavioral anomalies-v.3") leads, then
+    // v.2 ("BA-v.2"), then v.1 ("BA-v.1"). Drop any of the three lines +
+    // its import to remove that version.
+    tabs.push(getBehavioralAnomaliesV3Tab());
     tabs.push(getBehavioralAnomaliesV2Tab());
     tabs.push(getBehavioralAnomaliesTab());
 

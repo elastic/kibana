@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 export const BEHAVIORAL_ANOMALIES_V2_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.tabLabel',
-  { defaultMessage: 'Behavioral anomalies-v.2' }
+  { defaultMessage: 'BA-v.2' }
 );
 
 export const ATTACK_CHAIN_V2_TITLE = i18n.translate(

@@ -11,6 +11,7 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getBehavioralAnomaliesTab,
   getBehavioralAnomaliesV2Tab,
+  getBehavioralAnomaliesV3Tab,
   getRiskInputTab,
   getInsightsInputTab,
   getResolutionGroupTab,
@@ -105,14 +106,16 @@ export const useTabs = ({
           ]
         : [];
 
-    // Prototype: v.2 (renamed "Behavioral anomalies-v.2") leads, the
-    // original v.1 (renamed "BA-v.1") follows. Drop either entry + its
-    // import to remove that version.
+    // Prototype tab order: v.3 ("Behavioral anomalies-v.3") leads, then
+    // v.2 ("BA-v.2"), then v.1 ("BA-v.1"). Drop any of the three entries +
+    // its import to remove that version.
+    const behavioralAnomaliesV3Tab = [getBehavioralAnomaliesV3Tab()];
     const behavioralAnomaliesV2Tab = [getBehavioralAnomaliesV2Tab()];
     const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
 
     return [
       ...riskScoreTab,
+      ...behavioralAnomaliesV3Tab,
       ...behavioralAnomaliesV2Tab,
       ...behavioralAnomaliesTab,
       ...insightsTab,

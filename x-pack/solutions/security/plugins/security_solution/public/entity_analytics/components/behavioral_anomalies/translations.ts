@@ -40,10 +40,21 @@ export const BEHAVIORAL_ANOMALIES_COUNT_LABEL = i18n.translate(
 /**
  * Prototype "v.2" — label rendered next to the count of distinct MITRE
  * ATT&CK tactics triggered on the entity. Cleanup: remove with the rest of
- * the v.2 overview + `mitre/` folder.
+ * the v.2 overview. The `mitre/` folder is shared with v.3 — only delete it
+ * once BOTH v.2 and v.3 are gone.
  */
 export const BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2Overview.tacticsCountLabel',
+  { defaultMessage: 'Tactics' }
+);
+
+/**
+ * Prototype "v.3" — same "Tactics" label as v.2 but keyed under its own
+ * namespace so v.2 can be deleted without touching v.3. Cleanup: remove with
+ * `behavioral_anomalies_overview_v3.tsx`.
+ */
+export const BEHAVIORAL_ANOMALIES_V3_TACTICS_COUNT_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.tacticsCountLabel',
   { defaultMessage: 'Tactics' }
 );
 

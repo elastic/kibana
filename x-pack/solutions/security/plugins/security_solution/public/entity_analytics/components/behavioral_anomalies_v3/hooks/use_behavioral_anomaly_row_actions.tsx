@@ -1,0 +1,159 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useCallback, useMemo } from 'react';
+import type { IconType } from '@elastic/eui';
+import { encode } from '@kbn/rison';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
+import { BEHAVIORAL_ANOMALIES_V3_TIME_RANGE } from '../constants';
+import type { BehavioralAnomalyV3TableRow } from '../types';
+import {
+  ANOMALIES_TABLE_V3_ROW_ACTION_ADD_TO_TIMELINE,
+  ANOMALIES_TABLE_V3_ROW_ACTION_VIEW_IN_DISCOVER,
+  ANOMALIES_TABLE_V3_ROW_ACTION_VIEW_IN_SMV,
+} from '../translations';
+import {
+  BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTION_ADD_TO_TIMELINE_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTION_VIEW_IN_DISCOVER_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTION_VIEW_IN_SMV_TEST_ID,
+} from '../test_ids';
+import { useAnomalyV3SingleMetricViewerUrl } from './use_anomaly_single_metric_viewer_url';
+
+export interface BehavioralAnomalyV3RowAction {
+  key: string;
+  label: string;
+  icon: IconType;
+  onClick: () => void;
+  dataTestSubj: string;
+}
+
+export interface BehavioralAnomalyV3RowActionsResult {
+  actions: BehavioralAnomalyV3RowAction[];
+}
+
+interface UseBehavioralAnomalyV3RowActionsArgs {
+  row: BehavioralAnomalyV3TableRow;
+  closePopover: () => void;
+}
+
+/** Build a KQL expression matching the underlying event ids of a row. */
+const buildEventIdsKql = (row: BehavioralAnomalyV3TableRow): string => {
+  const ids = row.underlyingEvents.map((event) => `"${event._id}"`);
+  return ids.length > 0 ? `_id: (${ids.join(' OR ')})` : '';
+};
+
+/**
+ * BA-v.3 per-row action handlers for the Behavioral anomalies table.
+ *
+ * Returns the panel `actions` (timeline / discover / Single metric viewer).
+ *
+ * "Add to case" and "Add to chat" were intentionally removed from this menu
+ * for BA-v.3 per design direction — case attachments are surfaced elsewhere
+ * in the prototype and the chat affordance is owned by the global AI button.
+ *
+ * Prototype only: handlers wire to existing Security Solution flows
+ * (timeline, Discover, ML Single metric viewer).
+ */
+export const useBehavioralAnomalyV3RowActions = ({
+  row,
+  closePopover,
+}: UseBehavioralAnomalyV3RowActionsArgs): BehavioralAnomalyV3RowActionsResult => {
+  const { services } = useKibana();
+  const { application, ml } = services;
+  const {
+    timelinePrivileges: { read: canReadTimeline },
+  } = useUserPrivileges();
+
+  const { investigateInTimeline } = useInvestigateInTimeline();
+
+  const handleAddToTimeline = useCallback(() => {
+    closePopover();
+    const expression = buildEventIdsKql(row);
+    if (!expression) {
+      return;
+    }
+    investigateInTimeline({
+      query: { language: 'kuery', query: expression },
+      timeRange: {
+        kind: 'relative',
+        fromStr: BEHAVIORAL_ANOMALIES_V3_TIME_RANGE.from,
+        toStr: BEHAVIORAL_ANOMALIES_V3_TIME_RANGE.to,
+        from: BEHAVIORAL_ANOMALIES_V3_TIME_RANGE.from,
+        to: BEHAVIORAL_ANOMALIES_V3_TIME_RANGE.to,
+      },
+    });
+  }, [closePopover, investigateInTimeline, row]);
+
+  const discoverUrl = useMemo(() => {
+    const expression = buildEventIdsKql(row);
+    const encodedAppState = encode({
+      query: { language: 'kuery', query: expression },
+    });
+    return application.getUrlForApp('discover', {
+      path: `#/?_a=${encodedAppState}`,
+    });
+  }, [application, row]);
+
+  const handleViewInDiscover = useCallback(() => {
+    closePopover();
+    window.open(discoverUrl, '_blank', 'noopener,noreferrer');
+  }, [closePopover, discoverUrl]);
+
+  const singleMetricViewerUrl = useAnomalyV3SingleMetricViewerUrl(row);
+
+  const handleViewInSingleMetricViewer = useCallback(() => {
+    closePopover();
+    if (singleMetricViewerUrl) {
+      window.open(singleMetricViewerUrl, '_blank', 'noopener,noreferrer');
+    }
+  }, [closePopover, singleMetricViewerUrl]);
+
+  const actions = useMemo(() => {
+    const items: BehavioralAnomalyV3RowAction[] = [];
+
+    if (canReadTimeline) {
+      items.push({
+        key: 'add-to-timeline',
+        label: ANOMALIES_TABLE_V3_ROW_ACTION_ADD_TO_TIMELINE,
+        icon: 'timeline',
+        onClick: handleAddToTimeline,
+        dataTestSubj: BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTION_ADD_TO_TIMELINE_TEST_ID,
+      });
+    }
+
+    items.push({
+      key: 'view-in-discover',
+      label: ANOMALIES_TABLE_V3_ROW_ACTION_VIEW_IN_DISCOVER,
+      icon: 'productDiscover',
+      onClick: handleViewInDiscover,
+      dataTestSubj: BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTION_VIEW_IN_DISCOVER_TEST_ID,
+    });
+
+    if (ml && singleMetricViewerUrl) {
+      items.push({
+        key: 'view-in-single-metric-viewer',
+        label: ANOMALIES_TABLE_V3_ROW_ACTION_VIEW_IN_SMV,
+        icon: 'singleMetricViewer',
+        onClick: handleViewInSingleMetricViewer,
+        dataTestSubj: BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTION_VIEW_IN_SMV_TEST_ID,
+      });
+    }
+
+    return items;
+  }, [
+    canReadTimeline,
+    handleAddToTimeline,
+    handleViewInDiscover,
+    handleViewInSingleMetricViewer,
+    ml,
+    singleMetricViewerUrl,
+  ]);
+
+  return useMemo(() => ({ actions }), [actions]);
+};

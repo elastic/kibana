@@ -77,6 +77,8 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
         /* Outer halo of the leftmost dot extends 4px to the left of the cell. */
         padding-left: 4px;
         padding-right: 4px;
+        /* Per-cell chip rows in MitreTacticDot reserve the space they need
+           above each dot, so the chain itself no longer needs a top pad. */
       `}
     >
       <EuiFlexGroup

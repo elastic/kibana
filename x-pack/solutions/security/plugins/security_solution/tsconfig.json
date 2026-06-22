@@ -148,6 +148,7 @@
     "@kbn/security-solution-side-nav",
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-server-schemas",
+    "@kbn/date-range-picker",
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/expressions-plugin",

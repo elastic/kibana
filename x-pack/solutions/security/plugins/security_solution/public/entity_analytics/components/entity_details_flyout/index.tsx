@@ -21,8 +21,9 @@ import { ResolutionGroupTab } from '../entity_resolution/resolution_group_tab';
 import { RESOLUTION_GROUP_TAB_TEST_ID } from '../entity_resolution/test_ids';
 import { getBehavioralAnomaliesTab } from '../behavioral_anomalies/get_behavioral_anomalies_tab';
 import { getBehavioralAnomaliesV2Tab } from '../behavioral_anomalies_v2/get_behavioral_anomalies_v2_tab';
+import { getBehavioralAnomaliesV3Tab } from '../behavioral_anomalies_v3/get_behavioral_anomalies_v3_tab';
 
-export { getBehavioralAnomaliesTab, getBehavioralAnomaliesV2Tab };
+export { getBehavioralAnomaliesTab, getBehavioralAnomaliesV2Tab, getBehavioralAnomaliesV3Tab };
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;

@@ -25,6 +25,15 @@ export const BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TacticsCount` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TACTICS_CHAIN_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TacticsChain` as const;
+// Prototype-only count + chain for the MITRE ATT&CK tactics row in the v.3
+// overview (v.3 renders ONLY the chain — no swim lane). Remove with the v.3
+// overview file.
+export const BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3Overview` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TACTICS_COUNT_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TacticsCount` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TACTICS_CHAIN_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TacticsChain` as const;
 export const BEHAVIORAL_ANOMALIES_TAB_CONTENT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesTabContent` as const;
 export const BEHAVIORAL_ANOMALIES_TIMELINE_SECTION_TEST_ID =

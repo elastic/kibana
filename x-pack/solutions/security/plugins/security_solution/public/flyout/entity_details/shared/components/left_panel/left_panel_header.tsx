@@ -24,6 +24,10 @@ export enum EntityDetailsLeftPanelTab {
   RISK_INPUTS = 'risk_inputs',
   BEHAVIORAL_ANOMALIES = 'behavioral_anomalies',
   BEHAVIORAL_ANOMALIES_V2 = 'behavioral_anomalies_v2',
+  // Prototype: BA-v.3 — third design iteration of the behavioral anomalies
+  // tab, sits to the left of v.2/v.1 in the flyout. Drop this enum entry
+  // together with the `behavioral_anomalies_v3/` folder to remove v.3.
+  BEHAVIORAL_ANOMALIES_V3 = 'behavioral_anomalies_v3',
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',
