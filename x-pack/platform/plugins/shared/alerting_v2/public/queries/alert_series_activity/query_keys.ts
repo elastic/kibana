@@ -14,32 +14,32 @@ export const ruleOverviewQueryKeys = {
   all: ['alerting-v2', 'rule-overview'] as const,
   topNSeries: (ruleId: string, gteMs: number, lteMs: number) =>
     [...ruleOverviewQueryKeys.all, 'top-n-series', ruleId, gteMs, lteMs] as const,
-  ruleEvents: (
+  episodeSelection: (
     ruleId: string,
     gteMs: number,
     lteMs: number,
-    pageSize: number,
+    perLaneLimit: number,
     groupHashes: readonly string[]
   ) =>
     [
       ...ruleOverviewQueryKeys.all,
-      'rule-events',
+      'episode-selection',
       ruleId,
       gteMs,
       lteMs,
-      pageSize,
+      perLaneLimit,
       [...groupHashes].sort(),
     ] as const,
   timelineSummary: (ruleId: string, gteMs: number, lteMs: number) =>
     [...ruleOverviewQueryKeys.all, 'timeline-summary', ruleId, gteMs, lteMs] as const,
-  timelineAnchors: (ruleId: string, gteMs: number, lteMs: number, groupHashes: readonly string[]) =>
+  episodePhases: (ruleId: string, gteMs: number, lteMs: number, episodeIds: readonly string[]) =>
     [
       ...ruleOverviewQueryKeys.all,
-      'timeline-anchors',
+      'episode-phases',
       ruleId,
       gteMs,
       lteMs,
-      [...groupHashes].sort(),
+      [...episodeIds].sort(),
     ] as const,
   seriesGroupingValues: (
     ruleId: string,

@@ -20,7 +20,6 @@ import {
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { parseDurationToMs } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -82,49 +81,28 @@ export const AlertTimelineSection: React.FC = () => {
     return resolveGteLte(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
 
-  // Small lookback buffer so each episode's status at the left edge is known.
-  // The events query keeps the most-recent events per episode, and the start
-  // anchors restore each episode's true left edge, so the fetch window tracks
-  // the visible window (per-episode capping bounds the payload, not the window).
-  const bufferMs = useMemo(() => {
-    const raw = parseDurationToMs(rule.schedule.every);
-    const ms = Number.isFinite(raw) ? (raw as number) : 60_000;
-    return Math.min(Math.max(2 * ms, 60_000), 60 * 60_000);
-  }, [rule.schedule.every]);
-
-  const fetchGteMs = gteMs - bufferMs;
-
-  const {
-    events,
-    groupingValuesByHash,
-    summary,
-    anchorByEpisode,
-    totalSeriesCount,
-    isLoading,
-    isError,
-  } = useFetchRuleEvents({
-    ruleId: rule.id,
-    gteMs,
-    lteMs,
-    eventGteMs: fetchGteMs,
-    groupingFields,
-    topN: ALERT_TIMELINE_TOP_N_DEFAULT,
-    data,
-  });
+  const { phases, groupingValuesByHash, summary, totalSeriesCount, isLoading, isError } =
+    useFetchRuleEvents({
+      ruleId: rule.id,
+      gteMs,
+      lteMs,
+      groupingFields,
+      topN: ALERT_TIMELINE_TOP_N_DEFAULT,
+      data,
+    });
 
   const timelineData = useMemo(
     () =>
       deriveAlertTimelineData(
-        events,
+        phases,
         groupingValuesByHash,
         'recently_active',
         gteMs,
         lteMs,
         summary,
-        totalSeriesCount,
-        anchorByEpisode
+        totalSeriesCount
       ),
-    [events, groupingValuesByHash, gteMs, lteMs, summary, totalSeriesCount, anchorByEpisode]
+    [phases, groupingValuesByHash, gteMs, lteMs, summary, totalSeriesCount]
   );
 
   const discoverHref = useMemo(

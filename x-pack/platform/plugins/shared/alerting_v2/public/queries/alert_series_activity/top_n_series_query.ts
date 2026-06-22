@@ -26,10 +26,7 @@ export const buildTopNSeriesQuery = ({ ruleId, gteMs, lteMs }: BuildTopNSeriesQu
   const fromIso = toIsoUtc(gteMs);
   const toIso = toIsoUtc(lteMs);
 
-  // prettier-ignore
-  return esql.from(ALERT_EVENTS_DATA_STREAM)
-    .where`type == "alert"`
-    .where`rule.id == ${ruleId}`
+  return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`.where`rule.id == ${ruleId}`
     .where`@timestamp >= ${fromIso}::DATETIME AND @timestamp <= ${toIso}::DATETIME`
     .pipe`STATS last_event_ts = MAX(@timestamp) BY group_hash`
     .sort(['last_event_ts', 'DESC'])

@@ -8,8 +8,8 @@
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type {
   AlertTimelineData,
-  AlertTimelineEventRow,
   AlertTimelineGroupingValues,
+  AlertTimelinePhaseRow,
   AlertTimelineSegment,
   AlertTimelineSeries,
   AlertTimelineSortPolicy,
@@ -39,161 +39,109 @@ const compareSeries = (
   }
 };
 
-interface ParsedEvent {
+interface ParsedPhase {
   episodeId: string;
   status: AlertEpisodeStatus;
-  tsMs: number;
+  startMs: number;
+  endMs: number;
   groupHash: string;
 }
 
 /**
- * Derive alert-timeline-ready lanes from raw rule event rows in a single pass.
- * Each lane (series) splits its episodes into one segment per state span:
- * the segment between event N and event N+1 takes event N's status. An open
- * episode (last event is not INACTIVE) emits a tail segment running to
- * `lteMs`.
- *
- * Summary stats and the total series count are supplied externally (computed
- * by a dedicated ES|QL aggregation) so this function no longer re-iterates
- * every event for episode-level metrics.
- *
- * `anchorByEpisode` maps `episode.id` to the episode's earliest event timestamp
- * within the fetched window. The events query only returns the most-recent
- * events per episode, so a long episode's earliest fetched event is mid-episode;
- * the anchor lets us draw one flat segment from the true start to that first
- * fetched event, restoring the truncated left edge without fetching every
- * intermediate same-status event.
+ * Builds timeline lanes from per-status episode phase rows (`buildEpisodePhasesQuery`):
+ * order each episode's phases by start and link each to the next (Gantt bar = phases
+ * end to end). An open episode's last phase tails to `lteMs`; a terminal INACTIVE phase
+ * just marks recovery (no bar). Summary/total are supplied externally. Segments are
+ * clipped to `[gteMs, lteMs]`; a left edge clamped to `gteMs` is shown as "outside of
+ * window" by the renderer.
  */
 export const deriveAlertTimelineData = (
-  eventRows: AlertTimelineEventRow[],
+  phaseRows: AlertTimelinePhaseRow[],
   groupingValuesByHash: AlertTimelineGroupingValues,
   sort: AlertTimelineSortPolicy,
   gteMs: number,
   lteMs: number,
   summary: AlertTimelineSummary,
-  totalSeriesCount: number,
-  anchorByEpisode: Map<string, number> = new Map()
+  totalSeriesCount: number
 ): AlertTimelineData => {
-  const eventsBySeries = new Map<string, ParsedEvent[]>();
+  const phasesBySeries = new Map<string, ParsedPhase[]>();
 
-  for (const row of eventRows) {
-    const tsMs = Date.parse(row['@timestamp']);
-    if (!Number.isFinite(tsMs)) continue;
-    const ev: ParsedEvent = {
+  for (const row of phaseRows) {
+    const startMs = Date.parse(row.seg_start);
+    const endMs = Date.parse(row.seg_end);
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) continue;
+    const phase: ParsedPhase = {
       episodeId: row['episode.id'],
       status: row['episode.status'],
-      tsMs,
+      startMs,
+      endMs,
       groupHash: row.group_hash,
     };
-    const list = eventsBySeries.get(row.group_hash);
+    const list = phasesBySeries.get(row.group_hash);
     if (list) {
-      list.push(ev);
+      list.push(phase);
     } else {
-      eventsBySeries.set(row.group_hash, [ev]);
+      phasesBySeries.set(row.group_hash, [phase]);
     }
   }
 
   const seriesByHash = new Map<string, AlertTimelineSeries>();
 
-  for (const [groupHash, events] of eventsBySeries) {
-    events.sort((a, b) => a.tsMs - b.tsMs);
-
-    const eventsByEpisode = new Map<string, ParsedEvent[]>();
-    for (const ev of events) {
-      const list = eventsByEpisode.get(ev.episodeId);
-      if (list) list.push(ev);
-      else eventsByEpisode.set(ev.episodeId, [ev]);
+  for (const [groupHash, phases] of phasesBySeries) {
+    const phasesByEpisode = new Map<string, ParsedPhase[]>();
+    for (const phase of phases) {
+      const list = phasesByEpisode.get(phase.episodeId);
+      if (list) list.push(phase);
+      else phasesByEpisode.set(phase.episodeId, [phase]);
     }
 
     const segments: AlertTimelineSegment[] = [];
     const transitions: AlertTimelineTransition[] = [];
     let hasOpenEpisode = false;
     let longestOpenDurationMs = 0;
+    let seriesFirstMs = Infinity;
+    let seriesLastMs = -Infinity;
 
-    // Coalesce consecutive same-status events into a single segment per
-    // episode. Without this, a rule that re-fires the same status every tick
-    // would emit one tiny rect per tick — at full-window zoom they render as
-    // a striped band because of sub-pixel anti-aliasing on each edge.
-    const pushSegment = (s: AlertTimelineSegment) => {
-      const last = segments[segments.length - 1];
-      if (
-        last &&
-        last.episodeId === s.episodeId &&
-        last.status === s.status &&
-        last.x1Ms === s.x0Ms
-      ) {
-        last.x1Ms = s.x1Ms;
-      } else {
-        segments.push(s);
-      }
-    };
+    for (const [episodeId, episodePhases] of phasesByEpisode) {
+      episodePhases.sort((a, b) => a.startMs - b.startMs);
 
-    for (const [episodeId, episodeEvents] of eventsByEpisode) {
-      const collapsedEvents: ParsedEvent[] = [];
-      for (const ev of episodeEvents) {
-        const last = collapsedEvents[collapsedEvents.length - 1];
-        if (last && last.tsMs === ev.tsMs) {
-          collapsedEvents[collapsedEvents.length - 1] = ev;
-        } else {
-          collapsedEvents.push(ev);
-        }
-      }
+      const earliestStartMs = episodePhases[0].startMs;
 
-      // Restore the episode's truncated left edge. The events query only fetches
-      // the most-recent events per episode, so for a long episode the earliest
-      // fetched event is mid-episode. The anchor (the episode's true earliest
-      // timestamp in the fetched window) lets us prepend one flat segment from
-      // the start up to the first fetched event. It carries no transition dot —
-      // we have no event data in that range — so we also seed
-      // `lastTransitionStatus` so the first real event does not emit a spurious
-      // dot at the fetch boundary.
-      const anchorMs = anchorByEpisode.get(episodeId);
-      const firstEventMs = episodeEvents[0]?.tsMs;
-      const hasLeadingAnchor =
-        anchorMs !== undefined && firstEventMs !== undefined && anchorMs < firstEventMs;
+      for (let i = 0; i < episodePhases.length; i++) {
+        const phase = episodePhases[i];
+        const next = episodePhases[i + 1];
 
-      if (hasLeadingAnchor) {
-        pushSegment({
-          episodeId,
-          status: episodeEvents[0].status,
-          x0Ms: anchorMs,
-          x1Ms: firstEventMs,
-        });
-      }
+        // A dot at the entry into each status (start, transitions, recovery).
+        transitions.push({ episodeId, status: phase.status, tsMs: phase.startMs });
 
-      let lastTransitionStatus: AlertEpisodeStatus | undefined = hasLeadingAnchor
-        ? collapsedEvents[0]?.status
-        : undefined;
-      for (const ev of collapsedEvents) {
-        if (ev.status !== lastTransitionStatus) {
-          transitions.push({ episodeId, status: ev.status, tsMs: ev.tsMs });
-          lastTransitionStatus = ev.status;
-        }
-      }
-
-      for (let i = 0; i < episodeEvents.length; i++) {
-        const ev = episodeEvents[i];
-        const next = episodeEvents[i + 1];
         if (next) {
-          if (next.tsMs > ev.tsMs) {
-            pushSegment({ episodeId, status: ev.status, x0Ms: ev.tsMs, x1Ms: next.tsMs });
+          // This phase runs until the next one begins.
+          if (next.startMs > phase.startMs) {
+            segments.push({
+              episodeId,
+              status: phase.status,
+              x0Ms: phase.startMs,
+              x1Ms: next.startMs,
+            });
           }
-        } else if (isOpenStatus(ev.status)) {
-          if (lteMs > ev.tsMs) {
-            pushSegment({ episodeId, status: ev.status, x0Ms: ev.tsMs, x1Ms: lteMs });
+        } else if (isOpenStatus(phase.status)) {
+          // Last phase, still open: tail to the window edge. (Could cap at `endMs`
+          // to avoid overstating a stopped rule — follow-up.)
+          if (lteMs > phase.startMs) {
+            segments.push({ episodeId, status: phase.status, x0Ms: phase.startMs, x1Ms: lteMs });
           }
           hasOpenEpisode = true;
-          const firstTs = episodeEvents[0]?.tsMs ?? ev.tsMs;
-          const openDuration = Math.max(0, lteMs - firstTs);
+          const openDuration = Math.max(0, lteMs - earliestStartMs);
           if (openDuration > longestOpenDurationMs) longestOpenDurationMs = openDuration;
         }
+        // A terminal INACTIVE last phase draws nothing (recovery marker only).
+
+        if (phase.startMs < seriesFirstMs) seriesFirstMs = phase.startMs;
+        if (phase.endMs > seriesLastMs) seriesLastMs = phase.endMs;
       }
     }
 
-    // Clip to the visible window. Pre-window events are fetched as a
-    // lookback buffer (so we know the episode's status at gteMs and don't
-    // emit a misleading "transition" dot at the left edge), but we don't
-    // want to render anything to the left of gteMs.
+    // Clip to the visible window (phases may start before `gteMs`).
     const clippedSegments: AlertTimelineSegment[] = [];
     for (const s of segments) {
       if (s.x1Ms <= gteMs) continue;
@@ -206,11 +154,11 @@ export const deriveAlertTimelineData = (
       groupingValues: groupingValuesByHash[groupHash] ?? EMPTY_GROUPING_VALUES,
       segments: clippedSegments,
       transitions: clippedTransitions,
-      firstEventMs: events[0].tsMs,
-      lastEventMs: events[events.length - 1].tsMs,
+      firstEventMs: seriesFirstMs,
+      lastEventMs: seriesLastMs,
       hasOpenEpisode,
       longestOpenDurationMs,
-      episodeCount: eventsByEpisode.size,
+      episodeCount: phasesByEpisode.size,
     });
   }
 

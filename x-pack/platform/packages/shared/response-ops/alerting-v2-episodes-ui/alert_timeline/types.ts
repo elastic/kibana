@@ -15,13 +15,13 @@ export type AlertTimelineSortPolicy =
 
 export const ALERT_TIMELINE_TOP_N_DEFAULT = 8;
 
-/** A horizontal colored span inside a lane, between two consecutive events. */
+/** A horizontal colored span inside a lane, covering one status phase. */
 export interface AlertTimelineSegment {
   episodeId: string;
   status: AlertEpisodeStatus;
-  /** Inclusive epoch ms of the segment's left edge (the event that opened it). */
+  /** Inclusive epoch ms of the segment's left edge (the phase's start). */
   x0Ms: number;
-  /** Epoch ms of the segment's right edge (the next event, or `lteMs` for the open tail). */
+  /** Epoch ms of the segment's right edge (the next phase's start, or `lteMs` for the open tail). */
   x1Ms: number;
 }
 
@@ -59,12 +59,20 @@ export interface AlertTimelineData {
   summary: AlertTimelineSummary;
 }
 
-/** Minimum event shape accepted by deriveAlertTimelineData. */
-export interface AlertTimelineEventRow {
-  '@timestamp': string;
+/**
+ * One status phase of an episode (a pre-aggregated span) — the row shape accepted
+ * by deriveAlertTimelineData. Each row is `MIN`/`MAX` of `@timestamp` for a
+ * contiguous run of one `episode.status`, so an episode is described by ≤4 rows
+ * instead of thousands of raw heartbeat events.
+ */
+export interface AlertTimelinePhaseRow {
   'episode.id': string;
   'episode.status': AlertEpisodeStatus;
   group_hash: string;
+  /** ISO timestamp — MIN(@timestamp) for this (episode, status) phase. */
+  seg_start: string;
+  /** ISO timestamp — MAX(@timestamp) for this (episode, status) phase. */
+  seg_end: string;
 }
 
 /** Grouping values keyed by group hash. */

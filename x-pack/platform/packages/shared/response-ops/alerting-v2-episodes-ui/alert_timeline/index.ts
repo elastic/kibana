@@ -12,7 +12,7 @@ export type {
   AlertTimelineSeries,
   AlertTimelineSummary,
   AlertTimelineData,
-  AlertTimelineEventRow,
+  AlertTimelinePhaseRow,
   AlertTimelineGroupingValues,
 } from './types';
 export { ALERT_TIMELINE_TOP_N_DEFAULT } from './types';
