@@ -390,19 +390,19 @@ function getTabContainerCss(
       color: ${euiTheme.colors.text};
     }
 
+    ${!isSelected
+      ? `
+      &:hover .unifiedTabs__tabLabelText {
+        color: ${euiTheme.colors.primary};
+      }
+    `
+      : ''}
+
     &:hover,
     &:focus-within {
       .unifiedTabs__tabActions {
         opacity: 1;
       }
-
-      ${!isSelected
-        ? `
-        .unifiedTabs__tabLabelText {
-          color: ${euiTheme.colors.primary};
-        }
-      `
-        : ''}
 
       .unifiedTabs__tabLabel {
         width: calc(100% - ${euiTheme.size.l} * 2 - ${euiTheme.size.xs});
