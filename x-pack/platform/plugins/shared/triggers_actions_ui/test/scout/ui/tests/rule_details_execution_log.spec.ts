@@ -15,8 +15,34 @@
 // _run_soon to generate at least one event-log entry.
 
 import { tags } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule } from '../fixtures';
+
+const expectDurationCells = async (page: ScoutPage, colId: string) => {
+  const durationCells = page.locator(
+    `[data-gridcell-column-id="${colId}"][data-test-subj="dataGridRowCell"]`
+  );
+  await expect(durationCells).not.toHaveCount(0);
+  const durationTexts = await durationCells.allTextContents();
+  for (const raw of durationTexts.map((value) => value.trim()).filter(Boolean)) {
+    // Grid cells may append an interactive marker (e.g. U+21A6); strip trailing
+    // non-alphanumeric/colon chars before validating the duration format.
+    const text = raw.replace(/[^\w:/]+$/, '');
+    expect(text).toMatch(/^(?:N\/A|\d{2,}:\d{2})$/);
+  }
+};
+
+const sortEventLogColumnAscending = async (page: ScoutPage, colId: string) => {
+  await page.testSubj.locator(`dataGridHeaderCell-${colId}`).hover();
+  await page.testSubj.click(`dataGridHeaderCellActionButton-${colId}`);
+  await page.testSubj.locator(`dataGridHeaderCellActionGroup-${colId}`).waitFor();
+  await page.testSubj
+    .locator(`dataGridHeaderCellActionGroup-${colId}`)
+    .getByRole('button', { name: 'Sort A-Z' })
+    .click();
+  await expect(page.testSubj.locator(`dataGridHeaderCellSortingIcon-${colId}`)).toBeVisible();
+};
 
 test.describe('Rule Details - Execution log', { tag: tags.stateful.classic }, () => {
   let ruleId: string;
@@ -67,10 +93,7 @@ test.describe('Rule Details - Execution log', { tag: tags.stateful.classic }, ()
     // At least one event-log row is present (execution confirmed in beforeAll).
     await expect(page.locator('.euiDataGridRow')).not.toHaveCount(0, { timeout: 30_000 });
 
-    // The timestamp and execution_duration columns render cells. total_search_duration
-    // is hidden by default (not in RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS) and
-    // only appears once toggled on via the Columns button — a clean Playwright context
-    // starts with empty localStorage so that column is never rendered.
+    // The timestamp and execution_duration columns render cells.
     const timestampCells = page.locator(
       '[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]'
     );
@@ -79,17 +102,12 @@ test.describe('Rule Details - Execution log', { tag: tags.stateful.classic }, ()
     expect(timestampTexts.some((text) => text.trim() !== '')).toBe(true);
     expect(timestampTexts.map((text) => text.trim().toLowerCase())).not.toContain('invalid date');
 
-    const durationCells = page.locator(
-      '[data-gridcell-column-id="execution_duration"][data-test-subj="dataGridRowCell"]'
-    );
-    await expect(durationCells).not.toHaveCount(0);
-    const durationTexts = await durationCells.allTextContents();
-    for (const raw of durationTexts.map((value) => value.trim()).filter(Boolean)) {
-      // Grid cells may append an interactive marker (e.g. ↦ U+21A6); strip trailing
-      // non-alphanumeric/colon chars before validating the duration format.
-      const text = raw.replace(/[^\w:/]+$/, '');
-      expect(text).toMatch(/^(?:N\/A|\d{2,}:\d{2})$/);
-    }
+    await expectDurationCells(page, 'execution_duration');
+
+    await page.testSubj.click('dataGridColumnSelectorButton');
+    await page.testSubj.click('dataGridColumnSelectorToggleColumnVisibility-total_search_duration');
+    await page.keyboard.press('Escape');
+    await expectDurationCells(page, 'total_search_duration');
 
     // Apply the "success" status filter and confirm the filter badge updates.
     await statusFilter.click();
@@ -97,5 +115,9 @@ test.describe('Rule Details - Execution log', { tag: tags.stateful.classic }, ()
     await expect(statusFilter.locator('.euiNotificationBadge')).toHaveText('1');
     await statusFilter.click();
     await expect(page.testSubj.locator('eventLogList')).toBeVisible();
+    await expect(page.locator('.euiDataGridRow')).not.toHaveCount(0, { timeout: 10_000 });
+
+    await sortEventLogColumnAscending(page, 'timestamp');
+    await sortEventLogColumnAscending(page, 'total_search_duration');
   });
 });
