@@ -44,7 +44,7 @@ export function KnowledgeIndicatorsStatusFilter({
           return accumulator;
         }
 
-        if (ki.kind === 'feature' && ki.feature.excluded_at) {
+        if (ki.kind === 'feature' && ki.feature.excluded) {
           accumulator.excluded += 1;
         } else {
           accumulator.active += 1;
