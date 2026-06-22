@@ -988,9 +988,28 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
 
       const isNegativeCase = metadata?.category === 'negative';
 
+      // Judge LLM calls can fail with transient infra errors (malformed
+      // streaming chunks, fetch failed, 5xx). Convert those to N/A so a
+      // single judge blip doesn't fail the whole Playwright shard.
+      const judge = evaluators.criteria(criteria);
+      const evaluateWithCriteria = async (judgeInput: Parameters<typeof judge.evaluate>[0]) => {
+        try {
+          return await judge.evaluate(judgeInput);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          if (INFRA_ERROR_PATTERN.test(message)) {
+            return {
+              ...INFRA_ERROR_NA,
+              explanation: `${INFRA_ERROR_NA.explanation} (judge call: ${message.slice(0, 200)})`,
+            };
+          }
+          throw error;
+        }
+      };
+
       if (isNegativeCase) {
         const responseText = output.messages?.map((m) => m.message).join('\n') ?? '';
-        return evaluators.criteria(criteria).evaluate({
+        return evaluateWithCriteria({
           input: cleanInput,
           expected,
           output: { response: responseText },
@@ -1006,7 +1025,7 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
         };
       }
 
-      return evaluators.criteria(criteria).evaluate({
+      return evaluateWithCriteria({
         input: cleanInput,
         expected,
         output: { resultYaml: output.resultYaml },
