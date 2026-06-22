@@ -232,11 +232,8 @@ export const createVisualizationGraph = (
         throw new Error('Response is not a valid JSON object');
       }
 
-      // Pin the validated ES|QL query into the config's data_source(s). The query was already
-      // AST-validated and executed in generateESQLNode, so it is the single source of truth; the
-      // config-generation LLM is not allowed to own it. This overwrites whatever data_source the
-      // LLM emitted (or adds one when omitted) and runs before validation, so the validated and
-      // finalized config — and each retry attempt — always carries the known-good query.
+      // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
+      // config generation only binds columns from it.
       if (esqlQuery) {
         for (const carrier of getEsqlDataSourceCarriers(configResponse)) {
           carrier.data_source = { type: 'esql', query: esqlQuery };
