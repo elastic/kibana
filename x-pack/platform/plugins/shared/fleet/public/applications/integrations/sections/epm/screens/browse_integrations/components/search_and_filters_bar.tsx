@@ -126,10 +126,6 @@ const SortFilter: React.FC = () => {
   return (
     <EuiFilterGroup compressed>
       <EuiPopover
-        aria-label={i18n.translate(
-          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortPopoverAriaLabel',
-          { defaultMessage: 'Sort' }
-        )}
         id="browseIntegrationsSortPopover"
         aria-label={i18n.translate(
           'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortPopoverAriaLabel',
@@ -220,10 +216,6 @@ const SetupMethodFilter: React.FC<{
 
   return (
     <EuiPopover
-      aria-label={i18n.translate(
-        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodPopoverAriaLabel',
-        { defaultMessage: 'Setup method filter' }
-      )}
       id="browseIntegrationsSetupMethodPopover"
       aria-label={i18n.translate(
         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodPopoverAriaLabel',
@@ -323,10 +315,6 @@ const SignalFilter: React.FC<{
 
   return (
     <EuiPopover
-      aria-label={i18n.translate(
-        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalPopoverAriaLabel',
-        { defaultMessage: 'Signal filter' }
-      )}
       id="browseIntegrationsSignalPopover"
       aria-label={i18n.translate(
         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalPopoverAriaLabel',
@@ -406,10 +394,6 @@ const ContentFilter: React.FC<{
 
   return (
     <EuiPopover
-      aria-label={i18n.translate(
-        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentPopoverAriaLabel',
-        { defaultMessage: 'Content filter' }
-      )}
       id="browseIntegrationsContentPopover"
       aria-label={i18n.translate(
         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentPopoverAriaLabel',
@@ -722,10 +706,6 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
             {hiddenSubCategoriesItems && hiddenSubCategoriesItems.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
-                  aria-label={i18n.translate(
-                    'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.subCategoriesPopoverAriaLabel',
-                    { defaultMessage: 'More subcategories' }
-                  )}
                   data-test-subj="browseIntegrations.showMoreSubCategoriesButton"
                   id="browseIntegrationsMoreSubCategories"
                   aria-label={i18n.translate(
