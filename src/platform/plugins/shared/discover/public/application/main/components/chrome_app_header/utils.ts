@@ -18,7 +18,7 @@ import {
  * Returns true if the session is being edited from an existing embeddable.
  * (Do not confuse with Discover displayMode: 'embedded')
  */
-export const isExistingEmbeddable = (embeddableEditor: EmbeddableEditorService): boolean =>
+const isExistingEmbeddable = (embeddableEditor: EmbeddableEditorService): boolean =>
   embeddableEditor.isEmbeddedEditor() && Boolean(embeddableEditor.getEmbeddableId());
 
 /**
