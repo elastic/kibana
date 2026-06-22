@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { FieldType } from '../../../common/types/domain/template/fields';

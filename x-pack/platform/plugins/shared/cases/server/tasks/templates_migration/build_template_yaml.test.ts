@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import { buildTemplateYaml } from './build_template_yaml';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

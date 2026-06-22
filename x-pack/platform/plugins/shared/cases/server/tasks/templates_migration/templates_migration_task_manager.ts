@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import pMap from 'p-map';
 import type { CoreStart, ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
 import type {

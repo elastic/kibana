@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump as dumpYaml } from 'js-yaml';
+import { stringify as stringifyYaml } from 'yaml';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { FieldType } from '../../../common/types/domain/template/fields';
 
@@ -64,5 +64,5 @@ export const buildFieldDefinitionYaml = (
     fieldDef.control = FieldType.INPUT_TEXT;
   }
 
-  return { name: key, yaml: dumpYaml(fieldDef, { lineWidth: -1, noRefs: true }) };
+  return { name: key, yaml: stringifyYaml(fieldDef, { lineWidth: 0 }) };
 };

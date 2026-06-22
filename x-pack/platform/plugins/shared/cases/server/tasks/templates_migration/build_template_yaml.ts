@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump as dumpYaml } from 'js-yaml';
+import { stringify as stringifyYaml } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 import type { CaseCustomField } from '../../../common/types/domain/custom_field/v1';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
@@ -82,5 +82,5 @@ export const buildTemplateYaml = (
 
   templateDef.fields = fields;
 
-  return dumpYaml(templateDef, { lineWidth: -1, noRefs: true });
+  return stringifyYaml(templateDef, { lineWidth: 0 });
 };
