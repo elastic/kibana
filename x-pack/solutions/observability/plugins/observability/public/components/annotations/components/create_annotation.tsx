@@ -101,7 +101,7 @@ function CreateAnnotation({
     flyout = (
       <EuiFlyoutResizable
         onClose={onCancel}
-        type="push"
+        type="overlay"
         size="s"
         maxWidth={700}
         aria-labelledby={flyoutTitleId}
