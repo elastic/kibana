@@ -13,7 +13,6 @@ export {
   SWITCH_DEFAULT_HANDLE,
   switchCaseHandleId,
   TRIGGER_STEP_TYPES,
-  switchCaseHandleId,
   type EdgeBranchType,
   type ForeachGroup,
   type ForeachGroupNodeData,
