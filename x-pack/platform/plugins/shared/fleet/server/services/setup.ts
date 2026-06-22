@@ -15,7 +15,7 @@ import { compact } from 'lodash';
 import pRetry from 'p-retry';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';
@@ -54,6 +54,7 @@ import {
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
+import { scheduleBumpMigratedAgentPoliciesTask } from './agent_policies/bump_migrated_agent_policies_task';
 import { ensureSpaceSettings } from './preconfiguration/space_settings';
 import {
   ensureDeleteUnenrolledAgentsSetting,
@@ -65,6 +66,9 @@ import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+
+/** Maximum number of non-fatal errors retained in memory after setup. */
+const MAX_NON_FATAL_ERRORS = 100;
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -273,6 +277,11 @@ async function createSetupSideEffects(
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
 
+  // Bump the revision of agent policies whose package policies were flagged for a bump by a
+  // saved object migration (no span: this only schedules a background task).
+  logger.debug('Scheduling agent policy revision bump for migrated package policies');
+  await scheduleBumpMigratedAgentPoliciesTask(appContextService.getTaskManagerStart()!);
+
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug(
     'Setting up Fleet enrollment keys and verifying fleet server policies are not out-of-sync'
@@ -303,7 +312,7 @@ async function createSetupSideEffects(
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
 
-  const nonFatalErrors = [
+  const rawNonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
     ...(backfillPackagePolicySupportsAgentlessError
@@ -315,9 +324,9 @@ async function createSetupSideEffects(
   logger.info('Scheduling async setup tasks');
   await scheduleSetupTask(appContextService.getTaskManagerStart()!);
 
-  if (nonFatalErrors.length > 0) {
+  if (rawNonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
-    formatNonFatalErrors(nonFatalErrors)
+    formatNonFatalErrors(rawNonFatalErrors)
       .map((e) => JSON.stringify(e))
       .forEach((error) => {
         logger.info(error);
@@ -325,12 +334,46 @@ async function createSetupSideEffects(
       });
   }
 
+  // Strip heavy ES connection metadata and cap stored errors to prevent large ResponseError
+  // objects from being retained in the module-level promise.
+  // See https://github.com/elastic/kibana/issues/273921
+  if (rawNonFatalErrors.length > MAX_NON_FATAL_ERRORS) {
+    logger.warn(
+      `Fleet setup encountered ${rawNonFatalErrors.length} non-fatal errors; storing only the first ${MAX_NON_FATAL_ERRORS}`
+    );
+  }
+  const nonFatalErrors = rawNonFatalErrors
+    .slice(0, MAX_NON_FATAL_ERRORS)
+    .map(sanitizeNonFatalError);
+
   logger.info('Fleet setup completed');
 
   return {
     isInitialized: true,
     nonFatalErrors,
   };
+}
+
+/**
+ * Strips heavy ES client metadata (meta.connection, connection pool, TLS config, etc.)
+ * from any `ResponseError` stored inside a non-fatal error entry.  Each such object can
+ * retain ~10 MB of connection state, causing multi-GB heap growth when hundreds of errors
+ * accumulate in the module-level `awaitIfPending` promise.
+ *
+ * The entry's structural shape (package, agentPolicy, installType, …) is preserved so
+ * callers that inspect those fields continue to work.  Only the inner `.error` / `.errors`
+ * values are replaced with lightweight plain-Error objects carrying just name + message.
+ */
+function sanitizeNonFatalError(
+  e: SetupStatus['nonFatalErrors'][number]
+): SetupStatus['nonFatalErrors'][number] {
+  if ('error' in e) {
+    const slim = new Error(e.error.message);
+    slim.name = e.error.name;
+    return { ...e, error: slim } as typeof e;
+  }
+  // UpgradeManagedPackagePoliciesResult uses `errors: any` — nothing large to strip there.
+  return e;
 }
 
 /**

@@ -23,15 +23,16 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiComboBox,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
   EuiIcon,
+  EuiSpacer,
   EuiSuperSelect,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import sqliteParser from '@appland/sql-parser';
 import { FormattedMessage } from '@kbn/i18n-react';

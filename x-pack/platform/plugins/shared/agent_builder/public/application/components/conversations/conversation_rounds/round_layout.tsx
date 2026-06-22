@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -15,19 +15,15 @@ import type {
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
-import {
-  isAuthorizationPrompt,
-  isConfirmationPrompt,
-  type PromptResponse,
-} from '@kbn/agent-builder-common/agents';
+import { AgentPromptType, type PromptResponse } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
-import { AuthorizationPrompt, ConfirmationPrompt } from './round_prompt';
+import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
 
@@ -44,6 +40,9 @@ interface RoundLayoutProps {
 const labels = {
   container: i18n.translate('xpack.agentBuilder.round.container', {
     defaultMessage: 'Conversation round',
+  }),
+  askUserQuestionPreamble: i18n.translate('xpack.agentBuilder.round.askUserQuestionPreamble', {
+    defaultMessage: 'I need to clarify a few things first.',
   }),
 };
 
@@ -71,6 +70,27 @@ const computeCumulativeRefs = (
 
   const values = Array.from(highestVersionByAttachment.values());
   return values.length > 0 ? values : undefined;
+};
+
+const getAttachmentRefsKey = (attachmentRefs: AttachmentVersionRef[] | undefined): string =>
+  attachmentRefs
+    ?.map(
+      ({ attachment_id: attachmentId, version }) => `${encodeURIComponent(attachmentId)}:${version}`
+    )
+    .join('|') ?? '';
+
+const parseAttachmentRefsKey = (attachmentRefsKey: string): AttachmentVersionRef[] | undefined => {
+  if (!attachmentRefsKey) {
+    return undefined;
+  }
+
+  return attachmentRefsKey.split('|').map((refKey) => {
+    const [encodedAttachmentId, version] = refKey.split(':');
+    return {
+      attachment_id: decodeURIComponent(encodedAttachmentId),
+      version: Number(version),
+    };
+  });
 };
 
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
@@ -109,31 +129,16 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     pendingPrompts.length > 0 &&
     !isResuming;
 
-  const hasMessage = Boolean(response?.message);
-
-  const { latestStep, displayedSteps } = useMemo(() => {
-    if (!isLoadingCurrentRound || hasMessage) {
-      return { latestStep: undefined, displayedSteps: steps };
+  const cumulativeAttachmentRefsKey = useMemo(() => {
+    if (!response?.message) {
+      return '';
     }
-    const idx = steps.findLastIndex((s) => s.type !== ConversationRoundStepType.updateTodos);
-    return idx === -1
-      ? { latestStep: undefined, displayedSteps: steps }
-      : { latestStep: steps[idx], displayedSteps: steps.slice(0, idx) };
-  }, [steps, isLoadingCurrentRound, hasMessage]);
-
-  const cumulativeAttachmentRefs = useMemo(() => {
-    if (!response?.message) return undefined;
-    return computeCumulativeRefs(allRounds, roundIndex);
+    return getAttachmentRefsKey(computeCumulativeRefs(allRounds, roundIndex));
   }, [allRounds, roundIndex, response?.message]);
 
-  const confirmationPrompts = useMemo(
-    () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
-    [pendingPrompts]
-  );
-
-  const authorizationPrompts = useMemo(
-    () => (pendingPrompts ?? []).filter(isAuthorizationPrompt),
-    [pendingPrompts]
+  const attachmentRefs = useMemo(
+    () => parseAttachmentRefsKey(cumulativeAttachmentRefsKey),
+    [cumulativeAttachmentRefsKey]
   );
 
   const handlePromptResponse = useCallback(
@@ -197,16 +202,15 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         />
       </EuiFlexItem>
 
-      {/* Steps container — `latestStep` is held back from `displayedSteps`
-          and rendered inside `RoundResponse` as the live indicator instead.
-          Always rendered above the error block (when one exists) so the
-          steps stay anchored where the user last saw them and the error
-          appears below, rather than the error shoving them down. */}
-      {displayedSteps.length > 0 && (
+      {/* Steps container — always rendered above the error block so steps
+          stay anchored where the user last saw them. */}
+      {steps.length > 0 && (
         <EuiFlexItem grow={false}>
           <RoundEvents
-            steps={displayedSteps}
-            isReloadedRound={!(isLoadingCurrentRound || hasBeenLoading)}
+            steps={steps}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
           />
         </EuiFlexItem>
       )}
@@ -225,42 +229,60 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiFlexItem>
       )}
 
-      {/* Confirmation Prompts */}
+      {/* Pending Prompts */}
       {isAwaitingPrompt &&
-        confirmationPrompts.map((prompt) => {
-          const stored = promptResponses[prompt.id];
-          return (
-            <EuiFlexItem grow={false} key={prompt.id}>
-              <ConfirmationPrompt
-                prompt={prompt}
-                onConfirm={() => handlePromptResponse(prompt.id, { allow: true })}
-                onCancel={() => handlePromptResponse(prompt.id, { allow: false })}
-                isLoading={isResuming}
-                isDisabled={isHitlDisabled}
-                isAnswered={stored !== undefined}
-                answeredValue={stored && 'allow' in stored ? stored.allow : undefined}
-              />
-            </EuiFlexItem>
-          );
-        })}
-
-      {/* Authorization Prompts */}
-      {isAwaitingPrompt &&
-        authorizationPrompts.map((prompt) => {
-          const stored = promptResponses[prompt.id];
-          return (
-            <EuiFlexItem grow={false} key={prompt.id}>
-              <AuthorizationPrompt
-                prompt={prompt}
-                onAuthorize={() => handlePromptResponse(prompt.id, { authorized: true })}
-                onCancel={() => handlePromptResponse(prompt.id, { authorized: false })}
-                isLoading={isResuming}
-                isDisabled={isHitlDisabled}
-                isAnswered={stored !== undefined}
-                answeredValue={stored && 'authorized' in stored ? stored.authorized : undefined}
-              />
-            </EuiFlexItem>
-          );
+        (pendingPrompts ?? []).map((prompt) => {
+          switch (prompt.type) {
+            case AgentPromptType.confirmation: {
+              const stored = promptResponses[prompt.id];
+              return (
+                <EuiFlexItem grow={false} key={prompt.id}>
+                  <ConfirmationPrompt
+                    prompt={prompt}
+                    onConfirm={() => handlePromptResponse(prompt.id, { allow: true })}
+                    onCancel={() => handlePromptResponse(prompt.id, { allow: false })}
+                    isLoading={isResuming}
+                    isDisabled={isHitlDisabled}
+                    isAnswered={stored !== undefined}
+                    answeredValue={stored && 'allow' in stored ? stored.allow : undefined}
+                  />
+                </EuiFlexItem>
+              );
+            }
+            case AgentPromptType.authorization: {
+              const stored = promptResponses[prompt.id];
+              return (
+                <EuiFlexItem grow={false} key={prompt.id}>
+                  <AuthorizationPrompt
+                    prompt={prompt}
+                    onAuthorize={() => handlePromptResponse(prompt.id, { authorized: true })}
+                    onCancel={() => handlePromptResponse(prompt.id, { authorized: false })}
+                    isLoading={isResuming}
+                    isDisabled={isHitlDisabled}
+                    isAnswered={stored !== undefined}
+                    answeredValue={stored && 'authorized' in stored ? stored.authorized : undefined}
+                  />
+                </EuiFlexItem>
+              );
+            }
+            case AgentPromptType.ask_user_question:
+              return (
+                <React.Fragment key={prompt.id}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="m">{labels.askUserQuestionPreamble}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AskUserQuestionPrompt
+                      promptId={prompt.id}
+                      questions={prompt.questions}
+                      onSubmit={(r) => handlePromptResponse(prompt.id, r)}
+                      isLoading={isResuming}
+                      isDisabled={isHitlDisabled}
+                    />
+                  </EuiFlexItem>
+                </React.Fragment>
+              );
+          }
         })}
 
       {/* Response */}
@@ -273,9 +295,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               steps={steps}
               isLoading={isLoadingCurrentRound}
               isLastRound={isCurrentRound}
-              latestStep={latestStep}
               conversationAttachments={conversationAttachments}
-              attachmentRefs={cumulativeAttachmentRefs}
+              attachmentRefs={attachmentRefs}
               conversationId={conversationId}
               rawRound={rawRound}
             />

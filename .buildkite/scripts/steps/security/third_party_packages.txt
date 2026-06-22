@@ -51,3 +51,4 @@ jszip
 @opentelemetry/otlp-transformer
 typescript-6
 @typescript/native-preview
+just-bash
