@@ -233,7 +233,16 @@ export const SearchApplicationSchema: React.FC = () => {
     {
       render: ({ type }: SchemaField) => {
         if (type !== 'conflict') return null;
-        return <EuiIcon type="error" color="danger" />;
+        return (
+          <EuiIcon
+            type="error"
+            color="danger"
+            aria-label={i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictIndicator',
+              { defaultMessage: 'Field type conflict' }
+            )}
+          />
+        );
       },
       width: '24px',
     },
@@ -246,7 +255,7 @@ export const SearchApplicationSchema: React.FC = () => {
       ),
       render: ({ name, type }: SchemaField) => (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {name.includes('.') && <EuiIcon type="sortRight" color="subdued" />}
+          {name.includes('.') && <EuiIcon aria-hidden type="sortRight" color="subdued" />}
           <EuiText size="s" color={type === 'conflict' ? 'danger' : 'primary'}>
             <p>{name}</p>
           </EuiText>
@@ -414,6 +423,10 @@ export const SearchApplicationSchema: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.popover.ariaLabel',
+                  { defaultMessage: 'Filter by field types' }
+                )}
                 button={filterButton}
                 isOpen={isFilterByPopoverOpen}
                 closePopover={() => setIsFilterByPopoverOpen(false)}

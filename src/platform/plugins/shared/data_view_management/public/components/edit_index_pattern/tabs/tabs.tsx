@@ -316,6 +316,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     anchorPosition="downCenter"
                     data-test-subj="indexedFieldTypeFilterDropdown-popover"
                     aria-label={filterAriaLabel}
+                    panelPaddingSize="s"
                     button={
                       <EuiFilterButton
                         aria-label={filterAriaLabel}
@@ -351,6 +352,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     anchorPosition="downCenter"
                     data-test-subj="schemaFieldTypeFilterDropdown-popover"
                     aria-label={schemaAriaLabel}
+                    panelPaddingSize="s"
                     button={
                       <EuiFilterButton
                         aria-label={schemaAriaLabel}

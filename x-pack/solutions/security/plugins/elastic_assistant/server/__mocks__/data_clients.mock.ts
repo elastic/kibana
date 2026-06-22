@@ -115,6 +115,9 @@ const createAttackDiscoveryScheduleDataClientMock = (): AttackDiscoveryScheduleD
   deleteSchedule: jest.fn(),
   enableSchedule: jest.fn(),
   disableSchedule: jest.fn(),
+  bulkDeleteSchedules: jest.fn(),
+  bulkEnableSchedules: jest.fn(),
+  bulkDisableSchedules: jest.fn(),
 });
 
 export const attackDiscoveryScheduleDataClientMock: {

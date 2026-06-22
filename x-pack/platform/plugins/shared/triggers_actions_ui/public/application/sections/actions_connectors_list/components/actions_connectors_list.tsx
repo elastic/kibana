@@ -32,6 +32,7 @@ import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import {
   DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
   DEPRECATED_LABEL,
@@ -105,7 +106,7 @@ const ActionsConnectorsList = ({
     setBreadcrumbs,
     chrome,
     docLinks,
-    actions: { isEarsEnabled },
+    actions: { isEarsEnabled, isEarsExperimentalEnabled },
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -115,11 +116,15 @@ const ActionsConnectorsList = ({
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
   const isDisabledEarsConnector = useCallback(
-    (item: ActionConnectorTableItem | ActionConnector) =>
-      !isEarsEnabled &&
-      'config' in item &&
-      (item.config as Record<string, unknown>)?.authType === 'ears',
-    [isEarsEnabled]
+    (item: ActionConnectorTableItem | ActionConnector) => {
+      if (!('config' in item) || (item.config as Record<string, unknown>)?.authType !== 'ears') {
+        return false;
+      }
+      if (!isEarsEnabled) return true;
+      if (isEarsExperimentalConnector(item.actionTypeId) && !isEarsExperimentalEnabled) return true;
+      return false;
+    },
+    [isEarsEnabled, isEarsExperimentalEnabled]
   );
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -231,10 +236,6 @@ const ActionsConnectorsList = ({
     setConnectorsToDelete(itemIds);
     setDeleteConnectorWarning(itemIds);
   }
-  const hasDeprecatedConnectors = useMemo(() => {
-    return actionConnectorTableItems.some((item) => item.isConnectorTypeDeprecated);
-  }, [actionConnectorTableItems]);
-
   const actionsTableColumns = [
     {
       field: 'name',
@@ -247,6 +248,7 @@ const ActionsConnectorsList = ({
       ),
       sortable: false,
       truncateText: true,
+      width: '25%',
       render: (value: string, item: ActionConnectorTableItem) => {
         const checkEnabledResult = checkActionTypeEnabled(
           actionTypesIndex && actionTypesIndex[item.actionTypeId],
@@ -350,38 +352,6 @@ const ActionsConnectorsList = ({
         );
       },
     },
-    ...(hasDeprecatedConnectors
-      ? [
-          {
-            name: '',
-            render: (item: ActionConnectorTableItem) => {
-              if (!item.isConnectorTypeDeprecated) return null;
-              return (
-                <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={DEPRECATED_LABEL}
-                      tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
-                      color="warning"
-                      size="s"
-                    />
-                  </EuiFlexItem>
-                  {isLLMConnectorTypeId(item.actionTypeId) && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="info"
-                        color="subdued"
-                        content={DEPRECATED_LLM_CONNECTOR_INFO}
-                        data-test-subj={`deprecatedLLMConnectorInfo-${item.id}`}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              );
-            },
-          },
-        ]
-      : []),
     {
       field: 'actionType',
       'data-test-subj': 'connectorsTableCell-actionType',
@@ -393,6 +363,33 @@ const ActionsConnectorsList = ({
       ),
       sortable: false,
       truncateText: true,
+      render: (actionType: string, item: ActionConnectorTableItem) => {
+        if (!item.isConnectorTypeDeprecated) return actionType;
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{actionType}</EuiFlexItem>
+            {isLLMConnectorTypeId(item.actionTypeId) && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="info"
+                  color="subdued"
+                  content={DEPRECATED_LLM_CONNECTOR_INFO}
+                  data-test-subj={`deprecatedLLMConnectorInfo-${item.id}`}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={DEPRECATED_LABEL}
+                tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                color="warning"
+                size="s"
+                alignment="middle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'compatibility',
@@ -465,6 +462,7 @@ const ActionsConnectorsList = ({
     },
     {
       name: '',
+      width: '300px',
       render: (item: ActionConnectorTableItem) => {
         if (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]) {
           return null;
@@ -475,7 +473,7 @@ const ActionsConnectorsList = ({
         const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
 
         return (
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
             {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
               <>
                 {connectorAuthStatusError ? (
@@ -545,6 +543,7 @@ const ActionsConnectorsList = ({
       loading={isLoadingActions || isLoadingActionTypes}
       items={actionConnectorTableItems}
       sorting={true}
+      tableLayout="fixed"
       itemId={(item: ActionConnectorTableItem) =>
         item.isPreconfigured ? `preconfigured_${item.id}` : item.id
       }

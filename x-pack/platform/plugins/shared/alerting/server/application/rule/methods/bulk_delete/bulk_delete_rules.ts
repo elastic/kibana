@@ -10,6 +10,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import {
   combineFiltersWithInternalRuleTypeFilter,
@@ -30,11 +31,7 @@ import {
   buildKueryNodeFilter,
 } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type {
-  BulkOperationError,
-  BulkDeleteRulesResult,
-  BulkDeleteRulesRequestBody,
-} from './types';
+import type { BulkOperationError, BulkDeleteRulesResult, BulkDeleteRulesParams } from './types';
 import { validateBulkDeleteRulesBody } from './validation';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -43,11 +40,11 @@ import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
-  options: BulkDeleteRulesRequestBody
+  options: BulkDeleteRulesParams
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
     validateBulkDeleteRulesBody(options);
@@ -89,7 +86,12 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDeleteWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
+          bulkDeleteWithOCC(context, {
+            filter: filterKueryNode,
+            changeTracking: {
+              metadata: { bulkCount: total, ...options.changeTracking?.metadata },
+            },
+          }),
         filter: finalFilter,
       })
   );
@@ -128,7 +130,6 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
@@ -155,7 +156,10 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
-  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
+  {
+    filter,
+    changeTracking,
+  }: { filter: KueryNode | null; changeTracking: RuleChangeTracking<never> }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -281,13 +285,13 @@ const bulkDeleteWithOCC = async (
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: rules,
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleDelete,
       timestamp: deletionTimestamp,
-      metadata: { bulkCount: totalNumOfRules },
+      metadata: changeTracking?.metadata,
     },
   });
 

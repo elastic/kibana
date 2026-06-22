@@ -45,8 +45,23 @@ export interface ResolveIndexResponse {
 export interface EsqlView {
   name: string;
   query: string;
+  description?: string;
+  links?: Array<{ label: string; url: string }>;
+  type?: string;
 }
 
 export interface EsqlViewsResult {
   views: EsqlView[];
+}
+
+export interface EsqlDataset {
+  name: string;
+  data_source: string;
+  resource: string;
+  description?: string;
+  settings?: Record<string, unknown>;
+}
+
+export interface EsqlDatasetsResult {
+  datasets: EsqlDataset[];
 }

@@ -21,6 +21,7 @@ import {
   INDEX_MANAGEMENT_LOCATOR_ID,
   type IndexManagementLocatorParams,
 } from '@kbn/index-management-shared-types';
+import { BaseClassicNavItems } from './base_classic_navigation_items';
 import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,
@@ -40,7 +41,7 @@ export class SearchNavigationPlugin
   private pluginsStart: AppPluginStartDependencies | undefined = undefined;
   private onAppMountHandlers: Array<() => Promise<void>> = [];
   private chromeSub: Subscription | undefined;
-  private baseClassicNavItems: ClassicNavItem[] = [];
+  private baseClassicNavItems: ClassicNavItem[] = BaseClassicNavItems;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -72,12 +73,6 @@ export class SearchNavigationPlugin
         })
       );
     }
-
-    // Async loads classic nav items on start
-    import('./base_classic_navigation_items').then(({ BaseClassicNavItems }) => {
-      // caches nav items so we don't need to do an async call when needed by other plugins.
-      this.baseClassicNavItems = BaseClassicNavItems;
-    });
 
     return {
       handleOnAppMount: this.handleOnAppMount.bind(this),
@@ -135,12 +130,18 @@ export class SearchNavigationPlugin
     if (forClassicChromeStyle === true && this.currentChromeStyle !== 'classic') return;
 
     if (this.pluginsStart?.serverless) {
+      // Serverless: use the serverless plugin's breadcrumb API
       this.pluginsStart.serverless.setBreadcrumbs(breadcrumbs);
-    } else {
-      const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
-      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs, {
-        project: { value: breadcrumbs, absolute: true },
+    } else if (this.currentChromeStyle === 'project') {
+      // Project chrome (solution spaces): the navigation tree provides the base path.
+      // Breadcrumbs are appended to the nav-tree-generated path.
+      this.coreStart?.chrome.setBreadcrumbs([], {
+        project: { value: breadcrumbs },
       });
+    } else {
+      // Classic chrome: prepend the Elasticsearch home breadcrumb
+      const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
+      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs);
     }
   }
 

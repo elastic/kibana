@@ -11,7 +11,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 
-import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
@@ -43,6 +44,7 @@ const DEFAULT_SUGGESTIONS_COUNT = 10;
 const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
 const BULK_GET_MAX_UIDS_PER_BATCH = 50;
 const BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS = 5;
+const RUNAS_HEADER = 'es-security-runas-user';
 
 export interface UserProfileServiceStartInternal extends UserProfileServiceStart {
   /**
@@ -67,6 +69,7 @@ export interface UserProfileServiceSetupParams {
 export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 function parseUserProfile<D extends UserProfileData>(
@@ -115,10 +118,10 @@ export class UserProfileService {
     this.license = license;
   }
 
-  start({ clusterClient, session }: UserProfileServiceStartParams) {
+  start({ clusterClient, session, getCurrentUser }: UserProfileServiceStartParams) {
     return {
       activate: this.activate.bind(this, clusterClient),
-      getCurrent: this.getCurrent.bind(this, clusterClient, session),
+      getCurrent: this.getCurrent.bind(this, clusterClient, session, getCurrentUser),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -317,10 +320,12 @@ export class UserProfileService {
   private recordGetCurrentSuccess(params: {
     profileActivationRequired?: boolean;
     apiKeyRetrievalRequired?: boolean;
+    fakeRequestProfileResolution?: boolean;
   }) {
     securityTelemetry.recordGetCurrentProfileInvocation({
       profileActivationRequired: params.profileActivationRequired,
       apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      fakeRequestProfileResolution: params.fakeRequestProfileResolution,
       outcome: 'success',
     });
   }
@@ -328,10 +333,12 @@ export class UserProfileService {
   private recordGetCurrentFailure(params: {
     profileActivationRequired?: boolean;
     apiKeyRetrievalRequired?: boolean;
+    fakeRequestProfileResolution?: boolean;
   }) {
     securityTelemetry.recordGetCurrentProfileInvocation({
       profileActivationRequired: params.profileActivationRequired,
       apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      fakeRequestProfileResolution: params.fakeRequestProfileResolution,
       outcome: 'failure',
     });
   }
@@ -342,9 +349,19 @@ export class UserProfileService {
   private async getCurrent<D extends UserProfileData>(
     clusterClient: IClusterClient,
     session: PublicMethodsOf<Session>,
+    getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
-    if (request.auth.isAuthenticated === false) {
+    if (!this.license?.isEnabled()) {
+      this.logger.debug(
+        'Skipping user profile retrieval: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    // Fake requests carry a bound `profile_uid` instead of an HTTP auth state,
+    // so the standard `auth.isAuthenticated === false` gate doesn't apply.
+    if (!request.isFakeRequest && request.auth.isAuthenticated === false) {
       throw new Error('Request to get current user profile is not authenticated.');
     }
 
@@ -352,25 +369,47 @@ export class UserProfileService {
     let sessionId: string | undefined;
     let profileActivationRequired: boolean | undefined;
     let apiKeyRetrievalRequired: boolean | undefined;
+    let fakeRequestProfileResolution: boolean | undefined;
 
-    if (await session.getSID(request)) {
+    if (request.isFakeRequest) {
+      profileId = getCurrentUser(request)?.profile_uid;
+      if (profileId) {
+        fakeRequestProfileResolution = true;
+        this.logger.debug(`Resolving current user profile directly from profile_uid [fake=true].`);
+      }
+    }
+
+    if (!profileId && (await session.getSID(request))) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
-    } else {
+    } else if (!profileId && request.headers[RUNAS_HEADER]) {
+      // When a proxy sets `es-security-runas-user`, the Authorization header belongs to the proxy
+      // credential (e.g. `elastic`), not the effective user. Activating a profile from those
+      // credentials would associate the avatar with the proxy account, not the impersonated user.
+      // Return null because a user profile is not applicable in this context.
+      this.logger.debug(
+        `Skipping user profile retrieval for request with 'es-security-runas-user' header.`
+      );
+      return null;
+    } else if (!profileId) {
       const authType = this.getAuthHeaderType(request.headers.authorization);
 
       if (authType === 'basic') {
         profileActivationRequired = true;
 
         this.logger.debug(
-          `Request to get current user profile is authenticated via Basic credentials.`
+          `Request to get current user profile is authenticated via Basic credentials [fake=${!!fakeRequestProfileResolution}].`
         );
 
         let activatedProfile: UserProfileWithSecurity | undefined;
         try {
           activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
         } catch (error) {
-          this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
+          this.recordGetCurrentFailure({
+            profileActivationRequired,
+            apiKeyRetrievalRequired,
+            fakeRequestProfileResolution,
+          });
           this.logger.debug(
             `Failed to activate profile via basic credentials: ${getDetailedErrorMessage(error)}`
           );
@@ -380,21 +419,35 @@ export class UserProfileService {
         // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
         // we will need to re-fetch the profile like in the other cases (session, API key).
         if (activatedProfile && !dataPath) {
-          this.recordGetCurrentSuccess({ profileActivationRequired, apiKeyRetrievalRequired });
+          this.recordGetCurrentSuccess({
+            profileActivationRequired,
+            apiKeyRetrievalRequired,
+            fakeRequestProfileResolution,
+          });
           return activatedProfile;
         }
         profileId = activatedProfile?.uid;
       } else if (authType === 'apikey') {
         apiKeyRetrievalRequired = true;
-        this.logger.debug(`Request to get current user profile is authenticated via API key.`);
+        this.logger.debug(
+          `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
+        );
         profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
       }
     }
 
     if (!profileId) {
-      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
+      this.recordGetCurrentFailure({
+        profileActivationRequired,
+        apiKeyRetrievalRequired,
+        fakeRequestProfileResolution,
+      });
       return null;
     }
+
+    const requestDescriptor = sessionId
+      ? ` [sid=${getPrintableSessionId(sessionId)}]`
+      : ` [fake=${!!fakeRequestProfileResolution}]`;
 
     let body;
     try {
@@ -403,26 +456,34 @@ export class UserProfileService {
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
     } catch (error) {
-      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
+      this.recordGetCurrentFailure({
+        profileActivationRequired,
+        apiKeyRetrievalRequired,
+        fakeRequestProfileResolution,
+      });
       this.logger.error(
-        `Failed to retrieve user profile for the current user${
-          sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
-        }: ${getDetailedErrorMessage(error)}`
+        `Failed to retrieve user profile for the current user${requestDescriptor}: ${getDetailedErrorMessage(
+          error
+        )}`
       );
       throw error;
     }
 
     if (body.profiles.length === 0) {
-      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
-      this.logger.error(
-        `The user profile for the current user${
-          sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
-        } is not found.`
-      );
+      this.recordGetCurrentFailure({
+        profileActivationRequired,
+        apiKeyRetrievalRequired,
+        fakeRequestProfileResolution,
+      });
+      this.logger.error(`The user profile for the current user${requestDescriptor} is not found.`);
       throw new Error(`User profile is not found.`);
     }
 
-    this.recordGetCurrentSuccess({ profileActivationRequired, apiKeyRetrievalRequired });
+    this.recordGetCurrentSuccess({
+      profileActivationRequired,
+      apiKeyRetrievalRequired,
+      fakeRequestProfileResolution,
+    });
     this.logger.debug(`Returning current user profile.`);
     return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }

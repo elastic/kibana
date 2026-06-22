@@ -16,18 +16,11 @@ import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import type {
-  ExecutionContextStart,
-  FakeRawRequest,
-  Headers,
-  IBasePath,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
+import type { ExecutionContextStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -46,7 +39,7 @@ import {
   asTaskMarkRunningEvent,
   asTaskRunEvent,
   asTaskManagerStatEvent,
-  startTaskTimerWithEventLoopMonitoring,
+  startEventLoopMonitoring,
   TaskPersistence,
 } from '../task_events';
 import { intervalFromDate, parseIntervalAsMillisecond } from '../lib/intervals';
@@ -125,7 +118,6 @@ export interface Updatable {
 }
 
 type Opts = {
-  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
@@ -140,6 +132,7 @@ type Opts = {
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  enrichFakeRequest?: FakeRequestEnricher;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -187,7 +180,7 @@ export class TaskManagerRunner implements TaskRunner {
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
-  private readonly basePathService: IBasePath;
+
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
@@ -197,6 +190,7 @@ export class TaskManagerRunner implements TaskRunner {
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
+  private readonly enrichFakeRequest?: FakeRequestEnricher;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -209,7 +203,6 @@ export class TaskManagerRunner implements TaskRunner {
    * @memberof TaskManagerRunner
    */
   constructor({
-    basePathService,
     instance,
     definitions,
     logger,
@@ -226,8 +219,8 @@ export class TaskManagerRunner implements TaskRunner {
     getPollInterval,
     apiKeyStrategy,
     eventLogger,
+    enrichFakeRequest,
   }: Opts) {
-    this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
     this.logger = logger;
@@ -249,6 +242,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
+    this.enrichFakeRequest = enrichFakeRequest;
   }
 
   /**
@@ -379,6 +373,12 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
+    // Capture startedAt while TypeScript knows this.instance is ReadyToRunTask
+    // (ConcreteTaskInstanceWithStartedAt guarantees startedAt: Date, not null).
+    // We extract it here because the narrowing is lost inside the async closure below
+    // since this.instance is a mutable class property.
+    const { startedAt } = this.instance.task;
+
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
     return withActiveSpan(
@@ -395,7 +395,13 @@ export class TaskManagerRunner implements TaskRunner {
         const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
           childOf: this.instance.task.traceparent,
         });
-        const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
+        const stopEventLoopMonitoring = startEventLoopMonitoring(this.config.event_loop_delay);
+        const makeTaskTiming = (): TaskTiming => ({
+          start: startedAt.getTime(),
+          stop: Date.now(),
+          eventLoopBlockMs: stopEventLoopMonitoring(),
+        });
+        this.logTaskRunStartEvent(this.instance.task, startedAt);
 
         // Validate state
         const stateValidationResult = this.validateTaskState(this.instance.task);
@@ -410,7 +416,7 @@ export class TaskManagerRunner implements TaskRunner {
                   state: stateValidationResult.taskInstance.state,
                   shouldValidate: false,
                 }),
-                stopTaskTimer()
+                makeTaskTiming()
               )
           );
           if (apmTrans) apmTrans.end('failure');
@@ -440,10 +446,19 @@ export class TaskManagerRunner implements TaskRunner {
           const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
             modifiedContext.taskInstance
           );
-          const fakeRequest = this.getFakeKibanaRequest(
-            apiKeyForRequest,
-            modifiedContext.taskInstance.userScope?.spaceId
-          );
+          const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
+
+          const fakeRequest = buildTaskFakeRequest({
+            apiKey: apiKeyForRequest,
+            spaceId: modifiedContext.taskInstance.userScope?.spaceId,
+            userProfileId,
+            enrichFakeRequest: this.enrichFakeRequest,
+          });
+
+          const enrichRequest = buildChildRequestEnricher({
+            userProfileId,
+            enrichFakeRequest: this.enrichFakeRequest,
+          });
 
           const abortController = new AbortController();
 
@@ -451,13 +466,14 @@ export class TaskManagerRunner implements TaskRunner {
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
             abortController,
+            enrichRequest,
           });
 
           const originalTaskCancel = this.task.cancel;
 
           const logCancelEvent = () => {
             this.isCancelled = true;
-            this.logTaskCancelEvent(this.instance.task, stopTaskTimer());
+            this.logTaskCancelEvent(this.instance.task, makeTaskTiming());
           };
           this.task.cancel = async function () {
             abortController.abort();
@@ -487,7 +503,7 @@ export class TaskManagerRunner implements TaskRunner {
           const validatedResult = this.validateResult(result);
           const processedResult = await withSpan(
             { name: 'process result', type: 'task manager' },
-            () => this.processResult(validatedResult, stopTaskTimer())
+            () => this.processResult(validatedResult, makeTaskTiming())
           );
           if (apmTrans) apmTrans.end('success');
           return processedResult;
@@ -512,7 +528,7 @@ export class TaskManagerRunner implements TaskRunner {
             () =>
               this.processResult(
                 asErr({ error: err, state: modifiedContext.taskInstance.state }),
-                stopTaskTimer()
+                makeTaskTiming()
               )
           );
           if (apmTrans) apmTrans.end('failure');
@@ -1029,25 +1045,6 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 
-  private getFakeKibanaRequest(apiKey?: string, spaceId?: string): KibanaRequest | undefined {
-    if (apiKey) {
-      const requestHeaders: Headers = {};
-
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
-      const path = addSpaceIdToPath('/', spaceId || 'default');
-
-      const fakeRawRequest: FakeRawRequest = {
-        headers: requestHeaders,
-        path: '/',
-      };
-
-      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-      this.basePathService.set(fakeRequest, path);
-
-      return fakeRequest;
-    }
-  }
-
   private updateRetryAtOnIntervalForLongRunningTasks() {
     let stopped = false;
 
@@ -1104,6 +1101,27 @@ export class TaskManagerRunner implements TaskRunner {
     return stop;
   }
 
+  private logTaskRunStartEvent(task: ConcreteTaskInstance, startedAt: Date): void {
+    const scheduleDelayNs = task.scheduledAt
+      ? millisToNanos(startedAt.getTime() - task.scheduledAt.getTime())
+      : undefined;
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskRunStart,
+        start: startedAt.toISOString(),
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          type: this.taskType,
+          scheduled: task.scheduledAt.toISOString(),
+          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+        },
+      },
+      message: `Task ${this.taskType} "${this.id}" started.`,
+    });
+  }
+
   private logTaskRunEvent(
     task: ConcreteTaskInstance,
     taskTiming: TaskTiming,
@@ -1112,10 +1130,7 @@ export class TaskManagerRunner implements TaskRunner {
     error?: Error | DecoratedError
   ): void {
     const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
-    const scheduleDelayNs =
-      task.startedAt && task.scheduledAt
-        ? millisToNanos(task.startedAt.getTime() - task.scheduledAt.getTime())
-        : undefined;
+    const scheduleDelayNs = millisToNanos(taskTiming.start - task.scheduledAt.getTime());
     const errorDetails = error
       ? {
           message: error.message,
@@ -1136,7 +1151,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
-          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+          schedule_delay: scheduleDelayNs,
         },
       },
       message,

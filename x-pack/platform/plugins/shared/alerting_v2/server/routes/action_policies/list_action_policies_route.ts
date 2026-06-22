@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { findActionPoliciesResponseSchema } from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema, findActionPoliciesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
@@ -18,26 +17,31 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 const sortFieldSchema = z
-  .enum(['name', 'createdAt', 'updatedAt', 'createdByUsername', 'updatedByUsername'])
+  .enum(['name', 'createdAt', 'updatedAt'])
   .describe('The available fields to sort action policies by.');
 
+const tagFilterItemSchema = z.string().min(1).max(128);
+
 const listActionPoliciesQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
   perPage: z.coerce
     .number()
     .min(1)
     .max(100)
     .optional()
-    .describe('The number of action policies to return per page.'),
-  search: z.string().optional().describe('A text string to search across action policy fields.'),
+    .describe('The number of action policies to return per page. Defaults to 20.'),
+  search: z
+    .string()
+    .min(1)
+    .max(256)
+    .optional()
+    .describe('A text string to search across action policy fields.'),
   tags: z
-    .union([z.string(), z.array(z.string())])
+    .union([tagFilterItemSchema, z.array(tagFilterItemSchema)])
     .transform((v) => (Array.isArray(v) ? v : [v]).map((t) => t.trim()).filter(Boolean))
-    .pipe(z.array(z.string()).max(10))
+    .pipe(z.array(tagFilterItemSchema).max(10))
     .optional()
     .describe('Filter by tags. Accepts a single string or an array.'),
-  destinationType: z.string().optional().describe('Filter by destination connector type.'),
-  createdBy: z.string().optional().describe('Filter by the user ID who created the action policy.'),
   enabled: z
     .enum(['true', 'false'])
     .transform((v) => v === 'true')
@@ -60,16 +64,17 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
     summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(listActionPoliciesQuerySchema),
+      query: listActionPoliciesQuerySchema,
     },
     response: {
       200: {
         body: () => findActionPoliciesResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns a paginated list of action policies.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid query parameters.',
       },
     },
@@ -92,24 +97,12 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const {
-      page,
-      perPage,
-      search,
-      tags,
-      destinationType,
-      createdBy,
-      enabled,
-      sortField,
-      sortOrder,
-    } = this.request.query ?? {};
+    const { page, perPage, search, tags, enabled, sortField, sortOrder } = this.request.query ?? {};
     const result = await this.actionPolicyClient.findActionPolicies({
       page,
       perPage,
       search,
       tags,
-      destinationType,
-      createdBy,
       enabled,
       sortField,
       sortOrder,

@@ -25,8 +25,8 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  GranularRulesFilter,
   SearchRulesAggregations,
-  SearchRulesField,
   SearchRulesResponse,
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
@@ -122,8 +122,8 @@ export interface FetchRulesResponse {
 
 export interface FetchSearchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  fields?: SearchRulesField[];
-  filter?: string;
+  fields?: string[];
+  filter?: GranularRulesFilter;
   search?: GranularRulesSearch;
   sort_field?: z.infer<typeof FindRulesSortField>;
   sort_order?: z.infer<typeof SortOrder>;
@@ -140,6 +140,13 @@ export type FetchSearchRulesResponse = SearchRulesResponse;
 
 export interface FetchRuleProps {
   id: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleHistoryProps {
+  ruleId: string;
+  page: number;
+  perPage: number;
   signal?: AbortSignal;
 }
 

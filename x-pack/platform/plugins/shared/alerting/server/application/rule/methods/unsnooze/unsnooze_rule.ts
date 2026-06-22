@@ -7,9 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import type { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import type { RawRule } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -19,7 +17,7 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import { getUnsnoozeAttributes } from '../../../../rules_client/common';
 import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { unsnoozeRuleParamsSchema } from './schemas';
 
 export interface UnsnoozeParams {
@@ -59,10 +57,6 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
       operation: WriteOperations.Unsnooze,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -98,8 +92,14 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
     }),
   });
 
-  await logBulkRuleChanges({
-    ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
+  await logRuleChanges({
+    ruleSOs: [
+      {
+        ...updatedRuleRaw,
+        attributes: { ...attributes, ...updatedRuleRaw.attributes },
+        references: updatedRuleRaw.references ?? [],
+      },
+    ],
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleUnsnooze,

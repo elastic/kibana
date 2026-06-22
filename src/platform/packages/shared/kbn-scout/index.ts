@@ -11,7 +11,15 @@
 export * as cli from './src/cli';
 
 // Test framework
-export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
+export {
+  test,
+  spaceTest,
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  globalTeardownHook,
+  tags,
+} from './src/playwright';
 
 // Fixtures & configuration
 export {
@@ -35,6 +43,17 @@ export * from './src/playwright/eui_components';
 // Kibana-wide components
 export * from './src/playwright/ui_components';
 
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  CopySavedObjectsToSpaceFlyout,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+  ListingTable,
+  SavedObjectsManagementPage,
+} from './src/playwright/page_objects';
+export type { ContentListUrlState } from './src/playwright/page_objects';
+
 // Scout core types
 export type {
   ScoutPlaywrightOptions,
@@ -56,6 +75,7 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
+  ScoutSpaceParallelFixture,
   SpaceSolutionView,
 } from './src/playwright';
 

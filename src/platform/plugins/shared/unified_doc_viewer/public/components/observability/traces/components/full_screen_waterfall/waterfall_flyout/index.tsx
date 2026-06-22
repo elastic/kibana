@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiEmptyPrompt,
   EuiErrorBoundary,
   EuiFlyout,
   EuiFlyoutBody,
@@ -29,6 +30,7 @@ import { useDocViewerSpanLogViewedEvent } from '@kbn/unified-doc-viewer';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import { useOriginDocType } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
 import type { FlyoutContentId } from '../../../common/constants';
 
 const tabIds = {
@@ -73,11 +75,54 @@ const FlyoutTabs = ({ onClick, selectedTabId }: FlyoutTabsProps) => {
   ));
 };
 
+const NotFoundPrompt = () => (
+  <EuiEmptyPrompt
+    data-test-subj="unifiedDocViewerWaterfallFlyoutNotFound"
+    iconType="search"
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate(
+          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.title',
+          { defaultMessage: 'Document not found' }
+        )}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate(
+          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.body',
+          { defaultMessage: 'The document could not be found. It may no longer be available.' }
+        )}
+      </p>
+    }
+  />
+);
+
+const FetchErrorPrompt = ({ error }: { error: string }) => (
+  <EuiEmptyPrompt
+    data-test-subj="unifiedDocViewerWaterfallFlyoutFetchError"
+    iconType="warning"
+    iconColor="danger"
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate(
+          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.fetchError.title',
+          { defaultMessage: 'Unable to load document' }
+        )}
+      </h2>
+    }
+    body={<p>{error}</p>}
+  />
+);
+
 export interface Props {
   title: string;
   onCloseFlyout: EuiFlyoutProps['onClose'];
   hit: DataTableRecord | null;
   loading: boolean;
+  error?: string | null;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
   hasAnimation?: boolean;
@@ -92,6 +137,7 @@ export function WaterfallFlyout({
   dataView,
   hit,
   loading,
+  error,
   children,
   title,
   dataTestSubj,
@@ -104,9 +150,11 @@ export function WaterfallFlyout({
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
+  const originDocType = useOriginDocType();
 
   useDocViewerSpanLogViewedEvent({
     reportEvent: analytics.reportEvent,
+    originDocType,
     contentId: flyoutContentId,
     tabId: selectedTabId,
     hit,
@@ -137,23 +185,27 @@ export function WaterfallFlyout({
           }
         `}
       >
-        {loading || !hit ? (
+        {loading ? (
           <EuiSkeletonText lines={5} />
+        ) : !hit && error ? (
+          <FetchErrorPrompt error={error} />
+        ) : !hit ? (
+          <NotFoundPrompt />
         ) : (
           <>
             <EuiTabs size="s">
               <FlyoutTabs onClick={setSelectedTabId} selectedTabId={selectedTabId} />
             </EuiTabs>
             <EuiSkeletonText isLoading={loading}>
-              {selectedTabId === tabIds.OVERVIEW && hit ? (
+              {selectedTabId === tabIds.OVERVIEW ? (
                 <EuiErrorBoundary>{children}</EuiErrorBoundary>
               ) : null}
 
-              {selectedTabId === tabIds.TABLE && hit ? (
+              {selectedTabId === tabIds.TABLE ? (
                 <DocViewerTable hit={hit} dataView={dataView} />
               ) : null}
 
-              {selectedTabId === tabIds.JSON && hit ? (
+              {selectedTabId === tabIds.JSON ? (
                 <DocViewerSource
                   id={hit.id}
                   index={hit.raw._index}

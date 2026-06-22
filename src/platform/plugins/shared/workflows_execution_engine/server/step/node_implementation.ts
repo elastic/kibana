@@ -22,9 +22,16 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
-  input: unknown;
-  output: unknown;
-  error: SerializedError | undefined;
+  input?: unknown;
+  output?: unknown;
+  error?: SerializedError | undefined;
+  /**
+   * When true, the step has handed control back to the scheduler (e.g. a
+   * durable poll step that put itself in WAITING state). The base run loop
+   * skips finishStep/failStep/navigateToNextNode so the persisted WAITING
+   * record drives the resume flow instead.
+   */
+  suspended?: true;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
@@ -154,8 +161,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
-    // flush event logs after start step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     // Create APM span for step execution visibility in traces
     const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
@@ -165,21 +170,37 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
     }
 
+    let suspended = false;
     try {
       input = await this.getInput();
       this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
-      // This is the generic catch-all that protects every step type against context growth.
-      // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
-      if (result.output != null && !result.error) {
+      // This is the generic catch-all that protects every step type against
+      // context growth. Layer 1 (pre-emptive I/O enforcement) may have
+      // already caught this at the transport level.
+      let measuredOutputSize: number | undefined;
+      if (result.output != null) {
         const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const outputSize = safeOutputSize(result.output);
-          if (outputSize > 0 && outputSize > maxBytes) {
+          // Fail closed on non-serializable outputs (null sentinel) — the
+          // value cannot be persisted to ES, so silently allowing it through
+          // would leak a payload of unknown size into in-memory state and
+          // bypass both the size limit and eviction.
+          if (outputSize === null) {
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
+          if (outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(maxBytes, this.step.name, {
+              actualBytes: outputSize,
+            });
+          }
+          // Forward the already-computed size to finishStep so the IO service
+          // can decide eviction without re-serialising. Zero-byte outputs are
+          // forwarded so the step still counts toward stats.
+          measuredOutputSize = outputSize;
         }
       }
 
@@ -192,13 +213,30 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         return;
       }
 
+      // The step (e.g. a durable poll) put itself in WAITING. Skip
+      // finishStep/failStep/navigateToNextNode — the persisted WAITING
+      // record drives the resume flow instead.
+      if (result.suspended) {
+        suspended = true;
+        if (stepSpan) {
+          stepSpan.setOutcome('unknown');
+        }
+        return;
+      }
+
       if (result.error) {
-        this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
+        // Pass partial output (e.g. token-usage metadata accumulated before a
+        // stream error) so it is persisted and reachable via
+        // `steps.x.output.metadata.usage` even when the step fails.
+        this.stepExecutionRuntime.failStep(
+          new ExecutionError(result.error),
+          result.output ?? undefined
+        );
         if (stepSpan) {
           stepSpan.setOutcome('failure');
         }
       } else {
-        this.stepExecutionRuntime.finishStep(result.output);
+        this.stepExecutionRuntime.finishStep(result.output, measuredOutputSize);
         if (stepSpan) {
           stepSpan.setOutcome('success');
         }
@@ -215,10 +253,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
     }
 
-    // flush event logs after finishing the step
-    await this.stepExecutionRuntime.flushEventLogs();
-
-    this.workflowExecutionRuntime.navigateToNextNode();
+    if (!suspended) {
+      this.workflowExecutionRuntime.navigateToNextNode();
+    }
   }
 
   // Subclasses implement this to execute the step logic

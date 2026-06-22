@@ -14,6 +14,9 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { useConnectors } from '../../hooks/use_connectors';
 import { getConnectorIcon } from '../../utils/connector_display';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
+import { getModelStatus } from '../../utils/eis_utils';
+import { EisModelStatus } from '../../types';
 
 const getConnectorTaskType = (connector: InferenceConnector): string => {
   if (connector.isInferenceEndpoint) {
@@ -69,10 +72,22 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
     return available.map((connector) => {
       const count = nameToCount.get(connector.name) ?? 1;
       const label = count > 1 ? `${connector.name} (${connector.connectorId})` : connector.name;
+      const status = getModelStatus(connector.metadata);
+      const isDeprecated =
+        status === EisModelStatus.Deprecated || status === EisModelStatus.DeprecatedEOL;
       return {
         label,
         key: connector.connectorId,
         prepend: <EuiIcon type={getConnectorIcon(connector)} size="s" aria-hidden />,
+        disabled: status === EisModelStatus.DeprecatedEOL,
+        append: isDeprecated ? (
+          <ModelStatusBadge
+            id={connector.connectorId}
+            status={status}
+            metadata={connector.metadata}
+            iconOnly
+          />
+        ) : undefined,
       };
     });
   }, [connectors, existingEndpointIds, taskType]);

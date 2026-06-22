@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,8 +20,8 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiToolTip,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
@@ -29,13 +29,13 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
+import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
 import { ActionPolicyStateBadge } from '../action_policy_state_badge';
 import { isSnoozed } from '../is_snoozed';
-import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
-import { BadgeList } from './badge_list';
-import { DestinationRow } from './destination_row';
+import { ActionPolicyDefinitionList } from './action_policy_definition_list';
 
 const FLYOUT_TITLE_ID = 'actionPolicyDetailsFlyoutTitle';
 const EMPTY_VALUE = '-';
@@ -52,6 +52,9 @@ interface Props {
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isStateLoading?: boolean;
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
+  hasAnimation?: EuiFlyoutProps['hasAnimation'];
 }
 
 export const ActionPolicyDetailsFlyout = ({
@@ -66,10 +69,20 @@ export const ActionPolicyDetailsFlyout = ({
   onCancelSnooze,
   onUpdateApiKey,
   isStateLoading = false,
+  session,
+  ownFocus = true,
+  hasAnimation = true,
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
+
+  const metadataUids = useMemo(
+    () => [policy.createdBy, policy.updatedBy].filter((uid): uid is string => Boolean(uid)),
+    [policy.createdBy, policy.updatedBy]
+  );
+
+  const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 
   const snoozedActive = isSnoozed(policy.snoozedUntil);
 
@@ -79,110 +92,23 @@ export const ActionPolicyDetailsFlyout = ({
   };
 
   const handleClone = (p: ActionPolicyResponse) => {
-    onClose();
     onClone(p);
   };
 
   const handleDelete = (p: ActionPolicyResponse) => {
-    onClose();
     onDelete(p);
   };
 
   const handleUpdateApiKey = (id: string) => {
-    onClose();
     onUpdateApiKey(id);
   };
-
-  const actionPolicyItems: EuiDescriptionListProps['listItems'] = [
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.description', {
-        defaultMessage: 'Description',
-      }),
-      description: policy.description ? policy.description : EMPTY_VALUE,
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.tags', {
-        defaultMessage: 'Tags',
-      }),
-      description:
-        policy.tags && policy.tags.length > 0 ? <BadgeList items={policy.tags} /> : EMPTY_VALUE,
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.matcher', {
-        defaultMessage: 'Matcher',
-      }),
-      description: policy.matcher ? (
-        <EuiCode>{policy.matcher}</EuiCode>
-      ) : (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.detailsFlyout.matchesAll"
-            defaultMessage="Matches all alerts."
-          />
-        </EuiText>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.dispatchMode', {
-        defaultMessage: 'Dispatch per',
-      }),
-      description: getGroupingModeLabel(policy.groupingMode),
-    },
-  ];
-  if (policy.groupingMode === 'per_field' && policy.groupBy && policy.groupBy.length > 0) {
-    actionPolicyItems.push({
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.groupBy', {
-        defaultMessage: 'Group by',
-      }),
-      description: <BadgeList items={policy.groupBy} />,
-    });
-  }
-  actionPolicyItems.push({
-    title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.frequency', {
-      defaultMessage: 'Frequency',
-    }),
-    description: (
-      <>
-        {getThrottleStrategyLabel(policy.throttle?.strategy, policy.groupingMode)}
-        {policy.throttle?.interval && (
-          <>
-            {' '}
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.detailsFlyout.interval"
-                defaultMessage="Every {interval}"
-                values={{ interval: policy.throttle.interval }}
-              />
-            </EuiText>
-          </>
-        )}
-      </>
-    ),
-  });
-  actionPolicyItems.push({
-    title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.destinations', {
-      defaultMessage: 'Destinations',
-    }),
-    description:
-      policy.destinations.length === 0 ? (
-        EMPTY_VALUE
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          {policy.destinations.map((destination) => (
-            <EuiFlexItem key={`${destination.type}-${destination.id}`}>
-              <DestinationRow destination={destination} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
-  });
 
   const metadataItems: EuiDescriptionListProps['listItems'] = [
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdBy', {
         defaultMessage: 'Created by',
       }),
-      description: policy.createdByUsername ?? EMPTY_VALUE,
+      description: resolveDisplayName(policy.createdBy, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdAt', {
@@ -194,7 +120,7 @@ export const ActionPolicyDetailsFlyout = ({
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedBy', {
         defaultMessage: 'Updated by',
       }),
-      description: policy.updatedByUsername ?? EMPTY_VALUE,
+      description: resolveDisplayName(policy.updatedBy, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedAt', {
@@ -207,9 +133,10 @@ export const ActionPolicyDetailsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      hasAnimation
+      hasAnimation={hasAnimation}
       size="s"
-      ownFocus
+      ownFocus={ownFocus}
+      session={session}
       hideCloseButton
       paddingSize="none"
       onClose={onClose}
@@ -244,15 +171,25 @@ export const ActionPolicyDetailsFlyout = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              onClick={onClose}
-              aria-label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
+            <EuiToolTip
+              content={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
                 defaultMessage: 'Close',
               })}
-              data-test-subj="detailsFlyoutCloseIcon"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={onClose}
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                data-test-subj="detailsFlyoutCloseIcon"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -303,7 +240,7 @@ export const ActionPolicyDetailsFlyout = ({
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiDescriptionList compressed type="column" listItems={actionPolicyItems} />
+          <ActionPolicyDefinitionList policy={policy} />
           <EuiHorizontalRule />
           <EuiTitle size="xs">
             <h3>

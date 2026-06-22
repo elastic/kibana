@@ -28,7 +28,7 @@ import { OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID, type LogDocumentProfileProvider 
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
-  (prev, { context }) =>
+  (prev, { context, toolkit }) =>
   (params) => {
     const prevDocViewer = prev(params);
 
@@ -69,7 +69,7 @@ export const createGetDocViewer =
                 streamsFeature={streamsFeature}
                 cpsHasLinkedProjects={cpsHasLinkedProjects}
                 indexes={indexes}
-                docViewActions={params.actions}
+                docViewActions={toolkit.actions}
                 {...props}
               />
             );

@@ -289,9 +289,17 @@ export const movingAverageOperationSchema = metricOperationSharedSchema.extends(
   { meta: { id: 'movingAverageOperation', title: METRIC_OP_TITLES.movingAverage } }
 );
 
-export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends(
+export const cumulativeSumOperationSchema = metricOperationSharedSchema.extends(
   {
     operation: schema.literal('cumulative_sum'),
+    field: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.',
+        },
+      })
+    ),
   },
   { meta: { id: 'cumulativeSumOperation', title: METRIC_OP_TITLES.cumulativeSum } }
 );
@@ -338,6 +346,17 @@ export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf(
   }
 );
 
+export const fieldMetricOrStaticOrFormulaOperationDefinitionSchema = schema.oneOf(
+  [fieldMetricOperationsSchema, staticOperationDefinitionSchema, formulaOperationDefinitionSchema],
+  {
+    meta: {
+      title: 'Field Metric, Static Value, or Formula Operation',
+      description:
+        'Metric dimension using a field-based aggregation, a static value, or a mathematical formula.',
+    },
+  }
+);
+
 export type LensApiReferableMetricOperations =
   | LensApiCountMetricOperation
   | LensApiUniqueCountMetricOperation
@@ -364,6 +383,11 @@ export type LensApiStaticValueOperation = TypeOf<typeof staticOperationDefinitio
 
 export type LensApiFieldMetricOrFormulaOperation =
   | LensApiFieldMetricOperations
+  | LensApiFormulaOperation;
+
+export type LensApiFieldMetricOrStaticOrFormulaOperation =
+  | LensApiFieldMetricOperations
+  | LensApiStaticValueOperation
   | LensApiFormulaOperation;
 
 export type LensApiAllMetricOrFormulaOperations =

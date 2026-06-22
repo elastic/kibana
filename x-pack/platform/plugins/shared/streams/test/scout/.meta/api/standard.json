@@ -1,6 +1,17 @@
 {
-  "sha1": "bf21dbb038d8102155c251443b318bff09967812",
+  "sha1": "f0f47bc3d5813d360763b9200f4cc744c2389b91",
   "tests": [
+    {
+      "id": "4aaafd2a7000640-70ec3e6d9549722",
+      "title": "Teardown environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
+        "line": 11,
+        "column": 19
+      }
+    },
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
       "title": "Setup environment for Streams API tests",
@@ -13,8 +24,8 @@
       }
     },
     {
-      "id": "a940fbb08bf35e5-b0497b949dc6073",
-      "title": "Insights CRUD API should create a new insight",
+      "id": "b44f6c2216cb6bc-ea3faff2f10da6c",
+      "title": "Memory CRUD API smoke: create, read, search, categories, soft-delete, and restore by name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -23,14 +34,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 65,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 45,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-4cf3f03dab9340c",
-      "title": "Insights CRUD API should get an insight by ID",
+      "id": "b44f6c2216cb6bc-597176718a618d6",
+      "title": "Memory CRUD API a freshly written page is immediately readable without polling",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -39,14 +50,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 90,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 216,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-566c7fade75040e",
-      "title": "Insights CRUD API should return 404 for non-existent insight",
+      "id": "b44f6c2216cb6bc-24f17689411c1be",
+      "title": "Memory CRUD API removing a category does not return the stale older version",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -55,30 +66,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 116,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 305,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-cf00fb204ed0373",
-      "title": "Insights CRUD API should list all insights",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 129,
-        "column": 13
-      }
-    },
-    {
-      "id": "a940fbb08bf35e5-50c0d497cbfa529",
-      "title": "Insights CRUD API should filter insights by impact",
+      "id": "b44f6c2216cb6bc-0f36a39d57a31b9",
+      "title": "Memory CRUD API search does not return a page whose latest version no longer matches the filter",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -87,14 +82,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 170,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 379,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-68edc56df260e0f",
-      "title": "Insights CRUD API should update an existing insight",
+      "id": "b44f6c2216cb6bc-695cc6450b8de2c",
+      "title": "Memory CRUD API search does not return a soft-deleted page even if its latest version matches the filter",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -103,14 +98,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 209,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 442,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-29fe613a0f05ad5",
-      "title": "Insights CRUD API should delete an insight",
+      "id": "504e25785616fe1-1d8b985de6fcd2d",
+      "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -119,14 +114,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 245,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "line": 29,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-7788fbe4dc6bdfd",
-      "title": "Insights CRUD API should return 404 when deleting non-existent insight",
+      "id": "504e25785616fe1-6eae18e8b4c773e",
+      "title": "Onboarding bulk status API rejects an empty streamNames array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -135,30 +130,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 278,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "line": 55,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-3c7873d8e863808",
-      "title": "Insights CRUD API should bulk create insights",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 294,
-        "column": 13
-      }
-    },
-    {
-      "id": "a940fbb08bf35e5-eafe0d356e0d196",
-      "title": "Insights CRUD API should bulk delete insights",
+      "id": "504e25785616fe1-4d182347c2af93f",
+      "title": "Onboarding bulk status API returns 403 when significant events is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -167,121 +146,135 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 330,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "line": 67,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-92a60158012600a",
-      "title": "Insights CRUD API should handle mixed bulk operations",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 381,
-        "column": 13
-      }
-    },
-    {
-      "id": "a940fbb08bf35e5-e61787ff5cbb060",
-      "title": "Insights CRUD API should fail bulk operations with non-existent IDs",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 444,
-        "column": 13
-      }
-    },
-    {
-      "id": "a940fbb08bf35e5-beee0cf3c2cdf70",
-      "title": "Insights CRUD API should deny read-only user from creating insights",
+      "id": "94c80912f6246f4-094ac08f869a28e",
+      "title": "Significant Events discovery pipeline API POST _execute (trigger) returns an executionId",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 465,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 30,
         "column": 12
       }
     },
     {
-      "id": "a940fbb08bf35e5-70c03112e8a6bff",
-      "title": "Insights CRUD API should deny read-only user from bulk operations",
+      "id": "94c80912f6246f4-b38b60bd6807012",
+      "title": "Significant Events discovery pipeline API GET _status returns a valid status after trigger",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/insights_crud.spec.ts",
-        "line": 482,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 47,
         "column": 12
       }
     },
     {
-      "id": "54ee3174f5dbdf3-5bab250ba3d86c5",
-      "title": "ki_search tool returns knowledge indicators (features + queries) by default",
-      "expectedStatus": "skipped",
+      "id": "94c80912f6246f4-8f29a28b4278864",
+      "title": "Significant Events discovery pipeline API POST _execute (cancel) returns executionId or null",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
-        "line": 93,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 72,
         "column": 12
       }
     },
     {
-      "id": "54ee3174f5dbdf3-9752a372fadba87",
-      "title": "ki_search tool supports kind=[query] (queries-only KIs)",
-      "expectedStatus": "skipped",
+      "id": "53fcb18bfdd8ffe-9ee0f0d7f22c74a",
+      "title": "Draft stream simulation should simulate a set processor on a draft stream",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
-        "line": 193,
-        "column": 12
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 57,
+        "column": 10
       }
     },
     {
-      "id": "54ee3174f5dbdf3-2717e2cf72d2328",
-      "title": "ki_search tool returns an error result when Significant Events is disabled",
-      "expectedStatus": "skipped",
+      "id": "53fcb18bfdd8ffe-613a376a423c275",
+      "title": "Draft stream simulation should simulate grok processing on a draft stream",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
-        "line": 217,
-        "column": 12
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 85,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-13442199fc239a6",
+      "title": "Draft stream simulation should detect mapping errors for draft stream detected_fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-8021a5e1c328229",
+      "title": "Draft stream simulation should report processor failures correctly on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 162,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-8814c3f8c6c4449",
+      "title": "Draft stream simulation should simulate processing on a nested draft (draft child of draft)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 194,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-eca05f32c585194",
+      "title": "Draft stream simulation should simulate multiple sequential processors on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 230,
+        "column": 10
       }
     },
     {

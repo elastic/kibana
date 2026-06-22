@@ -17,6 +17,13 @@ interface MockEndpoint {
   service_settings?: Record<string, unknown>;
   metadata?: {
     display?: { name?: string; model_creator?: string };
+    heuristics?: {
+      properties?: string[];
+      status?: string;
+      end_of_life_date?: string;
+      release_date?: string;
+      [key: string]: unknown;
+    };
     [key: string]: unknown;
   };
 }
@@ -51,6 +58,10 @@ const endpointsAsConnectors = (endpoints: MockEndpoint[]) =>
       isInferenceEndpoint: true,
       isPreconfigured: !!ep.metadata?.display?.name,
       isEis: ep.service === 'elastic',
+      // Surface metadata at the top level so the deprecation logic in
+      // model_settings.tsx (which reads connector.metadata.heuristics) and
+      // the Add Model popover (which calls getModelStatus on it) work.
+      metadata: ep.metadata,
     }));
 
 const fulfillConnectors = async (page: ScoutPage, connectors: unknown[]) => {

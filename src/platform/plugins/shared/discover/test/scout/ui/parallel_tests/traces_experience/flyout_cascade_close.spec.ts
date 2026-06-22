@@ -48,7 +48,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       // Suppress the tour so it does not overlap the waterfall flyout interactions.
       await page.evaluate(() => localStorage.setItem('fullscreenWaterfallTourDismissed', 'true'));
     });

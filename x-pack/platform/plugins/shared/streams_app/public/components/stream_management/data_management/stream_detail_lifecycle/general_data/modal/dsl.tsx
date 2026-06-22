@@ -111,7 +111,6 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
             }
           >
             <EuiContextMenuPanel
-              size="s"
               items={timeUnits.map((unit) => (
                 <EuiContextMenuItem
                   key={unit.value}

@@ -25,10 +25,8 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
-import {
-  useSendMessage,
-  useSendMessageContext,
-} from '../../context/send_message/send_message_context';
+import { useConversationStream } from '../../hooks/use_conversation_stream';
+import { useStreamingContext } from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
@@ -56,9 +54,9 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
-  const { isResponseLoading } = useSendMessage();
+  const { isResponseLoading } = useConversationStream();
   const isAnyStreaming = useIsAnyConversationStreaming();
-  const { cancelAllStreams } = useSendMessageContext();
+  const { cancelAllStreams } = useStreamingContext();
   const conversationRounds = useConversationRounds();
   const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
@@ -66,7 +64,13 @@ export const Conversation: React.FC<{}> = () => {
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
   const { attachmentsService } = useAgentBuilderServices();
-  const { attachments: stagedAttachments = [], upsertAttachments } = useConversationContext();
+  const {
+    attachments: stagedAttachments = [],
+    upsertAttachments,
+    initialMessage,
+    autoSendInitialMessage,
+  } = useConversationContext();
+  const isPendingAutoSend = Boolean(initialMessage && autoSendInitialMessage);
   const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
@@ -154,8 +158,11 @@ export const Conversation: React.FC<{}> = () => {
     padding-bottom: ${euiTheme.size.base};
   `;
 
-  if (!hasActiveConversation) {
+  if (!hasActiveConversation && !isPendingAutoSend) {
     return <NewConversationPrompt />;
+  }
+  if (isPendingAutoSend && !hasActiveConversation) {
+    return null;
   }
 
   if (errorType) {

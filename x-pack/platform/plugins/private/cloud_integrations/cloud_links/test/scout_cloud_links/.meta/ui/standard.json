@@ -1,0 +1,187 @@
+{
+  "sha1": "65ec61ebc2a08258e91693a78442962a905ef6d2",
+  "tests": [
+    {
+      "id": "6a809f032317cab-9d625a74b69e51b",
+      "title": "Appearance selector modal has 4 color mode options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/appearance.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "6a809f032317cab-9f382a8c62f4282",
+      "title": "Appearance selector modal color mode changes affect the rendered theme",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/appearance.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "0da412ce46ac828-58e728275ad606b",
+      "title": "Cloud Links integration: Unprivileged User viewer sees nav and org/profile links but not billing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links_unprivileged.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "91cd9184b31ae7a-ca508fc9b995616",
+      "title": "Cloud Links integration connection details overlay shows ES URL and Cloud ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "91cd9184b31ae7a-978f6e30e85be1d",
+      "title": "Cloud Links integration connection details API key can be created",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "91cd9184b31ae7a-345e2f02fda41b7",
+      "title": "Cloud Links integration nav shows \"Manage this deployment\" link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
+        "line": 92,
+        "column": 7
+      }
+    },
+    {
+      "id": "91cd9184b31ae7a-f29eed17d656d6a",
+      "title": "Cloud Links integration user menu shows cloud profile links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
+        "line": 100,
+        "column": 7
+      }
+    },
+    {
+      "id": "a95d71ed3a6f6c5-3e0ecb0c015084a",
+      "title": "Cloud onboarding redirect with no token goes to the default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "a95d71ed3a6f6c5-e903c7559c82f61",
+      "title": "Cloud onboarding redirect saves and updates onboarding token and security details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "a95d71ed3a6f6c5-71c445698a3dbe2",
+      "title": "Cloud onboarding redirect saves and updates resource data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
+        "line": 94,
+        "column": 7
+      }
+    },
+    {
+      "id": "a95d71ed3a6f6c5-81bee6c2f78ab55",
+      "title": "Cloud onboarding redirect saves and updates deployment resource data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
+        "line": 128,
+        "column": 7
+      }
+    },
+    {
+      "id": "a95d71ed3a6f6c5-9fca1ca5611685e",
+      "title": "Cloud onboarding keeps initial onboarding token when not provided on update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
+        "line": 166,
+        "column": 7
+      }
+    },
+    {
+      "id": "bc0872f750778f4-592f7738df14a95",
+      "title": "Trial Product Intercept trial intercept can be dismissed and does not reappear",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/trial_product_intercepts.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    }
+  ]
+}

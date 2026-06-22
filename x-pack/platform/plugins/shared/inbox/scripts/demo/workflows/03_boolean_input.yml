@@ -1,0 +1,22 @@
+# Inbox demo workflow — boolean approval gate
+name: inbox-demo-boolean
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ask_approval
+    type: waitForInput
+    with:
+      message: "Approve isolation of host-42?"
+      schema:
+        type: object
+        properties:
+          approved:
+            type: boolean
+            title: Approve isolation
+        required:
+          - approved
+  - name: log_approval
+    type: console
+    with:
+      message: "Approved? {{ steps.ask_approval.output.approved }}"

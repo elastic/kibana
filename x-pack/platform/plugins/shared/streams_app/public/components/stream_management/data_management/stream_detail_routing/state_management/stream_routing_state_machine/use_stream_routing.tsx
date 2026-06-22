@@ -87,8 +87,8 @@ export const useStreamRoutingEvents = () => {
       editRule: (id: string) => {
         service.send({ type: 'routingRule.edit', id });
       },
-      forkStream: async (routingRule?: RoutingDefinition) => {
-        service.send({ type: 'routingRule.fork', routingRule });
+      forkStream: async (routingRule?: RoutingDefinition, draft?: boolean) => {
+        service.send({ type: 'routingRule.fork', routingRule, draft });
 
         await waitFor(
           service,

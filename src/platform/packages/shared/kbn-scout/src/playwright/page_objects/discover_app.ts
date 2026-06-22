@@ -12,6 +12,23 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
+import { DataViewEditorPage } from './data_view_editor_page';
+import { resolveSelector } from '../utils/locator_helper';
+
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
+export type DiscoverQueryMode = 'esql' | 'classic';
+
+export interface DiscoverGotoOptions {
+  queryMode?: DiscoverQueryMode;
+}
+
+export interface DataViewOptions {
+  /** Data view title; `*` is appended automatically by the editor. */
+  name: string;
+  /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
+  adHoc?: boolean;
+}
 
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
@@ -20,7 +37,9 @@ export class DiscoverApp {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
-  async goto() {
+  async goto(options: DiscoverGotoOptions = {}) {
+    if (options.queryMode) await this.setQueryMode(options.queryMode);
+
     await this.page.gotoApp('discover');
     await this.waitForDiscoverPage();
   }
@@ -78,6 +97,48 @@ export class DiscoverApp {
       .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
+  /**
+   * Returns the trimmed display name of the currently selected data view.
+   */
+  async getSelectedDataViewName(): Promise<string> {
+    return (await this.getSelectedDataView().innerText()).trim();
+  }
+
+  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+    const editor = new DataViewEditorPage(this.page);
+    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+
+    // FTR passes the base name and relies on the editor auto-appending `*` as the
+    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
+    // here to preserve that contract (`name`, `* will be added automatically`).
+    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
+
+    // wait for timestamp options; default @timestamp applies.
+    await editor.timestampField
+      .and(this.page.locator('[data-is-loading="0"]'))
+      .waitFor({ state: 'visible', timeout: 30_000 });
+
+    if (adHoc) {
+      await this.page.testSubj.click('exploreIndexPatternButton');
+      await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
+    } else {
+      await editor.save();
+    }
+
+    await this.waitUntilTabIsLoaded();
+  }
+
+  /**
+   * Creates a new data view from the Discover search bar data-view switcher
+   * (classic mode only). The editor appends `*` to the title automatically.
+   */
+  async createDataViewFromSearchBar(options: DataViewOptions) {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await dataViewSwitch.click();
+    await this.page.testSubj.click('dataview-create-new');
+    await this.fillAndSubmitDataViewEditor(options);
+  }
+
   private async clickAppMenuItem(
     testId: string,
     { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
@@ -129,14 +190,111 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
 
+  async saveSearchAsNew(name: string) {
+    await this.page.testSubj.click('discoverSaveButton');
+    await this.page.testSubj.fill('savedObjectTitle', name);
+    const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click();
+    }
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+  }
+
+  /**
+   * Save the currently rendered inline visualization (e.g. an ES|QL chart) to a
+   * brand-new dashboard via the "Save visualization" flow in the unified
+   * histogram. Returns once the save modal has closed.
+   */
+  async saveVisualizationToNewDashboard(visName: string) {
+    await this.page.testSubj.click('unifiedHistogramSaveVisualization');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
+    await this.page.testSubj.fill('savedObjectTitle', visName);
+    // Clicking the EuiRadio wrapper does not toggle the underlying input
+    // reliably; clicking the associated label does.
+    await this.page.locator('label[for="new-dashboard-option"]').click();
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+  }
+
   async waitUntilFieldListHasCountOfFields() {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
       state: 'hidden',
     });
   }
 
+  /**
+   * Returns the number of fields shown in the sidebar "Available fields" group.
+   */
+  async getSidebarAvailableFieldCount(): Promise<number> {
+    await this.waitUntilFieldListHasCountOfFields();
+    const count = await this.page.testSubj.innerText('fieldListGroupedAvailableFields-count');
+    return Number(count);
+  }
+
+  /**
+   * Filters the sidebar field list by the given search term.
+   */
+  async searchFieldInSidebar(name: string) {
+    await this.page.testSubj.fill('fieldListFiltersFieldSearch', name);
+  }
+
+  /**
+   * Assert that the "Selected fields" sidebar group contains exactly the
+   * fields named in `expected` — no more, no less. Useful for verifying ES|QL
+   * `KEEP` clauses or any explicit column-selection flow.
+   */
+  async expectSelectedSidebarFieldsToEqual(expected: readonly string[]) {
+    await this.waitUntilFieldListHasCountOfFields();
+    const selectedFields = this.page.testSubj.locator('fieldListGroupedSelectedFields');
+    await expect(selectedFields).toBeVisible();
+
+    const entries = selectedFields.getByTestId(/^dscFieldListPanelField-/);
+    await expect(entries).toHaveCount(expected.length);
+
+    for (const field of expected) {
+      await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toBeVisible();
+    }
+  }
+
   async waitForHistogramRendered() {
     await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
+  }
+
+  /**
+   * Returns the rendered height (rounded to whole pixels) of the fixed histogram panel
+   * Rounding avoids sub-pixel noise so callers can assert exact resize deltas.
+   */
+  async getHistogramHeight(): Promise<number> {
+    const histogram = this.page.testSubj.locator('unifiedHistogramResizablePanelFixed');
+    await histogram.waitFor();
+    const box = await histogram.boundingBox();
+    if (!box) {
+      throw new Error('Could not read the histogram panel bounding box');
+    }
+    return Math.round(box.height);
+  }
+
+  /**
+   * Drags the histogram resize handle vertically by `distance` pixels (positive
+   * grows the histogram).
+   * Neither Scout nor Playwright has a drag-by-offset helper (Scout's
+   * `testSubj.dragTo` only drags element-to-element), so we drive the mouse
+   * manually.
+   */
+  async resizeHistogramBy(distance: number) {
+    const resizeButton = this.page.testSubj.locator('unifiedHistogramResizableButton');
+    await resizeButton.waitFor();
+    const box = await resizeButton.boundingBox();
+    if (!box) {
+      throw new Error('Could not read the histogram resize handle bounding box');
+    }
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX, startY + distance, { steps: 10 });
+    await this.page.mouse.up();
   }
 
   async getCurrentQueryName(): Promise<string> {
@@ -194,6 +352,12 @@ export class DiscoverApp {
       state: 'hidden',
       timeout: 30_000,
     });
+  }
+
+  // Waits for a Discover tab to finish loading.
+  async waitUntilTabIsLoaded() {
+    await this.waitForDiscoverPage();
+    await this.waitUntilSearchingHasFinished();
   }
 
   // Waits for the document table to be fully rendered and stable
@@ -375,6 +539,14 @@ export class DiscoverApp {
     });
   }
 
+  /**
+   * Returns the label currently shown on the histogram breakdown selector button
+   * (e.g. `"Breakdown by geo.src"` or `"No breakdown"`.
+   */
+  async getBreakdownFieldValue(): Promise<string> {
+    return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+  }
+
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
     const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
     await button.click();
@@ -413,11 +585,53 @@ export class DiscoverApp {
     await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
-  async getDocHeader(): Promise<string> {
+  async getDocHeader(): Promise<string[]> {
     const headers = await this.page
-      .locator('[data-test-subj^="dataGridHeaderCell-"]')
+      .locator(
+        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      )
       .allInnerTexts();
-    return headers.join(',');
+    return headers.map((h) => h.trim());
+  }
+
+  /**
+   * Returns structured row data from the data grid, excluding control columns.
+   * Each inner array contains the visible text of each data cell in that row.
+   * When `isAnchorRow` is true, only the highlighted anchor row (context view) is returned.
+   */
+  async getDataGridRows(options?: { isAnchorRow?: boolean }): Promise<string[][]> {
+    const cellSelector = options?.isAnchorRow
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
+      : '.euiDataGridRowCell';
+
+    await this.page.locator(`${cellSelector} >> nth=0`).waitFor({
+      state: 'visible',
+      timeout: 30_000,
+    });
+
+    return this.page.evaluate((sel: string) => {
+      const cells = document.querySelectorAll(sel);
+      const rows: string[][] = [];
+      let rowIdx = -1;
+      let prevVisibleRowIndex = -1;
+
+      cells.forEach((cell) => {
+        const visibleRowIndex = Number(cell.getAttribute('data-gridcell-visible-row-index'));
+        if (prevVisibleRowIndex !== visibleRowIndex) {
+          rowIdx++;
+          rows[rowIdx] = [];
+          prevVisibleRowIndex = visibleRowIndex;
+        }
+        if (!cell.classList.contains('euiDataGridRowCell--controlColumn')) {
+          const content =
+            cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ??
+            (cell as HTMLElement);
+          rows[rowIdx].push(content.innerText.trim());
+        }
+      });
+
+      return rows;
+    }, cellSelector);
   }
 
   async showChart() {
@@ -426,6 +640,10 @@ export class DiscoverApp {
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+  }
+
+  async expectXYVisChartVisible() {
+    await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
   }
 
   async navigateToLensEditor() {
@@ -438,15 +656,25 @@ export class DiscoverApp {
   }
 
   async writeAndSubmitKqlQuery(query: string) {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'classic') {
+      throw new Error(
+        `writeAndSubmitKqlQuery requires Discover to be in classic mode, but the current mode is "${currentMode}".`
+      );
+    }
+
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
-    await this.page.testSubj.click('querySubmitButton');
+    await this.submitQuery();
     await this.waitUntilSearchingHasFinished();
   }
 
   async dragFieldToGrid(fieldName: string[]) {
+    const gridLocator = this.page.testSubj.locator('euiDataGridBody');
     for (const field of fieldName) {
-      await this.page.testSubj.dragTo(`field-${field}`, 'euiDataGridBody');
+      // Fields can appear in both "Popular fields" and the full field list.
+      await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
     }
   }
 
@@ -459,8 +687,8 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    // 1. Navigate to the export menu
-    await this.page.testSubj.click('exportTopNavButton');
+    // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
+    await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
 
     // 2. Trigger the report generation
@@ -489,29 +717,34 @@ export class DiscoverApp {
   }
 
   async selectTextBaseLang() {
-    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'esql') {
       await this.page.testSubj.click('select-text-based-language-btn');
-      await this.waitUntilSearchingHasFinished();
-      await this.codeEditor.waitCodeEditorReady('ESQLEditor');
     }
+
+    await this.waitUntilSearchingHasFinished();
+    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
-    await this.page.testSubj.click('querySubmitButton');
+    await this.submitQuery();
     await this.waitUntilSearchingHasFinished();
   }
 
-  async navigateToTabByName(name: string) {
-    const tabsBar = this.page.testSubj.locator('unifiedTabs_tabsBar');
-    const tab = tabsBar.getByRole('tab', { name });
-    await tab.click();
-    await expect(tab).toHaveAttribute('aria-selected', 'true');
+  /**
+   * Submits the current query (classic search bar or ES|QL editor) by clicking
+   * the query submit button. Does not wait for results — pair with
+   * `waitUntilSearchingHasFinished()` or `waitUntilTabIsLoaded()` as appropriate.
+   */
+  async submitQuery() {
+    await this.page.testSubj.click('querySubmitButton');
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
-    await this.page.testSubj.click('querySubmitButton');
+    await this.submitQuery();
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
@@ -537,7 +770,7 @@ export class DiscoverApp {
   async runRecommendedEsqlQuery(queryLabel: string) {
     await this.openRecommendedQueriesPanel();
 
-    const queryOption = this.esqlMenuPopover.getByRole('button', {
+    const queryOption = this.esqlMenuPopover.getByRole('menuitem', {
       exact: true,
       name: queryLabel,
     });
@@ -612,5 +845,91 @@ export class DiscoverApp {
     }
 
     await expect(docTable).toContainText(text);
+  }
+
+  /**
+   * Persists the requested Discover query mode in localStorage on the next
+   * page load. Useful to make tests resilient to the `discover.isEsqlDefault`
+   * feature flag being toggled at the project level.
+   *
+   * Note: this is not idempotent. Each call registers an additional init
+   * script via Playwright's `addInitScript`, and on subsequent page loads
+   * every registered script runs in order, so the value written by the
+   * last call wins. Avoid calling it multiple times in the same test
+   * unless that stacking behavior is intentional.
+   */
+  public setQueryMode(mode: DiscoverQueryMode) {
+    return this.page.addInitScript(
+      ([_mode, _discoverQueryModeKey]) => {
+        window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
+      },
+      [mode, DISCOVER_QUERY_MODE_KEY]
+    );
+  }
+
+  /**
+   * Detects whether Discover is currently rendering ES|QL or classic
+   * (KQL + data view) mode by racing the two mode-specific anchors:
+   * the ES|QL editor and the classic KQL `queryInput`.
+   */
+  async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
+    const esqlEditor = this.page.testSubj.locator('ESQLEditor');
+    const classicQueryInput = this.page.testSubj.locator('queryInput');
+
+    // Wait until one of the two mode-specific anchors is rendered
+    await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
+
+    // Return the mode that is currently visible
+    return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
+  }
+
+  async isShowingDocViewer(): Promise<boolean> {
+    try {
+      await this.page.testSubj
+        .locator('kbnDocViewer')
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Inside an open document-viewer flyout, type a field name into the search
+   * input to filter the fields table. Mirrors the FTR
+   * `discover.findFieldByNameOrValueInDocViewer`.
+   */
+  async findFieldByNameOrValueInDocViewer(name: string) {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
+    await searchInput.fill(name);
+    await expect(searchInput).toHaveValue(name, { timeout: 5_000 });
+  }
+
+  /**
+   * Inside an open document-viewer flyout, click a cell-level action button
+   * for a given field (e.g. `addFilterForValueButton`, `addExistsFilterButton`).
+   * Mirrors the FTR `dataGrid.clickFieldActionInFlyout`.
+   */
+  async clickFieldActionInFlyout(fieldName: string, actionName: string) {
+    const isValueAction = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(
+      actionName
+    );
+    const cellTestSubj = isValueAction
+      ? `tableDocViewRow-${fieldName}-value`
+      : `tableDocViewRow-${fieldName}-name`;
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await expect(async () => {
+      const cell = flyout.locator(`[data-test-subj="${cellTestSubj}"]`);
+      await cell.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await cell.hover();
+
+      const actionBtn = flyout.locator(`[data-test-subj="${actionName}-${fieldName}"]`);
+      await actionBtn.waitFor({ state: 'visible' });
+      await actionBtn.click();
+    }).toPass({ timeout: 15_000 });
   }
 }

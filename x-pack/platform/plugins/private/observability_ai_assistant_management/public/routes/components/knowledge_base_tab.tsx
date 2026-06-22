@@ -329,7 +329,6 @@ export function KnowledgeBaseTab() {
                   }
                 >
                   <EuiContextMenuPanel
-                    size="s"
                     items={[
                       <EuiContextMenuItem
                         key="singleEntry"
@@ -339,7 +338,6 @@ export function KnowledgeBaseTab() {
                           setIsNewEntryPopoverOpen(false);
                           setNewEntryFlyoutType('singleEntry');
                         }}
-                        size="s"
                       >
                         {i18n.translate(
                           'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.singleEntryContextMenuItemLabel',

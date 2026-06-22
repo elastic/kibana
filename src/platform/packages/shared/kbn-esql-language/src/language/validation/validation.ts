@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ESQLCommand } from '@elastic/esql/types';
 import { EsqlQuery } from '@elastic/esql';
-import { walk } from '@elastic/esql';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands/registry';
 import type { ICommandCallbacks } from '../../commands/registry/types';
@@ -70,38 +69,23 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources, views] = await Promise.all([
-    shouldValidateCallback(callbacks, 'getSources')
-      ? retrieveSources(rootCommands, callbacks)
-      : new Set<string>(),
-    shouldValidateCallback(callbacks, 'getPolicies')
-      ? retrievePolicies(rootCommands, callbacks)
-      : new Map(),
-    shouldValidateCallback(callbacks, 'getJoinIndices') ? callbacks?.getJoinIndices?.() : undefined,
-    shouldValidateCallback(callbacks, 'getTimeseriesIndices')
-      ? callbacks?.getTimeseriesIndices?.()
-      : undefined,
-    shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
-  ]);
-
-  const sourceQuery = queryString.split('|')[0];
-  const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
-    ? await new QueryColumns(
-        EsqlQuery.fromSrc(sourceQuery).ast,
-        sourceQuery,
-        callbacks,
-        options
-      ).asMap()
-    : new Map();
-
-  if (shouldValidateCallback(callbacks, 'getColumnsFor') && sourceFields.size > 0) {
-    messages.push(
-      ...validateUnsupportedTypeFields(
-        sourceFields as Map<string, ESQLFieldWithMetadata>,
-        rootCommands
-      )
-    );
-  }
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets] =
+    await Promise.all([
+      shouldValidateCallback(callbacks, 'getSources')
+        ? retrieveSources(rootCommands, callbacks)
+        : new Set<string>(),
+      shouldValidateCallback(callbacks, 'getPolicies')
+        ? retrievePolicies(rootCommands, callbacks)
+        : new Map(),
+      shouldValidateCallback(callbacks, 'getJoinIndices')
+        ? callbacks?.getJoinIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getTimeseriesIndices')
+        ? callbacks?.getTimeseriesIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
+      shouldValidateCallback(callbacks, 'getDatasets') ? callbacks?.getDatasets?.() : undefined,
+    ]);
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license
@@ -118,6 +102,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
       views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
     const commandMessages = validateCommand(command, references, rootCommands, {
@@ -161,6 +146,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
       views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
@@ -242,6 +228,7 @@ function validateCommand(
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
     views: references.views,
+    datasets: references.datasets,
     unmappedFieldsStrategy,
   };
 
@@ -262,31 +249,5 @@ function validateCommand(
 
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-function validateUnsupportedTypeFields(
-  fields: Map<string, ESQLFieldWithMetadata>,
-  commands: ESQLAstAllCommands[]
-) {
-  const usedColumnsInQuery: string[] = [];
-
-  walk(commands, {
-    visitColumn: (node) => usedColumnsInQuery.push(node.name),
-  });
-  const messages: ESQLMessage[] = [];
-  for (const column of usedColumnsInQuery) {
-    if (fields.has(column) && fields.get(column)!.type === 'unsupported') {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFieldType',
-          values: {
-            field: column,
-          },
-          locations: { min: 1, max: 1 },
-        })
-      );
-    }
-  }
   return messages;
 }

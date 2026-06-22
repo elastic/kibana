@@ -23,9 +23,9 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import type { DataStreamStats } from './use_data_stream_stats';
 import { formatBytes } from '../helpers/format_bytes';
-import { OverrideSettingsModal } from '../downsampling/override_settings_modal/override_settings_modal';
-import { EditDslStepsFlyout } from '../downsampling/edit_dsl_steps_flyout/edit_dsl_steps_flyout';
-import { MAX_DOWNSAMPLE_STEPS } from '../downsampling/edit_dsl_steps_flyout/form';
+import { OverrideSettingsModal } from '../data_phases/override_settings_modal/override_settings_modal';
+import { EditDslStepsFlyout } from '../data_phases/edit_dsl_steps_flyout/edit_dsl_steps_flyout';
+import { MAX_DOWNSAMPLE_STEPS } from '../data_phases/edit_dsl_steps_flyout/form';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
 import { buildLifecyclePhases } from '../common/data_lifecycle/lifecycle_types';
 import {
@@ -270,7 +270,7 @@ export const useDslLifecycleSummary = ({
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.lifecycleSummary.downsampleStepsUpdated', {
-          defaultMessage: 'Downsampling steps updated',
+          defaultMessage: 'Applied changes to downsample steps',
         }),
       });
 

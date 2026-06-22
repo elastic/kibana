@@ -14,6 +14,9 @@ import type {
 import {
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
 } from '../../constants/attachments';
 
 const isReferenceAttachmentId = (value: unknown): value is string | string[] => {
@@ -72,3 +75,19 @@ export const isUnifiedEventAttachment = (
   attachment: AttachmentRequestV2
 ): attachment is UnifiedReferenceAttachmentPayload =>
   isUnifiedReferenceAttachmentRequest(attachment) && isEventAttachmentType(attachment.type);
+
+// ------ Alert -------
+export const UNIFIED_ALERT_TYPES_ARRAY: string[] = [
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+];
+export const UNIFIED_ALERT_TYPES = new Set<string>(UNIFIED_ALERT_TYPES_ARRAY);
+
+export const isAlertAttachmentType = (type: string): boolean =>
+  type === AttachmentType.alert || UNIFIED_ALERT_TYPES.has(type);
+
+export const isUnifiedAlertAttachment = (
+  attachment: AttachmentRequestV2
+): attachment is UnifiedReferenceAttachmentPayload =>
+  isUnifiedReferenceAttachmentRequest(attachment) && UNIFIED_ALERT_TYPES.has(attachment.type);

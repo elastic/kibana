@@ -118,11 +118,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(resp.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
-      it('returns {} if matching data stream is not available', async () => {
+      it('returns an empty-data details payload when matching data stream is not available', async () => {
         const nonExistentDataSet = 'Non-existent';
         const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
         const resp = await callApiAs(supertestEditorWithCookieCredentials, nonExistentDataStream);
-        expect(resp.body).empty();
+        expect(resp.status).to.be(200);
+        expect(resp.body.docsCount).to.be(0);
+        expect(resp.body.degradedDocsCount).to.be(0);
+        expect(resp.body.services).to.eql({});
+        expect(resp.body.hosts).to.eql({});
+        expect(resp.body.sizeBytes).to.be(0);
       });
 
       it('returns service.name and host.name correctly', async () => {

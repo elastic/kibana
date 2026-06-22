@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AlertEventSeverity } from '../../resources/datastreams/alert_events';
+
 export type RuleId = string;
 export type ActionPolicyId = string;
 export type ActionGroupId = string;
@@ -21,6 +23,7 @@ export interface AlertEpisode {
   group_hash: string;
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  severity?: AlertEventSeverity;
   data?: AlertEpisodeData;
 }
 
@@ -50,13 +53,8 @@ export interface DispatcherTaskState {
 export interface Rule {
   id: RuleId;
   spaceId: string;
-  kind: 'alert' | 'signal';
   name: string;
-  description: string;
   tags: string[];
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface ActionPolicy {
@@ -76,12 +74,11 @@ export interface ActionPolicy {
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
-    interval?: string; // e.g. '1h', '30m', '5m'
+    interval?: string | null; // e.g. '1h', '30m', '5m'; null for intervalless strategies
   };
   snoozedUntil?: string | null;
   /** Target destinations to dispatch matched episodes to */
   destinations: ActionPolicyDestination[];
-
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }
@@ -98,13 +95,17 @@ export interface ActionGroup {
   destinations: ActionPolicyDestination[];
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
+
+export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export interface LastNotifiedRecord {
@@ -139,7 +140,7 @@ export interface DispatcherPipelineState {
   readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
+export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'engine_disabled';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

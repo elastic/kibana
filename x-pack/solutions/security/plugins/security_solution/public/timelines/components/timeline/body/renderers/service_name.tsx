@@ -46,7 +46,7 @@ const ServiceNameComponent: React.FC<Props> = ({
 
   const isInSecurityApp = useIsInSecurityApp();
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const { entityRecord } = useEntityFromStore({
     entityId,

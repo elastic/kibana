@@ -12,9 +12,15 @@ export { GenAISemanticConventions, ElasticGenAIAttributes } from './src/types';
 export {
   BAGGAGE_TRACKING_BEACON_KEY,
   BAGGAGE_TRACKING_BEACON_VALUE,
-  EVAL_RUN_ID_BAGGAGE_KEY,
+  EXECUTION_ID_BAGGAGE_KEY,
+  EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
 } from './src/baggage';
 
 export { isInferenceSpan } from './src/is_inference_span';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';
 export { PhoenixSpanProcessor } from './src/phoenix/phoenix_span_processor';
+export {
+  initInferenceTracerProvider,
+  getInferenceTracer,
+  shutdownInferenceTracerProvider,
+} from './src/inference_tracer_provider';

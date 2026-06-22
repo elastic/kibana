@@ -14,6 +14,7 @@ const TELEMETRY_PREFIX = 'agent_builder';
 export const AGENT_BUILDER_EVENT_TYPES = {
   OptInAction: `${TELEMETRY_PREFIX}_opt_in_action`,
   OptOut: `${TELEMETRY_PREFIX}_opt_out`,
+  UiClick: `${TELEMETRY_PREFIX}_ui_click`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
   AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
@@ -27,6 +28,11 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
   ToolCallSuccess: `${TELEMETRY_PREFIX}_tool_call_success`,
   ToolCallError: `${TELEMETRY_PREFIX}_tool_call_error`,
+  ManageEntityListView: `${TELEMETRY_PREFIX}_manage_entity_list_view`,
+  UsedByWarningShown: `${TELEMETRY_PREFIX}_used_by_warning_shown`,
+  UsedByWarningProceeded: `${TELEMETRY_PREFIX}_used_by_warning_proceeded`,
+  InappChatOpen: `${TELEMETRY_PREFIX}_inapp_chat_open`,
+  FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
 } as const;
 
 export type OptInSource =
@@ -60,6 +66,21 @@ export interface ReportOptOutParams {
 export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
+  item_count?: number;
+}
+
+export type AgentBuilderUiClickElementKind =
+  | 'button'
+  | 'link'
+  | 'role_button'
+  | 'input_button'
+  | 'other';
+
+export interface ReportUiClickParams {
+  ebt_element: string;
+  ebt_action?: string;
+  ebt_detail?: string;
+  element_kind: AgentBuilderUiClickElementKind;
 }
 
 export interface ReportRoundCompleteParams {
@@ -141,6 +162,8 @@ export interface ReportSkillCreatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API creates, `plugin` for plugin-bundled creates). */
   origin?: SkillCreationOrigin;
+  /** Deduplicated, normalized tool IDs included in the created skill. */
+  tool_ids: string[];
 }
 
 /** Telemetry params reported when a user-created skill is updated. */
@@ -153,6 +176,8 @@ export interface ReportSkillUpdatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API updates, `plugin` for plugin-bundled updates). */
   origin?: SkillCreationOrigin;
+  /** Deduplicated, normalized tool IDs included in the updated skill. */
+  tool_ids: string[];
 }
 
 /** Telemetry params reported when a user-created skill is deleted. */
@@ -225,9 +250,39 @@ export interface ReportToolCallErrorParams {
   duration_ms: number;
 }
 
+export interface ReportManageEntityListViewParams {
+  entity_type: string;
+  entity_count: number;
+}
+
+export interface ReportUsedByWarningShownParams {
+  entity_type: string;
+  agent_count: number;
+}
+
+export interface ReportUsedByWarningProceededParams {
+  entity_type: string;
+  agent_count: number;
+}
+
+export interface ReportInappChatOpenParams {
+  agent_id: string;
+  kibana_app?: string;
+  agent_count?: number;
+}
+
+export type FullscreenEntryPointSource = 'inapp_escalation' | 'direct' | 'bookmark' | 'redirect';
+
+export interface ReportFullscreenEntryPointParams {
+  agent_id: string;
+  conversation_id: string;
+  source: FullscreenEntryPointSource;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
+  [AGENT_BUILDER_EVENT_TYPES.UiClick]: ReportUiClickParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
@@ -246,11 +301,17 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess]: ReportToolCallSuccessParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCallError]: ReportToolCallErrorParams;
+  [AGENT_BUILDER_EVENT_TYPES.ManageEntityListView]: ReportManageEntityListViewParams;
+  [AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown]: ReportUsedByWarningShownParams;
+  [AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded]: ReportUsedByWarningProceededParams;
+  [AGENT_BUILDER_EVENT_TYPES.InappChatOpen]: ReportInappChatOpenParams;
+  [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
 }
 
 export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptInActionParams>
   | EventTypeOpts<ReportOptOutParams>
+  | EventTypeOpts<ReportUiClickParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
@@ -263,11 +324,17 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportRoundErrorParams>
   | EventTypeOpts<ReportToolCallSuccessParams>
-  | EventTypeOpts<ReportToolCallErrorParams>;
+  | EventTypeOpts<ReportToolCallErrorParams>
+  | EventTypeOpts<ReportManageEntityListViewParams>
+  | EventTypeOpts<ReportUsedByWarningShownParams>
+  | EventTypeOpts<ReportUsedByWarningProceededParams>
+  | EventTypeOpts<ReportInappChatOpenParams>
+  | EventTypeOpts<ReportFullscreenEntryPointParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
+  | typeof AGENT_BUILDER_EVENT_TYPES.UiClick
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
@@ -280,7 +347,12 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundError
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess
-  | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallError;
+  | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallError
+  | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityListView
+  | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown
+  | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded
+  | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
+  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -346,6 +418,41 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.UiClick,
+  schema: {
+    ebt_element: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Primary click identity from data-ebt-element (nearest ancestor from the interactive element upward)',
+        optional: false,
+      },
+    },
+    ebt_action: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional data-ebt-action from DOM',
+        optional: true,
+      },
+    },
+    ebt_detail: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional data-ebt-detail from DOM',
+        optional: true,
+      },
+    },
+    element_kind: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kind of activated control (button|link|role_button|input_button|other)',
+        optional: false,
+      },
+    },
+  },
+};
+
 const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.AddToChatClicked,
   schema: {
@@ -367,6 +474,13 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
       },
       _meta: {
         description: 'Types of attachments',
+        optional: true,
+      },
+    },
+    item_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of items added via bulk add-to-chat. Absent for single-item pathways.',
         optional: true,
       },
     },
@@ -471,6 +585,21 @@ const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    tool_ids: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID included in the created skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        },
+      },
+      _meta: {
+        description:
+          'Tool IDs included in the created skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -491,6 +620,21 @@ const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Origin of the updated skill (custom for direct API updates, plugin for plugin-bundled updates)',
         optional: true,
+      },
+    },
+    tool_ids: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID included in the updated skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        },
+      },
+      _meta: {
+        description:
+          'Tool IDs included in the updated skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+        optional: false,
       },
     },
   },
@@ -983,10 +1127,124 @@ const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const MANAGE_ENTITY_LIST_VIEW_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ManageEntityListView,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity on the list page (tool|plugin|skill)',
+        optional: false,
+      },
+    },
+    entity_count: {
+      type: 'integer',
+      _meta: { description: 'Number of entities shown in the list', optional: false },
+    },
+  },
+};
+
+const USED_BY_WARNING_SHOWN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity the warning is about (tool|plugin|skill)',
+        optional: false,
+      },
+    },
+    agent_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of agents currently using the entity',
+        optional: false,
+      },
+    },
+  },
+};
+
+const USED_BY_WARNING_PROCEEDED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Type of entity the user proceeded to modify despite the warning (tool|plugin|skill)',
+        optional: false,
+      },
+    },
+    agent_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of agents affected at the time the user proceeded',
+        optional: false,
+      },
+    },
+  },
+};
+
+const INAPP_CHAT_OPEN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.InappChatOpen,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent active when the in-app chat panel opened',
+        optional: false,
+      },
+    },
+    kibana_app: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Kibana application where the in-app chat was opened (e.g. dashboard, discover)',
+        optional: true,
+      },
+    },
+    agent_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of agents available to the user when the chat opened',
+        optional: true,
+      },
+    },
+  },
+};
+
+const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the agent in the full-screen conversation', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the conversation opened in full-screen', optional: false },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'How the user arrived at full-screen (inapp_escalation|direct|bookmark|redirect)',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
+  UI_CLICK_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
+  MANAGE_ENTITY_LIST_VIEW_EVENT,
+  USED_BY_WARNING_SHOWN_EVENT,
+  USED_BY_WARNING_PROCEEDED_EVENT,
+  INAPP_CHAT_OPEN_EVENT,
+  FULLSCREEN_ENTRY_POINT_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [

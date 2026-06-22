@@ -23,9 +23,7 @@ const mockAttrs: ActionPolicySavedObjectAttributes = {
     createdByUser: false,
   },
   createdBy: 'elastic',
-  createdByUsername: 'elastic',
   updatedBy: 'elastic',
-  updatedByUsername: 'elastic',
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };
@@ -399,6 +397,73 @@ describe('ActionPolicySavedObjectService', () => {
       const result = await service.bulkDelete({ ids: ['policy-missing'] });
 
       expect(result).toEqual([{ id: 'policy-missing', error: soError }]);
+    });
+  });
+
+  describe('find', () => {
+    const makeFindResponse = () => ({
+      saved_objects: [],
+      total: 0,
+      per_page: 10,
+      page: 1,
+    });
+
+    it('passes search, searchFields, and defaultSearchOperator AND when search is provided', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({ page: 1, perPage: 10, search: 'my-policy' });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'my-policy',
+          searchFields: ['name', 'description'],
+          defaultSearchOperator: 'AND',
+        })
+      );
+    });
+
+    it('does not pass search, searchFields, or defaultSearchOperator when search is undefined', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({ page: 1, perPage: 10 });
+
+      const callArgs = mockSoClient.find.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty('search');
+      expect(callArgs).not.toHaveProperty('searchFields');
+      expect(callArgs).not.toHaveProperty('defaultSearchOperator');
+    });
+
+    it('passes filter, sortField, and sortOrder', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({
+        page: 2,
+        perPage: 5,
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+      });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 2,
+          perPage: 5,
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+        })
+      );
+    });
+
+    it('defaults sortField to name.keyword and sortOrder to asc', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({ page: 1, perPage: 10 });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'name.keyword',
+          sortOrder: 'asc',
+        })
+      );
     });
   });
 

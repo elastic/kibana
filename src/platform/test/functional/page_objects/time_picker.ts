@@ -194,10 +194,10 @@ export class TimePickerPageObject extends FtrService {
       if (isShowDatesButton) {
         await this.testSubjects.moveMouseTo('superDatePickerShowDatesButton');
         await this.testSubjects.click('superDatePickerShowDatesButton', 50);
-      }
-      await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
-      // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
-      if (isShowDatesButton) {
+        // Close the start date popover which opens automatically
+        await this.testSubjects.existOrFail('superDatePickerstartDatePopoverButton', {
+          timeout: 1000,
+        });
         await this.testSubjects.click('superDatePickerstartDatePopoverButton');
       }
     });
@@ -321,6 +321,15 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async isOff() {
+    // The new picker renders a hidden `kbnQueryBar-datePicker-disabled` span
+    // whenever the time filter is off (no-time-field data view, isDisabled
+    // prop, or auto-refresh-only mode); the legacy picker renders it visibly
+    // inside the SuperDatePicker's isDisabled.display node.
+    if (await this.testSubjects.exists('kbnQueryBar-datePicker-disabled', { allowHidden: true })) {
+      return true;
+    }
+    // Legacy auto-refresh-only mode doesn't render the span; the
+    // SuperDatePicker collapses to a readOnly EuiAutoRefresh control instead.
     return await this.find.existsByCssSelector('.euiAutoRefresh .euiFormControlLayout-readOnly');
   }
 
@@ -520,7 +529,8 @@ export class TimePickerPageObject extends FtrService {
 
   public async getShowDatesButtonText() {
     if (await this.isNewDateRangePicker()) {
-      return (await this.testSubjects.getAttribute('dateRangePickerControlButton', 'value')) ?? '';
+      const valueDisplay = await this.testSubjects.find('dateRangePickerValueDisplay');
+      return await valueDisplay.getVisibleText();
     }
     const button = await this.testSubjects.find('superDatePickerShowDatesButton');
     const text = await button.getVisibleText();

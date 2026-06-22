@@ -24,6 +24,7 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { inlineCastsMapping } from '../generated/inline_casts_mapping';
+import { EsqlFunctionNames } from '../generated/function_names';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
@@ -105,11 +106,23 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { location, returnTypes, ignored = [], allowed = [] } = predicates;
+  const { location, returnTypes, ignored = [], allowed = [], isTimeseriesSource } = predicates;
 
   return functions.filter(
-    ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license, observabilityTier }) => {
+    ({
+      name,
+      locationsAvailable,
+      ignoreAsSuggestion,
+      tsdbCompatible,
+      signatures,
+      license,
+      observabilityTier,
+    }) => {
       if (ignoreAsSuggestion) {
+        return false;
+      }
+
+      if (isTimeseriesSource && tsdbCompatible === false) {
         return false;
       }
 
@@ -416,4 +429,12 @@ export const buildColumnSuggestions = (
  */
 export function getFunctionForInlineCast(castingType: InlineCastingType): string | undefined {
   return inlineCastsMapping[castingType];
+}
+
+export function isTypeConversionFunction(functionName: string): boolean {
+  const lower = functionName.toLowerCase();
+  return (
+    // TO_TEXT is the only conversion function not covered by inlineCastsMapping (text is not an inline cast type).
+    lower === EsqlFunctionNames.TO_TEXT || Object.values<string>(inlineCastsMapping).includes(lower)
+  );
 }

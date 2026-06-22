@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '../constants';
 
@@ -28,6 +28,8 @@ export class ServiceMapPage {
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
   public serviceMapOptionsPanel: Locator;
+  public serviceMapHideControlsButton: Locator;
+  public serviceMapShowControlsButton: Locator;
   public serviceMapFindInPageInput: Locator;
   /**
    * Native search `<input>` (`SERVICE_MAP_FIND_INPUT_ID`). Prefer this for fill/focus so React
@@ -35,6 +37,17 @@ export class ServiceMapPage {
    */
   public serviceMapFindInPageNativeInput: Locator;
   public serviceMapFindMatchSummary: Locator;
+  public readonly serviceMapEmbeddable: Locator;
+  public readonly serviceMapEditorSaveButton: Locator;
+  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxWrapper;
+  public readonly serviceMapEditorEnvironmentComboBoxInput: Locator;
+  public readonly serviceMapEditorKueryInput: Locator;
+  public readonly serviceMapViewFullMapButton: Locator;
+  public readonly dashboardEmbeddablePanel: Locator;
+  public readonly maximizedDashboardPanel: Locator;
+
+  private readonly serviceMapEditorServiceNameComboBoxLoading: Locator;
+  private readonly serviceMapEditorEnvironmentComboBoxLoading: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
@@ -61,9 +74,30 @@ export class ServiceMapPage {
       'apmEdgeContentsOpenInDiscoverButton'
     );
     this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
+    this.serviceMapHideControlsButton = page.testSubj.locator('serviceMapHideControlsButton');
+    this.serviceMapShowControlsButton = page.testSubj.locator('serviceMapShowControlsButton');
     this.serviceMapFindInPageInput = page.testSubj.locator('serviceMapControlsSearch');
     this.serviceMapFindInPageNativeInput = page.locator('#serviceMapFindInPageInput');
     this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
+    this.serviceMapEmbeddable = page.testSubj.locator('apmServiceMapEmbeddable');
+    this.serviceMapEditorSaveButton = page.testSubj.locator('apmServiceMapEditorSaveButton');
+    this.serviceMapEditorServiceNameComboBox = new EuiComboBoxWrapper(
+      page,
+      'apmServiceMapEditorServiceNameComboBox'
+    );
+    this.serviceMapEditorServiceNameComboBoxLoading = page.testSubj.locator(
+      'apmServiceMapEditorServiceNameComboBoxLoading'
+    );
+    this.serviceMapEditorEnvironmentComboBoxLoading = page.testSubj.locator(
+      'apmServiceMapEditorEnvironmentComboBoxLoading'
+    );
+    this.serviceMapEditorEnvironmentComboBoxInput = page.testSubj
+      .locator('apmServiceMapEditorEnvironmentComboBox')
+      .locator('[data-test-subj="comboBoxInput"]');
+    this.serviceMapEditorKueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');
+    this.serviceMapViewFullMapButton = page.testSubj.locator('serviceMapViewFullMapButton');
+    this.dashboardEmbeddablePanel = page.testSubj.locator('embeddablePanel');
+    this.maximizedDashboardPanel = page.locator('.dshLayout-isMaximizedPanel');
   }
 
   async gotoWithDateSelected(start: string, end: string, options?: { kuery?: string }) {
@@ -105,6 +139,27 @@ export class ServiceMapPage {
 
   async waitForMapToLoad() {
     await this.serviceMapGraph.waitFor({ state: 'visible' });
+  }
+
+  async getServiceMapEditorComboBoxLoadingCount() {
+    return (
+      (await this.serviceMapEditorServiceNameComboBoxLoading.count()) +
+      (await this.serviceMapEditorEnvironmentComboBoxLoading.count())
+    );
+  }
+
+  getServiceMapNodeContextHighlightFrame(serviceName: string) {
+    return this.page.testSubj.locator(
+      `serviceMapNodeContextHighlightFrame > serviceMapNode-service-${serviceName}`
+    );
+  }
+
+  async selectServiceMapEditorEnvironment(environment: string) {
+    await this.serviceMapEditorEnvironmentComboBoxInput.click();
+    await this.page.keyboard.type(environment, { delay: 50 });
+    const environmentOption = this.page.getByRole('option', { name: environment });
+    await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await environmentOption.click();
   }
 
   /**
@@ -344,6 +399,30 @@ export class ServiceMapPage {
   async dismissPopoverIfOpen() {
     await this.page.keyboard.press('Escape');
     await this.waitForPopoverToBeHidden({ timeout: 2000 }).catch(() => {});
+  }
+
+  /**
+   * Collapse the options panel if it is currently open. Use in tests that don't exercise the
+   * panel itself so the expanded menu can't overlap nodes/edges/badges after fit view.
+   */
+  async closeOptionsPanelIfOpen() {
+    if (await this.serviceMapHideControlsButton.isVisible().catch(() => false)) {
+      await this.serviceMapHideControlsButton.click();
+      await this.serviceMapOptionsPanel.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {});
+    }
+  }
+
+  /**
+   * Expand the options panel if it is currently collapsed. Use in tests that assert on
+   * panel contents (find-in-page input, filters) after the panel was closed in beforeEach.
+   */
+  async openOptionsPanelIfClosed() {
+    if (await this.serviceMapShowControlsButton.isVisible().catch(() => false)) {
+      await this.serviceMapShowControlsButton.click();
+      await this.serviceMapOptionsPanel
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .catch(() => {});
+    }
   }
 
   async getPopoverTitle() {

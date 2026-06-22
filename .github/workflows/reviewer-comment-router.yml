@@ -1,0 +1,80 @@
+name: Reviewer Comment Router
+
+on:
+  issue_comment:
+    types: [ created ]
+  pull_request_review_comment:
+    types: [ created ]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  route:
+    name: Route reviewer comment
+    if: |
+      github.event.sender.type != 'Bot'
+      && (
+        (
+          github.event_name == 'issue_comment'
+          && github.event.issue.pull_request
+          && !contains(github.event.issue.labels.*.name, 'reviewer:skip-ai')
+          && (
+            (
+              contains(github.event.comment.body, '@codex')
+              && contains(github.event.issue.labels.*.name, 'reviewer:codex')
+            )
+            || (
+              contains(github.event.comment.body, '@claude')
+              && contains(github.event.issue.labels.*.name, 'reviewer:claude')
+            )
+            || (
+              contains(github.event.comment.body, '@scout')
+              && contains(github.event.issue.labels.*.name, 'reviewer:scout')
+            )
+          )
+        )
+        || (
+          github.event_name == 'pull_request_review_comment'
+          && !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai')
+          && (
+            (
+              contains(github.event.comment.body, '@codex')
+              && contains(github.event.pull_request.labels.*.name, 'reviewer:codex')
+            )
+            || (
+              contains(github.event.comment.body, '@claude')
+              && contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+            )
+            || (
+              contains(github.event.comment.body, '@scout')
+              && contains(github.event.pull_request.labels.*.name, 'reviewer:scout')
+            )
+          )
+        )
+      )
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout workflow scripts
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Validate reviewer comment
+        id: route
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          script: |
+            const { routeReviewerComment } = require('./.github/scripts/reviewer_comment');
+            await routeReviewerComment({ context, core });
+
+      - name: Upload reviewer comment
+        if: steps.route.outputs.matched == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reviewer-comment
+          path: reviewer-comment/comment.json
+          retention-days: 1

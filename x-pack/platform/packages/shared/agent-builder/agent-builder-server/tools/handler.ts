@@ -13,18 +13,19 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentExecutionMode } from '@kbn/agent-builder-common';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type {
   ToolEventEmitter,
   ModelProvider,
   ScopedRunner,
   ToolProvider,
   ToolResultStore,
+  SkillsStore,
   ToolPromptManager,
   ToolStateManager,
   ToolManager,
   RunContext,
 } from '../runner';
-import type { IToolFileStore } from '../runner/filestore';
 import type { SkillsService } from '../runner/skills_service';
 import type { ToolCallSource } from '../runner/runner';
 import type { AttachmentStateManager } from '../attachments';
@@ -126,6 +127,10 @@ export interface ToolHandlerContext {
    */
   resultStore: ToolResultStore;
   /**
+   * Skills store to access skill files (and their per-file metadata) during execution.
+   */
+  skillsStore: SkillsStore;
+  /**
    * Event emitter that can be used to emits custom events
    */
   events: ToolEventEmitter;
@@ -147,10 +152,6 @@ export interface ToolHandlerContext {
    */
   attachments: AttachmentStateManager;
   /**
-   * File store to access data from the agent's virtual filesystem
-   */
-  filestore: IToolFileStore;
-  /**
    * Skills service to interact with skills.
    */
   skills: SkillsService;
@@ -167,4 +168,9 @@ export interface ToolHandlerContext {
    * When 'standalone', the execution is non-interactive (HITL disabled).
    */
   executionMode?: AgentExecutionMode;
+  /**
+   * The effective agent configuration for the current run, with any
+   * runtime configuration overrides already applied.
+   */
+  agentConfiguration?: AgentConfiguration;
 }

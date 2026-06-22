@@ -2,13 +2,14 @@ notify:
   - slack:
       channels:
         - '#kibana-operations-alerts'
+      message: "<!subteam^S2XQAJ39Q|kibana-operations-team> Version bump to ${NEW_VERSION} — ${BUILDKITE_BUILD_URL}"
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) &&
       (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
         - '#mission-control'
       message: |
-        Kibana has been bumped to `${NEW_VERSION}` on branch `${BRANCH}` and a DRA build has begun.
+        Kibana has been bumped to `${NEW_VERSION}` on branch `${BRANCH}`.
         Build: ${BUILDKITE_BUILD_URL}
     if: build.state == "passed"
 
@@ -55,3 +56,23 @@ steps:
           field: '.version'
           expected_value: '${NEW_VERSION}-SNAPSHOT'
           polling_interval: '30'
+
+  - wait
+
+  - name: 'slack notification'
+    command: .buildkite/scripts/steps/version_bump/slack_notify.sh
+    soft_fail: true
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+
+  - key: verify-es-snapshot
+    label: 'Verify ES Snapshot'
+    trigger: kibana-elasticsearch-snapshot-verify
+    async: true
+    soft_fail: true
+    if: build.env("DRY_RUN") != "true"
+    build:
+      branch: $BRANCH

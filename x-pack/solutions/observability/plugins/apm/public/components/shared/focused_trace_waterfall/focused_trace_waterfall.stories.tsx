@@ -8,18 +8,10 @@
 import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { FocusedTraceWaterfall } from '.';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 const stories: Meta<any> = {
-  title: 'FocusedTraceWaterfall',
+  title: 'shared/TraceWaterfall/FocusedTraceWaterfall',
   component: FocusedTraceWaterfall,
-  decorators: [
-    (StoryComponent) => (
-      <MockApmPluginStorybook>
-        <StoryComponent />
-      </MockApmPluginStorybook>
-    ),
-  ],
 };
 export default stories;
 
