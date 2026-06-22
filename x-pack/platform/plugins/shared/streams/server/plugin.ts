@@ -26,6 +26,7 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
 import { installWorkflows } from './lib/workflows/setup/install_workflows';
@@ -114,6 +115,7 @@ export class StreamsPlugin
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
   private streamsGetScopedClients?: GetScopedClients;
+  private subscriptions: Subscription[] = [];
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -645,30 +647,34 @@ export class StreamsPlugin
         }
       );
 
-      memoryEnabled$.subscribe(() => {
-        void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
-          (error: unknown) => {
+      this.subscriptions.push(
+        memoryEnabled$.subscribe(() => {
+          void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
+            (error: unknown) => {
+              this.logger.error(
+                `streams: Failed to install memory managed workflows after feature flag change: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+          );
+        })
+      );
+
+      this.subscriptions.push(
+        investigationEnabled$.subscribe(() => {
+          void this.installInvestigationWorkflowIfEnabled(
+            workflowsExtensions,
+            core.featureFlags
+          ).catch((error: unknown) => {
             this.logger.error(
-              `streams: Failed to install memory managed workflows after feature flag change: ${
+              `streams: Failed to install investigation managed workflow after feature flag change: ${
                 error instanceof Error ? error.message : String(error)
               }`
             );
-          }
-        );
-      });
-
-      investigationEnabled$.subscribe(() => {
-        void this.installInvestigationWorkflowIfEnabled(
-          workflowsExtensions,
-          core.featureFlags
-        ).catch((error: unknown) => {
-          this.logger.error(
-            `streams: Failed to install investigation managed workflow after feature flag change: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
-      });
+          });
+        })
+      );
     }
 
     if (plugins.agentBuilder && this.server && this.streamsGetScopedClients) {
@@ -770,6 +776,7 @@ export class StreamsPlugin
   }
 
   public async stop() {
+    this.subscriptions.forEach((s) => s.unsubscribe());
     await this.patternExtractionService?.stop();
   }
 }

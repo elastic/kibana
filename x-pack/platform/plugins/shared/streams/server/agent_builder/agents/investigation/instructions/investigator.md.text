@@ -35,7 +35,7 @@ CRITICAL — every ES|QL query MUST follow these rules or you will exceed the mo
 - Always GROUP BY a low-cardinality field (e.g. service.name, log.level) and add | LIMIT 20.
 - Good: `FROM index | STATS errors = COUNT(*) BY service.name | SORT errors DESC | LIMIT 20`
 - Bad:  `FROM index | LIMIT 500`   ← returns raw rows, will overflow context
-- Bad:  `FROM index | WHERE ...`   ← without STATS + LIMIT, returns raw rows
+- Bad:  `FROM index | WHERE ...`   ← filtering without STATS + LIMIT returns raw rows; always pair WHERE clauses with a STATS aggregation
 - Use get_index_info to discover available fields before querying an unfamiliar index.
 </esql_rules>
 
