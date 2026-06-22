@@ -16,6 +16,7 @@ import {
   type StoredQueryKnowledgeIndicator,
   type StoredTombstone,
 } from '../data_stream';
+import { computeFeatureUuid } from '@kbn/streams-schema';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 jest.mock('../../../sig_events/latest_source_query', () => {
@@ -40,30 +41,39 @@ import { executeAndDecodeSource } from '../../../sig_events/latest_source_query'
 
 const STREAM = 'logs-app';
 
+// Mirrors the server-side derivation: the stored document `id` is the
+// deterministic uuid computed from (slug, stream_name, type).
+function featureUuid(slug: string, type = 'entity'): string {
+  return computeFeatureUuid({ id: slug, stream_name: STREAM, type });
+}
+
 function createFeatureDoc(
-  overrides: Partial<StoredFeatureKnowledgeIndicator> = {}
+  overrides: Partial<StoredFeatureKnowledgeIndicator> & { slug?: string } = {}
 ): StoredFeatureKnowledgeIndicator {
+  const { slug = 'feat-1', ...rest } = overrides;
   return {
     '@timestamp': '2026-01-01T00:00:00.000Z',
-    id: 'feat-1',
+    id: featureUuid(slug),
     type: KI_TYPE_FEATURE,
     'stream.name': STREAM,
     title: 'Some entity',
     description: 'desc',
     feature: {
+      slug,
       type: 'entity',
       subtype: 'service',
       properties: { name: 'checkout' },
       confidence: 80,
     },
-    ...overrides,
+    ...rest,
   };
 }
 
 function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   return createFeatureDoc({
-    id: 'computed-1',
+    id: 'computed-1-uuid',
     feature: {
+      slug: 'computed-1',
       type: 'dataset_analysis',
       properties: {},
       confidence: 100,
@@ -106,17 +116,17 @@ describe('KnowledgeIndicatorClient.bulk', () => {
   describe('exclude', () => {
     it('reads the latest revision and appends a new one with excluded=true', async () => {
       const { client, create, runEsql } = makeClient();
-      const latest = createFeatureDoc({ id: 'feat-1' });
+      const latest = createFeatureDoc();
       runEsql.mockResolvedValueOnce({ hits: [latest] });
 
-      const result = await client.bulk(STREAM, [{ exclude: { id: 'feat-1' } }]);
+      const result = await client.bulk(STREAM, [{ exclude: { id: latest.id } }]);
 
       expect(result).toEqual({ applied: 1, skipped: 0 });
       expect(create).toHaveBeenCalledTimes(1);
       const [{ documents }] = create.mock.calls[0];
       expect(documents).toHaveLength(1);
       const written = documents[0] as StoredFeatureKnowledgeIndicator;
-      expect(written.id).toBe('feat-1');
+      expect(written.id).toBe(latest.id);
       expect(written.type).toBe(KI_TYPE_FEATURE);
       expect(written.excluded).toBe(true);
       // Payload preserved
@@ -160,10 +170,10 @@ describe('KnowledgeIndicatorClient.bulk', () => {
   describe('restore', () => {
     it('reads the latest revision and re-indexes with excluded cleared and fresh timestamps', async () => {
       const { client, create, runEsql } = makeClient();
-      const latest = createFeatureDoc({ id: 'feat-1', excluded: true });
+      const latest = createFeatureDoc({ excluded: true });
       runEsql.mockResolvedValueOnce({ hits: [latest] });
 
-      const result = await client.bulk(STREAM, [{ restore: { id: 'feat-1' } }]);
+      const result = await client.bulk(STREAM, [{ restore: { id: latest.id } }]);
 
       expect(result).toEqual({ applied: 1, skipped: 0 });
       expect(runEsql).toHaveBeenCalledTimes(1);
@@ -171,7 +181,7 @@ describe('KnowledgeIndicatorClient.bulk', () => {
       const [{ documents }] = create.mock.calls[0];
       expect(documents).toHaveLength(1);
       const written = documents[0] as StoredFeatureKnowledgeIndicator;
-      expect(written.id).toBe('feat-1');
+      expect(written.id).toBe(latest.id);
       expect(written.type).toBe(KI_TYPE_FEATURE);
       expect(written.excluded).toBeUndefined();
       // Payload preserved
@@ -293,8 +303,8 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
 
   it('returns active and excluded merged when includeExcluded is set', async () => {
     const { client, runEsql } = makeClient();
-    const active = createFeatureDoc({ id: 'a' });
-    const excluded = createFeatureDoc({ id: 'b', excluded: true });
+    const active = createFeatureDoc({ slug: 'a' });
+    const excluded = createFeatureDoc({ slug: 'b', excluded: true });
     runEsql.mockResolvedValueOnce({ hits: [active, excluded] });
 
     const { hits } = await client.getFeatures(STREAM, { includeExcluded: true });
@@ -382,12 +392,12 @@ describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
   it('returns excluded features in the order returned by ES|QL (sort pushed into query)', async () => {
     const { client, runEsql } = makeClient();
     const older = createFeatureDoc({
-      id: 'old',
+      slug: 'old',
       excluded: true,
       '@timestamp': '2026-01-01T00:00:00.000Z',
     });
     const newer = createFeatureDoc({
-      id: 'new',
+      slug: 'new',
       excluded: true,
       '@timestamp': '2026-02-01T00:00:00.000Z',
     });
