@@ -1,14 +1,8 @@
-fileGroups:
-  src:
-    - 'version_dependencies.txt'
 tags:
   - is-webpack-built
 tasks:
   extract-version-dependencies:
-    command: node
     args:
-      - scripts/extract_version_dependencies.js
-      - src/platform/packages/private/kbn-ui-shared-deps-npm/version_dependencies.txt
       - --collect
       - '@babel/runtime'
       - --collect
@@ -96,42 +90,11 @@ tasks:
       - --collect
       - webpack
       - --transitive
-    env:
-      CI_STATS_DISABLED: 'true'
-    inputs:
-      - /package.json
-      - /yarn.lock
-    outputs:
-      - version_dependencies.txt
-    options:
-      runFromWorkspaceRoot: true
   build-webpack:
-    command: yarn
     args:
-      - build
-    deps:
-      - ~:extract-version-dependencies
-      - '^:build-webpack'
-    inputs:
-      - '@group(src)'
-      - 'package.json'
-      - 'webpack.config.js'
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
+      - --task-name
+      - shared_built_assets
   watch-webpack:
-    type: run
-    options:
-      persistent: true
-    command: yarn
     args:
-      - build
-      - '--watch'
-    deps:
-      - extract-version-dependencies
-      - '^:build-webpack'
-    inputs:
-      - '@group(src)'
-      - 'package.json'
-      - 'webpack.config.js'
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
+      - --task-name
+      - shared_built_assets
