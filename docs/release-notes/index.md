@@ -61,7 +61,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **{{esql}} editor**:
 * Fixes a regression where KQL autocomplete suggestions stopped working in the {{esql}} editor [#273931]({{kib-pull}}273931).
-* Fixes editing of object fields in the {{esql}} **Index** editor when using dot-notation column names [#273303]({{kib-pull}}273303).
+* Fixes editing of object fields in the {{esql}} lookup index editor when using dot-notation column names [#273303]({{kib-pull}}273303).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.4.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
