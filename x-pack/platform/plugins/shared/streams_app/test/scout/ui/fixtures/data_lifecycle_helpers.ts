@@ -16,8 +16,6 @@ export const RETENTION_TEST_IDS = {
   // Successful data: edit lifecycle method flyout
   successfulLifecycleFlyout: 'streamsEditSuccessfulDataLifecycleFlyout',
   successfulInheritCheckbox: 'dataLifecycleInheritCheckbox',
-  // Backwards-compatible alias for the inherit control (now a checkbox in the flyout).
-  inheritSwitch: 'dataLifecycleInheritCheckbox',
   successfulFlyoutApplyButton: 'dataLifecycleFlyoutApplyButton',
   successfulFlyoutCancelButton: 'dataLifecycleFlyoutCancelButton',
 
@@ -47,25 +45,12 @@ export const RETENTION_TEST_IDS = {
 } as const;
 
 /**
- * Confirms the "This will override index template settings" modal when it appears.
- *
- * Saving a DLM lifecycle change (successful or failure store) on a stream that
- * currently inherits its lifecycle (classic streams and root wired streams)
- * shows this confirmation modal before the change is applied. It does not appear
- * once the stream already overrides the inherited settings, so this is a no-op
- * in that case.
+ * Confirms the "This will override index template settings" modal.
  */
-export async function confirmOverrideIfPresent(page: ScoutPage): Promise<void> {
+async function confirmOverride(page: ScoutPage): Promise<void> {
   const overrideButton = page.getByTestId('overrideSettingsModal-overrideButton');
-  if (
-    await overrideButton
-      .waitFor({ state: 'visible', timeout: 3_000 })
-      .then(() => true)
-      .catch(() => false)
-  ) {
-    await overrideButton.click();
-    await expect(overrideButton).toBeHidden();
-  }
+  await overrideButton.click();
+  await expect(overrideButton).toBeHidden();
 }
 
 /**
@@ -81,9 +66,14 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
 /**
  * Saves the lifecycle method flyout changes (Apply) and waits for it to close.
  */
-export async function saveRetentionChanges(page: ScoutPage): Promise<void> {
+export async function saveRetentionChanges(
+  page: ScoutPage,
+  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+): Promise<void> {
   await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutApplyButton).click();
-  await confirmOverrideIfPresent(page);
+  if (expectOverrideConfirmation) {
+    await confirmOverride(page);
+  }
   await expect(page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)).toBeHidden();
 }
 
@@ -140,23 +130,18 @@ export async function selectDlmMethod(page: ScoutPage): Promise<void> {
 }
 
 /**
- * Ensures the successful data lifecycle uses DSL (DLM) rather than an inherited
- * or ILM lifecycle, so a custom DSL delete phase can be configured afterwards.
- *
- * Classic streams (and root wired streams) inherit their lifecycle from the
- * backing index template, which may resolve to ILM. In that case the delete
- * phase flyout entry point is not available until the stream overrides the
- * inherited lifecycle with DLM. This is a no-op when DLM is already effective.
+ * Ensures the successful data lifecycle uses DSL (DLM) so a custom DSL delete
+ * phase can be configured afterwards, switching from an inherited/ILM lifecycle
+ * when needed.
  */
 export async function ensureDslLifecycle(page: ScoutPage): Promise<void> {
-  // If the delete phase entry points are already available, DLM is effective.
   const addDeletePhaseButton = page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton);
   const existingDeletePhase = page.getByTestId('lifecyclePhase-delete-button');
-  const dslAlreadyEffective = await Promise.any([
-    addDeletePhaseButton.waitFor({ state: 'visible', timeout: 5_000 }).then(() => true),
-    existingDeletePhase.waitFor({ state: 'visible', timeout: 5_000 }).then(() => true),
-  ]).catch(() => false);
 
+  await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toBeVisible();
+
+  const dslAlreadyEffective =
+    (await addDeletePhaseButton.isVisible()) || (await existingDeletePhase.isVisible());
   if (dslAlreadyEffective) {
     return;
   }
@@ -181,39 +166,23 @@ export async function selectIlmPolicy(page: ScoutPage, policyName: string): Prom
 
 /**
  * Opens the delete-phase flyout for successful data so a custom DSL retention can be set.
- *
- * When no delete phase exists yet, the entry point is the "Add delete phase" header
- * action. When a delete phase already exists, it is edited via the lifecycle bar phase
- * popover edit button.
  */
-export async function openDeletePhaseFlyout(page: ScoutPage): Promise<Locator> {
-  const addButton = page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton);
-  const deletePhaseButton = page.getByTestId('lifecyclePhase-delete-button');
+export async function openDeletePhaseFlyout(
+  page: ScoutPage,
+  { existing = false }: { existing?: boolean } = {}
+): Promise<Locator> {
   const flyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
 
-  type DeletePhaseOpener = 'add' | 'edit';
-
-  // Either the "Add delete phase" header action is shown (no delete phase yet),
-  // or an existing delete phase is edited through the lifecycle bar popover.
-  //
-  // Important: the "Add delete phase" button can be visible but disabled when a delete
-  // phase already exists. In that case we must use the "edit existing phase" path.
-  const opener = await Promise.any<DeletePhaseOpener>([
-    deletePhaseButton
-      .waitFor({ state: 'visible', timeout: 15_000 })
-      .then<DeletePhaseOpener>(() => 'edit'),
-    (async (): Promise<DeletePhaseOpener> => {
-      await addButton.waitFor({ state: 'visible', timeout: 15_000 });
-      await expect(addButton).toBeEnabled({ timeout: 15_000 });
-      return 'add';
-    })(),
-  ]);
-
-  if (opener === 'add') {
-    await addButton.click();
-  } else {
+  if (existing) {
+    const deletePhaseButton = page.getByTestId('lifecyclePhase-delete-button');
+    await deletePhaseButton.waitFor({ state: 'visible' });
     await deletePhaseButton.click();
     await page.getByTestId('lifecyclePhase-delete-editButton').click();
+  } else {
+    const addButton = page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton);
+    await addButton.waitFor({ state: 'visible' });
+    await expect(addButton).toBeEnabled();
+    await addButton.click();
   }
 
   await expect(flyout).toBeVisible();
@@ -227,9 +196,13 @@ export async function openDeletePhaseFlyout(page: ScoutPage): Promise<Locator> {
 export async function setCustomRetention(
   page: ScoutPage,
   value: string,
-  unit: 'd' | 'h' | 'm' | 's' = 'd'
+  unit: 'd' | 'h' | 'm' | 's' = 'd',
+  {
+    existing = false,
+    expectOverrideConfirmation = false,
+  }: { existing?: boolean; expectOverrideConfirmation?: boolean } = {}
 ): Promise<void> {
-  const flyout = await openDeletePhaseFlyout(page);
+  const flyout = await openDeletePhaseFlyout(page, { existing });
 
   const field = flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseValue);
   await field.fill('');
@@ -241,17 +214,24 @@ export async function setCustomRetention(
   await flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseUnit).click();
 
   await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseApplyButton).click();
-  await confirmOverrideIfPresent(page);
+  if (expectOverrideConfirmation) {
+    await confirmOverride(page);
+  }
   await expect(page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)).toBeHidden();
 }
 
 /**
  * Removes the delete phase (resets to indefinite retention) for successful data.
  */
-export async function removeDeletePhase(page: ScoutPage): Promise<void> {
-  await openDeletePhaseFlyout(page);
+export async function removeDeletePhase(
+  page: ScoutPage,
+  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+): Promise<void> {
+  await openDeletePhaseFlyout(page, { existing: true });
   await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseRemoveButton).click();
-  await confirmOverrideIfPresent(page);
+  if (expectOverrideConfirmation) {
+    await confirmOverride(page);
+  }
   await expect(page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)).toBeHidden();
 }
 

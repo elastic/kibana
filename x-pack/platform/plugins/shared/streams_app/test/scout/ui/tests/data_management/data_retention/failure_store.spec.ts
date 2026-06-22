@@ -180,11 +180,13 @@ test.describe('Stream data retention - updating failure store', () => {
   test(
     'should set failure store retention to different value than main retention',
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-    async ({ page, pageObjects }) => {
+    async ({ page, pageObjects, config }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
       await ensureDslLifecycle(page);
-      await setCustomRetention(page, '30', 'd');
+      await setCustomRetention(page, '30', 'd', {
+        expectOverrideConfirmation: config.serverless,
+      });
       await verifyRetentionDisplay(page, '30 days');
 
       // Set failure store retention to 7 days

@@ -69,7 +69,7 @@ test.describe(
       // Should have inherit toggle
       await openLifecycleMethodFlyout(page);
       await verifyInheritSwitchVisible(page);
-      const inheritSwitch = page.getByTestId(RETENTION_TEST_IDS.inheritSwitch);
+      const inheritSwitch = page.getByTestId(RETENTION_TEST_IDS.successfulInheritCheckbox);
       await expect(inheritSwitch).toBeChecked();
     });
 

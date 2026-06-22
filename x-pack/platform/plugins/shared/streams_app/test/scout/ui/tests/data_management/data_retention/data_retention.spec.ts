@@ -158,6 +158,7 @@ test.describe(
       pageObjects,
       logsSynthtraceEsClient,
       apiServices,
+      config,
     }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
@@ -167,7 +168,9 @@ test.describe(
       // which may resolve to ILM. Switch to DSL so a custom delete phase can be set.
       await ensureDslLifecycle(page);
 
-      await setCustomRetention(page, '7', 'd');
+      await setCustomRetention(page, '7', 'd', {
+        expectOverrideConfirmation: config.serverless,
+      });
       await verifyRetentionDisplay(page, '7 days');
     });
 

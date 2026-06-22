@@ -85,7 +85,7 @@ test.describe(
       await verifyRetentionDisplay(page, '7 days');
 
       // Set a new value and save - value updates
-      await setCustomRetention(page, '30', 'd');
+      await setCustomRetention(page, '30', 'd', { existing: true });
       await verifyRetentionDisplay(page, '30 days');
     });
   }
