@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { normalizeAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/connector-specs';
 import type { AxiosErrorWithRetry } from '../axios_utils';
@@ -89,7 +90,13 @@ export class EarsStrategy implements AxiosAuthStrategy {
           deps,
           response.config as InternalAxiosRequestConfig & { _retry?: boolean },
           (msg) => {
-            throw new Error(msg);
+            throw new AxiosError(
+              msg,
+              'ERR_BAD_RESPONSE',
+              response.config,
+              response.request,
+              response
+            );
           }
         );
       },
