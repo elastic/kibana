@@ -196,8 +196,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Top N - With filter');
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
-    const filterBadge = page.locator('[data-test-subj="filter-badge-extension"]');
-    await expect(filterBadge).toBeVisible();
+    expect(await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'css' })).toBe(true);
   });
 
   spaceTest('should preserve query in lens', async ({ page, pageObjects }) => {

@@ -93,7 +93,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Timeseries - With filter');
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
-    await expect(page.locator('[data-test-subj="filter-badge-css"]')).toBeVisible();
+    expect(await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'css' })).toBe(true);
   });
 
   spaceTest('should preserve query in Lens', async ({ page, pageObjects }) => {
