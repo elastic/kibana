@@ -17,6 +17,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
+import { shouldShowAlertingV2CreateRuleFlyout } from '@kbn/alerting-v2-utils';
 import type { RootProfileProvider } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { AlertsLegacyRuleType, AppMenuExtensionParams } from '../../../..';
@@ -26,10 +27,10 @@ export const createGetAppMenu =
   (prev) =>
   (params) => {
     const prevValue = prev(params);
-    const showCreateRuleV2 =
-      params.isEsqlMode &&
-      Boolean(services.alertingVTwo) &&
-      Boolean(services.application.capabilities.alertingVTwo);
+    const showCreateRuleV2 = shouldShowAlertingV2CreateRuleFlyout(services.core, {
+      isEsqlMode: params.isEsqlMode,
+      isPluginAvailable: Boolean(services.alertingVTwo),
+    });
 
     return {
       getAlertsLegacyRuleTypes: showCreateRuleV2

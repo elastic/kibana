@@ -19,7 +19,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -156,12 +156,7 @@ export const module = new ContainerModule(({ bind }) => {
         container: diContainer,
       });
 
-      const alertingEnabled = coreStart.settings.globalClient.get<boolean>(
-        ALERTING_V2_ENABLED_SETTING_ID,
-        false
-      );
-
-      if (!alertingEnabled) {
+      if (!isAlertingV2Enabled(coreStart)) {
         disableAlertingManagementUi(alertingSection);
         return;
       }
