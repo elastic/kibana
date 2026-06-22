@@ -431,17 +431,18 @@ export class TemplatesMigrationTaskManager {
     }
 
     // ── Write migration flags ────────────────────────────────────────────────
-    // Flags are written only when the phase ran (non-empty array). Leaving the flag unset for
-    // empty arrays allows subsequent startups to pick up newly-added custom fields or templates
-    // without requiring a manual reset. Individual per-item failures (e.g. a single field-def
-    // ES write error) are logged and skipped above — the flag still marks the phase as processed
-    // so we don't re-attempt the whole batch on the next run (intentional best-effort behaviour).
+    // Both flags are written together whenever the configure SO has any legacy data (custom fields
+    // or templates). Setting legacyTemplatesMigrated even when there are no templates at migration
+    // time prevents spurious re-runs on subsequent startups. Configure SOs with no legacy data at
+    // all (empty arrays) receive no flags — they are re-evaluated cheaply on each restart.
     const flagsToWrite: Partial<ConfigurationPersistedAttributes> = {};
-    if (!attributes.legacyCustomFieldsMigrated && legacyCustomFields.length > 0) {
-      flagsToWrite.legacyCustomFieldsMigrated = true;
-    }
-    if (!attributes.legacyTemplatesMigrated && legacyTemplates.length > 0) {
-      flagsToWrite.legacyTemplatesMigrated = true;
+    if (legacyCustomFields.length > 0 || legacyTemplates.length > 0) {
+      if (!attributes.legacyCustomFieldsMigrated) {
+        flagsToWrite.legacyCustomFieldsMigrated = true;
+      }
+      if (!attributes.legacyTemplatesMigrated) {
+        flagsToWrite.legacyTemplatesMigrated = true;
+      }
     }
 
     if (Object.keys(flagsToWrite).length > 0) {

@@ -356,11 +356,11 @@ describe('TemplatesMigrationTaskManager', () => {
 
       // No creates — template reused
       expect(repo.create).not.toHaveBeenCalled();
-      // Flag still written
+      // Both flags written even though there were no custom fields at migration time
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        expect.objectContaining({ legacyTemplatesMigrated: true }),
+        { legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true },
         expect.anything()
       );
     });
@@ -379,13 +379,12 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      // Per-item failures are caught and logged; the templates flag is still written to avoid
+      // Per-item failures are caught and logged; both flags are still written to avoid
       // re-processing on the next restart (intentional best-effort behaviour).
-      // The custom fields flag is NOT written because the configure SO has no custom fields.
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyTemplatesMigrated: true },
+        { legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true },
         expect.anything()
       );
     });
