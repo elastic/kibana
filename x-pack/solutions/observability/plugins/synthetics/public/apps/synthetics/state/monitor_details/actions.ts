@@ -6,7 +6,7 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import type { MostRecentPingsRequest } from './api';
+import type { LatestTestRunRequest, MostRecentPingsRequest } from './api';
 import type {
   Ping,
   PingsResponse,
@@ -23,13 +23,12 @@ export const getMonitorAction = createAsyncAction<
   SyntheticsMonitorWithId
 >('[MONITOR DETAILS] GET MONITOR');
 
-export const getMonitorLastRunAction = createAsyncAction<
-  { monitorId: string; locationLabel: string },
-  { ping?: Ping }
->('[MONITOR DETAILS] GET LAST RUN');
+export const getMonitorLastRunAction = createAsyncAction<LatestTestRunRequest, { ping?: Ping }>(
+  '[MONITOR DETAILS] GET LAST RUN'
+);
 
 export const getMonitorLastErrorRunAction = createAsyncAction<
-  { monitorId: string; locationLabel: string },
+  LatestTestRunRequest,
   { ping?: Ping }
 >('[MONITOR DETAILS] GET LAST ERROR RUN');
 
