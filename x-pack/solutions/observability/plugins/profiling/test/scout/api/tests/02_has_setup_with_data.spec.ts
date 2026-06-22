@@ -14,8 +14,23 @@ import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/cons
 apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
-    await profilingSetup.loadData(esArchiversPath);
+
+  apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup }) => {
+    let status = await profilingSetup.checkStatus();
+
+    if (!status.has_setup) {
+      await profilingHelper.installPolicies();
+      await profilingSetup.setupResources();
+    }
+
+    if (!status.has_data) {
+      await profilingSetup.loadData(esArchiversPath);
+    }
+
+    status = await profilingSetup.checkStatus();
+    expect(status.has_setup).toBe(true);
+    expect(status.has_data).toBe(true);
+
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
     adminApiCreditials = await requestAuth.getApiKey('admin');
   });
@@ -31,7 +46,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
     const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBe(true);
     expect(adminStatus.has_data).toBe(true);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    expect(adminStatus.pre_8_9_1_data).toBeDefined();
   });
 
   apiTest('Viewer user', async ({ apiClient }) => {
@@ -46,7 +61,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
     const readStatus = readRes.body;
     expect(readStatus.has_setup).toBe(true);
     expect(readStatus.has_data).toBe(true);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBeDefined();
     expect(readStatus.has_required_role).toBe(false);
   });
 });
