@@ -19,8 +19,8 @@ import {
   EuiSkeletonText,
   EuiText,
   EuiToolTip,
+  CENTER_ALIGNMENT,
   type HorizontalAlignment,
-  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -206,6 +206,33 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
 
     const columns = useMemo(() => {
       const columnDef: EuiBasicTableColumn<ActionDetails>[] = [
+        {
+          field: '',
+          align: CENTER_ALIGNMENT as HorizontalAlignment,
+          width: '30px',
+          isExpander: true,
+          name: (
+            <EuiScreenReaderOnly>
+              <span>{UX_MESSAGES.screenReaderExpand}</span>
+            </EuiScreenReaderOnly>
+          ),
+          render: (actionListDataItem: ActionListApiResponse['data'][number]) => {
+            const actionId = actionListDataItem.id;
+            return (
+              <EuiToolTip
+                content={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj={getTestId('expand-button')}
+                  onClick={onClickCallback(actionListDataItem)}
+                  aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+                  iconType={expandedRowMap[actionId] ? 'chevronSingleUp' : 'chevronSingleDown'}
+                />
+              </EuiToolTip>
+            );
+          },
+        },
         {
           field: 'startedAt',
           name: TABLE_COLUMN_NAMES.time,
@@ -405,33 +432,6 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
               },
             },
           ],
-        },
-        {
-          field: '',
-          align: RIGHT_ALIGNMENT as HorizontalAlignment,
-          width: '40px',
-          isExpander: true,
-          name: (
-            <EuiScreenReaderOnly>
-              <span>{UX_MESSAGES.screenReaderExpand}</span>
-            </EuiScreenReaderOnly>
-          ),
-          render: (actionListDataItem: ActionListApiResponse['data'][number]) => {
-            const actionId = actionListDataItem.id;
-            return (
-              <EuiToolTip
-                content={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
-                disableScreenReaderOutput
-              >
-                <EuiButtonIcon
-                  data-test-subj={getTestId('expand-button')}
-                  onClick={onClickCallback(actionListDataItem)}
-                  aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
-                  iconType={expandedRowMap[actionId] ? 'chevronSingleUp' : 'chevronSingleDown'}
-                />
-              </EuiToolTip>
-            );
-          },
         },
       ];
       // filter out the `hosts` column
