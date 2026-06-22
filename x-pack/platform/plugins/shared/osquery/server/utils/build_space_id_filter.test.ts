@@ -8,9 +8,9 @@
 import { buildSpaceIdFilter } from './build_space_id_filter';
 
 describe('buildSpaceIdFilter', () => {
-  it('returns undefined when no spaceId is provided', () => {
-    expect(buildSpaceIdFilter(undefined)).toBeUndefined();
-    expect(buildSpaceIdFilter('')).toBeUndefined();
+  it('always returns a clause (fail-closed: never unscoped)', () => {
+    expect(buildSpaceIdFilter('default')).toBeDefined();
+    expect(buildSpaceIdFilter('my-space')).toBeDefined();
   });
 
   it('matches the default space OR a missing space_id field in the default space', () => {

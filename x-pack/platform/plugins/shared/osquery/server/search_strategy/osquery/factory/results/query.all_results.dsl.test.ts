@@ -460,31 +460,10 @@ describe('buildResultsQuery', () => {
       kuery: '',
     };
 
-    it('adds no space_id clause when spaceId is omitted (backward compatible)', () => {
-      const result = buildResultsQuery(baseOptions);
-      const filter = (result.query as any).bool.filter;
-      expect(JSON.stringify(filter)).not.toContain('space_id');
-    });
-
-    it('matches default space OR missing space_id when spaceId is "default"', () => {
-      const result = buildResultsQuery({ ...baseOptions, spaceId: 'default' });
-      const filter = (result.query as any).bool.filter;
-      expect(filter).toContainEqual({
-        bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
-          ],
-        },
-      });
-    });
-
-    it('matches the space exactly in a named space', () => {
+    it('does not scope space_id in the builder (centralized in the search strategy)', () => {
       const result = buildResultsQuery({ ...baseOptions, spaceId: 'my-space' });
       const filter = (result.query as any).bool.filter;
-      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
-      // must NOT match other spaces or docs without a space_id
-      expect(JSON.stringify(filter)).not.toContain('exists');
+      expect(JSON.stringify(filter)).not.toContain('space_id');
     });
   });
 });

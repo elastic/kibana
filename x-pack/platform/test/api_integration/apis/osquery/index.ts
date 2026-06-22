@@ -20,6 +20,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./unified_history'));
     loadTestFile(require.resolve('./scheduled_results'));
     loadTestFile(require.resolve('./scheduled_results_cross_space'));
+    loadTestFile(require.resolve('./action_results_cross_space'));
     loadTestFile(require.resolve('./export_results'));
   });
 }

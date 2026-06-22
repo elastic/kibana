@@ -67,13 +67,14 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const spaceIdFilter = buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer | undefined;
+  const spaceIdFilter = spaceId
+    ? (buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer)
+    : undefined;
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
     ...agentIdsFilter,
     getQueryFilter({ filter }),
-    ...(spaceIdFilter ? [spaceIdFilter] : []),
   ];
 
   let baseIndex: string;

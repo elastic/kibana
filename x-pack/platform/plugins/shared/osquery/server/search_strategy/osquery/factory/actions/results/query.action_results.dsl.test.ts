@@ -573,13 +573,12 @@ describe('buildActionResultsQuery', () => {
     const getAggFilterMust = (result: any) =>
       result.aggs.aggs.aggs.responses_by_action_id.filter.bool.must;
 
-    it('adds no space_id clause when spaceId is omitted (backward compatible)', () => {
+    it('adds no aggregation space_id clause when spaceId is omitted', () => {
       const result = buildActionResultsQuery(baseOptions);
-      expect(JSON.stringify((result.query as any).bool.filter)).not.toContain('space_id');
       expect(JSON.stringify(getAggFilterMust(result))).not.toContain('space_id');
     });
 
-    it('matches default space OR missing space_id when spaceId is "default"', () => {
+    it('scopes the aggregation to default space OR missing space_id when spaceId is "default"', () => {
       const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'default' });
       const defaultClause = {
         bool: {
@@ -589,16 +588,12 @@ describe('buildActionResultsQuery', () => {
           ],
         },
       };
-      expect((result.query as any).bool.filter).toContainEqual(defaultClause);
-      // The aggregation filter is also space-scoped so counts match the hits.
+      // The aggregation filter is space-scoped so counts match the hits.
       expect(getAggFilterMust(result)).toContainEqual(defaultClause);
     });
 
-    it('matches the space exactly in a named space', () => {
+    it('scopes the aggregation to the space exactly in a named space', () => {
       const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
-      expect((result.query as any).bool.filter).toContainEqual({
-        term: { space_id: 'my-space' },
-      });
       expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
     });
   });

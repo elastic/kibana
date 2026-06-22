@@ -78,7 +78,7 @@ describe('buildScheduledActionResultsQuery', () => {
     expect(result.sort).toEqual([{ 'agent.id': { order: 'asc' } }]);
   });
 
-  it('includes space_id filter when spaceId is provided', () => {
+  it('scopes the aggregation by space_id when spaceId is provided', () => {
     const options: ScheduledActionResultsRequestOptions = {
       ...defaultOptions,
       spaceId: 'my-space',
@@ -91,7 +91,6 @@ describe('buildScheduledActionResultsQuery', () => {
         filter: [
           { term: { schedule_id: 'test-schedule-id' } },
           { term: { schedule_execution_count: 42 } },
-          { term: { space_id: 'my-space' } },
         ],
       },
     });
@@ -130,7 +129,6 @@ describe('buildScheduledActionResultsQuery', () => {
         filter: [
           { term: { schedule_id: 'test-schedule-id' } },
           { term: { schedule_execution_count: 42 } },
-          defaultSpaceClause,
         ],
       },
     });

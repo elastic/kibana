@@ -9,7 +9,6 @@ import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
 import { getQueryFilter } from '../../../../../utils/build_query';
-import { buildSpaceIdFilter } from '../../../../../utils/build_space_id_filter';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
 
@@ -17,7 +16,6 @@ export const buildActionDetailsQuery = ({
   actionId,
   kuery,
   componentTemplateExists,
-  spaceId,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
   let filter = actionIdQuery;
@@ -29,14 +27,12 @@ export const buildActionDetailsQuery = ({
     bool: { filter: baseFilter },
   } = getQueryFilter({ filter });
 
-  const spaceIdFilter = buildSpaceIdFilter(spaceId);
-  const extendedFilter = spaceIdFilter ? [...baseFilter, spaceIdFilter] : baseFilter;
-
+  // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
   const dslQuery = {
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    query: { bool: { filter: extendedFilter } },
+    query: { bool: { filter: baseFilter } },
     size: 1,
     fields: ['*'],
   };
