@@ -21,13 +21,10 @@ import { useEntityCaseTakeActionItems } from '../../../cases/attachments/entity/
 export const UserPanelFooter = ({
   identityFields,
   entity,
-  riskLevel,
 }: {
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
-  /** Current risk level for the entity, when known. Captured at attach time on the case. */
-  riskLevel?: RiskSeverity;
 }) => {
   const userName = useMemo(
     () => identityFields['user.name'] || Object.values(identityFields)[0] || '',
@@ -42,11 +39,10 @@ export const UserPanelFooter = ({
     return euidApi.euid.kql.getEuidFilterBasedOnDocument('user', entity);
   }, [euidApi?.euid, entity]);
 
-  // Canonical entity.id (EUID) from the store record. The case attachment is
-  // resolved by querying `entity.id` directly, so we attach this rather than the
-  // raw user.name — without it the attachment cannot be matched back to a store row.
   const entityStoreId = entity?.entity?.id;
-  const riskScore = entity ? getRiskFromEntityRecord(entity)?.calculated_score : undefined;
+  const risk = entity ? getRiskFromEntityRecord(entity) : undefined;
+  const riskLevel = risk?.calculated_level as RiskSeverity | undefined;
+  const riskScore = risk?.calculated_score_norm;
 
   const entityToAttach = useMemo<EntityToAttach>(
     () => ({ id: entityStoreId ?? '', name: userName, type: 'user', riskLevel, riskScore }),

@@ -39,13 +39,10 @@ export const HostPanelFooter = ({
     return euidApi.euid.kql.getEuidFilterBasedOnDocument('host', entity);
   }, [euidApi?.euid, entity]);
 
-  // Canonical entity.id (EUID) from the store record. The case attachment is
-  // resolved by querying `entity.id` directly, so we attach this rather than the
-  // raw host.name — without it the attachment cannot be matched back to a store row.
   const entityStoreId = entity?.entity?.id;
   const risk = entity ? getRiskFromEntityRecord(entity) : undefined;
   const riskLevel = risk?.calculated_level as RiskSeverity | undefined;
-  const riskScore = risk?.calculated_score;
+  const riskScore = risk?.calculated_score_norm;
 
   const entityToAttach = useMemo<EntityToAttach>(
     () => ({ id: entityStoreId ?? '', name: hostName, type: 'host', riskLevel, riskScore }),

@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { formatRiskScore } from '../../../../entity_analytics/common';
 import type { EntityAttachmentMetadata } from '../../../../../common/cases/attachments/entity';
 import {
   ENTITY_NAME_TEST_ID,
@@ -99,7 +100,7 @@ export const EntityChildren: FC<EntityChildrenProps> = ({ metadata }) => {
               defaultMessage="Risk score:"
             />
           }
-          value={Math.round(riskScore)}
+          value={formatRiskScore(riskScore)}
           valueTestSubj={ENTITY_RISK_SCORE_TEST_ID}
         />
       )}

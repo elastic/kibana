@@ -14,7 +14,6 @@ import {
   ADD_TO_EXISTING_CASE_TEST_ID,
 } from '../../../cases/attachments/entity/components/test_ids';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
-import type { RiskSeverity } from '../../../../common/search_strategy';
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
@@ -59,7 +58,6 @@ const USER_IDENTITY_FIELDS = { 'user.name': 'alice' };
 const ENTITY_STORE_RECORD = {
   entity: { id: 'entity-store-id-abc' },
 } as unknown as EntityStoreRecord;
-const RISK_LEVEL = 'High' as RiskSeverity;
 
 const renderFooter = (
   entityAttachmentsEnabled: boolean,
@@ -74,7 +72,7 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <UserPanelFooter identityFields={identityFields} entity={entity} riskLevel={RISK_LEVEL} />
+      <UserPanelFooter identityFields={identityFields} entity={entity} />
     </TestProviders>
   );
 };

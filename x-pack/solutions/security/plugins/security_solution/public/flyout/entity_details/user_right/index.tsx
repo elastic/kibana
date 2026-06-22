@@ -341,11 +341,7 @@ export const UserPanel = memo(function UserPanel({
         )}
       </FlyoutBody>
       {!isPreviewMode && assetInventoryEnabled && (
-        <UserPanelFooter
-          identityFields={documentEntityIdentifiers}
-          entity={entityFromStore}
-          riskLevel={headerRiskLevel}
-        />
+        <UserPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter

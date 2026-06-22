@@ -129,10 +129,10 @@ spaceTest.describe.skip(
         await spaceTest.step('navigate to the new case and check the Entities tab', async () => {
           await entityCases.clickCaseToastLink();
 
-          await expect(entityCases.entitiesTab).toBeVisible({ timeout: 15000 });
+          await expect(entityCases.entitiesTab).toBeVisible();
           await entityCases.clickEntitiesTab();
 
-          await expect(entityCases.entityTabTable).toBeVisible({ timeout: 15000 });
+          await expect(entityCases.entityTabTable).toBeVisible();
         });
       }
     );
@@ -150,10 +150,10 @@ spaceTest.describe.skip(
 
         await entityCases.navigateToCase(caseId);
 
-        await expect(entityCases.entitiesTab).toBeVisible({ timeout: 15000 });
+        await expect(entityCases.entitiesTab).toBeVisible();
         await entityCases.clickEntitiesTab();
 
-        await expect(entityCases.entityTabTable).toBeVisible({ timeout: 15000 });
+        await expect(entityCases.entityTabTable).toBeVisible();
       }
     );
 
@@ -169,10 +169,10 @@ spaceTest.describe.skip(
 
         await entityCases.navigateToCase(caseId);
 
-        await expect(entityCases.entitiesTab).toBeVisible({ timeout: 15000 });
+        await expect(entityCases.entitiesTab).toBeVisible();
         await entityCases.clickEntitiesTab();
 
-        await expect(entityCases.entityTabEmpty).toBeVisible({ timeout: 15000 });
+        await expect(entityCases.entityTabEmpty).toBeVisible();
         await expect(entityCases.entityTabTable).toBeHidden();
       }
     );

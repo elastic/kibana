@@ -115,8 +115,6 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
   }
 
   if (isEntityStoreDisabled) {
-    // Space the embedded prompt so the `color="plain"` panel's borders aren't
-    // clipped by the accordion's edges (the shared body keeps its page styling).
     return (
       <>
         <EuiSpacer size="s" />
@@ -126,8 +124,6 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
     );
   }
 
-  // Non-dismissible callout reusing the EA home page wording. Renders nothing
-  // when no privileges are missing; shown as a banner above the table otherwise.
   const privilegesCallout = (
     <EntityAnalyticsReadPrivilegesCallout
       riskEngineReadPrivileges={riskEngineReadPrivileges}
@@ -137,7 +133,6 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
     />
   );
 
-  // Hide the table when entity store read is denied to avoid a misleading empty grid.
   if (hasNoReadPrivileges) {
     return (
       <EuiFlexItem data-test-subj={ENTITY_TAB_NO_PRIVILEGES_TEST_ID}>

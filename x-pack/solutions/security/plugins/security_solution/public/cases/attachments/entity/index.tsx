@@ -11,7 +11,6 @@ import type {
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { JsonValue } from '@kbn/utility-types';
 import React, { Suspense, type ComponentType } from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,22 +21,11 @@ import type { EntityAttachmentMetadata } from '../../../../common/cases/attachme
 import { EntityAttachmentPayloadSchema } from '../../../../common/cases/attachments/entity';
 
 export type { EntityAttachmentMetadata };
-
-/**
- * A minimal, decoupled representation of the entity we want to attach to a case.
- * Kept independent from Entity Analytics internal models so the "add to case"
- * entry points can be wired in from any surface (flyout, table, etc.).
- */
 export interface EntityToAttach {
-  /** The canonical entity id (EUID) from the entity store. Stored as `attachmentId`. */
   id: string;
-  /** Human-readable entity name. */
   name: string;
-  /** The kind of entity. */
   type: EntityAttachmentMetadata['entityType'];
-  /** Optional risk score captured at attach time. */
   riskScore?: number;
-  /** Optional risk level captured at attach time. */
   riskLevel?: string;
 }
 
@@ -54,9 +42,6 @@ const DISPLAY_NAME = i18n.translate('xpack.securitySolution.entityAnalytics.case
   defaultMessage: 'Entities',
 });
 
-/**
- * Defines the `security.entity` cases attachment registered with the cases attachment framework.
- */
 export const getEntityAttachment = () =>
   defineAttachment({
     id: SECURITY_ENTITY_ATTACHMENT_TYPE,
@@ -65,8 +50,6 @@ export const getEntityAttachment = () =>
     schema: EntityAttachmentPayloadSchema,
     getAttachmentViewObject: (props) => {
       const entityType = props.metadata?.entityType;
-      // Reflect the entity kind in the timeline icon (host/service/generic), falling
-      // back to the generic globe rather than the misleading person icon.
       const iconType = entityType ? EntityIconByType[entityType as EntityType] ?? 'globe' : 'globe';
       return {
         eventColor: 'subdued' as const,
@@ -103,18 +86,16 @@ export const generateEntityAttachmentsWithoutOwner = (
     return [];
   }
 
-  const metadata: EntityAttachmentMetadata = {
-    entityName: entity.name,
-    entityType: entity.type,
-    ...(entity.riskScore != null ? { riskScore: entity.riskScore } : {}),
-    ...(entity.riskLevel != null ? { riskLevel: entity.riskLevel } : {}),
-  };
-
   return [
     {
       type: SECURITY_ENTITY_ATTACHMENT_TYPE,
       attachmentId: entity.id,
-      metadata: metadata as unknown as { [p: string]: JsonValue },
+      metadata: {
+        entityName: entity.name,
+        entityType: entity.type,
+        ...(entity.riskScore != null ? { riskScore: entity.riskScore } : {}),
+        ...(entity.riskLevel != null ? { riskLevel: entity.riskLevel } : {}),
+      } satisfies EntityAttachmentMetadata,
     },
   ];
 };
