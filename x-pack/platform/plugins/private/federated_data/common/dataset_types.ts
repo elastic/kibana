@@ -21,6 +21,6 @@ export type DataSetWithName = Dataset & { name: string };
 export type DatasetSettings = DatasetSettingsFile;
 
 export interface DatasetSettingsFile {
-  error_mode?: 'fail_fast' | 'skip_row' | 'null_field';
+  error_mode?: '' | 'fail_fast' | 'skip_row' | 'null_field';
   partition_detection?: 'auto' | 'hive' | 'template' | 'none';
 }

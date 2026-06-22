@@ -8,7 +8,6 @@
 import type {
   DataSource,
   DataSourceWithSecrets,
-  S3DataSourceSettings,
   S3DataSourceSettingsWithSecrets,
 } from '../../common/datasource_types';
 import {
