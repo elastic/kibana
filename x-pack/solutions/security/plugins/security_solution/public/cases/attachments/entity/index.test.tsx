@@ -60,7 +60,9 @@ describe('Entity attachment', () => {
       ['service', 'node'],
       ['generic', 'globe'],
     ])('uses the %s entity icon', (entityType, expectedIcon) => {
-      expect(getIconType({ entityName: 'foo', entityType } as Props['metadata'])).toBe(expectedIcon);
+      expect(getIconType({ entityName: 'foo', entityType } as Props['metadata'])).toBe(
+        expectedIcon
+      );
     });
 
     it('falls back to the globe icon when the entity type is missing', () => {
