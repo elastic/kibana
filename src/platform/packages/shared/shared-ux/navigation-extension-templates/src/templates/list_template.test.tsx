@@ -38,6 +38,9 @@ const EXTENSION_ID = 'recentlyAccessedDashboards';
 const defaultContext: NavExtensionPointContext = {
   slotId: SLOT_ID,
   extensionId: EXTENSION_ID,
+  primaryItemId: 'dashboards',
+  sectionId: 'dashboards-section',
+  surface: 'sidePanel',
 };
 
 const defaultConfig: ListTemplateConfig<TestRow> = {

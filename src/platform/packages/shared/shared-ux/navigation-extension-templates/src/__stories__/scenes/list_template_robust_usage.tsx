@@ -59,6 +59,9 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
     context: {
       slotId: 'slotId',
       extensionId: 'extensionId',
+      primaryItemId: 'primaryItemId',
+      sectionId: 'sectionId',
+      surface: 'sidePanel',
     },
   },
 };
