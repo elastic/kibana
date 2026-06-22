@@ -3201,7 +3201,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             ...policy,
             attributes: {
               ...previousRevision?.attributes,
-              inputs_for_versions: null,
+              inputs_for_versions: previousRevision?.attributes.inputs_for_versions ?? {},
               revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
               latest_revision: true,
             },
