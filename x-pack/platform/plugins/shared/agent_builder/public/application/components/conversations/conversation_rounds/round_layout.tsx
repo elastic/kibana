@@ -42,7 +42,7 @@ const labels = {
     defaultMessage: 'Conversation round',
   }),
   askUserQuestionPreamble: i18n.translate('xpack.agentBuilder.round.askUserQuestionPreamble', {
-    defaultMessage: 'I need to get clarity on a few things...',
+    defaultMessage: 'I need to clarify a few things first.',
   }),
 };
 

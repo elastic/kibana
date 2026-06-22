@@ -40,16 +40,24 @@ import converseAsyncDescription from './oas/converse_async.text';
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
   schema.object({ authorized: schema.boolean() }),
-  schema.object({
-    answers: schema.arrayOf(
-      schema.object({
-        choice: schema.maybe(schema.arrayOf(schema.number(), { maxSize: 100 })),
-        custom: schema.maybe(schema.string({ minLength: 1, maxLength: 20_000 })),
-        skipped: schema.maybe(schema.boolean()),
-      }),
-      { maxSize: 100 }
-    ),
-  }),
+  schema.object(
+    {
+      answers: schema.arrayOf(
+        schema.object({
+          choice: schema.maybe(schema.arrayOf(schema.number(), { maxSize: 100 })),
+          custom: schema.maybe(schema.string({ minLength: 1, maxLength: 20_000 })),
+          skipped: schema.maybe(schema.boolean()),
+        }),
+        { maxSize: 100 }
+      ),
+    },
+    {
+      meta: {
+        description:
+          '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.',
+      },
+    }
+  ),
 ]);
 
 export function registerChatRoutes({
@@ -113,7 +121,7 @@ export function registerChatRoutes({
       schema.recordOf(schema.string({ minLength: 1, maxLength: 512 }), promptResponseEntrySchema, {
         meta: {
           description:
-            'Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send an `allow` boolean to answer a confirmation prompt, an `authorized` boolean to answer an authorization prompt, or an `answers` array (one entry per question) to answer a ask_user_question prompt.',
+            'Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.',
         },
       })
     ),
