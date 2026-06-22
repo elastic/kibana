@@ -18,7 +18,12 @@ import type { Logger } from '@kbn/logging';
 import semverGt from 'semver/functions/gt';
 import semverSatisfies from 'semver/functions/satisfies';
 
-import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../common';
+import { escapeKuery } from '@kbn/es-query';
+
+import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT, AGENT_POLICY_INDEX } from '../../../../common';
+import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../../common/constants/agent_policy';
+import type { RollbackResult } from '../../package_policy_service';
+import { getAgentsByKuery, reassignAgents } from '../../agents';
 
 import type {
   BulkRollbackAvailableCheckResponse,
@@ -408,6 +413,9 @@ export async function rollbackInstallation(options: {
       savedObjectsClient,
       rollbackResult
     );
+    if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      await cleanupVersionSpecificPoliciesAfterRollback(savedObjectsClient, esClient, rollbackResult);
+    }
 
     // Clear the snapshot so a subsequent rollback attempt does not act on stale data.
     if (
@@ -514,6 +522,59 @@ async function _rollbackDependencies({
   );
 
   return failedDeps;
+}
+
+// After rollback, agent policies that no longer have any package with agent version conditions
+// may still have stale variant policies (e.g. policy-id#9.2) and agents assigned to them.
+// This function tears down those variants for each affected parent policy: agents are
+// reassigned to the parent first (so they are never left without a valid policy), then
+// has_agent_version_conditions is cleared, then the stale .fleet-policies documents are deleted.
+async function cleanupVersionSpecificPoliciesAfterRollback(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  rollbackResult: RollbackResult
+) {
+  const logger = appContextService.getLogger();
+
+  const parentAgentPolicyIds = uniq(
+    Object.values(rollbackResult.updatedPolicies)
+      .flat()
+      .flatMap((policy) => policy.attributes.policy_ids ?? [])
+      .filter((id) => !id.includes(AGENT_POLICY_VERSION_SEPARATOR))
+  );
+
+  for (const parentId of parentAgentPolicyIds) {
+    const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, parentId);
+    const stillHasVersionConditions = packagePolicies.some((pp) => pp.package_agent_version_condition);
+    if (stillHasVersionConditions) continue;
+
+    const variantKuery = `policy_id:${escapeKuery(parentId)}${AGENT_POLICY_VERSION_SEPARATOR}*`;
+    const { total: variantAgentCount } = await getAgentsByKuery(esClient, soClient, {
+      kuery: variantKuery,
+      showInactive: false,
+      perPage: 0,
+    });
+    if (variantAgentCount > 0) {
+      logger.info(
+        `[rollback] Reassigning ${variantAgentCount} agents from variant policies of ${parentId} back to parent`
+      );
+      await reassignAgents(soClient, esClient, { kuery: variantKuery, showInactive: false }, parentId);
+    }
+
+    await agentPolicyService.update(soClient, esClient, parentId, {}, {
+      bumpRevision: false,
+      skipValidation: true,
+    });
+
+    await esClient.deleteByQuery({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      query: { prefix: { policy_id: `${parentId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
+      refresh: true,
+    });
+
+    logger.info(`[rollback] Cleaned up version-specific policy variants for agent policy ${parentId}`);
+  }
 }
 
 function sendRollbackTelemetry({
