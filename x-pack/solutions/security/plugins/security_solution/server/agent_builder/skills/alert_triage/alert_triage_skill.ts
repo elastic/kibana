@@ -8,8 +8,87 @@
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { prioritizeAlerts } from './services/alert_triage_service';
+
+const PRIORITIZE_ALERTS_TOOL_ID = 'security.alert-triage.prioritize-alerts';
+
+const prioritizeAlertsSchema = z.object({
+  timeWindowHours: z
+    .number()
+    .min(1)
+    .max(168)
+    .default(24)
+    .describe('How far back to look for alerts in hours (1–168, default 24)'),
+  maxAlerts: z
+    .number()
+    .min(1)
+    .max(500)
+    .default(100)
+    .describe(
+      'Maximum number of alerts to fetch and score before grouping (1–500, default 100). ' +
+        'The tool always returns at most 10 ranked groups regardless of this value.'
+    ),
+  workflowStatus: z
+    .enum(['open', 'open+acknowledged'])
+    .default('open')
+    .describe(
+      'Which alert workflow statuses to include. "open" is the default. ' +
+        'Use "open+acknowledged" to include acknowledged alerts.'
+    ),
+  alertIds: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional: specific alert IDs to triage (e.g. from an alert attachment or user selection). ' +
+        'When provided, only these alerts are scored. timeWindowHours still applies as a time filter.'
+    ),
+});
+
+const createPrioritizeAlertsTool = (): BuiltinSkillBoundedTool<typeof prioritizeAlertsSchema> => ({
+  id: PRIORITIZE_ALERTS_TOOL_ID,
+  type: ToolType.builtin,
+  description:
+    'Fetch the alert queue, score each alert using base risk score and MITRE tactic boost, ' +
+    'cluster alerts by shared entity (host/user), and return ranked groups with score breakdowns. ' +
+    'Use this as the first step for any alert queue prioritization request.',
+  schema: prioritizeAlertsSchema,
+  handler: async ({ timeWindowHours, maxAlerts, workflowStatus, alertIds }, context) => {
+    try {
+      const result = await prioritizeAlerts({
+        esClient: context.esClient.asCurrentUser,
+        spaceId: context.spaceId,
+        timeWindowHours,
+        maxAlerts,
+        workflowStatus,
+        alertIds,
+      });
+
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: result,
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Failed to prioritize alerts: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+            },
+          },
+        ],
+      };
+    }
+  },
+});
 
 export const alertTriageSkill = defineSkillType({
   id: 'alert-triage',
@@ -105,79 +184,5 @@ End with a brief summary of total alerts assessed and how many groups were ident
 
   getRegistryTools: () => [],
 
-  getInlineTools: () => [
-    {
-      id: 'security.alert-triage.prioritize-alerts',
-      type: ToolType.builtin,
-      description:
-        'Fetch the alert queue, score each alert using base risk score and MITRE tactic boost, ' +
-        'cluster alerts by shared entity (host/user), and return ranked groups with score breakdowns. ' +
-        'Use this as the first step for any alert queue prioritization request.',
-      schema: z.object({
-        timeWindowHours: z
-          .number()
-          .min(1)
-          .max(168)
-          .default(24)
-          .describe('How far back to look for alerts in hours (1–168, default 24)'),
-        maxAlerts: z
-          .number()
-          .min(1)
-          .max(500)
-          .default(100)
-          .describe(
-            'Maximum number of alerts to fetch and score before grouping (1–500, default 100). ' +
-              'The tool always returns at most 10 ranked groups regardless of this value.'
-          ),
-        workflowStatus: z
-          .enum(['open', 'open+acknowledged'])
-          .default('open')
-          .describe(
-            'Which alert workflow statuses to include. "open" is the default. ' +
-              'Use "open+acknowledged" to include acknowledged alerts.'
-          ),
-        alertIds: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: specific alert IDs to triage (e.g. from an alert attachment or user selection). ' +
-              'When provided, only these alerts are scored. timeWindowHours still applies as a time filter.'
-          ),
-      }),
-      handler: async ({ timeWindowHours, maxAlerts, workflowStatus, alertIds }, context) => {
-        try {
-          const result = await prioritizeAlerts({
-            esClient: context.esClient.asCurrentUser,
-            spaceId: context.spaceId,
-            timeWindowHours,
-            maxAlerts,
-            workflowStatus,
-            alertIds,
-          });
-
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: result,
-              },
-            ],
-          };
-        } catch (error) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: `Failed to prioritize alerts: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`,
-                },
-              },
-            ],
-          };
-        }
-      },
-    },
-  ],
+  getInlineTools: () => [createPrioritizeAlertsTool()],
 });

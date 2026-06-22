@@ -112,8 +112,8 @@ describe('Security Skills', () => {
       expect(alertTriageSkill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('returns 0 registry tools (all access is via the inline tool)', () => {
-      const tools = alertTriageSkill.getRegistryTools!();
+    it('returns 0 registry tools (all access is via the inline tool)', async () => {
+      const tools = await alertTriageSkill.getRegistryTools!();
       expect(tools).toHaveLength(0);
     });
 
@@ -123,8 +123,8 @@ describe('Security Skills', () => {
       expect(inlineTools[0].id).toBe('security.alert-triage.prioritize-alerts');
     });
 
-    it('has total tool count within limits (2 registry + 1 inline = 3)', async () => {
-      const registryTools = alertTriageSkill.getRegistryTools!();
+    it('has total tool count within limits (0 registry + 1 inline = 1)', async () => {
+      const registryTools = await alertTriageSkill.getRegistryTools!();
       const inlineTools = await alertTriageSkill.getInlineTools!();
       expect(registryTools.length + inlineTools.length).toBeLessThanOrEqual(7);
     });
