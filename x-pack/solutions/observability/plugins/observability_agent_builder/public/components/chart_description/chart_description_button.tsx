@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiPopoverTitle,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -152,18 +153,49 @@ export function ChartDescriptionButton({
 
   const isUsingAiSummary = hasAiInsightAccess && Boolean(aiSummary) && !aiError;
   const isAwaitingAiSummary = hasAiInsightAccess && !chartDataMessage && !aiError && !aiSummary;
+  const isStreamingAiSummary = hasAiInsightAccess && isAiLoading && !chartDataMessage;
   const isUsingDeterministicFallback =
     !chartDataMessage &&
     (!hasAiInsightAccess || Boolean(aiError) || (!isAwaitingAiSummary && !aiSummary));
+
+  const generatingAiSummaryMessage = i18n.translate(
+    'xpack.observabilityAgentBuilder.chartDescription.generatingAiSummary',
+    {
+      defaultMessage: 'Generating AI summary.',
+    }
+  );
+
+  const showScreenReaderLiveRegion =
+    hasAiInsightAccess &&
+    !chartDataMessage &&
+    (isStreamingAiSummary || isAwaitingAiSummary || isUsingAiSummary);
+
+  const screenReaderStatus = useMemo(() => {
+    if (!showScreenReaderLiveRegion) {
+      return undefined;
+    }
+
+    if (isStreamingAiSummary || isAwaitingAiSummary) {
+      return generatingAiSummaryMessage;
+    }
+
+    return aiSummary;
+  }, [
+    aiSummary,
+    generatingAiSummaryMessage,
+    isAwaitingAiSummary,
+    isStreamingAiSummary,
+    showScreenReaderLiveRegion,
+  ]);
+
+  const hideStreamingSummaryFromScreenReader = isStreamingAiSummary && Boolean(aiSummary);
 
   const summary = chartDataMessage
     ? chartDataMessage
     : isUsingAiSummary
     ? aiSummary
     : isAwaitingAiSummary
-    ? i18n.translate('xpack.observabilityAgentBuilder.chartDescription.generatingAiSummary', {
-        defaultMessage: 'Generating AI summary.',
-      })
+    ? generatingAiSummaryMessage
     : deterministicSummary;
 
   const summaryNote = chartDataMessage
@@ -188,19 +220,25 @@ export function ChartDescriptionButton({
   const popover = (
     <div
       role="region"
-      aria-live="polite"
       aria-labelledby={popoverTitleId}
       aria-describedby={summaryId}
       data-test-subj={`${dataTestSubj}Panel`}
     >
+      {screenReaderStatus ? (
+        <EuiScreenReaderOnly>
+          <p aria-live="polite" data-test-subj={`${dataTestSubj}ScreenReaderStatus`}>
+            {screenReaderStatus}
+          </p>
+        </EuiScreenReaderOnly>
+      ) : null}
       <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('xpack.observabilityAgentBuilder.chartDescription.popoverTitle', {
           defaultMessage: 'Chart summary',
         })}
       </EuiPopoverTitle>
       <EuiText size="s" id={summaryId}>
-        <p>{summary}</p>
-        {isAiLoading && isAwaitingAiSummary && <LoadingCursor />}
+        <p aria-hidden={hideStreamingSummaryFromScreenReader}>{summary}</p>
+        {isAiLoading && hasAiInsightAccess && !chartDataMessage && <LoadingCursor />}
       </EuiText>
       {summaryNote ? (
         <EuiText size="xs" color="subdued">

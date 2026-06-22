@@ -105,6 +105,10 @@ describe('ChartDescriptionButton', () => {
     await user.click(screen.getByTestId('observabilityChartDescriptionButton'));
 
     expect(screen.getByTestId('observabilityChartDescriptionButtonPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('observabilityChartDescriptionButtonPanel')).toHaveAttribute(
+      'aria-describedby',
+      expect.any(String)
+    );
     expect(screen.getByText(/Summary for Throughput/i)).toBeInTheDocument();
     expect(screen.getByText(/Basic summary generated from chart data/i)).toBeInTheDocument();
   });
@@ -117,5 +121,53 @@ describe('ChartDescriptionButton', () => {
     await user.click(screen.getByTestId('observabilityChartDescriptionButton'));
 
     expect(screen.getByText('Loading chart summary.')).toBeInTheDocument();
+  });
+
+  it('does not announce streaming AI chunks in the visible summary live region', async () => {
+    const user = userEvent.setup();
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        agentBuilder: {},
+        application: {
+          capabilities: {
+            agentBuilder: {
+              show: true,
+            },
+          },
+        },
+      },
+    });
+    mockUseLicense.mockReturnValue({
+      getLicense: () => ({
+        hasAtLeast: () => true,
+      }),
+    });
+    mockUseGenAIConnectors.mockReturnValue({
+      hasConnectors: true,
+      connectors: [],
+      loading: false,
+    });
+    mockUseStreamingAiInsight.mockReturnValue({
+      ...baseStreamingState(),
+      isLoading: true,
+      summary: 'Partial AI summary chunk',
+    });
+
+    renderComponent();
+
+    await user.click(screen.getByTestId('observabilityChartDescriptionButton'));
+
+    expect(screen.getByText('Partial AI summary chunk')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityChartDescriptionButtonScreenReaderStatus')
+    ).toHaveTextContent('Generating AI summary.');
+    expect(screen.getByText('Partial AI summary chunk').closest('p')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+    expect(screen.getByTestId('observabilityChartDescriptionButtonPanel')).not.toHaveAttribute(
+      'aria-live'
+    );
   });
 });
