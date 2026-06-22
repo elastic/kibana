@@ -22,20 +22,10 @@ const configSchema = schema.object({
    * without completely disabling the plugin.
    */
   available: schema.boolean({ defaultValue: true }),
-  /**
-   * Global workflow executions list (`/app/workflows/executions`). Not exposed in Advanced Settings;
-   * enable via `workflowsManagement.globalExecutionsView.enabled` in `kibana.yml`.
-   */
-  globalExecutionsView: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: {
-    globalExecutionsView: true,
-  },
 };

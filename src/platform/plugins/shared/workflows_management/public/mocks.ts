@@ -49,9 +49,6 @@ export const createStartServicesMock = () => ({
       reportEvent: jest.fn(),
     },
     availability: createAvailabilityServiceMock(),
-    globalExecutionsView: {
-      enabled: false,
-    },
   },
 });
 

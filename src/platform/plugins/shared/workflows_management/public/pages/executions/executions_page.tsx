@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPageTemplate, EuiScreenReaderOnly, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiPageTemplate,
+  EuiScreenReaderOnly,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { WorkflowExecutionsPageContent } from './workflow_executions_page_content';
@@ -24,6 +30,13 @@ const executionsPageDescription = i18n.translate(
   }
 );
 
+const executionsPageExperimentalBadgeLabel = i18n.translate(
+  'workflowsManagement.executionsPage.experimentalBadge',
+  {
+    defaultMessage: 'Experimental',
+  }
+);
+
 export function WorkflowExecutionsPage() {
   const { euiTheme } = useEuiTheme();
 
@@ -35,7 +48,18 @@ export function WorkflowExecutionsPage() {
       css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
       data-test-subj="workflowExecutionsPage"
     >
-      <EuiPageTemplate.Header bottomBorder pageTitle={executionsPageTitle} restrictWidth={false}>
+      <EuiPageTemplate.Header
+        bottomBorder
+        pageTitle={executionsPageTitle}
+        restrictWidth={false}
+        rightSideItems={[
+          <EuiBetaBadge
+            key="experimental"
+            label={executionsPageExperimentalBadgeLabel}
+            color="hollow"
+          />,
+        ]}
+      >
         <EuiScreenReaderOnly>
           <h2 id="workflowExecutionsTableLabel">{executionsPageTitle}</h2>
         </EuiScreenReaderOnly>

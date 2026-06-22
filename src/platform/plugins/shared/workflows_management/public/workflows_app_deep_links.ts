@@ -11,7 +11,7 @@ import type { AppDeepLink } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_NAME } from '../common';
 
-export function getWorkflowsAppDeepLinks(executionsViewEnabled: boolean): AppDeepLink[] {
+export function getWorkflowsAppDeepLinks(experimentalFeaturesEnabled: boolean): AppDeepLink[] {
   const links: AppDeepLink[] = [
     {
       id: 'workflowsList',
@@ -20,7 +20,7 @@ export function getWorkflowsAppDeepLinks(executionsViewEnabled: boolean): AppDee
     },
   ];
 
-  if (executionsViewEnabled) {
+  if (experimentalFeaturesEnabled) {
     links.push({
       id: 'executions',
       title: i18n.translate('workflowsManagement.nav.executionsDeepLinkTitle', {

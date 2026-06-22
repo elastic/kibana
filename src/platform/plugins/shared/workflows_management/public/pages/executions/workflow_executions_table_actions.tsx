@@ -183,7 +183,7 @@ export const WorkflowExecutionActionsMenu = ({
   const anchorPosition: EuiPopoverProps['anchorPosition'] =
     variant === 'takeAction' ? 'upRight' : 'upCenter';
 
-  if (listItems && listItems?.length === 0) {
+  if (!listItems?.length) {
     return null;
   }
 

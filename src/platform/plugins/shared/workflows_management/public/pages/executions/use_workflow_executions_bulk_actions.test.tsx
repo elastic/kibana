@@ -209,7 +209,6 @@ describe('useWorkflowExecutionsBulkActions', () => {
     services.application.navigateToApp = mockNavigateToApp;
 
     const executions = [createExecution('exec-1', 'wf-1'), createExecution('exec-2', 'wf-2')];
-    // The list omits `context`; the full execution is fetched per id on re-run.
     mockGetExecution.mockImplementation(async (executionId: string) => ({
       context:
         executionId === 'exec-1'

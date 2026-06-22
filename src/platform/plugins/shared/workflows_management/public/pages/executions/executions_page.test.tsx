@@ -38,16 +38,8 @@ jest.mock('../../hooks/use_workflow_url_state', () => ({
 }));
 
 describe('WorkflowExecutionsPage', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseWorkflowUrlState.mockReturnValue({
-      selectedExecutionId: undefined,
-      setSelectedExecution: mockSetSelectedExecution,
-    });
-  });
-  it('renders the executions page with search, filters, and table', async () => {
+  const renderPage = () => {
     const services = createStartServicesMock();
-    services.workflowsManagement.globalExecutionsView.enabled = true;
     services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;
@@ -60,7 +52,22 @@ describe('WorkflowExecutionsPage', () => {
 
     render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
 
+    return services;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseWorkflowUrlState.mockReturnValue({
+      selectedExecutionId: undefined,
+      setSelectedExecution: mockSetSelectedExecution,
+    });
+  });
+
+  it('renders the executions page with search, filters, and table', async () => {
+    renderPage();
+
     expect(screen.getByTestId('workflowExecutionsPage')).toBeInTheDocument();
+    expect(screen.getByText('Experimental')).toBeInTheDocument();
     expect(screen.getByTestId('workflowExecutionsPageContent')).toBeInTheDocument();
     expect(screen.getByTestId('searchBarStub')).toBeInTheDocument();
     await waitFor(() => {
@@ -78,19 +85,7 @@ describe('WorkflowExecutionsPage', () => {
       setSelectedExecution: mockSetSelectedExecution,
     });
 
-    const services = createStartServicesMock();
-    services.workflowsManagement.globalExecutionsView.enabled = true;
-    services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
-    const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
-    services.unifiedSearch.ui.SearchBar = SearchBarStub;
-    jest.mocked(services.http.get).mockResolvedValue({
-      results: [],
-      page: 1,
-      size: 25,
-      total: 0,
-    });
-
-    render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
+    renderPage();
 
     await waitFor(() => {
       expect(screen.getByTestId('workflowExecutionsPageContent')).toBeInTheDocument();

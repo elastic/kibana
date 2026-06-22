@@ -74,9 +74,7 @@ export interface TestWorkflowParams {
 }
 
 export interface SearchExecutionsParams {
-  /** JSON-encoded Elasticsearch query DSL. */
   query?: string;
-  /** JSON-encoded Elasticsearch sort definition. */
   sort?: string;
   from?: number;
   size?: number;

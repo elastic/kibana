@@ -9,7 +9,6 @@
 
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 
-/** Clipboard / copy action: pretty-printed JSON for one or more execution list items. */
 export const formatWorkflowExecutionsForCopy = (
   executions: WorkflowExecutionListItemDto[]
 ): string => {

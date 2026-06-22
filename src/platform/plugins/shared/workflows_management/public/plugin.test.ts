@@ -12,6 +12,7 @@ import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -42,13 +43,12 @@ jest.mock('./connectors/workflows', () => ({
   getWorkflowsConnectorType: jest.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
 }));
 
-const createPlugin = (globalExecutionsViewEnabled = false) =>
+const createPlugin = () =>
   new WorkflowsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
       logging: { console: false },
       available: true,
-      globalExecutionsView: { enabled: globalExecutionsViewEnabled },
     })
   );
 
@@ -80,6 +80,14 @@ describe('WorkflowsPlugin', () => {
   });
 
   describe('setup()', () => {
+    const mockWorkflowsUiSettings = (experimentalFeaturesEnabled: boolean) => {
+      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) return true;
+        if (key === WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
+        return fallback;
+      });
+    };
+
     it('should return an empty object when workflows UI is disabled', () => {
       coreSetup.uiSettings.get.mockReturnValue(false);
 
@@ -89,12 +97,8 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register only the workflows list deep link when executions view flag is off in bootstrap', () => {
-      plugin = createPlugin(false);
-      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
-        if (key === WORKFLOWS_UI_SETTING_ID) return true;
-        return fallback;
-      });
+    it('should register only the workflows list deep link when experimental features are off', () => {
+      mockWorkflowsUiSettings(false);
 
       const result = plugin.setup(coreSetup, setupDeps as any);
 
@@ -110,12 +114,8 @@ describe('WorkflowsPlugin', () => {
       expect(result).toEqual({});
     });
 
-    it('should register the executions deep link when executions view flag is on in bootstrap', () => {
-      plugin = createPlugin(true);
-      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
-        if (key === WORKFLOWS_UI_SETTING_ID) return true;
-        return fallback;
-      });
+    it('should register the executions deep link when experimental features are on in bootstrap', () => {
+      mockWorkflowsUiSettings(true);
 
       plugin.setup(coreSetup, setupDeps as any);
 

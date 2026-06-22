@@ -11,11 +11,6 @@ import { isPlainObject } from 'lodash/fp';
 
 export interface RerunWorkflowExecutionParams {
   workflowId: string;
-  /**
-   * Execution to re-run. When `context` is not supplied (e.g. from the executions
-   * list, which intentionally omits `context` for payload size), the re-run handler
-   * fetches the full execution by this id to recover the original inputs/event.
-   */
   executionId?: string;
   context?: Record<string, unknown>;
 }
@@ -27,8 +22,10 @@ export const buildReplayInputsFromExecutionContext = (
     return {};
   }
 
+  const inputs = isPlainObject(context.inputs) ? (context.inputs as Record<string, unknown>) : {};
+
   return {
-    ...(isPlainObject(context.inputs) && (context.inputs as object)),
+    ...inputs,
     ...(context.event !== undefined && { event: context.event }),
   };
 };

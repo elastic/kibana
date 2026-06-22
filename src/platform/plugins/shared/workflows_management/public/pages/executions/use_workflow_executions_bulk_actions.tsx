@@ -13,8 +13,10 @@ import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { useRunWorkflow, useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { buildReplayInputsFromExecutionContext } from './build_replay_inputs_from_execution_context';
-import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
+import {
+  buildReplayInputsFromExecutionContext,
+  type RerunWorkflowExecutionParams,
+} from './build_replay_inputs_from_execution_context';
 import { formatWorkflowExecutionsForCopy } from './format_workflow_executions_for_copy';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -30,8 +32,6 @@ export const useWorkflowExecutionRerun = ({
   return useCallback(
     async ({ workflowId, executionId, context }: RerunWorkflowExecutionParams) => {
       try {
-        // The executions list omits `context` for payload size, so recover the
-        // original inputs/event from the full execution before re-running.
         const replayContext =
           context ?? (executionId ? (await api.getExecution(executionId)).context : undefined);
 
@@ -132,8 +132,6 @@ export const useWorkflowExecutionsBulkActions = ({
 
       const results = await Promise.allSettled(
         executionsToRerun.map(async ({ executionId, workflowId }) => {
-          // The executions list omits `context`, so fetch the full execution to
-          // recover the original inputs/event before re-running.
           const { context } = await api.getExecution(executionId);
           return runWorkflow({
             id: workflowId,
