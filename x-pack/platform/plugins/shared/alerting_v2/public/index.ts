@@ -153,6 +153,7 @@ export const module = new ContainerModule(({ bind }) => {
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        container: diContainer,
       });
 
       const alertingEnabled = coreStart.settings.globalClient.get<boolean>(
