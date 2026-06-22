@@ -21,6 +21,8 @@ interface UseResolveTimeFieldParams {
   onTimeFieldChange?: (timeField: string) => void;
   http: HttpStart;
   dataViews: DataViewsPublicPluginStart;
+  /** When false, skips field resolution and auto-correction. Defaults to true. */
+  enabled?: boolean;
 }
 
 /**
@@ -35,11 +37,13 @@ export const useResolveTimeField = ({
   onTimeFieldChange,
   http,
   dataViews,
+  enabled = true,
 }: UseResolveTimeFieldParams) => {
   const fromSourceQuery = useMemo(() => extractFromSourceQuery(query), [query]);
+  const resolutionQuery = enabled ? fromSourceQuery : '';
 
   const { data: fieldMap, isLoading: isLoadingFields } = useDataFields({
-    query: fromSourceQuery,
+    query: resolutionQuery,
     http,
     dataViews,
   });
@@ -53,7 +57,8 @@ export const useResolveTimeField = ({
     [fieldMap]
   );
 
-  const needsApiTimeField = Boolean(fromSourceQuery) && !isLoadingFields && dateFields.length === 0;
+  const needsApiTimeField =
+    enabled && Boolean(fromSourceQuery) && !isLoadingFields && dateFields.length === 0;
 
   const { data: apiTimeField, isLoading: isLoadingApiTimeField } = useQuery({
     queryKey: ruleFormKeys.composeDiscoverApiTimeField(fromSourceQuery),
@@ -76,7 +81,7 @@ export const useResolveTimeField = ({
   }, [dateFields, apiTimeField]);
 
   const isTimeFieldResolved = useMemo(() => {
-    if (!fromSourceQuery) {
+    if (!enabled || !fromSourceQuery) {
       return true;
     }
     if (isLoadingFields || (needsApiTimeField && isLoadingApiTimeField)) {
@@ -87,6 +92,7 @@ export const useResolveTimeField = ({
     }
     return true;
   }, [
+    enabled,
     fromSourceQuery,
     isLoadingFields,
     needsApiTimeField,
@@ -96,7 +102,7 @@ export const useResolveTimeField = ({
   ]);
 
   useEffect(() => {
-    if (!onTimeFieldChange || !fromSourceQuery) {
+    if (!enabled || !onTimeFieldChange || !fromSourceQuery) {
       return;
     }
     if (dateFields.length > 0 && !dateFields.includes(timeField)) {
@@ -106,7 +112,7 @@ export const useResolveTimeField = ({
     } else if (dateFields.length === 0 && !apiTimeField && timeField !== '@timestamp') {
       onTimeFieldChange('@timestamp');
     }
-  }, [fromSourceQuery, dateFields, apiTimeField, timeField, onTimeFieldChange]);
+  }, [enabled, fromSourceQuery, dateFields, apiTimeField, timeField, onTimeFieldChange]);
 
   return {
     timeFieldOptions,

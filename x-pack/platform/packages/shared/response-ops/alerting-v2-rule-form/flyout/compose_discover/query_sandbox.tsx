@@ -139,9 +139,10 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     timeFieldOptions: resolvedTimeFieldOptions,
     isTimeFieldResolved: resolvedIsTimeFieldResolved,
   } = useResolveTimeField({
-    query: skipTimeFieldResolution ? '' : query,
+    query,
     timeField,
-    onTimeFieldChange: skipTimeFieldResolution ? undefined : onTimeFieldChange,
+    onTimeFieldChange,
+    enabled: !skipTimeFieldResolution,
     http: services.http,
     dataViews: services.dataViews,
   });

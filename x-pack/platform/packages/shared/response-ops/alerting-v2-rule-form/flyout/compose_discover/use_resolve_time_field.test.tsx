@@ -154,6 +154,38 @@ describe('useResolveTimeField', () => {
     });
   });
 
+  it('skips resolution and auto-correction when enabled is false', async () => {
+    const onTimeFieldChange = jest.fn();
+    (useDataFields as jest.Mock).mockReturnValue({
+      data: {
+        timestamp: { name: 'timestamp', type: 'date', searchable: true, aggregatable: true },
+      },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          timeField: '@timestamp',
+          onTimeFieldChange,
+          enabled: false,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(useDataFields).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: '',
+        })
+      );
+      expect(onTimeFieldChange).not.toHaveBeenCalled();
+      expect(getESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(result.current.isTimeFieldResolved).toBe(true);
+    });
+  });
+
   it('reports isTimeFieldResolved once correction completes', async () => {
     (useDataFields as jest.Mock).mockReturnValue({
       data: {
