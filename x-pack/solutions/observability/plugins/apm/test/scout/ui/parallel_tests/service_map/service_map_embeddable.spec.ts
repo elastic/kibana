@@ -308,7 +308,7 @@ test.describe(
 
         // A failed save (e.g. schema validation rejecting the panel config) shows an
         // error toast and keeps the dashboard dirty; assert success instead.
-        await expect(page.getByTestId('errorToastMessage')).toBeHidden();
+        await expect(page.getByTestId('euiToastText')).toBeHidden();
         await expect(page).toHaveURL(/\/app\/dashboards#\/view\//);
 
         await pageObjects.dashboard.waitForPanelsToLoad(1);
