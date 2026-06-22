@@ -24,12 +24,15 @@ const baseContext = {
 };
 
 const makeEntityMetadataClient = (
-  responses: Array<{ status: number; type?: string; reason?: string }> = []
+  failed: number = 0
 ): {
   entityMetadataClient: EntityMetadataClient;
   bulkAppend: jest.Mock;
 } => {
-  const bulkAppend = jest.fn().mockResolvedValue(responses);
+  const bulkAppend = jest.fn().mockImplementation(async (docs: unknown[]) => ({
+    successful: docs.length - failed,
+    failed,
+  }));
   const entityMetadataClient = {
     bulkAppendMetadata: bulkAppend,
   } as unknown as EntityMetadataClient;
@@ -297,11 +300,9 @@ describe('writeRelationshipMetadatas', () => {
       ).rejects.toThrow(/bulk transport failure/);
     });
 
-    it('logs at error level when bulkAppend returns failed items but does not throw', async () => {
+    it('logs at error level when bulkAppend reports failed items but does not throw', async () => {
       const logger = loggerMock.create();
-      const { entityMetadataClient } = makeEntityMetadataClient([
-        { status: 503, type: 'cluster_block_exception', reason: 'read-only' },
-      ]);
+      const { entityMetadataClient } = makeEntityMetadataClient(1);
       const records: EntityRelationshipRecord[] = [
         {
           entityId: 'user:alice@corp',

@@ -54,7 +54,9 @@ const makeClients = (
   const bulkUpdate = jest.fn().mockResolvedValue(errors);
   // After writeEntityIds, runIntegration calls the metadata append path on
   // the EntityMetadataClient. Mocked here so tests can assert on the second write.
-  const bulkAppend = jest.fn().mockResolvedValue([]);
+  const bulkAppend = jest
+    .fn()
+    .mockImplementation(async (docs: unknown[]) => ({ successful: docs.length, failed: 0 }));
   const crudClient = {
     bulkUpdateEntity: bulkUpdate,
   } as unknown as EntityUpdateClient;

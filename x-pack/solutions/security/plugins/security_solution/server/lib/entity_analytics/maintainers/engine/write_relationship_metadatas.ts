@@ -97,18 +97,14 @@ export const writeRelationshipMetadatas = async (
 
   if (docs.length === 0) return { docsAttempted: 0, docsApplied: 0 };
 
-  const failures = await entityMetadataClient.bulkAppendMetadata(docs);
-  const docsApplied = docs.length - failures.length;
+  const { successful, failed } = await entityMetadataClient.bulkAppendMetadata(docs);
 
-  if (failures.length > 0) {
-    logger.error(
-      `Failed to append ${failures.length} of ${
-        docs.length
-      } relationship metadata: ${JSON.stringify(failures)}`
-    );
+  if (failed > 0) {
+    // Per-doc drop reasons are logged in the entity-store infra layer's onDrop hook.
+    logger.error(`Failed to append ${failed} of ${docs.length} relationship metadata`);
   } else {
     logger.info(`Appended ${docs.length} relationship metadata to metadata datastream`);
   }
 
-  return { docsAttempted: docs.length, docsApplied };
+  return { docsAttempted: docs.length, docsApplied: successful };
 };
