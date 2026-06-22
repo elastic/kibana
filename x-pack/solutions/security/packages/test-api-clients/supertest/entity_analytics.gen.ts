@@ -132,6 +132,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * **DEPRECATED.**
+   */
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
@@ -164,7 +167,9 @@ is added to its existing source labels instead.
       .send(props.body as object);
   },
   /**
-      * Bulk upsert up to 1000 asset criticality records.
+      * **DEPRECATED.**
+
+Bulk upsert up to 1000 asset criticality records.
 
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 
@@ -205,7 +210,9 @@ If asset criticality records already exist for the specified entities, those rec
       .send(props.body as object);
   },
   /**
-      * Create or update an asset criticality record for a specific entity.
+      * **DEPRECATED.**
+
+Create or update an asset criticality record for a specific entity.
 
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 
@@ -282,7 +289,7 @@ If a record already exists for the specified entity, that record is overwritten 
       .send(props.body as object);
   },
   /**
-   * Delete the asset criticality record for a specific entity.
+   * **DEPRECATED.** Delete the asset criticality record for a specific entity.
    */
   deleteAssetCriticalityRecord(
     props: DeleteAssetCriticalityRecordProps,
@@ -447,7 +454,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * List asset criticality records, paging, sorting and filtering as needed.
+   * **DEPRECATED.** List asset criticality records, paging, sorting and filtering as needed.
    */
   findAssetCriticalityRecords(
     props: FindAssetCriticalityRecordsProps,
@@ -480,7 +487,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .send(props.body as object);
   },
   /**
-   * Get the asset criticality record for a specific entity.
+   * **DEPRECATED.** Get the asset criticality record for a specific entity.
    */
   getAssetCriticalityRecord(
     props: GetAssetCriticalityRecordProps,
@@ -493,6 +500,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * **DEPRECATED.**
+   */
   getAssetCriticalityStatus(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/status', kibanaSpace))
@@ -991,6 +1001,9 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * **DEPRECATED.**
+   */
   uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))

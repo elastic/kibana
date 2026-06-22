@@ -75,8 +75,10 @@ paths:
       x-labels: [ess, serverless]
       x-internal: true
       x-codegen-enabled: true
+      deprecated: true
       operationId: UploadAssetCriticalityRecords
       summary: Uploads a CSV file containing asset criticality data
+      description: '**DEPRECATED.**'
       requestBody:
         content:
           multipart/form-data:

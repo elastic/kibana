@@ -649,6 +649,9 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **DEPRECATED.**
+   */
   async assetCriticalityGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API AssetCriticalityGetPrivileges`);
     return this.kbnClient
@@ -686,7 +689,9 @@ is added to its existing source labels instead.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Bulk upsert up to 1000 asset criticality records.
+    * **DEPRECATED.**
+
+Bulk upsert up to 1000 asset criticality records.
 
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 
@@ -828,7 +833,9 @@ and should not remove existing data, but it can consume significant cluster reso
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Create or update an asset criticality record for a specific entity.
+    * **DEPRECATED.**
+
+Create or update an asset criticality record for a specific entity.
 
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 
@@ -1149,7 +1156,7 @@ Call `GET /api/detection_engine/index` first to confirm the index that will be r
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete the asset criticality record for a specific entity.
+   * **DEPRECATED.** Delete the asset criticality record for a specific entity.
    */
   async deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAssetCriticalityRecord`);
@@ -1741,7 +1748,7 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * List asset criticality records, paging, sorting and filtering as needed.
+   * **DEPRECATED.** List asset criticality records, paging, sorting and filtering as needed.
    */
   async findAssetCriticalityRecords(props: FindAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindAssetCriticalityRecords`);
@@ -1846,7 +1853,7 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get the asset criticality record for a specific entity.
+   * **DEPRECATED.** Get the asset criticality record for a specific entity.
    */
   async getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAssetCriticalityRecord`);
@@ -1862,6 +1869,9 @@ finishes and then call this operation once.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **DEPRECATED.**
+   */
   async getAssetCriticalityStatus() {
     this.log.info(`${new Date().toISOString()} Calling API GetAssetCriticalityStatus`);
     return this.kbnClient
@@ -3770,6 +3780,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **DEPRECATED.**
+   */
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient

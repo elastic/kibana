@@ -8,8 +8,10 @@ paths:
       x-labels: [ess, serverless]
       x-internal: true
       x-codegen-enabled: true
+      deprecated: true
       operationId: AssetCriticalityGetPrivileges
       summary: Get Asset Criticality Privileges
+      description: '**DEPRECATED.**'
       responses:
         '200':
           description: Successful response

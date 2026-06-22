@@ -8,9 +8,12 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
+      deprecated: true
       operationId: BulkUpsertAssetCriticalityRecords
       summary: Bulk upsert asset criticality records
       description: |
+        **DEPRECATED.**
+
         Bulk upsert up to 1000 asset criticality records.
 
         If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
