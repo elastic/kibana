@@ -7,5 +7,5 @@ products:
 areas:
 - Kibana platform
 title: Deprecate `elastic.apm` settings
-impact: Elastic APM instrumentation is deprecated and will be removed in future versions.
+impact: The Elastic APM instrumentation is deprecated and will be removed in a future version.
 action: Use the OpenTelemetry instrumentation when collecting traces and metrics from Kibana. Refer to [Instrumenting with OTel Traces](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces) for more information.
