@@ -77,7 +77,7 @@ async function fetchLatestVersionSpecifiers(
       rules: AggregationsMultiBucketAggregateBase<{
         latest_version: {
           hits: SearchHitsMetadata<{
-            [PREBUILT_RULE_ASSETS_SO_TYPE]: RuleVersionSpecifier;
+            [PREBUILT_RULE_ASSETS_SO_TYPE]: RuleVersionSpecifier & { deprecated?: boolean };
           }>;
         };
       }>;
@@ -110,6 +110,7 @@ async function fetchLatestVersionSpecifiers(
               _source: [
                 `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
                 `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+                `${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`,
               ],
             },
           },
@@ -125,17 +126,27 @@ async function fetchLatestVersionSpecifiers(
     'fetchLatestVersionSpecifiers: expected buckets to be an array'
   );
 
-  const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.map((bucket) => {
+  const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.flatMap((bucket) => {
     const hit = bucket.latest_version.hits.hits[0];
     const hitSource = hit?._source;
 
     invariant(hitSource, 'fetchLatestVersionSpecifiers: expected hit source to be defined');
 
     const soAttributes = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
-    return {
-      rule_id: soAttributes.rule_id,
-      version: soAttributes.version,
-    };
+
+    // Drop buckets whose latest version is a deprecated asset stub.
+    // Deprecation is monotonic per rule_id, so a deprecated top hit means the
+    // whole rule_id is deprecated
+    if (soAttributes.deprecated === true) {
+      return [];
+    }
+
+    return [
+      {
+        rule_id: soAttributes.rule_id,
+        version: soAttributes.version,
+      },
+    ];
   });
   return latestVersionSpecifiers;
 }

@@ -41,9 +41,6 @@ export async function fetchLatestAssets(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    // Exclude deprecated rule assets so they are not returned as installable/upgradeable
-    filter: `NOT ${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.deprecated: true`,
-    // Aggregation groups prebuilt rule assets by rule_id and gets a rule with the highest version for each group.
     aggs: {
       rules: {
         terms: {
@@ -67,9 +64,19 @@ export async function fetchLatestAssets(
   const buckets = findResult.aggregations?.rules?.buckets ?? [];
   invariant(Array.isArray(buckets), 'fetchLatestAssets: expected buckets to be an array');
 
-  const ruleAssets = buckets.map((bucket) => {
+  const ruleAssets = buckets.flatMap((bucket) => {
     const hit = bucket.latest_version.hits.hits[0];
-    return hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
+    const source = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
+
+    // Drop buckets whose latest version is a deprecated asset stub.
+    // Deprecation is monotonic per rule_id, so a deprecated top hit means the
+    // whole rule_id is deprecated and must not flow into
+    // validatePrebuiltRuleAssets as it would throw an error.
+    if (source.deprecated === true) {
+      return [];
+    }
+
+    return [source];
   });
 
   return validatePrebuiltRuleAssets(ruleAssets);

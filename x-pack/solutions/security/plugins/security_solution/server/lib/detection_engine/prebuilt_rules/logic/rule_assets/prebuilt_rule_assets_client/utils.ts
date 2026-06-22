@@ -30,17 +30,6 @@ export const PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS: MappingRuntimeFields = {
 export function prepareQueryDslFilter(ruleIds?: string[], filter?: string): ESFilter[] {
   const queryFilter: ESFilter[] = [];
 
-  // Exclude deprecated rules by default from all queries that use this filter.
-  // For existing SOs without a `deprecated` field, the term query matches nothing,
-  // so must_not correctly includes them.
-  queryFilter.push({
-    bool: {
-      must_not: {
-        term: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`]: true },
-      },
-    },
-  });
-
   if (ruleIds) {
     queryFilter.push({
       terms: {
