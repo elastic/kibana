@@ -993,8 +993,8 @@ describe('installAssetsForInputPackagePolicy', () => {
         } as any,
       });
 
-      // profiles is owned by Universal Profiling (dedicated profiling-* indices); Fleet must
-      // not create profiles-* data streams for it (elastic/package-spec#1191).
+      // profiles is owned end-to-end by Universal Profiling; Fleet must not create data streams
+      // for it (elastic/package-spec#1191).
       expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 

@@ -158,11 +158,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
 
-    // Fleet-unmanaged signal types (e.g. profiles) are written to dedicated indices, not to a
-    // `<type>-<dataset>-<namespace>` data stream, so for them the type is fixed and the dataset has
-    // no effect. Hide both fields to avoid implying configurability that doesn't exist. This is keyed
-    // off the signal type (not the input type) so it behaves the same for OTel and non-OTel input
-    // packages. See FLEET_UNMANAGED_DATA_STREAM_TYPES.
+    // For Fleet-unmanaged signal types (e.g. profiles) the type is fixed and the dataset has no
+    // effect; hide both to avoid implying configurability that doesn't exist. Keyed off the signal
+    // type so it applies to both OTel and non-OTel packages. See FLEET_UNMANAGED_DATA_STREAM_TYPES.
     const isUnmanagedDataStreamType = FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(
       customDataStreamTypeVarValue
     );

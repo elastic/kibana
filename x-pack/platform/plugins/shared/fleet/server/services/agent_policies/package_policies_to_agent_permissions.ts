@@ -19,7 +19,7 @@ import {
   FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS,
   OTEL_COLLECTOR_INPUT_TYPE,
   OTEL_TEMPLATE_SUFFIX,
-  UNIVERSAL_PROFILING_INDEX_PATTERN,
+  UNIVERSAL_PROFILING_INDEX_PATTERNS,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
@@ -131,14 +131,10 @@ export function storedPackagePoliciesToAgentPermissions(
       );
     }
 
-    // Special handling for Universal Profiling packages, as it does not use data streams _only_,
-    // but also indices that do not adhere to the convention.
-    //
-    // These are `integration` packages with no data streams, so the generic `profiles` ->
-    // `profiling-*` mapping (FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS, applied in
-    // getDataStreamPrivileges) never runs for them: the empty-data-streams gate below short-circuits
-    // first. If they were migrated to `input` packages with a `profiles` policy template, that
-    // generic path would cover them and this name-based special case could be removed.
+    // Special handling for Universal Profiling packages: they are `integration` packages with no
+    // data streams, so the generic `profiles` -> UNIVERSAL_PROFILING_INDEX_PATTERNS path in
+    // getDataStreamPrivileges never runs (the empty-data-streams gate below short-circuits first).
+    // Migrating them to `input` packages with a `profiles` template would remove this special case.
     if (
       pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
       pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
@@ -384,13 +380,12 @@ export function getDataStreamPrivileges(
   dataStream: DataStreamMeta,
   namespace: string = '*'
 ): SecurityIndicesPrivileges {
-  // Fleet-unmanaged signals (e.g. profiles) are written by their producer/exporter to
-  // dedicated indices that don't follow the `<type>-<dataset>-<namespace>` convention, so
-  // their write permissions target that fixed pattern instead (e.g. profiles -> profiling-*).
-  const unmanagedIndexPattern = FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS[dataStream.type];
-  if (unmanagedIndexPattern) {
+  // Fleet-unmanaged signals (e.g. profiles) are routed by their producer/exporter; grant write
+  // permissions to the known destination patterns instead of `<type>-<dataset>-<namespace>`.
+  const unmanagedIndexPatterns = FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS[dataStream.type];
+  if (unmanagedIndexPatterns) {
     return {
-      names: [unmanagedIndexPattern],
+      names: [...unmanagedIndexPatterns],
       privileges: dataStream?.elasticsearch?.privileges?.indices?.length
         ? dataStream.elasticsearch.privileges.indices
         : UNIVERSAL_PROFILING_PERMISSIONS,
@@ -426,13 +421,12 @@ export function getDataStreamPrivileges(
 }
 
 function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
-  const profilingIndexPattern = UNIVERSAL_PROFILING_INDEX_PATTERN;
   return [
     packagePolicyId,
     {
       indices: [
         {
-          names: [profilingIndexPattern],
+          names: [...UNIVERSAL_PROFILING_INDEX_PATTERNS],
           privileges: UNIVERSAL_PROFILING_PERMISSIONS,
         },
       ],

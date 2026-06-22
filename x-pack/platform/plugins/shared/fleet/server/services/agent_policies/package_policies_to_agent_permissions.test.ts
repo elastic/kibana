@@ -775,7 +775,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'package-policy-uuid-test-123': {
         indices: [
           {
-            names: ['profiling-*'],
+            names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
           },
         ],
@@ -817,7 +817,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'package-policy-uuid-test-123': {
         indices: [
           {
-            names: ['profiling-*'],
+            names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
           },
         ],
@@ -825,7 +825,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
-  it('Returns profiling-* permissions for a non-dynamic OTel profiles input', async () => {
+  it('Returns Universal Profiling permissions for a non-dynamic OTel profiles input', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-otel-profiles',
@@ -861,12 +861,12 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'test',
       packagePolicies
     );
-    // profiles is written to the dedicated profiling-* indices, not a profiles-<dataset> data stream.
+    // profiles is owned end-to-end by Universal Profiling, not managed as a profiles-<dataset> data stream.
     expect(permissions).toMatchObject({
       'package-policy-otel-profiles': {
         indices: [
           {
-            names: ['profiling-*'],
+            names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
           },
         ],
@@ -2522,14 +2522,14 @@ describe('getDataStreamPrivileges()', () => {
     });
   });
 
-  it('targets the profiling-* indices for the profiles signal regardless of dataset/namespace', () => {
+  it('targets Universal Profiling index patterns for the profiles signal regardless of dataset/namespace', () => {
     const dataStream = { type: 'profiles', dataset: 'profilingreceiver' } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    // profiles is written by the Elasticsearch exporter to the dedicated profiling-* indices,
-    // not to a profiles-<dataset>-<namespace> data stream.
+    // profiles is owned end-to-end by Universal Profiling; permissions cover both legacy
+    // profiling-* custom indices and future profiles-* data streams.
     expect(privileges).toEqual({
-      names: ['profiling-*'],
+      names: ['profiling-*', 'profiles-*'],
       privileges: UNIVERSAL_PROFILING_PERMISSIONS,
     });
   });
@@ -2545,7 +2545,7 @@ describe('getDataStreamPrivileges()', () => {
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
     expect(privileges).toEqual({
-      names: ['profiling-*'],
+      names: ['profiling-*', 'profiles-*'],
       privileges: ['create_doc'],
     });
   });

@@ -1675,8 +1675,8 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
-      // profiles is owned by Universal Profiling (dedicated profiling-* indices) and routed
-      // by the Elasticsearch exporter, so Fleet must not stamp data_stream.* for it.
+      // profiles is owned end-to-end by Universal Profiling (routing and storage handled by its
+      // Elasticsearch exporter), so Fleet must not stamp data_stream.* for it.
       expect(
         result.processors?.['transform/test-multi-signal-stream-id-1-routing']?.profile_statements
       ).toBeUndefined();

@@ -790,10 +790,8 @@ describe('PackagePolicyInputStreamConfig', () => {
   });
 
   describe('Fleet-unmanaged signal types (e.g. profiles)', () => {
-    // profiles is written to dedicated profiling-* indices, not a `<type>-<dataset>-<namespace>`
-    // data stream, so its type is fixed and the dataset has no effect. Both fields are hidden,
-    // keyed off the signal type (FLEET_UNMANAGED_DATA_STREAM_TYPES) so OTel and non-OTel input
-    // packages behave the same.
+    // For profiles the type is fixed and the dataset has no effect; both fields are hidden
+    // via FLEET_UNMANAGED_DATA_STREAM_TYPES for both OTel and non-OTel packages.
     const datasetVar = {
       name: DATASET_VAR_NAME,
       type: 'text',
