@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type {
   SavedObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -163,15 +164,6 @@ export class AttachmentService {
    */
   public get isUnifiedAttachmentsEnabled(): boolean {
     return this.context.config.attachments?.enabled === true;
-  }
-
-  private async getAttachmentSavedObjectType(
-    savedObjectId: string
-  ): Promise<typeof CASE_ATTACHMENT_SAVED_OBJECT | typeof CASE_COMMENT_SAVED_OBJECT | null> {
-    return resolveAttachmentSavedObjectType(
-      this.context.unsecuredSavedObjectsClient,
-      savedObjectId
-    );
   }
 
   /**
@@ -634,7 +626,10 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to UPDATE attachment ${savedObjectId}`);
 
-      const soType = await this.getAttachmentSavedObjectType(savedObjectId);
+      const soType = await resolveAttachmentSavedObjectType(
+        this.context.unsecuredSavedObjectsClient,
+        savedObjectId
+      );
       if (soType === null) {
         throw new Error(`Attachment ${savedObjectId} not found`);
       }
@@ -714,57 +709,61 @@ export class AttachmentService {
         `Attempting to UPDATE attachments ${comments.map((c) => c.savedObjectId).join(', ')}`
       );
 
-      const savedObjectType = getAttachmentSavedObjectType(this.context.config);
+      const defaultSavedObjectType = getAttachmentSavedObjectType(this.context.config);
+      const perAttachmentTypes = this.isUnifiedAttachmentsEnabled
+        ? (
+            await Promise.all(
+              comments.map((c) =>
+                resolveAttachmentSavedObjectType(
+                  this.context.unsecuredSavedObjectsClient,
+                  c.savedObjectId
+                )
+              )
+            )
+          ).map((soType) => soType ?? defaultSavedObjectType)
+        : comments.map(() => defaultSavedObjectType);
 
-      if (savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT) {
-        const res =
-          await this.context.unsecuredSavedObjectsClient.bulkUpdate<UnifiedAttachmentAttributes>(
-            comments.map((c) => {
-              const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
-                c.updatedAttributes
-              );
-              const transformer = getTransformerForPatchAttributes(
-                decodedAttributes,
-                requestWithoutType
-              );
-              const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
+      const unifiedRequests: Array<{
+        index: number;
+        payload: SavedObjectsBulkUpdateObject<UnifiedAttachmentAttributes>;
+      }> = [];
+      const legacyRequests: Array<{
+        index: number;
+        payload: SavedObjectsBulkUpdateObject<AttachmentPersistedAttributes>;
+      }> = [];
 
-              return {
-                ...c.options,
-                type: CASE_ATTACHMENT_SAVED_OBJECT,
-                id: c.savedObjectId,
-                attributes: unifiedAttributes,
-              };
-            }),
-            { refresh }
-          );
-        return this.transformAndDecodeBulkUpdateResponse(res, comments, requestWithoutType);
-      }
+      for (let i = 0; i < comments.length; i++) {
+        const c = comments[i];
+        const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(c.updatedAttributes);
+        const transformer = getTransformerForPatchAttributes(decodedAttributes, requestWithoutType);
 
-      const res =
-        await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentPersistedAttributes>(
-          comments.map((c) => {
-            const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
-              c.updatedAttributes
-            );
-            assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
-            const transformer = getTransformerForPatchAttributes(
-              decodedAttributes,
-              requestWithoutType
-            );
-            const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
-            const {
-              attributes: extractedAttributes,
-              references: extractedReferences,
-              didDeleteOperation,
-            } = extractAttachmentSORefsFromAttributes(
-              legacyAttributes,
-              c.options?.references ?? []
-            );
+        // If unified attachment, transform to unified schema
+        if (perAttachmentTypes[i] === CASE_ATTACHMENT_SAVED_OBJECT) {
+          const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
+          unifiedRequests.push({
+            index: i,
+            payload: {
+              ...c.options,
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              id: c.savedObjectId,
+              attributes: unifiedAttributes,
+            },
+          });
+        } else {
+          // for legacy attachments, transform to legacy schema
+          assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
+          const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
+          const {
+            attributes: extractedAttributes,
+            references: extractedReferences,
+            didDeleteOperation,
+          } = extractAttachmentSORefsFromAttributes(legacyAttributes, c.options?.references ?? []);
 
-            const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
+          const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
 
-            return {
+          legacyRequests.push({
+            index: i,
+            payload: {
               ...c.options,
               type: CASE_COMMENT_SAVED_OBJECT,
               id: c.savedObjectId,
@@ -775,12 +774,44 @@ export class AttachmentService {
                * to prevent this.
                */
               references: shouldUpdateRefs ? extractedReferences : undefined,
-            };
-          }),
-          { refresh }
-        );
+            },
+          });
+        }
+      }
 
-      return this.transformAndDecodeBulkUpdateResponse(res, comments, requestWithoutType);
+      const mergedSavedObjects: Array<
+        SavedObjectsUpdateResponse<
+          AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
+        >
+      > = new Array(comments.length);
+
+      if (unifiedRequests.length > 0) {
+        const res =
+          await this.context.unsecuredSavedObjectsClient.bulkUpdate<UnifiedAttachmentAttributes>(
+            unifiedRequests.map((r) => r.payload),
+            { refresh }
+          );
+        res.saved_objects.forEach((so, k) => {
+          mergedSavedObjects[unifiedRequests[k].index] = so;
+        });
+      }
+
+      if (legacyRequests.length > 0) {
+        const res =
+          await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentPersistedAttributes>(
+            legacyRequests.map((r) => r.payload),
+            { refresh }
+          );
+        res.saved_objects.forEach((so, k) => {
+          mergedSavedObjects[legacyRequests[k].index] = so;
+        });
+      }
+
+      return this.transformAndDecodeBulkUpdateResponse(
+        { saved_objects: mergedSavedObjects },
+        comments,
+        requestWithoutType
+      );
     } catch (error) {
       this.context.log.error(
         `Error on UPDATE attachments ${comments.map((c) => c.savedObjectId).join(', ')}: ${error}`

@@ -920,6 +920,134 @@ describe('AttachmentService', () => {
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
     });
+
+    describe('per-attachment SO type resolution (flag ON)', () => {
+      // When the unified SO is registered, bulkUpdate must probe each id
+      // and write to the bucket that actually owns the row
+      const buildServiceWithFlagOn = () =>
+        new AttachmentService({
+          log: mockLogger,
+          unsecuredSavedObjectsClient,
+          config: createAttachmentServiceConfig(true),
+        });
+
+      const unifiedCommentAttrs = {
+        type: 'comment',
+        data: { content: 'hello' },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      } as const;
+
+      // Mock `get` such that `unifiedId` resolves to the unified bucket and
+      // `legacyId` to the legacy bucket; everything else 404s.
+      const mockResolveByBucket = (legacyId: string, unifiedId: string) => {
+        unsecuredSavedObjectsClient.get.mockImplementation((type: string, id: string) => {
+          if (type === CASE_ATTACHMENT_SAVED_OBJECT && id === unifiedId) {
+            return Promise.resolve({ ...createUserAttachment(), id, type });
+          }
+          if (type === CASE_COMMENT_SAVED_OBJECT && id === legacyId) {
+            return Promise.resolve(createUserAttachment());
+          }
+          return Promise.reject(Object.assign(new Error('Not found'), { statusCode: 404 }));
+        });
+      };
+
+      it('writes to both buckets when ids resolve to different SOs', async () => {
+        mockResolveByBucket('legacy-id', 'unified-id');
+        unsecuredSavedObjectsClient.bulkUpdate
+          .mockResolvedValueOnce({
+            saved_objects: [
+              {
+                id: 'unified-id',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+                attributes: unifiedCommentAttrs,
+                references: [],
+                version: 'v2',
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            saved_objects: [{ ...createUserAttachment(), id: 'legacy-id' }],
+          });
+
+        const res = await buildServiceWithFlagOn().bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'unified-id',
+              updatedAttributes: unifiedCommentAttrs,
+            },
+            {
+              savedObjectId: 'legacy-id',
+              updatedAttributes: createUserAttachment().attributes,
+            },
+          ],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(2);
+        const [unifiedCall, legacyCall] = unsecuredSavedObjectsClient.bulkUpdate.mock.calls;
+        expect(unifiedCall[0]).toEqual([
+          expect.objectContaining({ type: CASE_ATTACHMENT_SAVED_OBJECT, id: 'unified-id' }),
+        ]);
+        expect(legacyCall[0]).toEqual([
+          expect.objectContaining({ type: CASE_COMMENT_SAVED_OBJECT, id: 'legacy-id' }),
+        ]);
+
+        expect(res.saved_objects).toHaveLength(2);
+        expect(res.saved_objects[0].id).toBe('unified-id');
+        expect(res.saved_objects[0].type).toBe(CASE_ATTACHMENT_SAVED_OBJECT);
+        expect(res.saved_objects[1].id).toBe('legacy-id');
+        expect(res.saved_objects[1].type).toBe(CASE_COMMENT_SAVED_OBJECT);
+      });
+
+      it('issues a single bulkUpdate when every id lives in cases-comments', async () => {
+        mockResolveByBucket('legacy-id', '__none__');
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [{ ...createUserAttachment(), id: 'legacy-id' }],
+        });
+
+        await buildServiceWithFlagOn().bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'legacy-id',
+              updatedAttributes: createUserAttachment().attributes,
+            },
+          ],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+        const [requests] = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0];
+        expect(requests).toEqual([
+          expect.objectContaining({ type: CASE_COMMENT_SAVED_OBJECT, id: 'legacy-id' }),
+        ]);
+      });
+    });
+
+    it('skips the per-attachment SO probe when config.attachments.enabled is false', async () => {
+      const serviceWithFlagOff = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(false),
+      });
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [createUserAttachment()],
+      });
+
+      await serviceWithFlagOff.bulkUpdate({
+        comments: [
+          {
+            savedObjectId: '1',
+            updatedAttributes: createUserAttachment().attributes,
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkDelete', () => {
