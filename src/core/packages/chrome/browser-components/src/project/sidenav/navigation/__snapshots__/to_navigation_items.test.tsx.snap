@@ -62,7 +62,7 @@ Array [
     "href": "/jom/app/dev_tools",
     "iconType": "editorCodeBlock",
     "id": "dev_tools",
-    "label": "Developer Tools",
+    "label": "Developer tools",
     "sections": undefined,
   },
   Object {
@@ -333,7 +333,7 @@ Array [
             "label": "Feature Settings",
           },
         ],
-        "label": "Model management",
+        "label": "Model Management",
       },
       Object {
         "id": "node-3",

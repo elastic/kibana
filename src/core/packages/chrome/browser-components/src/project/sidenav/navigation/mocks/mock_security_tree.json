@@ -918,7 +918,7 @@
       ]
     },
     {
-      "title": "Developer Tools",
+      "title": "Developer tools",
       "icon": "editorCodeBlock",
       "id": "dev_tools",
       "href": "/jom/app/dev_tools",
@@ -1214,7 +1214,7 @@
         {
           "id": "node-model-management",
           "path": "stack_management.node-model-management",
-          "title": "Model management",
+          "title": "Model Management",
           "children": [
             {
               "id": "management:elastic_inference_service",
