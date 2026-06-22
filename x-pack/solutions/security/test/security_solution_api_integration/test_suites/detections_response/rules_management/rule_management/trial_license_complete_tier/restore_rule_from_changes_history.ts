@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body2.items[0].metadata.changeId).toBe(changeId);
     });
 
-    it('restores a pure prebuilt rule that was never customized', async () => {
+    it('restores a non-customized prebuilt rule', async () => {
       await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
         createRuleAssetSavedObject({ rule_id: 'prebuilt-restore-pure', version: 1 }),
       ]);

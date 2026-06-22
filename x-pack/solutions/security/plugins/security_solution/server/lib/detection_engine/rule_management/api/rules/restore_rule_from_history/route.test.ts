@@ -43,7 +43,7 @@ describe('Restore rule from history route', () => {
       buildRestoreRequest({
         params: {
           ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
-          changeId: 'change-abc-123',
+          changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f',
         },
       }),
       requestContextMock.convertContext(context)
@@ -53,7 +53,7 @@ describe('Restore rule from history route', () => {
     expect(response.body).toEqual(responseBody);
     expect(clients.detectionRulesClient.restoreRuleFromHistory).toHaveBeenCalledWith({
       ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
-      changeId: 'change-abc-123',
+      changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f',
     });
   });
 
@@ -80,7 +80,7 @@ describe('Restore rule from history route', () => {
       buildRestoreRequest({
         params: {
           ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
-          changeId: 'change-abc-123',
+          changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f',
         },
       }),
       requestContextMock.convertContext(context)
