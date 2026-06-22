@@ -6,12 +6,12 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
+import type { EntityDefinition } from '../../../../common/domain/definitions/entity_schema';
 import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsqlFromDefinition,
-} from '../../../common/domain/euid/esql';
-import type { PaginationFields } from './query_builder_commons';
+} from '../../../../common/domain/euid/esql';
+import type { PaginationFields } from '../query_builder_commons';
 import {
   buildExtractionSourceClause,
   buildSetFieldsByCondition,
@@ -20,27 +20,27 @@ import {
   type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
   TIMESTAMP_FIELD,
   aggregationStats,
   fieldsToKeep,
   extractPaginationParams,
   buildPaginationSection,
-  NULLIFY_UNMAPPED_FIELDS_SETTING,
-} from './query_builder_commons';
+} from '../query_builder_commons';
 
-const CCS_FIELDS_TO_KEEP = [
+const REMOTE_FIELDS_TO_KEEP = [
   TIMESTAMP_FIELD,
   MAIN_ENTITY_ID_FIELD,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 ];
 
-export const CCS_PAGINATION_FIELDS: PaginationFields = {
+export const REMOTE_PAGINATION_FIELDS: PaginationFields = {
   timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   finalIdField: MAIN_ENTITY_ID_FIELD,
   idFieldInQuery: MAIN_ENTITY_ID_FIELD,
 };
 
-export interface CcsLogsExtractionQueryParams {
+export interface RemoteLogsExtractionQueryParams {
   indexPatterns: string[];
   entityDefinition: EntityDefinition;
   fromDateISO: string;
@@ -53,10 +53,10 @@ export interface CcsLogsExtractionQueryParams {
 }
 
 /**
- * Builds ESQL for CCS-only extraction: same aggregation as main but no LOOKUP JOIN.
+ * Builds ESQL for remote extraction: same aggregation as main but no LOOKUP JOIN.
  * Writes partial entities to updates with @timestamp = nowISO so the next run intakes them.
  */
-export function buildCcsLogsExtractionEsqlQuery({
+export function buildRemoteLogsExtractionEsqlQuery({
   indexPatterns,
   entityDefinition,
   fromDateISO,
@@ -66,7 +66,7 @@ export function buildCcsLogsExtractionEsqlQuery({
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
-}: CcsLogsExtractionQueryParams): string {
+}: RemoteLogsExtractionQueryParams): string {
   const { fields, type } = entityDefinition;
 
   const parts = [];
@@ -119,19 +119,25 @@ export function buildCcsLogsExtractionEsqlQuery({
   }
 
   // Keep fields
-  parts.push(`| KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}`);
+  parts.push(`| KEEP ${fieldsToKeep(fields, REMOTE_FIELDS_TO_KEEP)}`);
 
   // Paginate
   parts.push(
-    ...buildPaginationSection(fromDateISO, docsLimit, CCS_PAGINATION_FIELDS, pagination, recoveryId)
+    ...buildPaginationSection(
+      fromDateISO,
+      docsLimit,
+      REMOTE_PAGINATION_FIELDS,
+      pagination,
+      recoveryId
+    )
   );
 
   return parts.join('\n');
 }
 
-export function extractCcsPaginationParams(
+export function extractRemotePaginationParams(
   esqlResponse: ESQLSearchResponse,
   maxDocs: number
 ): PaginationParams | undefined {
-  return extractPaginationParams(esqlResponse, maxDocs, CCS_PAGINATION_FIELDS);
+  return extractPaginationParams(esqlResponse, maxDocs, REMOTE_PAGINATION_FIELDS);
 }

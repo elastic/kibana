@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { LogsExtractionClient } from './logs_extraction_client';
+import { createPlaywrightConfig } from '@kbn/scout-security';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+  workers: 1,
+});
