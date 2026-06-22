@@ -82,8 +82,7 @@ export async function runDockerGenerator(
   if (flags.serverless) artifactVariant = '-serverless';
   if (flags.solution) artifactSolution = `-${flags.solution.artifact}`;
   const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
-  const tarExt = config.getTarZstd() ? 'tar.zst' : 'tar.gz';
-  const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.${tarExt}`;
+  const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat${
     flags.fips ? '-fips' : ''
@@ -139,8 +138,6 @@ export async function runDockerGenerator(
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
     fips: flags.fips,
-    tarZstd: config.getTarZstd(),
-    tarExt,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
