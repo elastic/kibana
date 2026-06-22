@@ -53,7 +53,8 @@ const areSettingsEqual = (
     left?.autoCloseEnabled === right?.autoCloseEnabled &&
     left?.autoCloseConfidenceScoreMinThreshold === right?.autoCloseConfidenceScoreMinThreshold &&
     left?.autoCloseConfidenceScoreMaxThreshold === right?.autoCloseConfidenceScoreMaxThreshold &&
-    left?.connectorId === right?.connectorId
+    left?.connectorId === right?.connectorId &&
+    left?.createConversation === right?.createConversation
   );
 };
 
@@ -239,6 +240,48 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   settings={settings}
                   onChange={(connectorId) =>
                     setPageSettings((prev) => (prev ? { ...prev, connectorId } : prev))
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertValidationWorkflow.createConversationSectionTitle"
+                    defaultMessage="Create conversation"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertValidationWorkflow.createConversationSectionDescription"
+                    defaultMessage="When enabled, the AI agent creates a new conversation for each alert analysis. Disable to prevent large numbers of conversations from accumulating."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth>
+                <EuiSwitch
+                  data-test-subj="alertValidationWorkflowCreateConversation"
+                  showLabel={false}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.alertValidationWorkflow.createConversationAriaLabel',
+                    { defaultMessage: 'Create conversation per alert analysis' }
+                  )}
+                  label={i18n.translate(
+                    'xpack.securitySolution.alertValidationWorkflow.createConversationHiddenLabel',
+                    { defaultMessage: 'Create conversation per alert analysis' }
+                  )}
+                  checked={pageSettings.createConversation ?? true}
+                  disabled={!canEditAdvancedSettings}
+                  onChange={(event) =>
+                    setPageSettings({
+                      ...pageSettings,
+                      createConversation: event.target.checked,
+                    })
                   }
                 />
               </EuiFormRow>

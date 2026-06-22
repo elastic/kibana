@@ -13,6 +13,7 @@ import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
@@ -37,6 +38,7 @@ const AlertValidationWorkflowSettingsWithConnectorRequestBody =
   AlertValidationWorkflowSettings.extend({
     connectorId: z.string().optional(),
     workflowEnabled: z.boolean().optional(),
+    createConversation: z.boolean().optional(),
   }).refine(
     ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
       autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
@@ -56,12 +58,14 @@ const toWorkflowSettings = ({
   autoCloseConfidenceScoreMaxThreshold,
   connectorId,
   workflowEnabled,
+  createConversation,
 }: AlertValidationWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertValidationWorkflowSettings => ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId: connectorId ?? '',
   workflowEnabled: workflowEnabled ?? true,
+  createConversation: createConversation ?? true,
 });
 
 export const registerAlertValidationWorkflowSettingsRoutes = (
@@ -105,6 +109,9 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           ),
           connectorId: await uiSettingsClient.get<string>(
             SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID
+          ),
+          createConversation: await uiSettingsClient.get<boolean>(
+            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION
           ),
         };
 
@@ -185,6 +192,10 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           await uiSettingsClient.set(
             SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
             settings.connectorId
+          );
+          await uiSettingsClient.set(
+            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
+            settings.createConversation
           );
 
           const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(

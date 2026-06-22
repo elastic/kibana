@@ -45,6 +45,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     autoCloseConfidenceScoreMinThreshold: 0.85,
     autoCloseConfidenceScoreMaxThreshold: 1,
     connectorId: '',
+    createConversation: true,
   },
 };
 
@@ -114,6 +115,21 @@ function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): voi
   }
 }
 
+const findStepByName = (steps: unknown[], name: string): Record<string, unknown> | undefined => {
+  for (const step of steps) {
+    const s = step as Record<string, unknown>;
+    if (s.name === name) return s;
+    for (const key of ['steps', 'else']) {
+      const nested = s[key];
+      if (Array.isArray(nested)) {
+        const found = findStepByName(nested, name);
+        if (found) return found;
+      }
+    }
+  }
+  return undefined;
+};
+
 describe('managedWorkflowDefinitions', () => {
   it('contains unique workflow ids', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
@@ -132,12 +148,72 @@ describe('managedWorkflowDefinitions', () => {
       autoCloseConfidenceScoreMinThreshold: 0.7,
       autoCloseConfidenceScoreMaxThreshold: 0.9,
       connectorId: '',
+      createConversation: false,
     });
 
     const workflow = parse(renderedYaml) as { consts: Record<string, unknown> };
     expect(workflow.consts.auto_close_enabled).toBe(false);
     expect(workflow.consts.auto_close_confidence_score_min_threshold).toBe(0.7);
     expect(workflow.consts.auto_close_confidence_score_max_threshold).toBe(0.9);
+  });
+
+  it('confidence score schema uses the same 0-1 scale as the auto-close thresholds', () => {
+    // Regression: the LLM schema maximum must stay on the same scale as the threshold
+    // consts (0-1) so the auto-close condition comparison is valid. If maximum drifts
+    // back to 100 while thresholds stay at e.g. 0.85, the condition `score <= 1.0`
+    // will never be true for any meaningful score.
+    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+      workflowEnabled: true,
+      autoCloseEnabled: true,
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      autoCloseConfidenceScoreMaxThreshold: 1.0,
+      connectorId: '',
+      createConversation: true,
+    });
+
+    const workflow = parse(renderedYaml) as {
+      consts: Record<string, unknown>;
+      steps: Array<{ steps?: unknown[] }>;
+    };
+
+    const agentStep = findStepByName(workflow.steps as unknown[], 'onechat_runAgent_step') as {
+      with: { schema: { properties: { confidence_score: { minimum: number; maximum: number } } } };
+    };
+
+    expect(agentStep).toBeDefined();
+    expect(agentStep.with.schema.properties.confidence_score.minimum).toBe(0);
+    // maximum must be 1 (not 100) so the threshold comparison `score <= 1.0` is valid
+    expect(agentStep.with.schema.properties.confidence_score.maximum).toBe(1);
+  });
+
+  it('auto-close condition references thresholds via consts Liquid templates', () => {
+    // Regression: the condition must reference the threshold consts so that the
+    // renderer-injected values are used at runtime. A hardcoded literal would
+    // ignore any configured threshold.
+    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+      workflowEnabled: true,
+      autoCloseEnabled: true,
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      autoCloseConfidenceScoreMaxThreshold: 1.0,
+      connectorId: '',
+      createConversation: true,
+    });
+
+    const workflow = parse(renderedYaml) as { steps: unknown[] };
+
+    const autoCloseStep = findStepByName(workflow.steps, 'check_auto_close_conditions') as {
+      condition: string;
+    };
+
+    expect(autoCloseStep).toBeDefined();
+    // Condition must gate on classification=false_positive
+    expect(autoCloseStep.condition).toContain('false_positive');
+    // Condition must use >= and <= comparisons for the score
+    expect(autoCloseStep.condition).toContain('confidence_score >=');
+    expect(autoCloseStep.condition).toContain('confidence_score <=');
+    // Comparisons must reference consts (not hardcoded literals) so the renderer values are used
+    expect(autoCloseStep.condition).toContain('auto_close_confidence_score_min_threshold');
+    expect(autoCloseStep.condition).toContain('auto_close_confidence_score_max_threshold');
   });
 
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {

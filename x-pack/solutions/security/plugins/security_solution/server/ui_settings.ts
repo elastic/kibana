@@ -15,6 +15,7 @@ import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
@@ -689,6 +690,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
+    readonlyMode: 'ui',
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED]: {
     name: i18n.translate(
@@ -711,6 +713,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
+    readonlyMode: 'ui',
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]: {
     name: i18n.translate(
@@ -733,6 +736,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.number({ min: 0, max: 1 }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
+    readonlyMode: 'ui',
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]: {
     name: i18n.translate(
@@ -755,6 +759,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.number({ min: 0, max: 1 }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
+    readonlyMode: 'ui',
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID]: {
     name: i18n.translate(
@@ -774,6 +779,28 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.string(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
+    readonlyMode: 'ui',
+  },
+  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowCreateConversationLabel',
+      { defaultMessage: 'Create AI conversation per alert analysis' }
+    ),
+    value: true,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowCreateConversationDescription',
+      {
+        defaultMessage:
+          'When enabled, the AI agent step creates a new conversation for each alert analysis. Disable to prevent large numbers of conversations from being created.',
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonlyMode: 'ui',
   },
 });
 

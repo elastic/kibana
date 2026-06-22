@@ -16,6 +16,7 @@ import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
 import type { StartPlugins } from '../plugin';
@@ -105,7 +106,8 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
       .mockResolvedValueOnce(false) // autoCloseEnabled
       .mockResolvedValueOnce(0.7) // autoCloseConfidenceScoreMinThreshold
       .mockResolvedValueOnce(0.9) // autoCloseConfidenceScoreMaxThreshold
-      .mockResolvedValueOnce('connector-abc'); // connectorId
+      .mockResolvedValueOnce('connector-abc') // connectorId
+      .mockResolvedValueOnce(true); // createConversation
 
     const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
       .versions['1'].handler;
@@ -120,6 +122,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
           autoCloseConfidenceScoreMinThreshold: 0.7,
           autoCloseConfidenceScoreMaxThreshold: 0.9,
           connectorId: 'connector-abc',
+          createConversation: true,
         },
         workflowId: 'system-security-alert-validation-space-1',
       },
@@ -133,6 +136,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
       autoCloseConfidenceScoreMinThreshold: 0.75,
       autoCloseConfidenceScoreMaxThreshold: 0.95,
       connectorId: 'connector-xyz',
+      createConversation: false,
     };
     const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
       .versions['1'].handler;
@@ -158,6 +162,10 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
       settings.connectorId
+    );
+    expect(uiSettingsClient.set).toHaveBeenCalledWith(
+      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
+      settings.createConversation
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
       SECURITY_ALERT_VALIDATION_WORKFLOW_ID,

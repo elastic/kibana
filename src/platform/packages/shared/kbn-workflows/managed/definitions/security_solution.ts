@@ -20,6 +20,7 @@ export interface SecurityAlertValidationWorkflowTemplateValues
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
   connectorId: string;
+  createConversation: boolean;
 }
 
 const renderAlertValidationWorkflowYaml = ({
@@ -28,6 +29,7 @@ const renderAlertValidationWorkflowYaml = ({
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId,
+  createConversation,
 }: SecurityAlertValidationWorkflowTemplateValues): string => {
   const document = parseDocument(ALERT_VALIDATION_WORKFLOW_YAML);
 
@@ -42,6 +44,7 @@ const renderAlertValidationWorkflowYaml = ({
     autoCloseConfidenceScoreMaxThreshold
   );
   document.setIn(['consts', 'connector_id'], connectorId);
+  document.setIn(['consts', 'create_conversation'], createConversation);
 
   return document.toString();
 };

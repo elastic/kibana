@@ -836,6 +836,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'AI connector used by the alert analysis workflow' },
   },
+  'securitySolution:alertValidationWorkflowCreateConversation': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the AI agent creates a new conversation per alert analysis',
+    },
+  },
   'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {

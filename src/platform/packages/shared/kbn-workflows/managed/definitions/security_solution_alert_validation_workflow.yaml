@@ -73,6 +73,9 @@ consts:
   # AI connector used for alert classification
   connector_id: "gpt41Azure"
 
+  # Whether the AI agent step creates a new conversation per alert analysis
+  create_conversation: true
+
 # =============================================================================
 # Steps
 # =============================================================================
@@ -914,7 +917,7 @@ steps:
             type: ai.agent
             agent-id: "elastic-ai-agent"
             connector-id: "{{ consts.connector_id }}"
-            create-conversation: true
+            create-conversation: "{{ consts.create_conversation }}"
             on-failure:
               retry:
                 max-attempts: 3
@@ -941,8 +944,8 @@ steps:
                   confidence_score:
                     type: number
                     minimum: 0
-                    maximum: 100
-                    description: Confidence score from 0-100 indicating certainty of the classification
+                    maximum: 1
+                    description: Confidence score from 0.0-1.0 indicating certainty of the classification
                   rationale:
                     type: string
                     description: Human-readable explanation of the classification decision
@@ -1012,7 +1015,7 @@ steps:
                         **{{ steps.onechat_runAgent_step.output.structured_output.classification }}**
 
                         ### Confidence Score
-                        {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }} / 100
+                        {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}
 
                         ### Rationale
                         {{ steps.onechat_runAgent_step.output.structured_output.rationale }}
