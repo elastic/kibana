@@ -142,6 +142,11 @@ export class TemplatesMigrationTaskManager {
     // Remove any lingering task record so the migration re-runs on every Kibana startup.
     // Each configure SO's own legacyCustomFieldsMigrated / legacyTemplatesMigrated flags
     // make individual phases idempotent — already-migrated SOs are cheap no-ops.
+    //
+    // Multi-node note: in a rolling restart, a second node may call removeIfExists while
+    // the task is still executing on another node. TaskStore.remove on a locked task is a
+    // best-effort delete; if interrupted mid-run the next startup will re-process the
+    // partially-migrated SO (the per-SO flags prevent double-creation of already-written SOs).
     await taskManager.removeIfExists(CASES_TEMPLATES_MIGRATION_TASK_ID);
 
     try {
