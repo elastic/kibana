@@ -314,7 +314,7 @@ Array [
             "href": "/jom/app/management/modelManagement/elastic_inference_service",
             "id": "management:elastic_inference_service",
             "isExternal": false,
-            "label": "Elastic inference",
+            "label": "Elastic Inference",
           },
           Object {
             "badgeType": undefined,
@@ -322,7 +322,7 @@ Array [
             "href": "/jom/app/management/modelManagement/inference_endpoints",
             "id": "management:inference_endpoints",
             "isExternal": false,
-            "label": "External Inference",
+            "label": "External inference",
           },
           Object {
             "badgeType": undefined,
