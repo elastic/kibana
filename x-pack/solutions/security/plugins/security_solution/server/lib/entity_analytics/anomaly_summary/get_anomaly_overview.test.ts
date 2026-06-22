@@ -48,6 +48,7 @@ const baseParams = {
 };
 
 const emptyResult = {
+  anomalyByTimeBucket: [],
   recentAnomalies: [],
   tacticCounts: {},
   totalAnomaliesCount: 0,
@@ -55,27 +56,28 @@ const emptyResult = {
   to: TO_MS,
 };
 
-interface RawHit {
-  job_id: string;
-  timestamp: number;
-  record_score: number;
-  detector_index: number;
-  function?: string;
-  by_field_value?: string;
-  actual?: number[];
-}
-
 const makeSearchResponse = (
-  hits: RawHit[] = [],
-  allJobBuckets: Array<{ key: string; doc_count: number }> = [],
+  timeBuckets: Array<{
+    key: number;
+    doc_count: number;
+    max_score: number | null;
+    jobBuckets?: Array<{ key: string; doc_count: number }>;
+  }>,
+  allJobKeys: string[] = [],
   total: number = 0
 ) => ({
-  hits: {
-    hits: hits.map((src) => ({ _source: src })),
-    total: { value: total },
-  },
+  hits: { hits: [], total: { value: total } },
   aggregations: {
-    all_jobs: { buckets: allJobBuckets },
+    by_time: {
+      buckets: timeBuckets.map((b) => ({
+        key_as_string: new Date(b.key).toISOString(),
+        key: b.key,
+        doc_count: b.doc_count,
+        max_score: { value: b.max_score },
+        jobs: { buckets: b.jobBuckets ?? [] },
+      })),
+    },
+    all_jobs: { buckets: allJobKeys.map((k) => ({ key: k })) },
   },
 });
 
@@ -126,49 +128,32 @@ describe('getEntityAnomalyOverview', () => {
     const JOB_B = 'job-b';
 
     const jobConfigMap = new Map([
-      [
-        JOB_A,
-        {
-          jobName: 'Job A',
-          threatTactics: ['Execution', 'Discovery'],
-          threatTechniques: [],
-          detectors: [{ function: 'high_count' }],
-        },
-      ],
-      [
-        JOB_B,
-        {
-          jobName: 'Job B',
-          threatTactics: ['Persistence'],
-          threatTechniques: [],
-          detectors: [{ function: 'rare' }],
-        },
-      ],
+      [JOB_A, { threatTactics: ['Execution', 'Discovery'], threatTechniques: [] }],
+      [JOB_B, { threatTactics: ['Persistence'], threatTechniques: [] }],
     ]);
 
-    const rawHit1: RawHit = {
-      job_id: JOB_A,
-      timestamp: FROM_MS + 1000,
-      record_score: 75.5,
-      detector_index: 0,
-      function: 'high_count',
-      actual: [13],
-    };
-    const rawHit2: RawHit = {
-      job_id: JOB_B,
-      timestamp: FROM_MS + 500,
-      record_score: 50,
-      detector_index: 0,
-      function: 'rare',
-      by_field_value: 'Crimea',
-    };
+    const bucket1Key = FROM_MS + 1000;
+    const bucket2Key = FROM_MS + 2 * 60 * 60 * 1000;
 
     const searchResponse = makeSearchResponse(
-      [rawHit1, rawHit2],
       [
-        { key: JOB_A, doc_count: 4 },
-        { key: JOB_B, doc_count: 1 },
+        {
+          key: bucket1Key,
+          doc_count: 3,
+          max_score: 75.5,
+          jobBuckets: [
+            { key: JOB_A, doc_count: 2 },
+            { key: JOB_B, doc_count: 1 },
+          ],
+        },
+        {
+          key: bucket2Key,
+          doc_count: 2,
+          max_score: 50,
+          jobBuckets: [{ key: JOB_A, doc_count: 2 }],
+        },
       ],
+      [JOB_A, JOB_B],
       5
     );
 
@@ -178,41 +163,48 @@ describe('getEntityAnomalyOverview', () => {
       mockMlAnomalySearch.mockResolvedValue(searchResponse);
     });
 
-    it('returns recentAnomalies with jobId, jobName, timestamp, and anomalousValue', async () => {
+    it('returns anomaly entries for each non-empty time bucket', async () => {
       const result = await getEntityAnomalyOverview(baseParams);
 
-      expect(result.recentAnomalies).toHaveLength(2);
-      expect(result.recentAnomalies[0]).toMatchObject({
-        jobId: JOB_A,
-        jobName: 'Job A',
-        timestamp: new Date(rawHit1.timestamp).toISOString(),
-        anomalousValue: '13',
+      expect(result.anomalyByTimeBucket).toHaveLength(2);
+      expect(result.anomalyByTimeBucket[0]).toMatchObject({
+        timestamp: new Date(bucket1Key).toISOString(),
+        maxScore: 75.5,
       });
-      expect(result.recentAnomalies[1]).toMatchObject({
-        jobId: JOB_B,
-        jobName: 'Job B',
-        timestamp: new Date(rawHit2.timestamp).toISOString(),
-        anomalousValue: 'Crimea',
+      expect(result.anomalyByTimeBucket[1]).toMatchObject({
+        timestamp: new Date(bucket2Key).toISOString(),
+        maxScore: 50,
       });
     });
 
-    it('uses by_field_value as anomalousValue for rare detectors', async () => {
+    it('aggregates tactics per bucket from job configs', async () => {
       const result = await getEntityAnomalyOverview(baseParams);
 
-      expect(result.recentAnomalies[1].anomalousValue).toBe('Crimea');
+      expect(result.anomalyByTimeBucket[0].threatTactics).toEqual(
+        expect.arrayContaining(['Execution', 'Discovery', 'Persistence'])
+      );
+      expect(result.anomalyByTimeBucket[1].threatTactics).toEqual(
+        expect.arrayContaining(['Execution', 'Discovery'])
+      );
     });
 
-    it('uses actual[0] as anomalousValue for non-rare detectors', async () => {
+    it('deduplicates tactics within a bucket', async () => {
+      const duplicateJobConfig = new Map([
+        [JOB_A, { threatTactics: ['Execution'], threatTechniques: [] }],
+        [JOB_B, { threatTactics: ['Execution'], threatTechniques: [] }],
+      ]);
+      mockGetJobConfig.mockResolvedValue(duplicateJobConfig);
+
       const result = await getEntityAnomalyOverview(baseParams);
 
-      expect(result.recentAnomalies[0].anomalousValue).toBe('13');
+      expect(result.anomalyByTimeBucket[0].threatTactics).toEqual(['Execution']);
     });
 
-    it('counts tactic occurrences using all_jobs doc_count', async () => {
+    it('counts tactic occurrences across all buckets', async () => {
       const result = await getEntityAnomalyOverview(baseParams);
 
-      // JOB_A doc_count: 4, tactics: Execution, Discovery → each gets 4
-      // JOB_B doc_count: 1, tactics: Persistence → gets 1
+      // JOB_A appears in bucket1 (doc_count 2) and bucket2 (doc_count 2) → Execution: 4, Discovery: 4
+      // JOB_B appears in bucket1 (doc_count 1) → Persistence: 1
       expect(result.tacticCounts).toEqual({
         Execution: 4,
         Discovery: 4,
@@ -237,14 +229,8 @@ describe('getEntityAnomalyOverview', () => {
   describe('tactic filtering', () => {
     it('filters jobs to those matching requested threatTactics before searching', async () => {
       const jobConfigMap = new Map([
-        [
-          'job-execution',
-          { jobName: null, threatTactics: ['Execution'], threatTechniques: [], detectors: [] },
-        ],
-        [
-          'job-persistence',
-          { jobName: null, threatTactics: ['Persistence'], threatTechniques: [], detectors: [] },
-        ],
+        ['job-execution', { threatTactics: ['Execution'], threatTechniques: [] }],
+        ['job-persistence', { threatTactics: ['Persistence'], threatTechniques: [] }],
       ]);
 
       mockGetSecurityMlJobIds.mockResolvedValue(['job-execution', 'job-persistence']);
@@ -262,14 +248,8 @@ describe('getEntityAnomalyOverview', () => {
 
     it('passes all jobs when threatTactics is empty', async () => {
       const jobConfigMap = new Map([
-        [
-          'job-a',
-          { jobName: null, threatTactics: ['Execution'], threatTechniques: [], detectors: [] },
-        ],
-        [
-          'job-b',
-          { jobName: null, threatTactics: ['Persistence'], threatTechniques: [], detectors: [] },
-        ],
+        ['job-a', { threatTactics: ['Execution'], threatTechniques: [] }],
+        ['job-b', { threatTactics: ['Persistence'], threatTechniques: [] }],
       ]);
 
       mockGetSecurityMlJobIds.mockResolvedValue(['job-a', 'job-b']);
@@ -283,6 +263,82 @@ describe('getEntityAnomalyOverview', () => {
         (f: Record<string, unknown>) => f.terms !== undefined
       );
       expect(jobTermsFilter?.terms?.job_id).toEqual(['job-a', 'job-b']);
+    });
+  });
+
+  describe('buckets with null max_score', () => {
+    it('excludes buckets where max_score is null', async () => {
+      mockGetSecurityMlJobIds.mockResolvedValue(['job-a']);
+      mockGetJobConfig.mockResolvedValue(
+        new Map([['job-a', { threatTactics: [], threatTechniques: [] }]])
+      );
+      mockMlAnomalySearch.mockResolvedValue(
+        makeSearchResponse(
+          [
+            {
+              key: FROM_MS + 1000,
+              doc_count: 2,
+              max_score: null,
+              jobBuckets: [{ key: 'job-a', doc_count: 2 }],
+            },
+            {
+              key: FROM_MS + 2000,
+              doc_count: 1,
+              max_score: 42,
+              jobBuckets: [{ key: 'job-a', doc_count: 1 }],
+            },
+          ],
+          ['job-a'],
+          3
+        )
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.anomalyByTimeBucket).toHaveLength(1);
+      expect(result.anomalyByTimeBucket[0].maxScore).toBe(42);
+    });
+  });
+
+  describe('bucket interval', () => {
+    const DAY_MS = 24 * 60 * 60 * 1000;
+
+    const getFixedInterval = () => {
+      const searchCall = mockMlAnomalySearch.mock.calls[0][0];
+      return searchCall.aggs.by_time.date_histogram.fixed_interval;
+    };
+
+    beforeEach(() => {
+      mockGetSecurityMlJobIds.mockResolvedValue(['job-a']);
+      mockGetJobConfig.mockResolvedValue(new Map());
+      mockMlAnomalySearch.mockResolvedValue(makeSearchResponse([], [], 0));
+    });
+
+    it('uses 1h interval for spans ≤ 2 days', async () => {
+      await getEntityAnomalyOverview({
+        ...baseParams,
+        fromMs: FROM_MS,
+        toMs: FROM_MS + 2 * DAY_MS,
+      });
+      expect(getFixedInterval()).toBe('1h');
+    });
+
+    it('uses 1d interval for spans between 2 and 30 days', async () => {
+      await getEntityAnomalyOverview({
+        ...baseParams,
+        fromMs: FROM_MS,
+        toMs: FROM_MS + 7 * DAY_MS,
+      });
+      expect(getFixedInterval()).toBe('1d');
+    });
+
+    it('uses 7d interval for spans > 30 days', async () => {
+      await getEntityAnomalyOverview({
+        ...baseParams,
+        fromMs: FROM_MS,
+        toMs: FROM_MS + 31 * DAY_MS,
+      });
+      expect(getFixedInterval()).toBe('7d');
     });
   });
 

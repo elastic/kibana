@@ -156,6 +156,24 @@ export const AnomalyOverviewRequestBody = lazySchema(() =>
 );
 export type AnomalyOverviewRequestBody = z.infer<typeof AnomalyOverviewRequestBody>;
 
+export const AnomalyOverviewEntry = lazySchema(() =>
+  z.object({
+    /**
+     * ISO-8601 start of the time bucket
+     */
+    timestamp: z.string().max(100),
+    /**
+     * Highest anomaly record_score within this time bucket
+     */
+    maxScore: z.number(),
+    /**
+     * MITRE ATT&CK tactic names for all jobs that fired in this bucket
+     */
+    threatTactics: z.array(z.string().max(150)).max(100),
+  })
+);
+export type AnomalyOverviewEntry = z.infer<typeof AnomalyOverviewEntry>;
+
 export const AnomalyOverviewHit = lazySchema(() =>
   z.object({
     jobId: z.string().max(150),
@@ -179,6 +197,7 @@ export const AnomalyOverviewResponse = lazySchema(() =>
   z.object({
     entityId: z.string().max(200),
     entityType: z.string().max(100).optional(),
+    anomalyByTimeBucket: z.array(AnomalyOverviewEntry),
     /**
      * Up to 3 most recent individual anomaly records, sorted by timestamp then score descending
      */

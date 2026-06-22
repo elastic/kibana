@@ -11,7 +11,11 @@ import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
-import type { AnomalyOverviewHit } from '../../../../common/api/entity_analytics';
+import { deriveBucketInterval } from '../../../../common/entity_analytics/anomalies/derive_bucket_interval';
+import type {
+  AnomalyOverviewEntry,
+  AnomalyOverviewHit,
+} from '../../../../common/api/entity_analytics';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
@@ -19,8 +23,17 @@ const NUM_RECENT_ANOMALIES = 3;
 export const DEFAULT_OVERVIEW_LOOKBACK_MS =
   ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
 
+interface TimeBucket {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+  max_score: { value: number | null };
+  jobs: { buckets: Array<{ key: string; doc_count: number }> };
+}
+
 interface OverviewAggs {
-  all_jobs: { buckets: Array<{ key: string; doc_count: number }> };
+  by_time: { buckets: TimeBucket[] };
+  all_jobs: { buckets: Array<{ key: string }> };
 }
 
 interface GetEntityAnomalyOverviewParams {
@@ -36,7 +49,22 @@ interface GetEntityAnomalyOverviewParams {
   soClient: SavedObjectsClientContract;
 }
 
+const buildTacticCounts = (
+  buckets: TimeBucket[],
+  tacticsByJob: Map<string, string[]>
+): Record<string, number> =>
+  buckets
+    .flatMap((b) => b.jobs.buckets)
+    .flatMap(({ key, doc_count }) =>
+      (tacticsByJob.get(key) ?? []).map((tactic) => ({ tactic, doc_count }))
+    )
+    .reduce<Record<string, number>>((acc, { tactic, doc_count }) => {
+      acc[tactic] = (acc[tactic] ?? 0) + doc_count;
+      return acc;
+    }, {});
+
 interface AnomalyOverview {
+  anomalyByTimeBucket: AnomalyOverviewEntry[];
   recentAnomalies: AnomalyOverviewHit[];
   tacticCounts: Record<string, number>;
   totalAnomaliesCount: number;
@@ -58,7 +86,9 @@ export const getEntityAnomalyOverview = async ({
 }: GetEntityAnomalyOverviewParams): Promise<AnomalyOverview> => {
   const effectiveToMs = toMs ?? Date.now();
   const effectiveFromMs = fromMs ?? effectiveToMs - DEFAULT_OVERVIEW_LOOKBACK_MS;
+  const bucketInterval = deriveBucketInterval(effectiveFromMs, effectiveToMs);
   const empty: AnomalyOverview = {
+    anomalyByTimeBucket: [],
     recentAnomalies: [],
     tacticCounts: {},
     totalAnomaliesCount: 0,
@@ -91,7 +121,6 @@ export const getEntityAnomalyOverview = async ({
     const resp = await mlSystem.mlAnomalySearch<RawAnomalyRecord>(
       {
         size: NUM_RECENT_ANOMALIES,
-        track_total_hits: true,
         runtime_mappings: {
           entity_id: euid.painless.getEuidRuntimeMapping(entityType),
         },
@@ -116,6 +145,16 @@ export const getEntityAnomalyOverview = async ({
         },
         sort: [{ timestamp: { order: 'desc' } }, { record_score: { order: 'desc' } }],
         aggs: {
+          by_time: {
+            date_histogram: {
+              field: 'timestamp',
+              fixed_interval: `${bucketInterval.value}${bucketInterval.unit}`,
+            },
+            aggs: {
+              max_score: { max: { field: 'record_score' } },
+              jobs: { terms: { field: 'job_id', size: 200 } },
+            },
+          },
           all_jobs: {
             terms: { field: 'job_id', size: 200 },
           },
@@ -126,23 +165,34 @@ export const getEntityAnomalyOverview = async ({
 
     aggs = resp.aggregations as unknown as OverviewAggs | undefined;
     rawHits = compact(resp.hits.hits.map((h) => h._source));
-    const rawTotal = resp.hits.total;
-    totalAnomaliesCount =
-      rawTotal == null ? 0 : typeof rawTotal === 'number' ? rawTotal : rawTotal.value;
+    const total = resp.hits.total;
+    totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
   } catch (err) {
     logger.warn(`Error fetching anomaly overview for "${entityId}": ${err}`);
     return empty;
   }
 
-  const allJobBuckets = aggs?.all_jobs?.buckets ?? [];
-  if (allJobBuckets.length === 0) return empty;
+  const presentJobIds = (aggs?.all_jobs?.buckets ?? []).map((b) => b.key);
+  if (presentJobIds.length === 0) return empty;
 
-  const tacticCounts = allJobBuckets.reduce<Record<string, number>>((acc, { key, doc_count }) => {
-    for (const tactic of allJobConfigs.get(key)?.threatTactics ?? []) {
-      acc[tactic] = (acc[tactic] ?? 0) + doc_count;
-    }
-    return acc;
-  }, {});
+  // Build jobId → tactics lookup once, reused per bucket.
+  const tacticsByJob = new Map(
+    presentJobIds.map((id) => [id, allJobConfigs.get(id)?.threatTactics ?? []])
+  );
+
+  const anomalyByTimeBucket: AnomalyOverviewEntry[] = (aggs?.by_time?.buckets ?? [])
+    .filter((b) => b.doc_count > 0 && b.max_score.value !== null)
+    .map((b) => {
+      const bucketJobIds = b.jobs.buckets.map((j) => j.key);
+      const tactics = [...new Set(bucketJobIds.flatMap((id) => tacticsByJob.get(id) ?? []))];
+      return {
+        timestamp: new Date(b.key).toISOString(),
+        maxScore: b.max_score.value as number,
+        threatTactics: tactics,
+      };
+    });
+
+  const tacticCounts = buildTacticCounts(aggs?.by_time?.buckets ?? [], tacticsByJob);
 
   const recentAnomalies: AnomalyOverviewHit[] = rawHits.map((anomaly) => {
     const jobConfig = allJobConfigs.get(anomaly.job_id);
@@ -164,6 +214,7 @@ export const getEntityAnomalyOverview = async ({
   });
 
   return {
+    anomalyByTimeBucket,
     recentAnomalies,
     tacticCounts,
     totalAnomaliesCount,

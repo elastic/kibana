@@ -90,6 +90,7 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
               body: {
                 entityId,
                 entityType,
+                anomalyByTimeBucket: [],
                 recentAnomalies: [],
                 tacticCounts: {},
                 totalAnomaliesCount: 0,
