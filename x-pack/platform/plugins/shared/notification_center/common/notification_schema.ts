@@ -19,16 +19,16 @@ export const notificationSchema = z
     /**
      * Deterministic idempotency key. See the ID conventions in `notification_id.ts`.
      */
-    notification_id: z.string().min(1),
+    notification_id: z.string().min(1).max(512),
     /** Timestamp of the notification event, ISO 8601. */
     event_timestamp: z.iso.datetime(),
     /** Registered notification type, e.g. `inferenceModelStatus`. */
-    type: z.string().min(1),
+    type: z.string().min(1).max(64),
     /** Short, human-readable headline. */
-    title: z.string().min(1),
+    title: z.string().min(1).max(256),
     /** Longer human-readable description. */
-    description: z.string().min(1),
+    description: z.string().min(1).max(2000),
     /** App id of the producing application, e.g. `inference`. */
-    source_app_id: z.string().min(1),
+    source_app_id: z.string().min(1).max(64),
   })
   .strict();

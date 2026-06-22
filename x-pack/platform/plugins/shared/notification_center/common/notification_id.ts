@@ -58,12 +58,22 @@ export const buildEventNotificationId: (parts: EventNotificationIdParts) => stri
   producer,
   event,
   epochMs,
-}) => joinNotificationIdSegments([producer, event, String(epochMs)]);
+}) => {
+  if (!Number.isFinite(epochMs)) {
+    throw new Error('notification_id epochMs must be a finite number');
+  }
+  return joinNotificationIdSegments([producer, event, String(epochMs)]);
+};
 
 const joinNotificationIdSegments = (segments: string[]): string => {
   segments.forEach((segment) => {
     if (segment.length === 0) {
       throw new Error('notification_id segments must be non-empty');
+    }
+    if (segment.includes(NOTIFICATION_ID_SEPARATOR)) {
+      throw new Error(
+        `notification_id segments must not contain the separator "${NOTIFICATION_ID_SEPARATOR}"`
+      );
     }
   });
   return segments.join(NOTIFICATION_ID_SEPARATOR);

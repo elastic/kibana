@@ -44,6 +44,12 @@ describe('buildStaticStateNotificationId', () => {
       buildStaticStateNotificationId({ producer: 'inference', entity: '', state: 'deprecated' })
     ).toThrow(/non-empty/);
   });
+
+  it('rejects segments containing the separator', () => {
+    expect(() =>
+      buildStaticStateNotificationId({ producer: 'inference', entity: 'a:b', state: 'deprecated' })
+    ).toThrow(/separator/);
+  });
 });
 
 describe('buildEventNotificationId', () => {
@@ -77,5 +83,17 @@ describe('buildEventNotificationId', () => {
     expect(() =>
       buildEventNotificationId({ producer: 'autoOps', event: '', epochMs: 1750118400000 })
     ).toThrow(/non-empty/);
+  });
+
+  it.each([NaN, Infinity, -Infinity])('rejects non-finite epochMs (%s)', (epochMs) => {
+    expect(() =>
+      buildEventNotificationId({ producer: 'autoOps', event: 'memoryLimit', epochMs })
+    ).toThrow(/finite/);
+  });
+
+  it('rejects segments containing the separator', () => {
+    expect(() =>
+      buildEventNotificationId({ producer: 'auto:Ops', event: 'memoryLimit', epochMs: 1750118400000 })
+    ).toThrow(/separator/);
   });
 });
