@@ -51,6 +51,15 @@ describe('NamespacedCache', () => {
       expect(cache.get('space1')).toBe('value1');
       expect(cache.get('space2')).toBe('value2');
     });
+
+    it('unrefs the eviction timer so it does not keep the process alive', () => {
+      const unref = jest.fn();
+      jest.spyOn(global, 'setTimeout').mockReturnValue({ unref } as unknown as NodeJS.Timeout);
+
+      cache.set('default', 'value1', 5000);
+
+      expect(unref).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('TTL expiry', () => {
