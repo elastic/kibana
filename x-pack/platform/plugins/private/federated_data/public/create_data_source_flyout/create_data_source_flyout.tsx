@@ -310,6 +310,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
+          <CreateDataSourceFlyoutTypeSettingsBlock
+            control={control}
+            dataSourceType={dataSourceType}
+            unregister={unregister}
+          />
           <EuiHorizontalRule margin="m" />
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
@@ -325,11 +330,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             requireGcsCredentials={!isEditMode}
             requireGcsFederatedIdentity={!isEditMode}
             requireAzureCredentials={!isEditMode}
-            unregister={unregister}
-          />
-          <CreateDataSourceFlyoutTypeSettingsBlock
-            control={control}
-            dataSourceType={dataSourceType}
             unregister={unregister}
           />
         </EuiForm>
