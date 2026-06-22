@@ -17,7 +17,7 @@ export function createManagedOtlpServiceApiKey(esClient: ElasticsearchClient, na
       managed: true,
     },
     role_descriptors: {
-      otel_managed_service: {
+      apm_writer: {
         cluster: [],
         index: [],
         applications: [APM_EVENT_WRITE_APPLICATION],

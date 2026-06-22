@@ -35,10 +35,7 @@ export const INDEX_OTLP_LOGS_METRICS_AND_TRACES: estypes.SecurityIndicesPrivileg
   privileges: ['auto_configure', 'create_doc'],
 };
 
-/**
- * Application privilege required to ingest through the managed OTLP service (APM).
- * Shared so the managed OTLP key and its privilege pre-check stay in sync.
- */
+// https://docs.elastic.dev/hotel/development/api-key-ingestion#option-3-elasticsearch-api
 export const APM_EVENT_WRITE_APPLICATION: estypes.SecurityApplicationPrivileges = {
   application: 'apm',
   privileges: ['event:write'],
