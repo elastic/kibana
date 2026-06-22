@@ -15,8 +15,7 @@ describe('createRuleAttachmentType', () => {
   };
   const getStartServices = jest.fn().mockResolvedValue([{}, startPlugins, {}]);
 
-  const makeType = () =>
-    createRuleAttachmentType({ getStartServices: getStartServices as never });
+  const makeType = () => createRuleAttachmentType({ getStartServices: getStartServices as never });
 
   const resolveCtx = {
     ...agentBuilderMocks.attachments.createFormatContextMock(),

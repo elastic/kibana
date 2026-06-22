@@ -78,7 +78,10 @@ const D_EXCEPTION_ITEM_ID = 'investigate-rule-eval-exception-host';
 // Scenario E — one dominant USER, all open, no disposition (concentrated but unconfirmed).
 const E_DOMINANT_USER = 'svc-ci';
 const E_DOMINANT_COUNT = 30; // 30 open alerts for svc-ci, spread across 6 hosts (5 each)
-const E_DOMINANT_HOSTS = Array.from({ length: 6 }, (_, i) => `node-${String(i + 1).padStart(2, '0')}`);
+const E_DOMINANT_HOSTS = Array.from(
+  { length: 6 },
+  (_, i) => `node-${String(i + 1).padStart(2, '0')}`
+);
 const E_OTHER_USERS = ['alice', 'bob']; // 2 each = 4 open -> 34 total
 
 interface CreatedRule {
