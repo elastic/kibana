@@ -101,9 +101,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     stateManager,
     events,
     promptManager,
-    filestore,
-    filesystemService,
-    bashService,
     skills,
     skillsStore,
     toolManager,
@@ -177,13 +174,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
-    filesystemService,
-    bashService,
     request,
-    experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
-    todoStateManager,
   });
 
   // First add static tools
@@ -232,8 +225,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resultTransformer = createResultTransformer({
     toolRegistry,
     toolManager,
-    filestore,
-    filestoreEnabled: experimentalFeatures.filestore,
+    resultStore: context.resultStore,
     conversationTokenEstimate,
   });
 
@@ -260,7 +252,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
-    filestore,
+    skills: filteredSkills,
     processedConversation,
     toolManager,
     resultTransformer,

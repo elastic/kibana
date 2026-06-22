@@ -88,6 +88,7 @@ network:
     - defaults
     - github
     - elastic.litellm-prod.ai
+    - elastic.co
 jobs:
   prefetch_pr_context:
     permissions:
