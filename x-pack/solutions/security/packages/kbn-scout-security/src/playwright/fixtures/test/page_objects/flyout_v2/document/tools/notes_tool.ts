@@ -53,7 +53,7 @@ export class NotesTool {
     this.deleteConfirmModal = page.testSubj.locator('delete-notes-modal');
     this.deleteConfirmButton = page.testSubj.locator('confirmModalConfirmButton');
     this.backButton = page
-      .locator('.euiFlyout', { has: this.content })
+      .locator('[role="dialog"]', { has: this.content })
       .getByTestId('euiFlyoutMenuBackButton');
   }
 

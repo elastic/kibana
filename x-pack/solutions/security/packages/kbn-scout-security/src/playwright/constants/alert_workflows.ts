@@ -14,21 +14,6 @@ export const ALERT_ASSIGNEES_API_PATH = '/api/detection_engine/signals/assignees
 /** Kibana internal endpoint that returns the currently authenticated user's profile. */
 export const CURRENT_USER_PROFILE_API_PATH = '/internal/security/me';
 
-/**
- * data-test-subj for the "Filter for" cell-action button that appears when hovering
- * the status badge (or any cell-actions-enabled field) in the document flyout.
- * Composed of: SECURITY_CELL_ACTIONS_DEFAULT trigger id + 'filterIn' action name.
- */
-export const STATUS_FILTER_IN_BUTTON_TEST_SUBJ = 'actionItem-security-default-cellActions-filterIn';
-
-/**
- * The word token present in the filter chip's data-test-subj when a workflow-status
- * filter has been applied.  Use with the `~` prefix in testSubj.locator to perform
- * a CSS whitespace-separated word match:
- *   page.testSubj.locator(`~${WORKFLOW_STATUS_FILTER_KEY_TEST_SUBJ}`)
- */
-export const WORKFLOW_STATUS_FILTER_KEY_TEST_SUBJ = 'filter-key-kibana.alert.workflow_status';
-
 /** Workflow status values for security alerts. */
 export const AlertWorkflowStatus = {
   OPEN: 'open',
@@ -52,13 +37,6 @@ export const ClosingReasonOption = {
 /** Returns the success toast message produced when n alerts are closed. */
 export const closedAlertsToastText = (count: number): string =>
   `Successfully closed ${count} ${count === 1 ? 'alert' : 'alerts'}.`;
-
-/**
- * data-test-subj for the "Add to Timeline" cell-action button that appears when hovering
- * a cell-actions-enabled field in the document flyout.
- */
-export const STATUS_ADD_TO_TIMELINE_BUTTON_TEST_SUBJ =
-  'actionItem-security-default-cellActions-addToTimeline';
 
 /** Returns the success toast title produced when a value is added to Timeline. */
 export const addedToTimelineToastText = (value: string): string => `Added ${value} to Timeline`;
