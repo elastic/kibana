@@ -45,8 +45,8 @@ export const createFilesystemServices = async ({
 
   const filesystemService = new FilesystemService({
     workspaceVolume,
-    toolResultsVolume: resultStore.getVolume(),
-    skillsVolume: skillsStore.getVolume(),
+    toolResultsSource: resultStore,
+    skillsSource: skillsStore,
   });
   await filesystemService.init();
 
