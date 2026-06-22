@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
   EuiBadge,
   EuiCallOut,
+  EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
@@ -30,14 +32,14 @@ import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_con
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
-import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
-import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 
 const MAX_VISIBLE_STREAMS = 3;
+
+const DEFAULT_SIG_EVENTS_RANGE = { from: 'now-7d', to: 'now' };
 
 const clickableRowCss = css`
   cursor: pointer;
@@ -147,7 +149,8 @@ const buildSelectableOptions = <T extends string>({
   }));
 
 export const SigEventsTab = () => {
-  const { timeState } = useTimefilter();
+  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
+    useTabTimeRange(DEFAULT_SIG_EVENTS_RANGE);
 
   const { filteredStreams } = useKiGeneration();
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -228,28 +231,18 @@ export const SigEventsTab = () => {
     }
   };
 
-  const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
-    setSearchQuery(String(queryPayload.query?.query ?? ''));
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
           <EuiFlexItem grow style={{ minWidth: 160 }}>
-            <StreamsAppSearchBar
-              onQuerySubmit={handleQueryChange}
-              onQueryChange={handleQueryChange}
+            <EuiFieldSearch
               placeholder={SEARCH_PLACEHOLDER}
-              query={{
-                query: searchQuery,
-                language: 'text',
-              }}
-              showDatePicker
-              showQueryInput
-              enableDateRangePicker
-              submitButtonStyle="iconOnly"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               isClearable
+              fullWidth
+              compressed
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -267,6 +260,25 @@ export const SigEventsTab = () => {
               ))}
             </EuiFilterGroup>
           </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
+          <EuiFlexItem>
+            <EuiSuperDatePicker
+              start={pickerRange.from}
+              end={pickerRange.to}
+              onTimeChange={handleTimeChange}
+              onRefresh={() => {
+                refreshAbsoluteRange();
+                refetch();
+              }}
+              showUpdateButton="iconOnly"
+              updateButtonProps={{ size: 's', fill: false }}
+              compressed
+              width="full"
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FindSignificantEventsButton
               onRun={handleRun}
@@ -274,6 +286,7 @@ export const SigEventsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning}
+              size="s"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
