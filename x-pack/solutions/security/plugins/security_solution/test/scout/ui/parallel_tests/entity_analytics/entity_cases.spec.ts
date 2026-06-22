@@ -21,7 +21,17 @@
  *   curl -X POST 'http://localhost:5601/api/entity_store/enable' \
  *     -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '{}'
  *
- * These tests are skipped until the feature graduates from experimental status.
+ * SKIPPED IN CI (intentionally): `entityAttachmentsEnabled` gates server-side
+ * attachment-type registration in the plugin `setup` lifecycle (see
+ * `server/cases/attachments/register.ts`), so it must be set at server boot and
+ * cannot be enabled at runtime via Scout's `apiServices.core.settings()`. Running
+ * this suite in CI requires a dedicated custom server config set (boot-time
+ * `serverArgs`) plus the entity store running — tracked in
+ * https://github.com/elastic/security-team/issues/17889 and must land before
+ * `entityAttachmentsEnabled` defaults on. Until then the core logic is covered by
+ * unit/integration tests (attachments service guard, server registration gating,
+ * and metadata builder).
+ *
  * To run them locally: remove the `.skip` from `spaceTest.describe.skip` below,
  * start the server with the flag above, and run:
  *
@@ -43,8 +53,10 @@ const ALERT_RULE: typeof CUSTOM_QUERY_RULE = {
 };
 
 /*
- * Remove `.skip` and ensure the server is started with `entityAttachmentsEnabled`
- * before running these tests (see file-level JSDoc above).
+ * Skipped in CI pending a custom server config set that enables
+ * `entityAttachmentsEnabled` at boot — see file-level JSDoc and
+ * https://github.com/elastic/security-team/issues/17889. To run locally, remove
+ * `.skip` and start the server with the flag.
  */
 // eslint-disable-next-line playwright/no-skipped-test
 spaceTest.describe.skip(

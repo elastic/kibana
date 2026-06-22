@@ -45,12 +45,18 @@ export class EntityCasesPage {
     this.entityTabTable = page.testSubj.locator('eaCasesEntityTabTable');
     this.entityTabEmpty = page.testSubj.locator('eaCasesEntityTabEmpty');
 
-    this.createCaseNameInput = page.locator(
-      'input[data-test-subj="input"][aria-label*="Case name"]'
-    );
+    // Scope to the Cases plugin's stable `caseTitle` form row, then the single
+    // `<input>` within it — avoids matching stray `data-test-subj="input"` fields
+    // elsewhere on the page and survives aria-label/copy changes.
+    this.createCaseNameInput = page.testSubj.locator('caseTitle').locator('input');
     this.createCaseSubmitButton = page.testSubj.locator('create-case-submit');
 
-    this.caseToastLink = page.locator('[data-test-subj*="toastLink"]');
+    // Exact plugin-owned test-subj for the "View case" link in the case-created
+    // success toast — avoids the brittle `*=toastLink` substring match. Each test
+    // creates a single case in its own space, so only one such toast is present;
+    // if two ever stacked, Playwright strict mode surfaces it rather than
+    // silently clicking the wrong one.
+    this.caseToastLink = page.testSubj.locator('toaster-content-case-view-link');
   }
 
   async navigateToAlerts() {
@@ -59,20 +65,21 @@ export class EntityCasesPage {
 
   async openHostFlyoutForRule(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    const row = this.alertsTable
-      .getByTestId('ruleName')
-      .filter({ hasText: ruleName })
-      .locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
-    await row.getByTestId('host-details-button').click();
+    await this.rowForRule(ruleName).getByTestId('host-details-button').click();
   }
 
   async openUserFlyoutForRule(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    const row = this.alertsTable
-      .getByTestId('ruleName')
-      .filter({ hasText: ruleName })
-      .locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
-    await row.getByTestId('users-link').click();
+    await this.rowForRule(ruleName).getByTestId('users-link').click();
+  }
+
+  // Scope to the data grid row whose `ruleName` cell matches, using the stable
+  // ARIA `row` role rather than the internal `euiDataGridRow` EUI class (which an
+  // EUI version bump could rename/wrap and silently break row scoping).
+  private rowForRule(ruleName: string): Locator {
+    return this.alertsTable.getByRole('row').filter({
+      has: this.page.testSubj.locator('ruleName').filter({ hasText: ruleName }),
+    });
   }
 
   async openTakeActionMenu() {
