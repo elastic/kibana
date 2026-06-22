@@ -232,6 +232,127 @@ describe('transformWorkflowToGraph', () => {
     expect([...new Set(sourcesIntoAfter)]).toEqual(['par']);
   });
 
+  // ── switch ────────────────────────────────────────────────────────────────
+
+  it('labels switch-case edges with the match value and the default edge as "default" (Rule 1 + 2)', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'sw',
+            type: 'switch',
+            expression: '{{ steps.check.output.status }}',
+            cases: [
+              { match: 'success', steps: [{ name: 'on_success', type: 'http' }] },
+              { match: 'error', steps: [{ name: 'on_error', type: 'http' }] },
+            ],
+            default: [{ name: 'on_unknown', type: 'http' }],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const fromGate = r.edges.filter((e) => e.source === 'sw');
+    const labels = fromGate.map((e) => e.label).sort();
+    expect(labels).toEqual(['default', 'error', 'success']);
+    // Case sub-step nodes exist (IdAllocator slugifies underscores to hyphens)
+    expect(r.nodes.map((n) => n.id)).toEqual(
+      expect.arrayContaining(['on-success', 'on-error', 'on-unknown'])
+    );
+    // With a default branch the switch is exhaustive — no plain fall-through edge from gate to 'after'.
+    const plainEdgeToAfter = r.edges.find((e) => e.source === 'sw' && e.target === 'after');
+    expect(plainEdgeToAfter).toBeUndefined();
+    // All branch leaves connect to 'after'.
+    const sourcesIntoAfter = r.edges
+      .filter((e) => e.target === 'after')
+      .map((e) => e.source)
+      .sort();
+    expect(sourcesIntoAfter).toEqual(['on-error', 'on-success', 'on-unknown']);
+    // Each case edge carries its stable sourceHandle; default edge carries 'default'.
+    // All fan-out edges carry branchCount = cases.length + 1 for octopus lane routing.
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        target: 'on-success',
+        sourceHandle: 'case-0',
+        branchCount: 3,
+      })
+    );
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        target: 'on-error',
+        sourceHandle: 'case-1',
+        branchCount: 3,
+      })
+    );
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        target: 'on-unknown',
+        sourceHandle: 'default',
+        branchCount: 3,
+      })
+    );
+  });
+
+  it('emits a plain fall-through edge from switch gate to next step when no default (Rule 3)', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'sw',
+            type: 'switch',
+            expression: '{{ steps.x.output.v }}',
+            cases: [{ match: 'a', steps: [{ name: 'on_a', type: 'http' }] }],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // The plain fall-through edge: no label, no branchIndex, no sourceHandle, no branchCount.
+    const fallThrough = r.edges.find((e) => e.source === 'sw' && e.target === 'after');
+    expect(fallThrough).toBeDefined();
+    expect(fallThrough?.label).toBeUndefined();
+    expect(fallThrough?.branchIndex).toBeUndefined();
+    expect(fallThrough?.sourceHandle).toBeUndefined();
+    expect(fallThrough?.branchCount).toBeUndefined();
+    // The labeled case edge carries a sourceHandle and branchCount.
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        target: 'on-a',
+        label: 'a',
+        sourceHandle: 'case-0',
+        branchCount: 1,
+      })
+    );
+  });
+
+  it('chains multiple steps inside a switch case sequentially', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'sw',
+            type: 'switch',
+            expression: '{{ x }}',
+            cases: [
+              {
+                match: 'go',
+                steps: [
+                  { name: 'step1', type: 'http' },
+                  { name: 'step2', type: 'http' },
+                ],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(r.edges).toContainEqual(expect.objectContaining({ source: 'step1', target: 'step2' }));
+  });
+
   it('handles merge step with a single contained body', () => {
     const r = transformWorkflowToGraph(
       minimal({
@@ -346,5 +467,55 @@ describe('computeTopologyFingerprint', () => {
       ] as unknown as WorkflowYaml['steps'],
     });
     expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfReordered));
+  });
+
+  it('changes when a step inside a switch case is renamed', () => {
+    const wfBase = minimal({
+      steps: [
+        {
+          name: 'sw',
+          type: 'switch',
+          expression: '{{ x }}',
+          cases: [{ match: 'a', steps: [{ name: 'inner', type: 'http' }] }],
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    const wfMutated = minimal({
+      steps: [
+        {
+          name: 'sw',
+          type: 'switch',
+          expression: '{{ x }}',
+          cases: [{ match: 'a', steps: [{ name: 'inner_renamed', type: 'http' }] }],
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfMutated));
+  });
+
+  it('changes when a switch default step is renamed', () => {
+    const wfBase = minimal({
+      steps: [
+        {
+          name: 'sw',
+          type: 'switch',
+          expression: '{{ x }}',
+          cases: [{ match: 'a', steps: [{ name: 'on_a', type: 'http' }] }],
+          default: [{ name: 'fallback', type: 'http' }],
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    const wfMutated = minimal({
+      steps: [
+        {
+          name: 'sw',
+          type: 'switch',
+          expression: '{{ x }}',
+          cases: [{ match: 'a', steps: [{ name: 'on_a', type: 'http' }] }],
+          default: [{ name: 'fallback_v2', type: 'http' }],
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfMutated));
   });
 });

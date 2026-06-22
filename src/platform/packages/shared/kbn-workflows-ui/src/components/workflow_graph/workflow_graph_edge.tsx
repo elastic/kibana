@@ -17,6 +17,10 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   readonly label?: string;
   readonly traversed?: boolean;
   readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
+  /** Switch fan-out: 0-based slot index of this branch (matches the handle position). */
+  readonly branchIndex?: number;
+  /** Switch fan-out: total number of branches on the source switch node. */
+  readonly branchCount?: number;
 }
 
 const LABEL_TRUNCATE = 24;
@@ -69,6 +73,20 @@ function enforceOrthogonal(
     }
   }
   return out;
+}
+
+/**
+ * Lane depth for symmetric "octopus" nesting. Mirror slots (equidistant from
+ * the center) share one lane; the center slot sits deepest (nearest the
+ * target, nearly straight). 0 = outermost (nearest source). Always an
+ * integer: for odd counts the center is exactly integer; for even counts the
+ * half-integer center cancels when computing `center - |slot - center|`.
+ *
+ * Exported for unit testing.
+ */
+export function laneDepth(slot: number, count: number): number {
+  const center = (count - 1) / 2;
+  return center - Math.abs(slot - center);
 }
 
 /**
@@ -161,7 +179,55 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   let edgePath: string;
   let labelX: number;
   let labelY: number;
-  if (dagrePoints && dagrePoints.length >= 2) {
+
+  // Octopus fan routing for switch edges. Each case/default branch receives
+  // its own staggered horizontal lane (TB) or vertical lane (LR), distributed
+  // evenly within the inter-rank gap. Outermost slots peel off nearest the
+  // source; the center slot stays nearly straight. Requires branchIndex and
+  // branchCount to be set on the edge data (only switch edges carry these).
+  const { branchIndex, branchCount } = edgeData ?? {};
+  const isLROctopus = sourcePosition === Position.Right || sourcePosition === Position.Left;
+  const octopusGap = isLROctopus ? targetX - sourceX : targetY - sourceY;
+  const useOctopus =
+    branchIndex != null && branchCount != null && branchCount > 1 && octopusGap > 0;
+
+  if (useOctopus && branchIndex != null && branchCount != null) {
+    const depth = laneDepth(branchIndex, branchCount);
+    const levels = Math.ceil(branchCount / 2); // distinct depth levels
+    const step = octopusGap / (levels + 1);
+    const laneOffset = (depth + 1) * step;
+    if (isLROctopus) {
+      // LR: stagger on vertical lanes off the right/left handle.
+      const laneX = sourceX + laneOffset;
+      const built = buildRoundedOrthogonalPath(
+        [
+          { x: sourceX - 2, y: sourceY },
+          { x: laneX, y: sourceY },
+          { x: laneX, y: targetY },
+          { x: targetX, y: targetY },
+        ],
+        CORNER_RADIUS
+      );
+      edgePath = built.path;
+      labelX = laneX;
+      labelY = (sourceY + targetY) / 2;
+    } else {
+      // TB: stagger on horizontal lanes off the bottom/top handle.
+      const laneY = sourceY + laneOffset;
+      const built = buildRoundedOrthogonalPath(
+        [
+          { x: sourceX, y: sourceY - 2 },
+          { x: sourceX, y: laneY },
+          { x: targetX, y: laneY },
+          { x: targetX, y: targetY },
+        ],
+        CORNER_RADIUS
+      );
+      edgePath = built.path;
+      labelX = (sourceX + targetX) / 2;
+      labelY = laneY;
+    }
+  } else if (dagrePoints && dagrePoints.length >= 2) {
     let middle = dagrePoints.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
     const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
 
@@ -380,7 +446,13 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     return false;
   const pd = prev.data as WorkflowEdgeData | undefined;
   const nd = next.data as WorkflowEdgeData | undefined;
-  return pd?.traversed === nd?.traversed && pd?.label === nd?.label && pd?.points === nd?.points;
+  return (
+    pd?.traversed === nd?.traversed &&
+    pd?.label === nd?.label &&
+    pd?.points === nd?.points &&
+    pd?.branchIndex === nd?.branchIndex &&
+    pd?.branchCount === nd?.branchCount
+  );
 }
 
 export const WorkflowGraphEdge = memo(WorkflowGraphEdgeInner, edgePropsAreEqual);

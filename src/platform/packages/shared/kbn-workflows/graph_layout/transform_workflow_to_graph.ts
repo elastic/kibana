@@ -17,8 +17,15 @@ import type {
   PreLayoutTriggerNode,
   Step,
 } from './types';
-import { DEFAULT_NODE_STYLE } from './types';
-import type { ForEachStep, IfStep, MergeStep, ParallelStep, WorkflowYaml } from '../spec/schema';
+import { DEFAULT_NODE_STYLE, SWITCH_DEFAULT_HANDLE, switchCaseHandleId } from './types';
+import type {
+  ForEachStep,
+  IfStep,
+  MergeStep,
+  ParallelStep,
+  SwitchStep,
+  WorkflowYaml,
+} from '../spec/schema';
 
 const TRIGGER_LABEL: Record<string, string> = {
   manual: 'Manual',
@@ -244,6 +251,73 @@ function transformInternal(
         }
         branchExits.push(...inner.leafIds);
       });
+      if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
+    } else if (step.type === 'switch') {
+      const switchStep = step as SwitchStep;
+      const cases =
+        (switchStep.cases as Array<{ match: string | number | boolean; steps: Step[] }>) ?? [];
+      const branchExits: string[] = [];
+
+      // Compute the real fan size before the loop so branchCount is accurate.
+      // When there is no `default`, the fan consists only of the cases — no
+      // phantom slot reserved for a missing branch. This is what makes the
+      // octopus lane routing (laneDepth) symmetric: for 5 cases / no default
+      // fanCount = 5 → depths [0,1,2,1,0]; without this fix it was 6 → [0,1,2,2,1].
+      const defaultSteps = switchStep.default as Step[] | undefined;
+      const hasDefault = Array.isArray(defaultSteps) && defaultSteps.length > 0;
+      const fanCount = cases.length + (hasDefault ? 1 : 0);
+
+      // Rule 1 — one labeled edge per case (label = match value).
+      cases.forEach((caseItem, idx) => {
+        if (!Array.isArray(caseItem.steps) || caseItem.steps.length === 0) {
+          // Defensive: empty case in loose/partial schema — fall through the gate.
+          branchExits.push(id);
+          return;
+        }
+        const inner = transformInternal([], caseItem.steps as Step[], ids);
+        nodes.push(...inner.nodes);
+        edges.push(...inner.edges);
+        foreachGroups.push(...inner.foreachGroups);
+        const firstId = inner.nodes[0]?.id;
+        if (firstId) {
+          edges.push({
+            id: `${id}:${firstId}-case-${idx}`,
+            source: id,
+            target: firstId,
+            branchIndex: idx,
+            branchCount: fanCount,
+            label: String(caseItem.match),
+            sourceHandle: switchCaseHandleId(idx),
+          });
+        }
+        branchExits.push(...inner.leafIds);
+      });
+
+      // Rule 2 — `default` branch, labeled 'default'.
+      if (hasDefault) {
+        const inner = transformInternal([], defaultSteps as Step[], ids);
+        nodes.push(...inner.nodes);
+        edges.push(...inner.edges);
+        foreachGroups.push(...inner.foreachGroups);
+        const firstId = inner.nodes[0]?.id;
+        if (firstId) {
+          edges.push({
+            id: `${id}:${firstId}-default`,
+            source: id,
+            target: firstId,
+            branchIndex: cases.length,
+            branchCount: fanCount,
+            label: 'default',
+            sourceHandle: SWITCH_DEFAULT_HANDLE,
+          });
+        }
+        branchExits.push(...inner.leafIds);
+      } else {
+        // Rule 3 — no `default`: push the gate id so the generic sibling-connector
+        // emits a plain (unlabeled) edge from the gate to the next step.
+        branchExits.push(id);
+      }
+
       if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
     } else if (step.type === 'merge') {
       const mergeStep = step as MergeStep;
