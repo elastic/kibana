@@ -17,7 +17,6 @@ import {
   mapFormValuesToCreateRequest as baseCreateRequest,
   mapFormValuesToUpdateRequest as baseUpdateRequest,
   mapRuleResponseToFormValues,
-  type RuleRequestCommon,
 } from '../../form/utils/rule_request_mappers';
 import type { ComposeFormValues } from './compose_form_types';
 
@@ -32,7 +31,7 @@ import type { ComposeFormValues } from './compose_form_types';
  */
 const applyDelayModeFilter = (
   formValues: ComposeFormValues
-): RuleRequestCommon['state_transition'] | undefined => {
+): CreateRuleData['state_transition'] | undefined => {
   if (formValues.kind !== 'alert') return undefined;
 
   const alertMode =
@@ -43,7 +42,7 @@ const applyDelayModeFilter = (
     deriveRecoveryDelayModeFromStateTransition(formValues.stateTransition);
 
   const st = formValues.stateTransition;
-  const out: NonNullable<RuleRequestCommon['state_transition']> = {};
+  const out: NonNullable<CreateRuleData['state_transition']> = {};
 
   if (alertMode === DELAY_MODE.immediate) {
     out.pending_count = 0;

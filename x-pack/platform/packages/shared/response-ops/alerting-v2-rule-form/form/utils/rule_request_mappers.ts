@@ -11,12 +11,7 @@ import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from '../types';
-import {
-  mapArtifacts,
-  mergeArtifactsByType,
-  splitArtifactsByType,
-  type RuleArtifactPayload,
-} from './artifact_mappers';
+import { mapArtifacts, mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
 
 // ---------------------------------------------------------------------------
 // FormValues → API request
@@ -63,9 +58,9 @@ const mapGrouping = (grouping: FormValues['grouping']) =>
  */
 const mapStateTransition = (
   st?: StateTransition
-): RuleRequestCommon['state_transition'] | undefined => {
+): CreateRuleData['state_transition'] | undefined => {
   if (!st) return undefined;
-  const out: NonNullable<RuleRequestCommon['state_transition']> = {};
+  const out: NonNullable<CreateRuleData['state_transition']> = {};
   if (st.pendingCount != null) out.pending_count = st.pendingCount;
   if (st.pendingTimeframe != null) out.pending_timeframe = st.pendingTimeframe;
   if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
@@ -73,41 +68,16 @@ const mapStateTransition = (
   return Object.keys(out).length ? out : undefined;
 };
 
-/**
- * Common rule request shape shared between create and update payloads.
- * Contains all fields except `kind` (only required for create).
- */
-export interface RuleRequestCommon {
-  metadata: {
-    name: string;
-    description?: string;
-    owner?: string;
-    tags?: string[];
-    builder_type?: string;
-  };
-  time_field: string;
-  schedule: { every: string; lookback?: string };
-  query: Query;
-  recovery_strategy?: 'query';
-  grouping?: { fields: string[] };
-  state_transition?: {
-    pending_count?: number;
-    pending_timeframe?: string;
-    recovering_count?: number;
-    recovering_timeframe?: string;
-  };
-  artifacts?: RuleArtifactPayload;
-}
-
-export const mapFormValuesToRuleRequest = (
+export const mapFormValuesToCreateRequest = (
   formValues: FormValues,
   builderType?: string
-): RuleRequestCommon => {
-  const { metadata, timeField, schedule, query, grouping, stateTransition } = formValues;
+): CreateRuleData => {
+  const { kind, metadata, timeField, schedule, query, grouping, stateTransition } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const hasRecovery = query.recovery != null;
 
   return {
+    kind,
     metadata: mapMetadata(metadata, builderType),
     time_field: timeField,
     schedule: mapSchedule(schedule),
@@ -119,20 +89,13 @@ export const mapFormValuesToRuleRequest = (
   };
 };
 
-export const mapFormValuesToCreateRequest = (
-  formValues: FormValues,
-  builderType?: string
-): CreateRuleData => ({
-  kind: formValues.kind,
-  ...mapFormValuesToRuleRequest(formValues, builderType),
-});
 
 export const mapFormValuesToUpdateRequest = (
   formValues: FormValues,
   builderType?: string
 ): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, metadata, ...rest } =
-    mapFormValuesToRuleRequest(formValues, builderType);
+  const { kind, grouping, state_transition, artifacts, metadata, ...rest } =
+    mapFormValuesToCreateRequest(formValues, builderType);
 
   return {
     ...rest,
