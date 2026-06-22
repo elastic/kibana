@@ -211,6 +211,14 @@ interface NodeDefinitionBase {
   animateItemReorder?: boolean;
 
   /**
+   * (optional) Placeholder shown when a section has no child items.
+   */
+  emptyState?: {
+    iconType: IconType;
+    message: string;
+  };
+
+  /**
    * (optional) Icon buttons rendered on the trailing edge of this side nav item row.
    */
   itemActions?: ItemActionDefinition[];

@@ -102,16 +102,20 @@ export const createDashboardsNavigationNode = (
     });
   }
 
-  if (options.recentDashboards?.length) {
-    children.push({
-      id: 'dashboards_recent',
-      title: i18n.translate('dashboard.nav.recent', {
-        defaultMessage: 'Recent',
+  children.push({
+    id: 'dashboards_recent',
+    title: i18n.translate('dashboard.nav.recent', {
+      defaultMessage: 'Recent',
+    }),
+    animateItemReorder: true,
+    emptyState: {
+      iconType: 'clockCounter',
+      message: i18n.translate('dashboard.nav.recentEmpty', {
+        defaultMessage: 'Recently visited dashboards will show here',
       }),
-      animateItemReorder: true,
-      children: options.recentDashboards.map(createDashboardPanelItem),
-    });
-  }
+    },
+    children: options.recentDashboards?.map(createDashboardPanelItem) ?? [],
+  });
 
   return {
     id: DASHBOARD_APP_ID,

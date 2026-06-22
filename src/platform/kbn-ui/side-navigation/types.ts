@@ -121,6 +121,14 @@ export interface SecondaryMenuItem {
 }
 
 /**
+ * Placeholder content shown when a secondary menu section has no items.
+ */
+export interface SecondaryMenuSectionEmptyState {
+  iconType: IconType;
+  message: string;
+}
+
+/**
  * A section grouping within a secondary menu.
  * Sections help organize related secondary menu items with optional headers.
  */
@@ -141,6 +149,10 @@ export interface SecondaryMenuSection {
    * (optional) Animate list item reordering within this section.
    */
   animateItemReorder?: boolean;
+  /**
+   * (optional) Placeholder shown when the section has no items.
+   */
+  emptyState?: SecondaryMenuSectionEmptyState;
 }
 
 /**

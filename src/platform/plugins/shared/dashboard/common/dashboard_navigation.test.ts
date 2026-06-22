@@ -71,6 +71,16 @@ describe('createDashboardsNavigationNode', () => {
             },
           ],
         },
+        {
+          id: 'dashboards_recent',
+          title: 'Recent',
+          animateItemReorder: true,
+          emptyState: {
+            iconType: 'clockCounter',
+            message: 'Recently visited dashboards will be shown here',
+          },
+          children: [],
+        },
       ],
       getIsActive: expect.any(Function),
     });
@@ -102,7 +112,54 @@ describe('createDashboardsNavigationNode', () => {
     expect(node.children?.[2]).toMatchObject({
       id: 'dashboards_recent',
       title: 'Recent',
+      animateItemReorder: true,
+      emptyState: {
+        iconType: 'clockCounter',
+        message: 'Recently visited dashboards will be shown here',
+      },
     });
+  });
+
+  it('always shows the recent section with an empty state in the side panel', () => {
+    const deepLinks = {
+      [DASHBOARD_APP_ID]: getDeepLink(DASHBOARD_APP_ID, 'app/dashboards#/list', 'Dashboards'),
+      [DASHBOARD_ALL_NAV_LINK]: getDeepLink(
+        DASHBOARD_ALL_NAV_LINK,
+        'app/dashboards#/list',
+        'All dashboards'
+      ),
+      [DASHBOARD_CREATE_NAV_LINK]: getDeepLink(
+        DASHBOARD_CREATE_NAV_LINK,
+        'app/dashboards#/create',
+        'Create dashboard'
+      ),
+    };
+
+    const { navigationTreeUI } = parseNavigationTree(
+      'oblt',
+      {
+        body: [createDashboardsNavigationNode()],
+      },
+      { deepLinks, cloudLinks: {} }
+    );
+
+    const { navItems } = toNavigationItems(navigationTreeUI, [], [], new PanelStateManager());
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === DASHBOARD_APP_ID);
+
+    expect(dashboardsItem?.sections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'dashboards_recent',
+          label: 'Recent',
+          animateItemReorder: true,
+          items: [],
+          emptyState: {
+            iconType: 'clockCounter',
+            message: 'Recently visited dashboards will be shown here',
+          },
+        }),
+      ])
+    );
   });
 
   it('creates secondary panel sections when the dashboards app link is registered', () => {
@@ -145,7 +202,7 @@ describe('createDashboardsNavigationNode', () => {
       { deepLinks, cloudLinks: {} }
     );
 
-    const { navItems } = toNavigationItems(navigationTreeUI, [], new PanelStateManager());
+    const { navItems } = toNavigationItems(navigationTreeUI, [], [], new PanelStateManager());
     const dashboardsItem = navItems.primaryItems.find((item) => item.id === DASHBOARD_APP_ID);
 
     expect(dashboardsItem?.href).toBe('/foo/app/dashboards#/list');
@@ -200,6 +257,7 @@ describe('createDashboardsNavigationNode', () => {
       {
         id: 'dashboards_recent',
         label: 'Recent',
+        animateItemReorder: true,
         items: [
           expect.objectContaining({
             id: 'recent_1',
@@ -247,7 +305,7 @@ describe('createDashboardsNavigationNode', () => {
     const panelStateManager = new PanelStateManager();
     panelStateManager.setPanelLastActive(DASHBOARD_APP_ID, 'recent_1');
 
-    const { navItems } = toNavigationItems(navigationTreeUI, [], panelStateManager);
+    const { navItems } = toNavigationItems(navigationTreeUI, [], [], panelStateManager);
     const dashboardsItem = navItems.primaryItems.find((item) => item.id === DASHBOARD_APP_ID);
 
     expect(dashboardsItem?.href).toBe('/foo/app/dashboards#/list');
@@ -309,6 +367,7 @@ describe('createDashboardsNavigationNode', () => {
         [panelNode, recentSection, recentNode],
         [panelNode, starredSection, starredNode],
       ],
+      [],
       panelStateManager
     );
 

@@ -255,9 +255,9 @@ export const toNavigationItems = (
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
             if (child.sideNavStatus === 'hidden') return null;
-            if (!child.children?.length) return null;
+            if (!child.children?.length && !child.emptyState) return null;
 
-            const validChildren = filterValidSecondaryChildren(child.children);
+            const validChildren = filterValidSecondaryChildren(child.children ?? []);
             const secondaryItems = validChildren.map(createSecondaryMenuItem);
 
             if (child.href) {
@@ -271,9 +271,12 @@ export const toNavigationItems = (
               label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
               ...(child.animateItemReorder ? { animateItemReorder: true } : {}),
+              ...(child.emptyState && secondaryItems.length === 0
+                ? { emptyState: child.emptyState }
+                : {}),
             };
           })
-        ).filter((section) => section.items.length > 0); // Filter out empty sections;
+        ).filter((section) => section.items.length > 0 || section.emptyState);
       }
 
       // If after all filtering there are no sections, we skip this menu item

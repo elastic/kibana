@@ -49,6 +49,13 @@ export interface SecondaryMenuItem {
 /**
  * A section grouping within a secondary menu.
  */
+export interface SecondaryMenuSectionEmptyState {
+  /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
+  iconType: string;
+  /** Message shown when the section has no items. */
+  message: string;
+}
+
 export interface SecondaryMenuSection {
   /** Unique identifier for this section. */
   id: string;
@@ -58,6 +65,8 @@ export interface SecondaryMenuSection {
   label?: string;
   /** Optional animation when items in this section are reordered. */
   animateItemReorder?: boolean;
+  /** Optional placeholder shown when the section has no items. */
+  emptyState?: SecondaryMenuSectionEmptyState;
 }
 
 /**

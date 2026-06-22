@@ -12,17 +12,22 @@ import type { ReactNode } from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import type { SecondaryMenuSectionEmptyState } from '../../../types';
+import { SecondaryMenuSectionEmptyStateComponent } from './section_empty_state';
+
 const REORDER_ANIMATION_MS = 300;
 
 export interface SecondaryMenuSectionProps {
   animateItemReorder?: boolean;
   children: ReactNode;
+  emptyState?: SecondaryMenuSectionEmptyState;
   label?: string;
 }
 
 export const SecondaryMenuSectionComponent = ({
   animateItemReorder = false,
   children,
+  emptyState,
   label,
 }: SecondaryMenuSectionProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
@@ -114,6 +119,8 @@ export const SecondaryMenuSectionComponent = ({
     width: 100%;
   `;
 
+  const hasItems = React.Children.count(children) > 0;
+
   return (
     <div css={secondaryMenuWrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
       {label && (
@@ -121,9 +128,13 @@ export const SecondaryMenuSectionComponent = ({
           {label}
         </EuiText>
       )}
-      <ul ref={listRef} css={listStyles} role="none">
-        {children}
-      </ul>
+      {hasItems ? (
+        <ul ref={listRef} css={listStyles} role="none">
+          {children}
+        </ul>
+      ) : (
+        emptyState && <SecondaryMenuSectionEmptyStateComponent {...emptyState} />
+      )}
     </div>
   );
 };

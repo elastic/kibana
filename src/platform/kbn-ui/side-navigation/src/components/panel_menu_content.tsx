@@ -48,6 +48,7 @@ const PanelMenuSections = ({
         <SideNav.SecondaryMenu.Section
           key={section.id}
           animateItemReorder={section.animateItemReorder}
+          emptyState={section.emptyState}
           label={section.label}
         >
           {section.items.map((subItem, subItemIndex) => {
