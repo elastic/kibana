@@ -191,12 +191,20 @@ export async function openDeletePhaseFlyout(page: ScoutPage): Promise<Locator> {
   const deletePhaseButton = page.getByTestId('lifecyclePhase-delete-button');
   const flyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
 
-  // Either the "Add delete phase" header action is shown (no delete phase yet)
+  type DeletePhaseOpener = 'add' | 'edit';
+
+  // Either the "Add delete phase" header action is shown (no delete phase yet),
   // or an existing delete phase is edited through the lifecycle bar popover.
-  // Wait for whichever entry point renders first to avoid racing on visibility.
-  const opener = await Promise.any([
-    addButton.waitFor({ state: 'visible', timeout: 15_000 }).then(() => 'add' as const),
-    deletePhaseButton.waitFor({ state: 'visible', timeout: 15_000 }).then(() => 'edit' as const),
+  //
+  // Important: the "Add delete phase" button can be visible but disabled when a delete
+  // phase already exists. In that case we must use the "edit existing phase" path.
+  const opener = await Promise.any<DeletePhaseOpener>([
+    deletePhaseButton.waitFor({ state: 'visible', timeout: 15_000 }).then<DeletePhaseOpener>(() => 'edit'),
+    (async (): Promise<DeletePhaseOpener> => {
+      await addButton.waitFor({ state: 'visible', timeout: 15_000 });
+      await expect(addButton).toBeEnabled({ timeout: 15_000 });
+      return 'add';
+    })(),
   ]);
 
   if (opener === 'add') {

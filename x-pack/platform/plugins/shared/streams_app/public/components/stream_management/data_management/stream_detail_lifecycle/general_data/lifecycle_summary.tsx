@@ -79,6 +79,11 @@ const maxDownsampleStepsTooltip = i18n.translate(
   }
 );
 
+const deletePhaseAlreadyInUseTooltip = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.deletePhaseAlreadyInUseTooltip',
+  { defaultMessage: 'Delete phase is already in use' }
+);
+
 const HeaderActionsSeparator = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -431,6 +436,8 @@ const NonIlmLifecycleSummary = ({
   const isDslDownsampleFlyoutBlocking =
     isDslDownsampleFlyoutOpen || dslSummary.isEditLifecycleFlyoutOpen || isDataPhaseFlyoutOpen;
   const isAddDeletePhaseDisabled = isExternalFlyoutOpen || isDslDownsampleFlyoutBlocking;
+  const isAddDeletePhaseAlreadyInUse = hasDeletePhase;
+  const isAddDeletePhaseButtonDisabled = isAddDeletePhaseDisabled || isAddDeletePhaseAlreadyInUse;
 
   const addDownsampleStepButton = (
     <EuiButton
@@ -444,20 +451,36 @@ const NonIlmLifecycleSummary = ({
     </EuiButton>
   );
 
-  const addDeletePhaseButton =
-    onAddDeletePhase && definition.privileges.lifecycle && !hasDeletePhase ? (
+  const addDeletePhaseButtonLabel = i18n.translate(
+    'xpack.streams.dataLifecycleSummary.addDeletePhaseButtonLabel',
+    { defaultMessage: 'Add delete phase' }
+  );
+
+  const addDeletePhaseButtonIsDisabled = isAddDeletePhaseAlreadyInUse
+    ? true
+    : isAddDeletePhaseButtonDisabled;
+
+  const addDeletePhaseButtonElement =
+    onAddDeletePhase && definition.privileges.lifecycle ? (
       <EuiButton
         color="text"
         size="s"
         data-test-subj="dataLifecycleSummaryAddDeletePhase"
-        onClick={isAddDeletePhaseDisabled ? undefined : onAddDeletePhase}
-        isDisabled={isAddDeletePhaseDisabled}
+        onClick={onAddDeletePhase}
+        isDisabled={addDeletePhaseButtonIsDisabled}
       >
-        {i18n.translate('xpack.streams.dataLifecycleSummary.addDeletePhaseButtonLabel', {
-          defaultMessage: 'Add delete phase',
-        })}
+        {addDeletePhaseButtonLabel}
       </EuiButton>
     ) : null;
+
+  const addDeletePhaseButton =
+    addDeletePhaseButtonElement && isAddDeletePhaseAlreadyInUse ? (
+      <EuiToolTip position="top" content={deletePhaseAlreadyInUseTooltip}>
+        {addDeletePhaseButtonElement}
+      </EuiToolTip>
+    ) : (
+      addDeletePhaseButtonElement
+    );
 
   const dslHeaderActions =
     definition.privileges.lifecycle &&
@@ -581,13 +604,21 @@ const NonIlmLifecycleSummary = ({
 };
 
 export const LifecycleSummary = (props: LifecycleSummaryProps) => {
+  const { isServerless } = useKibana();
   const isIlm = isIlmLifecycle(props.definition.effective_lifecycle);
 
-  const editLifecycleMethodButton = getEditLifecycleMethodButton({
-    onEditSuccessfulLifecycle: props.onEditSuccessfulLifecycle,
-    canManageLifecycle: Boolean(props.definition.privileges.lifecycle),
-    isDisabled: Boolean(props.isExternalFlyoutOpen) || Boolean(props.isDataPhaseFlyoutOpen),
-  });
+  const isServerlessWiredRootStream =
+    isServerless &&
+    StreamsSchema.WiredStream.GetResponse.is(props.definition) &&
+    isRoot(props.definition.stream.name);
+
+  const editLifecycleMethodButton = isServerlessWiredRootStream
+    ? null
+    : getEditLifecycleMethodButton({
+        onEditSuccessfulLifecycle: props.onEditSuccessfulLifecycle,
+        canManageLifecycle: Boolean(props.definition.privileges.lifecycle),
+        isDisabled: Boolean(props.isExternalFlyoutOpen) || Boolean(props.isDataPhaseFlyoutOpen),
+      });
 
   return isIlm ? (
     <IlmLifecycleSummary {...props} editLifecycleMethodButton={editLifecycleMethodButton} />
