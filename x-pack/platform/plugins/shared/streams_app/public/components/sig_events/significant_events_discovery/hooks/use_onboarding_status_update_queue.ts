@@ -9,7 +9,6 @@ import {
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SigEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
-import pMap from 'p-map';
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 
@@ -24,28 +23,35 @@ export function useOnboardingStatusUpdateQueue(
   const queue = useRef(new Set<string>([]));
   const isProcessing = useRef(false);
 
-  const { getOnboardingStatus } = useOnboardingApi();
+  const { getOnboardingStatuses } = useOnboardingApi();
 
   const updateStatuses = useCallback(async (): Promise<void> => {
-    await pMap(
-      queue.current,
-      async (streamName) => {
-        const statusResult = await getOnboardingStatus(streamName);
+    if (queue.current.size === 0) {
+      return;
+    }
 
-        onStreamStatusUpdate(streamName, statusResult);
+    const streamNames = [...queue.current];
 
-        if (!STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
-          queue.current.delete(streamName);
-        }
-      },
-      { concurrency: 10 }
-    );
+    const statuses = await getOnboardingStatuses(streamNames);
+
+    for (const streamName of streamNames) {
+      const statusResult = statuses[streamName];
+      if (statusResult === undefined) {
+        continue;
+      }
+
+      onStreamStatusUpdate(streamName, statusResult);
+
+      if (!STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
+        queue.current.delete(streamName);
+      }
+    }
 
     if (queue.current.size > 0) {
       await new Promise((res) => setTimeout(res, 2000));
       await updateStatuses();
     }
-  }, [getOnboardingStatus, onStreamStatusUpdate]);
+  }, [getOnboardingStatuses, onStreamStatusUpdate]);
 
   const processStatusUpdateQueue = useCallback(async () => {
     if (isProcessing.current) {
