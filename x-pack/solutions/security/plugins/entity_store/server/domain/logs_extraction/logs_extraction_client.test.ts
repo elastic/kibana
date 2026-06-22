@@ -241,6 +241,7 @@ describe('LogsExtractionClient', () => {
         logger: expect.any(Object),
         abortController: undefined,
         refresh: true,
+        onDropped: expect.any(Function),
       });
 
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(

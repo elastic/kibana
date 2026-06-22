@@ -114,13 +114,15 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-user-profile-browser'
-  - '@kbn/code-editor'
-  - '@kbn/workflows-yaml'
   - '@kbn/workflows-ui'
   - '@kbn/core-spaces-common'
   - '@kbn/datemath'
-  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/css-utils'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/cps'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
