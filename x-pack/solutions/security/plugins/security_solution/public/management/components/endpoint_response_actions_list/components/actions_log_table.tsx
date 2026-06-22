@@ -25,6 +25,10 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { CancelActionModal } from './cancel_action_modal';
+import { isResponseActionCancelable } from '../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
@@ -86,8 +90,10 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
+    const authz = useUserPrivileges().endpointPrivileges;
 
     const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
+    const [actionToCancel, setActionToCancel] = useState<ActionDetails | null>(null);
 
     const actionIdsWithOpenTrays = useMemo(
       (): string[] =>
@@ -143,6 +149,10 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       },
       [expandedRowMap, onShowActionDetails, dataTestSubj]
     );
+
+    const onCloseCancelModalHandler = useCallback(() => {
+      setActionToCancel(null);
+    }, []);
 
     // memoized callback for toggleDetails
     const onClickCallback = useCallback(
@@ -404,29 +414,38 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           actions: [
             {
               render: (actionDetailsItem: ActionDetails) => {
+                if (actionDetailsItem.isCompleted) {
+                  return <></>;
+                }
+
+                let tooltipText: React.ReactNode = UX_MESSAGES.cancelAction;
+                const buttonProps: React.ComponentProps<typeof EuiButtonIcon> = {
+                  iconType: 'stop',
+                  'data-test-subj': 'responseActionRowActions',
+                  'aria-label': UX_MESSAGES.cancelAction,
+                  isDisabled: !!actionToCancel,
+                };
+
+                if (
+                  !isResponseActionCancelable(
+                    actionDetailsItem.command,
+                    actionDetailsItem.agentType
+                  )
+                ) {
+                  buttonProps.isDisabled = true;
+                  tooltipText = UX_MESSAGES.cancelActionNotSupportedTooltip;
+                } else if (!canUserCancelCommand(authz, actionDetailsItem.command)) {
+                  buttonProps.isDisabled = true;
+                  tooltipText = UX_MESSAGES.cancelActionNotPermittedTooltip;
+                } else {
+                  buttonProps.onClick = () => {
+                    setActionToCancel(actionDetailsItem);
+                  };
+                }
+
                 return (
-                  // FIXME:PT implement EuiPopover menu
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.securitySolution.actionsLogTable.cancelUserAction',
-                      {
-                        // FIXME:PT implement custom tooltips based on use cases
-                        defaultMessage: 'Cancel',
-                      }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      data-test-subj="endpointTableRowActions"
-                      iconType="stop"
-                      onClick={
-                        // FIXME:PT implement
-                        () => {}
-                      }
-                      aria-label={i18n.translate(
-                        'xpack.securitySolution.actionsLogTable.cancelUserAction',
-                        { defaultMessage: 'Cancel' }
-                      )}
-                    />
+                  <EuiToolTip content={tooltipText}>
+                    <EuiButtonIcon {...buttonProps} />
                   </EuiToolTip>
                 );
               },
@@ -434,13 +453,15 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           ],
         },
       ];
+
       // filter out the `hosts` column
       // if showHostNames is FALSE
       if (!showHostNames) {
         return columnDef.filter((column) => 'field' in column && column.field !== 'hosts');
       }
+
       return columnDef;
-    }, [expandedRowMap, getTestId, onClickCallback, showHostNames]);
+    }, [actionToCancel, authz, expandedRowMap, getTestId, onClickCallback, showHostNames]);
 
     return (
       <>
@@ -463,6 +484,10 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           loading={loading}
           error={error}
         />
+
+        {actionToCancel && (
+          <CancelActionModal action={actionToCancel} onClose={onCloseCancelModalHandler} />
+        )}
       </>
     );
   }

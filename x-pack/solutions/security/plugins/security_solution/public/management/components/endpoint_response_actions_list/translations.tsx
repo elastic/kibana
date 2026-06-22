@@ -193,6 +193,43 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: 'Triggered by rule',
     }
   ),
+  cancelAction: i18n.translate('xpack.securitySolution.responseActionsList.action.cancelAction', {
+    defaultMessage: 'Cancel',
+  }),
+  cancelActionNotSupportedTooltip: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionNotSupportedTooltip',
+    {
+      defaultMessage: 'Cancellation is not supported for this action type',
+    }
+  ),
+  cancelActionNotPermittedTooltip: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionNotPermittedTooltip',
+    {
+      defaultMessage: 'You do not have permission to cancel this action',
+    }
+  ),
+  cancelActionModalTitle: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalTitle',
+    {
+      defaultMessage: 'Cancel action',
+    }
+  ),
+  cancelActionModalSubmitButonLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalSubmitButonLabel',
+    { defaultMessage: 'Submit' }
+  ),
+  cancelActionModalActionAlreadyComplete: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalActionAlreadyComplete',
+    {
+      defaultMessage: 'Action is already complete',
+    }
+  ),
+  cancelActionModalCommentFieldPlaceholder: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalCommentFieldPlaceholder',
+    {
+      defaultMessage: 'Optional comment',
+    }
+  ),
 });
 
 export const FILTER_NAMES = Object.freeze({
