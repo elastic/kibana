@@ -42,7 +42,6 @@ apiTest.describe(
     // Admin API key: authenticated without a SAML profile — used for telemetry stats.
     let adminCredentials: RoleApiCredentials;
     let user1CookieHeader: Record<string, string>;
-    let user2CookieHeader: Record<string, string>;
     let user3CookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ config, requestAuth, samlAuth, kbnClient }) => {
@@ -50,8 +49,7 @@ apiTest.describe(
         config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
       adminCredentials = await requestAuth.getApiKeyForAdmin();
       ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName));
-      // Admin SAML user: different identity from editor → different profile_uid for cross-user isolation.
-      ({ cookieHeader: user2CookieHeader } = await samlAuth.asInteractiveUser('admin'));
+      // Viewer: different identity from editor → different profile_uid for cross-user isolation.
       ({ cookieHeader: user3CookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
       await kbnClient.spaces.create({
@@ -133,10 +131,10 @@ apiTest.describe(
         });
 
         await apiTest.step(
-          'user2 does not see user1 favorites (cross-user isolation)',
+          'user3 does not see user1 favorites (cross-user isolation)',
           async () => {
             const r = await apiClient.get(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}`, {
-              headers: { ...INTERNAL_HEADERS, ...user2CookieHeader },
+              headers: { ...INTERNAL_HEADERS, ...user3CookieHeader },
             });
             expect(r.body.favoriteIds).not.toContain(id1);
             expect(r.body.favoriteIds).not.toContain(id2);
@@ -200,7 +198,7 @@ apiTest.describe(
       // Add a known set across distinct user-space combos:
       //   user1 / default → 2 favorites  (user-space combo 1, 2 items)
       //   user1 / custom  → 1 favorite   (user-space combo 2, 1 item)
-      //   user2 / default → 1 favorite   (user-space combo 3, 1 item)
+      //   user3 / default → 1 favorite   (user-space combo 3, 1 item)
       const suffix = `stats-${Date.now()}`;
       const idA = `${suffix}-a`;
       const idB = `${suffix}-b`;
@@ -225,7 +223,7 @@ apiTest.describe(
         ).toHaveStatusCode(200);
         expect(
           await apiClient.post(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}/${idA}/favorite`, {
-            headers: { ...INTERNAL_HEADERS, ...user2CookieHeader },
+            headers: { ...INTERNAL_HEADERS, ...user3CookieHeader },
           })
         ).toHaveStatusCode(200);
 
@@ -246,10 +244,10 @@ apiTest.describe(
         );
         expect(user1CustomList.body.favoriteIds).toContain(idA);
 
-        const user2DefaultList = await apiClient.get(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}`, {
-          headers: { ...INTERNAL_HEADERS, ...user2CookieHeader },
+        const user3DefaultList = await apiClient.get(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}`, {
+          headers: { ...INTERNAL_HEADERS, ...user3CookieHeader },
         });
-        expect(user2DefaultList.body.favoriteIds).toContain(idA);
+        expect(user3DefaultList.body.favoriteIds).toContain(idA);
         // user1/default has 2 favorites so max is at least 2
         expect(afterStats.dashboard.max_per_user_per_space).toBeGreaterThanOrEqual(2);
       } finally {
@@ -264,7 +262,7 @@ apiTest.describe(
           { headers: { ...INTERNAL_HEADERS, ...user1CookieHeader } }
         );
         await apiClient.post(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}/${idA}/unfavorite`, {
-          headers: { ...INTERNAL_HEADERS, ...user2CookieHeader },
+          headers: { ...INTERNAL_HEADERS, ...user3CookieHeader },
         });
       }
     });
