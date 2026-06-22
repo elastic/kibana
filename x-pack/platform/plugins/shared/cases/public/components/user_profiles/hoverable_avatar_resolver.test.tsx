@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { CaseUser } from '../../containers/types';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -60,7 +61,7 @@ describe('HoverableAvatarResolver', () => {
 
     render(<HoverableAvatarResolver user={user} userProfiles={userProfilesMap} />);
 
-    fireEvent.mouseOver(screen.getByText('DR'));
+    await userEvent.hover(screen.getByText('DR'));
 
     await screen.findByTestId('user-profile-tooltip');
 

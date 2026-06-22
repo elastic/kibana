@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { HoverableAvatar } from './hoverable_avatar';
@@ -21,7 +22,7 @@ describe('HoverableAvatar', () => {
   it('renders the tooltip when hovering', async () => {
     render(<HoverableAvatar userInfo={userProfiles[0]} />);
 
-    fireEvent.mouseOver(screen.getByText('DR'));
+    await userEvent.hover(screen.getByText('DR'));
 
     await screen.findByTestId('user-profile-tooltip');
 
