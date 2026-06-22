@@ -229,6 +229,8 @@ export const WorkflowYAMLEditor = ({
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const workflowLookupRef = useRef(workflowLookup);
+  workflowLookupRef.current = workflowLookup;
   const lastRevealedHighlightedStepIdRef = useRef<string | undefined>(undefined);
 
   // Data
