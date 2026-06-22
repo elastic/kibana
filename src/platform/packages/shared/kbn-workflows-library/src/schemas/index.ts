@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerExecutionRoutes } from './executions';
-import { registerInternalRoutes } from './internal';
-import { registerLibraryRoutes } from './library';
-import type { RouteDependencies } from './types';
-import { registerWorkflowRoutes } from './workflows';
+export {
+  InstallFormFieldOptionSchema,
+  InstallFormFieldSchema,
+  InstallFormFieldTypeSchema,
+  InstallFormSchemaSchema,
+} from './install_form';
 
-export function defineRoutes(deps: RouteDependencies): void {
-  registerWorkflowRoutes(deps);
-  registerExecutionRoutes(deps);
-  registerInternalRoutes(deps);
-  registerLibraryRoutes(deps);
-}
+export { TemplateMetadataSchema } from './template';
+
+export {
+  KibanaVersionEntrySchema,
+  KibanaVersionsManifestSchema,
+  ManifestSchema,
+  TemplateSchema,
+  TemplatesCatalogSchema,
+} from './catalog';

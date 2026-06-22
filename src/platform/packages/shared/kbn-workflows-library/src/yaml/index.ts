@@ -7,15 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerExecutionRoutes } from './executions';
-import { registerInternalRoutes } from './internal';
-import { registerLibraryRoutes } from './library';
-import type { RouteDependencies } from './types';
-import { registerWorkflowRoutes } from './workflows';
-
-export function defineRoutes(deps: RouteDependencies): void {
-  registerWorkflowRoutes(deps);
-  registerExecutionRoutes(deps);
-  registerInternalRoutes(deps);
-  registerLibraryRoutes(deps);
-}
+export { parseTemplateYaml, TemplateParseError } from './parse_template';
+export type { ParsedTemplate, TemplateParseErrorReason } from './parse_template';

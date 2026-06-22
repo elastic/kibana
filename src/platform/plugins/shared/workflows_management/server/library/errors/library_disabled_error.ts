@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerExecutionRoutes } from './executions';
-import { registerInternalRoutes } from './internal';
-import { registerLibraryRoutes } from './library';
-import type { RouteDependencies } from './types';
-import { registerWorkflowRoutes } from './workflows';
-
-export function defineRoutes(deps: RouteDependencies): void {
-  registerWorkflowRoutes(deps);
-  registerExecutionRoutes(deps);
-  registerInternalRoutes(deps);
-  registerLibraryRoutes(deps);
+/**
+ * Thrown by the `LibraryService` when a request is made while the
+ * `workflowsManagement:library:enabled` global uiSetting is `false`. Routes
+ * surface this as HTTP 503 — the routes exist, but the feature is gated.
+ */
+export class LibraryDisabledError extends Error {
+  readonly statusCode = 503;
+  constructor() {
+    super('Workflow Template Library is disabled.');
+    this.name = 'LibraryDisabledError';
+  }
 }

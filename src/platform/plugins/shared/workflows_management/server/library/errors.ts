@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerExecutionRoutes } from './executions';
-import { registerInternalRoutes } from './internal';
-import { registerLibraryRoutes } from './library';
-import type { RouteDependencies } from './types';
-import { registerWorkflowRoutes } from './workflows';
-
-export function defineRoutes(deps: RouteDependencies): void {
-  registerWorkflowRoutes(deps);
-  registerExecutionRoutes(deps);
-  registerInternalRoutes(deps);
-  registerLibraryRoutes(deps);
-}
+export { LibraryDisabledError } from './errors/library_disabled_error';
+export { LibraryNotFoundError } from './errors/library_not_found_error';
+export { LibraryFetchError } from './errors/library_fetch_error';
+export type { LibraryFetchErrorReason } from './errors/library_fetch_error';

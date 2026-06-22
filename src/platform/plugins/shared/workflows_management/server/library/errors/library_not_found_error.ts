@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerExecutionRoutes } from './executions';
-import { registerInternalRoutes } from './internal';
-import { registerLibraryRoutes } from './library';
-import type { RouteDependencies } from './types';
-import { registerWorkflowRoutes } from './workflows';
-
-export function defineRoutes(deps: RouteDependencies): void {
-  registerWorkflowRoutes(deps);
-  registerExecutionRoutes(deps);
-  registerInternalRoutes(deps);
-  registerLibraryRoutes(deps);
+/**
+ * Thrown when the catalog has no row matching a requested slug. Surfaced as
+ * HTTP 404.
+ */
+export class LibraryNotFoundError extends Error {
+  readonly statusCode = 404;
+  constructor(slug: string) {
+    super(`Template "${slug}" was not found in the catalog.`);
+    this.name = 'LibraryNotFoundError';
+  }
 }
