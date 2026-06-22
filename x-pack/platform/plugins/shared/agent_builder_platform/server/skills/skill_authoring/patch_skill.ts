@@ -147,7 +147,7 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
   id: 'patch_skill',
   type: ToolType.builtin,
   description:
-    'Refine an existing `skill` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. If you are changing `tool_ids`, call `list_tools` first and pick ids verbatim from the result — invalid ids will cause this call to fail. After patching, re-render the draft via `<render_attachment id="ATTACHMENT_ID" />`.',
+    'Refine an existing `skill` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. If you are changing `tool_ids`, call `list_tools` first and pick ids verbatim from the result — invalid ids will cause this call to fail. After the final patch in this round, render the draft via `<render_attachment id="ATTACHMENT_ID" />`. If you plan to apply more patches before responding to the user, hold the render until after the last one.',
   schema: patchSkillSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {

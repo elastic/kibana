@@ -54,14 +54,15 @@ After reading this SKILL.md, three inline tools become available:
 
 2. **Call \`load_skill_for_editing\`** with the confirmed skill id.
 
-3. **Render the attachment inline.**
-   - Emit \`<render_attachment id="ATTACHMENT_ID" />\` so the user sees the current content.
+3. **Render the attachment only when appropriate.**
+   - If the user just wants to view the skill, emit \`<render_attachment id="ATTACHMENT_ID" />\` so they see the current content.
+   - If the user already asked for changes that you will apply via \`patch_skill\` in this same round, **skip this render** — emit \`<render_attachment>\` only after the final patch. Showing the pre-patch state is redundant and clutters the response.
 
 4. **If the user wants changes, apply them via \`patch_skill\`.**
    - Use targeted search-replace patches rather than rewriting fields wholesale.
    - Prefer \`content_patches\` for surgical edits to the markdown body.
    - Use \`tool_ids\` replacement only when the full list is changing.
-   - Re-render the attachment after each patch so the card refreshes in place.
+   - After the final patch, emit \`<render_attachment id="ATTACHMENT_ID" />\` once so the user sees the updated draft.
 
 5. **When the user is happy, point them at the Save button.**
    - The card's "Save changes" button calls \`PUT /api/agent_builder/skills/:id\`. You do **not** need to call any HTTP endpoint yourself.
@@ -84,10 +85,9 @@ User: "Add a section about rate limiting to the api-security skill."
 Steps:
 1. Call \`list_skills\` to confirm \`skill_id: "api-security"\`.
 2. Call \`load_skill_for_editing\`.
-3. Emit \`<render_attachment id="att-xyz" />\`.
-4. Call \`patch_skill\` to insert the rate limiting section.
-5. Re-emit \`<render_attachment id="att-xyz" />\`.
-6. Ask the user to review and click Save changes when ready.
+3. Call \`patch_skill\` to insert the rate limiting section.
+4. Emit \`<render_attachment id="att-xyz" />\` once so the user sees the updated draft.
+5. Ask the user to review and click Save changes when ready.
 
 ### Example 3: edit — remove a tool
 
@@ -96,9 +96,8 @@ User: "Remove the execute_esql tool from my logs-debug skill."
 Steps:
 1. Call \`list_skills\` to confirm \`skill_id: "logs-debug"\`.
 2. Call \`load_skill_for_editing\`.
-3. Emit \`<render_attachment id="att-abc" />\`.
-4. Call \`patch_skill\` with the updated \`tool_ids\` and a \`content_patch\` removing the tool reference.
-5. Re-render the updated draft.
+3. Call \`patch_skill\` with the updated \`tool_ids\` and a \`content_patch\` removing the tool reference.
+4. Emit \`<render_attachment id="att-abc" />\` once so the user sees the updated draft.
   `),
   getInlineTools: () => [
     createListSkillsTool(),

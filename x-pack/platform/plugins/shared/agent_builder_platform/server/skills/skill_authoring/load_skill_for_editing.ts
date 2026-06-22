@@ -36,7 +36,7 @@ export const createLoadSkillForEditingTool = (): BuiltinSkillBoundedTool<
   id: 'load_skill_for_editing',
   type: ToolType.builtin,
   description:
-    'Load an existing user-created skill into a draft attachment. Use this to display a skill to the user OR to begin editing it. Fetches the skill by id, creates a versioned `skill` attachment pre-populated with the current content, and returns `attachment_id`. After calling this, render with `<render_attachment id="ATTACHMENT_ID" />`. If the user wants changes, use `patch_skill` to apply changes.',
+    'Load an existing user-created skill into a draft attachment. Use this to display a skill to the user OR to begin editing it. Fetches the skill by id, creates a versioned `skill` attachment pre-populated with the current content, and returns `attachment_id`. If the user only wants to view the skill, render the draft with `<render_attachment id="ATTACHMENT_ID" />`. If the user wants changes, do NOT render yet — call `patch_skill` first and render once after the final patch so the user sees a single up-to-date card.',
   schema: loadSkillForEditingSchema,
   confirmation: { askUser: 'never' },
   handler: async ({ skill_id: skillId }, context) => {

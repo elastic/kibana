@@ -101,7 +101,7 @@ This skill exposes the following tools:
 
 8. **Iterate on feedback via \`patch_skill\`.**
    - Prefer search-replace patches over full rewrites; it's cheaper and easier for the user to follow.
-   - After each patch, re-render the attachment so the card refreshes in place.
+   - If you apply multiple patches in the same round, emit \`<render_attachment>\` once after the final patch — not after each intermediate one. The card always reflects the latest version, so repeated renders just clutter the response.
 
 9. **When the user approves the draft, direct them to the create button on the card.**
    - The card handles submission — you do not need to call any API endpoint yourself.
