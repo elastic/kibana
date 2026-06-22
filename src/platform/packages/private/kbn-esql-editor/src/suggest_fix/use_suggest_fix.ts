@@ -15,9 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { SUGGEST_FIX_ROUTE, FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
-import { ReviewActionsWidget } from '../comment_to_esql/review_actions_widget';
-import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
+import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
+import { useReplaceReview } from '../comment_to_esql/use_replace_review';
 
 type SuggestFixHandler = (
   queryString: string,
@@ -61,13 +61,6 @@ function ensureCommandRegistered() {
   );
 }
 
-interface ReviewState {
-  firstChangedOriginalLine: number;
-  lastChangedOriginalLine: number;
-  generatedLineStart: number;
-  generatedLineEnd: number;
-}
-
 interface UseSuggestFixParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
@@ -87,45 +80,15 @@ export const useSuggestFix = ({
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
-  const reviewDecorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(
-    undefined
-  );
   const generatingDecorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(
     undefined
   );
-  const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
-  const contextKeyRef = useRef<monaco.editor.IContextKey<boolean> | undefined>(undefined);
-  const actionDisposablesRef = useRef<monaco.IDisposable[]>([]);
-  const reviewStateRef = useRef<ReviewState | null>(null);
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
-
-  const abortInFlight = useCallback(() => {
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = undefined;
-  }, []);
 
   const clearGeneratingDecoration = useCallback(() => {
     generatingDecorationsRef.current?.clear();
     generatingDecorationsRef.current = undefined;
   }, []);
-
-  const cleanup = useCallback(() => {
-    reviewDecorationsRef.current?.clear();
-    reviewDecorationsRef.current = undefined;
-
-    if (widgetRef.current) {
-      widgetRef.current.dispose();
-      widgetRef.current = undefined;
-    }
-
-    actionDisposablesRef.current.forEach((d) => d.dispose());
-    actionDisposablesRef.current = [];
-    contextKeyRef.current?.set(false);
-    reviewStateRef.current = null;
-
-    clearGeneratingDecoration();
-    abortInFlight();
-  }, [clearGeneratingDecoration, abortInFlight]);
 
   const trackFixResult = useCallback(
     (
@@ -151,128 +114,29 @@ export const useSuggestFix = ({
     [telemetryService]
   );
 
-  const acceptFix = useCallback(() => {
-    const editor = editorRef.current;
-    const model = editorModel.current;
-    const state = reviewStateRef.current;
-
-    cleanup();
-
-    if (!editor || !model || !state) {
-      return;
-    }
-
-    trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
-
-    // Remove only the original changed lines — the fix lines shift up to replace them
-    editor.executeEdits('esql-suggest-fix-accept', [
-      {
-        range: new monaco.Range(
-          state.firstChangedOriginalLine,
-          1,
-          state.lastChangedOriginalLine + 1,
-          1
-        ),
-        text: null,
-      },
-    ]);
-  }, [editorRef, editorModel, cleanup, trackFixReview]);
-
-  const rejectFix = useCallback(() => {
-    const editor = editorRef.current;
-    const model = editorModel.current;
-    const state = reviewStateRef.current;
-
-    cleanup();
-
-    if (!editor || !model || !state) {
-      return;
-    }
-
-    trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1);
-
-    // Remove the "\n" connector + fix lines by selecting from the end of the last
-    // original changed line through the end of the last fix line.
-    editor.executeEdits('esql-suggest-fix-reject', [
-      {
-        range: new monaco.Range(
-          state.lastChangedOriginalLine,
-          model.getLineMaxColumn(state.lastChangedOriginalLine),
-          state.generatedLineEnd,
-          model.getLineMaxColumn(state.generatedLineEnd)
-        ),
-        text: null,
-      },
-    ]);
-  }, [editorRef, editorModel, cleanup, trackFixReview]);
-
-  const showReview = useCallback(
-    (state: ReviewState) => {
-      const editor = editorRef.current;
-      if (!editor) return;
-
-      reviewStateRef.current = state;
-
-      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-
-      for (
-        let line = state.firstChangedOriginalLine;
-        line <= state.lastChangedOriginalLine;
-        line++
-      ) {
-        decorations.push({
-          range: new monaco.Range(line, 1, line, 1),
-          options: { isWholeLine: true, className: LINE_REPLACED_CLASS },
-        });
-      }
-
-      for (let line = state.generatedLineStart; line <= state.generatedLineEnd; line++) {
-        decorations.push({
-          range: new monaco.Range(line, 1, line, 1),
-          options: { isWholeLine: true, className: CODE_ADDED_CLASS },
-        });
-      }
-
-      reviewDecorationsRef.current = editor.createDecorationsCollection(decorations);
-
-      if (!contextKeyRef.current) {
-        contextKeyRef.current = editor.createContextKey('esqlFixReviewActive', false);
-      }
-      contextKeyRef.current.set(true);
-
-      widgetRef.current = new ReviewActionsWidget(
-        euiTheme,
-        editor,
-        state.generatedLineEnd,
-        { onAccept: acceptFix, onReject: rejectFix },
-        true
-      );
-
-      actionDisposablesRef.current = [
-        editor.addAction({
-          id: 'esql.suggestFix.reject',
-          label: i18n.translate('esqlEditor.suggestFix.rejectLabel', {
-            defaultMessage: 'Undo AI fix',
-          }),
-          // eslint-disable-next-line no-bitwise
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Backspace],
-          precondition: 'esqlFixReviewActive',
-          run: () => rejectFix(),
-        }),
-        editor.addAction({
-          id: 'esql.suggestFix.accept',
-          label: i18n.translate('esqlEditor.suggestFix.acceptLabel', {
-            defaultMessage: 'Keep AI fix',
-          }),
-          // eslint-disable-next-line no-bitwise
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
-          precondition: 'esqlFixReviewActive',
-          run: () => acceptFix(),
-        }),
-      ];
+  const { showReview, reject: rejectFix } = useReplaceReview({
+    editorRef,
+    editorModel,
+    euiTheme,
+    contextKeyId: 'esqlFixReviewActive',
+    acceptAction: {
+      id: 'esql.suggestFix.accept',
+      label: i18n.translate('esqlEditor.suggestFix.acceptLabel', {
+        defaultMessage: 'Keep AI fix',
+      }),
     },
-    [editorRef, euiTheme, acceptFix, rejectFix]
-  );
+    rejectAction: {
+      id: 'esql.suggestFix.reject',
+      label: i18n.translate('esqlEditor.suggestFix.rejectLabel', {
+        defaultMessage: 'Undo AI fix',
+      }),
+    },
+    editSourceId: 'esql-suggest-fix',
+    onAfterAccept: (state) =>
+      trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1),
+    onAfterReject: (state) =>
+      trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1),
+  });
 
   const runSuggestFix = useCallback(
     async (
@@ -288,6 +152,8 @@ export const useSuggestFix = ({
       if (!editor || !model) return;
 
       rejectFix();
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = undefined;
 
       const decorationLine = errorLineNumber ?? model.getLineCount();
       const decorationCol = model.getLineMaxColumn(decorationLine);

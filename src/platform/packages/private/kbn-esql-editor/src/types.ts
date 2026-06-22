@@ -70,7 +70,7 @@ export interface ESQLEditorProps {
   hideQueryHistory?: boolean;
   /** hide quick search **/
   hideQuickSearch?: boolean;
-/** adds border in the editor **/
+  /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
@@ -94,6 +94,12 @@ export interface ESQLEditorProps {
   queryStats?: ESQLQueryStats;
   /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  /**
+   * Called once the editor has set up its NL-to-ES|QL review handler.
+   * The parent receives `handler` and can pass it as `onNlResult` to a sibling
+   * QuickSearchVisor (the non-inline case where the visor lives outside the editor).
+   */
+  onVisorNlResultReady?: (handler: (generatedQuery: string) => void) => void;
 }
 
 interface ESQLVariableService {

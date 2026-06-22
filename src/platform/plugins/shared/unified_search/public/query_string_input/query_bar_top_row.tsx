@@ -599,6 +599,12 @@ export const QueryBarTopRow = React.memo(
     // stays in sync with real query cadence. The timefilter drives data fetches in consumers like
     // Discover and Dashboard; without this the two independent timers drift apart over time.
     const [autoRefreshEpoch, setAutoRefreshEpoch] = useState<number | undefined>(undefined);
+    const visorNlResultRef = useRef<((generatedQuery: string) => void) | undefined>(undefined);
+    const [visorNlResultReady, setVisorNlResultReady] = useState(false);
+    const onVisorNlResultReady = useCallback((fn: (generatedQuery: string) => void) => {
+      visorNlResultRef.current = fn;
+      setVisorNlResultReady(true);
+    }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
 
@@ -1219,6 +1225,7 @@ export const QueryBarTopRow = React.memo(
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+            onVisorNlResultReady={onVisorNlResultReady}
           />
         )
       );
@@ -1261,6 +1268,7 @@ export const QueryBarTopRow = React.memo(
                     query={
                       props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
                     }
+                    onNlResult={visorNlResultReady ? visorNlResultRef.current : undefined}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
                   />
                 </EuiFlexItem>

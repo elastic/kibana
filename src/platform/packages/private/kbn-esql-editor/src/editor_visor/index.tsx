@@ -36,6 +36,8 @@ export interface QuickSearchVisorProps {
   isSpaceReduced?: boolean;
   // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
   isInline?: boolean;
+  // Called with the LLM-generated ES|QL so the parent editor can show the diff review UI
+  onNlResult?: (generatedQuery: string) => void;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
@@ -69,6 +71,7 @@ export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isInline,
+  onNlResult,
   onUpdateAndSubmitQuery,
   telemetryService,
 }: QuickSearchVisorProps) {
@@ -153,7 +156,11 @@ export function QuickSearchVisor({
           undefined,
           result.content.length
         );
-        onUpdateAndSubmitQuery(result.content);
+        if (onNlResult) {
+          onNlResult(result.content);
+        } else {
+          onUpdateAndSubmitQuery(result.content);
+        }
       }
     } catch (error) {
       if (abortController.signal.aborted) return;
@@ -180,6 +187,7 @@ export function QuickSearchVisor({
     query,
     core.http,
     core.notifications.toasts,
+    onNlResult,
     onUpdateAndSubmitQuery,
     trackNlResult,
   ]);
@@ -328,6 +336,7 @@ export function QuickSearchVisor({
                   dataTestSubj="esqlVisorKQLQueryInput"
                   size="s"
                   footerOption={footerOption}
+                  isClearable={false}
                 />
               </EuiFlexItem>
               {isNlLoading && (

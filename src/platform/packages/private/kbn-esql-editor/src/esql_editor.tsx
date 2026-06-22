@@ -39,7 +39,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
-import { useCommentToEsql, useGhostLineHint } from './comment_to_esql';
+import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
@@ -123,6 +123,7 @@ const ESQLEditorInternal = function ESQLEditor({
   queryStats,
   enableResourceBrowser = false,
   onESQLDocsFlyoutVisibilityChanged,
+  onVisorNlResultReady,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -634,6 +635,21 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
   });
 
+  const visorNlOnSubmit = useCallback(
+    (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH),
+    [onUpdateAndSubmitQuery]
+  );
+
+  const { showVisorReview } = useVisorNlToEsql({
+    editorRef,
+    editorModel,
+    onSubmit: visorNlOnSubmit,
+  });
+
+  useEffect(() => {
+    onVisorNlResultReady?.(showVisorReview);
+  }, [showVisorReview, onVisorNlResultReady]);
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
     editorModel,
@@ -697,7 +713,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 query={code}
                 isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
                 isInline={Boolean(editorIsInline)}
-
+                onNlResult={showVisorReview}
                 onUpdateAndSubmitQuery={(newQuery) =>
                   onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
                 }
