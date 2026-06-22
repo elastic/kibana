@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { isInternalURL } from '@kbn/std';
 
 /**
  * Severity of a notification, lowest to highest. Drives the per-document
@@ -21,20 +22,18 @@ export const ctaSchema = z
   .object({
     /**
      * Internal Kibana destination the call-to-action navigates to. Must be a
-     * relative path beginning with a single `/`. External, protocol-relative
-     * (`//host`), and backslash-prefixed (`/\host`) URLs are rejected — they
-     * resolve off-origin in the browser and would be an open-redirect surface.
+     * root-relative path beginning with a single `/`. External, protocol-relative
+     * (`//host`), and backslash-prefixed (`/\host`) URLs are rejected via
+     * `isInternalURL` — they resolve off-origin in the browser and would be an
+     * open-redirect surface.
      */
     link: z
       .string()
       .min(1)
       .max(200)
-      .refine(
-        (value) => value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\'),
-        {
-          message: 'link must be an internal path starting with a single "/"',
-        }
-      ),
+      .refine((value) => value.startsWith('/') && isInternalURL(value), {
+        message: 'link must be an internal path starting with a single "/"',
+      }),
     /** Human-readable label rendered for the link. */
     linkText: z.string().min(1).max(200),
   })
