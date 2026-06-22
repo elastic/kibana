@@ -10,12 +10,9 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import {
-  createPanelFailureResult,
-  getErrorMessage,
-  type PanelContentAttempt,
-  type VisPanelResolutionRequest,
-} from './core';
+import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
+import { getErrorMessage } from '../utils';
+import type { VisPanelResolutionRequest } from '../operations/panels';
 
 /** Host plumbing the vis resolver needs to call the visualization builder. */
 export interface VisPanelResolverDeps {
@@ -26,15 +23,17 @@ export interface VisPanelResolverDeps {
 }
 
 /**
- * Kibana host implementation of the generate core's `ResolvePanelContent` seam
- * for `vis` panels.
+ * Default implementation of the generate core's `ResolvePanelContent` seam for
+ * `vis` panels.
  *
  * Builds inline Lens panel content from natural language / ES|QL using Kibana
  * plumbing (model provider, ES client, the visualization builder) and returns
  * it to the core through the type-agnostic {@link PanelContentAttempt} contract.
- * It lives outside `core/` so the generation core stays free of Kibana-only
- * dependencies and remains reusable by third parties, which supply their own
- * resolver.
+ *
+ * It ships in `core/resolvers/` so any caller of the generation core — the
+ * dashboard tool or a CLI host — gets a ready-to-use vis resolver from one
+ * place. It is still wired in through the `resolvePanelContent` seam, so tests
+ * can inject a fake and a host can substitute its own resolver if ever needed.
  */
 export const createVisPanelResolver = ({
   logger,

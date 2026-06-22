@@ -19,8 +19,8 @@ import {
 
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import { createVisPanelResolver } from './vis_panel_resolver';
 import {
+  createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,

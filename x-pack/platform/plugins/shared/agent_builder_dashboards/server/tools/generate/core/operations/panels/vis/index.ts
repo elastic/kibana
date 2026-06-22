@@ -19,14 +19,14 @@ import type { PanelResolutionRequestBase } from '../../../resolve_panel';
  * already-resolved Lens config passed by value) or `source: 'request'` (resolved
  * from a natural-language / ES|QL query). This module owns the Lens embeddable
  * identity, the by-value config contract, the vis input schemas (add + edit), and
- * the vis resolution-request contract. The concrete resolver is host-specific and
- * lives outside `core/` (see `vis_panel_resolver.ts`).
+ * the vis resolution-request contract. The resolver that turns these requests into
+ * Lens panel content lives in `core/resolvers/vis_panel_resolver.ts`.
  */
 
 /**
  * Request to resolve a Lens visualization panel from a natural-language / ES|QL
- * query. This is the `vis` member of the panel resolution union; the host's
- * resolver (see `vis_panel_resolver.ts`) turns it into Lens panel content.
+ * query. This is the `vis` member of the panel resolution union; the resolver
+ * (see `core/resolvers/vis_panel_resolver.ts`) turns it into Lens panel content.
  */
 export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   type: 'vis';

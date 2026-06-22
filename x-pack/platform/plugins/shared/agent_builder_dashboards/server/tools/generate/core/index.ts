@@ -12,3 +12,6 @@ export { getErrorMessage, hasValidCreateMetadataOperations } from './utils';
 export { createPanelFailureResult } from './resolve_panel';
 export type { PanelContentAttempt } from './resolve_panel';
 export type { VisPanelResolutionRequest } from './operations/panels';
+
+export { createVisPanelResolver } from './resolvers/vis_panel_resolver';
+export type { VisPanelResolverDeps } from './resolvers/vis_panel_resolver';

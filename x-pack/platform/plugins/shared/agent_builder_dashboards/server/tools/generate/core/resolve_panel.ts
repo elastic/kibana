@@ -12,8 +12,8 @@ import type { PanelFailure } from './utils';
  * Type-agnostic primitives for inline panel content resolution: the resolution
  * result, the failure helper, and the request fields shared by every panel type.
  * Each panel type contributes its own request shape (see `operations/panels/<type>`),
- * and the panels barrel aggregates them into the host-implemented
- * `ResolvePanelContent` contract (see `vis_panel_resolver.ts`).
+ * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
+ * whose default implementation lives in `resolvers/vis_panel_resolver.ts`.
  */
 export type PanelContentAttempt =
   | {
