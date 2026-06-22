@@ -228,6 +228,7 @@ export const mapAppMenuItemToPanelItem = (
       title,
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
+    ...(item?.isDestructive && { color: 'danger' }),
   };
 };
 

@@ -494,3 +494,57 @@ export const PrimaryActionWithPopover: Story = {
     },
   },
 };
+
+const destructiveItemConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'runRule',
+      order: 1,
+      label: 'Run rule',
+      run: action('run-rule-clicked'),
+      iconType: 'play',
+      testId: 'runRuleButton',
+    },
+    {
+      id: 'deleteInline',
+      order: 2,
+      label: 'Delete (inline)',
+      run: action('delete-inline-clicked'),
+      iconType: 'trash',
+      testId: 'deleteInlineButton',
+      isDestructive: true,
+    },
+    {
+      id: 'deleteOverflow',
+      order: 3,
+      label: 'Delete (overflow)',
+      run: action('delete-overflow-clicked'),
+      iconType: 'trash',
+      testId: 'deleteOverflowButton',
+      isDestructive: true,
+      overflow: true,
+    },
+    {
+      id: 'updateApiKey',
+      order: 4,
+      label: 'Update API key',
+      run: action('update-api-key-clicked'),
+      iconType: 'key',
+      testId: 'updateApiKeyButton',
+      overflow: true,
+    },
+  ],
+  primaryActionItem: {
+    run: action('edit-clicked'),
+    id: 'edit',
+    label: 'Edit rule',
+    testId: 'editButton',
+    iconType: 'pencil',
+  },
+};
+export const DestructiveItems: Story = {
+  name: 'Destructive items',
+  args: {
+    config: destructiveItemConfig,
+  },
+};

@@ -120,6 +120,11 @@ interface AppMenuItemBase {
    * Hides the item at the specified responsive breakpoints.
    * */
   hidden?: EuiHideForProps['sizes'];
+  /**
+   * Marks the item as destructive (e.g. delete) by rendering in danger/red color
+   * Not available for primary action items.
+   */
+  isDestructive?: boolean;
 }
 
 type AppMenuLinkItem = AppMenuItemBase & {
@@ -265,7 +270,7 @@ export interface AppMenuSwitch {
   'data-test-subj'?: string;
 }
 
-interface AppMenuPrimaryActionBase extends AppMenuItemBase {
+interface AppMenuPrimaryActionBase extends Omit<AppMenuItemBase, 'isDestructive'> {
   /**
    * Width of the popover in pixels. Used when `items` or `splitButtonProps.items` is provided.
    */

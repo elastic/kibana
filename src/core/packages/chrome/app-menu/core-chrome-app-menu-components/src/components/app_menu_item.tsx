@@ -40,6 +40,7 @@ export const AppMenuItem = ({
   hidden,
   popoverWidth,
   popoverTestId,
+  isDestructive,
   onPopoverToggle,
   onPopoverClose,
 }: AppMenuItemProps) => {
@@ -93,7 +94,7 @@ export const AppMenuItem = ({
         size="s"
         iconSide="left"
         iconSize="m"
-        color="text"
+        color={isDestructive ? 'danger' : 'text'}
         aria-haspopup={hasItems ? 'menu' : undefined}
         isSelected={hasItems ? isPopoverOpen : undefined}
         css={buttonCss}
