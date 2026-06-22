@@ -20,7 +20,7 @@ import type {
 } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query';
 import { i18n } from '@kbn/i18n';
-import { STACK_ALERTS_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { STACK_ALERTS_ONLY_FEATURE_ID } from '@kbn/rule-data-utils';
 import { ALERTS_FEATURE_ID } from '../constants';
 
 export interface UseGetRuleTypesPermissionsParams {
@@ -113,7 +113,7 @@ export const useGetRuleTypesPermissions = ({
 
   const authorizedToReadAnyAlerts =
     authorizedToReadAnyRules ||
-    Boolean(capabilities?.[STACK_ALERTS_ALERTS_FEATURE_ID]?.show);
+    Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show);
 
   return {
     ruleTypesState: {

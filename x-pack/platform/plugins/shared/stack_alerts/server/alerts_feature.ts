@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { STACK_ALERTS_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { STACK_ALERTS_ONLY_FEATURE_ID } from '@kbn/rule-data-utils';
 import { alertingFeatures } from './feature';
 
-export const STACK_ALERTS_ALERTS_FEATURE: KibanaFeatureConfig = {
-  id: STACK_ALERTS_ALERTS_FEATURE_ID,
-  name: i18n.translate('xpack.stackAlerts.featureRegistry.stackAlertsAlertsFeatureName', {
+export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
+  id: STACK_ALERTS_ONLY_FEATURE_ID,
+  name: i18n.translate('xpack.stackAlerts.featureRegistry.stackAlertsOnlyFeatureName', {
     defaultMessage: 'Stack Alerts',
   }),
   order: 2001,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { STACK_ALERTS_ALERTS_FEATURE } from './alerts_feature';
+import { STACK_ALERTS_ONLY_FEATURE } from './alerts_feature';
 
-describe('Stack Alerts Alerts Feature Privileges', () => {
-  const allPrivilege = STACK_ALERTS_ALERTS_FEATURE.privileges?.all;
-  const readPrivilege = STACK_ALERTS_ALERTS_FEATURE.privileges?.read;
+describe('Stack Alerts Only Feature Privileges', () => {
+  const allPrivilege = STACK_ALERTS_ONLY_FEATURE.privileges?.all;
+  const readPrivilege = STACK_ALERTS_ONLY_FEATURE.privileges?.read;
 
-  test('feature ID is stackAlertsAlerts', () => {
-    expect(STACK_ALERTS_ALERTS_FEATURE.id).toBe('stackAlertsAlerts');
+  test('feature ID is stackAlertsOnly', () => {
+    expect(STACK_ALERTS_ONLY_FEATURE.id).toBe('stackAlertsOnly');
   });
 
   test('"all" privilege grants alert.all for all stack rule types', () => {

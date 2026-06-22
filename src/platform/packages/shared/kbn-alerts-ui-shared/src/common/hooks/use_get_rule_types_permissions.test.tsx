@@ -118,7 +118,7 @@ describe('useGetRuleTypesPermissions', () => {
     expect(result.current.authorizedToCreateAnyRules).toBe(false);
   });
 
-  it('should return authorizedToReadAnyAlerts=true when capabilities grant stackAlertsAlerts.show', async () => {
+  it('should return authorizedToReadAnyAlerts=true when capabilities grant stackAlertsOnly.show', async () => {
     getRuleTypes.mockResolvedValueOnce([]);
     const { result } = renderHook(
       () =>
@@ -130,7 +130,7 @@ describe('useGetRuleTypesPermissions', () => {
             navLinks: {},
             management: {},
             catalogue: {},
-            stackAlertsAlerts: { show: true },
+            stackAlertsOnly: { show: true },
           },
         }),
       {

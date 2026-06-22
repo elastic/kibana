@@ -79,12 +79,12 @@ apiTest.describe(
       adminCreds = await requestAuth.getApiKey('admin');
 
       withAllPrivilegeCreds = await requestAuth.getApiKeyForCustomRole({
-        kibana: [{ base: [], feature: { stackAlertsAlerts: ['all'] }, spaces: ['*'] }],
+        kibana: [{ base: [], feature: { stackAlertsOnly: ['all'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [] },
       });
 
       withReadPrivilegeCreds = await requestAuth.getApiKeyForCustomRole({
-        kibana: [{ base: [], feature: { stackAlertsAlerts: ['read'] }, spaces: ['*'] }],
+        kibana: [{ base: [], feature: { stackAlertsOnly: ['read'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [] },
       });
 
@@ -148,7 +148,7 @@ apiTest.describe(
       }
     });
 
-    apiTest.describe('with stackAlertsAlerts privilege', () => {
+    apiTest.describe('with stackAlertsOnly privilege', () => {
       apiTest.describe('rule CRUD denial', () => {
         for (const spec of RULE_SPECS) {
           apiTest(
@@ -309,7 +309,7 @@ apiTest.describe(
       });
     });
 
-    apiTest.describe('with stackAlertsAlerts read privilege', () => {
+    apiTest.describe('with stackAlertsOnly read privilege', () => {
       apiTest.describe('alert read', () => {
         apiTest('can find alerts via RAC', async ({ apiClient }) => {
           const response = await apiClient.post('internal/rac/alerts/find', {
@@ -385,7 +385,7 @@ apiTest.describe(
       });
     });
 
-    apiTest.describe('without stackAlertsAlerts privilege', () => {
+    apiTest.describe('without stackAlertsOnly privilege', () => {
       apiTest.describe('per-alert mute/unmute denial', () => {
         for (const spec of RULE_SPECS) {
           apiTest(
