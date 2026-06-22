@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
@@ -40,7 +41,6 @@ import type {
   ToolManager,
   WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
@@ -60,7 +60,8 @@ import {
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runInternalTool, runTool } from './run_tool';
 import { runAgent } from './run_agent';
-import { createStore } from './store';
+import { createResultStore } from './store/volumes/tool_results/tool_result_store';
+import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 
@@ -100,7 +101,6 @@ export interface CreateScopedRunnerDeps {
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
-  filestore: IFileStore;
   /** Execution mode for this runner context. */
   executionMode: AgentExecutionMode;
   /** Sub-agent executor for spawning child executions. */
@@ -120,7 +120,6 @@ export type CreateRunnerDeps = Omit<
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
-  | 'filestore'
   | 'toolManager'
   | 'subAgentExecutor'
   | 'executionMode'
@@ -198,6 +197,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   const createScopedRunnerWithDeps = async ({
     request,
     defaultConnectorId,
+    telemetryMetadata,
     conversation,
     nextInput,
     promptState,
@@ -206,13 +206,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
+    telemetryMetadata?: ConnectorTelemetryMetadata;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
   }): Promise<ScopedRunner> => {
-    const { resultStore, filestore, skillsStore } = createStore({ conversation });
+    const resultStore = createResultStore({ conversation });
+    const skillsStore = createSkillsStore({ skills: [] });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -224,7 +226,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+    const modelProvider = modelProviderFactory({ request, defaultConnectorId, telemetryMetadata });
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
@@ -240,7 +242,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       todoStateManager,
       stateManager,
       promptManager,
-      filestore,
       toolManager,
       executionMode,
       subAgentExecutor,
@@ -279,6 +280,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const {
         request,
         defaultConnectorId,
+        telemetryMetadata,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
         ...otherParams
@@ -287,6 +289,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
+        telemetryMetadata,
         conversation,
         nextInput,
         abortSignal,
