@@ -199,7 +199,9 @@ export async function openDeletePhaseFlyout(page: ScoutPage): Promise<Locator> {
   // Important: the "Add delete phase" button can be visible but disabled when a delete
   // phase already exists. In that case we must use the "edit existing phase" path.
   const opener = await Promise.any<DeletePhaseOpener>([
-    deletePhaseButton.waitFor({ state: 'visible', timeout: 15_000 }).then<DeletePhaseOpener>(() => 'edit'),
+    deletePhaseButton
+      .waitFor({ state: 'visible', timeout: 15_000 })
+      .then<DeletePhaseOpener>(() => 'edit'),
     (async (): Promise<DeletePhaseOpener> => {
       await addButton.waitFor({ state: 'visible', timeout: 15_000 });
       await expect(addButton).toBeEnabled({ timeout: 15_000 });
