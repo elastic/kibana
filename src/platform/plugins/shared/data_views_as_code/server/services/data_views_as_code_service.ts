@@ -12,7 +12,7 @@ import {
   fromStoredDataViewToAsCodeSavedSchema,
   toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
-import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import { type DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 
@@ -53,5 +53,28 @@ export class DataViewsAsCodeService {
 
   public delete(id: string) {
     return this.dataViewsService.delete(id);
+  }
+
+  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>) {
+    const dataViewSpec = toStoredDataView({ id, ...spec });
+
+    if (await this.exists(id)) {
+      const dataViewInstance = await this.dataViewsService.createFromSpecLazy(dataViewSpec);
+
+      await this.dataViewsService.updateSavedObject(dataViewInstance);
+      return { action: 'updated', body: await this.mapDataView(dataViewInstance) };
+    }
+
+    const createdDataView = await this.dataViewsService.createAndSaveDataViewLazy(dataViewSpec);
+    return { action: 'created', body: await this.mapDataView(createdDataView) };
+  }
+
+  private async exists(id: string) {
+    try {
+      await this.dataViewsService.getDataViewLazy(id);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

@@ -1189,7 +1189,7 @@ export class DataViewsService {
    * @param spec data view spec
    * @returns DataViewLazy
    */
-  private async createFromSpecLazy({
+  public async createFromSpecLazy({
     id,
     name,
     title,
