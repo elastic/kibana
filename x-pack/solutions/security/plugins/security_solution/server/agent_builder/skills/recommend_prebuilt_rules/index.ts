@@ -6,10 +6,8 @@
  */
 
 export { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules_skill';
-export {
-  buildPrebuiltRulesToolFilter,
-  FIND_PREBUILT_RULES_INLINE_TOOL_ID,
-} from './find_prebuilt_rules_tool';
+export { FIND_PREBUILT_RULES_INLINE_TOOL_ID } from './find_prebuilt_rules_tool';
+export { buildPrebuiltRulesToolFilter } from './find_prebuilt_rules_filter';
 export { GET_USER_DATA_INVENTORY_INLINE_TOOL_ID } from './get_user_data_inventory_tool';
 export { GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID } from './get_installable_catalog_overview_tool';
 export { GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID } from './get_installed_rules_mitre_coverage_tool';
