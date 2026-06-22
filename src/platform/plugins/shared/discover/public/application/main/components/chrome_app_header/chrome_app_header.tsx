@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppHeader } from '@kbn/app-header';
 import { AppMenuActionId } from '@kbn/discover-utils';
@@ -21,9 +22,15 @@ interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
   titleAppend?: ReactNode;
   isCollapsed?: boolean;
+  hasTabs?: boolean;
 }
 
-export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({
+  menu,
+  titleAppend,
+  isCollapsed,
+  hasTabs = false,
+}: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const persistedDiscoverSession = useInternalStateSelector(
@@ -59,14 +66,20 @@ export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHea
   }
 
   return (
-    <AppHeader
-      title={title}
-      back={back}
-      menu={appMenu}
-      sticky={false}
-      padding="m"
-      titleAppend={titleAppend}
-      borderless
-    />
+    <div // Wrap needed to keep the header border visible when tabs not shown.
+      css={css`
+        position: relative;
+      `}
+    >
+      <AppHeader
+        title={title}
+        back={back}
+        menu={appMenu}
+        sticky={false}
+        padding="m"
+        titleAppend={titleAppend}
+        borderless={hasTabs}
+      />
+    </div>
   );
 };
