@@ -56,6 +56,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     types: [
       {
         type: 'ears',
+        recommend: true,
         overrides: {
           meta: { scope: { disabled: true } },
         },
@@ -67,6 +68,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       },
       {
         type: 'oauth_authorization_code',
+        recommend: true,
         defaults: {
           scope:
             'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
@@ -109,7 +111,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       },
       {
         type: 'oauth_client_credentials',
-        warn: true,
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
         },
@@ -136,7 +137,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       },
       {
         type: 'oauth_client_credentials_private_key_jwt',
-        warn: true,
         defaults: {
           algorithm: 'PS256',
           certificateBinding: 'x5t#S256',

@@ -30,7 +30,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let meta: Record<string, Record<string, unknown>> | undefined;
 
   let labelOverride: string | undefined;
-  let warnOverride: boolean | undefined;
+  let recommendOverride: boolean | undefined;
   let hiddenOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
@@ -41,7 +41,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     defaults = def.defaults;
     meta = def?.overrides?.meta;
     labelOverride = def.label;
-    warnOverride = def.warn;
+    recommendOverride = def.recommend;
     hiddenOverride = def.hidden;
   }
 
@@ -89,7 +89,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   const schemaMeta = {
     ...existingMeta,
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
-    ...(warnOverride !== undefined ? { warn: warnOverride } : {}),
+    ...(recommendOverride !== undefined ? { recommend: recommendOverride } : {}),
     ...(hiddenOverride !== undefined ? { hidden: hiddenOverride } : {}),
   };
 

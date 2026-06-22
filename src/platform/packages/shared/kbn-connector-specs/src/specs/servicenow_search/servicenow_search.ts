@@ -59,6 +59,7 @@ export const ServicenowSearch: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
+        recommend: true,
         defaults: {},
         overrides: {
           meta: {
@@ -74,7 +75,6 @@ export const ServicenowSearch: ConnectorSpec = {
       },
       {
         type: 'oauth_client_credentials',
-        warn: true,
         defaults: {},
         overrides: {
           meta: {

@@ -192,6 +192,7 @@ export const Slack: ConnectorSpec = {
     types: [
       {
         type: 'ears',
+        recommend: true,
         overrides: {
           meta: { scope: { disabled: true } },
         },

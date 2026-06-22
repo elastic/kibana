@@ -57,6 +57,7 @@ export const JiraConnector: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
+        recommend: true,
         overrides: {
           meta: {
             authorizationUrl: { hidden: true },
@@ -75,7 +76,6 @@ export const JiraConnector: ConnectorSpec = {
         label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.basic.label', {
           defaultMessage: 'Shared API key',
         }),
-        warn: true,
         defaults: {},
         overrides: {
           meta: {

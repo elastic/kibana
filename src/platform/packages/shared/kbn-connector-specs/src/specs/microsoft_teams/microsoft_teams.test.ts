@@ -74,15 +74,15 @@ describe('MicrosoftTeams', () => {
         (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
       );
       expect(visibleTypes).toHaveLength(4);
-      expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
+      expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears', recommend: true }));
       expect(visibleTypes?.[1]).toEqual(
-        expect.objectContaining({ type: 'oauth_authorization_code' })
+        expect.objectContaining({ type: 'oauth_authorization_code', recommend: true })
       );
       expect(visibleTypes?.[2]).toEqual(
-        expect.objectContaining({ type: 'oauth_client_credentials', warn: true })
+        expect.objectContaining({ type: 'oauth_client_credentials' })
       );
       expect(visibleTypes?.[3]).toEqual(
-        expect.objectContaining({ type: 'oauth_client_credentials_private_key_jwt', warn: true })
+        expect.objectContaining({ type: 'oauth_client_credentials_private_key_jwt' })
       );
     });
 

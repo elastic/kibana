@@ -139,7 +139,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const onChange = () => setSelectedOption(discriminatorValue);
         const optionMeta = getMeta(option);
         const label = optionMeta.label;
-        const isWarn = Boolean((optionMeta as Record<string, unknown>).warn);
+        const isRecommended = Boolean((optionMeta as Record<string, unknown>).recommend);
         const isHidden = Boolean((optionMeta as Record<string, unknown>).hidden);
         const isChecked = selectedOption === discriminatorValue;
 
@@ -154,14 +154,16 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         }
         const isDisabled = getMeta(option).disabled;
 
-        const cardLabel = isWarn ? (
+        const cardLabel = isRecommended ? (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>{label as string}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">
+              <EuiBadge color="success">
                 {i18n.translate(
-                  'responseOps.formGenerator.multiOptionUnionWidget.notRecommendedLabel',
-                  { defaultMessage: 'Not recommended' }
+                  'responseOps.formGenerator.multiOptionUnionWidget.recommendedLabel',
+                  {
+                    defaultMessage: 'Recommended',
+                  }
                 )}
               </EuiBadge>
             </EuiFlexItem>

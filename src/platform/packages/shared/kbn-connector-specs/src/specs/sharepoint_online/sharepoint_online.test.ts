@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
@@ -116,6 +116,25 @@ describe('SharepointOnline', () => {
         typeof t === 'string' ? t : t.type
       );
       expect(types).toContain('oauth_client_credentials');
+    });
+
+    it('lists recommended delegated auth (ears, oauth_authorization_code) before app-only credentials', () => {
+      const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toEqual([
+        'ears',
+        'oauth_authorization_code',
+        'oauth_client_credentials',
+        'oauth_client_credentials_private_key_jwt',
+      ]);
+    });
+
+    it('marks ears and oauth_authorization_code as recommended', () => {
+      const recommended = (SharepointOnline.auth?.types as Array<string | AuthTypeDef>)
+        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.recommend))
+        .map((t) => t.type);
+      expect(recommended).toEqual(['ears', 'oauth_authorization_code']);
     });
 
     it('supports ears auth with microsoft provider and SharePoint scopes', () => {
