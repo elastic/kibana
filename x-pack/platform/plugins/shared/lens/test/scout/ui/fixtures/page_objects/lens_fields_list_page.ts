@@ -37,9 +37,30 @@ export class LensFieldsListPage {
     this.fieldSearchInput = page.testSubj.locator('lnsIndexPatternFieldSearch');
   }
 
-  async getLastTopValuesBucket(): Promise<Locator> {
-    const allBuckets = await this.topValuesBuckets.all();
-    return allBuckets[allBuckets.length - 1];
+  getLastTopValuesBucket(): Locator {
+    return this.topValuesBuckets.last();
+  }
+
+  /**
+   * Label child of a top-values bucket, e.g. the field value or the literal "Other".
+   * Scoped to a specific test-subject so it ignores the screen-reader-only
+   * duplicate emitted by EuiProgress.
+   */
+  getBucketLabel(bucket: Locator): Locator {
+    return bucket
+      .locator('[data-test-subj="lnsFieldListPanel-topValues-formattedFieldValue"]')
+      .first();
+  }
+
+  /**
+   * Percentage child of a top-values bucket, e.g. "96.7%". Scoped to a specific
+   * test-subject so it ignores the screen-reader-only duplicate emitted by
+   * EuiProgress.
+   */
+  getBucketPercentage(bucket: Locator): Locator {
+    return bucket
+      .locator('[data-test-subj="lnsFieldListPanel-topValues-formattedPercentage"]')
+      .first();
   }
 
   getFieldLocator(fieldName: string): Locator {

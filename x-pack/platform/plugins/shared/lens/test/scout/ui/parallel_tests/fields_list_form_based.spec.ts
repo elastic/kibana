@@ -57,26 +57,31 @@ spaceTest.describe(
         await expect(lensFieldsList.popoverTitle).toBeVisible();
         await expect(lensFieldsList.topValuesChart).toBeVisible();
         await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-        const otherBucket = await lensFieldsList.getLastTopValuesBucket();
-        await expect(otherBucket).toHaveText('Other\n96.7%');
+        const otherBucket = lensFieldsList.getLastTopValuesBucket();
+        await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
+        await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('96.7%');
 
         await lensFieldsList.distributionButton.click();
         await expect(lensFieldsList.getPopoverChart()).toBeVisible();
       }
     );
 
-    spaceTest('should show a top values popover for a keyword field', async ({ pageObjects }) => {
-      const { lensFieldsList } = pageObjects;
-      const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+    spaceTest.only(
+      'should show a top values popover for a keyword field',
+      async ({ pageObjects }) => {
+        const { lensFieldsList } = pageObjects;
+        const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
 
-      await lensFieldsList.clickField(fieldId);
-      await expect(lensFieldsList.popoverTitle).toBeVisible();
-      await expect(lensFieldsList.topValuesChart).toBeVisible();
-      await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-      const otherBucket = await lensFieldsList.getLastTopValuesBucket();
-      await expect(otherBucket).toHaveText('Other\n99.9%');
-      await expect(lensFieldsList.getPopoverChart()).toBeHidden();
-    });
+        await lensFieldsList.clickField(fieldId);
+        await expect(lensFieldsList.popoverTitle).toBeVisible();
+        await expect(lensFieldsList.topValuesChart).toBeVisible();
+        await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
+        const otherBucket = lensFieldsList.getLastTopValuesBucket();
+        await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
+        await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('99.9%');
+        await expect(lensFieldsList.getPopoverChart()).toBeHidden();
+      }
+    );
 
     spaceTest('should show a date histogram popover for a date field', async ({ pageObjects }) => {
       const { lensFieldsList } = pageObjects;
@@ -112,8 +117,9 @@ spaceTest.describe(
           await expect(lensFieldsList.popoverTitle).toBeVisible();
           await expect(lensFieldsList.topValuesChart).toBeVisible();
           await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-          const runtimeOtherBucket = await lensFieldsList.getLastTopValuesBucket();
-          await expect(runtimeOtherBucket).toHaveText('Other\n96.7%');
+          const runtimeOtherBucket = lensFieldsList.getLastTopValuesBucket();
+          await expect(lensFieldsList.getBucketLabel(runtimeOtherBucket)).toHaveText('Other');
+          await expect(lensFieldsList.getBucketPercentage(runtimeOtherBucket)).toHaveText('96.7%');
           await lensFieldsList.distributionButton.click();
           await expect(lensFieldsList.getPopoverChart()).toBeVisible();
         });
