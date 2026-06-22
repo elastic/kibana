@@ -111,30 +111,36 @@ export const SplayTimeField = ({
         disabled={disabled}
         dataTestSubj="osquery-schedule-splay-toggle"
       >
-        <EuiFormRow isInvalid={isInvalid} error={isInvalid ? SPLAY_MAX_ERROR : undefined} fullWidth>
-          <EuiFieldNumber
-            fullWidth
-            min={1}
-            max={MAX_SPLAY_SECONDS}
-            step={1}
-            value={value.value}
-            onChange={handleValueChange}
-            disabled={disabled}
+        {value.enabled ? (
+          <EuiFormRow
             isInvalid={isInvalid}
-            aria-label={SPLAY_VALUE_LABEL}
-            append={
-              <EuiSelect
-                options={UNIT_OPTIONS}
-                value={value.unit}
-                onChange={handleUnitChange}
-                disabled={disabled}
-                aria-label={SPLAY_UNIT_LABEL}
-                data-test-subj="osquery-schedule-splay-unit"
-              />
-            }
-            data-test-subj="osquery-schedule-splay-value"
-          />
-        </EuiFormRow>
+            error={isInvalid ? SPLAY_MAX_ERROR : undefined}
+            fullWidth
+          >
+            <EuiFieldNumber
+              fullWidth
+              min={1}
+              max={MAX_SPLAY_SECONDS}
+              step={1}
+              value={value.value}
+              onChange={handleValueChange}
+              disabled={disabled}
+              isInvalid={isInvalid}
+              aria-label={SPLAY_VALUE_LABEL}
+              append={
+                <EuiSelect
+                  options={UNIT_OPTIONS}
+                  value={value.unit}
+                  onChange={handleUnitChange}
+                  disabled={disabled}
+                  aria-label={SPLAY_UNIT_LABEL}
+                  data-test-subj="osquery-schedule-splay-unit"
+                />
+              }
+              data-test-subj="osquery-schedule-splay-value"
+            />
+          </EuiFormRow>
+        ) : null}
       </ToggleableRow>
       {showQueryStormAdvisory ? (
         <>

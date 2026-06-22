@@ -92,25 +92,27 @@ export const StopAfterField = ({
       disabled={disabled}
       dataTestSubj="osquery-schedule-stop-after-toggle"
     >
-      <EuiFormRow
-        isInvalid={showError}
-        error={showError ? STOP_AFTER_BEFORE_START_ERROR : undefined}
-        fullWidth
-      >
-        <EuiDatePicker
+      {enabled ? (
+        <EuiFormRow
+          isInvalid={showError}
+          error={showError ? STOP_AFTER_BEFORE_START_ERROR : undefined}
           fullWidth
-          aria-label={STOP_AFTER_DATE_LABEL}
-          selected={selectedMoment}
-          onChange={handleDateChange}
-          onChangeRaw={handleChangeRaw}
-          onBlur={handleBlur}
-          showTimeSelect
-          timeIntervals={SLOT_MINUTES}
-          minDate={minMoment}
-          disabled={disabled}
-          data-test-subj="osquery-schedule-stop-after-date"
-        />
-      </EuiFormRow>
+        >
+          <EuiDatePicker
+            fullWidth
+            aria-label={STOP_AFTER_DATE_LABEL}
+            selected={selectedMoment}
+            onChange={handleDateChange}
+            onChangeRaw={handleChangeRaw}
+            onBlur={handleBlur}
+            showTimeSelect
+            timeIntervals={SLOT_MINUTES}
+            minDate={minMoment}
+            disabled={disabled}
+            data-test-subj="osquery-schedule-stop-after-date"
+          />
+        </EuiFormRow>
+      ) : null}
     </ToggleableRow>
   );
 };
