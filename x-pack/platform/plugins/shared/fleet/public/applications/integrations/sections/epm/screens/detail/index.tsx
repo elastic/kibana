@@ -257,30 +257,49 @@ export function Detail() {
     }
   );
 
-  const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
-  const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
+  // The no-version endpoint returns the installed version when the package is installed,
+  // not the latest available. Use packageInfo.latestVersion (always registry-sourced) as
+  // the primary source for both GA and prerelease latest versions.
 
-  // fetch latest GA version (prerelease=false)
-  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(pkgName, '', {
-    prerelease: false,
-  });
+  // When prerelease is disabled, packageInfo.latestVersion is the latest GA.
+  // When prerelease is enabled and a newer prerelease exists, packageInfo.latestVersion
+  // is that prerelease — fall back to the GA query's latestVersion in that case.
+  // Both queries use a specific version (pkgVersion from the URL) so the server returns
+  // registry data rather than the installed version.
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    { prerelease: false },
+    { enabled: Boolean(pkgVersion), refetchOnMount: 'always' }
+  );
 
-  useEffect(() => {
-    const pkg = packageInfoLatestGAData?.item;
-    const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
-    if (isGAVersion) {
-      setLatestGAVersion(pkg.version);
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    { prerelease: true },
+    { enabled: Boolean(pkgVersion), refetchOnMount: 'always' }
+  );
+
+  const latestGAVersion = useMemo(() => {
+    if (packageInfo?.latestVersion && !isPackagePrerelease(packageInfo.latestVersion)) {
+      return packageInfo.latestVersion;
     }
-  }, [packageInfoLatestGAData?.item]);
+    // packageInfo.latestVersion is a prerelease (prerelease enabled + newer prerelease exists):
+    // use the GA query's latestVersion as fallback.
+    const ver = packageInfoLatestGAData?.item?.latestVersion;
+    if (ver && !isPackagePrerelease(ver)) {
+      return ver;
+    }
+    return undefined;
+  }, [packageInfo?.latestVersion, packageInfoLatestGAData?.item?.latestVersion]);
 
-  // fetch latest Prerelease version (prerelease=true)
-  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
-    prerelease: true,
-  });
-
-  useEffect(() => {
-    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
-  }, [packageInfoLatestPrereleaseData?.item.version]);
+  const latestPrereleaseVersion = useMemo(() => {
+    const ver = packageInfoLatestPrereleaseData?.item?.latestVersion;
+    if (ver && isPackagePrerelease(ver)) {
+      return ver;
+    }
+    return undefined;
+  }, [packageInfoLatestPrereleaseData?.item?.latestVersion]);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -531,8 +550,6 @@ export function Detail() {
     ]
   );
 
-  const showVersionSelect = Boolean(latestGAVersion);
-
   const installedVersion =
     packageInfo && 'installationInfo' in packageInfo
       ? packageInfo.installationInfo?.version
@@ -560,6 +577,8 @@ export function Detail() {
     return options;
   }, [latestPrereleaseVersion, latestGAVersion, installedVersion, packageInfo?.version]);
 
+  const showVersionSelect = Boolean(latestGAVersion) && versionOptions.length > 1;
+
   const versionLabel = i18n.translate('xpack.fleet.epm.versionLabel', {
     defaultMessage: 'Version',
   });
@@ -584,7 +603,7 @@ export function Detail() {
               {
                 label: showVersionSelect ? undefined : versionLabel,
                 content: (
-                  <EuiFlexGroup gutterSize="s">
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem>
                       {showVersionSelect ? (
                         <EuiSelect

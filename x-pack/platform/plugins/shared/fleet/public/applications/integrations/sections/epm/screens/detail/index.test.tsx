@@ -233,11 +233,20 @@ describe('When on integration detail', () => {
     unInstalledPackage.item.status = 'not_installed';
     unInstalledPackage.item.version = pkgVersion;
 
+    const isViewingPrerelease = pkgVersion.includes('-');
+
     mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
       if (query?.prerelease === false) {
         const gaPackage = { item: { ...unInstalledPackage.item } };
         gaPackage.item.version = '1.0.0';
+        gaPackage.item.latestVersion = '1.0.0';
         return gaPackage;
+      }
+      if (query?.prerelease === true) {
+        // The prerelease query uses a specific version; latestVersion reflects newest prerelease.
+        const pkg = { item: { ...unInstalledPackage.item } };
+        pkg.item.latestVersion = isViewingPrerelease ? pkgVersion : '1.0.0';
+        return pkg;
       }
       return unInstalledPackage;
     });
@@ -295,14 +304,16 @@ describe('When on integration detail', () => {
 
       mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
         if (query?.prerelease === false) {
-          // latest GA query (empty version, prerelease=false)
-          return { item: { ...notInstalledOldVersion, version: '1.0.0' } };
+          // GA query (version=0.3.7, prerelease=false): latestVersion = latest GA
+          return { item: { ...notInstalledOldVersion, version: '0.3.7', latestVersion: '1.0.0' } };
         }
-        if (!version || version === '') {
-          // latest prerelease query (empty version, prerelease=true or undefined)
-          return { item: { ...notInstalledOldVersion, version: '1.0.0-beta' } };
+        if (query?.prerelease === true) {
+          // Prerelease query (version=0.3.7, prerelease=true): latestVersion = latest prerelease
+          return {
+            item: { ...notInstalledOldVersion, version: '0.3.7', latestVersion: '1.0.0-beta' },
+          };
         }
-        // specific version query (0.3.7 pinned by URL)
+        // main query (version=0.3.7, prerelease=true from settings)
         return { item: notInstalledOldVersion };
       });
 
@@ -342,13 +353,10 @@ describe('When on integration detail', () => {
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
-    it('should display version selector with current version and no callout if prerelease setting disabled', async () => {
-      // With prerelease disabled the selector still shows (always visible now),
-      // but only contains the single GA version since latestGA === latestPrerelease.
-      expect(renderResult.queryByTestId('versionText')).toBeNull();
-      const versionSelect = renderResult.queryByTestId('versionSelect');
-      expect(versionSelect).toBeInTheDocument();
-      expect((versionSelect as HTMLSelectElement)?.value).toEqual('1.0.0');
+    it('should display static version text and no callout if prerelease setting disabled and only one version available', async () => {
+      // Only one version available (no newer GA, no prerelease) → selector collapses to static text.
+      expect(renderResult.queryByTestId('versionSelect')).toBeNull();
+      expect(renderResult.queryByTestId('versionText')).toBeInTheDocument();
       expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
   });
@@ -1070,7 +1078,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     if (typeof path === 'string') {
       if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
-        return mockedApiInterface.responseProvider.epmGetInfo('nginx');
+        return mockedApiInterface.responseProvider.epmGetInfo('nginx', '0.3.7', options.query);
       }
       if (path === epmRouteService.getInfoPath(`nginx`)) {
         markApiCallAsHandled();
