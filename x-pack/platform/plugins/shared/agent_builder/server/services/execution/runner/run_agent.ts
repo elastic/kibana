@@ -52,7 +52,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     promptManager,
     stateManager,
-    filestore,
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
@@ -74,13 +73,11 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   ]);
 
   const experimentalFeatures: ExperimentalFeatures = {
-    filestore: true,
     skills: true,
     subagents: isExperimentalEnabled,
     todos: isExperimentalEnabled,
+    askUserQuestion: isExperimentalEnabled,
     bash: isBashEnabled,
-    // forcefully disabled until the UI is implemented
-    askUserQuestion: false, // isExperimentalEnabled,
   };
 
   const { filesystemService, bashService } = await createFilesystemServices({
@@ -109,7 +106,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillsStore,
     attachmentStateManager,
     todoStateManager,
-    filestore,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({
