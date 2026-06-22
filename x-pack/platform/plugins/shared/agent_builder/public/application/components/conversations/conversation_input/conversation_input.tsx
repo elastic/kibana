@@ -27,6 +27,8 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { useMessageQueue } from '../../../hooks/use_message_queue';
+import { MessageQueue } from './message_queue';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -106,6 +108,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
     useConversationContext();
   const submitMessage = useSubmitMessage();
+  const { queue, enqueue, remove, isFull } = useMessageQueue({
+    isResponseLoading,
+    onDrain: submitMessage,
+  });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -113,7 +119,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
   const isSubmitDisabled =
-    messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
+    messageEditorController.isEmpty ||
+    !isAgentIdValid ||
+    isAwaitingPrompt ||
+    (isResponseLoading && isFull);
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -189,13 +198,19 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
-    submitMessage(content);
+    if (isResponseLoading) {
+      enqueue(content);
+    } else {
+      submitMessage(content);
+    }
     messageEditorController.clear();
     onSubmit?.();
   };
 
   return (
-    <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
+    <>
+      <MessageQueue queue={queue} onRemove={remove} />
+      <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
       {visibleAttachments.length > 0 && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow attachments={visibleAttachments} removable />
@@ -224,5 +239,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
         />
       )}
     </InputContainer>
+    </>
   );
 };
