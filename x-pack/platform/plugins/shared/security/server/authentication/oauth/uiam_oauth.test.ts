@@ -47,6 +47,7 @@ describe('UiamOAuth', () => {
 
       const result = await uiamOAuth.createClient(request, {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
       });
 
       expect(result).toBeNull();
@@ -64,12 +65,14 @@ describe('UiamOAuth', () => {
 
       const result = await uiamOAuth.createClient(request, {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
         client_name: 'Test',
       });
 
       expect(result).toEqual(mockResponse);
       expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
         client_name: 'Test',
       });
     });
@@ -87,6 +90,7 @@ describe('UiamOAuth', () => {
 
       const params = {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
         client_name: 'Test',
         client_type: 'confidential' as const,
         client_metadata: { owner: 'admin' },
@@ -107,6 +111,7 @@ describe('UiamOAuth', () => {
       await expect(
         uiamOAuth.createClient(request, {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
       ).rejects.toThrow('UIAM error');
 

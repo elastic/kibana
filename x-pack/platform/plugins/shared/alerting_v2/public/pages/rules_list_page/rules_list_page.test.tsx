@@ -41,9 +41,19 @@ jest.mock('@kbn/core-di-browser', () => ({
       return { basePath: { prepend: (p: string) => p } };
     }
     if (token === 'notifications') {
+      return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
+    }
+    if (
+      token === 'data' ||
+      token === 'dataViews' ||
+      token === 'lens' ||
+      token === 'uiActions' ||
+      token === 'dashboard' ||
+      token === 'cps'
+    ) {
       return {};
     }
-    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+    if (typeof token === 'function') {
       return {};
     }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
@@ -113,7 +123,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', description: 'Monitors log errors', tags: ['prod'] },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
   {
     id: 'rule-2',
@@ -121,7 +131,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM metrics-*' } },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   },
 ];
 
@@ -157,6 +167,19 @@ describe('RulesListPage', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('renders the experimental badge in the page header', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('renders loading state', () => {
@@ -267,7 +290,7 @@ describe('RulesListPage', () => {
     renderPage();
 
     expect(
-      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
+      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
@@ -282,7 +305,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
@@ -732,7 +755,9 @@ describe('RulesListPage', () => {
       isError: false,
       error: null,
     });
-    mockCreateRuleMutate.mockImplementationOnce((_payload, options) => options?.onSuccess?.());
+    mockCreateRuleMutate.mockImplementationOnce((_payload, options) =>
+      options?.onSuccess?.({ id: 'rule-1', metadata: { name: 'Test Rule' } })
+    );
 
     renderPage();
 
@@ -840,7 +865,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith(
-      'rule-1',
+      { id: 'rule-1', name: 'Rule One' },
       expect.objectContaining({
         onSettled: expect.any(Function),
       })

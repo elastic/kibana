@@ -111,12 +111,15 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     if (!ruleToDelete) {
       return;
     }
-    deleteRuleMutation.mutate(ruleToDelete.id, {
-      onSettled: () => {
-        setRuleToDelete(null);
-        setExpandedRuleId(null);
-      },
-    });
+    deleteRuleMutation.mutate(
+      { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+      {
+        onSettled: () => {
+          setRuleToDelete(null);
+          setExpandedRuleId(null);
+        },
+      }
+    );
   };
 
   return (

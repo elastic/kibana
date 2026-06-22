@@ -40,13 +40,18 @@ export const InspectIlmPolicyFlyout = ({
   policy,
   onBack,
   onEditPolicy,
-  onSelectAndApply,
+  primaryAction,
   type,
+  container,
+  ownFocus,
 }: InspectIlmPolicyFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const footerStyles = css`
     padding: ${euiTheme.size.m} ${euiTheme.size.l};
   `;
+
+  const primaryActionTestSubj =
+    primaryAction['data-test-subj'] ?? 'inspectIlmPolicyFlyoutSelectAndApplyButton';
 
   return (
     <FlyoutWithTabs
@@ -58,6 +63,8 @@ export const InspectIlmPolicyFlyout = ({
       onClose={onBack}
       onBack={onBack}
       type={type}
+      container={container}
+      ownFocus={ownFocus}
     >
       {(selectedTab) => (
         <>
@@ -98,10 +105,11 @@ export const InspectIlmPolicyFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
-                      onClick={() => onSelectAndApply(policyName)}
-                      data-test-subj="inspectIlmPolicyFlyoutSelectAndApplyButton"
+                      onClick={() => primaryAction.onClick(policyName)}
+                      data-test-subj={primaryActionTestSubj}
+                      disabled={primaryAction.isDisabled}
                     >
-                      {strings.selectAndApplyButton}
+                      {primaryAction.label}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>

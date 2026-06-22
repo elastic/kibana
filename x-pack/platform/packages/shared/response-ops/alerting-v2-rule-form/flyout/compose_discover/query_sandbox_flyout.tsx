@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -15,28 +15,14 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiToolTip,
-  EuiSuperDatePicker,
-  EuiSelect,
-  EuiPanel,
-  EuiTabs,
-  EuiTab,
-  EuiDataGrid,
-  type EuiDataGridColumn,
-  type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import { useRuleFormServices } from '../../form/contexts/rule_form_context';
-import { useDataFields } from '../../form/hooks/use_data_fields';
-import type { SandboxDraft, SandboxTabConfig, QueryTab } from './types';
-import { useQueryExecution } from './use_query_execution';
-import { ComposeDiscoverChart } from './compose_discover_chart';
-import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_discover_tabs';
+import { i18n } from '@kbn/i18n';
+import type { monaco } from '@kbn/code-editor';
+import type { RuleQuery } from './compose_form_types';
+import { getBreachQuery } from './compose_form_types';
+import type { QueryTab } from './types';
+import { QuerySandbox } from './query_sandbox';
+import type { QuerySandboxProps } from './query_sandbox';
 
 /**
  * Props for the Discover Sandbox flyout — a full-screen ES|QL editor with live
@@ -44,229 +30,147 @@ import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_d
  *
  * ## Usage modes
  *
- * **Compose Discover flyout (default)** — the parent owns the draft and commits it
- * to RHF on Apply. Pass `draft`, `onDraftChange`, and `onApply`.
+ * **Compose Discover flyout (editable)** — pass `query`, `onQueryChange`, and `onApply`.
+ * The parent holds the editing buffer; Apply commits it to RHF.
  *
- * **Rule Builder preview** — show the committed query read-only so the user can
- * inspect it before closing. Omit `onDraftChange` (makes editors read-only) and
- * omit `onApply` (hides the Apply button; only the close button is shown).
+ * **Preview / read-only** — omit `onQueryChange` (makes all editors read-only) and
+ * omit `onApply` (hides the Apply button). Only the close button is shown.
  *
- * **Rule Builder edit** — let the user edit the query but commit on their own
- * terms. Pass `onDraftChange` but omit `onApply` (close-only, no Apply button).
+ * **Edit without Apply** — pass `onQueryChange` but omit `onApply`. The flyout has
+ * editors but no Apply button; the caller commits on its own terms.
  *
  * ## State ownership
  *
  * `QuerySandboxFlyout` is a **props-only component** — it owns no query state.
- * The parent is responsible for:
- * - Holding `SandboxDraft` (editing buffer) via `useSandboxDraft`
- * - Holding `timeField` in `SandboxDraft` (editing buffer); committed to RHF on Apply
- * - Owning `activeTab` in the UI-state reducer
- * - Calling `draftToRuleQuery(draft, tracking)` and writing to RHF on Apply
- *
- * @see useSandboxDraft — editing buffer hook; keeps draft across open/close cycles
- * @see draftToRuleQuery — converts draft + tracking flag to the `RuleQuery` API shape
+ * The parent holds `query`, `timeField`, and `dateRange` as separate `useState`s and
+ * passes them down. `query` and `timeField` reset to committed RHF values on close;
+ * `dateRange` persists across open/close cycles.
  */
 export interface QuerySandboxFlyoutProps {
-  /** Editing buffer for all query strings and the preview date range. */
-  draft: SandboxDraft;
+  /** The live query being edited. Shape drives the split-editor layout. */
+  query: RuleQuery;
+  /** Called on every editor change. Absent → all query editors are read-only. */
+  onQueryChange?: (q: RuleQuery) => void;
   /**
-   * Called with a partial update on every editor keystroke, date-picker change,
-   * and time field selection. When absent, all editors and the time field selector
-   * are read-only (mirrors the uncontrolled-input pattern).
+   * Which tabs to show. Absent or [] → single editor, no tab bar.
+   * ['base', 'alert'] → base-alert split; ['recovery'] → recovery tab only.
    */
-  onDraftChange?: (update: Partial<SandboxDraft>) => void;
-  /** Controls whether the Sandbox renders a single editor or a split Base/Alert/Recovery layout. */
-  tabConfig: SandboxTabConfig;
-  /** Active tab, owned by the parent reducer and passed down as a controlled value. */
-  activeTab: QueryTab;
-  onTabChange: (tab: QueryTab) => void;
-  /**
-   * When true, all query editors are locked regardless of `onDraftChange`.
-   * Use this for Rule Builder read-only preview mode.
-   */
-  readOnlyQueries?: boolean;
-  /**
-   * When provided, an "Apply changes" button is rendered in the flyout footer.
-   * Clicking it should commit `draft` to RHF (e.g. via `draftToRuleQuery`) and
-   * close the child flyout.
-   * When absent, no Apply button is shown — the flyout is close-only.
-   */
+  tabs?: QueryTab[];
+  /** Active tab — ignored when tabs is absent/[]. */
+  activeTab?: QueryTab;
+  /** Should always be provided when tabs is non-empty — without it tab clicks are no-ops. */
+  onTabChange?: (tab: QueryTab) => void;
+  timeField: string;
+  /** Absent → time field selector is read-only. */
+  onTimeFieldChange?: (tf: string) => void;
+  /** When provided, resolution is owned by the parent and passed through to QuerySandbox. */
+  timeFieldOptions?: Array<{ value: string; text: string }>;
+  isTimeFieldResolved?: boolean;
+  /** Preview date range. Never resets on close — caller owns persistence. */
+  dateRange: { dateStart: string; dateEnd: string };
+  /** Always required — date range is always interactive. */
+  onDateRangeChange: (r: { dateStart: string; dateEnd: string }) => void;
+  /** When provided an Apply button is shown. No-args: caller already holds current state. */
   onApply?: () => void;
   onClose: () => void;
-  /** Flyout header title. Defaults to "Query sandbox". */
   title?: string;
-  /** Called with the Monaco editor instance when the alert-block editor mounts.
-   *  Use this to register split-query autocomplete providers at the flyout level. */
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
-  /** Called with the Monaco editor instance when the recovery-block editor mounts. */
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const QUERY_SANDBOX_TITLE_ID = 'composeDiscoverChildTitle';
-const VISIBLE_ROWS = 10;
-const INITIAL_EDITOR_HEIGHT = 200;
-const MIN_EDITOR_HEIGHT = 80;
-const MAX_EDITOR_HEIGHT = 600;
-
-const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
-const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
 export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
-  draft,
-  onDraftChange,
-  tabConfig,
-  activeTab,
+  query,
+  onQueryChange,
+  tabs,
+  activeTab = 'alert',
   onTabChange,
-  readOnlyQueries = false,
+  timeField,
+  onTimeFieldChange,
+  timeFieldOptions,
+  isTimeFieldResolved,
+  dateRange,
+  onDateRangeChange,
   onApply,
   onClose,
   onAlertEditorMount,
   onRecoveryEditorMount,
-  title = 'Query sandbox',
+  title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
+    defaultMessage: 'Query sandbox',
+  }),
 }) => {
-  const services = useRuleFormServices();
-  const isSplit = tabConfig.type !== 'single';
-  const isReadOnly = readOnlyQueries || !onDraftChange;
+  const isReadOnly = !onQueryChange;
 
-  const timeRange = useMemo(
-    () => ({ from: draft.dateStart, to: draft.dateEnd }),
-    [draft.dateStart, draft.dateEnd]
-  );
-
-  // Always assemble base + breach for execution. In non-tracking mode draft.base
-  // is '' so this collapses to breach alone. In YAML mode, the parser may produce
-  // a composed-format draft while the reducer tracking flag hasn't caught up yet
-  // (the tracking effect is blocked by the yamlMode guard); assembling here makes
-  // the query executable regardless of that transient inconsistency.
-  const activeQuery = [draft.base, draft.breach].filter(Boolean).join('\n');
-
-  // Only fetch fields when the query has a real index pattern after FROM.
-  const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
-  const { data: fieldMap } = useDataFields({
-    query: queryForFields,
-    http: services.http,
-    dataViews: services.dataViews,
-  });
-
-  const timeFieldOptions = useMemo(() => {
-    const dateFields = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-
-    // No index queried yet (or index has no date fields) — show @timestamp as the
-    // conventional default. Never inject it alongside real fields so the selector
-    // only shows fields that actually exist in the index.
-    if (dateFields.length === 0) {
-      return [{ value: '@timestamp', text: '@timestamp' }];
-    }
-
-    return dateFields.map((name) => ({ value: name, text: name }));
-  }, [fieldMap]);
-
-  // Keep the selected time field in sync with what the index actually has.
-  useEffect(() => {
-    const dateFieldNames = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name);
-
-    if (dateFieldNames.length === 0) {
-      if (draft.timeField !== '@timestamp') onDraftChange?.({ timeField: '@timestamp' });
-    } else if (!dateFieldNames.includes(draft.timeField)) {
-      onDraftChange?.({ timeField: dateFieldNames[0] });
-    }
-  }, [fieldMap, draft.timeField, onDraftChange]);
-
-  const {
-    columns,
-    rows,
-    totalRowCount,
-    isLoading,
-    isError,
-    error,
-    run,
-    hasRun,
-    lastExecutedQuery,
-  } = useQueryExecution({
-    query: activeQuery,
-    timeField: draft.timeField,
-    timeRange,
-    data: services.data,
-  });
-
-  // Auto-run the active query when the sandbox opens. No-ops if the query is
-  // empty, so a blank editor on first open shows the "Run your query" prompt.
-  useEffect(() => {
-    run();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        e.preventDefault();
-        e.stopPropagation();
-        run();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown, true);
-    return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [run]);
-
-  const gridColumns: EuiDataGridColumn[] = useMemo(
+  const queryFields = useMemo(
     () =>
-      columns.map((col) => ({
-        id: col.id,
-        displayAsText: col.displayAsText,
-        schema: col.esType,
-      })),
-    [columns]
+      query.format === 'composed'
+        ? {
+            base: query.base,
+            breach: query.breach.segment,
+            recover: query.recovery?.segment ?? '',
+          }
+        : {
+            base: query.no_data?.query ?? '',
+            breach: query.breach.query,
+            recover: query.recovery?.query ?? '',
+          },
+    [query]
   );
 
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
-
-  const prevColumnIdsRef = useRef('');
-  useEffect(() => {
-    const ids = columns.map((c) => c.id).join(',');
-    if (ids !== prevColumnIdsRef.current) {
-      prevColumnIdsRef.current = ids;
-      setVisibleColumns(columns.map((c) => c.id));
-    }
-  }, [columns]);
-
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: VISIBLE_ROWS });
-  const onChangePage = useCallback((pageIndex: number) => {
-    setPagination((prev) => ({ ...prev, pageIndex }));
-  }, []);
-  const onChangeItemsPerPage = useCallback((pageSize: number) => {
-    setPagination({ pageIndex: 0, pageSize });
-  }, []);
-
-  const renderCellValue = useCallback(
-    ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      const row = rows[rowIndex];
-      if (!row) return null;
-      const value = row[columnId];
-      return <>{value ?? '—'}</>;
+  const updateQuery = useCallback(
+    (patch: { base?: string; breach?: string; recover?: string }) => {
+      if (!onQueryChange) return;
+      const next = { ...queryFields, ...patch };
+      onQueryChange(
+        query.format === 'composed'
+          ? {
+              format: 'composed',
+              base: next.base,
+              breach: { segment: next.breach },
+              ...(next.recover ? { recovery: { segment: next.recover } } : {}),
+            }
+          : {
+              format: 'standalone',
+              breach: { query: next.breach },
+              ...(next.base ? { no_data: { query: next.base } } : {}),
+              ...(next.recover ? { recovery: { query: next.recover } } : {}),
+            }
+      );
     },
-    [rows]
+    [query, queryFields, onQueryChange]
   );
 
-  const splitTabs = useMemo(() => {
-    if (!isSplit) return [];
-    const tabIds = visibleTabIds(tabConfig);
-    return TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
-  }, [isSplit, tabConfig]);
+  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
 
-  const editorPanelStyles: React.CSSProperties = useMemo(
-    () => ({
-      resize: 'vertical',
-      overflow: 'auto',
-      height: INITIAL_EDITOR_HEIGHT,
-      minHeight: MIN_EDITOR_HEIGHT,
-      maxHeight: MAX_EDITOR_HEIGHT,
-    }),
-    []
-  );
+  const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
+
+  const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
+    if (!tabs?.length) return undefined;
+    return {
+      tabs,
+      activeTab,
+      onTabChange: onTabChange ?? (() => {}),
+      baseQuery: queryFields.base,
+      alertBlock: queryFields.breach,
+      recoveryBlock: queryFields.recover,
+      onBaseQueryChange: (v: string) => updateQuery({ base: v }),
+      onAlertBlockChange: (v: string) => updateQuery({ breach: v }),
+      onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
+      onAlertEditorMount,
+      onRecoveryEditorMount,
+      readOnly: isReadOnly,
+    };
+  }, [
+    tabs,
+    activeTab,
+    onTabChange,
+    queryFields,
+    updateQuery,
+    onAlertEditorMount,
+    onRecoveryEditorMount,
+    isReadOnly,
+  ]);
 
   return (
     <EuiFlyout
@@ -274,6 +178,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       size="fill"
       onClose={onClose}
       aria-labelledby={QUERY_SANDBOX_TITLE_ID}
+      closeButtonProps={{ 'data-test-subj': 'querySandboxClose' }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={QUERY_SANDBOX_TITLE_ID}>
@@ -282,181 +187,18 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {/* ── 0. Tab bar (split mode only) ─────────────────────────────── */}
-        {splitTabs.length > 0 && (
-          <>
-            <EuiTabs>
-              {splitTabs.map((tab) => (
-                <EuiTab
-                  key={tab.id}
-                  isSelected={activeTab === tab.id}
-                  onClick={() => onTabChange(tab.id)}
-                  data-test-subj={`composeDiscoverTab-${tab.id}`}
-                >
-                  {tab.label}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-            <EuiSpacer size="s" />
-          </>
-        )}
-
-        {/* ── 1. Time field / date picker / Search row — one line ──────── */}
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
-            <EuiSelect
-              options={timeFieldOptions}
-              value={draft.timeField}
-              aria-label="Time field for rule execution"
-              onChange={(e) => onDraftChange?.({ timeField: e.target.value })}
-              compressed
-              prepend="Time field"
-              data-test-subj="composeDiscoverTimeField"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiSuperDatePicker
-              start={draft.dateStart}
-              end={draft.dateEnd}
-              onTimeChange={({ start, end }) => {
-                onDraftChange?.({ dateStart: start, dateEnd: end });
-              }}
-              showUpdateButton={false}
-              compressed
-              width="full"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
-              <EuiButton
-                size="s"
-                onClick={run}
-                isLoading={isLoading}
-                data-test-subj="composeDiscoverRunQuery"
-              >
-                Search
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-
-        {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
-        <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
-          {isSplit ? (
-            <ComposeDiscoverTabs
-              baseQuery={draft.base}
-              alertBlock={draft.breach}
-              recoveryBlock={draft.recover}
-              onBaseQueryChange={(v) => onDraftChange?.({ base: v })}
-              onAlertBlockChange={(v) => onDraftChange?.({ breach: v })}
-              onRecoveryBlockChange={(v) => onDraftChange?.({ recover: v })}
-              activeTab={activeTab}
-              onTabChange={onTabChange}
-              tabConfig={tabConfig}
-              onAlertEditorMount={onAlertEditorMount}
-              onRecoveryEditorMount={onRecoveryEditorMount}
-              readOnly={isReadOnly}
-              hideTabBar
-            />
-          ) : (
-            <CodeEditor
-              languageId={ESQL_LANG_ID}
-              value={draft.breach}
-              onChange={(v) => onDraftChange?.({ breach: v })}
-              height="100%"
-              options={{
-                minimap: { enabled: false },
-                automaticLayout: true,
-                scrollBeyondLastLine: false,
-                fontSize: 13,
-                readOnly: isReadOnly,
-                domReadOnly: isReadOnly,
-              }}
-            />
-          )}
-        </EuiPanel>
-        <EuiSpacer size="s" />
-
-        {/* ── 3. Footer stats ─────────────────────────────────────────── */}
-        {hasRun && !isLoading && !isError && (
-          <EuiText size="xs" color="subdued">
-            {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
-          </EuiText>
-        )}
-
-        <EuiSpacer size="s" />
-
-        {/* ── 4. Results ──────────────────────────────────────────────── */}
-        <EuiSpacer size="m" />
-
-        {!hasRun && (
-          <EuiEmptyPrompt
-            iconType="playFilled"
-            title={<h4>Run your query to see results</h4>}
-            body={
-              <p>
-                Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
-                execute the query.
-              </p>
-            }
-          />
-        )}
-
-        {hasRun && isLoading && (
-          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-
-        {hasRun && isError && (
-          <EuiCallOut announceOnMount color="danger" iconType="error" title="Query error">
-            <p>{error}</p>
-          </EuiCallOut>
-        )}
-
-        {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
-          <EuiEmptyPrompt
-            iconType="search"
-            title={<h4>No results</h4>}
-            body={<p>The query returned no results for the current time range.</p>}
-          />
-        )}
-
-        {hasRun && !isLoading && !isError && rows.length > 0 && (
-          <>
-            <ComposeDiscoverChart
-              query={lastExecutedQuery ?? activeQuery}
-              timeField={draft.timeField}
-              timeRange={timeRange}
-              columns={columns}
-            />
-
-            <EuiSpacer size="m" />
-
-            <EuiDataGrid
-              aria-label="Query results"
-              columns={gridColumns}
-              columnVisibility={{ visibleColumns, setVisibleColumns }}
-              rowCount={rows.length}
-              renderCellValue={renderCellValue}
-              pagination={{
-                ...pagination,
-                pageSizeOptions: [10, 25, 50],
-                onChangePage,
-                onChangeItemsPerPage,
-              }}
-              gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
-              toolbarVisibility={{
-                showColumnSelector: true,
-                showSortSelector: true,
-                showFullScreenSelector: false,
-              }}
-            />
-          </>
-        )}
+        <QuerySandbox
+          query={activeQuery}
+          onQueryChange={isReadOnly ? undefined : handleQueryChange}
+          timeField={timeField}
+          onTimeFieldChange={onTimeFieldChange}
+          timeFieldOptions={timeFieldOptions}
+          isTimeFieldResolved={isTimeFieldResolved}
+          dateRange={dateRange}
+          onDateRangeChange={onDateRangeChange}
+          autoRun
+          tabProps={tabProps}
+        />
       </EuiFlyoutBody>
 
       {onApply && (
@@ -464,7 +206,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton fill onClick={onApply} data-test-subj="querySandboxApply">
-                Apply changes
+                {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.applyButtonLabel', {
+                  defaultMessage: 'Apply changes',
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

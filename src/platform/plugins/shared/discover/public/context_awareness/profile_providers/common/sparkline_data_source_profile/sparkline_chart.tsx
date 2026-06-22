@@ -9,7 +9,6 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
@@ -17,11 +16,11 @@ import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@el
 import { useLogRateAnalysisBarColors } from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 
 interface SparklineChartProps {
   charts: ChartsPluginStart;
-  values?: number[];
-  rowHeight?: number;
+  values: Array<number | string>;
 }
 
 const miniHistogramChartTheme: PartialTheme = {
@@ -45,29 +44,21 @@ const miniHistogramChartTheme: PartialTheme = {
   },
 };
 
-export const SparklineChart: FC<SparklineChartProps> = ({ values, charts, rowHeight }) => {
+export const SparklineChart: FC<SparklineChartProps> = ({ values, charts }) => {
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const barColors = useLogRateAnalysisBarColors();
 
-  const cssChartSize = css({
-    width: '100%',
-    // ROWS_HEIGHT_OPTIONS.auto = -1, which makes rowHeight * 14 produce a negative (invalid) CSS
-    // value that collapses the chart. Use an explicit fixed height for any non-positive value.
-    height: rowHeight !== undefined && rowHeight > 0 ? `${rowHeight * 14}px` : '40px',
-    margin: '0px',
-  });
-
   const chartData = useMemo(
-    () => values?.map((value, index) => ({ key: index, value })) ?? [],
+    () => values.map((value, index) => ({ key: index, value })) ?? [],
     [values]
   );
 
-  if (Array.isArray(values) === false || values.length === 0) {
+  if (values.length === 0) {
     return values;
   }
 
   return (
-    <div css={cssChartSize}>
+    <>
       <Chart>
         <Tooltip type={TooltipType.None} />
         <Settings
@@ -87,6 +78,9 @@ export const SparklineChart: FC<SparklineChartProps> = ({ values, charts, rowHei
           color={barColors.barColor}
         />
       </Chart>
-    </div>
+      <EuiScreenReaderOnly>
+        <span>{values.join(', ')}</span>
+      </EuiScreenReaderOnly>
+    </>
   );
 };

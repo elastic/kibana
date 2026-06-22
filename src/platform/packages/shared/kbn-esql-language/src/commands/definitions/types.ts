@@ -185,6 +185,7 @@ export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
+  tsdbCompatible?: boolean;
   name: string;
   alias?: string[];
   description: string;
@@ -202,6 +203,7 @@ export interface FunctionFilterPredicates {
   returnTypes?: string[];
   ignored?: string[];
   allowed?: string[];
+  isTimeseriesSource?: boolean;
 }
 
 // PromQL Function Definition Types
@@ -216,6 +218,7 @@ export enum PromQLFunctionDefinitionTypes {
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
   SCALAR_CONVERSION = 'scalar_conversion',
   TIME = 'time',
+  HISTOGRAM = 'histogram',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -370,6 +373,10 @@ export interface ValidationErrors {
     message: string;
     type: { field: string };
   };
+  columnTypeConflict: {
+    message: string;
+    type: { columnName: string; types?: string };
+  };
   unsupportedMode: {
     message: string;
     type: { command: string; value: string; expected: string };
@@ -489,6 +496,10 @@ export interface ValidationErrors {
   mmrOnFieldWrongType: {
     message: string;
     type: { type: string };
+  };
+  tsdbIncompatibleFunction: {
+    message: string;
+    type: { fnName: string };
   };
 }
 

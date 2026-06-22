@@ -7,10 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  WORKFLOW_YAML_ATTACHMENT_TYPE,
-  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-} from '@kbn/workflows/common/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
 
 export const workflowAuthoringSkill = defineSkillType({
@@ -19,59 +16,42 @@ export const workflowAuthoringSkill = defineSkillType({
   experimental: true,
   basePath: 'skills/platform/workflows',
   description:
-    'Create, modify, and validate Elastic workflow YAML definitions using natural language. Covers step types, triggers, Liquid templating, connector integrations, and validation.',
-  content: `## Auto-Loading Note
+    'Elastic Workflow knowledge & discovery: deep YAML syntax, Liquid templating, trigger event schemas, step/connector inspection, validation error debugging, and execution debugging. Load when the user asks how workflows work, requests advanced syntax help, debugs an execution, or asks to inspect the step/connector/example libraries. **Not required for creating, editing, or running workflows** — call `platform.core.generate_workflow` or `platform.core.execute_workflow` directly.',
+  content: `## When to Use This Skill
 
-When a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is present, all workflow tools are already available and
-validation results are shown in the attachment. You do NOT need to load this skill to access tools
-or see validation errors — skip the \`filestore.read\` call.
+Load this skill when the user wants to:
+- Learn workflow YAML syntax, Liquid templating, or trigger event schemas
+- Inspect step types, trigger types, connectors, or the example library
+- Debug a workflow execution or fix a validation error
+- Discover existing workflows in the workspace
 
-## When to Use This Skill
-
-Use this skill when the user wants to:
-- Create a new workflow YAML definition (no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment present)
-- Understand advanced step types, triggers, or connector integrations
-- Learn workflow YAML syntax, Liquid templating, or best practices
-- Fix complex validation errors that require understanding step schemas
+**You do NOT need this skill to create or edit a workflow.** Call \`${platformCoreTools.generateWorkflow}\` directly — it has its own innate knowledge of workflow syntax, step types, connector types, the connectors configured on the current Kibana, and (when an \`attachmentId\` is provided) the existing workflow definition. Do **NOT** pre-fetch step definitions, examples, or connectors before calling it.
 
 ## Available Tools
 
-### Lookup Tools
-- **${workflowTools.getStepDefinitions}**: Look up available step types, their input params (\`with\` block), config params, and examples
-- **${workflowTools.getTriggerDefinitions}**: Look up available trigger types and their schemas
-- **${workflowTools.getExamples}**: Search the bundled example library for working workflow YAML patterns
-- **${workflowTools.getConnectors}**: Find connector instances configured in the user's environment
-- **${workflowTools.validateWorkflow}**: Validate a complete workflow YAML string against all rules. When validation fails, step definitions for referenced step types are automatically included.
+### Generation (preferred for creation/editing)
+- **${platformCoreTools.generateWorkflow}**: Single entry point for both creation and editing. Pass a natural-language \`query\`; for edits also pass \`attachmentId\`. Emits a diff card and returns \`attachmentId\`, \`diffAttachmentId\`, and \`attachmentVersion\`. Do NOT use \`attachments.add\` directly.
+
+### Discovery (only when the user explicitly asks, or when debugging)
+These tools answer questions about *what's installed* on the user's Kibana. Use them when the user explicitly asks (e.g. "what Slack connectors do I have", "what does the http step output"), or when you are debugging a validation error / unfamiliar legacy step type. **Do NOT call them as preparation for \`${platformCoreTools.generateWorkflow}\`** — that tool already has this knowledge built in.
+- **${workflowTools.getStepDefinitions}**: Look up a step type's input params (\`with\` block), config params, outputs, and examples. Deprecated step types are excluded by default; pass an exact \`stepType\` or \`includeDeprecated: true\` for legacy workflows.
+- **${workflowTools.getTriggerDefinitions}**: Look up a trigger type's full event context schema.
+- **${workflowTools.getExamples}**: Search the bundled example library for working YAML patterns.
+- **${workflowTools.getConnectors}**: List connector instances configured in the user's environment.
+- **${workflowTools.validateWorkflow}**: Validate a complete workflow YAML string. When validation fails, step definitions for referenced step types are automatically included.
+
+### Execution & Debugging
+- **${platformCoreTools.executeWorkflow}**: Run a full workflow end-to-end. Use this for "run the workflow" requests.
+- **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe steps with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Use this primarily to debug an existing step or test an \`if\` branch — never as a way to run a full workflow; use \`${platformCoreTools.executeWorkflow}\` for that.
 
 ### Discovering Existing Workflows (SML)
 
 To list or find existing workflows, use the SML (Semantic Metadata Layer) tools — do NOT use \`${platformCoreTools.search}\` to query internal indices.
 
-1. **${platformCoreTools.smlSearch}**: Search for workflows by name, description, or tags. Pass a query like "workflow" or use "*" to return all available workflows. Results include \`chunk_id\` values.
-2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from the search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment that you can then edit with the edit tools below.
+1. **${platformCoreTools.smlSearch}**: Search workflows by name, description, or tags. Pass a query like "workflow" or "*" for all. Results include \`chunk_id\` values.
+2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
 
-### Edit Tools
-- **${workflowTools.setYaml}**: Set the complete workflow YAML. Creates a new workflow when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists, or replaces the entire YAML of an existing one.
-- **${workflowTools.insertStep}**: Insert a new step at the end of the steps list (requires existing attachment)
-- **${workflowTools.modifyStep}**: Replace an entire step by name (requires existing attachment)
-- **${workflowTools.modifyStepProperty}**: Modify a single property of a step (requires existing attachment)
-- **${workflowTools.modifyProperty}**: Modify a top-level workflow property (requires existing attachment)
-- **${workflowTools.deleteStep}**: Delete a step by name (requires existing attachment)
-
-### Execution Tool
-- **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog before they run — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe step calls with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation for that step and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Pass \`yaml\` parameter with inline YAML to execute a step before a workflow attachment exists (useful for index field discovery).
-
-## Core Instructions
-
-### Creating New Workflows
-
-To create a new workflow, call \`${workflowTools.setYaml}\` with the complete YAML. This tool creates the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment automatically when none exists. Do NOT use attachments.add or attachment_add — that will fail.
-
-### Search Examples Before Writing Step YAML
-
-Before writing new steps or modifying step types you haven't seen in this conversation,
-use \`${workflowTools.getExamples}\` to find similar working patterns. This applies to both new workflows
-and adding/changing steps in existing ones.
+## Workflow YAML Reference
 
 ### Workflow YAML Structure
 
@@ -160,26 +140,25 @@ and require a \`connector-id\` to specify which configured connector to use.
 **ALWAYS prefer connector steps over raw HTTP for integrations like Slack, Jira, etc.**
 Connector steps are simpler, more secure, and handle authentication automatically.
 
-Available connector types include: slack, jira, pagerduty, email, webhook, servicenow, opsgenie, teams, and more.
+Available connector types include: slack2, jira, pagerduty, email, webhook, servicenow, opsgenie, teams, and more.
+
+**Slack steps: ONLY use the \`slack2.*\` namespace.** Discovery may also surface
+\`slack\` (legacy webhook) and \`slack_api.*\` step types; these must NOT be used
+for new steps. Use \`slack2.sendMessage\`, \`slack2.listChannels\`,
+\`slack2.resolveChannelId\`, or \`slack2.searchMessages\` with a \`.slack2\`
+connector instance.
 
 **Slack connector example (PREFERRED):**
 \`\`\`yaml
 - name: send_slack_notification
-  type: slack
+  type: slack2.sendMessage
   connector-id: my-slack-connector
   with:
-    message: "Hello from the workflow!"
+    channel: "C0123456789"
+    text: "Hello from the workflow!"
 \`\`\`
 
-When asked to add Slack/Jira/etc integration, ALWAYS use connector steps first!
-Use \`${workflowTools.getConnectors}\` to find the connector IDs configured in the user's environment.
-
-### Verify Step Type IDs Before Editing
-
-**ALWAYS call \`${workflowTools.getStepDefinitions}\` to verify the exact step type ID before inserting a new step or changing a step's type.**
-Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`; \`http\`, not \`http.request\`).
-Using an incorrect type ID will produce a validation error — verify the ID first to avoid invalid proposals.
-Deprecated step types are excluded from discovery by default; if you are maintaining an existing workflow that already uses one, call \`${workflowTools.getStepDefinitions}\` with \`stepType\` set to the exact legacy ID or pass \`includeDeprecated: true\`.
+When asked to add Slack/Jira/etc integration, ALWAYS use connector steps first! \`${platformCoreTools.generateWorkflow}\` already knows the connectors configured on the current Kibana — pass the user's request directly. Only call \`${workflowTools.getConnectors}\` if the user explicitly asks "what connectors do I have".
 
 ### Liquid Templating
 
@@ -210,31 +189,12 @@ Useful filters:
 - \`| url_encode\` - URL encode a string
 - \`| default: "value"\` - Provide default if nil
 
-### Discover Index Fields — Do NOT Guess
+### Verifying ES Queries After Generation
 
-Before writing any \`elasticsearch.search\` or \`elasticsearch.esql.query\` step, discover the actual field names and values by calling \`${workflowTools.executeStep}\` with inline \`yaml\`:
-\`\`\`
-${workflowTools.executeStep}({
-  stepName: "discover",
-  yaml: "version: '1'\\nname: tmp\\ntriggers:\\n  - type: manual\\nsteps:\\n  - name: discover\\n    type: elasticsearch.esql.query\\n    with:\\n      query: \\"FROM <index> | LIMIT 5\\""
-})
-\`\`\`
-Inspect the returned columns (names and types) and sample values. Then write your actual query using the real field names.
-Do NOT guess field names from conventions (e.g. \`@timestamp\`, \`service.name\`) — user indices use arbitrary field names.
+\`${platformCoreTools.generateWorkflow}\` does not know the schema of the user's indices, so an ES query it produces may reference field names that don't exist. **Only when the workflow is about to run** (the user wants to execute or save it), and only for \`elasticsearch.search\` / \`elasticsearch.esql.query\` steps that target a specific user-named index, you can call \`${workflowTools.executeStep}\` on that step to confirm it returns rows. If it returns zero rows, ask the user to confirm the index/fields rather than silently broadening the query. Do NOT pre-discover index fields before calling \`${platformCoreTools.generateWorkflow}\` — that turns one tool call into many.
 
-### Validate and Execute Before Proposing
-
-After writing the workflow YAML:
-
-1. Call \`${workflowTools.validateWorkflow}\` — fix any errors and re-validate until valid
-2. **Call \`${workflowTools.executeStep}\` on every \`elasticsearch.search\` and \`elasticsearch.esql.query\` step** to verify the query returns real, non-empty results. Zero results means something is wrong — broaden the query (drop filters, widen time range) and investigate.
-3. Use the real output to verify that Liquid templates in downstream steps reference the correct field paths and column order.
-4. Only propose after both validation and execution confirm correctness.
-
-If a step references previous step outputs, provide \`contextOverride\` with mock data:
+If a step references previous step outputs during a debug execution, provide \`contextOverride\` with mock data:
 \`{ "steps": { "previous_step": { "output": { "data": [...] } } } }\`
-
-Skip validation for trivial changes where the risk of errors is low.
 
 ### Writing \`if\` Conditions
 
@@ -253,37 +213,24 @@ To test a condition with \`${workflowTools.executeStep}\`, temporarily add an \`
 
 ### Fixing Validation Errors
 
-When fixing validation errors:
+When fixing validation errors on an existing workflow:
 
 1. Call \`${workflowTools.validateWorkflow}\` — it automatically includes step definitions for all referenced step types when validation fails
 2. Analyze the errors and identify the problematic steps
 3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions
-4. Use edit tools to fix the issues, then check the \`validation\` field in the edit tool response to confirm the fix
+4. Call \`${platformCoreTools.generateWorkflow}\` with an explicit description of each fix to apply
 5. NEVER guess or replace a step type with something unrelated
 6. **After fixing an error, scan the entire YAML for other occurrences of the same mistake.** For example, if you fix \`triggers.event\` → \`event\` in one place, check all other Liquid expressions for the same incorrect pattern and fix them all in one pass
 
-### Proposing Changes (Edit Tools)
-
-When a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is present in the conversation, you MUST use the edit tools to propose changes.
-Edit tools compute the diff on the server, emit a ${WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE} attachment visible in chat, and update
-the YAML attachment so subsequent edits see the latest state. The client-side editor will show the diff
-with an accept/decline UX. NEVER just describe changes in text when edit tools are available.
-
-When using edit tools:
-1. Provide step definitions as structured JSON objects, NOT as YAML strings
-2. Include a \`description\` explaining what the change does
-3. Validate the workflow AFTER the user accepts the proposed change
-5. For multi-step changes, call multiple edit tools — each creates a separate proposal
-6. Each edit tool reads the current YAML from the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment and updates it,
-   so sequential tool calls within a round see each other's changes
-7. After edits, you can render the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment with <render_attachment id="{attachmentId}"/> to show the user the current complete YAML
-
 ### Best Practices
 
-1. Always search examples first before writing step YAML
-2. Use unique step names within the workflow
-3. Use 2 spaces per indentation level
-4. Use \`on-failure\` with \`retry\`, \`fallback\`, and (optionally) \`continue\` for error handling
-5. Prefer connector steps over raw HTTP for integrations`,
-  getRegistryTools: () => Object.values(workflowTools),
+1. Use unique step names within the workflow
+2. Use 2 spaces per indentation level
+3. Use \`on-failure\` with \`retry\`, \`fallback\`, and (optionally) \`continue\` for error handling
+4. Prefer connector steps over raw HTTP for integrations`,
+  getRegistryTools: () => [
+    ...Object.values(workflowTools),
+    platformCoreTools.generateWorkflow,
+    platformCoreTools.executeWorkflow,
+  ],
 });

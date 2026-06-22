@@ -1,0 +1,789 @@
+{
+  "sha1": "1476c7b8ba870e49441fd32720e9d52ccb559c7b",
+  "tests": [
+    {
+      "id": "f2021206c8725fa-04f3bb10cae78cb",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) discover with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-e2f0655c1f8dffc",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) discover with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-37225d427937609",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) discover with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-1dedd0149eaab93",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) discover with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-6ca02f74a8e0e2f",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) discover with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-f83654ecc2117e6",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) discover with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-eb4b1e6a39c8b86",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) dashboard with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-8b503861dd552f9",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) dashboard with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-7675f90dcfc0fba",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) dashboard with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-6261cdb23b0800f",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) dashboard with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-2dede746e7c8975",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) dashboard with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-d69a46952084109",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) dashboard with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-b2cfc21deda4adf",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) maps with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-bbdf1662bd62c06",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) maps with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-10053039dc49f37",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) maps with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-d319b4bc183bae0",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) maps with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-37a16ef5990e41c",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) maps with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-fccca66e0465194",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) maps with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-9e4c8d9d8c6781a",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) visualize with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-c585e26e2bb28be",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) visualize with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-d16feaf017ab71a",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) visualize with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-7abfcd6f0e09fe2",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) visualize with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-3a210b0b40e684f",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) visualize with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "f2021206c8725fa-9fdb0396a91c071",
+      "title": "Saved query management capabilities - v1 (implicit savedQueryManagement on feature `all`) visualize with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-c7d4bdf70276a94",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) discover_v2 with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-d704a8f4f8c755c",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) discover_v2 with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-aa9e1f399b25378",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) discover_v2 with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-fa038aa0cae4128",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) discover_v2 with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-9e89854e040ff7c",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) discover_v2 with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-73f1c55ba2b7de5",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) discover_v2 with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-f5a9a238f9789fe",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) dashboard_v2 with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-0f91fdd3fa188e4",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) dashboard_v2 with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-b8e09a6fa626bb2",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) dashboard_v2 with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-b1686dd7e216afd",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) dashboard_v2 with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-3a1503ca82b92f7",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) dashboard_v2 with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-66d6a21c134bfa5",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) dashboard_v2 with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-a7b3e95fa3b896e",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) maps_v2 with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-68350c7867f99a2",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) maps_v2 with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-34295e94d2edfde",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) maps_v2 with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-cdb6702d8d8e01b",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) maps_v2 with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-2306af967075551",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) maps_v2 with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-f6e6f3b7eb3ea4f",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) maps_v2 with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-2fb646082acd77f",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) visualize_v2 with feature:read + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-adeae5a7df40486",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) visualize_v2 with feature:read + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-376c27ccd6a4ec8",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) visualize_v2 with feature:read + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-44a15e98839294a",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) visualize_v2 with feature:all + sqm:all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-a9651585fda5150",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) visualize_v2 with feature:all + sqm:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "7c606b844d756e0-0ef98830461d543",
+      "title": "Saved query management capabilities - v2 (explicit savedQueryManagement privilege) visualize_v2 with feature:all + sqm:none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
+        "line": 27,
+        "column": 16
+      }
+    },
+    {
+      "id": "4498a2f90875736-58d0e042edeffe2",
+      "title": "Saved query management - spaces feature visibility disabling discover in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "4498a2f90875736-24ec96b6c636e80",
+      "title": "Saved query management - spaces feature visibility disabling dashboard in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "4498a2f90875736-3c9777be418d31c",
+      "title": "Saved query management - spaces feature visibility disabling maps in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "4498a2f90875736-a893ccaf4269c7c",
+      "title": "Saved query management - spaces feature visibility disabling visualize in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "4498a2f90875736-65126ef5d07e860",
+      "title": "Saved query management - spaces feature visibility disabling discover_v2 in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "4498a2f90875736-3e81ab25be79e4a",
+      "title": "Saved query management - spaces feature visibility disabling dashboard_v2 in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "4498a2f90875736-de9277d4e229058",
+      "title": "Saved query management - spaces feature visibility disabling maps_v2 in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "4498a2f90875736-bea2d6b5eccbaaf",
+      "title": "Saved query management - spaces feature visibility disabling visualize_v2 in a space does not disable savedQueryManagement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    }
+  ]
+}

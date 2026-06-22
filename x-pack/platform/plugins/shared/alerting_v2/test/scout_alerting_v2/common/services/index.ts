@@ -8,9 +8,6 @@
 export type { RulesApiService } from './rules_api_service';
 export { getRulesApiService } from './rules_api_service';
 
-export type { InsightsApiService, InsightSeed } from './insights_api_service';
-export { getInsightsApiService } from './insights_api_service';
-
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
@@ -28,3 +25,9 @@ export { getMaintenanceWindowsApiService } from './maintenance_windows_api_servi
 
 export type { DispatcherApiService, WaitForDispatcherTickParams } from './dispatcher_api_service';
 export { getDispatcherApiService } from './dispatcher_api_service';
+
+export type { TaskManagerService } from './task_manager_service';
+export { getTaskManagerService } from './task_manager_service';
+
+export type { TelemetryService } from './telemetry_service';
+export { getTelemetryService } from './telemetry_service';

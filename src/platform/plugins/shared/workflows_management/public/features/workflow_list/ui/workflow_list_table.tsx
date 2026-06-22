@@ -14,7 +14,6 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -28,11 +27,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
-import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
+import {
+  getRunTooltipContent,
+  ManagedWorkflowBadge,
+  StatusBadge,
+  WorkflowStatus,
+} from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+
+const MAX_VISIBLE_TAGS = 2;
 
 export interface WorkflowListTableProps {
   items: WorkflowListItemDto[];
@@ -54,6 +60,9 @@ export interface WorkflowListTableProps {
   canUpdateWorkflow: boolean;
   canDeleteWorkflow: boolean;
   canExecuteWorkflow: boolean;
+  sortField?: WorkflowSortField;
+  sortOrder?: 'asc' | 'desc';
+  onSortChange?: (field: WorkflowSortField, order: 'asc' | 'desc') => void;
 }
 
 export const WorkflowListTable = ({
@@ -76,6 +85,9 @@ export const WorkflowListTable = ({
   canUpdateWorkflow,
   canDeleteWorkflow,
   canExecuteWorkflow,
+  sortField,
+  sortOrder,
+  onSortChange,
 }: WorkflowListTableProps) => {
   const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
 
@@ -85,6 +97,7 @@ export const WorkflowListTable = ({
         field: 'name',
         name: i18n.translate('workflows.workflowList.column.name', { defaultMessage: 'Name' }),
         dataType: 'string',
+        sortable: true,
         render: (name: string, item) => (
           <div
             css={css`
@@ -135,7 +148,6 @@ export const WorkflowListTable = ({
                       </EuiText>
                     )}
                   </EuiFlexItem>
-                  <WorkflowTagsBadge tags={item.definition?.tags} />
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -162,6 +174,16 @@ export const WorkflowListTable = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
+        ),
+      },
+      {
+        field: 'tags',
+        name: i18n.translate('workflows.workflowList.column.tags', {
+          defaultMessage: 'Tags',
+        }),
+        width: '18%',
+        render: (value: unknown, item: WorkflowListItemDto) => (
+          <WorkflowTagsCell tags={item.definition?.tags} isManaged={item.managed === true} />
         ),
       },
       {
@@ -215,7 +237,8 @@ export const WorkflowListTable = ({
           defaultMessage: 'Enabled',
         }),
         field: 'enabled',
-        width: '70px',
+        width: '90px',
+        sortable: true,
         render: (value: unknown, item: WorkflowListItemDto) => {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -314,15 +337,20 @@ export const WorkflowListTable = ({
             onClick: (item: WorkflowListItemDto) => onExportWorkflow(item),
           },
           {
-            enabled: () => canDeleteWorkflow,
+            enabled: (item) => canDeleteWorkflow && item.managed !== true,
             type: 'icon',
             color: 'danger',
             name: i18n.translate('workflows.workflowList.delete', { defaultMessage: 'Delete' }),
             'data-test-subj': 'deleteWorkflowAction',
             icon: 'trash',
-            description: i18n.translate('workflows.workflowList.delete', {
-              defaultMessage: 'Delete workflow',
-            }),
+            description: (item: WorkflowListItemDto) =>
+              item.managed === true
+                ? i18n.translate('workflows.workflowList.deleteManagedDisabled', {
+                    defaultMessage: 'Managed workflows cannot be deleted',
+                  })
+                : i18n.translate('workflows.workflowList.deleteDescription', {
+                    defaultMessage: 'Delete workflow',
+                  }),
             onClick: (item: WorkflowListItemDto) => onDeleteWorkflow(item),
           },
         ],
@@ -365,9 +393,28 @@ export const WorkflowListTable = ({
       itemId="id"
       responsiveBreakpoint="xs"
       tableLayout="fixed"
+      sorting={
+        sortField && sortOrder
+          ? { sort: { field: sortField, direction: sortOrder } }
+          : { sort: undefined }
+      }
       onChange={({
         page: { index: pageIndex, size: pageSize },
-      }: CriteriaWithPagination<WorkflowListItemDto>) => onPageChange(pageIndex, pageSize)}
+        sort,
+      }: CriteriaWithPagination<WorkflowListItemDto>) => {
+        // EUI can emit `sort` as `undefined` on page-only changes — guard
+        // against that so we don't fire `onSortChange` on pagination.
+        const incoming =
+          sort?.field === 'name' || sort?.field === 'enabled'
+            ? { field: sort.field as WorkflowSortField, order: sort.direction }
+            : undefined;
+        const sortChanged = incoming?.field !== sortField || incoming?.order !== sortOrder;
+        if (sortChanged && incoming) {
+          onSortChange?.(incoming.field, incoming.order);
+          return;
+        }
+        onPageChange(pageIndex, pageSize);
+      }}
       {...(allowRowSelection
         ? {
             selection: {
@@ -387,60 +434,102 @@ export const WorkflowListTable = ({
   );
 };
 
-const WorkflowTagsBadge = ({ tags }: { tags: readonly string[] | undefined }) => {
+const tagsRowStyle = css`
+  flex-wrap: nowrap;
+  min-width: 0;
+`;
+
+const visibleTagStyle = css`
+  min-width: 0;
+
+  .euiBadge {
+    max-width: 100%;
+  }
+`;
+
+const overflowPopoverStyle = css`
+  max-height: 200px;
+  max-width: 320px;
+  overflow: auto;
+`;
+
+const WorkflowTagsCell = ({
+  tags,
+  isManaged,
+}: {
+  tags: readonly string[] | undefined;
+  isManaged: boolean;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  if (!tags || tags.length === 0) return null;
+  if (!isManaged && (!tags || tags.length === 0)) return null;
+
+  const workflowTags = tags ?? [];
+  const visibleWorkflowTags = workflowTags.slice(
+    0,
+    isManaged ? MAX_VISIBLE_TAGS - 1 : MAX_VISIBLE_TAGS
+  );
+  const hidden = workflowTags.slice(visibleWorkflowTags.length);
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPopover
-        ownFocus
-        isOpen={isOpen}
-        closePopover={close}
-        aria-label={i18n.translate('workflows.workflowList.tags.ariaLabel', {
-          defaultMessage: 'View tags',
-        })}
-        button={
-          <EuiBadge
-            color="hollow"
-            onClick={toggle}
-            onClickAriaLabel={i18n.translate('workflows.workflowList.tags.ariaLabel', {
-              defaultMessage: 'View tags',
-            })}
-            data-test-subj="workflowTagsBadge"
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="tag" size="s" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{tags.length}</EuiFlexItem>
-            </EuiFlexGroup>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+      css={tagsRowStyle}
+      data-test-subj="workflowTags"
+    >
+      {isManaged ? (
+        <EuiFlexItem grow={false} css={visibleTagStyle}>
+          <ManagedWorkflowBadge />
+        </EuiFlexItem>
+      ) : null}
+      {visibleWorkflowTags.map((tag) => (
+        <EuiFlexItem key={tag} grow={false} css={visibleTagStyle}>
+          <EuiBadge color="hollow" title={tag}>
+            {tag}
           </EuiBadge>
-        }
-      >
-        <EuiPopoverTitle>
-          {i18n.translate('workflows.workflowList.tags.popoverTitle', {
-            defaultMessage: 'Tags',
-          })}
-        </EuiPopoverTitle>
-        <EuiBadgeGroup
-          gutterSize="xs"
-          css={css`
-            max-height: 200px;
-            max-width: 400px;
-            overflow: auto;
-          `}
-        >
-          {tags.map((tag) => (
-            <EuiBadge key={tag} color="hollow">
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      </EuiPopover>
-    </EuiFlexItem>
+        </EuiFlexItem>
+      ))}
+      {hidden.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            ownFocus
+            isOpen={isOpen}
+            closePopover={close}
+            aria-label={i18n.translate('workflows.workflowList.tags.popoverTitle', {
+              defaultMessage: 'Tags',
+            })}
+            button={
+              <EuiBadge
+                color="hollow"
+                onClick={toggle}
+                onClickAriaLabel={i18n.translate('workflows.workflowList.tags.moreAriaLabel', {
+                  defaultMessage: 'View more tags',
+                })}
+                data-test-subj="workflowTagsOverflowBadge"
+              >
+                {`+${hidden.length}`}
+              </EuiBadge>
+            }
+          >
+            <EuiPopoverTitle>
+              {i18n.translate('workflows.workflowList.tags.popoverTitle', {
+                defaultMessage: 'Tags',
+              })}
+            </EuiPopoverTitle>
+            <EuiBadgeGroup gutterSize="xs" css={overflowPopoverStyle}>
+              {hidden.map((tag) => (
+                <EuiBadge key={tag} color="hollow">
+                  {tag}
+                </EuiBadge>
+              ))}
+            </EuiBadgeGroup>
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };

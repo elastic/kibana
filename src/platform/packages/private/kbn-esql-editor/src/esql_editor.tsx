@@ -195,8 +195,22 @@ const ESQLEditorInternal = function ESQLEditor({
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
-  // To make server side errors less "sticky", register the state of the code when submitting
-  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
+
+  // To make server side errors less "sticky", register the query that last errored
+  const [lastErroredCode, setLastErroredCode] = useState<string | undefined>(() =>
+    serverErrors?.length || serverWarning ? fixedQuery : undefined
+  );
+
+  const fixedQueryRef = useRef(fixedQuery);
+  fixedQueryRef.current = fixedQuery;
+  useEffect(() => {
+    if (serverErrors?.length || serverWarning) {
+      setLastErroredCode(fixedQueryRef.current);
+    } else {
+      setLastErroredCode(undefined);
+    }
+  }, [serverErrors, serverWarning]);
+
   const [editorHeight, setEditorHeight] = useRestorableState(
     'editorHeight',
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
@@ -314,7 +328,6 @@ const ESQLEditorInternal = function ESQLEditor({
     measuredEditorWidth,
     onTextLangQuerySubmit,
     onQueryUpdate,
-    setCodeStateOnSubmission,
     telemetryService,
   });
 
@@ -600,7 +613,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const { editorMessages, editorMessagesRef, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } =
     useQueryValidation({
       code,
-      codeWhenSubmitted,
+      lastErroredCode,
       editorRef,
       editorModel,
       esqlCallbacks,
@@ -738,7 +751,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   isNlToEsqlEnabled
                     ? i18n.translate('esqlEditor.placeholder', {
                         defaultMessage:
-                          "Start typing ES|QL, or write a // comment and press {commandKey}+J to describe what you're looking for",
+                          "Start typing ES|QL, or describe what you're looking for in a // comment, then press {commandKey}+J to generate the query",
                         values: { commandKey: isMac ? '⌘' : 'Ctrl' },
                       })
                     : i18n.translate('esqlEditor.placeholder.basic', {
@@ -889,6 +902,7 @@ const ESQLEditorInternal = function ESQLEditor({
       {!hideQuickSearch && (
         <QuickSearchVisor
           query={code}
+          isInline={Boolean(editorIsInline)}
           isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
           isVisible={isVisorOpen}
           onUpdateAndSubmitQuery={(newQuery) =>

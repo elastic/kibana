@@ -79,7 +79,16 @@ class ConversationClientImpl implements ConversationClient {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
-      _source: ['agent_id', 'user_id', 'user_name', 'title', 'created_at', 'updated_at'],
+      _source: [
+        'agent_id',
+        'user_id',
+        'user_name',
+        'title',
+        'created_at',
+        'updated_at',
+        'status',
+        'read',
+      ],
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space)],

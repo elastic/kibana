@@ -45,6 +45,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           '--serverless=security',
+          `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+            { product_line: 'security', product_tier: 'complete' },
+            { product_line: 'endpoint', product_tier: 'complete' },
+          ])}`,
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointExceptionsMovedUnderManagement',

@@ -73,7 +73,7 @@ export const RULE_KIND_SIGNAL = i18n.translate('xpack.alertingV2.episodeDetails.
 export const RULE_KIND_ALERTING = i18n.translate(
   'xpack.alertingV2.episodeDetails.ruleKindAlerting',
   {
-    defaultMessage: 'Alerting',
+    defaultMessage: 'Alert',
   }
 );
 
@@ -221,74 +221,3 @@ export const RULE_STATUS_DISABLED = i18n.translate(
 export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2.episodeDetails.runbookEmpty', {
   defaultMessage: 'No runbook has been added to this rule.',
 });
-
-export const RELATED_EPISODES_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedEpisodesTitle',
-  {
-    defaultMessage: 'Related alert episodes',
-  }
-);
-
-export const RELATED_EPISODES_EMPTY = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedEpisodesEmpty',
-  {
-    defaultMessage: 'No related episodes found.',
-  }
-);
-
-export const RELATED_SAME_GROUP_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedSameGroupTitle',
-  {
-    defaultMessage: 'Same alert group',
-  }
-);
-
-export const RELATED_SAME_GROUP_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedSameGroupDescription',
-  {
-    defaultMessage: 'Other episodes for this rule that share the same group as this alert.',
-  }
-);
-
-export const RELATED_SAME_GROUP_EMPTY = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedSameGroupEmpty',
-  {
-    defaultMessage: 'No other episodes in this group.',
-  }
-);
-
-export const RELATED_OTHER_GROUPS_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedOtherGroupsTitle',
-  {
-    defaultMessage: 'Other groups for this rule',
-  }
-);
-
-export const RELATED_OTHER_GROUPS_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedOtherGroupsDescription',
-  {
-    defaultMessage:
-      'Other episodes for this rule that belong to a different group than the current alert.',
-  }
-);
-
-export const RELATED_RULE_ONLY_LIST_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedRuleOnlyListTitle',
-  {
-    defaultMessage: 'Other episodes for this rule',
-  }
-);
-
-export const RELATED_RULE_ONLY_LIST_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedRuleOnlyListDescription',
-  {
-    defaultMessage: 'Other episodes for this rule, excluding the current one.',
-  }
-);
-
-export const RELATED_OTHER_GROUPS_EMPTY = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedOtherGroupsEmpty',
-  {
-    defaultMessage: 'No other related episodes for this rule.',
-  }
-);
