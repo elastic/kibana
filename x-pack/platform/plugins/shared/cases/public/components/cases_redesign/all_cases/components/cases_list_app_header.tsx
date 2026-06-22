@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import { PAGE_TITLE } from '../../../../common/translations';
 import { useCreateCaseNavigation } from '../../../../common/navigation';
@@ -19,22 +19,14 @@ export const CasesListAppHeader: FC = () => {
   const { navigateToCreateCase } = useCreateCaseNavigation();
   const { navigateToConfigureCases } = useConfigureCasesNavigation();
 
-  const onNavigateToCreateCase = useCallback(() => {
-    navigateToCreateCase();
-  }, [navigateToCreateCase]);
-
-  const onNavigateToConfigureCases = useCallback(() => {
-    navigateToConfigureCases();
-  }, [navigateToConfigureCases]);
-
   const menu = useMemo(
     () =>
       getListMenu({
         permissions,
-        navigateToCreateCase: onNavigateToCreateCase,
-        navigateToConfigureCases: onNavigateToConfigureCases,
+        navigateToCreateCase,
+        navigateToConfigureCases,
       }),
-    [permissions, onNavigateToCreateCase, onNavigateToConfigureCases]
+    [permissions, navigateToCreateCase, navigateToConfigureCases]
   );
 
   return <AppHeader sticky={false} title={PAGE_TITLE} menu={menu} />;
