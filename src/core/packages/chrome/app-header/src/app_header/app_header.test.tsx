@@ -113,6 +113,14 @@ describe('AppHeaderView', () => {
     expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
   });
 
+  it('renders when the only content is a title appendix', () => {
+    renderAppHeader(
+      <AppHeaderView titleAppend={<div data-test-subj="titleAppend">Title append</div>} />
+    );
+
+    expect(screen.getByTestId('titleAppend')).toBeInTheDocument();
+  });
+
   it('renders legacy badge fallback content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getBadge$.mockReturnValue(
@@ -123,6 +131,26 @@ describe('AppHeaderView', () => {
 
     expect(screen.getByTestId('appHeader')).toBeInTheDocument();
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
+  });
+
+  it('renders an xs title for a single row and an s title when a second row is present', () => {
+    const { unmount: unmountSingle } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
+    unmountSingle();
+
+    const { unmount: unmountTabs } = renderAppHeader(
+      <AppHeaderView title="Dashboard" tabs={[{ id: 'overview', label: 'Overview' }]} />
+    );
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
+    unmountTabs();
+
+    renderAppHeader(
+      <AppHeaderView
+        title="Dashboard"
+        metadata={[{ type: 'text', label: 'Created by: analyst' }]}
+      />
+    );
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
   });
 
   it('renders tab badge and test subject metadata', () => {

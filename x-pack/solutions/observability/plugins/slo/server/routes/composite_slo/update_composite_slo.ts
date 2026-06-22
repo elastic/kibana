@@ -7,8 +7,8 @@
 
 import { updateCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient } from '../../services/burn_rates_client';
-import { DefaultSummaryClient } from '../../services/summary_client';
 import { updateCompositeSlo } from '../../services/composites/update_composite_slo';
+import { DefaultSummaryClient } from '../../services/summary_client';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
 export const updateCompositeSLORoute = createCompositeSloServerRoute({
@@ -20,15 +20,15 @@ export const updateCompositeSLORoute = createCompositeSloServerRoute({
     },
   },
   params: updateCompositeSLOParamsSchema,
-  handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
-    const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
+  handler: async ({ context, params, logger, request, getScopedClients }) => {
+    const { scopedClusterClient, repository, compositeRepository, spaceId } =
       await getScopedClients({
         request,
         logger,
       });
 
     const core = await context.core;
-    const userId = core.security.authc.getCurrentUser()?.username;
+    const userId = core.security.authc.getCurrentUser()?.username ?? '';
 
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
     const summaryClient = new DefaultSummaryClient(
@@ -40,8 +40,8 @@ export const updateCompositeSLORoute = createCompositeSloServerRoute({
       { ...params.body, id: params.path.id, spaceId, userId },
       {
         esClient: scopedClusterClient.asCurrentUser,
-        compositeSloRepository,
-        sloDefinitionRepository: repository,
+        compositeRepository,
+        repository,
         summaryClient,
         logger,
       }
