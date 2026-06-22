@@ -58,9 +58,6 @@ tasks:
       - webpack
       - '--transitive'
   build-webpack:
-    args:
-      - '--task-name'
-      - shared_built_assets
     inputs:
       - /src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}
@@ -91,7 +88,3 @@ tasks:
       - /src/core/packages/chrome/browser-context/**/*.{js,ts,tsx}
       - /src/core/packages/di/browser/**/*.{js,ts,tsx}
       - '!/src/**/*.test.{js,ts,tsx}'
-  watch-webpack:
-    args:
-      - '--task-name'
-      - shared_built_assets

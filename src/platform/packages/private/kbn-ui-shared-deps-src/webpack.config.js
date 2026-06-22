@@ -13,6 +13,7 @@ require('@kbn/babel-register').install();
 const Path = require('path');
 
 const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
@@ -22,6 +23,17 @@ const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const DOMPURIFY_SRC = require.resolve('dompurify/purify.js');
 const { REPO_ROOT } = require('@kbn/repo-info');
+
+// Sources copied alongside the webpack bundle so the built package is self-contained for the dist build.
+const BUILD_SOURCE_PATHS = {
+  include: ['index.js', 'webpack.config.js', 'src/**/*'],
+  exclude: [],
+};
+const PACKAGE_BUILD_DIR = Path.resolve(
+  REPO_ROOT,
+  'target/build',
+  Path.relative(REPO_ROOT, __dirname)
+);
 
 /** @returns {import('webpack').Configuration} */
 module.exports = {
@@ -149,6 +161,16 @@ module.exports = {
     new NodeLibsBrowserPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
+    }),
+
+    new CopyPlugin({
+      patterns: BUILD_SOURCE_PATHS.include.map((from) => ({
+        from,
+        to: PACKAGE_BUILD_DIR,
+        context: __dirname,
+        globOptions: { ignore: BUILD_SOURCE_PATHS.exclude, dot: false },
+        noErrorOnMissing: true,
+      })),
     }),
 
     new webpack.DllReferencePlugin({

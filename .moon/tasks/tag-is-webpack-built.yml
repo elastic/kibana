@@ -25,10 +25,11 @@ tasks:
       runFromWorkspaceRoot: true
 
   build-webpack:
-    command: node
+    command: webpack-cli
     args:
-      - $workspaceRoot/scripts/build_package.js
-      - $projectRoot
+      - '--config'
+      - $projectRoot/webpack.config.js
+      - '--stats=errors-only'
     deps:
       - ~:extract-version-dependencies
       - '^:build-webpack'
@@ -36,16 +37,20 @@ tasks:
       - '@group(src)'
       - package.json
       - webpack.config.js
+      - $NODE_ENV
     outputs:
       - /target/build/$projectSource
+    options:
+      runFromWorkspaceRoot: true
 
   watch-webpack:
     type: run
-    command: node
+    command: webpack-cli
     args:
-      - $workspaceRoot/scripts/build_package.js
-      - $projectRoot
+      - '--config'
+      - $projectRoot/webpack.config.js
       - '--watch'
+      - '--stats=minimal'
     deps:
       - ~:extract-version-dependencies
       - '^:build-webpack'
@@ -53,7 +58,9 @@ tasks:
       - '@group(src)'
       - package.json
       - webpack.config.js
+      - $NODE_ENV
     outputs:
       - /target/build/$projectSource
     options:
       persistent: true
+      runFromWorkspaceRoot: true

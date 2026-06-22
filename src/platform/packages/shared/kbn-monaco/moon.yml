@@ -53,15 +53,8 @@ tasks:
       - webpack
       - '--transitive'
   build-webpack:
-    args:
-      - '--task-name'
-      - target_workers
     inputs:
       - /src/platform/packages/shared/kbn-esql-language/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-esql-types/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-i18n/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}
-  watch-webpack:
-    args:
-      - '--task-name'
-      - target_workers
