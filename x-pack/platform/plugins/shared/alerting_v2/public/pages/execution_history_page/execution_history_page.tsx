@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -36,12 +37,32 @@ export const ExecutionHistoryPage = () => {
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
   const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
 
-  const tabs: Array<{ id: TabId; label: string }> = [
+  const tabs: Array<{ id: TabId; label: React.ReactNode }> = [
     {
       id: POLICIES_TAB_ID,
-      label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
-        defaultMessage: 'Policies',
-      }),
+      label: (
+        <EuiFlexGroup component="span" alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false} component="span">
+            {i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
+              defaultMessage: 'Policies',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} component="span">
+            <span data-test-subj="executionHistoryDenormalizationTip">
+              <EuiIconTip
+                type="info"
+                content={i18n.translate(
+                  'xpack.alertingV2.executionHistory.denormalizationTooltip',
+                  {
+                    defaultMessage:
+                      'Pagination is by event. A single event may show as multiple rows — one per rule referenced by the event.',
+                  }
+                )}
+              />
+            </span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
     },
     // {
     //   id: RULES_TAB_ID,
@@ -51,36 +72,32 @@ export const ExecutionHistoryPage = () => {
     // },
   ];
 
+  const handlePolicyClick = (policyId: string) => {
+    setRuleToViewId(null);
+    setPolicyToViewId(policyId);
+  };
+
+  const handleRuleClick = (ruleId: string) => {
+    setPolicyToViewId(null);
+    setRuleToViewId(ruleId);
+  };
+
   return (
     <>
       <EuiPageHeader
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
               <FormattedMessage
                 id="xpack.alertingV2.executionHistory.pageTitle"
                 defaultMessage="Execution history"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span data-test-subj="executionHistoryDenormalizationTip">
-                <EuiIconTip
-                  type="info"
-                  content={i18n.translate(
-                    'xpack.alertingV2.executionHistory.denormalizationTooltip',
-                    {
-                      defaultMessage:
-                        'Pagination is by event. A single event may show as multiple rows — one per rule referenced by the event.',
-                    }
-                  )}
-                />
-              </span>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        description={i18n.translate('xpack.alertingV2.executionHistory.pageDescription', {
-          defaultMessage: 'Showing dispatcher decisions from the last 24 hours.',
-        })}
       />
       <EuiSpacer size="l" />
       <EuiTabs>
@@ -96,7 +113,7 @@ export const ExecutionHistoryPage = () => {
       </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === POLICIES_TAB_ID ? (
-        <PoliciesTabContent onPolicyClick={setPolicyToViewId} onRuleClick={setRuleToViewId} />
+        <PoliciesTabContent onPolicyClick={handlePolicyClick} onRuleClick={handleRuleClick} />
       ) : (
         <RulesPlaceholder />
       )}

@@ -11,7 +11,7 @@ See also: [Director](../director/README.md) and [Dispatcher](../dispatcher/READM
 - Running one rule execution from start to finish
 - Building the ES|QL request from rule configuration
 - Streaming result rows through the execution pipeline
-- Materializing breach / recovery / no-data rule events
+- Materializing breach / recovery rule events
 - Invoking the director for alert rules
 - Writing rule events to `.rule-events`
 
@@ -51,6 +51,7 @@ RuleExecutionPipeline
    |
    +--> middleware chain wraps each step
    |
+   +--> CheckEngineEnabledStep
    +--> WaitForResourcesStep
    +--> FetchRuleStep
    +--> ValidateRuleStep
@@ -103,14 +104,34 @@ Rules are saved objects. Relevant attributes include:
 - `kind`
 - `metadata`
 - `schedule`
-- `evaluation`
+- `query` — the new nested shape (see below)
 - `grouping`
-- `recovery_policy`
 - `state_transition`
-- `no_data`
 - server-managed flags such as `enabled`
 
 The persisted shape lives in `saved_objects/schemas/rule_saved_object_attributes/`. API schemas live in `@kbn/alerting-v2-schemas`.
+
+### Query shape
+
+`query` is a discriminated union on `format`:
+
+- `format: 'composed'` — `base` ES\|QL plus pipe-less segments for each phase.
+- `format: 'standalone'` — independent ES\|QL queries for each phase.
+
+In both formats the `breach` sub-object is required; the `recovery` sub-object is optional. Recovery and no-data behaviour are now controlled by **top-level rule fields** rather than fields nested inside `query`:
+
+| Sub-object | Required? | Behavior |
+| --- | --- | --- |
+| `breach` | Yes | The breach query (composed: `segment`; standalone: `query`). Produces breached events on matching rows. |
+| `recovery` | Optional | The recovery query payload only. Present when `recovery_strategy` is `'query'` and holds the leaf field: `segment` for composed, `query` for standalone. No `strategy` field — that is the top-level `recovery_strategy`. |
+| `no_data` | Optional (standalone only) | Data-presence query. Present when `no_data_strategy` is not `'none'`. Composed queries do not have a `no_data` block. |
+
+Top-level strategy fields (sit alongside `query` on the rule, not inside it):
+
+| Top-level field | Values | Meaning |
+| --- | --- | --- |
+| `recovery_strategy` | `'no_breach'` \| `'query'` \| `'none'` | How the executor detects recovery. `'none'` disables recovery entirely. |
+| `no_data_strategy` | `'emit'` \| `'last_known_status'` \| `'recover'` \| `'none'` | How the executor reacts when `no_data` returns no rows. The executor does not yet act on this field — no-data event emission will be wired up in a future change. |
 
 ## Operational parameters
 
@@ -138,40 +159,43 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 
 | # | Step | Responsibility |
 | --- | --- | --- |
-| 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
-| 2 | `FetchRuleStep` | Load the current rule saved object. |
-| 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
-| 5 | `CreateAlertEventsStep` | Turn a row batch into breached rule events. |
-| 6 | `CreateRecoveryEventsStep` | Append recovery events for alert rules when configured. |
-| 7 | `DirectorStep` | Enrich alert-type events with episode state. |
-| 8 | `StoreAlertEventsStep` | Persist the final batch into `.rule-events`. |
+| 1 | `CheckEngineEnabledStep` | Halt before any work when the `alerting:v2:enabled` advanced setting is off. |
+| 2 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
+| 3 | `FetchRuleStep` | Load the current rule saved object. |
+| 4 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
+| 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
+| 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events. |
+| 7 | `CreateRecoveryEventsStep` | Append recovery events for alert rules when configured. |
+| 8 | `DirectorStep` | Enrich alert-type events with episode state. |
+| 9 | `StoreAlertEventsStep` | Persist the final batch into `.rule-events`. |
 
 ## Recovery behavior
 
 Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.
 
-Recovery only applies to `kind: alert` rules and is optional. A rule without a `recovery_policy` never emits recovery events.
+Recovery only applies to `kind: alert` rules and is optional. A rule with `recovery_strategy: 'none'` (or no `recovery_strategy`) never emits recovery events.
 
 ### `no_breach` recovery
 
-Selected when `recovery_policy.type` is `no_breach`. The executor:
+Selected when `recovery_strategy === 'no_breach'`. The executor:
 
 1. queries `.rule-events` for group hashes that still have non-inactive episode state
 2. compares that active set to the current breach batch
 3. emits one recovered event for each active group missing from the current breached set
 
+No `query.recovery` block is needed for this mode.
+
 ### `query` recovery
 
-If `recovery_policy.type` is `query`, the executor runs the configured `recovery_policy.query.base` ES|QL query and only emits recovery events for rows whose computed `group_hash` matches the active set.
+Selected when `recovery_strategy === 'query'`. The executor runs the configured recovery query — composed `base` + `query.recovery.segment`, or standalone `query.recovery.query` — and only emits recovery events for rows whose computed `group_hash` matches the active set.
 
 ### Summary
 
-| `recovery_policy` | Recovery is emitted when |
+| `recovery_strategy` | Recovery is emitted when |
 | --- | --- |
-| _absent_ | Never. The executor skips the active-group lookup entirely. |
-| `no_breach` | An active group is absent from the current breach batch. |
-| `query` | A recovery query row matches a currently active group. |
+| absent / `'none'` | Never. The executor skips the active-group lookup entirely. |
+| `'no_breach'` | An active group is absent from the current breach batch. |
+| `'query'` | A recovery query row matches a currently active group. |
 
 Recovered documents are appended to `alertEventsBatch` before `DirectorStep` and storage.
 
@@ -206,7 +230,7 @@ For each breached ES\|QL row, the executor:
 ### Important constraints
 
 - Severity is only considered for `breached` events.
-- `recovered` and `no_data` events do not carry severity.
+- `recovered` events do not carry severity.
 - The original ES\|QL row is still stored in `data`, so `data.severity`
   is preserved even when the top-level `severity` field is absent or normalized.
 - Unsupported values never fail the rule execution.
@@ -219,6 +243,7 @@ For each breached ES\|QL row, the executor:
 | --- | --- |
 | `rule_deleted` | The saved object no longer exists. |
 | `rule_disabled` | The rule is present but disabled. |
+| `engine_disabled` | The `alerting:v2:enabled` advanced setting is off. Task state is preserved so execution resumes when it is turned back on. |
 | `state_not_ready` | A step ran without required upstream state. Usually indicates ordering or stream wiring misuse. |
 
 ## Middleware vs decorators
@@ -309,6 +334,7 @@ export interface RulePipelineState {
 Add the export to `steps/index.ts`, then register it in `setup/bind_rule_executor.ts`.
 
 ```typescript
+bind(RuleExecutionStepsToken).to(CheckEngineEnabledStep).inSingletonScope();
 bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
 bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
 bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
