@@ -10,13 +10,14 @@ import { render, waitFor } from '@testing-library/react';
 import { ElasticInferenceServiceModelsHeader } from './header';
 import { useKibana } from '../../hooks/use_kibana';
 import { docLinks } from '../../../common/doc_links';
+import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
 
 jest.mock('../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
 
 const mockUiSettings = (inferencePreferencesEnabled: boolean) => ({
   get: jest.fn((key: string, defaultValue?: unknown) => {
-    if (key === 'searchInferenceEndpoints:inferencePreferencesEnabled') {
+    if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) {
       return inferencePreferencesEnabled;
     }
     return defaultValue;
