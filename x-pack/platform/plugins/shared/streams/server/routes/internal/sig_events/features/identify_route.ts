@@ -52,7 +52,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
         end: z.number().optional(),
         runId: z.string().optional(),
         iteration: z.number().optional(),
-        featureTtlDays: z.number().optional(),
         sampleSize: z.number().optional(),
         entityFilteredRatio: z.number().min(0).max(1).optional(),
         diverseRatio: z.number().min(0).max(1).optional(),
@@ -67,7 +66,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const {
       scopedClusterClient,
-      getFeatureClient,
+      getKnowledgeIndicatorClient,
       streamsClient,
       inferenceClient,
       soClient,
@@ -87,7 +86,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
       connectorId: connectorIdOverride,
       runId = uuidv4(),
       iteration,
-      featureTtlDays = tuningConfig.feature_ttl_days,
       sampleSize = tuningConfig.sample_size,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
       diverseRatio = tuningConfig.diverse_ratio,
@@ -97,7 +95,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       diverseOffset,
     } = params.body ?? {};
 
-    const [connectorId, stream, featureClient] = await Promise.all([
+    const [connectorId, stream, kiClient] = await Promise.all([
       connectorIdOverride
         ? Promise.resolve(connectorIdOverride)
         : resolveConnectorForFeature({
@@ -107,7 +105,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
             request,
           }),
       streamsClient.getStream(streamName),
-      getFeatureClient(),
+      getKnowledgeIndicatorClient(),
     ]);
 
     const streamType = getStreamTypeFromDefinition(stream);
@@ -115,7 +113,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     try {
       const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
-        featureClient,
+        kiClient,
         soClient,
         inferenceClient: inferenceClient.bindTo({
           connectorId,
@@ -135,7 +133,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
         runId,
         iteration,
         tuning: {
-          feature_ttl_days: featureTtlDays,
           sample_size: sampleSize,
           entity_filtered_ratio: entityFilteredRatio,
           diverse_ratio: diverseRatio,
@@ -208,7 +205,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
         start: z.number().optional(),
         end: z.number().optional(),
         runId: z.string().optional(),
-        featureTtlDays: z.number().optional(),
       })
       .nullable()
       .optional(),
@@ -216,9 +212,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const {
       scopedClusterClient,
-      getFeatureClient,
+      getKnowledgeIndicatorClient,
       streamsClient,
-      tuningConfig,
       licensing,
       uiSettingsClient,
     } = await getScopedClients({ request });
@@ -228,15 +223,10 @@ const identifyComputedFeaturesRoute = createServerRoute({
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'computed', streamName);
     const now = Date.now();
-    const {
-      start = now - MS_PER_DAY,
-      end = now,
-      runId = uuidv4(),
-      featureTtlDays = tuningConfig.feature_ttl_days,
-    } = params.body ?? {};
+    const { start = now - MS_PER_DAY, end = now, runId = uuidv4() } = params.body ?? {};
 
-    const [featureClient, stream] = await Promise.all([
-      getFeatureClient(),
+    const [kiClient, stream] = await Promise.all([
+      getKnowledgeIndicatorClient(),
       streamsClient.getStream(streamName),
     ]);
 
@@ -247,9 +237,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
         start,
         end,
         esClient: scopedClusterClient.asCurrentUser,
-        featureClient,
+        kiClient,
         logger: routeLogger,
-        featureTtlDays,
         runId,
       });
 
@@ -290,13 +279,15 @@ const shouldIdentifyRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const featureClient = await getFeatureClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     return shouldIdentifyFeatures({
-      featureClient,
+      kiClient,
       streamName: params.path.streamName,
       thresholdHours: params.query.thresholdHours,
     });
