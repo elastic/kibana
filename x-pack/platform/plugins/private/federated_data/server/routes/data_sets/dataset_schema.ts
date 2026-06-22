@@ -19,14 +19,6 @@ export const datasetSchema = schema.object({
   description: optionalString,
   settings: schema.maybe(
     schema.object({
-      format: schema.maybe(
-        schema.oneOf([
-          schema.literal('parquet'),
-          schema.literal('csv'),
-          schema.literal('ndjson'),
-          schema.literal('orc'),
-        ])
-      ),
       error_mode: schema.maybe(
         schema.oneOf([
           schema.literal('fail_fast'),
@@ -34,8 +26,6 @@ export const datasetSchema = schema.object({
           schema.literal('null_field'),
         ])
       ),
-      max_errors: schema.maybe(schema.number()),
-      max_error_ratio: schema.maybe(schema.number()),
       partition_detection: schema.maybe(
         schema.oneOf([
           schema.literal('auto'),
@@ -44,8 +34,7 @@ export const datasetSchema = schema.object({
           schema.literal('none'),
         ])
       ),
-      partition_path: optionalString,
-      hive_partitioning: schema.maybe(schema.boolean()),
+      schema_sample_size: schema.maybe(schema.number({ min: 1 })),
     })
   ),
 });

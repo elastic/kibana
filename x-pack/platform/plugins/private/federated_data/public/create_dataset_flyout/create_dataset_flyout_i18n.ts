@@ -190,6 +190,21 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Must be a number between 0 and 1.',
     }),
 
+  settingsSchemaSampleSizeLabel: () =>
+    i18n.translate('dataSets.createDatasetFlyout.settingsSchemaSampleSizeLabel', {
+      defaultMessage: 'Schema sample size',
+    }),
+
+  settingsSchemaSampleSizeHelp: () =>
+    i18n.translate('dataSets.createDatasetFlyout.settingsSchemaSampleSizeHelp', {
+      defaultMessage: 'Number of rows to sample when inferring schema.',
+    }),
+
+  settingsSchemaSampleSizeInvalid: () =>
+    i18n.translate('dataSets.createDatasetFlyout.settingsSchemaSampleSizeInvalid', {
+      defaultMessage: 'Must be a positive integer.',
+    }),
+
   settingsPartitionDetectionLabel: () =>
     i18n.translate('dataSets.createDatasetFlyout.settingsPartitionDetectionLabel', {
       defaultMessage: 'Partition detection',

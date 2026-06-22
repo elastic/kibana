@@ -6,12 +6,22 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFormRow, EuiSelect, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
-import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
+import {
+  validateSchemaSampleSize,
+  type CreateDatasetFormValues,
+} from './create_dataset_flyout_form_state';
 
 export function CreateDatasetFlyoutSettings({
   control,
@@ -58,6 +68,14 @@ function CreateDatasetFlyoutFileSettings({
   const { field: partitionDetectionField } = useController({
     name: 'settings.partition_detection',
     control,
+  });
+
+  const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
+    name: 'settings.schema_sample_size',
+    control,
+    rules: {
+      validate: validateSchemaSampleSize,
+    },
   });
 
   const errorModeOptions = useMemo(
@@ -120,6 +138,25 @@ function CreateDatasetFlyoutFileSettings({
           onChange={(e) => errorModeField.onChange(e.target.value)}
           name={errorModeField.name}
           inputRef={errorModeField.ref}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()}
+        helpText={createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp()}
+        fullWidth
+        isInvalid={Boolean(schemaSampleSizeState.error)}
+        error={schemaSampleSizeState.error?.message}
+      >
+        <EuiFieldNumber
+          data-test-subj="createDatasetFlyoutSettingsSchemaSampleSize"
+          fullWidth
+          min={1}
+          step={1}
+          isInvalid={Boolean(schemaSampleSizeState.error)}
+          value={schemaSampleSizeField.value}
+          onChange={(e) => schemaSampleSizeField.onChange(e.target.value)}
+          name={schemaSampleSizeField.name}
+          inputRef={schemaSampleSizeField.ref}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>

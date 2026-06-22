@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
+
+import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 
 export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';
@@ -12,6 +16,7 @@ export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'templat
 export interface CreateDatasetSettingsFormValues {
   error_mode: DatasetErrorModeFormValue;
   partition_detection: DatasetPartitionDetectionFormValue;
+  schema_sample_size: string;
 }
 
 export interface CreateDatasetFormValues {
@@ -25,9 +30,28 @@ export interface CreateDatasetFormValues {
 export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFormValues => ({
   error_mode: '',
   partition_detection: '',
+  schema_sample_size: '',
 });
 
-import type { DatasetSettingsFile, DatasetSettings } from '../../common/dataset_types';
+const parseOptionalPositiveInteger = (value: string): number | undefined => {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  const parsed = Number(trimmed);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return undefined;
+  }
+  return parsed;
+};
+
+export const validateSchemaSampleSize = (value: string): true | string => {
+  const parsed = parseOptionalPositiveInteger(value);
+  if (value?.trim() && parsed === undefined) {
+    return createDatasetFlyoutStrings.settingsSchemaSampleSizeInvalid();
+  }
+  return true;
+};
 
 /**
  * Maps flyout form values to settings for the API payload.
@@ -46,6 +70,11 @@ export const buildDatasetSettingsFromFormValues = (
 
   if (settings.partition_detection) {
     applied.partition_detection = settings.partition_detection;
+  }
+
+  const schemaSampleSize = parseOptionalPositiveInteger(settings.schema_sample_size);
+  if (schemaSampleSize !== undefined) {
+    applied.schema_sample_size = schemaSampleSize;
   }
 
   return Object.keys(applied).length > 0 ? applied : undefined;

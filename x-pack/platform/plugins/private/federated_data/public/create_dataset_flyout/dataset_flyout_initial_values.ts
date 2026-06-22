@@ -47,6 +47,8 @@ const settingsToFlyoutFormValues = (
     error_mode: (fileSettings.error_mode ?? '') as DatasetErrorModeFormValue,
     partition_detection: (fileSettings.partition_detection ??
       '') as DatasetPartitionDetectionFormValue,
+    schema_sample_size:
+      fileSettings.schema_sample_size !== undefined ? String(fileSettings.schema_sample_size) : '',
   };
 };
 

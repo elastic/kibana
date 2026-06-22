@@ -19,7 +19,7 @@ describe('dataset_flyout_initial_values', () => {
       description: '',
       data_source: '',
       resource: '',
-      settings: { error_mode: '', partition_detection: '' },
+      settings: { error_mode: '', partition_detection: '', schema_sample_size: '' },
     });
   });
 
@@ -44,6 +44,7 @@ describe('dataset_flyout_initial_values', () => {
       settings: {
         error_mode: 'skip_row',
         partition_detection: '',
+        schema_sample_size: '',
       },
     });
   });

@@ -64,7 +64,11 @@ describe('CreateDatasetFlyoutSettings', () => {
     });
 
     expect(getByTestId('settingsValue')).toHaveTextContent(
-      JSON.stringify({ error_mode: 'skip_row', partition_detection: 'hive' })
+      JSON.stringify({
+        error_mode: 'skip_row',
+        partition_detection: 'hive',
+        schema_sample_size: '',
+      })
     );
   });
 });

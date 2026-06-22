@@ -16,6 +16,7 @@ describe('create_dataset_flyout_form_state', () => {
       expect(emptyCreateDatasetSettingsFormValues()).toEqual({
         error_mode: '',
         partition_detection: '',
+        schema_sample_size: '',
       });
     });
   });
@@ -32,6 +33,7 @@ describe('create_dataset_flyout_form_state', () => {
         buildDatasetSettingsFromFormValues({
           error_mode: 'skip_row',
           partition_detection: '',
+          schema_sample_size: '',
         })
       ).toEqual({ error_mode: 'skip_row' });
 
@@ -39,6 +41,7 @@ describe('create_dataset_flyout_form_state', () => {
         buildDatasetSettingsFromFormValues({
           error_mode: '',
           partition_detection: 'hive',
+          schema_sample_size: '',
         })
       ).toEqual({ partition_detection: 'hive' });
     });
@@ -48,11 +51,22 @@ describe('create_dataset_flyout_form_state', () => {
         buildDatasetSettingsFromFormValues({
           error_mode: 'fail_fast',
           partition_detection: 'template',
+          schema_sample_size: '',
         })
       ).toEqual({
         error_mode: 'fail_fast',
         partition_detection: 'template',
       });
+    });
+
+    it('includes schema_sample_size when set to a positive integer', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          error_mode: '',
+          partition_detection: '',
+          schema_sample_size: '10',
+        })
+      ).toEqual({ schema_sample_size: 10 });
     });
   });
 });
