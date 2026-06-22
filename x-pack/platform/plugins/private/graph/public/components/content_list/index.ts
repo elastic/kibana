@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { GraphPage } from './graph_page';
-export { GraphListingPage } from './graph_listing_page';
+export { GraphContentList } from './graph_content_list';

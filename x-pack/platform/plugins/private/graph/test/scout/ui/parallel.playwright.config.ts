@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { GraphPage } from './graph_page';
-export { GraphListingPage } from './graph_listing_page';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+});
