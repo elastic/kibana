@@ -130,6 +130,7 @@ export interface RelationshipEsqlRow {
   relationshipNodeId: string;
   targetId: string;
   targetDocData: string;
+  pinned?: string | null;
 }
 
 export interface EntityRecord {
