@@ -55,6 +55,14 @@ tester.run('@kbn/alerting-v2/require_eui_form_compressed', RequireEuiFormCompres
       name: 'non-target components are ignored',
     },
     {
+      code: '<EuiButtonGroup buttonSize="compressed" />',
+      name: 'EuiButtonGroup with buttonSize compressed is valid',
+    },
+    {
+      code: '<EuiButtonGroup buttonSize={layout === "flyout" ? "compressed" : "s"} />',
+      name: 'EuiButtonGroup with dynamic buttonSize expression is valid',
+    },
+    {
       code: '<EuiFieldText compressed {...rest} />',
       name: 'spread props with explicit compressed are fine',
     },
@@ -62,36 +70,46 @@ tester.run('@kbn/alerting-v2/require_eui_form_compressed', RequireEuiFormCompres
   invalid: [
     {
       code: '<EuiFieldText />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
     },
     {
       code: '<EuiFieldNumber value={5} />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
     },
     {
       code: '<EuiSelect options={opts} />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
     },
     {
       code: '<EuiComboBox options={[]} />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
     },
     {
       code: '<EuiSuperSelect options={[]} />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
     },
     {
       code: '<EuiTextArea />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
     },
     {
       code: '<EuiSuperDatePicker />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
     },
     {
       code: '<EuiFieldNumber {...rest} value={localValue} />',
-      errors: [{ messageId: 'missingCompressed' }],
+      errors: [{ messageId: 'missing' }],
       name: 'spread without explicit compressed is flagged',
+    },
+    {
+      code: '<EuiButtonGroup options={[]} />',
+      errors: [{ messageId: 'missing' }],
+      name: 'EuiButtonGroup without buttonSize is flagged',
+    },
+    {
+      code: '<EuiButtonGroup buttonSize="s" />',
+      errors: [{ messageId: 'missing' }],
+      name: 'EuiButtonGroup with non-compressed buttonSize is flagged',
     },
   ],
 });

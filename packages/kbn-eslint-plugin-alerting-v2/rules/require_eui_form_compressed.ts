@@ -11,15 +11,21 @@ import type { Rule } from 'eslint';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
-const COMPRESSED_FORM_COMPONENTS = [
-  'EuiFieldText',
-  'EuiFieldNumber',
-  'EuiSelect',
-  'EuiComboBox',
-  'EuiSuperSelect',
-  'EuiTextArea',
-  'EuiSuperDatePicker',
-];
+/**
+ * Maps component names to the prop that must carry a "compressed" value.
+ * - `prop` only: the prop must exist (boolean style, e.g. `compressed`).
+ * - `prop` + `value`: the prop must equal that literal or be a dynamic expression.
+ */
+const COMPRESSED_REQUIREMENTS: Record<string, { prop: string; value?: string }> = {
+  EuiFieldText: { prop: 'compressed' },
+  EuiFieldNumber: { prop: 'compressed' },
+  EuiSelect: { prop: 'compressed' },
+  EuiComboBox: { prop: 'compressed' },
+  EuiSuperSelect: { prop: 'compressed' },
+  EuiTextArea: { prop: 'compressed' },
+  EuiSuperDatePicker: { prop: 'compressed' },
+  EuiButtonGroup: { prop: 'buttonSize', value: 'compressed' },
+};
 
 export const RequireEuiFormCompressed: Rule.RuleModule = {
   meta: {
@@ -28,7 +34,7 @@ export const RequireEuiFormCompressed: Rule.RuleModule = {
       description: 'Require the compressed prop on EUI form controls in the alerting v2 rule form.',
     },
     messages: {
-      missingCompressed: '{{component}} should use the `compressed` prop in rule form components.',
+      missing: '{{component}} should use {{hint}} in rule form components.',
     },
     schema: [],
   },
@@ -38,29 +44,36 @@ export const RequireEuiFormCompressed: Rule.RuleModule = {
         if (!('name' in node)) return;
 
         const name = String(node.name);
-        const parent = node.parent;
+        const requirement = COMPRESSED_REQUIREMENTS[name];
+        if (!requirement) return;
 
-        if (
-          parent?.type !== AST_NODE_TYPES.JSXOpeningElement ||
-          !COMPRESSED_FORM_COMPONENTS.includes(name)
-        ) {
-          return;
-        }
+        const parent = node.parent;
+        if (parent?.type !== AST_NODE_TYPES.JSXOpeningElement) return;
 
         const attributes = (parent as TSESTree.JSXOpeningElement).attributes;
+        const { prop, value } = requirement;
 
-        const hasCompressed = attributes.some(
-          (attr) =>
-            attr.type === AST_NODE_TYPES.JSXAttribute &&
-            attr.name.type === AST_NODE_TYPES.JSXIdentifier &&
-            attr.name.name === 'compressed'
-        );
+        const hasRequiredProp = attributes.some((attr) => {
+          if (
+            attr.type !== AST_NODE_TYPES.JSXAttribute ||
+            attr.name.type !== AST_NODE_TYPES.JSXIdentifier ||
+            attr.name.name !== prop
+          ) {
+            return false;
+          }
+          if (!value) return true;
+          if (attr.value?.type === AST_NODE_TYPES.Literal && attr.value.value === value) {
+            return true;
+          }
+          return attr.value?.type === AST_NODE_TYPES.JSXExpressionContainer;
+        });
 
-        if (!hasCompressed) {
+        if (!hasRequiredProp) {
+          const hint = value ? `\`${prop}="${value}"\`` : `the \`${prop}\` prop`;
           context.report({
-            node,
-            messageId: 'missingCompressed',
-            data: { component: name },
+            node: node as unknown as Rule.Node,
+            messageId: 'missing',
+            data: { component: name, hint },
           });
         }
       },
