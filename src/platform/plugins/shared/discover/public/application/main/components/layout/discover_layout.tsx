@@ -37,6 +37,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDiscoverCustomizationContext } from '../../../../customizations';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -97,7 +98,6 @@ export function DiscoverLayout() {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
-    chrome,
   } = useDiscoverServices();
   const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
@@ -368,7 +368,8 @@ export function DiscoverLayout() {
     if (isChromeNextProjectHeader && isStandalone) {
       return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
     }
-    return euiTheme.size.xxl;
+
+    return `${TABS_BAR_HEIGHT}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isChromeNextProjectHeader]);
 
   return (

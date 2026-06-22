@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
+import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const MIN_TAB_WIDTH = 114;
@@ -59,6 +60,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('should show tabs in a responsive way', async () => {
+      // Check that the constant telling the height of the tabs bar is thrustworthy
+      expect(Math.round(await unifiedTabs.getTabsBarHeight())).to.be(TABS_BAR_HEIGHT);
+
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect(await unifiedTabs.isScrollable()).to.be(false);
       expect((await unifiedTabs.getTabWidths()).every((width) => width === MIN_TAB_WIDTH)).to.be(
