@@ -19,7 +19,7 @@ const FAILURE_HOOKS_CONFIG = require.resolve('./__fixtures__/failure_hooks/confi
 // Failing: See https://github.com/elastic/kibana/issues/271289
 describe.skip('failure hooks', function () {
   it('runs and prints expected output', () => {
-    const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG], {
+    const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG, '--info'], {
       // this FTR run should not produce a scout report
       env: { ...process.env, SCOUT_REPORTER_ENABLED: '0' },
     });

@@ -171,7 +171,7 @@ export class UnifiedTabsPageObject extends FtrService {
       const value = await labelElement.getAttribute('value');
       return value === '';
     });
-    await labelElement.type(newLabel, { charByChar: true });
+    await labelElement.type(newLabel);
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.retry.waitFor('the tab label to change', async () => {
       return (await this.getSelectedTab())?.label === newLabel;
@@ -303,7 +303,7 @@ export class UnifiedTabsPageObject extends FtrService {
   public async closeTabsBarMenu() {
     await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
     await this.retry.waitFor('the tabs bar menu to close', async () => {
-      return !(await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel'));
+      return !(await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel', { timeout: 200 }));
     });
     await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel the tooltip if it is open
   }
@@ -472,11 +472,11 @@ export class UnifiedTabsPageObject extends FtrService {
   public async clearRecentlyClosedTabs() {
     await this.openTabsBarMenu();
     const buttonTestId = 'unifiedTabs_tabsMenu_clearRecentlyClosed';
-    const clearButtonExists = await this.testSubjects.exists(buttonTestId);
+    const clearButtonExists = await this.testSubjects.exists(buttonTestId, { timeout: 200 });
     if (clearButtonExists) {
       await this.testSubjects.click(buttonTestId);
       await this.retry.waitFor('recently closed tabs to be cleared', async () => {
-        return !(await this.testSubjects.exists(buttonTestId));
+        return !(await this.testSubjects.exists(buttonTestId, { timeout: 200 }));
       });
     }
     await this.closeTabsBarMenu();

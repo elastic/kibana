@@ -65,7 +65,7 @@ export const LOADING_DEBOUNCE_TIME = 250;
 
 /**
  * Returns `true` when HTTP requests are in flight, debounced to avoid flickering
- * on very short requests.
+ * on very short requests. Use for visual display only.
  */
 export function useIsLoading(): boolean {
   const { http } = useChromeComponentsDeps();
@@ -77,6 +77,16 @@ export function useIsLoading(): boolean {
       ),
     [http]
   );
+  return useObservable(isLoading$, false);
+}
+
+/**
+ * Returns `true` when HTTP requests are in flight, without debounce. Use for
+ * test attributes that must reflect loading state immediately.
+ */
+export function useIsLoadingImmediate(): boolean {
+  const { http } = useChromeComponentsDeps();
+  const isLoading$ = useMemo(() => http.getLoadingCount$().pipe(map((c) => c > 0)), [http]);
   return useObservable(isLoading$, false);
 }
 
