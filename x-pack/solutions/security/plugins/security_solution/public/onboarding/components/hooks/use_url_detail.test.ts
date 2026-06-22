@@ -12,11 +12,12 @@ import { useHistory } from 'react-router-dom';
 jest.mock('@kbn/security-solution-navigation', () => ({
   ...jest.requireActual('@kbn/security-solution-navigation'),
   useNavigateTo: jest.fn(),
-  SecurityPageName: { landing: 'landing' },
+  SecurityPageName: { landing: 'landing', siemMigrationsManage: 'siemMigrationsManage' },
 }));
 
 jest.mock('./use_stored_state', () => ({
   ...jest.requireActual('./use_stored_state'),
+  useStoredCloudOnboardingConsumed: jest.fn(),
   useStoredUrlDetails: jest.fn(),
 }));
 
@@ -44,7 +45,7 @@ jest.mock('react-router-dom', () => {
 });
 
 // Import the mocked modules for type-checking and setting implementations
-import { useStoredUrlDetails } from './use_stored_state';
+import { useStoredCloudOnboardingConsumed, useStoredUrlDetails } from './use_stored_state';
 import { useTopicId } from './use_topic_id';
 import { useCloudTopicId } from './use_cloud_topic_id';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
@@ -193,6 +194,7 @@ describe('getCardIdFromHash', () => {
 // --- Tests for useSyncUrlDetails ---
 describe('useSyncUrlDetails', () => {
   let mockSetStoredUrlDetail: jest.Mock;
+  let mockSetCloudOnboardingConsumed: jest.Mock;
   let mockNavigateTo: jest.Mock;
   let mockReportCardOpen: jest.Mock;
   let mockStartGetCloudTopicId: jest.Mock;
@@ -200,7 +202,9 @@ describe('useSyncUrlDetails', () => {
   let mockCloudOnComplete: (topicId: OnboardingTopicId | null) => void;
 
   beforeEach(() => {
+    window.history.replaceState({}, '', '/app/security/get_started');
     mockSetStoredUrlDetail = jest.fn();
+    mockSetCloudOnboardingConsumed = jest.fn();
     mockNavigateTo = jest.fn();
     mockReportCardOpen = jest.fn();
     mockStartGetCloudTopicId = jest.fn();
@@ -208,6 +212,10 @@ describe('useSyncUrlDetails', () => {
 
     // Provide default values for the dependencies used inside useUrlDetail
     (useStoredUrlDetails as jest.Mock).mockReturnValue([null, mockSetStoredUrlDetail]);
+    (useStoredCloudOnboardingConsumed as jest.Mock).mockReturnValue([
+      false,
+      mockSetCloudOnboardingConsumed,
+    ]);
     (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
     (useTopicId as jest.Mock).mockReturnValue(OnboardingTopicId.default);
     (useCloudTopicId as jest.Mock).mockImplementation(({ onComplete }) => {
@@ -219,6 +227,7 @@ describe('useSyncUrlDetails', () => {
     });
     (useOnboardingContext as jest.Mock).mockReturnValue({
       config: { has: mockConfigHas },
+      spaceId: 'test-space',
       telemetry: { reportCardOpen: mockReportCardOpen },
     });
   });
@@ -290,7 +299,21 @@ describe('useSyncUrlDetails', () => {
     expect(mockStartGetCloudTopicId).toHaveBeenCalled();
   });
 
-  it('navigates to cloud topic without storing it', () => {
+  it('does not call startGetCloudTopicId when the cloud onboarding redirect was consumed', () => {
+    (useStoredUrlDetails as jest.Mock).mockReturnValue([undefined, mockSetStoredUrlDetail]);
+    (useStoredCloudOnboardingConsumed as jest.Mock).mockReturnValue([
+      true,
+      mockSetCloudOnboardingConsumed,
+    ]);
+
+    renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
+
+    expect(mockStartGetCloudTopicId).not.toHaveBeenCalled();
+    expect(mockNavigateTo).not.toHaveBeenCalled();
+    expect(mockSetStoredUrlDetail).not.toHaveBeenCalled();
+  });
+
+  it('navigates to SIEM migrations manage and stores the consumed flag', () => {
     renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
 
     act(() => {
@@ -298,9 +321,12 @@ describe('useSyncUrlDetails', () => {
     });
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
-      deepLinkId: SecurityPageName.landing,
-      path: OnboardingTopicId.siemMigrations,
+      deepLinkId: SecurityPageName.siemMigrationsManage,
     });
+    expect(mockSetCloudOnboardingConsumed).toHaveBeenCalledWith(true);
+    expect(mockSetCloudOnboardingConsumed.mock.invocationCallOrder[0]).toBeLessThan(
+      mockNavigateTo.mock.invocationCallOrder[0]
+    );
     expect(mockSetStoredUrlDetail).not.toHaveBeenCalled();
   });
 

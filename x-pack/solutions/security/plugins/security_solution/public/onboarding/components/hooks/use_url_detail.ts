@@ -9,7 +9,7 @@ import { useCallback, useEffect } from 'react';
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 import { useHistory } from 'react-router-dom';
 import type { History } from 'history';
-import { useStoredUrlDetails } from './use_stored_state';
+import { useStoredCloudOnboardingConsumed, useStoredUrlDetails } from './use_stored_state';
 import { OnboardingTopicId, type OnboardingCardId } from '../../constants';
 import { useOnboardingContext } from '../onboarding_context';
 import { useTopicId } from './use_topic_id';
@@ -76,13 +76,17 @@ interface UseSyncUrlDetailsParams {
  * This hook manages the expanded card id state in the LocalStorage and the hash in the URL.
  */
 export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetailsParams) => {
-  const { config, telemetry } = useOnboardingContext();
+  const { config, spaceId, telemetry } = useOnboardingContext();
+  const { navigateTo } = useNavigateTo();
   const { storedUrlDetail, setStoredUrlDetail, navigateToDetail, setTopic } = useUrlDetail();
+  const [isCloudOnboardingConsumed, setIsCloudOnboardingConsumed] =
+    useStoredCloudOnboardingConsumed(spaceId);
 
   const onComplete = useCallback((cloudTopicId: OnboardingTopicId | null) => {
     if (cloudTopicId && config.has(cloudTopicId)) {
       if (cloudTopicId === OnboardingTopicId.siemMigrations) {
-        navigateToDetail(cloudTopicId);
+        setIsCloudOnboardingConsumed(true);
+        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsManage });
       } else {
         setTopic(cloudTopicId);
       }
@@ -122,7 +126,7 @@ export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetails
     }
 
     // If nothing is stored and nothing is in the URL, let's see if we have a cloud topic (first time onboarding)
-    if (!urlDetail && storedUrlDetail === undefined) {
+    if (!urlDetail && storedUrlDetail === undefined && !isCloudOnboardingConsumed) {
       startGetCloudTopicId();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

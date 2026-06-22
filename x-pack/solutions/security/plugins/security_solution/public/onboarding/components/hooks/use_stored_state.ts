@@ -15,6 +15,7 @@ const LocalStorageKey = {
   completeCards: 'securitySolution.onboarding.completeCards',
   expandedCard: 'securitySolution.onboarding.expandedCard',
   urlDetails: 'securitySolution.onboarding.urlDetails',
+  cloudOnboardingConsumed: 'securitySolution.onboarding.cloudOnboardingConsumed',
   selectedCardItemId: 'securitySolution.onboarding.selectedCardItem',
   assistantConnectorId: 'securitySolution.onboarding.assistantCard.connectorId',
 } as const;
@@ -30,6 +31,12 @@ export const useStoredCompletedCardIds = (spaceId: string) =>
  */
 export const useStoredUrlDetails = (spaceId: string) =>
   useLocalStorage<string | null | undefined>(`${LocalStorageKey.urlDetails}.${spaceId}`);
+
+/**
+ * Stores whether the cloud onboarding redirect was consumed per space
+ */
+export const useStoredCloudOnboardingConsumed = (spaceId: string) =>
+  useDefinedLocalStorage<boolean>(`${LocalStorageKey.cloudOnboardingConsumed}.${spaceId}`, false);
 
 /**
  * Stores the selected selectable card ID per space
