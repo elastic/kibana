@@ -53,9 +53,9 @@ describe('getCustomAgents', () => {
   });
 
   test('passes target SSL overrides to the CONNECT-upgraded TLS request', async () => {
-    const callbackSpy = jest
-      .spyOn(HttpsProxyAgent.prototype, 'callback')
-      .mockResolvedValue({} as Awaited<ReturnType<HttpsProxyAgent['callback']>>);
+    const connectSpy = jest
+      .spyOn(HttpsProxyAgent.prototype, 'connect')
+      .mockResolvedValue({} as Awaited<ReturnType<HttpsProxyAgent<string>['connect']>>);
     const proxySettings = {
       proxyUrl: 'http://someproxyhost',
       proxySSLSettings: {
@@ -76,23 +76,23 @@ describe('getCustomAgents', () => {
     });
 
     try {
-      await (httpsAgent as unknown as HttpsProxyAgent).callback(
-        {} as Parameters<HttpsProxyAgent['callback']>[0],
+      await (httpsAgent as unknown as HttpsProxyAgent<string>).connect(
+        {} as Parameters<HttpsProxyAgent<string>['connect']>[0],
         {
           host: targetHost,
           port: 443,
           secureEndpoint: true,
-        } as Parameters<HttpsProxyAgent['callback']>[1]
+        } as Parameters<HttpsProxyAgent<string>['connect']>[1]
       );
 
-      expect(callbackSpy).toHaveBeenCalledWith(
+      expect(connectSpy).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           rejectUnauthorized: false,
         })
       );
     } finally {
-      callbackSpy.mockRestore();
+      connectSpy.mockRestore();
     }
   });
 
@@ -250,8 +250,8 @@ describe('getCustomAgents', () => {
     expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
 
-    expect(httpsAgent?.options.ca).toBe('ca data here');
-    expect(httpsAgent?.options.rejectUnauthorized).toBe(false);
+    expect((httpsAgent as any).targetSSLOptions.ca).toBe('ca data here');
+    expect((httpsAgent as any).targetSSLOptions.rejectUnauthorized).toBe(false);
   });
 
   test('sets auth on HttpsProxyAgent when proxy URL contains credentials', () => {
@@ -270,7 +270,8 @@ describe('getCustomAgents', () => {
       url: targetUrl,
     });
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
-    expect((httpsAgent as any).proxy.auth).toBe('proxyuser:proxypass');
+    expect((httpsAgent as any).proxy.username).toBe('proxyuser');
+    expect((httpsAgent as any).proxy.password).toBe('proxypass');
   });
 
   test('does not set auth on HttpsProxyAgent when proxy URL has no credentials', () => {
@@ -289,7 +290,8 @@ describe('getCustomAgents', () => {
       url: targetUrl,
     });
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
-    expect((httpsAgent as any).proxy.auth).toBeUndefined();
+    expect((httpsAgent as any).proxy.username).toBe('');
+    expect((httpsAgent as any).proxy.password).toBe('');
   });
 
   test('handles overriding global verificationMode "none"', () => {
@@ -371,7 +373,7 @@ describe('getCustomAgents', () => {
 
     expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
-    expect(httpsAgent?.options.rejectUnauthorized).toBeTruthy();
+    expect((httpsAgent as any).targetSSLOptions.rejectUnauthorized).toBeTruthy();
   });
 
   test('handles overriding global verificationMode "full" with a proxy', () => {
