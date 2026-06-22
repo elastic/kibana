@@ -411,31 +411,31 @@ apiTest.describe(
         const body = response.body as AnomalyOverviewResponse;
 
         // Response shape
-        expect.soft(body.entityId).toBe(CAROL_EUID);
-        expect.soft(body.entityType).toBe('user');
-        expect.soft(Array.isArray(body.anomalies)).toBe(true);
-        expect.soft(typeof body.from).toBe('number');
-        expect.soft(typeof body.to).toBe('number');
-        expect.soft(body.to).toBeGreaterThan(body.from);
+        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.entityType).toBe('user');
+        expect(Array.isArray(body.anomalies)).toBe(true);
+        expect(typeof body.from).toBe('number');
+        expect(typeof body.to).toBe('number');
+        expect(body.to).toBeGreaterThan(body.from);
 
         // Carol has 2 indexed anomaly records: pad_windows_rare_region_name_by_user_ea and auth_high_count_logon_events_ea
-        expect.soft(body.totalAnomaliesCount).toBe(2);
+        expect(body.totalAnomaliesCount).toBe(2);
 
         // Per-bucket entry shape
-        expect.soft(body.anomalies.length).toBeGreaterThanOrEqual(1);
+        expect(body.anomalies.length).toBeGreaterThanOrEqual(1);
         for (const entry of body.anomalies) {
-          expect.soft(typeof entry.timestamp).toBe('string');
-          expect.soft(new Date(entry.timestamp).toISOString()).toBe(entry.timestamp);
-          expect.soft(typeof entry.maxScore).toBe('number');
-          expect.soft(entry.maxScore).toBeGreaterThan(0);
-          expect.soft(Array.isArray(entry.threatTactics)).toBe(true);
+          expect(typeof entry.timestamp).toBe('string');
+          expect(new Date(entry.timestamp).toISOString()).toBe(entry.timestamp);
+          expect(typeof entry.maxScore).toBe('number');
+          expect(entry.maxScore).toBeGreaterThan(0);
+          expect(Array.isArray(entry.threatTactics)).toBe(true);
         }
 
         // auth_high_count_logon_events_ea contributes 'Credential Access' and 'Initial Access'
-        expect.soft(Object.keys(body.tacticCounts)).toContain('Credential Access');
-        expect.soft(Object.keys(body.tacticCounts)).toContain('Initial Access');
+        expect(Object.keys(body.tacticCounts)).toContain('Credential Access');
+        expect(Object.keys(body.tacticCounts)).toContain('Initial Access');
         for (const count of Object.values(body.tacticCounts)) {
-          expect.soft(count).toBeGreaterThan(0);
+          expect(count).toBeGreaterThan(0);
         }
       }
     );
