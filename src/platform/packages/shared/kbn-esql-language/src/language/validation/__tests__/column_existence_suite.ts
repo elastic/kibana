@@ -58,6 +58,16 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       ]);
     });
 
+    it('reports conflicting column types with original types', async () => {
+      const { expectErrors } = await setup();
+      const message =
+        'Column [conflictingField] has conflicting types across indices: [text], [keyword]';
+
+      await expectErrors('from conflict_index | keep conflictingField', [], [message]);
+      await expectErrors('from conflict_index | drop conflictingField', [], [message]);
+      await expectErrors('from conflict_index | sort conflictingField', [message]);
+    });
+
     it('returns one warning for each instance of the same unmapped column', async () => {
       const { expectErrors } = await setup();
       await expectErrors(
