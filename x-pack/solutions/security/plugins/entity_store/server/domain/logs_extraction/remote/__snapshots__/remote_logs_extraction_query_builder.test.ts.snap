@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entity type 1`] = `
+exports[`buildRemoteLogsExtractionEsqlQuery generates expected query for host entity type 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:metrics-*
   | WHERE
@@ -172,7 +172,7 @@ data_stream*,
 | LIMIT 5000"
 `;
 
-exports[`buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`] = `
+exports[`buildRemoteLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
   | WHERE
@@ -346,7 +346,7 @@ data_stream*,
 | LIMIT 10000"
 `;
 
-exports[`buildCcsLogsExtractionEsqlQuery generates expected query with pagination 1`] = `
+exports[`buildRemoteLogsExtractionEsqlQuery generates expected query with pagination 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
   | WHERE
@@ -515,7 +515,7 @@ host*,
 | LIMIT 10000"
 `;
 
-exports[`buildCcsLogsExtractionEsqlQuery generates query for generic entity type 1`] = `
+exports[`buildRemoteLogsExtractionEsqlQuery generates query for generic entity type 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote_cluster:logs-*
   | WHERE
