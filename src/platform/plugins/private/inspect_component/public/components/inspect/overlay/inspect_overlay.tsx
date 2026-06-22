@@ -22,7 +22,11 @@ import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
 import { InspectHighlight } from './inspect_highlight';
-import { INSPECT_OVERLAY_ID } from '../../../lib/constants';
+import {
+  INSPECT_BUTTON_TEST_SUBJ,
+  INSPECT_FLYOUT_ID,
+  INSPECT_OVERLAY_ID,
+} from '../../../lib/constants';
 import type { ReactFiberNode, SourceComponent } from '../../../lib/fiber/types';
 
 interface Props {
@@ -97,10 +101,9 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
     async (event: MouseEvent) => {
       const target = getElementFromPoint(event);
 
-      if (!target) {
-        setIsInspecting(false);
-        return;
-      }
+      // No inspectable element under the cursor (e.g. click on the flyout
+      // itself, or on a non-inspectable region). Keep the inspector active.
+      if (!target) return;
 
       const componentData = await getInspectedElementData({
         httpService: core.http,
@@ -108,25 +111,37 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
         sourceComponent,
       });
 
-      if (!componentData) {
-        setIsInspecting(false);
-        return;
-      }
+      // Clicked on something with no resolvable source component — just
+      // ignore the click and stay in inspect mode.
+      if (!componentData) return;
 
       const flyout = core.overlays.openFlyout(
         toMountPoint(
-          <InspectFlyout componentData={componentData} target={target} branch={branch} />,
+          <InspectFlyout
+            componentData={componentData}
+            target={target}
+            branch={branch}
+            core={core}
+          />,
           core.rendering
         ),
-        flyoutOptions
+        {
+          ...flyoutOptions,
+          // `options.onClose` is only invoked when EuiFlyout itself triggers
+          // close (X button or Escape inside the flyout), NOT when
+          // `openFlyout` programmatically replaces an existing flyout. That's
+          // exactly the distinction we need: a *user* close should exit
+          // inspect mode, but re-targeting via click (which replaces the
+          // flyout) should not.
+          onClose: (f) => {
+            f.close();
+            setFlyoutOverlayRef(null);
+            setIsInspecting(false);
+          },
+        }
       );
 
-      flyout.onClose.then(() => {
-        setFlyoutOverlayRef(null);
-      });
-
       setFlyoutOverlayRef(flyout);
-      setIsInspecting(false);
     },
     [core, branch, sourceComponent, targetFiberNode, setIsInspecting, setFlyoutOverlayRef]
   );
@@ -135,8 +150,22 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
     /**
      * Capture all click events on the document and stop them from propagating.
      * 'EuiWindowEvent' can't be used here as it doesn't allow for setting 'capture: true'.
+     *
+     * Events whose target is inside the inspector's own flyout are passed
+     * through unchanged so that flyout controls (buttons, inputs, the close
+     * button) keep working — the flyout is part of the inspector UI, not a
+     * click target for inspection.
      */
     const handleMouseEvent = (event: MouseEvent) => {
+      const eventTarget = event.target;
+      if (eventTarget instanceof Element) {
+        // Clicks on the inspector flyout (its buttons, inputs, etc.) and
+        // clicks on the inspect-mode toggle button itself must pass through
+        // unhindered — they're part of the inspector UI, not click targets
+        // for inspection.
+        if (eventTarget.closest(`#${INSPECT_FLYOUT_ID}`) !== null) return;
+        if (eventTarget.closest(`[data-test-subj="${INSPECT_BUTTON_TEST_SUBJ}"]`) !== null) return;
+      }
       handleEventPropagation({ event, callback: handleClickAtPositionOfInspectedElement });
     };
 
@@ -157,6 +186,13 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
             // This is a workaround which forces the crosshair cursor when inspecting.
             'body *': {
               cursor: 'crosshair !important',
+            },
+            // The inspector flyout is part of the inspector UI, not a target
+            // for inspection — restore the default cursor inside it so its
+            // controls remain usable. ID-based selector has higher specificity
+            // than `body *` so this override wins.
+            [`#${INSPECT_FLYOUT_ID}, #${INSPECT_FLYOUT_ID} *`]: {
+              cursor: 'auto !important',
             },
           }}
         />

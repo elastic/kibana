@@ -86,6 +86,8 @@ describe('getInspectedElementData', () => {
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
       fileName: mockTargetFiberNode?._debugSource.fileName,
+      lineNumber: mockTargetFiberNode?._debugSource.lineNumber,
+      columnNumber: mockTargetFiberNode?._debugSource.columnNumber,
     });
 
     expect(result).toBeNull();
@@ -105,6 +107,8 @@ describe('getInspectedElementData', () => {
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
       fileName: mockTargetFiberNode._debugSource.fileName,
+      lineNumber: mockTargetFiberNode._debugSource.lineNumber,
+      columnNumber: mockTargetFiberNode._debugSource.columnNumber,
     });
     expect(getIconType).toHaveBeenCalledWith(mockTarget);
 

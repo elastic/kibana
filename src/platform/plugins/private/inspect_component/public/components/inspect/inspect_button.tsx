@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { isKeyboardShortcut } from '../../lib/keyboard_shortcut/keyboard_shortcut';
 import { InspectOverlay } from './overlay/inspect_overlay';
+import { INSPECT_BUTTON_TEST_SUBJ } from '../../lib/constants';
 
 const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel', {
   defaultMessage: 'Inspect component',
@@ -87,7 +88,7 @@ export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props
           aria-pressed={isInspecting}
           css={buttonStyle}
           aria-label={ARIA_LABEL}
-          data-test-subj="inspectComponentButton"
+          data-test-subj={INSPECT_BUTTON_TEST_SUBJ}
           {...(buttonLocation === 'developerToolbar'
             ? {
                 color: 'text',

@@ -30,12 +30,18 @@ const PREVIEW_BADGE_LABEL = i18n.translate(
 
 interface Props {
   element: HTMLElement | null;
+  /**
+   * Monotonic counter; bumping it requests a fresh screenshot of `element`.
+   * `InspectFlyout` increments this after a successful live-preview prop
+   * change or commit so the user sees the preview reflect their edit.
+   */
+  previewVersion?: number;
 }
 
 /**
  * ComponentPreview component displays a preview of the source component associated with the inspected HTML element.
  */
-export const ComponentPreview = ({ element }: Props) => {
+export const ComponentPreview = ({ element, previewVersion = 0 }: Props) => {
   const [screenshot, setScreenshot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,21 +64,36 @@ export const ComponentPreview = ({ element }: Props) => {
   `;
 
   useEffect(() => {
-    const generateScreenshot = async () => {
+    if (!element) return;
+
+    // Debounce the capture so rapid prop edits (every keystroke in a text
+    // field, repeated dropdown changes, etc.) coalesce into a single
+    // dom-to-image run. 200ms is below the "feels sluggish" threshold for
+    // a single edit but more than long enough for React DevTools'
+    // overrideValueAtPath to commit the new render before we snapshot.
+    let cancelled = false;
+    const timer = setTimeout(async () => {
       try {
         const canvas = await domtoimage.toCanvas(element);
-        setScreenshot(canvas.toDataURL('image/png'));
+        if (!cancelled) {
+          setScreenshot(canvas.toDataURL('image/png'));
+        }
       } catch (err) {
-        return;
+        // dom-to-image can fail on cross-origin resources, very large
+        // subtrees, etc. We silently keep the previous screenshot rather
+        // than blanking the preview.
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
-    };
+    }, 200);
 
-    if (element) {
-      generateScreenshot();
-    }
-  }, [element]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [element, previewVersion]);
 
   if (!element) {
     return null;

@@ -35,7 +35,7 @@ export interface ReactFiberNode {
    * The {@link ReactFiberNode React Fiber node} that created this node.
    */
   _debugOwner?: ReactFiberNode | null;
-  /** The actual HTML element for host components, or component instance for class components. */
+  /** The actual DOM element for host components (null for function components). */
   stateNode?: HTMLElement | null;
   /** First child {@link ReactFiberNode React Fiber node}. */
   child?: ReactFiberNode | null;
@@ -45,6 +45,12 @@ export interface ReactFiberNode {
   return?: ReactFiberNode | null;
   /** HTML element associated with the {@link ReactFiberNode React Fiber node}. */
   element?: HTMLElement;
+  /** Current committed props for this fiber. */
+  memoizedProps?: Record<string, unknown> | null;
+  /** Props pending for the next render. */
+  pendingProps?: Record<string, unknown> | null;
+  /** The alternate fiber used for double-buffering. */
+  alternate?: ReactFiberNode | null;
 }
 
 /**

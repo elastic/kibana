@@ -9,6 +9,8 @@
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import { getComponentData, getComponentDataBodySchema } from './component_data/get_component_data';
+import { handleCommitProp, commitPropBodySchema } from './commit_prop';
+import { handleDocgen, docgenQuerySchema } from './docgen';
 
 /**
  * Options for {@link registerInspectComponentRoutes}.
@@ -20,11 +22,20 @@ interface InspectComponentRoutesOptions {
   logger: Logger;
 }
 
+const AUTH_OPT_OUT = {
+  security: {
+    authz: {
+      enabled: false as const,
+      reason: 'This route is opted out from authorization',
+    },
+  },
+  options: {
+    access: 'internal' as const,
+  },
+};
+
 /**
  * Register routes for the Inspect Component plugin.
- * @param {InspectComponentRoutesOptions} options
- * @param {http} options.httpService {@link HttpServiceSetup}
- * @param {Logger} options.logger {@link Logger}
  */
 export const registerInspectComponentRoutes = ({
   httpService,
@@ -32,30 +43,36 @@ export const registerInspectComponentRoutes = ({
 }: InspectComponentRoutesOptions) => {
   const router = httpService.createRouter();
 
-  /**
-   * @internal
-   * Route for getting data about a React component at a given path.
-   * @returns {Object} Result object.
-   * @returns {string[]} result.codeowners - List of codeowners for the file.
-   * @returns {string} result.relativePath - Path relative to the repo root.
-   * @returns {string} result.baseFileName - Base file name.
-   */
   router.post(
     {
       path: '/internal/inspect_component/inspect',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      options: {
-        access: 'internal',
-      },
+      ...AUTH_OPT_OUT,
       validate: {
         body: getComponentDataBodySchema,
       },
     },
     async (_ctx, req, res) => getComponentData({ req, res, logger })
+  );
+
+  router.post(
+    {
+      path: '/internal/inspect_component/commit_prop',
+      ...AUTH_OPT_OUT,
+      validate: {
+        body: commitPropBodySchema,
+      },
+    },
+    async (_ctx, req, res) => handleCommitProp({ req, res, logger })
+  );
+
+  router.get(
+    {
+      path: '/internal/inspect_component/docgen',
+      ...AUTH_OPT_OUT,
+      validate: {
+        query: docgenQuerySchema,
+      },
+    },
+    (_ctx, req, res) => handleDocgen({ req, res, logger })
   );
 };
