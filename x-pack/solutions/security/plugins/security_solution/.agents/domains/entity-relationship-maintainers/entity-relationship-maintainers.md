@@ -66,9 +66,6 @@ Links to existing documentation for this domain (Confluence, wikis, ADRs, README
 
 ## Who to contact
 
-- Architecture / data model questions: @elastic/contextual-security-apps, @elastic/security-entity-analytics
-- Engine / registry / task design: @chennn1990, @maxcold, @JordanSh
-- Performance / ES query (ES|QL, EUID, account exclusion) questions: @niros1, @JordanSh
-- Error-handling / partial-data / abort-signal correctness: @macroscopeapp
-- Scout test structure questions: @csr, @MadameSheema
-  > **[VERIFY]:** Owner handles derived from CODEOWNERS (`@elastic/contextual-security-apps`, `@elastic/security-entity-analytics` for `.../entity_analytics/maintainers`) and from PR-review reviewer activity; confirm the right point-of-contact per topic.
+- Architecture / data model questions: @seanrathier, @alexreal1314
+- Engine / registry questions: @chennn1990
+- Performance / ES|QL query questions: @romulets
