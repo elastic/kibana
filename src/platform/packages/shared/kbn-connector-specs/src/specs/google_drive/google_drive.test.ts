@@ -106,12 +106,34 @@ describe('GoogleDriveConnector', () => {
           pageSize: 250,
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
         },
       });
       expect(result).toEqual({
         files: mockResponse.data.files,
         nextPageToken: undefined,
       });
+    });
+
+    it('should include shared drive files in search results', async () => {
+      const mockResponse = { data: { files: [], nextPageToken: undefined } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GoogleDriveConnector.actions.searchFiles.handler(mockContext, {
+        query: "name contains 'budget'",
+        pageSize: 250,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.googleapis.com/drive/v3/files',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            includeItemsFromAllDrives: true,
+            supportsAllDrives: true,
+          }),
+        })
+      );
     });
 
     it('should include pageToken when provided', async () => {
@@ -136,6 +158,8 @@ describe('GoogleDriveConnector', () => {
           pageToken: 'next-page-token',
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
         },
       });
     });
@@ -240,12 +264,35 @@ describe('GoogleDriveConnector', () => {
           pageSize: 250,
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
         },
       });
       expect(result).toEqual({
         files: mockResponse.data.files,
         nextPageToken: undefined,
       });
+    });
+
+    it('should include shared drive files when listing a folder', async () => {
+      const mockResponse = { data: { files: [], nextPageToken: undefined } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GoogleDriveConnector.actions.listFiles.handler(mockContext, {
+        folderId: 'folder-abc123',
+        pageSize: 250,
+        includeTrashed: false,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.googleapis.com/drive/v3/files',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            includeItemsFromAllDrives: true,
+            supportsAllDrives: true,
+          }),
+        })
+      );
     });
 
     it('should list files in a specific folder', async () => {
@@ -420,7 +467,7 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
         {
-          params: { fields: 'id, name, mimeType, size' },
+          params: { fields: 'id, name, mimeType, size', supportsAllDrives: true },
         }
       );
 
@@ -428,7 +475,7 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
         {
-          params: { alt: 'media' },
+          params: { alt: 'media', supportsAllDrives: true },
           responseType: 'arraybuffer',
         }
       );
@@ -533,7 +580,7 @@ describe('GoogleDriveConnector', () => {
 
         expect(mockClient.get).toHaveBeenCalledWith(
           'https://www.googleapis.com/drive/v3/files/txt-1',
-          { params: { alt: 'media' }, responseType: 'text' }
+          { params: { alt: 'media', supportsAllDrives: true }, responseType: 'text' }
         );
         expect(result).toEqual(
           expect.objectContaining({ content: 'hello world', encoding: 'utf-8' })
@@ -555,7 +602,7 @@ describe('GoogleDriveConnector', () => {
 
         expect(mockClient.get).toHaveBeenCalledWith(
           'https://www.googleapis.com/drive/v3/files/pdf-1',
-          { params: { alt: 'media' }, responseType: 'arraybuffer' }
+          { params: { alt: 'media', supportsAllDrives: true }, responseType: 'arraybuffer' }
         );
         expect(result).toEqual(
           expect.objectContaining({
@@ -641,7 +688,7 @@ describe('GoogleDriveConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(result).toEqual({ files: [mockResponse.data] });
     });
@@ -669,15 +716,15 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledTimes(3);
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-2',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-3',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(result).toEqual({
         files: [mockResponse1.data, mockResponse2.data, mockResponse3.data],
