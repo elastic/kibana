@@ -18,7 +18,7 @@ const bodySchema = schema.object({
   date_start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
   date_end: schema.maybe(schema.string({ maxLength: ISO_DATE_MAX_LENGTH })),
   filter: schema.maybe(schema.string({ maxLength: 8192 })),
-  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
+  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 })),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({

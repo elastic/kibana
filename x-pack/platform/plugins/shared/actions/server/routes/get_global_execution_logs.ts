@@ -25,14 +25,14 @@ const sortFieldSchema = schema.oneOf([
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
   defaultValue: [{ timestamp: { order: 'desc' } }],
-  maxSize: 3,
+  maxSize: 10,
 });
 
 const bodySchema = schema.object({
   date_start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
   date_end: schema.maybe(schema.string({ maxLength: ISO_DATE_MAX_LENGTH })),
   filter: schema.maybe(schema.string({ maxLength: 8192 })),
-  per_page: schema.number({ defaultValue: 10, min: 1, max: 1000 }),
+  per_page: schema.number({ defaultValue: 10, min: 1, max: 100 }),
   page: schema.number({ defaultValue: 1, min: 1, max: 1000 }),
   sort: sortFieldsSchema,
   namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
