@@ -13,7 +13,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isString } from 'lodash';
 import {
   useConversationError,
@@ -83,15 +83,14 @@ export const Conversation: React.FC<{}> = () => {
     cancelAll: cancelAllStreams,
   });
 
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
   const { showScrollButton, smoothScrollToBottom, scrollToMostRecentRoundTop, stickToBottom } =
     useConversationScrollActions({
-      isResponseLoading,
       conversationId: conversationId || '',
-      scrollContainer: scrollContainerRef.current,
+      scrollContainer,
     });
 
-  const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
+  const scrollContainerHeight = scrollContainer?.clientHeight ?? 0;
 
   const stagedAttachmentIds = useMemo(() => {
     const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
@@ -122,6 +121,12 @@ export const Conversation: React.FC<{}> = () => {
       });
     }
   }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
+
+  useEffect(() => {
+    if (isResponseLoading && !showScrollButton) {
+      stickToBottom();
+    }
+  }, [conversationRounds, isResponseLoading, showScrollButton, stickToBottom]);
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
@@ -183,7 +188,7 @@ export const Conversation: React.FC<{}> = () => {
           <EuiFlexGroup
             direction="column"
             alignItems="center"
-            ref={scrollContainerRef}
+            ref={setScrollContainer}
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>

@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
 const DISTANCE_FROM_BOTTOM_THRESHOLD = 50; // pixels
-const SCROLL_POSITION_CHECK_INTERVAL = 1500; // milliseconds
 const DEBOUNCE_DELAY = 20; // milliseconds
 
 const scrollToMostRecentRound = ({
@@ -64,11 +63,9 @@ const createDebouncedCheckScrollPosition = (
 };
 
 export const useConversationScrollActions = ({
-  isResponseLoading,
   conversationId,
   scrollContainer,
 }: {
-  isResponseLoading: boolean;
   conversationId: string;
   scrollContainer: HTMLDivElement | null;
 }) => {
@@ -83,24 +80,12 @@ export const useConversationScrollActions = ({
     );
 
     scrollContainer.addEventListener('scroll', debouncedCheckScrollPosition);
-
-    // Set up interval for streaming check (only when response is loading)
-    let interval: NodeJS.Timeout | undefined;
-    if (isResponseLoading) {
-      interval = setInterval(
-        () => checkScrollPosition(scrollContainer, setShowScrollButton),
-        SCROLL_POSITION_CHECK_INTERVAL
-      );
-    } else {
-      // when the content stops streaming, check the scroll position
-      checkScrollPosition(scrollContainer, setShowScrollButton);
-    }
+    checkScrollPosition(scrollContainer, setShowScrollButton);
 
     return () => {
       scrollContainer.removeEventListener('scroll', debouncedCheckScrollPosition);
-      if (interval) clearInterval(interval);
     };
-  }, [isResponseLoading, conversationId, scrollContainer]);
+  }, [conversationId, scrollContainer]);
 
   const stickToBottom = useCallback(() => {
     if (!scrollContainer) {
