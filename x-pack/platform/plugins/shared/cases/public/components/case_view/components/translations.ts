@@ -43,3 +43,19 @@ export const NO_SEARCH_RESULTS_BODY = i18n.translate(
     defaultMessage: 'Try modifying your search.',
   }
 );
+
+export const TYPE = i18n.translate('xpack.cases.attachmentTypeFilter.type', {
+  defaultMessage: 'Type',
+});
+
+export const OBSERVABLES = i18n.translate('xpack.cases.attachmentTypeFilter.observables', {
+  defaultMessage: 'Observables',
+});
+
+export const AUTHOR = i18n.translate('xpack.cases.authorFilter.buttonLabel', {
+  defaultMessage: 'Author',
+});
+
+export const CLEAR_FILTERS = i18n.translate('xpack.cases.caseViewFilters.clearFilters', {
+  defaultMessage: 'Clear filters',
+});

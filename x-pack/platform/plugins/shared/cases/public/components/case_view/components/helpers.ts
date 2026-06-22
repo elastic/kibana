@@ -21,6 +21,21 @@ import {
   isUnifiedEventAttachment,
 } from '../../../../common/utils/attachments';
 import { getSavedObjectAttachmentAttributes } from '../../attachments/common/saved_object/helpers';
+import { UNKNOWN } from '../../../common/translations';
+
+/**
+ * Stable identifier for an attachment author. Prefers `profileUid`, then
+ * `username`, then `email`. Returns the empty string when none are set.
+ */
+export const getAttachmentAuthorKey = (user: AttachmentUIV2['createdBy']): string =>
+  user.profileUid ?? user.username ?? user.email ?? '';
+
+/**
+ * Display label for an attachment author. Prefers `fullName`, then `username`,
+ * then `email`, falling back to a localized "Unknown" placeholder.
+ */
+export const getAttachmentAuthorLabel = (user: AttachmentUIV2['createdBy']): string =>
+  user.fullName || user.username || user.email || UNKNOWN;
 
 export const getAttachmentItemCount = (comment: AttachmentUIV2): number => {
   if (isAlertAttachment(comment)) {

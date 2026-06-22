@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexItem,
@@ -16,24 +17,27 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { CaseViewFilters } from './case_view_filters';
+import { useCaseViewFilters } from '../hooks/use_case_view_filters';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
-import { toUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
+import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
 import { CaseViewTabs } from '../case_view_tabs';
-import { CaseViewObservables } from './case_view_observables';
+import { CaseViewObservables, OBSERVABLES_FILTER_ID } from './case_view_observables';
 import { useCaseObservables } from '../use_case_observables';
 import type { OnUpdateFields } from '../types';
 import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { getAttachmentItemCount } from './helpers';
 import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY } from './translations';
+import { CLEAR_FILTERS } from './translations';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -56,40 +60,70 @@ export const CaseViewAttachments = ({
 
   const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
 
+  const {
+    filteredCaseData: authorFilteredCaseData,
+    isTypeVisible,
+    isAuthorFilterActive,
+    hasActiveFilter,
+    clearFilters,
+    ...filters
+  } = useCaseViewFilters(caseData);
+
   const countsByType = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const comment of caseData.comments) {
-      const unifiedType = toUnifiedAttachmentType(comment.type, owner);
+    for (const comment of authorFilteredCaseData.comments) {
+      const unifiedType = resolveUnifiedAttachmentType(comment, owner);
       counts.set(unifiedType, (counts.get(unifiedType) ?? 0) + getAttachmentItemCount(comment));
     }
     return counts;
-  }, [caseData.comments, owner]);
+  }, [authorFilteredCaseData.comments, owner]);
+
+  // fileStats covers the whole case; when an author filter is active fall back
+  // to the per-author file count derived from caseData.comments so the badge
+  // matches what the author is actually responsible for.
+  const effectiveFileCount = isAuthorFilterActive
+    ? countsByType.get(FILE_ATTACHMENT_TYPE) ?? 0
+    : fileCount;
+
+  const excludedTypes = useMemo(
+    () =>
+      unifiedAttachmentTypeRegistry
+        .list()
+        .filter((type) => !type.getAttachmentTabViewObject?.()?.children)
+        .map((type) => type.id),
+    [unifiedAttachmentTypeRegistry]
+  );
 
   // Render one accordion per registered type that has a tab view AND a non-zero count.
-  // file count uses the file client as the source of truth
   const attachmentSections = useMemo(
     () =>
       unifiedAttachmentTypeRegistry
         .list()
         .flatMap((type) => {
+          if (!isTypeVisible(type.id)) return [];
           const Children = type.getAttachmentTabViewObject?.()?.children;
           if (!Children) {
             return [];
           }
           const count =
-            type.id === FILE_ATTACHMENT_TYPE ? fileCount : countsByType.get(type.id) ?? 0;
+            type.id === FILE_ATTACHMENT_TYPE ? effectiveFileCount : countsByType.get(type.id) ?? 0;
           if (count < 1) {
             return [];
           }
           return [{ id: type.id, displayName: type.displayName, count, Children }];
         })
         .sort((a, b) => a.displayName.localeCompare(b.displayName)),
-    [unifiedAttachmentTypeRegistry, countsByType, fileCount]
+    [unifiedAttachmentTypeRegistry, countsByType, effectiveFileCount, isTypeVisible]
   );
 
   // Observables stays hardcoded: there's no other entry point to add observables
   // to a case, so the accordion must be visible even when the count is 0.
-  const showObservables = observablesAuthorized && isObservablesFeatureEnabled;
+  // Observables have no author, so any active author filter hides them.
+  const showObservables =
+    observablesAuthorized &&
+    isObservablesFeatureEnabled &&
+    isTypeVisible(OBSERVABLES_FILTER_ID) &&
+    !isAuthorFilterActive;
   const { observables: filteredObservables, isLoading: isLoadingObservables } = useCaseObservables(
     caseData,
     searchTerm
@@ -97,9 +131,10 @@ export const CaseViewAttachments = ({
 
   const showNoResults = useMemo(
     () =>
-      Boolean(searchTerm) &&
-      attachmentSections.length === 0 &&
-      (!showObservables || filteredObservables.length === 0),
+      // observables is either hidden (e.g. observability)
+      // or a search is active and produced zero matches
+      (!showObservables || (Boolean(searchTerm) && filteredObservables.length === 0)) &&
+      attachmentSections.length === 0,
     [searchTerm, attachmentSections.length, showObservables, filteredObservables.length]
   );
 
@@ -138,6 +173,7 @@ export const CaseViewAttachments = ({
               fullWidth
             />
           </EuiFlexItem>
+          <CaseViewFilters caseData={caseData} state={filters} excludedTypes={excludedTypes} />
           <EuiFlexItem grow={false}>
             <EuiSuperUpdateButton
               fill={false}
@@ -150,7 +186,28 @@ export const CaseViewAttachments = ({
             <CaseViewAttachButton caseData={caseData} fill />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        {hasActiveFilter ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup gutterSize="none" justifyContent="flexStart">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={clearFilters}
+                  size="xs"
+                  iconSide="left"
+                  iconType="cross"
+                  flush="left"
+                  data-test-subj="case-view-filters-clear-filters"
+                >
+                  {CLEAR_FILTERS}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+          </>
+        ) : (
+          <EuiSpacer size="m" />
+        )}
         {showNoResults ? (
           <EuiEmptyPrompt
             data-test-subj="case-view-attachments-no-search-results"
@@ -172,7 +229,7 @@ export const CaseViewAttachments = ({
           <EuiFlexGroup direction="column" gutterSize="m">
             {attachmentSections.map(({ id, displayName, count, Children }) => (
               <AttachmentAccordion key={id} id={id} title={displayName} count={count}>
-                <Children caseData={caseData} searchTerm={searchTerm} />
+                <Children caseData={authorFilteredCaseData} searchTerm={searchTerm} />
               </AttachmentAccordion>
             ))}
             {showObservables && (
