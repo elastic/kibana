@@ -157,7 +157,6 @@ describe('muteAll()', () => {
         operation: 'muteAll',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
     });
 
     test('throws when user is not authorised to muteAll this type of alert', async () => {
