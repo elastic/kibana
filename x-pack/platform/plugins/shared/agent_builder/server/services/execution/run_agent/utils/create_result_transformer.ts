@@ -164,7 +164,7 @@ const tryFilestoreSubstitution = async ({
         data: {
           filepath: agentVisiblePath,
           comment:
-            'The result has been stored on the filestore. You can access it using the filestore_read tool with the specified filepath',
+            'The result has been stored in the virtual file system. You can access it using the read_file tool with the specified filepath.',
         },
       });
     }
