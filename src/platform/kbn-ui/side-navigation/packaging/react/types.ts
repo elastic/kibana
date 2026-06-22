@@ -42,11 +42,20 @@ export interface SecondaryMenuItem {
   badgeType?: BadgeType;
   /** If true, opens link in a new tab with an external icon. */
   isExternal?: boolean;
+  /** Optional icon buttons rendered on the trailing edge of this menu item row. */
+  itemActions?: PanelHeaderAction[];
 }
 
 /**
  * A section grouping within a secondary menu.
  */
+export interface SecondaryMenuSectionEmptyState {
+  /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
+  iconType: string;
+  /** Message shown when the section has no items. */
+  message: string;
+}
+
 export interface SecondaryMenuSection {
   /** Unique identifier for this section. */
   id: string;
@@ -54,6 +63,60 @@ export interface SecondaryMenuSection {
   items: SecondaryMenuItem[];
   /** Optional section header label (omit for unlabeled sections). */
   label?: string;
+  /** Optional animation when items in this section are reordered. */
+  animateItemReorder?: boolean;
+  /** Optional placeholder shown when the section has no items. */
+  emptyState?: SecondaryMenuSectionEmptyState;
+}
+
+/**
+ * An icon button rendered in a side panel header next to the panel title.
+ */
+export interface PanelHeaderAction {
+  /** Accessible label for the header action button. */
+  'aria-label': string;
+  /** Optional test selector for automated testing. */
+  'data-test-subj'?: string;
+  /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
+  iconType: string;
+  /** Unique identifier for this header action. */
+  id: string;
+  /** Optional click handler for the header action button. */
+  onClick?: () => void;
+  /** When set, clicking the header action opens the nested side panel with this id. */
+  opensNestedPanel?: string;
+  /** When set, clicking the action opens a registered item action menu popover. */
+  opensItemActionMenu?: string;
+  /** Context passed to the registered item action menu renderer. */
+  itemActionMenuContext?: Record<string, string>;
+}
+
+/**
+ * A nested side panel opened from a side panel header action.
+ */
+export interface PanelNestedPanel {
+  /** Unique identifier for this nested panel. */
+  id: string;
+  /** Title to display in the nested panel header. */
+  title: string;
+}
+
+/**
+ * A text button rendered at the bottom of a side panel for panel opener nodes.
+ */
+export interface PanelFooterAction {
+  /** Optional test selector for automated testing. */
+  'data-test-subj'?: string;
+  /** URL or hash for navigation. */
+  href: string;
+  /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
+  iconType: string;
+  /** Unique identifier for this footer action. */
+  id: string;
+  /** Display text for the footer action. */
+  label: string;
+  /** Optional click handler for the footer action button. */
+  onClick?: () => void;
 }
 
 /**
@@ -72,6 +135,12 @@ export interface MenuItem {
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
   badgeType?: BadgeType;
+  /** Optional icon buttons rendered in the side panel header next to the panel title. */
+  panelHeaderActions?: PanelHeaderAction[];
+  /** Optional nested side panels opened from panel header actions. */
+  panelNestedPanels?: PanelNestedPanel[];
+  /** Optional text buttons rendered at the bottom of the side panel. */
+  panelFooterActions?: PanelFooterAction[];
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
 }

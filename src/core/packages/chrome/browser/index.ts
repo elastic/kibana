@@ -66,10 +66,28 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,
+  PanelNestedPanelDefinition,
+  SidePanelNestedPanelItemClickParams,
+  SidePanelNestedPanelRenderProps,
+  SidePanelNestedPanelRenderer,
+  SideNavItemActionMenuContext,
+  SideNavItemActionMenuRenderProps,
+  SideNavItemActionMenuRenderer,
   SidebarApp,
   SidebarAppConfig,
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
   GlobalSearchConfig,
+} from './src';
+
+export {
+  getSidePanelNestedPanelRenderer,
+  registerSidePanelNestedPanelRenderer,
+  renderSidePanelNestedPanel,
+  subscribeSidePanelNestedPanelRenderers,
+  getSideNavItemActionMenuRenderer,
+  registerSideNavItemActionMenuRenderer,
+  renderSideNavItemActionMenu,
+  subscribeSideNavItemActionMenuRenderers,
 } from './src';

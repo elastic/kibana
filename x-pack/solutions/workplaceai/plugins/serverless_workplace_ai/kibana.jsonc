@@ -22,7 +22,7 @@
       "agentBuilder",
       "workflowsManagement"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["dashboard"],
     "requiredBundles": []
   }
 }

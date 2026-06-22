@@ -276,8 +276,32 @@ const initNavNode = <
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
   }
 
+  const { panelFooterActions: panelFooterActionDefs, ...restNavNodeFromProps } = navNodeFromProps;
+
+  const panelFooterActions = panelFooterActionDefs?.map((action) => {
+    const actionDeepLink = action.link !== undefined ? deepLinks[action.link] : undefined;
+    const resolvedHref = actionDeepLink?.href ?? action.href;
+
+    if (!resolvedHref) {
+      throw new Error(
+        `[Chrome navigation] Panel footer action [${action.id}] is missing href or valid link.`
+      );
+    }
+
+    if (!isAbsoluteLink(resolvedHref)) {
+      throw new Error(
+        `[Chrome navigation] Panel footer action [${action.id}] href must be an absolute URL.`
+      );
+    }
+
+    return {
+      ...action,
+      href: resolvedHref,
+    };
+  });
+
   const navNode: ChromeProjectNavigationNode = {
-    ...navNodeFromProps,
+    ...restNavNodeFromProps,
     id,
     href: deepLink?.url ?? href,
     path,
@@ -285,6 +309,7 @@ const initNavNode = <
     deepLink,
     isExternalLink,
     sideNavStatus,
+    ...(panelFooterActions ? { panelFooterActions } : {}),
   };
 
   return navNode;

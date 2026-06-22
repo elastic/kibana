@@ -111,6 +111,44 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'home' | 'panelOpener';
 
+export interface PanelHeaderActionDefinition {
+  ariaLabel: string;
+  iconType: IconType;
+  id: string;
+  /**
+   * When set, clicking the header action opens the nested side panel with this id.
+   */
+  opensNestedPanel?: string;
+  /**
+   * When set, clicking the action opens a registered item action menu popover.
+   */
+  opensItemActionMenu?: string;
+  /**
+   * Context passed to the registered item action menu renderer.
+   */
+  itemActionMenuContext?: Record<string, string>;
+}
+
+/** @public */
+export type ItemActionDefinition = PanelHeaderActionDefinition;
+
+export interface PanelNestedPanelDefinition {
+  id: string;
+  title: string;
+}
+
+export interface PanelFooterActionDefinition {
+  iconType: IconType;
+  id: string;
+  label: string;
+  href?: string;
+  link?: AppDeepLinkId;
+}
+
+export interface PanelFooterAction extends PanelFooterActionDefinition {
+  href: string;
+}
+
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
@@ -159,6 +197,39 @@ interface NodeDefinitionBase {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+
+  /**
+   * (optional) Icon buttons rendered in the side panel header next to the panel title.
+   */
+  panelHeaderActions?: PanelHeaderActionDefinition[];
+
+  /**
+   * (optional) Nested side panels opened from panel header actions.
+   */
+  panelNestedPanels?: PanelNestedPanelDefinition[];
+
+  /**
+   * (optional) Actions rendered at the bottom of the side panel for panel opener nodes.
+   */
+  panelFooterActions?: PanelFooterActionDefinition[];
+
+  /**
+   * (optional) Animate list item reordering within this section's side nav panel.
+   */
+  animateItemReorder?: boolean;
+
+  /**
+   * (optional) Placeholder shown when a section has no child items.
+   */
+  emptyState?: {
+    iconType: IconType;
+    message: string;
+  };
+
+  /**
+   * (optional) Icon buttons rendered on the trailing edge of this side nav item row.
+   */
+  itemActions?: ItemActionDefinition[];
 }
 
 /** @public */
@@ -188,6 +259,10 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    * Flag to indicate if the node is an "external" cloud link
    */
   isExternalLink?: boolean;
+  /**
+   * Resolved panel footer actions with absolute hrefs.
+   */
+  panelFooterActions?: PanelFooterAction[];
 }
 
 /** @public */
