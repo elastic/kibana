@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/244076
-  describe.skip('lens fields list tests', () => {
+  describe('lens fields list tests', () => {
     for (const datasourceType of ['form-based', 'ad-hoc', 'ad-hoc-no-timefield']) {
       describe(`${datasourceType} datasource`, () => {
         before(async () => {
@@ -172,31 +171,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               '[data-test-subj="lnsFieldListPanelFieldContent"] .echChart'
             )
           ).to.eql(false);
+          // close the popover
+          await testSubjects.click(fieldId);
           await lens.searchField('');
         });
 
         it('should change popover content if user defines a filter that affects field values', async () => {
+          const readStatsFooterCount = async () =>
+            retry.try(async () => {
+              const text = await testSubjects.getVisibleText('lnsFieldListPanel-statsFooter');
+              const parsed = parseInt(
+                text.replaceAll(/(Calculated from | records\.)/g, '').replace(',', ''),
+                10
+              );
+              expect(Number.isFinite(parsed)).to.be(true);
+              return parsed;
+            });
+
           // check the current records count for stats
           const [fieldId] = await lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
-          const valuesCount = parseInt(
-            (await testSubjects.getVisibleText('lnsFieldListPanel-statsFooter'))
-              .replaceAll(/(Calculated from | records\.)/g, '')
-              .replace(',', ''),
-            10
-          );
+          const valuesCount = await readStatsFooterCount();
+          // close the popover
+          await testSubjects.click(fieldId);
           // define a filter
           await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
+          await header.waitUntilLoadingHasFinished();
           await retry.waitFor('Wait for the filter to take effect', async () => {
             await testSubjects.click(fieldId);
             // check for top values chart has changed compared to the previous test
-            const newValuesCount = parseInt(
-              (await testSubjects.getVisibleText('lnsFieldListPanel-statsFooter'))
-                .replaceAll(/(Calculated from | records\.)/g, '')
-                .replace(',', ''),
-              10
-            );
+            const newValuesCount = await readStatsFooterCount();
+            // close the popover
+            await testSubjects.click(fieldId);
             return newValuesCount < valuesCount;
           });
         });
