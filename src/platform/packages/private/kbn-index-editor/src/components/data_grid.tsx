@@ -158,7 +158,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const getRowIndicator = useCallback(
     (row: DataTableRecord, euiThemeComputed: EuiThemeComputed) => {
       const pendingUpdate = savingDocs.get(row.id);
-      if (!pendingUpdate || pendingUpdate.type === 'delete-doc') {
+      // Only highlight rows that carry an actual pending value (a new row with content or an edit
+      // that still differs from the stored value). Reverted edits and empty new rows are not dirty.
+      if (pendingUpdate?.type !== 'add-doc' || Object.keys(pendingUpdate.update).length === 0) {
         return undefined;
       }
       return {
