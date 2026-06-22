@@ -88,9 +88,9 @@ entries:
   - https://github.com/elastic/kibana/pull/273521
 - file:
     name: 273392.yaml
-    checksum: cffe557c163785caa1825b524b432a7d60f0ad49
+    checksum: 3a6c535deb1de9473fcd67b9c4dae9e396222dfa
   type: bug-fix
-  title: Fix mute, unmute, and snooze failing without connector privileges
+  title: Fix the mute, unmute, and snooze actions failing without connector privileges
   products:
   - product: cloud-serverless
     target: 2026-06-18
@@ -140,9 +140,9 @@ entries:
   - https://github.com/elastic/kibana/issues/273366
 - file:
     name: 271532.yaml
-    checksum: a297c2c8d7aa53f4d36141ff7d9fd7c93f5b8367
+    checksum: 3adfaabb99d4776b4f0880179c53ce154f95f1df
   type: enhancement
-  title: Move Agent builder link to the top of the Security solutions navigation
+  title: Move Agent Builder link to the top of the Security solution's navigation
   products:
   - product: cloud-serverless
     target: 2026-06-18
@@ -216,9 +216,9 @@ entries:
   - https://github.com/elastic/kibana/issues/272609
 - file:
     name: 267849.yaml
-    checksum: 5acae466b3cb60a8ffd7a77ca63c79e3ab5334fd
+    checksum: 6977e5c2557d2906c4fda7cd1dbb56cfa903af40
   type: enhancement
-  title: Add remote cluster filter to Synthetics monitors overview
+  title: Add remote cluster filter to the Synthetics monitors overview
   products:
   - product: cloud-serverless
     target: 2026-06-18

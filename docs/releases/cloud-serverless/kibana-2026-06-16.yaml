@@ -21,14 +21,14 @@ entries:
   - https://github.com/elastic/kibana/issues/257369
 - file:
     name: 272414.yaml
-    checksum: e7a32d99369042bf046b4d0fb711983c97e75ff4
+    checksum: ad846435a7217b52b4c6686f0127b957beacd399
   type: breaking-change
   title: Deprecate `elastic.apm` settings
   products:
   - product: cloud-serverless
     target: 2026-06-16
-  impact: Elastic APM instrumentation is deprecated and will be removed in future versions.
-  action: Use the OpenTelemetry instrumentation when collecting traces and metrics from Kibana. Refer to [these docs](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces) for more information about how to configure it.
+  impact: The Elastic APM instrumentation is deprecated and will be removed in a future version.
+  action: Use the OpenTelemetry instrumentation when collecting traces and metrics from Kibana. Refer to [Instrumenting with OTel Traces](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces) for more information.
   areas:
   - Kibana platform
   prs:
@@ -105,9 +105,9 @@ entries:
   - https://github.com/elastic/kibana/issues/272583
 - file:
     name: 271844.yaml
-    checksum: 683e189dc0ee1ec4bb263e11ea74814a552fd56e
+    checksum: 1dea9e92236dc2240a5f68a289f10ed328963da6
   type: enhancement
-  title: Show browser monitor TLS certificates on the certificates page
+  title: Show browser monitor TLS certificates on the TLS Certificates page
   products:
   - product: cloud-serverless
     target: 2026-06-16
@@ -318,13 +318,13 @@ entries:
   - https://github.com/elastic/kibana/pull/271800
 - file:
     name: 271441.yaml
-    checksum: 227b38ac3dbb443c71c183555581124acc76e3d7
+    checksum: 088bd3bb775371d5d6d97973cecf736b41e226c7
   type: bug-fix
-  title: Fix stack alerts page double loading with filter controls
+  title: Fix the Alerts page double loading with filter controls
   products:
   - product: cloud-serverless
     target: 2026-06-16
-  description: Fix Stack Alerts page fetching alerts twice on load
+  description: Fix the Alerts page fetching alerts twice on load
   areas:
   - Alerting and reporting
   prs:
@@ -405,9 +405,9 @@ entries:
   - https://github.com/elastic/kibana/pull/272493
 - file:
     name: 271270.yaml
-    checksum: 2587a5d1152d84b1313b9b25febf4edc3c974804
+    checksum: 085c4ca15e1aa5baca705bc36466664d5ef66f45
   type: feature
-  title: Allow users to cancel unenroll actions after scheduled
+  title: Allow users to cancel scheduled unenroll actions
   products:
   - product: cloud-serverless
     target: 2026-06-16
@@ -419,13 +419,13 @@ entries:
   - https://github.com/elastic/kibana/issues/189508
 - file:
     name: 272276.yaml
-    checksum: 15177fc186c273a18a5fc18bb808a8a63f95bef7
+    checksum: a4831760d2d76e07d31ad4e03073ad36fa372013
   type: bug-fix
   title: Fix announcement modal reappearing after dismissal on fast navigation
   products:
   - product: cloud-serverless
     target: 2026-06-16
-  description: '> Fixes an issue where the Agent Builder announcement modal could reappear on page navigation after being dismissed, particularly in high-latency or proxy environments.'
+  description: Fixes an issue where the Agent Builder announcement modal could reappear on page navigation after being dismissed, particularly in high-latency or proxy environments.
   prs:
   - https://github.com/elastic/kibana/pull/272276
   issues:
@@ -471,9 +471,9 @@ entries:
   - https://github.com/elastic/kibana/pull/271353
 - file:
     name: 271922.yaml
-    checksum: 692e72075b80c56391530d80d1a73c58da21d72a
+    checksum: f6c5b1fcf26676a40162a2857da12d77ec43999b
   type: bug-fix
-  title: Fix yaml literal block scalar in Fleet
+  title: Fix YAML literal block scalar in Fleet
   products:
   - product: cloud-serverless
     target: 2026-06-16
@@ -546,9 +546,9 @@ entries:
   - https://github.com/elastic/kibana/pull/272122
 - file:
     name: 272397.yaml
-    checksum: de1bc82353eab58f9aab12e09787413d169f80c8
+    checksum: 8b44b2ad801effbc60d2f106642e5c6346e2c31c
   type: bug-fix
-  title: Fix translations for the Elasticsearch solution getting started page
+  title: Fix translations for the Getting started page in the Elasticsearch solution
   products:
   - product: cloud-serverless
     target: 2026-06-16
@@ -558,9 +558,9 @@ entries:
   - https://github.com/elastic/kibana/pull/272397
 - file:
     name: 272155.yaml
-    checksum: 902fd5bc9e0308aeb408f955be3ca27c218c4bdd
+    checksum: ccdb0e9c1429de64d04c75caebd609769f76e228
   type: bug-fix
-  title: Fix `Security` category link on global side nav
+  title: Fix `Security` category link in the global navigation menu
   products:
   - product: cloud-serverless
     target: 2026-06-16
