@@ -56,7 +56,11 @@ export type DiscoverAppMenuRenderAction = (
   params: DiscoverAppMenuRunActionParams
 ) => ReactElement | null;
 
-type DiscoverAppMenuActionItem =
+/**
+ * Replaces the core action/submenu union with Discover-specific action params.
+ * The `never` fields keep `run`, `render`, and `items` mutually exclusive.
+ */
+type DiscoverAppMenuActionOrSubmenu =
   | {
       run: DiscoverAppMenuRunAction;
       render?: never;
@@ -71,33 +75,30 @@ type DiscoverAppMenuActionItem =
       run?: never;
       render?: never;
       items?: never;
+    }
+  | {
+      items: DiscoverAppMenuPopoverItem[];
+      run?: never;
+      render?: never;
     };
 
-interface DiscoverAppMenuSubmenu {
-  items: DiscoverAppMenuPopoverItem[];
-  run?: never;
-  render?: never;
-}
-
-type DiscoverAppMenuActionItemOrSubmenu = DiscoverAppMenuActionItem | DiscoverAppMenuSubmenu;
+type WithDiscoverAppMenuAction<BaseItem> = Omit<BaseItem, 'run' | 'items'> &
+  DiscoverAppMenuActionOrSubmenu;
 
 /**
  * Discover-specific popover item with typed run action and nested items
  */
-export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run' | 'items'> &
-  DiscoverAppMenuActionItemOrSubmenu;
+export type DiscoverAppMenuPopoverItem = WithDiscoverAppMenuAction<AppMenuPopoverItem>;
 
 /**
  * Discover-specific menu item type with typed run action and items
  */
-export type DiscoverAppMenuItemType = Omit<AppMenuItemType, 'run' | 'items'> &
-  DiscoverAppMenuActionItemOrSubmenu;
+export type DiscoverAppMenuItemType = WithDiscoverAppMenuAction<AppMenuItemType>;
 
 /**
  * Discover-specific primary action item with typed run action
  */
-export type DiscoverAppMenuPrimaryActionItem = Omit<AppMenuPrimaryActionItem, 'run' | 'items'> &
-  DiscoverAppMenuActionItemOrSubmenu;
+export type DiscoverAppMenuPrimaryActionItem = WithDiscoverAppMenuAction<AppMenuPrimaryActionItem>;
 
 /**
  * Discover-specific app menu config with typed menu items
