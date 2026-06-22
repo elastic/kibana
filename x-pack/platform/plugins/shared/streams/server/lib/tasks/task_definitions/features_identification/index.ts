@@ -15,7 +15,7 @@ import { isInferenceProviderError, type InferenceConnector } from '@kbn/inferenc
 import {
   type IdentifyFeaturesResult,
   type IterationResult,
-  type Feature,
+  type FeatureUpsert,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
@@ -127,7 +127,7 @@ async function runFeaturesIdentification(
 
   let hasTrackedIteration = false;
   const iterationResults: IterationResult[] = [];
-  let discoveredFeatures: Feature[] = [];
+  let discoveredFeatures: FeatureUpsert[] = [];
 
   try {
     const stream = await streamsClient.getStream(streamName);
