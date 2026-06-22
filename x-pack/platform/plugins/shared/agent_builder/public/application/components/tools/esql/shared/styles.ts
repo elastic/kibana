@@ -55,6 +55,10 @@ export const visualizationEmbeddableStyles = (height: number) =>
     flex: '1 1 auto',
     minHeight: 0,
     height,
+    '[class*="metric_vis_renderer"]': {
+      marginRight: '170px',
+      width: 'unset',
+    },
   });
 
 export const actionsContainerStyles = ({ euiTheme }: UseEuiTheme) =>
