@@ -109,7 +109,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
     control,
     rules: areCredentialsRequired
       ? {
-          validate: (value: string) =>
+          validate: (value?: string) =>
             value?.trim()
               ? true
               : i18n.translate('dataSets.createFlyout.gcs.fields.credentialsRequired', {

@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFieldPassword,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
@@ -95,6 +104,12 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
+  const { euiTheme } = useEuiTheme();
+  const [isOptionalOpen, setIsOptionalOpen] = useState(false);
+  const optionalId = useGeneratedHtmlId({
+    prefix: 'createDataSourceFlyoutAzureFederatedOptionalSettings',
+  });
+
   const { field: tenantIdField, fieldState: tenantIdState } = useController({
     name: 'settings.tenant_id',
     control,
@@ -139,6 +154,14 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
         }
       : undefined,
   });
+
+  const hasOptionalError = useMemo(() => Boolean(jwtAudienceState.error), [jwtAudienceState.error]);
+
+  useEffect(() => {
+    if (hasOptionalError) {
+      setIsOptionalOpen(true);
+    }
+  }, [hasOptionalError]);
 
   useEffect(() => {
     return () => {
@@ -188,25 +211,51 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
           inputRef={clientIdField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.azure.fields.jwtAudience', {
-          defaultMessage: 'JWT audience',
-        })}
-        fullWidth
-        isInvalid={Boolean(jwtAudienceState.error)}
-        error={jwtAudienceState.error?.message}
+      <EuiButtonEmpty
+        size="s"
+        flush="left"
+        iconType={isOptionalOpen ? 'arrowDown' : 'arrowRight'}
+        aria-expanded={isOptionalOpen}
+        aria-controls={optionalId}
+        onClick={() => setIsOptionalOpen((value) => !value)}
+        data-test-subj="createDataSourceFlyoutAzureFederatedOptionalToggle"
       >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutAzureJwtAudience"
+        {isOptionalOpen
+          ? i18n.translate('dataSets.createFlyout.azure.federated.optional.hide', {
+              defaultMessage: 'Hide optional authentication settings',
+            })
+          : i18n.translate('dataSets.createFlyout.azure.federated.optional.show', {
+              defaultMessage: 'Show optional authentication settings',
+            })}
+      </EuiButtonEmpty>
+      <div
+        id={optionalId}
+        hidden={!isOptionalOpen}
+        css={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      >
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label={i18n.translate('dataSets.createFlyout.azure.fields.jwtAudience', {
+            defaultMessage: 'JWT audience',
+          })}
           fullWidth
-          autoComplete="off"
           isInvalid={Boolean(jwtAudienceState.error)}
-          value={jwtAudienceField.value}
-          onChange={(e) => jwtAudienceField.onChange(e.target.value)}
-          name={jwtAudienceField.name}
-          inputRef={jwtAudienceField.ref}
-        />
-      </EuiFormRow>
+          error={jwtAudienceState.error?.message}
+        >
+          <EuiFieldText
+            data-test-subj="createDataSourceFlyoutAzureJwtAudience"
+            fullWidth
+            autoComplete="off"
+            isInvalid={Boolean(jwtAudienceState.error)}
+            value={jwtAudienceField.value}
+            onChange={(e) => jwtAudienceField.onChange(e.target.value)}
+            name={jwtAudienceField.name}
+            inputRef={jwtAudienceField.ref}
+          />
+        </EuiFormRow>
+      </div>
     </>
   );
 }
