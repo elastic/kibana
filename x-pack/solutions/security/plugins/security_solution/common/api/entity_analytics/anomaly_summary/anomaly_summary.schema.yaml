@@ -102,6 +102,16 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; only anomalies at or before this timestamp are returned
+        min_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Minimum record_score (inclusive); omit to use the default threshold of 1
+        max_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Maximum record_score (inclusive); omit to return all scores up to 100
         job_ids:
           type: array
           maxItems: 200
@@ -274,6 +284,16 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; defaults to now when omitted
+        min_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Minimum record_score (inclusive); omit to use the default threshold of 1
+        max_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Maximum record_score (inclusive); omit to return all scores up to 100
         threat_tactics:
           type: array
           maxItems: 100
@@ -304,11 +324,38 @@ components:
             maxLength: 150
           description: MITRE ATT&CK tactic names for all jobs that fired in this bucket
 
+    AnomalyOverviewHit:
+      type: object
+      required:
+        - jobId
+        - jobName
+        - timestamp
+        - anomalousValue
+      properties:
+        jobId:
+          type: string
+          maxLength: 150
+        jobName:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Human-readable display name for the ML job
+        timestamp:
+          type: string
+          maxLength: 100
+          description: ISO-8601 timestamp of the anomaly record
+        anomalousValue:
+          type: string
+          maxLength: 200
+          nullable: true
+          description: The anomalous value observed by the detector
+
     AnomalyOverviewResponse:
       type: object
       required:
         - entityId
         - anomalies
+        - recentAnomalies
         - tacticCounts
         - totalAnomaliesCount
         - from
@@ -324,6 +371,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AnomalyOverviewEntry'
+        recentAnomalies:
+          type: array
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/AnomalyOverviewHit'
+          description: Up to 3 most recent individual anomaly records, sorted by timestamp then score descending
         tacticCounts:
           type: object
           additionalProperties:

@@ -35,6 +35,14 @@ export const AnomalySummaryRequestBody = lazySchema(() =>
      */
     to: z.number().int().min(0).optional(),
     /**
+     * Minimum record_score (inclusive); omit to use the default threshold of 1
+     */
+    min_score: z.number().min(0).max(100).optional(),
+    /**
+     * Maximum record_score (inclusive); omit to return all scores up to 100
+     */
+    max_score: z.number().min(0).max(100).optional(),
+    /**
      * Filter results to the specified ML job IDs; returns all jobs when omitted
      */
     job_ids: z.array(z.string().max(150)).max(200).optional(),
@@ -133,6 +141,14 @@ export const AnomalyOverviewRequestBody = lazySchema(() =>
      */
     to: z.number().int().min(0).optional(),
     /**
+     * Minimum record_score (inclusive); omit to use the default threshold of 1
+     */
+    min_score: z.number().min(0).max(100).optional(),
+    /**
+     * Maximum record_score (inclusive); omit to return all scores up to 100
+     */
+    max_score: z.number().min(0).max(100).optional(),
+    /**
      * Filter results to jobs associated with the specified MITRE ATT&CK tactic names; returns all tactics when omitted
      */
     threat_tactics: z.array(z.string().max(150)).max(100).optional(),
@@ -158,11 +174,34 @@ export const AnomalyOverviewEntry = lazySchema(() =>
 );
 export type AnomalyOverviewEntry = z.infer<typeof AnomalyOverviewEntry>;
 
+export const AnomalyOverviewHit = lazySchema(() =>
+  z.object({
+    jobId: z.string().max(150),
+    /**
+     * Human-readable display name for the ML job
+     */
+    jobName: z.string().max(1000).nullable(),
+    /**
+     * ISO-8601 timestamp of the anomaly record
+     */
+    timestamp: z.string().max(100),
+    /**
+     * The anomalous value observed by the detector
+     */
+    anomalousValue: z.string().max(200).nullable(),
+  })
+);
+export type AnomalyOverviewHit = z.infer<typeof AnomalyOverviewHit>;
+
 export const AnomalyOverviewResponse = lazySchema(() =>
   z.object({
     entityId: z.string().max(200),
     entityType: z.string().max(100).optional(),
     anomalies: z.array(AnomalyOverviewEntry),
+    /**
+     * Up to 3 most recent individual anomaly records, sorted by timestamp then score descending
+     */
+    recentAnomalies: z.array(AnomalyOverviewHit).max(3),
     /**
      * Number of anomaly records associated with each MITRE ATT&CK tactic
      */

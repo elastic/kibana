@@ -58,12 +58,25 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
         const siemResponse = buildSiemResponse(response);
         try {
           const { entity_id: entityId, entity_type: entityType } = request.params;
-          const { from, to, threat_tactics: threatTactics } = request.body ?? {};
+          const {
+            from,
+            to,
+            min_score: minScore,
+            max_score: maxScore,
+            threat_tactics: threatTactics,
+          } = request.body ?? {};
 
           if (from !== undefined && from < getStartOfDayOneYearAgo()) {
             return siemResponse.error({
               statusCode: 400,
               body: '`from` must not be older than 1 year',
+            });
+          }
+
+          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: '`min_score` must not be greater than `max_score`',
             });
           }
 
@@ -78,6 +91,7 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
                 entityId,
                 entityType,
                 anomalies: [],
+                recentAnomalies: [],
                 tacticCounts: {},
                 totalAnomaliesCount: 0,
                 from: from ?? now - DEFAULT_OVERVIEW_LOOKBACK_MS,
@@ -91,6 +105,8 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
             entityType,
             fromMs: from,
             toMs: to,
+            minScore,
+            maxScore,
             threatTactics,
             logger,
             ml,
@@ -137,6 +153,8 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
             page_size: pageSize = 100,
             from,
             to,
+            min_score: minScore,
+            max_score: maxScore,
             job_ids: jobIds,
             threat_tactics: threatTactics,
             sort,
@@ -146,6 +164,13 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
             return siemResponse.error({
               statusCode: 400,
               body: '`from` must not be older than 1 year',
+            });
+          }
+
+          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: '`min_score` must not be greater than `max_score`',
             });
           }
 
@@ -173,6 +198,8 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
             esClient,
             fromMs: from,
             toMs: to,
+            minScore,
+            maxScore,
             jobIds,
             threatTactics,
             logger,

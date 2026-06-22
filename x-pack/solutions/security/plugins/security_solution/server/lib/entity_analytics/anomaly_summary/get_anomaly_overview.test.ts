@@ -49,6 +49,7 @@ const baseParams = {
 
 const emptyResult = {
   anomalies: [],
+  recentAnomalies: [],
   tacticCounts: {},
   totalAnomaliesCount: 0,
   from: FROM_MS,
@@ -65,7 +66,7 @@ const makeSearchResponse = (
   allJobKeys: string[] = [],
   total: number = 0
 ) => ({
-  hits: { total: { value: total } },
+  hits: { hits: [], total: { value: total } },
   aggregations: {
     by_time: {
       buckets: timeBuckets.map((b) => ({

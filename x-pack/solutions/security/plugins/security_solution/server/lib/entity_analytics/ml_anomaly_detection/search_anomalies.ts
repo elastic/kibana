@@ -11,25 +11,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
-import type { AnomalyHit } from './types';
-
-interface RawAnomalyRecord {
-  _id?: string;
-  timestamp: number;
-  job_id: string;
-  detector_index: number;
-  function?: string;
-  record_score: number;
-  field_name?: string;
-  by_field_name?: string;
-  by_field_value?: string;
-  over_field_name?: string;
-  over_field_value?: string;
-  partition_field_name?: string;
-  partition_field_value?: string;
-  actual?: number[];
-  typical?: number[];
-}
+import type { AnomalyHit, RawAnomalyRecord } from './types';
 
 interface RequiredHit {
   _id: string;
@@ -83,6 +65,8 @@ export interface SearchEntityAnomaliesOpts {
   entityId: string;
   fromMs?: number;
   toMs?: number;
+  minScore?: number;
+  maxScore?: number;
   jobIds?: string[];
   sort?: Array<{ field: AnomalySortField; order: AnomalySortOrder }>;
   from?: number;
@@ -103,6 +87,8 @@ export const searchEntityAnomalies = async ({
   entityId,
   fromMs,
   toMs,
+  minScore,
+  maxScore,
   jobIds: filterJobIds,
   sort = DEFAULT_SORT_SPEC,
   from = 0,
@@ -141,7 +127,14 @@ export const searchEntityAnomalies = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              { range: { record_score: { gte: 1 } } },
+              {
+                range: {
+                  record_score: {
+                    gte: minScore ?? 1,
+                    ...(maxScore !== undefined ? { lte: maxScore } : {}),
+                  },
+                },
+              },
               {
                 range: {
                   timestamp: {

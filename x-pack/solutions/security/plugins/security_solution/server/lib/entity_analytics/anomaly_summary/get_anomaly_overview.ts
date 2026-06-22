@@ -9,11 +9,17 @@ import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/cor
 import type { EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { compact } from 'lodash';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
 import { deriveBucketInterval } from '../../../../common/entity_analytics/anomalies/derive_bucket_interval';
-import type { AnomalyOverviewEntry } from '../../../../common/api/entity_analytics';
+import type {
+  AnomalyOverviewEntry,
+  AnomalyOverviewHit,
+} from '../../../../common/api/entity_analytics';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
+import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
+const NUM_RECENT_ANOMALIES = 3;
 export const DEFAULT_OVERVIEW_LOOKBACK_MS =
   ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
 
@@ -35,6 +41,8 @@ interface GetEntityAnomalyOverviewParams {
   entityType: EntityType;
   fromMs?: number;
   toMs?: number;
+  minScore?: number;
+  maxScore?: number;
   threatTactics?: string[];
   logger: Logger;
   ml: MlPluginSetup;
@@ -57,6 +65,7 @@ const buildTacticCounts = (
 
 interface AnomalyOverview {
   anomalies: AnomalyOverviewEntry[];
+  recentAnomalies: AnomalyOverviewHit[];
   tacticCounts: Record<string, number>;
   totalAnomaliesCount: number;
   from: number;
@@ -68,6 +77,8 @@ export const getEntityAnomalyOverview = async ({
   entityType,
   fromMs,
   toMs,
+  minScore,
+  maxScore,
   threatTactics,
   logger,
   ml,
@@ -76,8 +87,9 @@ export const getEntityAnomalyOverview = async ({
   const effectiveToMs = toMs ?? Date.now();
   const effectiveFromMs = fromMs ?? effectiveToMs - DEFAULT_OVERVIEW_LOOKBACK_MS;
   const bucketInterval = deriveBucketInterval(effectiveFromMs, effectiveToMs);
-  const empty = {
+  const empty: AnomalyOverview = {
     anomalies: [],
+    recentAnomalies: [],
     tacticCounts: {},
     totalAnomaliesCount: 0,
     from: effectiveFromMs,
@@ -102,12 +114,13 @@ export const getEntityAnomalyOverview = async ({
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
   let aggs: OverviewAggs | undefined;
+  let rawHits: RawAnomalyRecord[] = [];
   let totalAnomaliesCount = 0;
 
   try {
-    const resp = await mlSystem.mlAnomalySearch(
+    const resp = await mlSystem.mlAnomalySearch<RawAnomalyRecord>(
       {
-        size: 0,
+        size: NUM_RECENT_ANOMALIES,
         runtime_mappings: {
           entity_id: euid.painless.getEuidRuntimeMapping(entityType),
         },
@@ -116,13 +129,21 @@ export const getEntityAnomalyOverview = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              { range: { record_score: { gte: 1 } } },
+              {
+                range: {
+                  record_score: {
+                    gte: minScore ?? 1,
+                    ...(maxScore !== undefined ? { lte: maxScore } : {}),
+                  },
+                },
+              },
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
               { term: { entity_id: entityId } },
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
             ],
           },
         },
+        sort: [{ timestamp: { order: 'desc' } }, { record_score: { order: 'desc' } }],
         aggs: {
           by_time: {
             date_histogram: {
@@ -143,6 +164,7 @@ export const getEntityAnomalyOverview = async ({
     );
 
     aggs = resp.aggregations as unknown as OverviewAggs | undefined;
+    rawHits = compact(resp.hits.hits.map((h) => h._source));
     const total = resp.hits.total;
     totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
   } catch (err) {
@@ -172,5 +194,31 @@ export const getEntityAnomalyOverview = async ({
 
   const tacticCounts = buildTacticCounts(aggs?.by_time?.buckets ?? [], tacticsByJob);
 
-  return { anomalies, tacticCounts, totalAnomaliesCount, from: effectiveFromMs, to: effectiveToMs };
+  const recentAnomalies: AnomalyOverviewHit[] = rawHits.map((anomaly) => {
+    const jobConfig = allJobConfigs.get(anomaly.job_id);
+    const detector = jobConfig?.detectors[anomaly.detector_index];
+
+    let anomalousValue: string | undefined;
+
+    if (detector?.function === 'rare') {
+      anomalousValue = anomaly.by_field_value;
+    } else {
+      anomalousValue = String(anomaly.actual?.[0]);
+    }
+    return {
+      jobId: anomaly.job_id,
+      jobName: jobConfig?.jobName ?? anomaly.job_id,
+      timestamp: new Date(anomaly.timestamp).toISOString(),
+      anomalousValue: anomalousValue ?? null,
+    };
+  });
+
+  return {
+    anomalies,
+    recentAnomalies,
+    tacticCounts,
+    totalAnomaliesCount,
+    from: effectiveFromMs,
+    to: effectiveToMs,
+  };
 };
