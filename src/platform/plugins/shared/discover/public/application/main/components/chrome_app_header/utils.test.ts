@@ -108,10 +108,13 @@ describe('getChromeHeaderBack', () => {
       label: 'Dashboard',
     });
 
+    const preventDefault = jest.fn();
     if (back && typeof back !== 'string' && back.onClick) {
-      back.onClick({} as unknown as React.MouseEvent);
+      back.onClick({ preventDefault } as unknown as React.MouseEvent);
     }
 
+    // The default href navigation must be prevented so only the programmatic transfer runs.
+    expect(preventDefault).toHaveBeenCalled();
     expect(embeddableEditor.transferBackToEditor).toHaveBeenCalledWith(TransferAction.Cancel);
   });
 });

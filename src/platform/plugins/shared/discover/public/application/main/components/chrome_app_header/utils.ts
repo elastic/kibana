@@ -35,7 +35,10 @@ export const getChromeHeaderBack = (
 
   return {
     href: originatingPath,
-    onClick: () => embeddableEditor.transferBackToEditor(TransferAction.Cancel),
+    onClick: (event) => {
+      event.preventDefault();
+      embeddableEditor.transferBackToEditor(TransferAction.Cancel);
+    },
     label: i18n.translate('discover.titleDashboardEditBackLabel', {
       defaultMessage: 'Dashboard',
     }),
