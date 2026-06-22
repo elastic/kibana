@@ -349,17 +349,19 @@ export const validateExtendedFieldsOnClose = async ({
 
   const allFields = [...globalFields, ...templateFields];
 
-  // Build field-value and type maps for condition evaluation (show_when).
+  // Build helper maps for condition evaluation (show_when).
   const fieldValues: Record<string, string | undefined> = {};
   const fieldTypeMap: Record<string, string> = {};
+  const fieldControlMap: Record<string, string> = {};
   for (const field of allFields) {
     fieldValues[field.name] = mergedExtendedFields[getFieldSnakeKey(field.name, field.type)];
     fieldTypeMap[field.name] = field.type;
+    fieldControlMap[field.name] = field.control;
   }
 
   const isFieldVisible = (field: InlineField): boolean =>
     field.display?.show_when == null ||
-    evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
+    evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap, fieldControlMap);
 
   const isFieldEmpty = (field: InlineField): boolean => {
     const value = fieldValues[field.name];
