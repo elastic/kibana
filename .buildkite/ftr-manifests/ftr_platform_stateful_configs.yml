@@ -212,7 +212,6 @@ enabled:
   - x-pack/platform/test/functional/apps/advanced_settings/config.ts
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/api_keys/config.ts
-  - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
