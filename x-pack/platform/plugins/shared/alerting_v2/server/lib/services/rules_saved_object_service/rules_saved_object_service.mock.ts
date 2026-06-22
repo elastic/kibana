@@ -18,15 +18,6 @@ export function createRulesSavedObjectService(): {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockSpaces = spacesMock.createStart();
 
-  // Default the point-in-time finder to an empty result so callers such as
-  // `getTotalScheduledPerMinute` resolve without extra setup.
-  mockSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
-    async *find() {
-      // no saved objects by default
-    },
-    close: jest.fn().mockResolvedValue(undefined),
-  } as unknown as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>);
-
   const rulesSavedObjectService = new RulesSavedObjectService(mockSavedObjectsClient, mockSpaces);
 
   const mockFindByIds = jest.spyOn(rulesSavedObjectService, 'findByIds').mockResolvedValue([]);

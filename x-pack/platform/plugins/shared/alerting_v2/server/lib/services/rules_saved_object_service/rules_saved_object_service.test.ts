@@ -7,27 +7,19 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import type { RuleSavedObjectAttributes } from '../../../saved_objects';
-import { createRuleSoAttributes } from '../../test_utils';
 import type { RulesSavedObjectService } from './rules_saved_object_service';
 import { createRulesSavedObjectService } from './rules_saved_object_service.mock';
 
-const buildRuleDoc = (id: string, every: string) => ({
-  id,
-  type: RULE_SAVED_OBJECT_TYPE,
-  references: [],
-  attributes: createRuleSoAttributes({
-    schedule: { every, lookback: '5m' },
-  }) as RuleSavedObjectAttributes,
-});
-
-const mockFinderForDocs = (docs: ReturnType<typeof buildRuleDoc>[]) =>
+const mockAggregationResponse = (buckets: Array<{ key: string; doc_count: number }>) =>
   ({
-    async *find() {
-      yield { saved_objects: docs };
+    saved_objects: [],
+    total: 0,
+    page: 1,
+    per_page: 0,
+    aggregations: {
+      schedule_intervals: { sum_other_doc_count: 0, buckets },
     },
-    close: jest.fn().mockResolvedValue(undefined),
-  } as unknown as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>);
+  } as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
 
 describe('RulesSavedObjectService', () => {
   let rulesSavedObjectService: RulesSavedObjectService;
@@ -38,29 +30,42 @@ describe('RulesSavedObjectService', () => {
   });
 
   describe('getTotalScheduledPerMinute', () => {
-    it('scans enabled rules across all spaces and sums their per-minute frequency', async () => {
-      mockSavedObjectsClient.createPointInTimeFinder.mockReturnValue(
-        mockFinderForDocs([
-          buildRuleDoc('rule-a', '1m'), // 1 run / min
-          buildRuleDoc('rule-b', '30s'), // 2 runs / min
-          buildRuleDoc('rule-c', '5m'), // 0.2 runs / min
+    it('aggregates enabled rules across all spaces and sums their per-minute frequency', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        mockAggregationResponse([
+          { key: '1m', doc_count: 3 }, // 3 * 1 = 3
+          { key: '30s', doc_count: 2 }, // 2 * 2 = 4
+          { key: '5m', doc_count: 5 }, // 5 * 0.2 = 1
         ])
       );
 
       const total = await rulesSavedObjectService.getTotalScheduledPerMinute();
 
-      expect(total).toBeCloseTo(3.2);
-      expect(mockSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+      expect(total).toBeCloseTo(8);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
           namespaces: ['*'],
           filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+          aggs: expect.objectContaining({
+            schedule_intervals: {
+              terms: expect.objectContaining({
+                field: `${RULE_SAVED_OBJECT_TYPE}.attributes.schedule.every`,
+              }),
+            },
+          }),
         })
       );
     });
 
-    it('returns 0 when there are no enabled rules', async () => {
-      mockSavedObjectsClient.createPointInTimeFinder.mockReturnValue(mockFinderForDocs([]));
+    it('returns 0 when there are no aggregation results', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      } as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
 
       expect(await rulesSavedObjectService.getTotalScheduledPerMinute()).toBe(0);
     });
