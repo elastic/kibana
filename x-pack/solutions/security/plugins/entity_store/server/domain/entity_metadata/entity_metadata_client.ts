@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getMetadataEntitiesDataStreamName } from '../asset_manager/metadata_data_stream';
 import { runWithSpan } from '../../telemetry/traces';
-import type { BulkObjectResponse } from '../crud';
+import type { BulkCreateEntityMetadataDocsResult } from '../../infra/elasticsearch/entity_metadata';
 import { bulkCreateEntityMetadataDocs } from '../../infra/elasticsearch/entity_metadata';
 
 interface EntityMetadataClientDependencies {
@@ -44,7 +44,7 @@ export class EntityMetadataClient {
     const baseBulkAppendMetadata = this.bulkAppendMetadata.bind(this);
     const tracedBulkAppendMetadata = <TDoc extends object>(
       docs: TDoc[]
-    ): Promise<BulkObjectResponse[]> =>
+    ): Promise<BulkCreateEntityMetadataDocsResult> =>
       runWithSpan({
         name: 'entityStore.metadata.bulk_append',
         namespace,
@@ -64,38 +64,26 @@ export class EntityMetadataClient {
 
   /**
    * Appends one or more documents to the entity metadata datastream.
-   * Does not throw on partial bulk failure — returns one `BulkObjectResponse`
-   * per failed item, mirroring `CRUDClient.bulkUpdateEntity`. Transport-level
-   * exceptions propagate to the caller's boundary.
+   * Does not throw on partial bulk failure — the underlying helper retries
+   * transient errors and reports unrecoverable per-doc drops via its `onDrop`
+   * hook (logged in the infra layer). Resolves to `{ successful, failed }`
+   * counts. Transport-level exceptions propagate to the caller's boundary.
    *
    * The caller owns the doc shape (must include `event.action` and any
    * domain-specific fields). The client does not validate the shape.
    */
   public async bulkAppendMetadata<TDoc extends object>(
     docs: TDoc[]
-  ): Promise<BulkObjectResponse[]> {
-    if (docs.length === 0) return [];
+  ): Promise<BulkCreateEntityMetadataDocsResult> {
+    if (docs.length === 0) return { successful: 0, failed: 0 };
 
-    const resp = await bulkCreateEntityMetadataDocs(this.esClient, {
+    const { successful, failed } = await bulkCreateEntityMetadataDocs(this.esClient, {
       index: getMetadataEntitiesDataStreamName(this.namespace),
       docs,
+      logger: this.logger,
     });
 
-    if (!resp.errors) {
-      this.logger.debug(`Successfully appended ${docs.length} entity metadata docs`);
-      return [];
-    }
-    this.logger.debug(`Appended ${docs.length} entity metadata docs with errors`);
-    return resp.items
-      .map((item) => Object.entries(item)[0][1])
-      .filter((value) => value.error !== undefined || value.status >= 400)
-      .map((value) => {
-        return {
-          _id: value._id,
-          status: value.status,
-          type: value.error?.type,
-          reason: value.error?.reason,
-        } as BulkObjectResponse;
-      });
+    this.logger.debug(`Appended ${successful} entity metadata docs, dropped ${failed}`);
+    return { successful, failed };
   }
 }

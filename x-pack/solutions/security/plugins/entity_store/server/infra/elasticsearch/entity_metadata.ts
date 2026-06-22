@@ -6,7 +6,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/logging';
+
+export interface BulkCreateEntityMetadataDocsResult {
+  /** Number of docs successfully appended. */
+  successful: number;
+  /** Number of docs dropped after exhausting the helper's retries. */
+  failed: number;
+}
 
 /**
  * Append documents to the entity metadata datastream. The datastream is
@@ -15,26 +22,40 @@ import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearc
  * metadata kinds (behaviors, anomalies, alerts) can reuse it without
  * needing a new write path.
  *
+ * Uses `esClient.helpers.bulk` (matching `ingestEntities`) rather than a
+ * hand-rolled `esClient.bulk`: the helper streams from the datasource instead
+ * of materializing the whole `operations` array, chunks by `flushBytes` so a
+ * high-fan-out run can't exceed `http.max_content_length`, and retries 429s.
+ * Per-doc drops are surfaced via `onDrop` and logged here; the call resolves
+ * to `{ successful, failed }` counts.
+ *
  * `refresh` defaults to `false`: this is an append-only history stream
  * written by background maintainers and read asynchronously, so blocking
  * each bulk on a shard refresh only adds latency to maintainer runs. Callers
  * that need read-your-write (e.g. tests) can opt into `'wait_for'`.
  */
-export const bulkCreateEntityMetadataDocs = <TDoc extends object>(
+export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
   esClient: ElasticsearchClient,
   params: {
     index: string;
     docs: TDoc[];
+    logger: Logger;
     refresh?: 'wait_for' | boolean;
   }
-): Promise<BulkResponse> => {
-  const operations: Array<BulkOperationContainer | TDoc> = [];
-  for (const doc of params.docs) {
-    operations.push({ create: {} }, doc);
-  }
-  return esClient.bulk({
+): Promise<BulkCreateEntityMetadataDocsResult> => {
+  const { successful, failed } = await esClient.helpers.bulk({
+    datasource: params.docs,
     index: params.index,
-    operations,
     refresh: params.refresh ?? false,
+    onDocument: () => ({ create: {} }),
+    onDrop: (dropped) => {
+      params.logger.error(
+        `entity metadata doc dropped from bulk operation (reason: ${
+          dropped.error?.reason || 'unknown error'
+        })`
+      );
+    },
   });
+
+  return { successful, failed };
 };
