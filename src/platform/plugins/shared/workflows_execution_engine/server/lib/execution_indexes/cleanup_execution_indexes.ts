@@ -10,7 +10,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { parseDuration } from '../../utils';
 
@@ -33,6 +32,7 @@ const listBackingIndexCandidates = async ({
   signal?: AbortSignal;
 }): Promise<BackingIndexCandidate[]> => {
   const aliasExists = await esClient.indices.existsAlias({ name: aliasName }, { signal });
+
   if (!aliasExists) {
     return [];
   }
@@ -48,7 +48,9 @@ const listBackingIndexCandidates = async ({
     });
   }
 
-  return candidates;
+  return candidates
+    .filter((candidate) => !candidate.isWriteIndex)
+    .toSorted((a, b) => a.indexName.localeCompare(b.indexName));
 };
 
 const getIndexCreationTimeMs = async ({
@@ -80,78 +82,6 @@ export interface CleanupExecutionIndexIfEligibleParams {
 }
 
 /**
- * Checks if the index has any non-terminal executions.
- */
-const hasNonTerminalExecutionsInIndex = async ({
-  esClient,
-  indexName,
-  signal,
-}: {
-  esClient: ElasticsearchClient;
-  indexName: string;
-  signal?: AbortSignal;
-}): Promise<boolean> => {
-  const response = await esClient.search(
-    {
-      index: indexName,
-      size: 0,
-      terminate_after: 1,
-      track_total_hits: true,
-      _source: false,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                status: [...NonTerminalExecutionStatuses],
-              },
-            },
-          ],
-        },
-      },
-    },
-    { signal }
-  );
-
-  const total =
-    typeof response?.hits?.total === 'number'
-      ? response.hits.total
-      : response?.hits?.total?.value ?? 0;
-
-  return total > 0;
-};
-
-const deleteTerminalExecutionsFromIndex = async ({
-  esClient,
-  indexName,
-  logger,
-  signal,
-}: {
-  esClient: ElasticsearchClient;
-  indexName: string;
-  logger: Logger;
-  signal?: AbortSignal;
-}): Promise<void> => {
-  logger.debug(`Skipping ${indexName} deletion: delete non-terminal executions first`);
-  await esClient.deleteByQuery(
-    {
-      index: indexName,
-      wait_for_completion: false,
-      query: {
-        bool: {
-          must_not: {
-            terms: {
-              status: [...NonTerminalExecutionStatuses],
-            },
-          },
-        },
-      },
-    },
-    { signal }
-  );
-};
-
-/**
  * Deletes non-write backing indexes older than `minIndexAge`.
  *
  * Assumes workflow timeouts are much shorter than `minIndexAge` (e.g. 30d in production),
@@ -174,45 +104,29 @@ export const cleanupExecutionIndexIfEligible = async ({
       return deletedCount;
     }
 
-    if (!candidate.isWriteIndex) {
-      const anyNonTerminalStatus = await hasNonTerminalExecutionsInIndex({
-        esClient,
-        indexName: candidate.indexName,
-        signal,
-      });
+    const creationTimeMs = await getIndexCreationTimeMs({
+      esClient,
+      indexName: candidate.indexName,
+      signal,
+    });
 
-      if (anyNonTerminalStatus) {
-        await deleteTerminalExecutionsFromIndex({
-          esClient,
-          indexName: candidate.indexName,
-          logger,
-          signal,
-        });
-      } else {
-        const creationTimeMs = await getIndexCreationTimeMs({
-          esClient,
-          indexName: candidate.indexName,
-          signal,
-        });
+    if (creationTimeMs === undefined) {
+      logger.warn(`Skipping ${candidate.indexName}: missing index.creation_date`);
+    } else {
+      const indexAgeMs = nowMs - creationTimeMs;
 
-        if (creationTimeMs === undefined) {
-          logger.warn(`Skipping ${candidate.indexName}: missing index.creation_date`);
-        } else {
-          const indexAgeMs = nowMs - creationTimeMs;
-
-          if (indexAgeMs < minIndexAgeMs) {
-            logger.debug(
-              `Skipping ${candidate.indexName}: age ${indexAgeMs}ms is below minIndexAge ${options.minIndexAge}`
-            );
-          } else {
-            await esClient.indices.delete({ index: candidate.indexName }, { signal });
-            deletedCount += 1;
-            logger.info(
-              `Deleted backing index ${candidate.indexName} for alias ${aliasName} (age >= ${options.minIndexAge})`
-            );
-          }
-        }
+      if (indexAgeMs < minIndexAgeMs) {
+        logger.debug(
+          `Stopping cleanup for alias ${aliasName}: ${candidate.indexName} age ${indexAgeMs}ms is below minIndexAge ${options.minIndexAge}`
+        );
+        break;
       }
+
+      await esClient.indices.delete({ index: candidate.indexName }, { signal });
+      deletedCount += 1;
+      logger.info(
+        `Deleted backing index ${candidate.indexName} for alias ${aliasName} (age >= ${options.minIndexAge})`
+      );
     }
   }
 
