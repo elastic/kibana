@@ -10,7 +10,7 @@ import moment from 'moment';
 import { unflattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { entityStoreMetrics } from '../../monitor/metrics';
+import { entityStoreMetrics } from '../../../monitor/metrics';
 import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
   EntityType,
