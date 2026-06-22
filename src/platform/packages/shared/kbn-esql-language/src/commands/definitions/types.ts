@@ -372,6 +372,10 @@ export interface ValidationErrors {
     message: string;
     type: { field: string };
   };
+  columnTypeConflict: {
+    message: string;
+    type: { columnName: string; types?: string };
+  };
   unsupportedMode: {
     message: string;
     type: { command: string; value: string; expected: string };
