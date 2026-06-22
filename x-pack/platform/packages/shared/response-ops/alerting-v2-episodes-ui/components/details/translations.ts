@@ -163,6 +163,57 @@ export const LIFECYCLE_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   }
 );
 
+/** --- Severity heatmap --- */
+export const SEVERITY_HEATMAP_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.title',
+  {
+    defaultMessage: 'Severity Timeline',
+  }
+);
+
+export const SEVERITY_HEATMAP_INFO_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.infoLabel',
+  {
+    defaultMessage: 'Info',
+  }
+);
+
+export const SEVERITY_HEATMAP_LOW_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.lowLabel',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const SEVERITY_HEATMAP_MEDIUM_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.mediumLabel',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+
+export const SEVERITY_HEATMAP_HIGH_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.highLabel',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const SEVERITY_HEATMAP_CRITICAL_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.criticalLabel',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+
+/** --- Severity heatmap section --- */
+export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmapSection.loadError',
+  {
+    defaultMessage: 'Could not load episode severity.',
+  }
+);
+
 /** --- Metadata details list --- */
 export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.groupingLabel',

@@ -15,6 +15,7 @@ export interface EpisodeEventRow {
   'episode.status': AlertEpisodeStatus;
   'rule.id': string;
   group_hash: string;
+  severity?: string | null;
 }
 
 const ALERT_EPISODE_EVENT_FIELDS = [
@@ -23,6 +24,7 @@ const ALERT_EPISODE_EVENT_FIELDS = [
   'episode.status',
   'rule.id',
   'group_hash',
+  'severity',
 ] as const;
 
 /**

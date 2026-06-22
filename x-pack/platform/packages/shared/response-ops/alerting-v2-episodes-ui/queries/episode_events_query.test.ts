@@ -17,5 +17,6 @@ describe('buildEpisodeEventsEsqlQuery', () => {
     expect(queryString).toContain('episode.id');
     expect(queryString).toContain(episodeId);
     expect(queryString).toContain(`SORT ${TIME_FIELD} ASC`);
+    expect(queryString).toContain('severity');
   });
 });
