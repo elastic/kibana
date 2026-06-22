@@ -87,6 +87,7 @@ import { applyNamespaceCustomizationChange } from '../services/apply_namespace_c
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 import { packageHasAtLeastOneSecret } from '../utils';
+import { CreatePackagePolicyFormProvider } from '../contexts/create_package_policy_form_context';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 
@@ -222,6 +223,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    createDatasetTemplates,
+    setCreateDatasetTemplates,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -420,6 +423,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     packageInfo,
+    createDatasetTemplates,
   });
 
   const layoutProps = useMemo(
@@ -489,6 +493,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const replaceDefineStepView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
+  );
+  const createBottomExtensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-create-bottom'
   );
 
   // PLI auth blocks are registered to UI Extension context and are used to display upselling components.
@@ -578,7 +586,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isPackageInfoLoading || !isInitialized ? (
         <Loading />
       ) : packageInfo ? (
-        <>
+        <CreatePackagePolicyFormProvider
+          value={{ createDatasetTemplates, setCreateDatasetTemplates }}
+        >
           <StepDefinePackagePolicy
             namespacePlaceholder={getInheritedNamespace(
               agentPolicies,
@@ -610,6 +620,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               submitAttempted={formState === 'INVALID'}
               isAgentlessSelected={isAgentlessSelected}
               varGroupSelections={varGroupSelections}
+              bottomExtension={
+                createBottomExtensionView && packagePolicy.package?.name ? (
+                  <ExtensionWrapper>
+                    <createBottomExtensionView.Component newPolicy={packagePolicy} />
+                  </ExtensionWrapper>
+                ) : undefined
+              }
             />
           )}
 
@@ -622,7 +639,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               />
             </ExtensionWrapper>
           )}
-        </>
+        </CreatePackagePolicyFormProvider>
       ) : (
         <div />
       ),
@@ -637,12 +654,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
+      createBottomExtensionView,
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
       varGroupSelections,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
+      createDatasetTemplates,
+      setCreateDatasetTemplates,
     ]
   );
 
