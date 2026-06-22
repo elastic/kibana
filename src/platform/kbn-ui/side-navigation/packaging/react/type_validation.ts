@@ -35,11 +35,11 @@ import type {
 
 // Packaged types.
 import type {
-  BadgeType as PackagedBadgeType,
-  NavigationProps as PackagedNavigationProps,
-  SecondaryMenuItem as PackagedSecondaryMenuItem,
-  SecondaryMenuSection as PackagedSecondaryMenuSection,
-  SideNavLogo as PackagedSideNavLogo,
+  KbnSideNavigationBadgeType as PackagedBadgeType,
+  KbnSideNavigationProps as PackagedNavigationProps,
+  KbnSideNavigationSecondaryMenuItem as PackagedSecondaryMenuItem,
+  KbnSideNavigationSecondaryMenuSection as PackagedSecondaryMenuSection,
+  KbnSideNavigationLogo as PackagedSideNavLogo,
 } from './types';
 
 // Simple types must match exactly.

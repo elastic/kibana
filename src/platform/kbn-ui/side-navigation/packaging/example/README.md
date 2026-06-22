@@ -1,4 +1,4 @@
-# SideNavigation Example
+# KbnSideNavigation Example
 
 Minimal test application for the `@kbn/ui-side-navigation` package.
 

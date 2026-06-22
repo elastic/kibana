@@ -11,8 +11,12 @@ import React, { useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiProvider, EuiSpacer, EuiText, EuiCode, useEuiTheme } from '@elastic/eui';
 
-import { SideNavigation } from '../../..';
-import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '../../..';
+import { KbnSideNavigation } from '@kbn/ui-side-navigation';
+import type {
+  KbnSideNavigationLogo,
+  KbnSideNavigationMenuItem,
+  KbnSideNavigationSecondaryMenuItem,
+} from '@kbn/ui-side-navigation';
 
 /** Returns a `className` that adds a divider after the Dashboard nav item. */
 const useNavDividerClass = () => {
@@ -97,14 +101,19 @@ const App = () => {
     ],
   };
 
-  const logo: SideNavLogo = {
+  const logo: KbnSideNavigationLogo = {
     id: 'home',
     label: 'Example',
     iconType: 'logoElastic',
     href: '#/',
   };
 
-  const handleItemClick = (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
+  const handleItemClick = (
+    item:
+      | KbnSideNavigationMenuItem
+      | KbnSideNavigationSecondaryMenuItem
+      | KbnSideNavigationLogo
+  ) => {
     // eslint-disable-next-line no-console
     console.log('Navigation item clicked:', item);
     setActiveItemId(item.id);
@@ -119,7 +128,7 @@ const App = () => {
   return (
     <EuiProvider colorMode="light">
       <div className={navDividerClass} style={{ display: 'flex', minHeight: '100vh' }}>
-        <SideNavigation
+        <KbnSideNavigation
           {...{ activeItemId, logo }}
           items={navigationItems}
           isCollapsed={isCollapsed}
@@ -139,7 +148,7 @@ const App = () => {
         >
           <EuiText>
             <h1>
-              <EuiCode>SideNavigation</EuiCode> Example
+              <EuiCode>KbnSideNavigation</EuiCode> Example
             </h1>
             <p>
               Active item: <EuiCode>{activeItemId}</EuiCode>

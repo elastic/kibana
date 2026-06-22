@@ -24,4 +24,4 @@ consuming application.
 
 The component relies on EUI's theme provider. Wrap your application in
 `<EuiProvider>` (or the equivalent in your EUI version) before rendering
-`<SideNavigation>`.
+`<KbnSideNavigation>`.

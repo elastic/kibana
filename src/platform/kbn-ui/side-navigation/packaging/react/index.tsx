@@ -25,25 +25,22 @@ import type {
 void React;
 
 export type {
-  BadgeType,
-  MenuItem,
-  NavigationProps,
-  NavigationStructure,
-  SecondaryMenuItem,
-  SecondaryMenuSection,
-  SideNavLogo,
+  BadgeType as KbnSideNavigationBadgeType,
+  MenuItem as KbnSideNavigationMenuItem,
+  NavigationProps as KbnSideNavigationProps,
+  NavigationStructure as KbnSideNavigationStructure,
+  SecondaryMenuItem as KbnSideNavigationSecondaryMenuItem,
+  SecondaryMenuSection as KbnSideNavigationSecondaryMenuSection,
+  SideNavLogo as KbnSideNavigationLogo,
 };
 
-/** Alias for the external package. */
-export type SideNavigationProps = NavigationProps;
-
 /**
- * `SideNavigation` — standalone navigation component for non-Kibana applications.
+ * `KbnSideNavigation` — standalone navigation component for non-Kibana applications.
  *
  * Wraps the internal `Navigation` component. Kibana-specific dependencies
  * (`@kbn/i18n`, `@kbn/ui-chrome-layout-constants`) are replaced at build
  * time via webpack aliases.
  */
-export const SideNavigation = (props: SideNavigationProps) => {
+export const KbnSideNavigation = (props: NavigationProps) => {
   return <Navigation {...props} />;
 };

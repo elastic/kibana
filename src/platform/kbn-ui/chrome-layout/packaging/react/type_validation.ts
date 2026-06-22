@@ -32,9 +32,9 @@ import type { GridLayoutGlobalStylesProps as SourceGridLayoutGlobalStylesProps }
 
 // Packaged types.
 import type {
-  ChromeLayoutConfig as PackagedChromeLayoutConfig,
-  ChromeStyle as PackagedChromeStyle,
-  GridLayoutGlobalStylesProps as PackagedGridLayoutGlobalStylesProps,
+  KbnChromeLayoutConfig as PackagedChromeLayoutConfig,
+  KbnChromeStyle as PackagedChromeStyle,
+  KbnGridLayoutGlobalStylesProps as PackagedGridLayoutGlobalStylesProps,
 } from './types';
 
 // ChromeStyle must match exactly.

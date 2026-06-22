@@ -8,7 +8,7 @@
  */
 
 /**
- * Standalone type definitions for the `SideNavigation` external package.
+ * Standalone type definitions for the `KbnSideNavigation` external package.
  *
  * Types are defined inline (not re-exported) so that declaration generation
  * does not pull in the full Kibana dependency graph. Build-time validation
@@ -24,12 +24,12 @@ type ReactNode = string | number | boolean | null | undefined | React.ReactEleme
 /**
  * Badge types that can be displayed next to navigation items.
  */
-export type BadgeType = 'beta' | 'techPreview' | 'new';
+export type KbnSideNavigationBadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
  * A navigation item within a secondary/nested menu.
  */
-export interface SecondaryMenuItem {
+export interface KbnSideNavigationSecondaryMenuItem {
   /** URL or hash for navigation. */
   href: string;
   /** Unique identifier for this item. */
@@ -39,7 +39,7 @@ export interface SecondaryMenuItem {
   /** Optional test selector for automated testing. */
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
-  badgeType?: BadgeType;
+  badgeType?: KbnSideNavigationBadgeType;
   /** If true, opens link in a new tab with an external icon. */
   isExternal?: boolean;
 }
@@ -47,11 +47,11 @@ export interface SecondaryMenuItem {
 /**
  * A section grouping within a secondary menu.
  */
-export interface SecondaryMenuSection {
+export interface KbnSideNavigationSecondaryMenuSection {
   /** Unique identifier for this section. */
   id: string;
   /** Array of menu items in this section. */
-  items: SecondaryMenuItem[];
+  items: KbnSideNavigationSecondaryMenuItem[];
   /** Optional section header label (omit for unlabeled sections). */
   label?: string;
 }
@@ -59,7 +59,7 @@ export interface SecondaryMenuSection {
 /**
  * A primary navigation menu item displayed in the sidebar.
  */
-export interface MenuItem {
+export interface KbnSideNavigationMenuItem {
   /** URL or hash for navigation. */
   href: string;
   /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
@@ -71,25 +71,25 @@ export interface MenuItem {
   /** Optional test selector for automated testing. */
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
-  badgeType?: BadgeType;
+  badgeType?: KbnSideNavigationBadgeType;
   /** Optional array of secondary menu sections for nested navigation. */
-  sections?: SecondaryMenuSection[];
+  sections?: KbnSideNavigationSecondaryMenuSection[];
 }
 
 /**
  * The complete navigation structure containing primary and footer items.
  */
-export interface NavigationStructure {
+export interface KbnSideNavigationStructure {
   /** Items displayed in the footer area of the navigation. */
-  footerItems: MenuItem[];
+  footerItems: KbnSideNavigationMenuItem[];
   /** Items displayed in the primary/main area of the navigation. */
-  primaryItems: MenuItem[];
+  primaryItems: KbnSideNavigationMenuItem[];
 }
 
 /**
  * Configuration for the logo displayed at the top of the sidebar.
  */
-export interface SideNavLogo {
+export interface KbnSideNavigationLogo {
   /** The route ID of the logo, used for the active state. */
   id: string;
   /** The href of the logo link, typically the home page. */
@@ -103,21 +103,26 @@ export interface SideNavLogo {
 }
 
 /**
- * Props accepted by the `SideNavigation` component.
+ * Props accepted by the `KbnSideNavigation` component.
  */
-export interface NavigationProps {
+export interface KbnSideNavigationProps {
   /** The active item ID, used for highlighting the current item. */
   activeItemId?: string;
   /** Whether the navigation is collapsed. */
   isCollapsed: boolean;
   /** The navigation structure containing primary, secondary, and footer items. */
-  items: NavigationStructure;
+  items: KbnSideNavigationStructure;
   /** The logo object containing the route ID, href, label, and type. */
-  logo: SideNavLogo;
+  logo: KbnSideNavigationLogo;
   /** Required by the grid layout to set the width of the navigation slot. */
   setWidth: (width: number) => void;
   /** Callback fired when a navigation item is clicked. */
-  onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
+  onItemClick?: (
+    item:
+      | KbnSideNavigationMenuItem
+      | KbnSideNavigationSecondaryMenuItem
+      | KbnSideNavigationLogo
+  ) => void;
   /** Callback fired when the collapse button is toggled. Omit to hide the toggle button. */
   onToggleCollapsed?: (isCollapsed: boolean) => void;
   /** When true, renders a centered horizontal separator at the top of the side nav. */
@@ -128,8 +133,5 @@ export interface NavigationProps {
   'data-test-subj'?: string;
 }
 
-/** Alias for the external package. */
-export type SideNavigationProps = NavigationProps;
-
 /** Component declaration (compiled to function declaration in `.d.ts`). */
-export declare function SideNavigation(props: SideNavigationProps): React.ReactNode;
+export declare function KbnSideNavigation(props: KbnSideNavigationProps): React.ReactNode;
