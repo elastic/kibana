@@ -186,6 +186,7 @@ export const ResizablePanel: React.FunctionComponent<{
                 content={i18n.translate('xpack.fleet.integrationsResizablePanel.collapseButton', {
                   defaultMessage: 'Collapse panel',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   key="chevronSingleUp"
@@ -203,6 +204,7 @@ export const ResizablePanel: React.FunctionComponent<{
                 content={i18n.translate('xpack.fleet.integrationsResizablePanel.collapseButton', {
                   defaultMessage: 'Collapse panel',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   key="chevronSingleDown"

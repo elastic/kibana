@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import type { FilteringRule } from '../..';
 
@@ -49,18 +50,22 @@ describe('FilteringPanel', () => {
     },
   ] as FilteringRule[];
 
-  it('renders', () => {
-    const wrapper = shallow(<FilteringPanel filteringRules={[]} />);
+  it('renders the sync rules heading without advanced rules', () => {
+    renderWithKibanaRenderContext(<FilteringPanel filteringRules={[]} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByRole('heading', { name: 'Sync rules' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Advanced sync rules' })).not.toBeInTheDocument();
   });
-  it('renders filtering rules list', () => {
-    const wrapper = shallow(<FilteringPanel filteringRules={filteringRules} />);
 
-    expect(wrapper).toMatchSnapshot();
+  it('renders filtering rules in the table', () => {
+    renderWithKibanaRenderContext(<FilteringPanel filteringRules={filteringRules} />);
+
+    expect(screen.getByRole('heading', { name: 'Sync rules' })).toBeInTheDocument();
+    expect(screen.getAllByText('THIS VALUE')).toHaveLength(filteringRules.length);
   });
-  it('renders advanced snippet', () => {
-    const wrapper = shallow(
+
+  it('renders advanced snippet panel when provided', () => {
+    renderWithKibanaRenderContext(
       <FilteringPanel
         advancedSnippet={{
           created_at: 'whatever',
@@ -71,6 +76,7 @@ describe('FilteringPanel', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByRole('heading', { name: 'Advanced sync rules' })).toBeInTheDocument();
+    expect(screen.getByText(/"one": "two"/)).toBeInTheDocument();
   });
 });
