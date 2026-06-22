@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient } from '@kbn/core/server';
-import { APM_EVENT_WRITE_APPLICATION } from './privileges';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { INDEX_PROMETHEUS_REMOTE_WRITE } from './privileges';
 
-export function createManagedOtlpServiceApiKey(esClient: ElasticsearchClient, name: string) {
+export function createPrometheusApiKey(esClient: ElasticsearchClient, name: string) {
   const timestamp = new Date().toISOString();
 
   return esClient.security.createApiKey({
@@ -17,10 +17,9 @@ export function createManagedOtlpServiceApiKey(esClient: ElasticsearchClient, na
       managed: true,
     },
     role_descriptors: {
-      apm_writer: {
+      indices: {
         cluster: [],
-        index: [],
-        applications: [APM_EVENT_WRITE_APPLICATION],
+        indices: [INDEX_PROMETHEUS_REMOTE_WRITE],
       },
     },
   });
