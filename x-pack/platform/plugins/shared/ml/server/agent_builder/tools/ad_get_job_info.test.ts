@@ -15,6 +15,7 @@ const createMlMock = () => ({
   getDatafeeds: jest.fn().mockResolvedValue({ datafeeds: [] }),
   getModelSnapshots: jest.fn().mockResolvedValue({ model_snapshots: [] }),
   getCalendars: jest.fn().mockResolvedValue({ calendars: [] }),
+  getCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
   info: jest.fn().mockResolvedValue({ version: '8.0.0' }),
 });
 
@@ -132,16 +133,75 @@ describe('adGetJobInfoTool', () => {
       );
     });
 
-    it('operation=get_calendar_events looks up calendar-{job_id}', async () => {
+    it('operation=get_calendar_events looks up calendars associated with the job', async () => {
       const ml = createMlMock();
+      ml.getJobs.mockResolvedValue({ jobs: [{ job_id: 'my-job', groups: ['ops-group'] }] });
+      ml.getCalendars.mockResolvedValue({
+        calendars: [
+          { calendar_id: 'holiday-cal', job_ids: ['other-job'] },
+          { calendar_id: 'ops-cal', job_ids: ['ops-group'] },
+          { calendar_id: 'direct-cal', job_ids: ['my-job'] },
+          { calendar_id: 'global-cal', job_ids: ['_all'] },
+        ],
+      });
+      ml.getCalendarEvents.mockImplementation(async ({ calendar_id: calendarId }) => ({
+        events: [{ calendar_id: calendarId, description: `${calendarId}-event` }],
+      }));
       const context = createContext(createEsClientMock(ml));
 
-      await adGetJobInfoTool.handler(
+      const result = await adGetJobInfoTool.handler(
         { operation: 'get_calendar_events', job_id: 'my-job' },
         context
       );
 
-      expect(ml.getCalendars).toHaveBeenCalledWith({ calendar_id: 'calendar-my-job' });
+      expect(ml.getCalendars).toHaveBeenCalledWith({ page: { from: 0, size: 10000 } });
+      expect(ml.getCalendarEvents).toHaveBeenCalledTimes(3);
+      expect(ml.getCalendarEvents).toHaveBeenCalledWith({ calendar_id: 'ops-cal' });
+      expect(ml.getCalendarEvents).toHaveBeenCalledWith({ calendar_id: 'direct-cal' });
+      expect(ml.getCalendarEvents).toHaveBeenCalledWith({ calendar_id: 'global-cal' });
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              calendars: [
+                {
+                  calendar_id: 'ops-cal',
+                  job_ids: ['ops-group'],
+                  events: [{ calendar_id: 'ops-cal', description: 'ops-cal-event' }],
+                },
+                {
+                  calendar_id: 'direct-cal',
+                  job_ids: ['my-job'],
+                  events: [{ calendar_id: 'direct-cal', description: 'direct-cal-event' }],
+                },
+                {
+                  calendar_id: 'global-cal',
+                  job_ids: ['_all'],
+                  events: [{ calendar_id: 'global-cal', description: 'global-cal-event' }],
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
+
+    it('operation=get_calendar_events returns error when job is not found', async () => {
+      const ml = createMlMock();
+      ml.getJobs.mockResolvedValue({ jobs: [] });
+      const context = createContext(createEsClientMock(ml));
+
+      const result = await adGetJobInfoTool.handler(
+        { operation: 'get_calendar_events', job_id: 'missing-job' },
+        context
+      );
+
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe('Job not found: missing-job');
     });
 
     it('operation=get_model_snapshots calls ml.getModelSnapshots', async () => {

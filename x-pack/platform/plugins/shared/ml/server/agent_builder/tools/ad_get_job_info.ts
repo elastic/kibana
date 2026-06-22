@@ -10,7 +10,43 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { AD_GET_JOB_INFO_TOOL_ID } from './tool_ids';
+
+const getCalendarsAssociatedWithJob = async (
+  ml: {
+    getJobs: (params: { job_id: string }) => Promise<{ jobs?: Array<{ groups?: string[] }> }>;
+    getCalendars: (params: {
+      page?: { from: number; size: number };
+    }) => Promise<{ calendars: Array<{ calendar_id: string; job_ids: string[] }> }>;
+    getCalendarEvents: (params: { calendar_id: string }) => Promise<{ events: unknown[] }>;
+  },
+  jobId: string
+) => {
+  const [{ jobs }, { calendars }] = await Promise.all([
+    ml.getJobs({ job_id: jobId }),
+    ml.getCalendars({ page: { from: 0, size: 10000 } }),
+  ]);
+
+  const job = jobs?.[0];
+  if (!job) {
+    return { jobFound: false as const, calendars: [] };
+  }
+
+  const jobGroups = job.groups ?? [];
+  const matchingCalendars = calendars.filter((calendar) =>
+    calendar.job_ids.some((id) => id === GLOBAL_CALENDAR || id === jobId || jobGroups.includes(id))
+  );
+
+  const calendarsWithEvents = await Promise.all(
+    matchingCalendars.map(async (calendar) => {
+      const { events } = await ml.getCalendarEvents({ calendar_id: calendar.calendar_id });
+      return { ...calendar, events };
+    })
+  );
+
+  return { jobFound: true as const, calendars: calendarsWithEvents };
+};
 
 const schema = z.object({
   operation: z.enum([
@@ -90,8 +126,13 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
               results: [createErrorResult('job_id is required for get_calendar_events')],
             };
           }
-          const calResponse = await ml.getCalendars({ calendar_id: `calendar-${jobId}` });
-          return { results: [{ type: ToolResultType.other, data: calResponse }] };
+          const { jobFound, calendars } = await getCalendarsAssociatedWithJob(ml, jobId);
+          if (!jobFound) {
+            return {
+              results: [createErrorResult(`Job not found: ${jobId}`)],
+            };
+          }
+          return { results: [{ type: ToolResultType.other, data: { calendars } }] };
         }
 
         case 'get_available_metadata': {
