@@ -73,6 +73,7 @@ export const internalTools = {
   loadSkill: 'load_skill',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
+  listFiles: 'list_files',
   bash: 'bash',
 };
 
