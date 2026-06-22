@@ -139,10 +139,7 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c4-standard-8-lssd
-      diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      machineType: n4-highcpu-32
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
@@ -150,27 +147,6 @@ steps:
       CHECK_GATE: 'true'
       RESTORE_ARCHIVE: 'true'
       UPLOAD_ARCHIVE: 'true'
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  # Non-gating comparison step: same type check on a higher-core profile to
-  # contrast tsgo build parallelism. Does not upload the archive so it can't
-  # race the gating step's GCS artifact. Temporary; remove after benchmarking.
-  - command: .buildkite/scripts/steps/typecheck/check_types.sh
-    label: 'Check Types (high-core comparison)'
-    agents:
-      machineType: n4-standard-32
-      diskSizeGb: 105
-    key: check_types_highcore
-    timeout_in_minutes: 60
-    soft_fail: true
-    env:
-      RESTORE_ARCHIVE: 'true'
-      KBN_TYPE_CHECK_BUILDERS: '16'
-      KBN_TYPE_CHECK_CHECKERS: '2'
-      KBN_TYPE_CHECK_MAX_OLD_SPACE_MB: '49152'
     retry:
       automatic:
         - exit_status: '-1'
