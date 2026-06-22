@@ -47,7 +47,14 @@ export class DiscoverApp {
   private async waitForDiscoverPage() {
     // Discover initialization in serverless CI environments regularly exceeds the default 10s,
     // likely due to additional plugin overhead and root profile resolution.
-    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
+    await this.page.testSubj.locator('dscPage').waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  private async waitUntilLoadingHasFinished() {
+    await this.page.testSubj.waitForSelector('loadingSpinner', {
+      state: 'hidden',
+      timeout: 30_000,
+    });
   }
 
   private async getVisibleDataViewSwitch() {
@@ -154,10 +161,10 @@ export class DiscoverApp {
     // Dismiss any stale popovers
     if (await popover.isVisible()) {
       await overflowButton.click();
-      await expect(popover).toBeHidden();
+      await popover.waitFor({ state: 'hidden' });
     }
 
-    await expect(overflowButton).toBeVisible();
+    await overflowButton.waitFor({ state: 'visible', timeout: 30_000 });
     await overflowButton.click();
 
     // If the click was consumed by closing a stale overlay, the popover won't be open.
@@ -178,9 +185,8 @@ export class DiscoverApp {
 
   async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
-    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
-    await this.waitForDiscoverPage();
-    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
+    await this.page.mouse.move(0, 0); // cancel tooltips
+    await this.waitUntilTabIsLoaded();
   }
 
   async saveSearch(name: string) {
@@ -304,16 +310,20 @@ export class DiscoverApp {
 
   async loadSavedSearch(searchName: string) {
     await this.clickAppMenuItem('discoverOpenButton');
-    await this.page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
+    const loadSearchForm = this.page.testSubj.locator('loadSearchForm');
+    await loadSearchForm.waitFor({ state: 'visible', timeout: 30_000 });
 
     // Filter for the search
     const searchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
+    await searchInput.waitFor({ state: 'visible' });
     await searchInput.fill(`"${searchName.replace('-', ' ')}"`);
 
     // Click the saved search
     const savedSearchId = searchName.split(' ').join('-');
-    await this.page.testSubj.click(`savedObjectTitle${savedSearchId}`);
-    await this.waitUntilSearchingHasFinished();
+    const savedSearch = this.page.testSubj.locator(`savedObjectTitle${savedSearchId}`);
+    await savedSearch.waitFor({ state: 'visible', timeout: 30_000 });
+    await savedSearch.click();
+    await this.waitUntilTabIsLoaded();
   }
 
   async getHitCountInt(): Promise<number> {
@@ -357,6 +367,7 @@ export class DiscoverApp {
   // Waits for a Discover tab to finish loading.
   async waitUntilTabIsLoaded() {
     await this.waitForDiscoverPage();
+    await this.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
   }
 
