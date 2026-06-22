@@ -20,13 +20,14 @@ const arrayWithNonEmptyString = (field: string, options: { maxSize: number }) =>
   schema.arrayOf(
     schema.string({
       minLength: 1,
+      maxLength: 256,
       validate: (id) => {
         if (id.trim() === '') {
           return `${field} cannot be an empty string`;
         }
       },
     }),
-    options
+    { maxSize: options.maxSize }
   );
 
 const schemaOneOfValues = (values: readonly string[]) =>
@@ -42,6 +43,7 @@ export const UpdateWorkflowInsightRequestSchema = {
   params: schema.object({
     insightId: schema.string({
       minLength: 1,
+      maxLength: 256,
       validate: (id) => {
         if (id.trim() === '') {
           return 'insightId cannot be an empty string';
@@ -50,16 +52,16 @@ export const UpdateWorkflowInsightRequestSchema = {
     }),
   }),
   body: schema.object({
-    '@timestamp': schema.maybe(schema.string()),
-    message: schema.maybe(schema.string()),
+    '@timestamp': schema.maybe(schema.string({ maxLength: 64 })),
+    message: schema.maybe(schema.string({ maxLength: 10000 })),
     category: schema.maybe(categoryOneOf),
     type: schema.maybe(insightTypeOneOf),
     source: schema.maybe(
       schema.object({
         type: schema.maybe(sourceTypeOneOf),
-        id: schema.maybe(schema.string()),
-        data_range_start: schema.maybe(schema.string()),
-        data_range_end: schema.maybe(schema.string()),
+        id: schema.maybe(schema.string({ maxLength: 256 })),
+        data_range_start: schema.maybe(schema.string({ maxLength: 64 })),
+        data_range_end: schema.maybe(schema.string({ maxLength: 64 })),
       })
     ),
     target: schema.maybe(
@@ -71,18 +73,18 @@ export const UpdateWorkflowInsightRequestSchema = {
     action: schema.maybe(
       schema.object({
         type: schema.maybe(actionTypeOneOf),
-        timestamp: schema.maybe(schema.string()),
+        timestamp: schema.maybe(schema.string({ maxLength: 64 })),
       })
     ),
-    value: schema.maybe(schema.string()),
+    value: schema.maybe(schema.string({ maxLength: 10000 })),
     remediation: schema.maybe(
       schema.object({
         exception_list_items: schema.maybe(
           schema.arrayOf(
             schema.object({
-              list_id: schema.maybe(schema.string()),
-              name: schema.maybe(schema.string()),
-              description: schema.maybe(schema.string()),
+              list_id: schema.maybe(schema.string({ maxLength: 256 })),
+              name: schema.maybe(schema.string({ maxLength: 256 })),
+              description: schema.maybe(schema.string({ maxLength: 256 })),
               entries: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 250 })),
               tags: schema.maybe(arrayWithNonEmptyString('tag', { maxSize: 50 })),
               os_types: schema.maybe(arrayWithNonEmptyString('os_type', { maxSize: 20 })),
@@ -90,13 +92,15 @@ export const UpdateWorkflowInsightRequestSchema = {
             { maxSize: 100 }
           )
         ),
-        descriptive: schema.maybe(schema.string()),
-        link: schema.maybe(schema.string()),
+        descriptive: schema.maybe(schema.string({ maxLength: 10000 })),
+        link: schema.maybe(schema.string({ maxLength: 2048 })),
       })
     ),
     metadata: schema.maybe(
       schema.object({
-        notes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+        notes: schema.maybe(
+          schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 1000 }))
+        ),
         message_variables: schema.maybe(
           arrayWithNonEmptyString('message_variable', { maxSize: 50 })
         ),
@@ -126,6 +130,7 @@ export const CreateWorkflowInsightRequestSchema = {
     endpointIds: schema.arrayOf(
       schema.string({
         minLength: 1,
+        maxLength: 256,
         validate: (v) => {
           if (v.trim() === '') {
             return 'endpointId cannot be an empty string';
@@ -134,7 +139,7 @@ export const CreateWorkflowInsightRequestSchema = {
       }),
       { maxSize: 50 }
     ),
-    connectorId: schema.maybe(schema.string({ minLength: 1 })),
+    connectorId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
   }),
 };
 
@@ -145,6 +150,7 @@ export const GetPendingInsightsRequestSchema = {
       schema.arrayOf(
         schema.string({
           minLength: 1,
+          maxLength: 256,
           validate: (v) => {
             if (v.trim() === '') {
               return 'endpointId cannot be an empty string';
