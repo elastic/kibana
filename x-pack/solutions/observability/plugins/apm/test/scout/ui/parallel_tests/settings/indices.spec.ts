@@ -10,7 +10,23 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
+const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
+const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
+
 test.describe('Indices', { tag: tags.stateful.classic }, () => {
+  test.afterAll(async ({ kbnClient }) => {
+    // The settings are persisted as the `apm-indices` saved object. Deleting it
+    // reverts APM back to its default indices so the shared lane isn't polluted.
+    try {
+      await kbnClient.savedObjects.delete({
+        type: APM_INDICES_SAVED_OBJECT_TYPE,
+        id: APM_INDICES_SAVED_OBJECT_ID,
+      });
+    } catch {
+      // Saved object may not exist if no test persisted a change; ignore 404s.
+    }
+  });
+
   test('Viewer should not be able to modify settings', async ({
     pageObjects: { indicesPage },
     browserAuth,
@@ -33,7 +49,6 @@ test.describe('Indices', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsPrivilegedUser();
     await indicesPage.goto();
 
-    const originalErrorIndex = await (await indicesPage.getErrorIndexInput()).inputValue();
     const newErrorIndex = 'logs-*';
     const errorInput = await indicesPage.getErrorIndexInput();
     await expect(errorInput).toBeEnabled();
@@ -47,12 +62,5 @@ test.describe('Indices', { tag: tags.stateful.classic }, () => {
     await waitForApmSettingsHeaderLink(page);
 
     await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
-
-    await test.step('restore original error index', async () => {
-      await indicesPage.setErrorIndex(originalErrorIndex);
-      await indicesPage.clickApplyChanges();
-      await waitForApmSettingsHeaderLink(page);
-      await expect(await indicesPage.getErrorIndexInput()).toHaveValue(originalErrorIndex);
-    });
   });
 });
