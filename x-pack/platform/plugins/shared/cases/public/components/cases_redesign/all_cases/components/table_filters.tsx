@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup, useEuiTheme } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { MoreFiltersSelectable } from '../../../all_cases/table_filter_config/more_filters_selectable';
@@ -124,6 +124,8 @@ const CasesTableFiltersComponent = ({
     isLoading: isLoadingFilters,
   });
 
+  const { euiTheme } = useEuiTheme();
+
   const handleOnCreateCasePressed = useCallback(() => {
     if (onCreateCasePressed) {
       onCreateCasePressed();
@@ -136,6 +138,9 @@ const CasesTableFiltersComponent = ({
       justifyContent="flexStart"
       wrap={true}
       data-test-subj="cases-table-filters"
+      css={css`
+        padding-top: ${euiTheme.size.m};
+      `}
     >
       {isSelectorView && onCreateCasePressed ? (
         <EuiFlexItem grow={false}>
