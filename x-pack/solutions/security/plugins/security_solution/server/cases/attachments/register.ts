@@ -10,6 +10,7 @@ import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import { getEndpointAttachmentType } from './endpoint';
 import { getEventAttachmentType } from './event';
 import { getIndicatorAttachmentType } from './indicator';
+import { getTimelineAttachmentType } from './timeline';
 
 export const registerCaseAttachments = (
   attachmentFramework: CasesServerSetup['attachmentFramework']
@@ -17,4 +18,5 @@ export const registerCaseAttachments = (
   attachmentFramework.registerUnified(getEndpointAttachmentType());
   attachmentFramework.registerUnified(getEventAttachmentType());
   attachmentFramework.registerUnified(getIndicatorAttachmentType());
+  attachmentFramework.registerUnified(getTimelineAttachmentType());
 };
