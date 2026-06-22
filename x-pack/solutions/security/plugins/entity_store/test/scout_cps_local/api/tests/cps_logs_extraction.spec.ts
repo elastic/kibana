@@ -8,18 +8,20 @@
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { EsClient } from '@kbn/scout-security';
-
-type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 import { get } from 'lodash';
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
-  ENTITY_STORE_ROUTES,
   LATEST_ALIAS,
   UPDATES_INDEX,
 } from '../../../scout/api/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { clearEntityStoreIndices } from '../../../scout/api/fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  forceLogExtraction,
+  installAllEntityTypes,
+  uninstallAllEntityTypes,
+} from '../../../scout/api/fixtures/helpers';
 
 const CPS_TEST_LOGS_INDEX = 'logs-cps-test';
 const NOW = Date.now();
@@ -37,20 +39,6 @@ async function ingestLogOnLinked(
   });
 }
 
-async function forceLogExtraction(
-  apiClient: ApiWorkerFixtures['apiClient'],
-  internalHeaders: Record<string, string>,
-  entityType: string
-) {
-  const res = await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
-    headers: internalHeaders,
-    responseType: 'json',
-    body: { fromDateISO: WINDOW_FROM, toDateISO: WINDOW_TO },
-  });
-  expect(res.statusCode).toBe(200);
-  expect(res.body.success).toBe(true);
-}
-
 apiTest.describe(
   'Entity Store CPS logs extraction (linked serverless project)',
   { tag: tags.serverless.security.complete },
@@ -64,11 +52,7 @@ apiTest.describe(
       internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
 
       await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
-      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      await installAllEntityTypes(apiClient, defaultHeaders);
     });
 
     apiTest.afterAll(async ({ apiClient, esClient, linkedProject }) => {
@@ -76,11 +60,7 @@ apiTest.describe(
         { index: CPS_TEST_LOGS_INDEX },
         { ignore: [404] }
       );
-      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      await uninstallAllEntityTypes(apiClient, defaultHeaders);
       await clearEntityStoreIndices(esClient);
     });
 
@@ -95,7 +75,9 @@ apiTest.describe(
           event: { outcome: 'success' },
         });
 
-        await forceLogExtraction(apiClient, internalHeaders, 'user');
+        const extraction = await forceLogExtraction(apiClient, internalHeaders, 'user', WINDOW_FROM, WINDOW_TO);
+        expect(extraction.statusCode).toBe(200);
+        expect(extraction.body.success).toBe(true);
         await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const hits = await esClient.search({
@@ -120,11 +102,15 @@ apiTest.describe(
         });
 
         // First call: CPS path writes the entity-update doc into updates.
-        await forceLogExtraction(apiClient, internalHeaders, 'user');
+        const firstExtraction = await forceLogExtraction(apiClient, internalHeaders, 'user', WINDOW_FROM, WINDOW_TO);
+        expect(firstExtraction.statusCode).toBe(200);
+        expect(firstExtraction.body.success).toBe(true);
         // Ensure the updates doc is visible before the main path reads it.
         await esClient.indices.refresh({ index: UPDATES_INDEX });
         // Second call: main path scans updates and merges into latest.
-        await forceLogExtraction(apiClient, internalHeaders, 'user');
+        const secondExtraction = await forceLogExtraction(apiClient, internalHeaders, 'user', WINDOW_FROM, WINDOW_TO);
+        expect(secondExtraction.statusCode).toBe(200);
+        expect(secondExtraction.body.success).toBe(true);
 
         await esClient.indices.refresh({ index: LATEST_ALIAS });
 
