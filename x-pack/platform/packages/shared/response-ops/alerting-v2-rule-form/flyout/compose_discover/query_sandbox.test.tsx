@@ -49,14 +49,13 @@ jest.mock('./compose_discover_chart', () => ({
   ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
 }));
 
-jest.mock('./compose_discover_tabs', () => ({
-  ComposeDiscoverTabs: () => <div data-test-subj="mockComposeDiscoverTabs" />,
-  TAB_DEFINITIONS: [
-    { id: 'base', label: 'Base' },
-    { id: 'alert', label: 'Alert' },
-    { id: 'recovery', label: 'Recovery' },
-  ],
-}));
+jest.mock('./compose_discover_tabs', () => {
+  const actual = jest.requireActual('./compose_discover_tabs');
+  return {
+    ...actual,
+    ComposeDiscoverTabs: () => <div data-test-subj="mockComposeDiscoverTabs" />,
+  };
+});
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="mockCodeEditor">{value}</pre>,
@@ -140,8 +139,8 @@ describe('QuerySandbox', () => {
         onRecoveryBlockChange: jest.fn(),
       },
     });
-    expect(screen.getByText('Base')).toBeInTheDocument();
-    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxTab-base')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxTab-alert')).toBeInTheDocument();
   });
 
   it('shows "Run your query" prompt when hasRun is false', () => {
@@ -219,5 +218,60 @@ describe('QuerySandbox', () => {
   it('enables time field selector when onTimeFieldChange is provided', () => {
     renderSandbox({ onTimeFieldChange: jest.fn() });
     expect(screen.getByTestId('querySandboxTimeField')).not.toBeDisabled();
+  });
+
+  describe('alert query tab', () => {
+    const tabPropsBase = {
+      tabs: ['base', 'alert'] as const,
+      onTabChange: jest.fn(),
+      alertBlock: '',
+      recoveryBlock: '',
+      onBaseQueryChange: jest.fn(),
+      onAlertBlockChange: jest.fn(),
+      onRecoveryBlockChange: jest.fn(),
+    };
+
+    it('disables the alert tab when the base query is empty', () => {
+      renderSandbox({
+        tabProps: {
+          ...tabPropsBase,
+          tabs: ['base', 'alert'],
+          activeTab: 'base',
+          baseQuery: '',
+        },
+      });
+
+      expect(screen.getByTestId('querySandboxTab-alert')).toBeDisabled();
+      expect(screen.getByTestId('querySandboxTab-base')).not.toBeDisabled();
+    });
+
+    it('enables the alert tab when the base query is populated', () => {
+      renderSandbox({
+        tabProps: {
+          ...tabPropsBase,
+          tabs: ['base', 'alert'],
+          activeTab: 'base',
+          baseQuery: 'FROM logs-*',
+        },
+      });
+
+      expect(screen.getByTestId('querySandboxTab-alert')).not.toBeDisabled();
+    });
+
+    it('switches to the base tab when alert is active without a base query', () => {
+      const onTabChange = jest.fn();
+
+      renderSandbox({
+        tabProps: {
+          ...tabPropsBase,
+          tabs: ['base', 'alert'],
+          activeTab: 'alert',
+          baseQuery: '',
+          onTabChange,
+        },
+      });
+
+      expect(onTabChange).toHaveBeenCalledWith('base');
+    });
   });
 });
