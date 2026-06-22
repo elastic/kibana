@@ -450,7 +450,7 @@ export class WorkflowExecutionRuntimeManager {
         }
       }
 
-      const currentTraceParent = getCurrentTraceParent();
+      const currentTraceParent = getCurrentTraceParent(agent);
       if (currentTraceParent) {
         this.workflowExecutionState.updateWorkflowExecution({
           traceParent: currentTraceParent,

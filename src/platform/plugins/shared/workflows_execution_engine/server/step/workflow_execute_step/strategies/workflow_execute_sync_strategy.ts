@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import agent from 'elastic-apm-node';
 import { omit } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
@@ -110,7 +111,7 @@ export class WorkflowExecuteSyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
-          ...buildChildWorkflowTraceContext(workflowExecution),
+          ...buildChildWorkflowTraceContext(agent, workflowExecution),
         },
         request
       );

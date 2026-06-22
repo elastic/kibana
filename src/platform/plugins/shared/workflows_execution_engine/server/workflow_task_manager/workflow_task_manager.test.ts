@@ -11,8 +11,13 @@ jest.mock('../workflow_context_manager/apm_internal', () => {
   const actual = jest.requireActual('../workflow_context_manager/apm_internal');
   return {
     ...actual,
-    withTraceParent: jest.fn((_traceParent: string | undefined, run: () => Promise<unknown>) =>
-      run()
+    withTraceParent: jest.fn(
+      (
+        _apm: unknown,
+        _traceParent: string | undefined,
+        run: () => Promise<unknown>,
+        _options?: { transactionName?: string }
+      ) => run()
     ),
   };
 });
@@ -373,7 +378,12 @@ describe('WorkflowTaskManager', () => {
         traceParent: '00-stored-trace-span-01',
       });
 
-      expect(withTraceParent).toHaveBeenCalledWith('00-stored-trace-span-01', expect.any(Function));
+      expect(withTraceParent).toHaveBeenCalledWith(
+        expect.anything(),
+        '00-stored-trace-span-01',
+        expect.any(Function),
+        { transactionName: 'workflow immediate resume schedule' }
+      );
     });
   });
 

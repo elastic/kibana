@@ -12,7 +12,9 @@
 // rest of the workflow engine is `any`-free; this module is the chokepoint
 // where the upstream typing gaps are absorbed so they don't bleed elsewhere.
 
-import agent from 'elastic-apm-node';
+import type agent from 'elastic-apm-node';
+
+const DEFAULT_TRACE_PARENT_TRANSACTION_NAME = 'workflow task schedule';
 
 type ApmAgentInternals = typeof agent & {
   setCurrentTransaction: (transaction: agent.Transaction) => void;
@@ -59,25 +61,48 @@ export function setCurrentTransaction(apm: typeof agent, transaction: agent.Tran
   (apm as ApmAgentInternals).setCurrentTransaction(transaction);
 }
 
-export function getCurrentTraceParent(): string | undefined {
-  const traceparent = (agent as ApmAgentInternals).currentTraceparent;
+export function getCurrentTraceParent(apm: typeof agent): string | undefined {
+  const traceparent = (apm as ApmAgentInternals).currentTraceparent;
   return typeof traceparent === 'string' && traceparent ? traceparent : undefined;
 }
 
+export interface WithTraceParentOptions {
+  /**
+   * APM transaction name for the short-lived schedule wrapper transaction.
+   * Defaults to {@link DEFAULT_TRACE_PARENT_TRANSACTION_NAME}.
+   */
+  transactionName?: string;
+}
+
 export async function withTraceParent<T>(
+  apm: typeof agent,
   traceParent: string | undefined,
-  run: () => Promise<T>
+  run: () => Promise<T>,
+  options?: WithTraceParentOptions
 ): Promise<T> {
   if (!traceParent) {
     return run();
   }
 
-  const transaction = agent.startTransaction('workflow task schedule', 'workflow', {
-    childOf: traceParent,
-  });
+  const transaction = apm.startTransaction(
+    options?.transactionName ?? DEFAULT_TRACE_PARENT_TRANSACTION_NAME,
+    'workflow',
+    {
+      childOf: traceParent,
+    }
+  );
 
   try {
-    return await run();
+    const result = await run();
+    if (transaction) {
+      transaction.outcome = 'success';
+    }
+    return result;
+  } catch (err) {
+    if (transaction) {
+      transaction.outcome = 'failure';
+    }
+    throw err;
   } finally {
     transaction?.end();
   }

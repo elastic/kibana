@@ -887,8 +887,16 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await withTraceParent(workflowExecution.traceParent, () =>
-          plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest })
+        const { default: apm } = await import('elastic-apm-node');
+        await withTraceParent(
+          apm,
+          workflowExecution.traceParent,
+          () => plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest }),
+          {
+            transactionName: isChildExecution
+              ? 'workflow child execution schedule'
+              : 'workflow execution schedule',
+          }
         );
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
