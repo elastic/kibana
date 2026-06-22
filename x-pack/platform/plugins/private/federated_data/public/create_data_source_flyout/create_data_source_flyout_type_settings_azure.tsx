@@ -143,16 +143,6 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
   const { field: jwtAudienceField, fieldState: jwtAudienceState } = useController({
     name: 'settings.jwt_audience',
     control,
-    rules: areFieldsRequired
-      ? {
-          validate: (value?: string) =>
-            value?.trim()
-              ? true
-              : i18n.translate('dataSets.createFlyout.azure.fields.jwtAudienceRequired', {
-                  defaultMessage: 'JWT audience is required.',
-                }),
-        }
-      : undefined,
   });
 
   const hasOptionalError = useMemo(() => Boolean(jwtAudienceState.error), [jwtAudienceState.error]);

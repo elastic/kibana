@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTextArea,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
@@ -158,19 +167,15 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
+  const [isOptionalOpen, setIsOptionalOpen] = useState(false);
+  const optionalId = useGeneratedHtmlId({
+    prefix: 'createDataSourceFlyoutGcsFederatedOptionalSettings',
+  });
+
   const { field: jwtAudienceField, fieldState: jwtAudienceState } = useController({
     name: 'settings.jwt_audience',
     control,
-    rules: areFieldsRequired
-      ? {
-          validate: (value?: string) =>
-            value?.trim()
-              ? true
-              : i18n.translate('dataSets.createFlyout.gcs.fields.jwtAudienceRequired', {
-                  defaultMessage: 'JWT audience is required.',
-                }),
-        }
-      : undefined,
   });
 
   const { field: stsAudienceField, fieldState: stsAudienceState } = useController({
@@ -193,6 +198,14 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
     control,
   });
 
+  const hasOptionalError = useMemo(() => Boolean(jwtAudienceState.error), [jwtAudienceState.error]);
+
+  useEffect(() => {
+    if (hasOptionalError) {
+      setIsOptionalOpen(true);
+    }
+  }, [hasOptionalError]);
+
   useEffect(() => {
     return () => {
       unregister('settings.jwt_audience');
@@ -203,25 +216,6 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
 
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.jwtAudience', {
-          defaultMessage: 'JWT audience',
-        })}
-        fullWidth
-        isInvalid={Boolean(jwtAudienceState.error)}
-        error={jwtAudienceState.error?.message}
-      >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutGcsFederatedJwtAudience"
-          fullWidth
-          autoComplete="off"
-          isInvalid={Boolean(jwtAudienceState.error)}
-          value={jwtAudienceField.value}
-          onChange={(e) => jwtAudienceField.onChange(e.target.value)}
-          name={jwtAudienceField.name}
-          inputRef={jwtAudienceField.ref}
-        />
-      </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('dataSets.createFlyout.gcs.fields.stsAudience', {
           defaultMessage: 'STS audience',
@@ -241,22 +235,67 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
           inputRef={stsAudienceField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.serviceAccountImpersonationUrl', {
-          defaultMessage: 'Service account impersonation URL',
-        })}
-        fullWidth
+      <EuiButtonEmpty
+        size="s"
+        flush="left"
+        iconType={isOptionalOpen ? 'arrowDown' : 'arrowRight'}
+        aria-expanded={isOptionalOpen}
+        aria-controls={optionalId}
+        onClick={() => setIsOptionalOpen((value) => !value)}
+        data-test-subj="createDataSourceFlyoutGcsFederatedOptionalToggle"
       >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutGcsFederatedServiceAccountImpersonationUrl"
+        {isOptionalOpen
+          ? i18n.translate('dataSets.createFlyout.gcs.federated.optional.hide', {
+              defaultMessage: 'Hide optional authentication settings',
+            })
+          : i18n.translate('dataSets.createFlyout.gcs.federated.optional.show', {
+              defaultMessage: 'Show optional authentication settings',
+            })}
+      </EuiButtonEmpty>
+      <div
+        id={optionalId}
+        hidden={!isOptionalOpen}
+        css={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      >
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label={i18n.translate('dataSets.createFlyout.gcs.fields.jwtAudience', {
+            defaultMessage: 'JWT audience',
+          })}
           fullWidth
-          autoComplete="off"
-          value={impersonationUrlField.value}
-          onChange={(e) => impersonationUrlField.onChange(e.target.value)}
-          name={impersonationUrlField.name}
-          inputRef={impersonationUrlField.ref}
-        />
-      </EuiFormRow>
+          isInvalid={Boolean(jwtAudienceState.error)}
+          error={jwtAudienceState.error?.message}
+        >
+          <EuiFieldText
+            data-test-subj="createDataSourceFlyoutGcsFederatedJwtAudience"
+            fullWidth
+            autoComplete="off"
+            isInvalid={Boolean(jwtAudienceState.error)}
+            value={jwtAudienceField.value}
+            onChange={(e) => jwtAudienceField.onChange(e.target.value)}
+            name={jwtAudienceField.name}
+            inputRef={jwtAudienceField.ref}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('dataSets.createFlyout.gcs.fields.serviceAccountImpersonationUrl', {
+            defaultMessage: 'Service account impersonation URL',
+          })}
+          fullWidth
+        >
+          <EuiFieldText
+            data-test-subj="createDataSourceFlyoutGcsFederatedServiceAccountImpersonationUrl"
+            fullWidth
+            autoComplete="off"
+            value={impersonationUrlField.value}
+            onChange={(e) => impersonationUrlField.onChange(e.target.value)}
+            name={impersonationUrlField.name}
+            inputRef={impersonationUrlField.ref}
+          />
+        </EuiFormRow>
+      </div>
     </>
   );
 }
