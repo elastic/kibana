@@ -26,6 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.4.3 [kibana-9.4.3-release-notes]
 
+### Features and enhancements [kibana-9.4.3-features-enhancements]
+
+**Alerting**:
+* Adds `xpack.alerting.alertsService.totalFieldsLimit` (default `2800`, max `5000`) to configure the field mapping limit on `.alerts-*` indices, index templates, and component templates [#274024]({{kib-pull}}274024).
 
 ### Fixes [kibana-9.4.3-fixes]
 
