@@ -25,10 +25,20 @@ jest.mock('./lib/get_user', () => ({
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+const mockResolveExecutionsWriteIndex = jest.fn().mockResolvedValue('.workflows-executions-000001');
+const mockResolveStepExecutionsWriteIndex = jest
+  .fn()
+  .mockResolvedValue('.workflows-step-executions-000001');
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
     createWorkflowExecution: mockCreateWorkflowExecution,
+    resolveWriteIndex: mockResolveExecutionsWriteIndex,
+  })),
+}));
+jest.mock('./repositories/step_execution_repository', () => ({
+  StepExecutionRepository: jest.fn().mockImplementation(() => ({
+    resolveWriteIndex: mockResolveStepExecutionsWriteIndex,
   })),
 }));
 

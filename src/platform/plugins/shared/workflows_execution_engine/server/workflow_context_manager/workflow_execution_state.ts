@@ -57,6 +57,7 @@ export type StepIoStateAccessor = Pick<
   | 'getLatestStepExecution'
   | 'getAllStepExecutions'
   | 'getStepExecutionIdsByStepId'
+  | 'getWorkflowExecution'
   | 'getWorkflowExecutionStatus'
   | 'getWorkflowExecutionId'
   | 'getWorkflowExecutionScopeStack'

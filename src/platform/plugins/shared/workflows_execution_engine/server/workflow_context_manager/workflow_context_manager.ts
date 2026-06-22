@@ -24,13 +24,14 @@ import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
 import {
   callKibanaApi,
   type CallKibanaApiParams,
   type CallKibanaApiResult,
 } from '../lib/call_kibana_api';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, isTemplateExpression } from '../utils';
+import { generateEncodedStepExecutionId, isTemplateExpression } from '../utils';
 import { isSerializedError } from '../utils/errors';
 
 export interface ContextManagerInit {
@@ -491,6 +492,15 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
+    const stepExecutionsIndex =
+      this.workflowExecutionState.getWorkflowExecution().stepExecutionsIndex;
+
+    if (!stepExecutionsIndex) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step executions index to be loaded'
+      );
+    }
+
     let scopeStack = WorkflowScopeStack.fromStackFrames(
       this.workflowExecutionState.getWorkflowExecution().scopeStack
     );
@@ -504,7 +514,13 @@ export class WorkflowContextManager {
       const topFrame = scopeStack.getCurrentScope();
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
-        buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
+        generateEncodedStepExecutionId({
+          executionId,
+          stepId: topFrame.stepId,
+          stackFrames: scopeStack.stackFrames,
+          indexName: stepExecutionsIndex,
+          indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
+        })
       );
       scopeEntries.push({ topFrame, stepExecution });
       if (stepExecution?.stepType === 'foreach') {

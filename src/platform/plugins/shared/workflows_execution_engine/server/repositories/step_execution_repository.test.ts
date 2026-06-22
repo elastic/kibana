@@ -8,6 +8,9 @@
  */
 
 import { StepExecutionRepository } from './step_execution_repository';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+
+const TARGET_INDEX = '.workflows-step-executions-000001';
 
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
@@ -16,7 +19,8 @@ describe('StepExecutionRepository', () => {
     update: jest.Mock;
     bulk: jest.Mock;
     mget: jest.Mock;
-    indices: { exists: jest.Mock; create: jest.Mock };
+    search: jest.Mock;
+    indices: { exists: jest.Mock; create: jest.Mock; getAlias: jest.Mock };
   };
 
   beforeEach(() => {
@@ -25,9 +29,11 @@ describe('StepExecutionRepository', () => {
       update: jest.fn(),
       bulk: jest.fn(),
       mget: jest.fn(),
+      search: jest.fn(),
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
+        getAlias: jest.fn(),
       },
     };
     underTest = new StepExecutionRepository(esClient as any);
@@ -438,6 +444,34 @@ describe('StepExecutionRepository', () => {
       const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
 
       expect(result[0].output).toBeNull();
+    });
+
+    it('uses the pinned backing index when provided', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+
+      await underTest.getStepExecutionsByIds(['step-1'], undefined, undefined, TARGET_INDEX);
+
+      expect(esClient.mget).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: TARGET_INDEX,
+          ids: ['step-1'],
+        })
+      );
+    });
+  });
+
+  describe('resolveWriteIndex', () => {
+    it('returns the index marked as write index', async () => {
+      esClient.indices.getAlias.mockResolvedValue({
+        '.workflows-step-executions-000002': {
+          aliases: { [WORKFLOWS_STEP_EXECUTIONS_INDEX]: { is_write_index: false } },
+        },
+        [TARGET_INDEX]: {
+          aliases: { [WORKFLOWS_STEP_EXECUTIONS_INDEX]: { is_write_index: true } },
+        },
+      });
+
+      await expect(underTest.resolveWriteIndex()).resolves.toBe(TARGET_INDEX);
     });
   });
 });

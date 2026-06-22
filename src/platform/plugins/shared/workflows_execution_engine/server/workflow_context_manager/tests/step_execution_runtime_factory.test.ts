@@ -9,6 +9,8 @@
 
 import { StepExecutionRuntimeFactory } from '../step_execution_runtime_factory';
 
+const TEST_STEP_EXECUTIONS_INDEX = '.workflows-step-executions-000001';
+
 const createParams = () => {
   const node = {
     id: 'node-1',
@@ -22,6 +24,7 @@ const createParams = () => {
       getWorkflowExecution: jest.fn(() => ({
         id: 'exec-1',
         spaceId: 'default',
+        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       })),
     },
     workflowExecutionGraph: {

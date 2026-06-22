@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from './__mock__/context_dependencies';
+import { createMockWorkflowExecutionEngineConfig } from './execution_functions_test_utils';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
@@ -48,22 +48,7 @@ describe('setupDependencies', () => {
     error: jest.fn(),
   } as unknown as Logger;
 
-  const mockConfig: WorkflowsExecutionEngineConfig = {
-    enabled: true,
-    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
-    maxWorkflowDepth: 10,
-    logging: {
-      console: true,
-    },
-    http: {
-      allowedHosts: ['*'],
-    },
-    maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
-    eviction: {
-      minPayloadSize: new ByteSizeValue(10 * 1024),
-    },
-    collectQueueMetrics: false,
-  };
+  const mockConfig: WorkflowsExecutionEngineConfig = createMockWorkflowExecutionEngineConfig();
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
   let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;

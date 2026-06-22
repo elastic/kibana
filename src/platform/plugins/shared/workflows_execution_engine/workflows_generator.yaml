@@ -1,0 +1,705 @@
+version: "1"
+name: Upload 20 Scheduled Copies
+enabled: true
+consts:
+  WORKFLOW_METRICS_COLLECTOR_INDEX: workflow-metrics-collector
+  WORKFLOW_EXECUTIONS_INDEX_PATTERN: .workflows-executions*
+triggers:
+  - type: manual
+    inputs:
+      - name: count_of_parent_workflows
+        type: number
+        description: The number of workflows to schedule concurrently
+        required: true
+        default: 2
+      - name: count_of_steps_in_child
+        type: number
+        description: The number of steps to execute in the child workflow
+        required: true
+        default: 1
+      - name: child_workflow_expected_size_in_mb
+        type: number
+        description: The expected size in MB of the child workflow
+        required: true
+        default: 5
+      - name: delete_workflow_metrics_collector_index
+        type: boolean
+        description: Whether to delete the workflow metrics collector index
+        required: true
+        default: false
+
+steps:
+  - name: delete_workflow_metrics_collector_index
+    type: elasticsearch.request
+    if: '${{ inputs.delete_workflow_metrics_collector_index }}'
+    with:
+      method: DELETE
+      path: /{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}
+    on-failure:
+      continue: true
+  
+  - name: verify_workflow_metrics_collector_index_exists
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}
+    on-failure:
+      continue: true
+
+  - name: create_workflow_metrics_collector_index
+    type: elasticsearch.request
+    if: '${{ steps.verify_workflow_metrics_collector_index_exists.output == nil }}'
+    with:
+      method: PUT
+      path: /{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}
+      body:
+        mappings:
+          dynamic: false
+          properties:
+            id:
+              type: keyword
+            "@timestamp":
+              type: date
+            spaceId:
+              type: keyword
+            metric:
+              type: keyword
+            value:
+              type: double
+            unit:
+              type: keyword
+            tags:
+              type: keyword
+  - name: create_metrics_collector_workflow
+    type: kibana.request
+    with:
+      method: POST
+      path: /s/{{workflow.spaceId}}/api/workflows/workflow
+      body:
+        yaml: |
+          
+          version: "1"
+          name: Workflow metrics collector
+          enabled: true
+          triggers:
+            - type: manual
+          consts:
+            WORKFLOW_METRICS_COLLECTOR_INDEX: workflow-metrics-collector
+          {% raw %}
+          settings:
+           concurrency:
+             key: ${{workflow.id}}
+             strategy: drop
+          
+          steps:
+            - name: long_loop
+              type: foreach
+              foreach: '${{ (0..3) | json }}'
+              steps:
+                - name: loop
+                  type: foreach
+                  foreach:
+                    - group: stepExecution
+                      alias_name: .workflows-step-executions
+                      executions_index_pattern: .workflows-step-executions*
+                      metrics_mapping:
+                        - metric: 'stepExecution.count'
+                          unit: 'int'
+                          expression: |
+                            metricValue = 1;
+                        - metric: 'stepExecution.createdAt'
+                          unit: 'int'
+                          expression: metricValue = Instant.parse(startedAt).toEpochMilli();
+                        - metric: 'stepExecution.duration'
+                          unit: 'int'
+                          expression: |
+                            metricValue = duration;
+                            if (metricValue == null && executionTimeMs != null) {
+                              metricValue = executionTimeMs;
+                            }
+                        - metric: 'stepExecution.queueTime'
+                          unit: int
+                          expression: |
+                            if (createdAt == null) {
+                              metricValue = null;
+                            } else {
+                              metricValue = Instant.parse(startedAt).toEpochMilli() - Instant.parse(createdAt).toEpochMilli();
+                            }
+                    - group: workflowExecution
+                      alias_name: .workflows-executions
+                      executions_index_pattern: .workflows-executions*
+                      metrics_mapping:
+                        - metric: 'workflowExecution.count'
+                          unit: 'int'
+                          expression: |
+                            metricValue = 1;
+                        - metric: 'workflowExecution.createdAt'
+                          unit: 'int'
+                          expression: metricValue = Instant.parse(createdAt).toEpochMilli();
+
+                        - metric: 'workflowExecution.duration'
+                          unit: 'int'
+                          expression: metricValue = duration;
+                      
+                        - metric: 'workflowExecution.queueTime'
+                          unit: int
+                          expression: |
+                            metricValue = Instant.parse(startedAt).toEpochMilli() - Instant.parse(createdAt).toEpochMilli();
+                  steps:
+                    - name: get_backing_indexes_count
+                      type: elasticsearch.request
+                      on-failure:
+                        continue: true
+                      with:
+                        method: GET
+                        path: _alias/{{foreach.item.alias_name}}
+
+                    - name: index_indexes_count
+                      type: elasticsearch.request
+                      if: '${{ steps.get_backing_indexes_count.error == nil }}'
+                      with:
+                        method: POST
+                        path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
+                        body:
+                          "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
+                          metric: '{{foreach.item.group}}.backing_indexes_count'
+                          value: ${{steps.get_backing_indexes_count.output | entries | size}}
+                          unit: int
+                    
+                    - name: get_alias_disk_size
+                      type: elasticsearch.request
+                      with:
+                        method: GET
+                        path: '{{foreach.item.alias_name}}*/_stats/store'
+                    
+                    - name: get_docs_count
+                      type: elasticsearch.request
+                      with:
+                        method: GET
+                        path: '{{foreach.item.alias_name}}*/_count'
+                    
+                    - name: index_docs_count
+                      type: elasticsearch.request
+                      with:
+                        method: POST
+                        path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
+                        body:
+                          "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
+                          metric: '{{foreach.item.group}}.docs_count'
+                          value: ${{steps.get_docs_count.output.count}}
+                          unit: int
+                    
+                    - name: index_overall_space_taken
+                      type: elasticsearch.request
+                      with:
+                        method: POST
+                        path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
+                        body:
+                          "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
+                          metric: '{{foreach.item.group}}.overall_size'
+                          value: '${{steps.get_alias_disk_size.output._all.total.store.size_in_bytes | divided_by: 1048576}}'
+                          unit: mb
+
+                    - name: loop_mappings
+                      type: foreach
+                      foreach: "${{foreach.item.metrics_mapping | default: '[]' | json_parse}}"
+                      steps:
+                        - name: async_reindex_duration_metrics
+                          type: elasticsearch.request
+                          on-failure:
+                            continue: true
+                          with:
+                            method: POST
+                            path: /_reindex?wait_for_completion=true
+                            body:
+                              conflicts: proceed
+                              source:
+                                index: "{{ steps.loop.item.executions_index_pattern }}"
+                                size: 50
+                                _source:
+                                  - spaceId
+                                  - id
+                                  - startedAt
+                                  - finishedAt
+                                  - duration
+                                  - createdAt
+                                  - executionTimeMs
+                                query:
+                                  bool:
+                                    must:
+                                      - range:
+                                          finishedAt:
+                                            gte: |
+                                              {%- if execution.triggeredBy == 'manual' -%}
+                                              now-10y
+                                              {%- else -%}
+                                              now-20m
+                                              {%- endif -%}
+                                      - terms:
+                                          status:
+                                            - completed
+                                            - failed
+                                            - cancelled
+                                            - skipped
+                                            - timed_out
+                              dest:
+                                index: "{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}"
+                                op_type: create
+                              script:
+                                lang: painless
+                                source: |
+                                  def spaceId = ctx._source.spaceId;
+                                  def id = ctx._source.id;
+                                  def finishedAt = ctx._source.finishedAt;
+                                  def createdAt = ctx._source.createdAt;
+                                  def startedAt = ctx._source.startedAt;
+                                  def duration = ctx._source.duration;
+                                  def executionTimeMs = ctx._source.executionTimeMs;
+                                  def metricId = "{{foreach.item.metric}}_" + ctx._source.id;
+                                  def metric = "{{foreach.item.metric}}";
+                                  def unit = "{{foreach.item.unit}}";
+          
+                                  def metricValue;
+
+                                  ctx._source.clear();
+
+                                  {% if foreach.item.expression %}
+                                    {{foreach.item.expression}}
+                                  {% endif %}
+
+                                  if (metricValue == null) { ctx.op = "noop"; return; }
+
+                                  ctx._source.spaceId = spaceId;
+                                  ctx._source.metric = metric;
+                                  ctx._source.value = metricValue;
+
+                                  ctx._source.unit = unit;
+                                  ctx._source['@timestamp'] = finishedAt;
+                                  ctx._source.id = metricId;
+                                  ctx._id = metricId;
+
+                - name: collect_workflow_status_counts
+                  type: foreach
+                  foreach:
+                    - metric: workflowExecution.pendingCount
+                      status: pending
+                    - metric: workflowExecution.runningCount
+                      status: running
+                    - metric: workflowExecution.completeCount
+                      status: completed
+                    - metric: workflowExecution.failedCount
+                      status: failed
+                  steps:
+                    - name: get_workflow_executions_count_by_status
+                      type: elasticsearch.request
+                      with:
+                        method: POST
+                        path: .workflows-executions*/_count
+                        body:
+                          query:
+                            term:
+                              status: '{{foreach.item.status}}'
+
+                    - name: index_workflow_executions_count_by_status
+                      type: elasticsearch.request
+                      with:
+                        method: POST
+                        path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
+                        body:
+                          "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
+                          metric: '{{foreach.item.metric}}'
+                          value: ${{steps.get_workflow_executions_count_by_status.output.count}}
+                          unit: int
+                - name: if
+                  type: if
+                  condition: ${{foreach.index > 0}}
+                  steps:
+                    - name: sleep
+                      type: wait
+                      with:
+                        duration: 7s
+          {% endraw %}
+  - name: create_metrics_collector_data_view
+    type: kibana.request
+    with:
+      method: POST
+      path: /s/{{workflow.spaceId}}/api/data_views/data_view
+      body:
+        override: true
+        data_view:
+          id: workflow-metrics-collector-dv
+          title: "{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}"
+          name: Workflow metrics collector
+          timeFieldName: "@timestamp"
+
+  - name: create_workflow_metrics_dashboard
+    type: kibana.request
+    with:
+      method: PUT
+      path: /s/{{workflow.spaceId}}/api/dashboards/workflows-metrics-dashboard
+      body:
+        title: Workflow metrics
+        description: Collected workflow execution metrics from {{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}
+        time_range:
+          from: now-1h
+          to: now
+        panels:
+          - grid:
+              x: 0
+              y: 0
+              w: 48
+              h: 12
+            type: vis
+            config:
+              type: xy
+              title: Queue time
+              query:
+                expression: 'metric: "workflowExecution.queueTime" or metric: "stepExecution.queueTime"'
+                language: kql
+              legend:
+                visibility: visible
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflow-metrics-collector-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  breakdown_by:
+                    operation: terms
+                    fields:
+                      - metric
+                    limit: 2
+                  x:
+                    operation: date_histogram
+                    field: "@timestamp"
+                    suggested_interval: 1m
+                    use_original_time_range: false
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: average
+                      field: value
+              axis:
+                y:
+                  title:
+                    text: Avg queue time (ms)
+          - grid:
+              x: 0
+              y: 12
+              w: 48
+              h: 12
+            type: vis
+            config:
+              type: xy
+              title: Duration
+              query:
+                expression: 'metric: "workflowExecution.duration" or metric: "stepExecution.duration"'
+                language: kql
+              legend:
+                visibility: visible
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflow-metrics-collector-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  breakdown_by:
+                    operation: terms
+                    fields:
+                      - metric
+                    limit: 2
+                  x:
+                    operation: date_histogram
+                    field: "@timestamp"
+                    suggested_interval: 1m
+                    use_original_time_range: false
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: average
+                      field: value
+              axis:
+                y:
+                  title:
+                    text: Avg duration (ms)
+          - grid:
+              x: 0
+              y: 24
+              w: 48
+              h: 12
+            type: vis
+            config:
+              type: xy
+              title: Count
+              query:
+                expression: 'metric: "workflowExecution.count" or metric: "stepExecution.count" or metric: "workflowExecution.pendingCount" or metric: "workflowExecution.runningCount" or metric: "workflowExecution.completeCount" or metric: "workflowExecution.failedCount"'
+                language: kql
+              legend:
+                visibility: visible
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflow-metrics-collector-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  breakdown_by:
+                    operation: terms
+                    fields:
+                      - metric
+                    limit: 6
+                  x:
+                    operation: date_histogram
+                    field: "@timestamp"
+                    suggested_interval: 1m
+                    use_original_time_range: false
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: sum
+                      field: value
+              axis:
+                y:
+                  title:
+                    text: Count
+          - grid:
+              x: 0
+              y: 36
+              w: 48
+              h: 12
+            type: vis
+            config:
+              type: xy
+              title: Backing indexes count
+              query:
+                expression: 'metric: "workflowExecution.backing_indexes_count" or metric: "stepExecution.backing_indexes_count"'
+                language: kql
+              legend:
+                visibility: visible
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflow-metrics-collector-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  breakdown_by:
+                    operation: terms
+                    fields:
+                      - metric
+                    limit: 2
+                  x:
+                    operation: date_histogram
+                    field: "@timestamp"
+                    suggested_interval: 1m
+                    use_original_time_range: false
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: last_value
+                      field: value
+                      time_field: "@timestamp"
+              axis:
+                y:
+                  title:
+                    text: Backing indexes count
+          - grid:
+              x: 0
+              y: 48
+              w: 48
+              h: 12
+            type: vis
+            config:
+              type: xy
+              title: Overall disk size
+              query:
+                expression: 'metric: "workflowExecution.overall_size" or metric: "stepExecution.overall_size"'
+                language: kql
+              legend:
+                visibility: visible
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflow-metrics-collector-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  breakdown_by:
+                    operation: terms
+                    fields:
+                      - metric
+                    limit: 2
+                  x:
+                    operation: date_histogram
+                    field: "@timestamp"
+                    suggested_interval: 1m
+                    use_original_time_range: false
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: max
+                      field: value
+                      format:
+                        type: number
+                        decimals: 2
+                        suffix: " MB"
+              axis:
+                y:
+                  title:
+                    text: Max disk size (MB)
+          - grid:
+              x: 0
+              y: 60
+              w: 48
+              h: 12
+            type: vis
+            config:
+              type: xy
+              title: Docs count
+              query:
+                expression: 'metric: "workflowExecution.docs_count" or metric: "stepExecution.docs_count"'
+                language: kql
+              legend:
+                visibility: visible
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflow-metrics-collector-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  breakdown_by:
+                    operation: terms
+                    fields:
+                      - metric
+                    limit: 2
+                  x:
+                    operation: date_histogram
+                    field: "@timestamp"
+                    suggested_interval: 1m
+                    use_original_time_range: false
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: max
+                      field: value
+              axis:
+                y:
+                  title:
+                    text: Max docs count
+
+  - name: create_child_workflow
+    type: kibana.request
+    with:
+      method: POST
+      path: /s/{{workflow.spaceId}}/api/workflows/workflow
+      body:
+        yaml: |
+          name: Child workflow
+          enabled: true
+          description: This is a new workflow
+          triggers:
+            - type: manual
+          outputs:
+            - name: file1
+              type: string
+            - name: file2
+              type: string
+            - name: file3
+              type: string
+          consts:
+            COUNT_OF_STEPS_IN_CHILD: {{ inputs.count_of_steps_in_child }}
+            CHILD_WORKFLOW_EXPECTED_SIZE_IN_MB: {{ inputs.child_workflow_expected_size_in_mb }}
+          {% raw %}
+          steps:
+            - name: log
+              type: console
+              foreach: ${{ (1..consts.COUNT_OF_STEPS_IN_CHILD) | json }}
+              with:
+                message: |
+                  {%- assign expected_size_in_bytes = consts.CHILD_WORKFLOW_EXPECTED_SIZE_IN_MB | times: 1024 | times: 1024 -%}
+                  {%- assign hex_line_size = 32 -%}
+                  {%- assign kb_chunk_size = hex_line_size | times: hex_line_size -%}
+                  {%- assign steps_count = expected_size_in_bytes | divided_by: kb_chunk_size | round -%}
+                  {%- capture kb_chunk -%}
+                    {%- for i in (1..hex_line_size) -%}0123456789abcdef0123456789abcdef{%- endfor -%}
+                  {%- endcapture -%}
+                  {%- capture mb_string -%}
+                    {% for i in (1..steps_count) %}{{ kb_chunk }}{% endfor %}
+                  {%- endcapture -%}
+                  {{ mb_string | strip }}
+            - name: log_produced_size_in_mb
+              type: console
+              with:
+                message: "{{ steps.log.output | size | divided_by: 1024 | divided_by: 1024 }} MB"
+            
+            - name: log_should_sleep
+              type: console
+              with:
+                message: |
+                  {%- assign modulo = foreach.index | modulo: 5 -%}
+                  {%- assign trueVar = 'true' -%}
+                  {%- if foreach.index > 0 and modulo == 0 -%}
+                  {{trueVar}}
+                  {%- endif -%}
+
+            - name: maybe_sleep
+              type: if
+              condition: '${{ steps.log_should_sleep.output == "true" }}'
+              steps:
+                - name: sleep
+                  type: wait
+                  with:
+                    duration: 7s
+            - name: output
+              type: workflow.output
+              with:
+                file1: ${{steps.log.output}}
+                file2: ${{steps.log.output}}
+                file3: ${{steps.log.output}}
+          {% endraw %}
+  
+  - name: create_parent_workflow
+    type: kibana.request
+    foreach: ${{ (1..inputs.count_of_parent_workflows) | json }}
+    with:
+      method: POST
+      path: /s/{{workflow.spaceId}}/api/workflows/workflow
+      body:
+        yaml: |
+          name: {{foreach.index}} Parent workflow
+          enabled: true
+          triggers:
+            - type: scheduled
+              with:
+                every: 1m
+          consts:
+            METRICS_COLLECTOR_WORKFLOW_ID: {{steps.create_metrics_collector_workflow.output.id}}
+            CHILD_WORKFLOW_ID: {{steps.create_child_workflow.output.id}}
+          steps:
+            - name: loop
+              type: foreach
+              {% raw %}
+              foreach: ${{ (1..6) | json }}
+
+              steps:
+                - name: schedule_child_workflow
+                  type: kibana.request
+                  with:
+                    method: POST
+                    path: '/api/workflows/workflow/{{ consts.CHILD_WORKFLOW_ID }}/run'
+                    body:
+                      inputs: {}
+                
+                - name: sleep
+                  type: wait
+                  with:
+                    duration: 7s
+
+            - name: trigger_workflow_metrics_collector
+              type: workflow.executeAsync
+              with:
+                workflow-id: '${{ consts.METRICS_COLLECTOR_WORKFLOW_ID }}'
+              {% endraw %}

@@ -30,13 +30,14 @@ interface ChildRef {
 }
 
 const STEP_SOURCE_EXCLUDES = ['input', 'output'];
-const PARENT_SOURCE_INCLUDES = ['spaceId', 'stepExecutionIds'];
+const PARENT_SOURCE_INCLUDES = ['spaceId', 'stepExecutionIds', 'stepExecutionsIndex'];
 const CHILD_SOURCE_INCLUDES = [
   'spaceId',
   'workflowId',
   'workflowDefinition.name',
   'status',
   'stepExecutionIds',
+  'stepExecutionsIndex',
 ];
 
 const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
@@ -75,6 +76,45 @@ const fetchChildDocs = async (
   return result;
 };
 
+const fetchChildStepExecutions = async ({
+  esClient,
+  stepsExecutionIndexAlias,
+  childDocMap,
+  sourceExcludes,
+}: {
+  esClient: ElasticsearchClient;
+  stepsExecutionIndexAlias: string;
+  childDocMap: Map<string, EsWorkflowExecution>;
+  sourceExcludes: string[];
+}): Promise<EsWorkflowStepExecution[]> => {
+  const stepIdsByBackingIndex = new Map<string, string[]>();
+
+  for (const doc of childDocMap.values()) {
+    const stepExecutionIds = doc.stepExecutionIds ?? [];
+    if (stepExecutionIds.length > 0 && doc.stepExecutionsIndex) {
+      const existing = stepIdsByBackingIndex.get(doc.stepExecutionsIndex) ?? [];
+      existing.push(...stepExecutionIds);
+      stepIdsByBackingIndex.set(doc.stepExecutionsIndex, existing);
+    }
+  }
+
+  const childStepExecutions: EsWorkflowStepExecution[] = [];
+
+  for (const [backingIndex, stepExecutionIds] of stepIdsByBackingIndex) {
+    const steps = await getStepExecutionsByWorkflowExecution({
+      esClient,
+      stepsExecutionIndex: backingIndex,
+      stepsExecutionIndexAlias,
+      workflowExecutionId: '',
+      stepExecutionIds,
+      sourceExcludes,
+    });
+    childStepExecutions.push(...steps);
+  }
+
+  return childStepExecutions;
+};
+
 const groupStepsByWorkflowRunId = (
   steps: EsWorkflowStepExecution[]
 ): Map<string, WorkflowStepExecutionDto[]> => {
@@ -106,9 +146,14 @@ export const getChildWorkflowExecutions = async ({
     return [];
   }
 
+  if (!parentDoc.stepExecutionsIndex || !parentDoc.stepExecutionIds?.length) {
+    return [];
+  }
+
   const parentStepExecutions = await getStepExecutionsByWorkflowExecution({
     esClient,
-    stepsExecutionIndex,
+    stepsExecutionIndex: parentDoc.stepExecutionsIndex,
+    stepsExecutionIndexAlias: stepsExecutionIndex,
     workflowExecutionId: parentExecutionId,
     stepExecutionIds: parentDoc.stepExecutionIds,
     sourceExcludes: STEP_SOURCE_EXCLUDES,
@@ -126,20 +171,12 @@ export const getChildWorkflowExecutions = async ({
     spaceId
   );
 
-  const allChildStepExecutionIds = Array.from(childDocMap.values()).flatMap(
-    (doc) => doc.stepExecutionIds ?? []
-  );
-
-  const childStepExecutions =
-    allChildStepExecutionIds.length > 0
-      ? await getStepExecutionsByWorkflowExecution({
-          esClient,
-          stepsExecutionIndex,
-          workflowExecutionId: '',
-          stepExecutionIds: allChildStepExecutionIds,
-          sourceExcludes: STEP_SOURCE_EXCLUDES,
-        })
-      : [];
+  const childStepExecutions = await fetchChildStepExecutions({
+    esClient,
+    stepsExecutionIndexAlias: stepsExecutionIndex,
+    childDocMap,
+    sourceExcludes: STEP_SOURCE_EXCLUDES,
+  });
 
   const stepsByRunId = groupStepsByWorkflowRunId(childStepExecutions);
 

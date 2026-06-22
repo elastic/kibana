@@ -10,6 +10,7 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 
 import {
   buildTaskAttemptsExhaustedMessage,
@@ -20,8 +21,24 @@ import {
   TASK_RECOVERY_ERROR_TYPE,
   taskRecoveryMessages,
 } from './task_recovery';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../common/workflow_executions_index';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+jest.mock('uuid', () => ({
+  v4: () => '550e8400-e29b-41d4-a716-446655440000',
+}));
+
+const TEST_EXECUTIONS_INDEX = '.workflows-executions-000001';
+const TEST_STEP_EXECUTIONS_INDEX = '.workflows-step-executions-000001';
+const WORKFLOW_RUN_ID = generateEncodedWorkflowExecutionId({
+  indexName: TEST_EXECUTIONS_INDEX,
+  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+});
+const MISSING_WORKFLOW_RUN_ID = generateEncodedWorkflowExecutionId({
+  indexName: '.workflows-executions-000002',
+  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+});
 
 function createElasticsearchNotFoundError(): Error {
   const err = new Error('Not Found');
@@ -75,7 +92,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 1,
         logger,
@@ -87,10 +104,11 @@ describe('resolveInterruptedWorkflowRunTask', () => {
   it('marks failed and completes task when retrying a running execution', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
+        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       },
     } as any);
     esClient.update.mockResolvedValue({} as any);
@@ -99,7 +117,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -108,7 +126,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         doc: expect.objectContaining({
           status: ExecutionStatus.FAILED,
           finishedAt: expect.any(String),
@@ -129,7 +147,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'missing-id',
+        workflowRunId: MISSING_WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -138,7 +156,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
     expect(esClient.update).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('no execution document for missing-id')
+      expect.stringContaining(`no execution document for ${MISSING_WORKFLOW_RUN_ID}`)
     );
     warnSpy.mockRestore();
   });
@@ -146,7 +164,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
   it('returns task_complete without update when execution is terminal on retry', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.FAILED,
@@ -157,7 +175,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -170,7 +188,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
   it('returns task_complete without update when execution is waiting_for_input on retry', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.WAITING_FOR_INPUT,
@@ -182,7 +200,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -197,10 +215,11 @@ describe('resolveInterruptedWorkflowRunTask', () => {
   it('marks failed when retrying a pending execution (stuck before run advances state)', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.PENDING,
+        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       },
     } as any);
     esClient.update.mockResolvedValue({} as any);
@@ -209,7 +228,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -238,7 +257,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 1,
         logger,
@@ -250,10 +269,11 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
   it('marks failed and completes task when retrying a running execution', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
+        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       },
     } as any);
     esClient.update.mockResolvedValue({} as any);
@@ -262,7 +282,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -271,7 +291,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         doc: expect.objectContaining({
           status: ExecutionStatus.FAILED,
           error: {
@@ -291,7 +311,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'missing-id',
+        workflowRunId: MISSING_WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -300,7 +320,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
     expect(esClient.update).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('no execution document for missing-id')
+      expect.stringContaining(`no execution document for ${MISSING_WORKFLOW_RUN_ID}`)
     );
     warnSpy.mockRestore();
   });
@@ -308,7 +328,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
   it('returns resume_workflow when still waiting_for_input so handler can retry', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.WAITING_FOR_INPUT,
@@ -319,7 +339,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -332,7 +352,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
   it('returns task_complete when execution is already terminal', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.COMPLETED,
@@ -343,7 +363,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -356,7 +376,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
   it('returns task_complete without update when execution is failed (terminal)', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'x',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.FAILED,
@@ -367,7 +387,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
         stepExecutionRepository,
-        workflowRunId: 'x',
+        workflowRunId: WORKFLOW_RUN_ID,
         spaceId: 'default',
         taskAttempts: 2,
         logger,
@@ -400,7 +420,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
       stepExecutionRepository,
-      workflowRunId: 'run-1',
+      workflowRunId: WORKFLOW_RUN_ID,
       spaceId: 'default',
       taskAttempts: 2,
       maxAttempts: 3,
@@ -415,10 +435,11 @@ describe('resolveExhaustedWorkflowRunTask', () => {
   it('marks FAILED with TaskAttemptsExhaustedError on last attempt when execution is non-terminal', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'run-1',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
+        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       },
     } as any);
     esClient.update.mockResolvedValue({} as any);
@@ -428,7 +449,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
       stepExecutionRepository,
-      workflowRunId: 'run-1',
+      workflowRunId: WORKFLOW_RUN_ID,
       spaceId: 'default',
       taskAttempts: 3,
       maxAttempts: 3,
@@ -438,7 +459,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'run-1',
+        id: WORKFLOW_RUN_ID,
         doc: expect.objectContaining({
           status: ExecutionStatus.FAILED,
           error: {
@@ -453,7 +474,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
   it('does not update when execution is already terminal on last attempt', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'run-1',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.COMPLETED,
@@ -463,7 +484,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
       stepExecutionRepository,
-      workflowRunId: 'run-1',
+      workflowRunId: WORKFLOW_RUN_ID,
       spaceId: 'default',
       taskAttempts: 3,
       maxAttempts: 3,
@@ -480,7 +501,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
       stepExecutionRepository,
-      workflowRunId: 'run-1',
+      workflowRunId: WORKFLOW_RUN_ID,
       spaceId: 'default',
       taskAttempts: 3,
       maxAttempts: 3,
@@ -500,7 +521,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
       stepExecutionRepository,
-      workflowRunId: 'run-1',
+      workflowRunId: WORKFLOW_RUN_ID,
       spaceId: 'default',
       taskAttempts: 3,
       maxAttempts: 3,
@@ -510,7 +531,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     expect(esClient.update).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to mark workflow execution run-1 as FAILED')
+      expect.stringContaining(`Failed to mark workflow execution ${WORKFLOW_RUN_ID} as FAILED`)
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Internal Server Error'));
   });
@@ -518,10 +539,11 @@ describe('resolveExhaustedWorkflowRunTask', () => {
   it('logs error when marking FAILED throws on last attempt', async () => {
     esClient.get.mockResolvedValue({
       _source: {
-        id: 'run-1',
+        id: WORKFLOW_RUN_ID,
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
+        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       },
     } as any);
     esClient.update.mockRejectedValueOnce(new Error('update rejected'));
@@ -529,7 +551,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
       stepExecutionRepository,
-      workflowRunId: 'run-1',
+      workflowRunId: WORKFLOW_RUN_ID,
       spaceId: 'default',
       taskAttempts: 3,
       maxAttempts: 3,
@@ -538,7 +560,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
     });
 
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to mark workflow execution run-1 as FAILED')
+      expect.stringContaining(`Failed to mark workflow execution ${WORKFLOW_RUN_ID} as FAILED`)
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('update rejected'));
   });

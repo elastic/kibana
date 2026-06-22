@@ -9,27 +9,20 @@
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import type { ContextDependencies } from '../../workflow_context_manager/types';
+import { createMockWorkflowExecutionEngineConfig } from '../execution_functions_test_utils';
 
-export const mockContextDependencies = () => ({
+export const mockContextDependencies = (): ContextDependencies => ({
   cloudSetup: cloudMock.createSetup(),
   coreStart: coreMock.createStart(),
   actions: actionsMock.createStart(),
   taskManager: taskManagerMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   config: {
-    enabled: true,
-    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
-    maxWorkflowDepth: 10,
+    ...createMockWorkflowExecutionEngineConfig(),
     logging: { console: false },
-    http: { allowedHosts: ['*'] },
-    maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
-    eviction: {
-      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
-    },
-    collectQueueMetrics: false,
   },
 });

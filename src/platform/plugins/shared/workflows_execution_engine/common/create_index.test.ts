@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createIndexWithMappings, createOrUpdateIndex } from './create_index';
+import { createIndexWithMappings, createOrUpdateIndex, setupRolloverIndex } from './create_index';
 
 const createEsClientMock = () => ({
   indices: {
     exists: jest.fn(),
     create: jest.fn(),
     putMapping: jest.fn(),
+    putIndexTemplate: jest.fn(),
+    existsAlias: jest.fn(),
+  },
+  ilm: {
+    putLifecycle: jest.fn(),
   },
 });
 
@@ -162,5 +167,75 @@ describe('createOrUpdateIndex', () => {
         logger: logger as any,
       })
     ).rejects.toThrow('network error');
+  });
+});
+
+describe('setupRolloverIndex', () => {
+  const mappings = { dynamic: false as const, properties: { id: { type: 'keyword' as const } } };
+  const baseOptions = {
+    aliasName: '.workflows-executions',
+    indexPattern: '.workflows-executions-*',
+    initialIndex: '.workflows-executions-000001',
+    mappings,
+  };
+
+  it('registers an index template with index pattern and mappings only', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.putIndexTemplate.mockResolvedValue({});
+    esClient.indices.existsAlias.mockResolvedValue(true);
+    const logger = createLoggerMock();
+
+    await setupRolloverIndex({
+      esClient: esClient as any,
+      ...baseOptions,
+      logger: logger as any,
+    });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+      name: '.workflows-executions',
+      index_patterns: ['.workflows-executions-*'],
+      template: { mappings },
+    });
+    expect(esClient.ilm.putLifecycle).not.toHaveBeenCalled();
+  });
+
+  it('bootstraps the write index when the alias does not exist', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.putIndexTemplate.mockResolvedValue({});
+    esClient.indices.existsAlias.mockResolvedValue(false);
+    esClient.indices.create.mockResolvedValue({});
+    const logger = createLoggerMock();
+
+    await setupRolloverIndex({
+      esClient: esClient as any,
+      ...baseOptions,
+      logger: logger as any,
+    });
+
+    expect(esClient.indices.create).toHaveBeenCalledWith({
+      index: '.workflows-executions-000001',
+      aliases: {
+        '.workflows-executions': { is_write_index: true },
+      },
+      mappings,
+    });
+  });
+
+  it('skips bootstrap when the alias already exists', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.putIndexTemplate.mockResolvedValue({});
+    esClient.indices.existsAlias.mockResolvedValue(true);
+    const logger = createLoggerMock();
+
+    await setupRolloverIndex({
+      esClient: esClient as any,
+      ...baseOptions,
+      logger: logger as any,
+    });
+
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Alias .workflows-executions already exists')
+    );
   });
 });

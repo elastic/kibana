@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from './mappings';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './step_executions_index';
+import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './workflow_executions_index';
 
 // The workflow index mappings are read by the engine, the inbox
 // provider, telemetry, and any cross-workflow listing. Pinning them

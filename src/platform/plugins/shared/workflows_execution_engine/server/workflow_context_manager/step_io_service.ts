@@ -454,10 +454,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       );
     }
 
+    const stepsExecutionIndex = this.state.getWorkflowExecution().stepExecutionsIndex;
     const foundSteps = await this.stepRepository.getStepExecutionsByIds(
       stepExecutionIds,
       undefined,
-      ['output']
+      ['output'],
+      stepsExecutionIndex
     );
 
     // Capture inputs and hand `output`-stripped metadata to state. The
@@ -484,10 +486,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
     if (pinnedIdsToFetch.length > 0) {
-      const pinnedDocs = await this.stepRepository.getStepExecutionsByIds(pinnedIdsToFetch, [
-        'id',
-        'output',
-      ]);
+      const pinnedDocs = await this.stepRepository.getStepExecutionsByIds(
+        pinnedIdsToFetch,
+        ['id', 'output'],
+        undefined,
+        stepsExecutionIndex
+      );
       for (const doc of pinnedDocs) {
         const output: JsonValue | null = doc.output ?? null;
         this.outputs.set(doc.id, output);
@@ -779,11 +783,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const startMs = performance.now();
     const expectedRunId = this.state.getWorkflowExecutionId();
-    const fetched = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, [
-      'id',
-      'output',
-      'workflowRunId',
-    ]);
+    const fetched = await this.stepRepository.getStepExecutionsByIds(
+      idsToRehydrate,
+      ['id', 'output', 'workflowRunId'],
+      undefined,
+      this.state.getWorkflowExecution().stepExecutionsIndex
+    );
     // Defensive cross-execution filter: mget targets documents by `_id` only,
     // and step execution IDs are constructed from the workflow execution ID,
     // so a collision is improbable but not impossible (e.g. someone running
@@ -893,7 +898,8 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     const flushedIds = Array.from(merged.keys());
-    await this.stepRepository.bulkUpsert(Array.from(merged.values()));
+    const stepExecutionsIndex = this.state.getWorkflowExecution().stepExecutionsIndex;
+    await this.stepRepository.bulkUpsert(Array.from(merged.values()), stepExecutionsIndex);
     return flushedIds;
   }
 

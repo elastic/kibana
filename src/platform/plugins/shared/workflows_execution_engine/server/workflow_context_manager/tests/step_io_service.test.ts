@@ -25,6 +25,8 @@ import { buildStepExecutionId } from '../../utils';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
+const TEST_STEP_EXECUTIONS_INDEX = '.workflows-step-executions-000001';
+
 /**
  * Builds a state + service pair backed by jest-mock repositories. Returns
  * the service under test plus the state so suites can seed step docs via
@@ -46,6 +48,7 @@ function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {})
     status: ExecutionStatus.RUNNING,
     startedAt: '2025-08-05T20:00:00.000Z',
     isTestRun: false,
+    stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
   } as EsWorkflowExecution;
 
   const state = new WorkflowExecutionState(fakeWorkflowExecution, workflowExecutionRepository);
@@ -574,7 +577,9 @@ describe('StepIoService', () => {
       expect(service.hasEvictedOutputs()).toBe(false);
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['step-1'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined,
+        TEST_STEP_EXECUTIONS_INDEX
       );
     });
 
@@ -1264,7 +1269,9 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenNthCalledWith(
         2,
         ['11'],
-        ['id', 'output']
+        ['id', 'output'],
+        undefined,
+        TEST_STEP_EXECUTIONS_INDEX
       );
     });
 
@@ -1428,7 +1435,9 @@ describe('StepIoService', () => {
       // Only step_b is referenced by step_c — exec-a should not be rehydrated.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-b'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined,
+        TEST_STEP_EXECUTIONS_INDEX
       );
     });
 
@@ -1849,7 +1858,9 @@ describe('StepIoService', () => {
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-alerts'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined,
+        TEST_STEP_EXECUTIONS_INDEX
       );
     });
 
@@ -1891,7 +1902,9 @@ describe('StepIoService', () => {
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-a'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined,
+        TEST_STEP_EXECUTIONS_INDEX
       );
     });
 

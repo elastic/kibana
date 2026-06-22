@@ -177,12 +177,16 @@ export class WorkflowExecuteSyncStrategy {
         const stepExecutions =
           await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
             state.executionId,
+            execution.stepExecutionsIndex,
             execution.stepExecutionIds
           );
         const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
           omit(exec, ['spaceId'])
         );
         output = this.getWorkflowOutput(stepExecutionDtos);
+        this.workflowLogger.logDebug(
+          `Using last step output from child workflow execution ${state.executionId}`
+        );
       }
 
       return {
