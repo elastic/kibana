@@ -58,7 +58,8 @@ viewer:
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
         - feature_siemV5.scripts_management_read
-        - feature_securitySolutionRulesV2.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.minimal_all
         - feature_securitySolutionAttackDiscovery.minimal_all
@@ -166,7 +167,8 @@ editor:
         - feature_siemV5.actions_log_management_all # Response actions history
         - feature_siemV5.file_operations_all
         - feature_siemV5.scripts_management_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
@@ -243,7 +245,8 @@ t1_analyst:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.scripts_management_read
-        - feature_securitySolutionRulesV2.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.minimal_all
@@ -323,7 +326,8 @@ t2_analyst:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.scripts_management_read
-        - feature_securitySolutionRulesV2.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_securitySolutionCases.all
@@ -422,7 +426,13 @@ t3_analyst:
         - feature_siemV5.scan_operations_all
         - feature_siemV5.scripts_management_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.minimal_all
+        - feature_securitySolutionRulesV4.security_solution_exceptions_all
+        - feature_securitySolutionRulesV4.security_solution_investigation_guide_edit
+        - feature_securitySolutionRulesV4.security_solution_custom_highlighted_fields_edit
+        - feature_securitySolutionRulesV4.security_solution_enable_disable_rules
+        - feature_securitySolutionRulesV4.security_solution_manual_run_rules
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
@@ -445,6 +455,8 @@ threat_intelligence_analyst:
   metadata:
     public: true
     reserved: true
+    _deprecated: true
+    _deprecated_reason: 'Please use the [threat_intelligence_analyst_v2] role instead'
   cluster:
     - 'read_project_routing'
   indices:
@@ -529,10 +541,93 @@ threat_intelligence_analyst:
         - feature_workflowsManagement.all
       resources: '*'
 
+threat_intelligence_analyst_v2:
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - logstash-*
+        - security_solution-*.misconfiguration_latest*
+      privileges:
+        - read
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+        - view_index_metadata
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+        - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
+        - '.ml-anomalies-*'
+      privileges:
+        - read
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_ml.read
+        - feature_siemV5.all
+        - feature_siemV5.endpoint_list_read
+        - feature_siemV5.global_artifact_management_all
+        - feature_siemV5.blocklist_all
+        - feature_siemV5.endpoint_exceptions_all
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionRulesV4.security_solution_exceptions_all
+        - feature_securitySolutionAlertsV1.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
+        - feature_actions.read
+        - feature_builtInAlerts.read
+        - feature_osquery.all
+        - feature_discover_v2.all
+        - feature_dashboard_v2.all
+        - feature_maps_v2.all
+        - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
+        - feature_workflowsManagement.all
+      resources: '*'
+
 rule_author:
   metadata:
     public: true
     reserved: true
+    _deprecated: true
+    _deprecated_reason: 'Please use the [rule_author_v2] role instead'
   cluster:
     - 'read_project_routing'
   indices:
@@ -620,10 +715,107 @@ rule_author:
         - feature_workflowsManagement.all
       resources: '*'
 
+rule_author_v2:
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - logstash-*
+        - .asset-criticality.asset-criticality-*
+        - security_solution-*.misconfiguration_latest*
+      privileges:
+        - read
+        - write
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .internal.preview.alerts-security*
+        - .preview.alerts-security*
+        - .internal.adhoc.alerts-security*
+        - .adhoc.alerts-security*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+        - view_index_metadata
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+        - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
+        - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
+        - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
+      privileges:
+        - read
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_ml.read
+        - feature_siemV5.all
+        - feature_siemV5.policy_management_all
+        - feature_siemV5.endpoint_list_all
+        - feature_siemV5.global_artifact_management_all
+        - feature_siemV5.trusted_applications_all
+        - feature_siemV5.trusted_devices_all
+        - feature_siemV5.event_filters_all
+        - feature_siemV5.host_isolation_exceptions_read
+        - feature_siemV5.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.actions_log_management_read
+        - feature_siemV5.workflow_insights_all
+        - feature_securitySolutionRulesV4.minimal_all
+        - feature_securitySolutionRulesV4.security_solution_exceptions_all
+        - feature_securitySolutionRulesV4.security_solution_investigation_guide_edit
+        - feature_securitySolutionRulesV4.security_solution_custom_highlighted_fields_edit
+        - feature_securitySolutionRulesV4.security_solution_enable_disable_rules
+        - feature_securitySolutionRulesV4.security_solution_manual_run_rules
+        - feature_securitySolutionAlertsV1.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
+        - feature_actions.read
+        - feature_builtInAlerts.all
+        - feature_osquery.all
+        - feature_discover_v2.all
+        - feature_dashboard_v2.all
+        - feature_maps_v2.all
+        - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
+        - feature_workflowsManagement.all
+      resources: '*'
+
 soc_manager:
   metadata:
     public: true
     reserved: true
+    _deprecated: true
+    _deprecated_reason: 'Please use the [soc_manager_v2] role instead'
   cluster:
     - 'read_project_routing'
   indices:
@@ -718,6 +910,105 @@ soc_manager:
         - feature_workflowsManagement.all
       resources: '*'
 
+soc_manager_v2:
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - logstash-*
+        - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
+        - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
+        - security_solution-*.misconfiguration_latest*
+      privileges:
+        - read
+        - write
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
+      privileges:
+        - read
+        - write
+        - manage
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+        - view_index_metadata
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+        - risk-score.risk-score-*
+        - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
+      privileges:
+        - read
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_ml.read
+        - feature_siemV5.all
+        - feature_siemV5.policy_management_all
+        - feature_siemV5.endpoint_list_all
+        - feature_siemV5.global_artifact_management_all
+        - feature_siemV5.trusted_applications_all
+        - feature_siemV5.trusted_devices_all
+        - feature_siemV5.event_filters_all
+        - feature_siemV5.host_isolation_exceptions_all
+        - feature_siemV5.blocklist_all
+        - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.host_isolation_all
+        - feature_siemV5.process_operations_all
+        - feature_siemV5.actions_log_management_all
+        - feature_siemV5.file_operations_all
+        - feature_siemV5.execute_operations_all
+        - feature_siemV5.scan_operations_all
+        - feature_siemV5.scripts_management_all
+        - feature_siemV5.workflow_insights_all
+        - feature_siemV5.soc_management_all
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionRulesV4.security_solution_exceptions_all
+        - feature_securitySolutionAlertsV1.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
+        - feature_actions.all
+        - feature_actions.endpoint_security_execute
+        - feature_builtInAlerts.all
+        - feature_osquery.all
+        - feature_indexPatterns.all
+        - feature_discover_v2.all
+        - feature_dashboard_v2.all
+        - feature_maps_v2.all
+        - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
+        - feature_workflowsManagement.all
+      resources: '*'
+
 detections_admin:
   metadata:
     public: true
@@ -777,7 +1068,8 @@ detections_admin:
         - feature_siemV5.all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
@@ -859,7 +1151,8 @@ platform_engineer:
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.scripts_management_read
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
@@ -962,7 +1255,8 @@ endpoint_operations_analyst:
         - feature_siemV5.scan_operations_all
         - feature_siemV5.scripts_management_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
@@ -1056,7 +1350,8 @@ endpoint_policy_manager:
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all

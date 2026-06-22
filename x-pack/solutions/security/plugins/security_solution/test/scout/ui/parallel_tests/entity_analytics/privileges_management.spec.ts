@@ -19,7 +19,7 @@ const NO_RISK_ENGINE_PRIVILEGES_ROLE: KibanaRole = {
       base: [],
       feature: {
         siemV5: ['read'],
-        securitySolutionRulesV2: ['read'],
+        securitySolutionRulesV4: ['read'],
       },
       spaces: ['*'],
     },
