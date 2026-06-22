@@ -8,6 +8,7 @@
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { CaseStatuses } from '../../../common/types/domain';
 import type {
   CasePatchRequest,
   CaseRequestCustomFields,
@@ -24,6 +25,8 @@ import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
 import type { InlineField } from '../../../common/types/domain/template/fields';
+import { isInlineField, FieldType } from '../../../common/types/domain/template/fields';
+import { evaluateCondition } from '../../../common/types/domain/template/evaluate_conditions';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -295,6 +298,90 @@ export const validateExtendedFieldsInRequest = async ({
     templatesService,
     partial: true,
   });
+};
+
+/**
+ * Validates that all `required_on_close` fields are filled when a case transitions to closed.
+ * Operates on the merged extended_fields (existing SO state + request updates).
+ * Only checks fields with `required_on_close: true` — regular required fields are a write-time
+ * concern and are not re-validated here. Orphaned keys from old templates are silently ignored.
+ */
+export const validateExtendedFieldsOnClose = async ({
+  updateReq,
+  originalCase,
+  templatesService,
+  globalFields,
+}: {
+  updateReq: CasePatchRequest;
+  originalCase: CaseSavedObjectTransformed;
+  templatesService: TemplatesService;
+  globalFields: InlineField[];
+}): Promise<void> => {
+  if (
+    updateReq.status !== CaseStatuses.closed ||
+    originalCase.attributes.status === CaseStatuses.closed
+  ) {
+    return;
+  }
+
+  const mergedExtendedFields: Record<string, string> = {
+    ...(originalCase.attributes.extended_fields ?? {}),
+    ...(updateReq.extended_fields ?? {}),
+  };
+
+  const templateId =
+    updateReq.template === null
+      ? null
+      : updateReq.template?.id ?? originalCase.attributes.template?.id;
+
+  let templateFields: InlineField[] = [];
+  if (templateId) {
+    const templateSO = await templatesService.getTemplate(templateId);
+    if (templateSO) {
+      try {
+        const parsedTemplate = parseTemplate(templateSO.attributes);
+        templateFields = parsedTemplate.definition.fields.filter(isInlineField);
+      } catch {
+        // Invalid template definition — skip template field validation on close
+      }
+    }
+  }
+
+  const allFields = [...globalFields, ...templateFields];
+
+  // Build field-value and type maps for condition evaluation (show_when).
+  const fieldValues: Record<string, string | undefined> = {};
+  const fieldTypeMap: Record<string, string> = {};
+  for (const field of allFields) {
+    fieldValues[field.name] = mergedExtendedFields[getFieldSnakeKey(field.name, field.type)];
+    fieldTypeMap[field.name] = field.type;
+  }
+
+  const isFieldVisible = (field: InlineField): boolean =>
+    field.display?.show_when == null ||
+    evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
+
+  const isFieldEmpty = (field: InlineField): boolean => {
+    const value = fieldValues[field.name];
+    const isArrayField =
+      field.control === FieldType.CHECKBOX_GROUP || field.control === FieldType.USER_PICKER;
+    return (
+      value === undefined || value === null || value === '' || (isArrayField && value === '[]')
+    );
+  };
+
+  const errors = allFields
+    .filter(
+      (field) =>
+        field.validation?.required_on_close === true && isFieldVisible(field) && isFieldEmpty(field)
+    )
+    .map((field) => `Field "${field.label ?? field.name}" is required`);
+
+  if (errors.length > 0) {
+    throw Boom.badRequest(
+      `Cannot close case, required fields must be filled: ${errors.join('; ')}`
+    );
+  }
 };
 
 export const validateSearchCasesCustomFields = ({

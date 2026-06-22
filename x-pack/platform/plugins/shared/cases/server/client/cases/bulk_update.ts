@@ -77,6 +77,7 @@ import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import {
   validateCustomFields,
   validateExtendedFieldsInRequest,
+  validateExtendedFieldsOnClose,
   resolveGlobalFields,
 } from './validators';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
@@ -583,15 +584,21 @@ export const bulkUpdate = async (
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
 
     // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
-    const uniqueOwnersWithExtendedFields = [
+    // Owners are collected for both cases that include extended_fields in the request and
+    // cases that are transitioning to closed (close-time validation needs the global fields
+    // even when the request does not include extended_fields).
+    const uniqueOwnersNeedingFields = [
       ...casesToUpdate.reduce((owners, { updateReq, originalCase }) => {
-        if (updateReq.extended_fields) owners.add(originalCase.attributes.owner);
+        const isBeingClosed =
+          updateReq.status === CaseStatuses.closed &&
+          originalCase.attributes.status !== CaseStatuses.closed;
+        if (updateReq.extended_fields || isBeingClosed) owners.add(originalCase.attributes.owner);
         return owners;
       }, new Set<string>()),
     ];
     const globalFieldsByOwner = new Map(
       await Promise.all(
-        uniqueOwnersWithExtendedFields.map(async (owner) => {
+        uniqueOwnersNeedingFields.map(async (owner) => {
           const fields = await resolveGlobalFields(owner, fieldDefinitionsService);
           return [owner, fields] as const;
         })
@@ -601,6 +608,17 @@ export const bulkUpdate = async (
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>
         validateExtendedFieldsInRequest({
+          updateReq,
+          originalCase,
+          templatesService,
+          globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
+        })
+      )
+    );
+
+    await Promise.all(
+      casesToUpdate.map(({ updateReq, originalCase }) =>
+        validateExtendedFieldsOnClose({
           updateReq,
           originalCase,
           templatesService,
