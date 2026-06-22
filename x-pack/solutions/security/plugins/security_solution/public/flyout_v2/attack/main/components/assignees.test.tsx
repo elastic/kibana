@@ -210,9 +210,7 @@ describe('<Assignees /> (v2)', () => {
   });
 
   it('disables the add button for a remote/CCS index', () => {
-    renderAssignees(
-      buildHit({}, { _index: 'remote-cluster:.alerts-security.alerts-default' })
-    );
+    renderAssignees(buildHit({}, { _index: 'remote-cluster:.alerts-security.alerts-default' }));
 
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
   });
