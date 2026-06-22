@@ -233,7 +233,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
-                        output: { ...taskOutput, traceId },
+                        output: { ...taskOutput, traceId: taskOutput.traceId ?? traceId },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });

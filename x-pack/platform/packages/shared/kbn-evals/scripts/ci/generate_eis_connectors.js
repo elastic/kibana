@@ -107,13 +107,14 @@ function main() {
     }
 
     const connectorId = `${connectorIdPrefix}${sanitizeId(modelId)}`;
+    const sanitizedInferenceId = inferenceId.replace(/^\./, '').replace(/\./g, '-');
     connectors[connectorId] = {
       name: `EIS ${modelId}`,
       actionTypeId: '.inference',
       config: {
         provider: 'elastic',
         taskType: 'chat_completion',
-        inferenceId,
+        inferenceId: sanitizedInferenceId,
         // For selection/metadata only; not used by the connector to route requests (inferenceId does that).
         providerConfig: {
           model_id: modelId,
