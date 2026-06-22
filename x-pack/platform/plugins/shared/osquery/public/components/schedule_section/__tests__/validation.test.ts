@@ -212,9 +212,9 @@ describe('validateScheduleFormData', () => {
       const past = new Date('2024-01-01T00:00:00.000Z');
       const data = recurrenceState({ startDate: past });
 
-      expect(
-        validateScheduleFormData(data, { originalStartDate: past })
-      ).not.toContain(START_DATE_IN_PAST_ERROR);
+      expect(validateScheduleFormData(data, { originalStartDate: past })).not.toContain(
+        START_DATE_IN_PAST_ERROR
+      );
     });
 
     it('still flags a newly-picked past start even in edit mode', () => {
