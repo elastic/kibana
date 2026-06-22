@@ -8,7 +8,7 @@
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   DATA_STREAM_CREATION_TASK_TYPE,
   TaskManagerService,
@@ -95,7 +95,7 @@ describe('runTask abort handling', () => {
     ownerId: null,
   };
 
-  const mockFakeRequest = {} as unknown;
+  const mockFakeRequest = httpServerMock.createKibanaRequest();
 
   const mockCoreStart = {
     elasticsearch: { client: { asInternalUser: {} } },
@@ -684,7 +684,7 @@ describe('runTask error edge cases', () => {
     ownerId: null,
   };
 
-  const mockFakeRequest = {} as unknown;
+  const mockFakeRequest = httpServerMock.createKibanaRequest();
 
   const mockCoreStart = {
     elasticsearch: { client: { asInternalUser: {} } },
