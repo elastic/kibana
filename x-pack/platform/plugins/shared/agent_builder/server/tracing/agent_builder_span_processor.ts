@@ -66,13 +66,22 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
 /**
  * Replaces user-created tool and agent names with 'custom' to avoid leaking
  * user-chosen identifiers. Built-in tools and agents keep their real names.
+ * Returns the anonymized attributes and the (possibly rewritten) span name.
  */
-function anonymizeNames(attributes: Record<string, unknown>): Record<string, unknown> {
+function anonymizeNames(
+  attributes: Record<string, unknown>,
+  spanName: string
+): { attributes: Record<string, unknown>; spanName: string } {
   const result = { ...attributes };
+  let finalSpanName = spanName;
 
   const agentName = result[GenAISemanticConventions.GenAIAgentName];
   if (agentName != null) {
     result[GenAISemanticConventions.GenAIAgentName] = 'custom';
+    const prefix = 'invoke_agent ';
+    if (finalSpanName.startsWith(prefix)) {
+      finalSpanName = `${prefix}custom`;
+    }
   }
 
   const toolName = result[GenAISemanticConventions.GenAIToolName];
@@ -81,7 +90,20 @@ function anonymizeNames(attributes: Record<string, unknown>): Record<string, unk
     result[GenAISemanticConventions.GenAIToolName] = isBuiltin ? toolName : 'custom';
   }
 
-  return result;
+  return { attributes: result, spanName: finalSpanName };
+}
+
+/**
+ * Strips tool call I/O (arguments and result) from attributes to avoid leaking
+ * the content of tool calls and their results.
+ */
+function stripToolCallIO(attributes: Record<string, unknown>): Record<string, unknown> {
+  const {
+    [GenAISemanticConventions.GenAIToolCallArguments]: _args,
+    [GenAISemanticConventions.GenAIToolCallResult]: _result,
+    ...rest
+  } = attributes;
+  return rest;
 }
 
 /**
@@ -144,9 +166,13 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       ? cleanAttributes
       : hashSensitiveAttributes(cleanAttributes);
 
-    const finalAttributes = settings.includeRealNames
+    const attributesAfterToolIO = settings.includeLlmResponses
       ? processedAttributes
-      : anonymizeNames(processedAttributes);
+      : stripToolCallIO(processedAttributes);
+
+    const { attributes: finalAttributes, spanName: finalSpanName } = settings.includeRealNames
+      ? { attributes: attributesAfterToolIO, spanName: span.name }
+      : anonymizeNames(attributesAfterToolIO, span.name);
 
     const datasetResource = resources.resourceFromAttributes({
       'data_stream.dataset': 'agent_builder',
@@ -156,6 +182,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     const exportSpan: tracing.ReadableSpan = Object.create(span, {
       resource: {
         value: span.resource.merge(datasetResource),
+        enumerable: true,
+      },
+      name: {
+        value: finalSpanName,
         enumerable: true,
       },
       attributes: {

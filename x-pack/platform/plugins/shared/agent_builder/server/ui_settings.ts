@@ -85,28 +85,11 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
     },
     [AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.userPrompts.name', {
-        defaultMessage: 'Agent Builder: Include user prompts in traces',
+        defaultMessage: 'Include user prompts in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.userPrompts.description', {
-        defaultMessage:
-          'When enabled, the content of user messages is recorded in traces. When disabled (default), only message metadata is recorded. Enable only if your data handling policy permits storing user inputs.',
+        defaultMessage: 'When enabled, the content of user messages is recorded in traces.',
       }),
-      schema: schema.boolean(),
-      value: false,
-      requiresPageReload: false,
-      readonly: false,
-    },
-    [AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID]: {
-      name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.llmResponses.name', {
-        defaultMessage: 'Agent Builder: Include LLM responses in traces',
-      }),
-      description: i18n.translate(
-        'xpack.agentBuilder.uiSettings.tracing.llmResponses.description',
-        {
-          defaultMessage:
-            'When enabled, assistant responses and tool results sent back to the LLM are recorded in traces. When disabled (default), only metadata is recorded.',
-        }
-      ),
       schema: schema.boolean(),
       value: false,
       requiresPageReload: false,
@@ -114,13 +97,13 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
     },
     [AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.systemPrompt.name', {
-        defaultMessage: 'Agent Builder: Include system prompt in traces',
+        defaultMessage: 'Include system prompt in traces',
       }),
       description: i18n.translate(
         'xpack.agentBuilder.uiSettings.tracing.systemPrompt.description',
         {
           defaultMessage:
-            "When enabled, the agent's system prompt (its instructions) is recorded in traces. When disabled (default), only metadata is recorded.",
+            "When enabled, the agent's system prompt (its instructions) is recorded in traces.",
         }
       ),
       schema: schema.boolean(),
@@ -128,13 +111,30 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       requiresPageReload: false,
       readonly: false,
     },
+    [AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID]: {
+      name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.llmResponses.name', {
+        defaultMessage: 'Include LLM responses in traces',
+      }),
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.tracing.llmResponses.description',
+        {
+          defaultMessage:
+            'When enabled, assistant responses and tool results sent back to the LLM are recorded in traces.',
+        }
+      ),
+      schema: schema.boolean(),
+      value: false,
+      requiresPageReload: false,
+      readonly: false,
+    },
+
     [AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.name', {
-        defaultMessage: 'Agent Builder: Include real tool and agent names in traces',
+        defaultMessage: 'Include real tool and agent names in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.description', {
         defaultMessage:
-          'When disabled (default), user-created tool and agent names are replaced with a stable anonymous identifier in traces. Built-in tools and agents always use their real names. Enable this to see actual names in the overview dashboard.',
+          'When disabled, user-created tool and agent names are replaced with a stable anonymous identifier in traces.',
       }),
       schema: schema.boolean(),
       value: false,
@@ -143,11 +143,11 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
     },
     [AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realIds.name', {
-        defaultMessage: 'Agent Builder: Include real conversation and workflow IDs in traces',
+        defaultMessage: 'Include real conversation and workflow IDs in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realIds.description', {
         defaultMessage:
-          'When disabled (default), conversation IDs, agent IDs, workflow IDs, and workflow execution IDs are replaced with a SHA-256–derived anonymous identifier. Enable this to correlate traces with application-level records.',
+          'When disabled, conversation IDs, agent IDs, workflow IDs, and workflow execution IDs are replaced with a SHA-256–derived anonymous identifier.',
       }),
       schema: schema.boolean(),
       value: false,
