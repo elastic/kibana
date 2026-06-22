@@ -1001,6 +1001,10 @@ describe('runRelationshipMaintainer', () => {
       const { esClient, search: localSearch, esql: localEsql } = makeEsClient();
       const { esClient: cpsEsClient, search: cpsSearch, esql: cpsEsql } = makeEsClient();
       const { crudClient } = makeCrudClient();
+      const collector: RelationshipMaintainerTelemetryCollector = {
+        sources: [],
+        relationshipTypeApplied: {},
+      };
 
       cpsSearch.mockResolvedValueOnce(
         successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
