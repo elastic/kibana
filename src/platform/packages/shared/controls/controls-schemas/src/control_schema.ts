@@ -14,7 +14,6 @@ export const controlTitleSchema = schema.object({
   title: schema.maybe(
     schema.string({
       meta: { description: 'A human-readable title for the control.' },
-      maxLength: 1000,
     })
   ),
 });
@@ -57,12 +56,10 @@ export const dataControlFieldVariantProps = {
   data_view_id: schema.string({
     meta: { description: 'The ID of the data view that provides field options for this control.' }, // this will generate a reference
     minLength: 1,
-    maxLength: 1000,
   }),
   field_name: schema.string({
     meta: { description: 'The name of the field in the data view that this control filters on.' },
     minLength: 1,
-    maxLength: 1000,
   }),
 };
 
@@ -72,7 +69,6 @@ export const dataControlEsqlVariantProps = {
   esql_query: schema.string({
     meta: { description: 'The ES|QL query that provides field options for this control' },
     minLength: 1,
-    maxLength: 1000000, // ES|QL queries might be longer, use higher dos prevention ceiling
   }),
 };
 
