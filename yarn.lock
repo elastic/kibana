@@ -6841,6 +6841,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-plugin-kbn-ui@link:packages/kbn-eslint-plugin-kbn-ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eslint-plugin-telemetry@link:packages/kbn-eslint-plugin-telemetry":
   version "0.0.0"
   uid ""

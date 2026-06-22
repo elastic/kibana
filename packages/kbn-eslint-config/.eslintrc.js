@@ -74,6 +74,7 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
+    '@kbn/eslint-plugin-kbn-ui',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -382,6 +383,11 @@ module.exports = {
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
+
+    /**
+     * kbn-ui rules
+     */
+    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
 
     /**
      * EUI Team rules
