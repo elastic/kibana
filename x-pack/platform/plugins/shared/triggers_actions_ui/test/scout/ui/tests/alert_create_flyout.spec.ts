@@ -10,6 +10,12 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule, defineIndexThresholdRule, THRESHOLD_TEST_INDEX } from '../fixtures';
 
+const INDEX_THRESHOLD_DEFAULT_MESSAGE = `Rule {{rule.name}} is active for group {{context.group}}:
+
+- Value: {{context.value}}
+- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
+- Timestamp: {{context.date}}`;
+
 const searchRules = async (page: ScoutPage, query: string) => {
   const field = page.testSubj.locator('ruleSearchField');
   await field.fill(query);
@@ -96,6 +102,69 @@ const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => 
   await defineIndexThresholdRule(page, alertName);
 };
 
+const selectComboBoxOption = async (page: ScoutPage, testSubj: string, value: string) => {
+  await page.testSubj.click(`${testSubj} > comboBoxInput`);
+  await page.testSubj.locator(`${testSubj} > comboBoxSearchInput`).pressSequentially(value);
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
+};
+
+const selectComboBoxOptionIn = async (
+  page: ScoutPage,
+  containerTestSubj: string,
+  testSubj: string,
+  value: string
+) => {
+  const container = page.testSubj.locator(containerTestSubj);
+  const combo = container.locator(`[data-test-subj="${testSubj}"]`);
+  await combo.locator('[data-test-subj="comboBoxInput"]').click();
+  await combo.locator('[data-test-subj="comboBoxSearchInput"]').pressSequentially(value);
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
+};
+
+const addStructuredFilterCondition = async (
+  page: ScoutPage,
+  {
+    field,
+    operator,
+    value,
+    containerTestSubj,
+  }: {
+    field: string;
+    operator: 'is not' | 'exists';
+    value?: string;
+    containerTestSubj?: string;
+  }
+) => {
+  if (containerTestSubj) {
+    await selectComboBoxOptionIn(page, containerTestSubj, 'filterFieldSuggestionList', field);
+    await selectComboBoxOptionIn(page, containerTestSubj, 'filterOperatorList', operator);
+    if (value) {
+      const paramsInput = page.testSubj
+        .locator(containerTestSubj)
+        .locator('[data-test-subj="filterParams"] input');
+      await expect(paramsInput).toBeEditable();
+      await paramsInput.fill(value);
+    }
+    return;
+  }
+
+  await selectComboBoxOption(page, 'filterFieldSuggestionList', field);
+  await selectComboBoxOption(page, 'filterOperatorList', operator);
+  if (value) {
+    const paramsInput = page.locator('[data-test-subj="filterParams"] input');
+    await expect(paramsInput).toBeEditable();
+    await paramsInput.fill(value);
+  }
+};
+
+const expectDslFilter = async (page: ScoutPage, filter: string) => {
+  const compactJson = filter.replace(/\s/g, '');
+  // Query DSL filter badges render the compact JSON as their visible badge text.
+  await expect(
+    page.locator('[data-test-subj^="filter-badge"]').filter({ hasText: compactJson })
+  ).toBeVisible({ timeout: 15_000 });
+};
+
 const deleteRuleByName = async (apiServices: ApiServicesFixture, name: string) => {
   const resp = await apiServices.alerting.rules.find({ search: name, search_fields: 'name' });
   for (const rule of (resp.data as any).data ?? []) {
@@ -171,7 +240,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     apiServices,
   }) => {
     const ruleName = `scout-flyout-del-${Date.now()}`;
-    await defineEsQueryAlert(page, ruleName);
+    await defineIndexThresholdAlert(page, ruleName);
 
     // Add Slack action with unique body text
     await page.testSubj.click('ruleActionsAddActionButton');
@@ -241,8 +310,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('ruleActionsAddActionButton');
     await selectConnectorInModal(page, slackConnectorName);
 
-    // Default message template should be populated for Index Threshold rule
-    await expect(page.testSubj.locator('messageTextArea')).not.toBeEmpty({ timeout: 5_000 });
+    await expect(page.testSubj.locator('messageTextArea')).toHaveValue(
+      INDEX_THRESHOLD_DEFAULT_MESSAGE
+    );
 
     // Replace with test text then insert a variable
     await page.testSubj.locator('messageTextArea').fill('test message ');
@@ -267,22 +337,20 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('onThrottleInterval');
     await page.testSubj.locator('throttleInput').fill('10');
 
-    // Conditional action filter: toggle, add DSL filter, add KQL query.
-    // The structured field selector stays disabled until the alerts index has field mappings,
-    // so DSL mode is used here for reliability.
+    // Conditional action filter: use the structured filter builder, matching
+    // the FTR coverage for field/operator/value interactions.
     await page.testSubj.click('alertsFilterQueryToggle');
     await page.testSubj.click('addFilter');
-    await page.testSubj.click('editQueryDSL');
     await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
-    const simpleFilter = JSON.stringify({
-      bool: { must_not: [{ term: { _id: 'fake-rule-id' } }] },
+    await addStructuredFilterCondition(page, {
+      field: '_id',
+      operator: 'is not',
+      value: 'fake-rule-id',
     });
-    await page.testSubj.locator('addFilterPopover').locator('.monaco-editor').click();
-    await page.keyboard.press('Control+a');
-    await page.keyboard.press('Delete');
-    await page.keyboard.type(simpleFilter);
     await page.testSubj.locator('saveFilter').scrollIntoViewIfNeeded();
     await page.testSubj.click('saveFilter');
+    await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
+    await expect(page.testSubj.locator('^filter-badge')).toBeVisible();
     await page.testSubj.locator('queryInput').fill('_id: *');
 
     try {
@@ -300,6 +368,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await expect(row).toBeVisible();
       await expect(row).toContainText('Index threshold');
       await expect(row).toContainText('1 min');
+      await expect(row).toContainText(/\d{2,}:\d{2}/);
     } finally {
       await deleteRuleByName(apiServices, alertName);
     }
@@ -324,6 +393,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     // Add Slack action and configure message
     await page.testSubj.click('ruleActionsAddActionButton');
     await selectConnectorInModal(page, slackConnectorName);
+    await expect(page.testSubj.locator('messageTextArea')).toHaveValue(
+      INDEX_THRESHOLD_DEFAULT_MESSAGE
+    );
     await page.testSubj.locator('messageTextArea').fill('test message ');
     await page.testSubj.click('messageAddVariableButton');
     await page.testSubj.click('variableMenuButton-alert.actionGroup');
@@ -332,33 +404,35 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('messageAddVariableButton');
     await page.testSubj.locator('messageVariablesSelectableSearch').fill('rule.id');
     await page.testSubj.click('variableMenuButton-rule.id');
+    await expect(page.testSubj.locator('messageTextArea')).toHaveValue(
+      'test message {{alert.actionGroup}} some additional text {{rule.id}}'
+    );
 
     // Action settings: throttle (Settings section auto-expands in the new accordion UI)
     await page.testSubj.click('notifyWhenSelect');
     await page.testSubj.click('onThrottleInterval');
     await page.testSubj.locator('throttleInput').fill('10');
 
-    // Conditional action filter: use DSL mode to combine both conditions in one filter.
-    // The structured field selector stays disabled until the alerts index has field mappings
-    // (which requires alerts to have fired first), so DSL mode is more reliable here.
+    // Conditional action filter: use the structured filter builder and add the
+    // second condition through the AND control, matching the old FTR flow.
     await page.testSubj.click('alertsFilterQueryToggle');
     await page.testSubj.click('addFilter');
-    await page.testSubj.click('editQueryDSL');
     await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
-    const compositeFilter = JSON.stringify({
-      bool: {
-        must_not: [{ term: { _id: 'fake-rule-id' } }],
-        filter: [{ exists: { field: 'kibana.alert.action_group' } }],
-      },
+    await addStructuredFilterCondition(page, {
+      field: '_id',
+      operator: 'is not',
+      value: 'fake-rule-id',
     });
-    // Click the visible Monaco container, select all existing content, delete it, then type
-    await page.testSubj.locator('addFilterPopover').locator('.monaco-editor').click();
-    await page.keyboard.press('Control+a');
-    await page.keyboard.press('Delete');
-    await page.keyboard.type(compositeFilter);
-    // data-test-subj="saveFilter" — the button text says "Add filter" but the testSubj is saveFilter
+    await page.testSubj.click('add-and-filter');
+    await addStructuredFilterCondition(page, {
+      field: 'kibana.alert.action_group',
+      operator: 'exists',
+      containerTestSubj: 'filter-0.1',
+    });
     await page.testSubj.locator('saveFilter').scrollIntoViewIfNeeded();
     await page.testSubj.click('saveFilter');
+    await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
+    await expect(page.testSubj.locator('^filter-badge')).toBeVisible();
     await page.testSubj.locator('queryInput').fill('_id: *');
 
     try {
@@ -375,6 +449,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await expect(row).toBeVisible();
       await expect(row).toContainText('Index threshold');
       await expect(row).toContainText('1 min');
+      await expect(row).toContainText(/\d{2,}:\d{2}/);
     } finally {
       await deleteRuleByName(apiServices, alertName);
     }
@@ -422,10 +497,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('saveFilter').scrollIntoViewIfNeeded();
     await expect(page.testSubj.locator('saveFilter')).toBeEnabled({ timeout: 10_000 });
     await page.testSubj.click('saveFilter');
-    // A filter badge should now be present in the filter pills group
-    await expect(page.locator('[data-test-subj="filter-items-group"] > *')).toHaveCount(1, {
-      timeout: 5_000,
-    });
+    await expectDslFilter(page, dslFilter);
 
     try {
       await page.testSubj.click('rulePageFooterSaveButton');
@@ -448,10 +520,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await ruleRow.locator('[data-test-subj="selectActionButton"]').click();
       await page.testSubj.click('editRule');
       await page.testSubj.locator('globalQueryBar').scrollIntoViewIfNeeded();
-      // DSL filter badge should still be present in the filter pills group
-      await expect(page.locator('[data-test-subj="filter-items-group"] > *')).toHaveCount(1, {
-        timeout: 5_000,
-      });
+      await expectDslFilter(page, dslFilter);
     } finally {
       await deleteRuleByName(apiServices, alertName);
     }
@@ -697,8 +766,6 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('saveFilter')).toBeEnabled({ timeout: 10_000 });
     await page.testSubj.click('saveFilter');
 
-    await expect(page.locator('[data-test-subj="filter-items-group"] > *')).toHaveCount(1, {
-      timeout: 5_000,
-    });
+    await expectDslFilter(page, filter);
   });
 });

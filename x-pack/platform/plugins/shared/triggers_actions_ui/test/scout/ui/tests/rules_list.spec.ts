@@ -96,6 +96,14 @@ const refreshRulesList = async (page: ScoutPage) => {
 const getTableRows = (page: ScoutPage) =>
   page.testSubj.locator('rulesList').locator('[data-test-subj^="rule-row"]');
 
+const expectDurationCell = async (page: ScoutPage) => {
+  await expect(page.testSubj.locator('rulesTableCell-duration')).toHaveText(/\d{2,}:\d{2}/);
+};
+
+const expectPercentileCell = async (page: ScoutPage, testSubj: string) => {
+  await expect(page.testSubj.locator(testSubj)).toHaveText(/^N\/A|\d{2,}:\d{2}$/);
+};
+
 const ensureRuleStatus = async (
   page: ScoutPage,
   ruleName: string,
@@ -183,6 +191,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`)).toBeVisible();
     await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
     await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('1');
+    await expectDurationCell(page);
   });
 
   test('should update alert list on the search clear button click', async ({
@@ -212,11 +221,17 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // Both rules match the shared tag.
     await searchRules(page, sharedTag);
     await expect(getTableRows(page)).toHaveCount(2);
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toHaveCount(2);
+    await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toHaveCount(2);
+    await expect(page.testSubj.locator('rulesTableCell-duration')).toHaveCount(2);
 
     // Narrowing to r1's name filters down to a single rule.
     await searchRules(page, r1.data.name as string);
     await expect(getTableRows(page)).toHaveCount(1);
     await expect(page.testSubj.locator(`rulesListTableRowName-${r1.data.name}`)).toBeVisible();
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+    await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('1');
+    await expectDurationCell(page);
 
     // The clear button resets the search field itself...
     await page.locator('.euiFormControlLayoutClearButton').click();
@@ -231,6 +246,9 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await searchRules(page, sharedTag);
     await expect(getTableRows(page)).toHaveCount(2);
     await expect(page.testSubj.locator(`rulesListTableRowName-${r2.data.name}`)).toBeVisible();
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toHaveCount(2);
+    await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toHaveCount(2);
+    await expect(page.testSubj.locator('rulesTableCell-duration')).toHaveCount(2);
   });
 
   test('should search for tags', async ({ page, apiServices }) => {
@@ -246,6 +264,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(getTableRows(page)).toHaveCount(1);
     await expect(page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`)).toBeVisible();
     await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('3');
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+    await expectDurationCell(page);
   });
 
   test('should display an empty list when search did not return any alerts', async ({
@@ -281,16 +301,34 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alerting.rules.create(makeEsQueryRule('reenable-single'));
     createdRuleIds.push(rule.data.id);
 
-    // Disable via API so we can focus on testing the re-enable UI path without
-    // the UntrackAlertsModal timing interfering.
-    await apiServices.alerting.rules.disable(rule.data.id);
-
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
+
+    // Scope the action menu to this rule's row to avoid interception by overlays
+    // or other rows that may be visible (same pattern as the delete test).
+    const ruleRow = page
+      .locator('[data-test-subj^="rule-row"]')
+      .filter({ has: page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`) });
+
+    await ruleRow.locator('[data-test-subj="collapsedItemActions"]').click();
+    await page.testSubj.click('disableButton');
+    await expect(page.testSubj.locator('confirmModalConfirmButton')).toBeVisible();
+    await page.testSubj.click('confirmModalConfirmButton');
+    // Wait for the EUI overlay backdrop to fully unmount before running ensureRuleStatus.
+    // The backdrop intercepts keyboard events including the Enter from searchRules,
+    // which can reopen the "Disable rule" modal via the focus-trap listener.
+    await expect(page.locator('.euiOverlayMask')).toHaveCount(0, { timeout: 15_000 });
     await ensureRuleStatus(page, rule.data.name as string, 'disabled');
+    // Press Escape in case the EUI focus-trap listener reactivated the modal
+    // during ensureRuleStatus. Escape safely cancels it (rule is already disabled).
+    // Playwright's click() below retries for 10 s while the overlay closes.
+    await page.keyboard.press('Escape');
 
     // Re-enable via UI — no confirmation modal when enabling a disabled rule.
-    await page.testSubj.click('collapsedItemActions');
+    // Open the menu and wait for the item to read "Enable" before clicking,
+    // which confirms the component's isDisabled state has caught up.
+    await ruleRow.locator('[data-test-subj="collapsedItemActions"]').click();
+    await expect(page.testSubj.locator('disableButton')).toHaveText('Enable');
     await page.testSubj.click('disableButton');
 
     await ensureRuleStatus(page, rule.data.name as string, 'enabled');
@@ -363,6 +401,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     await expect(page.testSubj.locator('rulesTable-P50ColumnName')).toBeVisible();
     await expect(page.testSubj.locator('P50Percentile')).toBeVisible();
+    await expectPercentileCell(page, 'P50Percentile');
 
     // Switch to P95
     await page.testSubj.click('percentileSelectablePopover-iconButton');
@@ -373,6 +412,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('percentileSelectablePopover-selectable')).toBeHidden();
     await expect(page.testSubj.locator('rulesTable-P95ColumnName')).toBeVisible();
     await expect(page.testSubj.locator('P95Percentile')).toBeVisible();
+    await expectPercentileCell(page, 'P95Percentile');
   });
 
   test('should render interval info icon when schedule interval is less than configured minimum', async ({
@@ -441,7 +481,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       ruleTypeId: '.es-query',
       consumer: 'alerts',
       enabled: true,
-      schedule: { interval: '24h' },
+      schedule: { interval: '30s' },
       tags: [tag],
       params: FAILING_RULE_PARAMS,
     });
@@ -465,6 +505,12 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     }).toPass({ timeout: 60_000, intervals: [3_000] });
 
     await expect(getTableRows(page)).toHaveCount(1);
+    await expect(
+      page.testSubj.locator(`rulesListTableRowName-${failRule.data.name}`)
+    ).toBeVisible();
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('30 sec');
+    await expect(page.testSubj.locator('rulesTableCell-lastResponse')).toContainText('Failed');
+    await expectDurationCell(page);
   });
 
   test('should display total alerts by status and error banner only when exists alerts with status error', async ({
@@ -490,6 +536,13 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
           timeout: 3_000,
         }
       );
+      await expect(getTableRows(page)).toHaveCount(1);
+      await expect(
+        page.testSubj.locator(`rulesListTableRowName-${normalRule.data.name}`)
+      ).toBeVisible();
+      await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+      await expect(page.testSubj.locator('rulesTableCell-lastResponse')).toContainText('Succeeded');
+      await expectDurationCell(page);
     }).toPass({ timeout: 60_000, intervals: [3_000] });
 
     // No error banner before any failures
@@ -500,7 +553,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       ruleTypeId: '.es-query',
       consumer: 'alerts',
       enabled: true,
-      schedule: { interval: '24h' },
+      schedule: { interval: '30s' },
       tags: [tag],
       params: FAILING_RULE_PARAMS,
     });
@@ -560,7 +613,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       ruleTypeId: '.es-query',
       consumer: 'alerts',
       enabled: true,
-      schedule: { interval: '24h' },
+      schedule: { interval: '30s' },
       tags: [tag],
       params: FAILING_RULE_PARAMS,
     });
@@ -579,6 +632,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     const expandedRow = page.locator('.euiTableRow-isExpandedRow');
     await expect(expandedRow).toBeVisible();
     await expect(expandedRow).toContainText('Error from last run');
+    await expect(expandedRow).toContainText('x_content_parse_exception');
   });
 
   test('should filter alerts by the alert type', async ({ page, apiServices }) => {
@@ -621,6 +675,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(
       page.testSubj.locator(`rulesListTableRowName-${rEsQuery.data.name}`)
     ).toBeVisible();
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+    await expectDurationCell(page);
   });
 
   test('should filter alerts by the action type', async ({ page, apiServices }) => {
@@ -664,6 +720,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(
       page.testSubj.locator(`rulesListTableRowName-${rWithSlack.data.name}`)
     ).toBeVisible();
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+    await expectDurationCell(page);
 
     // Navigate away and back (matching FTR pattern) so the dropdown re-opens fresh.
     await refreshRulesList(page);
@@ -762,6 +820,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await applyFilters(['ruleStatusFilterOption-enabled'], 1, 2);
     // Select only disabled → 2 rules (disabled + snoozed disabled)
     await applyFilters(['ruleStatusFilterOption-disabled'], 1, 2);
+    // Select enabled + disabled → all 4 rules
+    await applyFilters(['ruleStatusFilterOption-enabled', 'ruleStatusFilterOption-disabled'], 2, 4);
     // Select snoozed → only snoozed (2)
     await applyFilters(['ruleStatusFilterOption-snoozed'], 1, 2);
     // Select disabled + snoozed → 3 rules
@@ -966,7 +1026,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     // Alert instance should remain tracked
     await expect(async () => {
-      const summary = await getAlertSummary(kbnClient, rule.id);
+      const summary = await getAlertSummary(kbnClient, rule.data.id);
       const instance = summary.alerts['query matched'];
       if (!instance || instance.tracked !== true) {
         throw new Error('Alert instance unexpectedly untracked');
@@ -983,6 +1043,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
+    await expect(page.testSubj.locator('rulesListNotifyBadge-unsnoozed')).toBeVisible();
 
     await page.testSubj.click('collapsedItemActions');
     await page.testSubj.click('snoozeButton');
@@ -1004,6 +1065,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
+    await expect(page.testSubj.locator('rulesListNotifyBadge-unsnoozed')).toBeVisible();
 
     await page.testSubj.click('collapsedItemActions');
     await page.testSubj.click('snoozeButton');
