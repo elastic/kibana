@@ -7,14 +7,15 @@
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ChartDescriptionButton } from '@kbn/observability-agent-builder-plugin/public';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { asPercent } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { asAbsoluteDateTime, asPercent } from '../../../../../common/utils/formatters';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -31,10 +32,18 @@ import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
+import { toChartDescriptionSeries } from '../helper/to_chart_description_series';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
+
+const failedTransactionRateChartTitle = i18n.translate('xpack.apm.errorRate', {
+  defaultMessage: 'Failed transaction rate',
+});
+
+const formatFailedTransactionRateChartTimestamp = (timestamp: number) =>
+  asAbsoluteDateTime(timestamp, 'minutes');
 
 interface Props {
   height?: number;
@@ -164,6 +173,8 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
       : []),
   ];
 
+  const chartDescriptionSeries = useMemo(() => toChartDescriptionSeries(timeseries), [timeseries]);
+
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -171,11 +182,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate('xpack.apm.errorRate', {
-                    defaultMessage: 'Failed transaction rate',
-                  })}
-                </h2>
+                <h2>{failedTransactionRateChartTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
 
@@ -187,6 +194,19 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ChartDescriptionButton
+                chartTitle={failedTransactionRateChartTitle}
+                series={chartDescriptionSeries}
+                start={start}
+                end={end}
+                timestampFormatter={formatFailedTransactionRateChartTimestamp}
+                valueFormatter={yLabelFormat}
+                isLoading={isPending(status)}
+                hasError={status === FETCH_STATUS.FAILURE}
+                dataTestSubj="apmFailedTransactionRateChartDescriptionButton"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <OpenAnomalies
                 dataTestSubj="apmFailedTransactionRateChartOpenAnomalies"

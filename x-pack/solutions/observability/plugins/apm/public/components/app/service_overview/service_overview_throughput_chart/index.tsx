@@ -7,16 +7,17 @@
 
 import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import { ChartDescriptionButton } from '@kbn/observability-agent-builder-plugin/public';
+import React, { useEffect, useMemo } from 'react';
 
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import { asExactTransactionRate } from '../../../../../common/utils/formatters';
+import { asAbsoluteDateTime, asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
@@ -30,11 +31,19 @@ import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_dis
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { OpenAnomalies } from '../../../shared/links/machine_learning_links/open_anomalies';
+import { toChartDescriptionSeries } from '../../../shared/charts/helper/to_chart_description_series';
 
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
 };
+
+const throughputChartTitle = i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
+  defaultMessage: 'Throughput',
+});
+
+const formatThroughputChartTimestamp = (timestamp: number) =>
+  asAbsoluteDateTime(timestamp, 'minutes');
 
 export function ServiceOverviewThroughputChart({
   height,
@@ -123,9 +132,7 @@ export function ServiceOverviewThroughputChart({
       data: data?.currentPeriod ?? [],
       type: 'linemark',
       color: currentPeriodColor,
-      title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-        defaultMessage: 'Throughput',
-      }),
+      title: throughputChartTitle,
     },
     ...(comparisonEnabled
       ? [
@@ -138,6 +145,8 @@ export function ServiceOverviewThroughputChart({
         ]
       : []),
   ];
+
+  const chartDescriptionSeries = useMemo(() => toChartDescriptionSeries(timeseries), [timeseries]);
 
   const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
@@ -169,11 +178,7 @@ export function ServiceOverviewThroughputChart({
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-                    defaultMessage: 'Throughput',
-                  })}
-                </h2>
+                <h2>{throughputChartTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
 
@@ -190,6 +195,19 @@ export function ServiceOverviewThroughputChart({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ChartDescriptionButton
+                chartTitle={throughputChartTitle}
+                series={chartDescriptionSeries}
+                start={start}
+                end={end}
+                timestampFormatter={formatThroughputChartTimestamp}
+                valueFormatter={asExactTransactionRate}
+                isLoading={isPending(status)}
+                hasError={status === FETCH_STATUS.FAILURE}
+                dataTestSubj="apmThroughputChartDescriptionButton"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <OpenAnomalies
                 dataTestSubj="apmServiceOverviewThroughputChartOpenAnomalies"
