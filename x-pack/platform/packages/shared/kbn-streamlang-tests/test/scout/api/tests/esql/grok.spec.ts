@@ -264,8 +264,8 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
       // Test skipped document
       expectDefined(skipNumericDoc);
-      expect(skipNumericDoc['http.response.body.bytes']).toBeNull(); // Not groked but nullifies the matching field
-      expect(skipNumericDoc['status.keyword']).toBeNull(); // Not groked but nullifies the matching field
+      expect(skipNumericDoc['http.response.body.bytes']).toBe('1024'); // Not groked, pre-existing value is preserved
+      expect(skipNumericDoc['status.keyword']).toBe('preexisting'); // Not groked, pre-existing value is preserved
     }
   );
 
@@ -324,8 +324,8 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
       // Test document with no message
       expectDefined(noMessageDoc);
-      expect(noMessageDoc['user.name']).toBeNull();
-      expect(noMessageDoc['client.ip']).toBeNull();
+      expect(noMessageDoc['user.name']).toBe('legacy'); // grok failed but pre-existing value is preserved
+      expect(noMessageDoc['client.ip']).toBeNull(); // grok failed, field did not exist before grok
 
       // Test document with no where condition
       expectDefined(noWhereDoc);
@@ -334,8 +334,8 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
       // Test document with neither condition
       expectDefined(noneDoc);
-      expect(noneDoc['user.name']).toBeNull();
-      expect(noneDoc['client.ip']).toBeNull();
+      expect(noneDoc['user.name']).toBe('offline'); // grok did not run, pre-existing value is preserved
+      expect(noneDoc['client.ip']).toBeNull(); // grok did not run, field did not exist before grok
     }
   );
 
