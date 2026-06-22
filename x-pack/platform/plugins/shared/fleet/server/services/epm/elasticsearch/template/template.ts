@@ -1060,6 +1060,7 @@ function errorNeedRollover(err: any): boolean {
   ) {
     return true;
   }
+  return false;
 }
 
 /**
