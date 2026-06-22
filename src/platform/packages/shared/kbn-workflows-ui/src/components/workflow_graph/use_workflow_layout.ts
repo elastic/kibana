@@ -256,15 +256,13 @@ export function useWorkflowLayout({
         id: e.id,
         source: e.source,
         target: e.target,
-        sourceHandle: e.sourceHandle,
         type: 'workflowEdge',
         data: {
           label: e.label,
           traversed,
           traversedStatus,
           points: laid?.points,
-          branchIndex: e.branchIndex,
-          branchCount: e.branchCount,
+          branchType: e.branchType,
         },
       };
     });

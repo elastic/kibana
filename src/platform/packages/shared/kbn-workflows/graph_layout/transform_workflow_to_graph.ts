@@ -17,7 +17,7 @@ import type {
   PreLayoutTriggerNode,
   Step,
 } from './types';
-import { DEFAULT_NODE_STYLE, SWITCH_DEFAULT_HANDLE, switchCaseHandleId } from './types';
+import { DEFAULT_NODE_STYLE } from './types';
 import type {
   ForEachStep,
   IfStep,
@@ -258,14 +258,8 @@ function transformInternal(
         (switchStep.cases as Array<{ match: string | number | boolean; steps: Step[] }>) ?? [];
       const branchExits: string[] = [];
 
-      // Compute the real fan size before the loop so branchCount is accurate.
-      // When there is no `default`, the fan consists only of the cases — no
-      // phantom slot reserved for a missing branch. This is what makes the
-      // octopus lane routing (laneDepth) symmetric: for 5 cases / no default
-      // fanCount = 5 → depths [0,1,2,1,0]; without this fix it was 6 → [0,1,2,2,1].
       const defaultSteps = switchStep.default as Step[] | undefined;
       const hasDefault = Array.isArray(defaultSteps) && defaultSteps.length > 0;
-      const fanCount = cases.length + (hasDefault ? 1 : 0);
 
       // Rule 1 — one labeled edge per case (label = match value).
       cases.forEach((caseItem, idx) => {
@@ -284,10 +278,8 @@ function transformInternal(
             id: `${id}:${firstId}-case-${idx}`,
             source: id,
             target: firstId,
-            branchIndex: idx,
-            branchCount: fanCount,
+            branchType: 'switch',
             label: String(caseItem.match),
-            sourceHandle: switchCaseHandleId(idx),
           });
         }
         branchExits.push(...inner.leafIds);
@@ -305,10 +297,8 @@ function transformInternal(
             id: `${id}:${firstId}-default`,
             source: id,
             target: firstId,
-            branchIndex: cases.length,
-            branchCount: fanCount,
+            branchType: 'switch',
             label: 'default',
-            sourceHandle: SWITCH_DEFAULT_HANDLE,
           });
         }
         branchExits.push(...inner.leafIds);

@@ -12,15 +12,14 @@ import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer, getSmoothStepPath, Position } from '@xyflow/react';
 import React, { memo } from 'react';
 import { STRAIGHT_X_THRESHOLD } from '@kbn/dag-layout';
+import type { EdgeBranchType } from '@kbn/workflows';
 
 interface WorkflowEdgeData extends Record<string, unknown> {
   readonly label?: string;
   readonly traversed?: boolean;
   readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
-  /** Switch fan-out: 0-based slot index of this branch (matches the handle position). */
-  readonly branchIndex?: number;
-  /** Switch fan-out: total number of branches on the source switch node. */
-  readonly branchCount?: number;
+  /** Switch bus routing marker — present on all case/default edges of a switch node. */
+  readonly branchType?: EdgeBranchType;
 }
 
 const LABEL_TRUNCATE = 24;
@@ -38,6 +37,13 @@ const TRUNK_LENGTH_TO_TARGET = 14;
 // `true`/`false` labels on the same row even when the two branches lead to
 // targets at very different ranks.
 const TB_LABEL_Y_OFFSET = 30;
+
+// Switch single-bus routing: distance from the source handle to the shared
+// horizontal bus (TB) or vertical bus (LR). Labels are anchored at a further
+// fixed offset below/right of the bus so all case labels sit on an aligned
+// row (TB) / column (LR) regardless of sibling node heights.
+const SWITCH_BUS_TRUNK = 20;
+const SWITCH_BUS_LABEL_OFFSET = 20;
 
 const EPS = 0.5;
 
@@ -76,17 +82,49 @@ function enforceOrthogonal(
 }
 
 /**
- * Lane depth for symmetric "octopus" nesting. Mirror slots (equidistant from
- * the center) share one lane; the center slot sits deepest (nearest the
- * target, nearly straight). 0 = outermost (nearest source). Always an
- * integer: for odd counts the center is exactly integer; for even counts the
- * half-integer center cancels when computing `center - |slot - center|`.
+ * Build the SVG path for a switch-edge single-bus routing. All case/default
+ * edges of one switch share the same sourceX/sourceY, so their trunks and bus
+ * line (busY or busX) are identical — they naturally overlay into one visible
+ * trunk + one bus. Labels sit at a fixed offset below/right of the bus so all
+ * case labels align on one row (TB) / one column (LR) regardless of sibling
+ * node heights.
+ *
+ * TB shape: source → trunk down → bus horizontal → drop vertical → target.
+ * LR shape: source → trunk right → bus vertical → drop horizontal → target.
  *
  * Exported for unit testing.
  */
-export function laneDepth(slot: number, count: number): number {
-  const center = (count - 1) / 2;
-  return center - Math.abs(slot - center);
+export function buildSwitchBusPath(
+  p: { sourceX: number; sourceY: number; targetX: number; targetY: number },
+  isLR: boolean,
+  trunk: number
+): { path: string; labelX: number; labelY: number } {
+  const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty } = p;
+  if (isLR) {
+    const busX = sx + trunk;
+    const { path } = buildRoundedOrthogonalPath(
+      [
+        { x: sx - 2, y: sy },
+        { x: busX, y: sy },
+        { x: busX, y: ty },
+        { x: tx, y: ty },
+      ],
+      CORNER_RADIUS
+    );
+    return { path, labelX: busX + SWITCH_BUS_LABEL_OFFSET, labelY: ty };
+  } else {
+    const busY = sy + trunk;
+    const { path } = buildRoundedOrthogonalPath(
+      [
+        { x: sx, y: sy - 2 },
+        { x: sx, y: busY },
+        { x: tx, y: busY },
+        { x: tx, y: ty },
+      ],
+      CORNER_RADIUS
+    );
+    return { path, labelX: tx, labelY: busY + SWITCH_BUS_LABEL_OFFSET };
+  }
 }
 
 /**
@@ -180,56 +218,24 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   let labelX: number;
   let labelY: number;
 
-  // Octopus fan routing for switch edges. Each case/default branch receives
-  // its own staggered horizontal lane (TB) or vertical lane (LR), distributed
-  // evenly within the inter-rank gap. Outermost slots peel off nearest the
-  // source; the center slot stays nearly straight. Requires branchIndex and
-  // branchCount to be set on the edge data (only switch edges carry these).
-  const { branchIndex, branchCount } = edgeData ?? {};
-  const isLROctopus = sourcePosition === Position.Right || sourcePosition === Position.Left;
-  const octopusGap = isLROctopus ? targetX - sourceX : targetY - sourceY;
-  const useOctopus =
-    branchIndex != null && branchCount != null && branchCount > 1 && octopusGap > 0;
+  // Single-bus routing for switch edges. All case/default edges of one switch
+  // share the same sourceX/sourceY, so their trunks and bus line overlap into
+  // one visible trunk + one continuous bus. Each edge then drops straight from
+  // the bus to its own target. Labels sit at a fixed offset below the bus (TB)
+  // / right of the bus (LR) so all case labels align on one row/column.
+  const isSwitchBus = edgeData?.branchType === 'switch';
+  const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
+  const busGap = isLR ? targetX - sourceX : targetY - sourceY;
+  const useBus = isSwitchBus && busGap > SWITCH_BUS_TRUNK;
 
-  if (useOctopus && branchIndex != null && branchCount != null) {
-    const depth = laneDepth(branchIndex, branchCount);
-    const levels = Math.ceil(branchCount / 2); // distinct depth levels
-    const step = octopusGap / (levels + 1);
-    const laneOffset = (depth + 1) * step;
-    if (isLROctopus) {
-      // LR: stagger on vertical lanes off the right/left handle.
-      const laneX = sourceX + laneOffset;
-      const built = buildRoundedOrthogonalPath(
-        [
-          { x: sourceX - 2, y: sourceY },
-          { x: laneX, y: sourceY },
-          { x: laneX, y: targetY },
-          { x: targetX, y: targetY },
-        ],
-        CORNER_RADIUS
-      );
-      edgePath = built.path;
-      labelX = laneX;
-      labelY = (sourceY + targetY) / 2;
-    } else {
-      // TB: stagger on horizontal lanes off the bottom/top handle.
-      const laneY = sourceY + laneOffset;
-      const built = buildRoundedOrthogonalPath(
-        [
-          { x: sourceX, y: sourceY - 2 },
-          { x: sourceX, y: laneY },
-          { x: targetX, y: laneY },
-          { x: targetX, y: targetY },
-        ],
-        CORNER_RADIUS
-      );
-      edgePath = built.path;
-      labelX = (sourceX + targetX) / 2;
-      labelY = laneY;
-    }
+  if (useBus) {
+    ({
+      path: edgePath,
+      labelX,
+      labelY,
+    } = buildSwitchBusPath({ sourceX, sourceY, targetX, targetY }, isLR, SWITCH_BUS_TRUNK));
   } else if (dagrePoints && dagrePoints.length >= 2) {
     let middle = dagrePoints.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
-    const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
 
     if (isLR) {
       // LR layout: trunks are horizontal stubs off the left/right handle.
@@ -450,8 +456,7 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     pd?.traversed === nd?.traversed &&
     pd?.label === nd?.label &&
     pd?.points === nd?.points &&
-    pd?.branchIndex === nd?.branchIndex &&
-    pd?.branchCount === nd?.branchCount
+    pd?.branchType === nd?.branchType
   );
 }
 

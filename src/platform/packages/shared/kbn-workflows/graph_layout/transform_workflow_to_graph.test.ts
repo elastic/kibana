@@ -268,30 +268,29 @@ describe('transformWorkflowToGraph', () => {
       .map((e) => e.source)
       .sort();
     expect(sourcesIntoAfter).toEqual(['on-error', 'on-success', 'on-unknown']);
-    // Each case edge carries its stable sourceHandle; default edge carries 'default'.
-    // All fan-out edges carry branchCount = cases.length + 1 for octopus lane routing.
+    // Each case/default edge carries branchType: 'switch' for bus routing.
     expect(r.edges).toContainEqual(
       expect.objectContaining({
         source: 'sw',
         target: 'on-success',
-        sourceHandle: 'case-0',
-        branchCount: 3,
+        branchType: 'switch',
+        label: 'success',
       })
     );
     expect(r.edges).toContainEqual(
       expect.objectContaining({
         source: 'sw',
         target: 'on-error',
-        sourceHandle: 'case-1',
-        branchCount: 3,
+        branchType: 'switch',
+        label: 'error',
       })
     );
     expect(r.edges).toContainEqual(
       expect.objectContaining({
         source: 'sw',
         target: 'on-unknown',
-        sourceHandle: 'default',
-        branchCount: 3,
+        branchType: 'switch',
+        label: 'default',
       })
     );
   });
@@ -310,21 +309,19 @@ describe('transformWorkflowToGraph', () => {
         ] as unknown as WorkflowYaml['steps'],
       })
     );
-    // The plain fall-through edge: no label, no branchIndex, no sourceHandle, no branchCount.
+    // The plain fall-through edge: no label, no branchType, no branchIndex.
     const fallThrough = r.edges.find((e) => e.source === 'sw' && e.target === 'after');
     expect(fallThrough).toBeDefined();
     expect(fallThrough?.label).toBeUndefined();
+    expect(fallThrough?.branchType).toBeUndefined();
     expect(fallThrough?.branchIndex).toBeUndefined();
-    expect(fallThrough?.sourceHandle).toBeUndefined();
-    expect(fallThrough?.branchCount).toBeUndefined();
-    // The labeled case edge carries a sourceHandle and branchCount.
+    // The labeled case edge carries branchType: 'switch' for bus routing.
     expect(r.edges).toContainEqual(
       expect.objectContaining({
         source: 'sw',
         target: 'on-a',
+        branchType: 'switch',
         label: 'a',
-        sourceHandle: 'case-0',
-        branchCount: 1,
       })
     );
   });

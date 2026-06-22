@@ -28,7 +28,7 @@ export const TRIGGER_STEP_TYPES: ReadonlySet<string> = new Set([
   'document',
 ]);
 
-export type EdgeBranchType = 'then' | 'else';
+export type EdgeBranchType = 'then' | 'else' | 'switch';
 
 export interface NodeStyle {
   width: number;
@@ -76,18 +76,6 @@ export interface PreLayoutForeachGroupNode extends PreLayoutNodeBase {
 
 export type PreLayoutNode = PreLayoutStepNode | PreLayoutTriggerNode | PreLayoutForeachGroupNode;
 
-/**
- * Returns the stable React Flow source-handle id for a given switch case
- * index. Must stay in sync with the handles rendered by `WorkflowGraphNode`.
- */
-export const switchCaseHandleId = (idx: number): string => `case-${idx}`;
-
-/**
- * React Flow source-handle id for a switch node's `default` branch.
- * Must stay in sync with the handle rendered by `WorkflowGraphNode`.
- */
-export const SWITCH_DEFAULT_HANDLE = 'default' as const;
-
 export interface GraphEdge {
   id: string;
   source: string;
@@ -96,19 +84,6 @@ export interface GraphEdge {
   branchIndex?: number;
   /** Display label rendered on the edge (e.g. 'true' / 'false' / case value). */
   label?: string;
-  /**
-   * Source anchor id; matches a named `<Handle>` on the source node.
-   * Currently used by switch nodes to give each case/default branch its
-   * own distinct anchor point. Absent on sequential and fall-through edges.
-   */
-  sourceHandle?: string;
-  /**
-   * Total number of fan-out slots on the source node (i.e. `cases.length + 1`
-   * for a switch). Together with `branchIndex`, lets the renderer distribute
-   * lanes evenly across the inter-rank gap to avoid overlapping paths.
-   * Absent on sequential and fall-through edges.
-   */
-  branchCount?: number;
 }
 
 /**

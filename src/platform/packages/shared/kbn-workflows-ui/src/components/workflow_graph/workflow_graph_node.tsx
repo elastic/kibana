@@ -16,17 +16,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Handle, Position, useUpdateNodeInternals } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import {
-  ExecutionStatus,
-  SWITCH_DEFAULT_HANDLE,
-  switchCaseHandleId,
-  TRIGGER_STEP_TYPES,
-} from '@kbn/workflows';
+import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
@@ -45,10 +40,6 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
   readonly step?: {
     readonly retry?: { readonly 'max-attempts'?: number };
     readonly 'on-failure'?: { readonly retry?: { readonly 'max-attempts'?: number } };
-    /** Present on `switch` steps. Used to render per-case source handles. */
-    readonly cases?: ReadonlyArray<unknown>;
-    /** Present on `switch` steps that define a default branch. */
-    readonly default?: ReadonlyArray<unknown>;
   };
 }
 
@@ -145,66 +136,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const maxAttempts = getStepMaxAttempts(step);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
-
-  // Per-case source handles for switch nodes.
-  // Fan size = cases only when no default exists (no phantom slot).
-  // With a default: cases.length + 1. Without: cases.length (centered fan).
-  const switchCases = stepType === 'switch' ? step?.cases ?? [] : null;
-  const switchHasDefault =
-    stepType === 'switch' && Array.isArray(step?.default) && step.default.length > 0;
-  const switchFanCount = switchCases !== null ? switchCases.length + (switchHasDefault ? 1 : 0) : 0;
-  // Signature used as a useEffect dependency to detect structural changes.
-  const switchHandleSignature =
-    switchCases !== null ? `${switchCases.length}:${switchHasDefault}` : '';
-
-  // Re-measure handle bounds when the switch structure or layout direction changes.
-  // React Flow caches bounds per node id and won't re-measure on in-place updates.
-  const updateNodeInternals = useUpdateNodeInternals();
-  useEffect(() => {
-    if (stepType !== 'switch') return;
-    updateNodeInternals(node.id);
-  }, [node.id, stepType, sourceHandlePos, switchHandleSignature, updateNodeInternals]);
-
-  // Inline offset style for evenly-distributing handles along the source side.
-  // The cross-axis percentage keeps React Flow's centering `transform` intact.
-  const switchHandleStyle = (slot: number): React.CSSProperties => {
-    const pct = ((slot + 1) / (switchFanCount + 1)) * 100;
-    const isVerticalSide = sourceHandlePos === Position.Right || sourceHandlePos === Position.Left;
-    return isVerticalSide ? { top: `${pct}%`, opacity: 0 } : { left: `${pct}%`, opacity: 0 };
-  };
-
-  // Renders the ordered set of source handles for a switch node, replacing
-  // the single unnamed handle. Shared between the preview and main branches.
-  const renderSwitchSourceHandles = (): React.ReactNode => {
-    if (switchCases === null) return null;
-    // Fall-through handle is centered (not a fan slot) so it doesn't bias the
-    // case fan when there is no default.
-    const isVerticalSide = sourceHandlePos === Position.Right || sourceHandlePos === Position.Left;
-    const centeredStyle: React.CSSProperties = isVerticalSide
-      ? { top: '50%', opacity: 0 }
-      : { left: '50%', opacity: 0 };
-    return (
-      <>
-        {switchCases.map((_caseItem, idx) => (
-          <Handle
-            key={switchCaseHandleId(idx)}
-            type="source"
-            id={switchCaseHandleId(idx)}
-            position={sourceHandlePos}
-            style={switchHandleStyle(idx)}
-          />
-        ))}
-        {/* Last slot: named `default` handle in the fan, or unnamed fall-through at center */}
-        <Handle
-          key={switchHasDefault ? SWITCH_DEFAULT_HANDLE : '__fallthrough__'}
-          type="source"
-          id={switchHasDefault ? SWITCH_DEFAULT_HANDLE : undefined}
-          position={sourceHandlePos}
-          style={switchHasDefault ? switchHandleStyle(switchCases.length) : centeredStyle}
-        />
-      </>
-    );
-  };
 
   const isActive = node.selected;
   const [isHovered, setIsHovered] = useState(false);
@@ -303,11 +234,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             />
           )}
         </div>
-        {stepType === 'switch' ? (
-          renderSwitchSourceHandles()
-        ) : (
-          <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
-        )}
+        <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
       </>
     );
   }
@@ -551,11 +478,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           </div>
         )}
       </div>
-      {stepType === 'switch' ? (
-        renderSwitchSourceHandles()
-      ) : (
-        <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
-      )}
+      <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
     </>
   );
 }
