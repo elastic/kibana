@@ -16,7 +16,7 @@
  * var. It is intentionally short: since elastic/elasticsearch#139088,
  * `PUT _inference/_ccm` validates the key against the EIS gateway, so a
  * rotated-but-still-cached key hard-fails `--eis` startup. The shorter TTL
- * (plus pre-use validation in `resolveCcmApiKey`) limits that window.
+ * limits that window before a fresh key is fetched from Vault.
  *
  * Three read modes:
  *  - `readCachedKey` — returns the key only if within TTL.
@@ -94,17 +94,4 @@ export const writeCachedKey = (key: string, vaultAddr: string): void => {
   }
 
   fs.writeFileSync(CACHE_PATH, JSON.stringify(entry, null, 2), { encoding: 'utf-8', mode: 0o600 });
-};
-
-/**
- * Removes the cached key file. Used to evict a cached key that failed
- * validation against the EIS gateway (e.g. it was rotated or revoked), so the
- * next resolution falls back to Vault. No-op when the file is absent.
- */
-export const clearCachedKey = (): void => {
-  try {
-    fs.rmSync(CACHE_PATH, { force: true });
-  } catch {
-    // Best-effort eviction — a failure here shouldn't break the resolve flow.
-  }
 };

@@ -30,7 +30,7 @@ import chalk from 'chalk';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import { clearCachedKey, readCachedKey, readStaleKey, writeCachedKey } from './ccm_key_cache';
+import { readCachedKey, readStaleKey, writeCachedKey } from './ccm_key_cache';
 import { waitUntilClusterReady } from '../utils/wait_until_cluster_ready';
 
 /** QA environment URL for the Elastic Inference Service. */
@@ -78,59 +78,6 @@ export const eisHttpRequest = (
 
 export const createBasicAuth = (username: string, password: string): string =>
   Buffer.from(`${username}:${password}`).toString('base64');
-
-/**
- * EIS gateway authorization path. Elasticsearch calls this endpoint to validate
- * the CCM key before storing it via `PUT _inference/_ccm` (see
- * elastic/elasticsearch#139088). ES moved to the v2 endpoint in
- * elastic/elasticsearch#138249; we mirror that here so our pre-use validation
- * matches what ES actually does.
- */
-const EIS_AUTHORIZATIONS_PATH = '/api/v2/authorizations';
-
-/**
- * Validates a CCM API key against the EIS gateway by mirroring the
- * authorization call Elasticsearch performs. Returns `true` when the key is
- * accepted, `false` when the gateway rejects it (401/403). Returns `true` on
- * transient/unknown failures (network error, 5xx) so a flaky gateway doesn't
- * block startup — ES will surface a real problem when it sets the key.
- *
- * The key is sent with the `ApiKey` scheme to match Elasticsearch, which
- * switched from `Bearer` to `ApiKey` in elastic/elasticsearch#138590. The
- * gateway rejects `Bearer` with a 401, so using the wrong scheme here would
- * wrongly discard a perfectly valid key.
- */
-export const validateCcmApiKey = async (
-  apiKey: string,
-  log: ToolingLog,
-  eisUrl: string = EIS_QA_URL
-): Promise<boolean> => {
-  try {
-    const { statusCode } = await eisHttpRequest(`${eisUrl}${EIS_AUTHORIZATIONS_PATH}`, {
-      method: 'GET',
-      headers: { Authorization: `ApiKey ${apiKey}` },
-    });
-
-    if (statusCode === 401 || statusCode === 403) {
-      return false;
-    }
-
-    if (statusCode < 200 || statusCode >= 300) {
-      log.debug(
-        `EIS key validation returned HTTP ${statusCode}; treating as inconclusive and proceeding.`
-      );
-    }
-
-    return true;
-  } catch (error) {
-    log.debug(
-      `EIS key validation request failed (${
-        error instanceof Error ? error.message : String(error)
-      }); treating as inconclusive and proceeding.`
-    );
-    return true;
-  }
-};
 
 const VAULT_NOT_INSTALLED_MESSAGE = [
   'Vault is not installed or not in PATH.',
@@ -264,9 +211,8 @@ const getEisApiKeyFromVault = async (vaultAddr: string, log: ToolingLog): Promis
 
 /**
  * Resolves the CCM API key from (in priority order):
- * 1. KIBANA_EIS_CCM_API_KEY env var (returned as-is — the user opted in)
- * 2. Local file cache (~/.elastic/eis-ccm-key.json), validated against the EIS
- *    gateway before use; evicted and skipped if the gateway rejects it.
+ * 1. KIBANA_EIS_CCM_API_KEY env var
+ * 2. Local file cache (~/.elastic/eis-ccm-key.json)
  * 3. Vault (with fallback to stale cache on failure)
  */
 export const resolveCcmApiKey = async (log: ToolingLog): Promise<string> => {
@@ -278,15 +224,8 @@ export const resolveCcmApiKey = async (log: ToolingLog): Promise<string> => {
 
   const cached = readCachedKey();
   if (cached) {
-    if (await validateCcmApiKey(cached, log)) {
-      log.info('Using cached CCM API key from ~/.elastic/eis-ccm-key.json');
-      return cached;
-    }
-    log.warning(
-      'Cached CCM API key was rejected by the EIS gateway (likely rotated or revoked); ' +
-        'discarding it and re-fetching from Vault.'
-    );
-    clearCachedKey();
+    log.info('Using cached CCM API key from ~/.elastic/eis-ccm-key.json');
+    return cached;
   }
 
   const vaultAddr = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
