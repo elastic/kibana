@@ -25,7 +25,6 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
-import { useConversationStream } from '../../hooks/use_conversation_stream';
 import { useStreamingContext } from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
@@ -54,7 +53,6 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
-  const { isResponseLoading } = useConversationStream();
   const isAnyStreaming = useIsAnyConversationStreaming();
   const { cancelAllStreams } = useStreamingContext();
   const conversationRounds = useConversationRounds();
@@ -84,7 +82,7 @@ export const Conversation: React.FC<{}> = () => {
   });
 
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
-  const { showScrollButton, smoothScrollToBottom, scrollToMostRecentRoundTop, stickToBottom } =
+  const { showScrollButton, onMessageSent, smoothScrollToBottom, stickToBottom } =
     useConversationScrollActions({
       conversationId: conversationId || '',
       scrollContainer,
@@ -121,12 +119,6 @@ export const Conversation: React.FC<{}> = () => {
       });
     }
   }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
-
-  useEffect(() => {
-    if (isResponseLoading && !showScrollButton) {
-      stickToBottom();
-    }
-  }, [conversationRounds, isResponseLoading, showScrollButton, stickToBottom]);
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
@@ -212,10 +204,7 @@ export const Conversation: React.FC<{}> = () => {
               onDismiss={() => setDismissStaleAttachments(true)}
             />
           )}
-          <ConversationInput
-            onSubmit={scrollToMostRecentRoundTop}
-            onEditorFocus={scheduleStaleCheck}
-          />
+          <ConversationInput onSubmit={onMessageSent} onEditorFocus={scheduleStaleCheck} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <CanvasFlyout attachmentsService={attachmentsService} />
