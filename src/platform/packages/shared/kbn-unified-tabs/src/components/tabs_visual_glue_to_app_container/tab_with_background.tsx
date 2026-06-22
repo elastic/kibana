@@ -50,19 +50,18 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           // overlap the container's bottom border so the active tab connects to the content below
           margin-bottom: -${euiTheme.border.width.thin};
           padding-bottom: ${isDragging ? '0' : euiTheme.size.xs};
-          // Reserve space for the selected tab's top border on every tab so selecting a tab
-          // doesn't grow its height and shift the content below.
+          // Reserve space for the selected tab's borders so it does not shift layout.
           border-top: ${euiTheme.border.width.thick} solid transparent;
+          border-left: ${euiTheme.border.width.thin} solid transparent;
+          border-right: ${euiTheme.border.width.thin} solid transparent;
 
           ${isSelected
             ? `
               border-top-color: ${
                 isLoading ? euiTheme.colors.borderBaseSubdued : euiTheme.colors.primary
               };
-              border-left: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-              border-right: ${euiTheme.border.width.thin} solid ${
-                euiTheme.colors.borderBaseSubdued
-              }; 
+              border-left-color: ${euiTheme.colors.borderBaseSubdued};
+              border-right-color: ${euiTheme.colors.borderBaseSubdued};
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
             `
