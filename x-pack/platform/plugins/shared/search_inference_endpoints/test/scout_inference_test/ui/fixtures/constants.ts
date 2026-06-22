@@ -8,9 +8,9 @@
 export const BREADCRUMBS = {
   stateful: {
     classic: ['Stack Management'],
-    searchSolution: ['Stack Management', 'Model management'],
+    searchSolution: ['Stack Management', 'Model Management'],
   },
   serverless: {
-    search: ['Model management'],
+    search: ['Model Management'],
   },
 } as const;

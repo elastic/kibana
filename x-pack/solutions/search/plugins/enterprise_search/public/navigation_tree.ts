@@ -329,7 +329,7 @@ export const getNavigationTreeDefinition = ({
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.management.modelManagement',
                     {
-                      defaultMessage: 'Model management',
+                      defaultMessage: 'Model Management',
                     }
                   ),
                 },

@@ -153,7 +153,7 @@ export const i18nStrings = {
       }),
       trainedModels: i18n.translate(
         'securitySolutionPackages.navLinks.ml.modelManagement.trainedModels',
-        { defaultMessage: 'Trained Models' }
+        { defaultMessage: 'Trained models' }
       ),
     },
     aiopsLabs: {
@@ -176,7 +176,7 @@ export const i18nStrings = {
   },
   modelManagement: {
     title: i18n.translate('securitySolutionPackages.navLinks.modelManagement', {
-      defaultMessage: 'Model management',
+      defaultMessage: 'Model Management',
     }),
   },
   entityRiskScore: i18n.translate('securitySolutionPackages.navLinks.entityRiskScore', {
@@ -191,7 +191,7 @@ export const i18nStrings = {
     }),
   },
   devTools: i18n.translate('securitySolutionPackages.navLinks.devTools', {
-    defaultMessage: 'Developer Tools',
+    defaultMessage: 'Developer tools',
   }),
   management: {
     title: i18n.translate('securitySolutionPackages.navLinks.management.title', {
@@ -200,7 +200,7 @@ export const i18nStrings = {
   },
   projectSettings: {
     title: i18n.translate('securitySolutionPackages.navLinks.projectSettings.title', {
-      defaultMessage: 'Project settings',
+      defaultMessage: 'Project Settings',
     }),
   },
   stackManagement: {
@@ -305,7 +305,7 @@ export const i18nStrings = {
     },
     serverlessTitle: i18n.translate(
       'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
-      { defaultMessage: 'Admin and settings' }
+      { defaultMessage: 'Admin and Settings' }
     ),
     organization: {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.organization', {

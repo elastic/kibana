@@ -34,7 +34,7 @@ const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessSearch.nav.mngt.alertsAndInsights',
   {
-    defaultMessage: 'Alerts and Insights',
+    defaultMessage: 'Alerts and insights',
   }
 );
 const MACHINE_LEARNING_TITLE = i18n.translate('xpack.serverlessSearch.nav.machineLearning', {
@@ -221,7 +221,7 @@ export function createNavigationTree({
       {
         id: 'admin_and_settings',
         title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings', {
-          defaultMessage: 'Admin and settings',
+          defaultMessage: 'Admin and Settings',
         }),
         icon: 'gear',
         breadcrumbStatus: 'hidden',
@@ -315,7 +315,7 @@ export function createNavigationTree({
           {
             id: 'settings_model_management',
             title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.modelManagement', {
-              defaultMessage: 'Model management',
+              defaultMessage: 'Model Management',
             }),
             children: [
               {

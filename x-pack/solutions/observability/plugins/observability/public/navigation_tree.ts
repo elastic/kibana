@@ -354,7 +354,7 @@ function createNavTree({
           {
             id: 'category-aiops_labs',
             title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-              defaultMessage: 'AIOps labs',
+              defaultMessage: 'AIOps Labs',
             }),
             breadcrumbStatus: 'hidden',
             children: [
@@ -450,7 +450,7 @@ function createNavTree({
       {
         id: 'devTools',
         title: i18n.translate('xpack.observability.obltNav.devTools', {
-          defaultMessage: 'Developer Tools',
+          defaultMessage: 'Developer tools',
         }),
         link: 'dev_tools',
         icon: 'code',
@@ -467,7 +467,7 @@ function createNavTree({
           {
             id: 'ingest_and_integrations',
             title: i18n.translate('xpack.observability.obltNav.ingestAndIntegrations', {
-              defaultMessage: 'Ingest and Integrations',
+              defaultMessage: 'Ingest and integrations',
               description:
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
@@ -627,7 +627,7 @@ function createNavTree({
           {
             id: 'management_model_management',
             title: i18n.translate('xpack.observability.obltNav.modelManagement', {
-              defaultMessage: 'Model management',
+              defaultMessage: 'Model Management',
             }),
             children: [
               { link: 'management:elastic_inference_service' },

@@ -415,7 +415,7 @@ export const createNavigationTree = ({
       {
         id: 'devTools',
         title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
-          defaultMessage: 'Developer Tools',
+          defaultMessage: 'Developer tools',
         }),
         link: 'dev_tools',
         icon: 'code',
@@ -431,7 +431,7 @@ export const createNavigationTree = ({
         children: [
           {
             title: i18n.translate('xpack.serverlessObservability.nav.ingestAndIntegrations', {
-              defaultMessage: 'Ingest and Integrations',
+              defaultMessage: 'Ingest and integrations',
               description:
                 'The title of the ingest and integrations navigation item in the serverless observability nav tree.',
             }),
@@ -466,7 +466,7 @@ export const createNavigationTree = ({
       {
         id: 'admin_and_settings',
         title: i18n.translate('xpack.serverlessObservability.nav.adminAndSettings', {
-          defaultMessage: 'Admin and settings',
+          defaultMessage: 'Admin and Settings',
         }),
         icon: 'gear',
         breadcrumbStatus: 'hidden',
@@ -526,7 +526,7 @@ export const createNavigationTree = ({
             title: i18n.translate(
               'xpack.serverlessObservability.nav.projectSettings.alertsAndInsights',
               {
-                defaultMessage: 'Alerts and Insights',
+                defaultMessage: 'Alerts and insights',
               }
             ),
             breadcrumbStatus: 'hidden',
@@ -574,7 +574,7 @@ export const createNavigationTree = ({
               title: i18n.translate(
                 'xpack.serverlessObservability.nav.projectSettings.modelManagement',
                 {
-                  defaultMessage: 'Model management',
+                  defaultMessage: 'Model Management',
                 }
               ),
               children: [
