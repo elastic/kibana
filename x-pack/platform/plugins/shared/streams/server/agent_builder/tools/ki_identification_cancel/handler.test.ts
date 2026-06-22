@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { cancelKiIdentificationToolHandler } from './handler';
@@ -19,8 +19,10 @@ describe('cancelKiIdentificationToolHandler', () => {
       }),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
+    const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
+      telemetry,
     });
     const request = httpServerMock.createKibanaRequest();
 
@@ -38,7 +40,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     expect(result).toEqual({
       stream_name: 'logs.nginx',
       execution_id: 'exec-1',
-      status: StreamsKIsOnboardingStatus.Canceled,
+      status: SigEventsWorkflowStatus.Canceled,
     });
   });
 
@@ -47,8 +49,10 @@ describe('cancelKiIdentificationToolHandler', () => {
       getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
       cancelWorkflowExecution: jest.fn(),
     };
+    const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
+      telemetry,
     });
     const request = httpServerMock.createKibanaRequest();
 
@@ -62,7 +66,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     expect(result).toEqual({
       stream_name: 'logs.nginx',
       execution_id: null,
-      status: StreamsKIsOnboardingStatus.Canceled,
+      status: SigEventsWorkflowStatus.Canceled,
     });
   });
 });
