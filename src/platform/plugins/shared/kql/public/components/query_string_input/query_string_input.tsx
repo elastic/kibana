@@ -48,6 +48,7 @@ import { fromUser } from './from_user';
 import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type {
+  SuggestionFooterOption,
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
@@ -156,6 +157,12 @@ export interface QueryStringInputProps {
    * Debounce delay in ms for fetching suggestions. Defaults to 100.
    */
   suggestionsDebounceMs?: number;
+
+  /**
+   * Optional pinned footer item shown at the bottom of the suggestions dropdown.
+   * Displayed regardless of whether there are field/history suggestions.
+   */
+  footerOption?: SuggestionFooterOption;
 }
 
 interface State {
@@ -442,6 +449,14 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
           if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
             event.preventDefault();
             this.selectSuggestion(this.state.suggestions[index], index);
+          } else if (
+            isSuggestionsVisible &&
+            index === this.state.suggestions.length &&
+            this.props.footerOption
+          ) {
+            event.preventDefault();
+            this.props.footerOption.onClick();
+            this.setState({ isSuggestionsVisible: false, index: null });
           } else {
             this.onSubmit(this.props.query);
             this.setState({
@@ -587,17 +602,19 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   };
 
   private incrementIndex = (currentIndex: number) => {
+    const totalCount = this.state.suggestions.length + (this.props.footerOption ? 1 : 0);
     let nextIndex = currentIndex + 1;
-    if (currentIndex === null || nextIndex >= this.state.suggestions.length) {
+    if (currentIndex === null || nextIndex >= totalCount) {
       nextIndex = 0;
     }
     this.setState({ index: nextIndex });
   };
 
   private decrementIndex = (currentIndex: number) => {
+    const totalCount = this.state.suggestions.length + (this.props.footerOption ? 1 : 0);
     const previousIndex = currentIndex - 1;
     if (previousIndex < 0) {
-      this.setState({ index: this.state.suggestions.length - 1 });
+      this.setState({ index: totalCount - 1 });
     } else {
       this.setState({ index: previousIndex });
     }
@@ -924,6 +941,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                 loadMore={this.increaseLimit}
                 size={this.props.size}
                 inputContainer={this.state.queryBarInputDiv}
+                footerOption={this.props.footerOption}
               />
             </EuiPortal>
           </div>

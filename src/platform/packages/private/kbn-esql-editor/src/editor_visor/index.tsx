@@ -9,11 +9,10 @@
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiToolTip,
+  EuiText,
   type EuiComboBoxOptionOption,
   useEuiTheme,
 } from '@elastic/eui';
@@ -24,30 +23,11 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
-import { ModeSelector, VisorMode } from './mode_selector';
-import { NoConnectorMessage } from './no_connector_message';
-import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { reportEsqlError } from '../report_error';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
-
-export { VisorMode } from './mode_selector';
-
-const VISOR_MODE_STORAGE_KEY = 'esqlEditor.visor.mode';
-
-const getInitialVisorMode = (): VisorMode => {
-  try {
-    const stored = window.localStorage?.getItem(VISOR_MODE_STORAGE_KEY);
-    if (stored === VisorMode.KQL || stored === VisorMode.NaturalLanguage) {
-      return stored;
-    }
-  } catch {
-    // localStorage is unavailable (e.g., private mode); fall through to default
-  }
-  return VisorMode.NaturalLanguage;
-};
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -56,6 +36,8 @@ export interface QuickSearchVisorProps {
   isSpaceReduced?: boolean;
   // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
   isInline?: boolean;
+  // Whether to show the "Ask AI" option when the KQL bar is focused
+  showAiOption?: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
@@ -65,30 +47,31 @@ export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlacehol
   defaultMessage: 'Filter your data using KQL',
 });
 
+const searchPlaceholderWithAi = i18n.translate('esqlEditor.visor.searchPlaceholderWithAi', {
+  defaultMessage: 'Filter using KQL or ask AI...',
+});
+
 const searchPlaceholderShort = i18n.translate('esqlEditor.visor.searchPlaceholderShort', {
   defaultMessage: 'Filter using KQL',
 });
 
-const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
-  defaultMessage: 'Describe the query you want in plain language',
+const askAiLabel = i18n.translate('esqlEditor.visor.askAiLabel', {
+  defaultMessage: 'or ask using AI',
 });
 
-const nlPlaceholderShort = i18n.translate('esqlEditor.visor.nlPlaceholderShort', {
-  defaultMessage: 'Describe in plain language',
+const generatingLabel = i18n.translate('esqlEditor.visor.generatingLabel', {
+  defaultMessage: 'Generating...',
 });
 
-const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
-  defaultMessage: 'Technical preview',
-});
-
-const submitVisorLabel = i18n.translate('esqlEditor.visor.submitAriaLabel', {
-  defaultMessage: 'Submit',
+const stopLabel = i18n.translate('esqlEditor.visor.stopLabel', {
+  defaultMessage: 'Stop',
 });
 
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isInline,
+  showAiOption,
   onUpdateAndSubmitQuery,
   telemetryService,
 }: QuickSearchVisorProps) {
@@ -99,13 +82,10 @@ export function QuickSearchVisor({
   const useShortPlaceholder = useMemo(() => isInline || isSpaceReduced, [isInline, isSpaceReduced]);
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState<VisorMode>(getInitialVisorMode);
-  const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
-  const connectorCheckRef = useRef(false);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
-  const kqlInputRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
@@ -123,9 +103,7 @@ export function QuickSearchVisor({
           const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
           const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("""${kqlQuery.trim()}""")`;
           onUpdateAndSubmitQuery(newQuery);
-          // Clear the search value after submitting the query
           setSearchValue('');
-          // Reset user selection tracking when visor closes
           userSelectedSourceRef.current = false;
         }
       }
@@ -153,10 +131,12 @@ export function QuickSearchVisor({
     [telemetryService]
   );
 
-  const onNlSubmit = useCallback(async () => {
-    const trimmed = nlValue.trim();
-    if (!trimmed || isNlLoading) return;
+  const onAskAiClick = useCallback(async () => {
+    if (isNlLoading) return;
 
+    const trimmed = searchValue.trim();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
     setIsNlLoading(true);
     const startTime = Date.now();
     try {
@@ -165,6 +145,7 @@ export function QuickSearchVisor({
           nlInstruction: trimmed,
           currentQuery: query,
         }),
+        signal: abortController.signal,
       });
       if (result.content) {
         trackNlResult(
@@ -176,9 +157,9 @@ export function QuickSearchVisor({
           result.content.length
         );
         onUpdateAndSubmitQuery(result.content);
-        setNlValue('');
       }
     } catch (error) {
+      if (abortController.signal.aborted) return;
       reportEsqlError(error, { errorType: 'NlToEsql' });
       const errorCode = String(
         (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
@@ -191,49 +172,34 @@ export function QuickSearchVisor({
         });
       core.notifications.toasts.addDanger({ title: message });
     } finally {
-      setIsNlLoading(false);
+      setSearchValue('');
+      if (!abortController.signal.aborted) {
+        setIsNlLoading(false);
+      }
     }
   }, [
-    nlValue,
     isNlLoading,
+    searchValue,
+    query,
     core.http,
     core.notifications.toasts,
     onUpdateAndSubmitQuery,
-    query,
     trackNlResult,
   ]);
 
-  const checkConnectorAvailability = useCallback(async () => {
-    if (connectorCheckRef.current) return;
-    connectorCheckRef.current = true;
-    try {
-      const res = await core.http.get<{ connectors: unknown[] }>('/internal/inference/connectors');
-      setHasConnector(res.connectors.length > 0);
-    } catch {
-      setHasConnector(false);
-    }
-  }, [core.http]);
-
-  const onModeChange = useCallback(
-    (mode: VisorMode) => {
-      setVisorMode(mode);
-      try {
-        window.localStorage?.setItem(VISOR_MODE_STORAGE_KEY, mode);
-      } catch {
-        // localStorage unavailable (private mode etc.); silently ignore
-      }
-      if (mode === VisorMode.NaturalLanguage) {
-        checkConnectorAvailability();
-      }
-    },
-    [checkConnectorAvailability]
-  );
+  const onStopGeneration = useCallback(() => {
+    abortControllerRef.current?.abort();
+    setIsNlLoading(false);
+    setSearchValue('');
+  }, []);
 
   useEffect(() => {
-    if (visorMode === VisorMode.NaturalLanguage) {
-      checkConnectorAvailability();
-    }
-  }, [visorMode, checkConnectorAvailability]);
+    if (!showAiOption || !isNlToEsqlEnabled) return;
+    core.http
+      .get<{ connectors: unknown[] }>('/internal/inference/connectors')
+      .then((res) => setHasConnector(res.connectors.length > 0))
+      .catch(() => setHasConnector(false));
+  }, [showAiOption, isNlToEsqlEnabled, core.http]);
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
@@ -247,7 +213,6 @@ export function QuickSearchVisor({
       setSearchValue('');
       initializedRef.current = true;
     } else if (sources.length > 0 && !userSelectedSourceRef.current) {
-      // Update from query prop only if user hasn't manually selected a source
       if (!isEqual(selectedSources, sources)) {
         setSelectedSources(sources);
       }
@@ -289,13 +254,18 @@ export function QuickSearchVisor({
     euiThemeContext,
     comboBoxWidth,
     Boolean(isSpaceReduced),
-    visorMode,
     Boolean(isInline)
   );
 
   if (!KQLComponent) {
     return null;
   }
+
+  const showFooterOption =
+    showAiOption && isNlToEsqlEnabled && hasConnector === true && searchValue.trim().length > 0;
+  const footerOption = showFooterOption
+    ? { label: askAiLabel, iconType: 'productAgent' as const, onClick: onAskAiClick }
+    : undefined;
 
   return (
     <EuiFlexGroup
@@ -314,116 +284,80 @@ export function QuickSearchVisor({
           responsive={false}
           css={styles.visorBox}
         >
-          {isNlToEsqlEnabled && (
-            <>
-              <EuiFlexItem grow={false} css={styles.techPreviewIcon}>
-                <EuiIconTip type="flask" size="s" color="subdued" content={techPreviewTooltip} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
-                <ModeSelector onModeChange={onModeChange} initialMode={visorMode} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={styles.separator} />
-            </>
-          )}
-          {visorMode === VisorMode.KQL || !isNlToEsqlEnabled ? (
-            <>
-              <EuiFlexItem grow={false} css={styles.comboBoxWrapper}>
-                <SourcesDropdown
-                  currentSources={selectedSources.map((source) => source.label)}
-                  onChangeSources={(newSources) => {
-                    setSelectedSources(newSources.map((source) => ({ label: source })));
-                    userSelectedSourceRef.current = true;
+          <EuiFlexItem grow={false} css={styles.comboBoxWrapper}>
+            <SourcesDropdown
+              currentSources={selectedSources.map((source) => source.label)}
+              isDisabled={isNlLoading}
+              onChangeSources={(newSources) => {
+                setSelectedSources(newSources.map((source) => ({ label: source })));
+                userSelectedSourceRef.current = true;
+              }}
+            />
+          </EuiFlexItem>
+          {!isInline && <EuiFlexItem grow={false} css={styles.separator} />}
+
+          <EuiFlexItem css={styles.searchWrapper}>
+            <EuiFlexGroup
+              gutterSize="none"
+              alignItems="center"
+              responsive={false}
+              css={styles.searchInner}
+            >
+              <EuiFlexItem>
+                <KQLComponent
+                  iconType=""
+                  disableLanguageSwitcher={true}
+                  indexPatterns={adHocDataView ? [adHocDataView] : []}
+                  bubbleSubmitEvent={false}
+                  query={{
+                    query: searchValue,
+                    language: 'kuery',
                   }}
+                  disableAutoFocus={true}
+                  placeholder={
+                    showAiOption && isNlToEsqlEnabled
+                      ? searchPlaceholderWithAi
+                      : useShortPlaceholder
+                      ? searchPlaceholderShort
+                      : searchPlaceholder
+                  }
+                  onChange={(newQuery) => {
+                    onKqlValueChange(newQuery.query as string);
+                  }}
+                  onSubmit={(newQuery) => {
+                    onKqlSubmit(newQuery.query as string);
+                  }}
+                  appName="esqlEditorVisor"
+                  dataTestSubj="esqlVisorKQLQueryInput"
+                  size="s"
+                  footerOption={footerOption}
                 />
               </EuiFlexItem>
-              {!isInline && <EuiFlexItem grow={false} css={styles.separator} />}
-              <EuiFlexItem css={styles.searchWrapper}>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="center"
-                  responsive={false}
-                  css={styles.searchInner}
-                >
-                  <EuiFlexItem>
-                    <div ref={kqlInputRef}>
-                      <KQLComponent
-                        // If we remove the prop, the icon still appears (!!)
-                        iconType=""
-                        disableLanguageSwitcher={true}
-                        indexPatterns={adHocDataView ? [adHocDataView] : []}
-                        bubbleSubmitEvent={false}
-                        query={{
-                          query: searchValue,
-                          language: 'kuery',
-                        }}
-                        disableAutoFocus={true}
-                        placeholder={useShortPlaceholder ? searchPlaceholderShort : searchPlaceholder}
-                        onChange={(newQuery) => {
-                          onKqlValueChange(newQuery.query as string);
-                        }}
-                        onSubmit={(newQuery) => {
-                          onKqlSubmit(newQuery.query as string);
-                        }}
-                        appName="esqlEditorVisor"
-                        dataTestSubj="esqlVisorKQLQueryInput"
-                        size="s"
-                      />
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
-                    <EuiToolTip position="top" content={submitVisorLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        size="xs"
-                        color="primary"
-                        iconType="returnKey"
-                        aria-label={submitVisorLabel}
-                        data-test-subj="esqlVisorKQLSubmit"
-                        isDisabled={!searchValue.trim() || selectedSources.length === 0}
-                        onClick={() => onKqlSubmit(searchValue)}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </>
-          ) : (
-            <EuiFlexItem css={styles.nlInputWrapper}>
-              {hasConnector === false ? (
-                <NoConnectorMessage basePath={core.http.basePath} />
-              ) : (
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="center"
-                  responsive={false}
-                  css={styles.searchInner}
-                >
-                  <EuiFlexItem>
-                    <NLInput
-                      value={nlValue}
-                      placeholder={useShortPlaceholder ? nlPlaceholderShort : nlPlaceholder}
-                      disabled={isNlLoading}
-                      onChange={setNlValue}
-                      onSubmit={onNlSubmit}
-                      inputStyles={styles.nlInput}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
-                    <EuiToolTip position="top" content={submitVisorLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        size="xs"
-                        color="primary"
-                        iconType="returnKey"
-                        aria-label={submitVisorLabel}
-                        data-test-subj="esqlVisorNLSubmit"
-                        isDisabled={!nlValue.trim() || isNlLoading}
-                        onClick={() => onNlSubmit()}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              {isNlLoading && (
+                <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {generatingLabel}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge
+                        color="hollow"
+                        iconType="stop"
+                        iconSide="left"
+                        onClick={onStopGeneration}
+                        onClickAriaLabel={stopLabel}
+                        data-test-subj="esqlVisorStopGeneration"
+                      >
+                        {stopLabel}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               )}
-            </EuiFlexItem>
-          )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

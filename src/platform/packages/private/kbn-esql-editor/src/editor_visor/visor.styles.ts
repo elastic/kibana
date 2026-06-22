@@ -9,28 +9,19 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { euiFontSizeFromScale, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { VisorMode } from './mode_selector';
 
 export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
-export const MODE_SELECT_WIDTH_KQL = 80;
-export const MODE_SELECT_WIDTH_NL = 160;
 const VISOR_INNER_PADDING = '2px';
-// Cap the expanded NL textarea height to roughly a third of the viewport,
-// offset by 100px to leave room for the editor chrome above and below.
-// Matches the max-height used by the KQL QueryStringInput textarea.
-export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 
 export const visorStyles = (
   euiThemeContext: UseEuiTheme,
   comboBoxWidth: number,
   isSpaceReduced: boolean,
-  mode: VisorMode,
   isInline: boolean
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
-  const modeSelectWidth = mode === VisorMode.KQL ? MODE_SELECT_WIDTH_KQL : MODE_SELECT_WIDTH_NL;
   const borderRadius = euiTheme.border.radius.medium;
 
   return {
@@ -75,6 +66,7 @@ export const visorStyles = (
     searchWrapper: css`
       justify-content: center;
       padding-right: ${euiTheme.size.xs};
+      position: relative;
       ${isInline ? 'flex: 1 0 100%;' : ''}
       min-width: 0;
       ${isInline
@@ -107,43 +99,6 @@ export const visorStyles = (
         }
       }
     `,
-    techPreviewIcon: css`
-      padding-left: ${euiTheme.size.s};
-      flex-shrink: 0;
-      flex-grow: 0;
-      display: flex;
-      align-items: center;
-    `,
-    modeSelectWrapper: css`
-      flex-shrink: 0;
-      flex-grow: 0;
-      width: ${modeSelectWidth}px;
-      transition: width ${euiTheme.animation.slow} ease-in-out;
-
-      .euiComboBox__inputWrap {
-        border: none !important;
-        box-shadow: none !important;
-        outline: none !important;
-        background: transparent !important;
-        font-size: ${fontSize} !important;
-        &:hover,
-        &:focus,
-        &:focus-within,
-        &:focus-visible {
-          box-shadow: none !important;
-          outline: none !important;
-        }
-      }
-      .euiComboBox__input {
-        font-size: ${fontSize} !important;
-      }
-    `,
-    nlInputWrapper: css`
-      min-height: ${euiTheme.size.xl};
-      padding-right: ${euiTheme.size.xs};
-      overflow: visible;
-      position: relative;
-    `,
     searchInner: css`
       width: 100%;
     `,
@@ -151,35 +106,6 @@ export const visorStyles = (
       padding-right: ${euiTheme.size.xs};
       padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
-    `,
-    nlInput: css`
-      box-shadow: none !important;
-      border: none !important;
-      background-color: transparent;
-      font-size: ${fontSize} !important;
-      padding: calc(${euiTheme.size.xs} + ${VISOR_INNER_PADDING}) ${euiTheme.size.s} !important;
-      margin: 0;
-      resize: none;
-      overflow: hidden;
-      min-height: ${euiTheme.size.xl};
-      border-radius: ${borderRadius} !important;
-      position: relative;
-      z-index: ${euiTheme.levels.flyout};
-      &:focus,
-      &:hover {
-        box-shadow: none !important;
-        outline: none !important;
-      }
-    `,
-    searchFieldStyles: css`
-      box-shadow: none;
-      border-radius: 0;
-      font-size: ${fontSize} !important;
-      &:focus,
-      &:hover {
-        box-shadow: none !important;
-        outline: none !important;
-      }
     `,
   };
 };

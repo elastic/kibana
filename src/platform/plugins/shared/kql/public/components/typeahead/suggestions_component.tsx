@@ -13,8 +13,8 @@ import { isEmpty } from 'lodash';
 import classNames from 'classnames';
 
 import useRafState from 'react-use/lib/useRafState';
-import type { UseEuiTheme } from '@elastic/eui';
-import { euiShadow, euiShadowFlat } from '@elastic/eui';
+import type { IconType, UseEuiTheme } from '@elastic/eui';
+import { EuiIcon, euiFontSize, euiShadow, euiShadowFlat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { type EmotionStyles, useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { QuerySuggestion } from '../../autocomplete';
@@ -27,6 +27,12 @@ import {
 import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 import { onRaf, shallowEqual } from '../utils';
 
+export interface SuggestionFooterOption {
+  label: string;
+  iconType?: IconType;
+  onClick: () => void;
+}
+
 interface SuggestionsComponentProps {
   index: number | null;
   onClick: SuggestionOnClick;
@@ -36,6 +42,7 @@ interface SuggestionsComponentProps {
   loadMore: () => void;
   size?: SuggestionsListSize;
   inputContainer: HTMLElement | null;
+  footerOption?: SuggestionFooterOption;
 }
 
 export interface SuggestionsAbstraction {
@@ -58,12 +65,14 @@ export type SuggestionsListSize = 's' | 'l';
 export class SuggestionsComponent extends PureComponent<SuggestionsComponentProps> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
+  private footerNode: HTMLDivElement | null = null;
 
   constructor(props: SuggestionsComponentProps) {
     super(props);
 
     this.assignParentNode = this.assignParentNode.bind(this);
     this.assignChildNode = this.assignChildNode.bind(this);
+    this.assignFooterNode = this.assignFooterNode.bind(this);
   }
 
   private assignParentNode(node: HTMLDivElement) {
@@ -74,30 +83,31 @@ export class SuggestionsComponent extends PureComponent<SuggestionsComponentProp
     this.childNodes[index] = node;
   }
 
+  private assignFooterNode(node: HTMLDivElement | null) {
+    this.footerNode = node;
+  }
+
   public render() {
-    if (!this.props.inputContainer || !this.props.show || isEmpty(this.props.suggestions)) {
+    const hasContent = !isEmpty(this.props.suggestions) || Boolean(this.props.footerOption);
+    if (!this.props.inputContainer || !this.props.show || !hasContent) {
       return null;
     }
 
     const renderSuggestions = (containerWidth: number) => {
       const isDescriptionFittable = containerWidth >= SUGGESTIONS_LIST_REQUIRED_WIDTH;
-      const suggestions = this.props.suggestions.map((suggestion, index) => {
-        return (
-          <SuggestionComponent
-            innerRef={this.assignChildNode}
-            selected={index === this.props.index}
-            index={index}
-            suggestion={suggestion}
-            onClick={this.props.onClick}
-            onMouseEnter={this.props.onMouseEnter}
-            ariaId={'suggestion-' + index}
-            key={`${suggestion.type} - ${suggestion.text}`}
-            shouldDisplayDescription={isDescriptionFittable}
-          />
-        );
-      });
-
-      return suggestions;
+      return this.props.suggestions.map((suggestion, index) => (
+        <SuggestionComponent
+          innerRef={this.assignChildNode}
+          selected={index === this.props.index}
+          index={index}
+          suggestion={suggestion}
+          onClick={this.props.onClick}
+          onMouseEnter={this.props.onMouseEnter}
+          ariaId={'suggestion-' + index}
+          key={`${suggestion.type} - ${suggestion.text}`}
+          shouldDisplayDescription={isDescriptionFittable}
+        />
+      ));
     };
 
     return (
@@ -113,6 +123,13 @@ export class SuggestionsComponent extends PureComponent<SuggestionsComponentProp
             onScroll={this.handleScroll}
           >
             {renderSuggestions(rect.width)}
+            {this.props.footerOption && (
+              <SuggestionFooterItem
+                option={this.props.footerOption}
+                selected={this.props.index === this.props.suggestions.length}
+                innerRef={this.assignFooterNode}
+              />
+            )}
           </div>
         )}
       </ResizableSuggestionsListDiv>
@@ -130,9 +147,11 @@ export class SuggestionsComponent extends PureComponent<SuggestionsComponentProp
       return;
     }
     const parent = this.parentNode;
-    const child = this.childNodes[this.props.index];
+    const isFooterSelected =
+      this.props.index === this.props.suggestions.length && Boolean(this.props.footerOption);
+    const child = isFooterSelected ? this.footerNode : this.childNodes[this.props.index];
 
-    if (this.props.index == null || !parent || !child) {
+    if (!parent || !child) {
       return;
     }
 
@@ -161,6 +180,76 @@ export class SuggestionsComponent extends PureComponent<SuggestionsComponentProp
       this.props.loadMore();
     }
   });
+}
+
+function SuggestionFooterItem({
+  option,
+  selected,
+  innerRef,
+}: {
+  option: SuggestionFooterOption;
+  selected?: boolean;
+  innerRef?: (node: HTMLDivElement | null) => void;
+}) {
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const fontSize = euiFontSize(euiThemeContext, 'xs').fontSize;
+
+  return (
+    // eslint-disable-next-line jsx-a11y/interactive-supports-focus
+    <div
+      ref={innerRef}
+      role="option"
+      aria-selected={selected ?? false}
+      data-test-subj="kbnSuggestionFooterOption"
+      css={css({
+        display: 'flex',
+        alignItems: 'stretch',
+        cursor: 'pointer',
+        minHeight: euiTheme.size.xl,
+        fontSize,
+        borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+        '& > div:last-child': {
+          backgroundColor: selected ? euiTheme.colors.backgroundBaseSubdued : undefined,
+        },
+        '&:hover > div:last-child': {
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        },
+      })}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        option.onClick();
+      }}
+    >
+      {option.iconType && (
+        <div
+          css={css({
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: euiTheme.size.xl,
+            flexShrink: 0,
+            backgroundColor: euiTheme.colors.backgroundFilledAssistance,
+          })}
+        >
+          <EuiIcon type={option.iconType} size="s" color="white" />
+        </div>
+      )}
+      <div
+        css={css({
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          padding: `0 ${euiTheme.size.s}`,
+          color: euiTheme.colors.textSubdued,
+          backgroundColor: euiTheme.colors.backgroundBaseAssistance,
+          fontSize,
+        })}
+      >
+        {option.label}
+      </div>
+    </div>
+  );
 }
 
 const ResizableSuggestionsListDiv: React.FC<{

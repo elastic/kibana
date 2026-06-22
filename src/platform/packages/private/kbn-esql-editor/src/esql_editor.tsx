@@ -120,6 +120,7 @@ const ESQLEditorInternal = function ESQLEditor({
   dataErrorsControl,
   mergeExternalMessages,
   hideQuickSearch,
+  showAiOption,
   queryStats,
   enableResourceBrowser = false,
   onESQLDocsFlyoutVisibilityChanged,
@@ -697,6 +698,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 query={code}
                 isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
                 isInline={Boolean(editorIsInline)}
+                showAiOption={showAiOption}
                 onUpdateAndSubmitQuery={(newQuery) =>
                   onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
                 }
@@ -808,11 +810,8 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(
-                    editor,
-                    stableOnQuerySubmit,
-                    stableOnPrettifyQuery,
-                    () => onGenerateFromCommentRef.current()
+                  addEditorKeyBindings(editor, stableOnQuerySubmit, stableOnPrettifyQuery, () =>
+                    onGenerateFromCommentRef.current()
                   );
 
                   const ghostHintDisposables = setupGhostLineHint(editor);

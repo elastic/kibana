@@ -1262,6 +1262,7 @@ export const QueryBarTopRow = React.memo(
                       props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
                     }
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
+                    showAiOption
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

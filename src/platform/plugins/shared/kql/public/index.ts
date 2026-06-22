@@ -24,7 +24,10 @@ export type {
 } from './autocomplete';
 
 export { type SuggestionsAbstraction } from './components/typeahead/suggestions_component';
-export type { SuggestionsListSize } from './components/typeahead/suggestions_component';
+export type {
+  SuggestionsListSize,
+  SuggestionFooterOption,
+} from './components/typeahead/suggestions_component';
 
 export { QuerySuggestionTypes } from './autocomplete/providers/query_suggestion_provider';
 

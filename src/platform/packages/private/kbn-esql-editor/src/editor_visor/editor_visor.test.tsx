@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { waitFor, fireEvent } from '@testing-library/dom';
+import { waitFor } from '@testing-library/dom';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,18 +33,12 @@ describe('Quick search visor', () => {
   (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
   const dataMock = dataPluginMock.createStartContract();
 
-  const validLicense = {
-    status: 'active',
-    hasAtLeast: jest.fn().mockReturnValue(true),
-    getFeature: jest.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
-  };
-
   const services = {
     core: corePluginMock,
     data: dataMock,
     kql: kqlMock,
     esql: {
-      getLicense: jest.fn().mockResolvedValue(validLicense),
+      getLicense: jest.fn().mockResolvedValue(null),
     },
   };
 
@@ -55,29 +49,6 @@ describe('Quick search visor', () => {
       </KibanaContextProvider>
     );
   }
-
-  const switchMode = async (
-    getByTestId: ReturnType<typeof renderWithI18n>['getByTestId'],
-    targetLabel: 'KQL' | 'Natural language'
-  ) => {
-    let modeSelect: HTMLElement;
-    await waitFor(() => {
-      modeSelect = getByTestId('esqlVisorModeSelect');
-    });
-    const input = modeSelect!.querySelector('input')!;
-
-    await act(async () => {
-      fireEvent.click(input);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(targetLabel)).toBeInTheDocument();
-    });
-
-    await act(async () => {
-      fireEvent.click(screen.getByText(targetLabel));
-    });
-  };
 
   let props: QuickSearchVisorProps;
   beforeEach(() => {
@@ -105,20 +76,23 @@ describe('Quick search visor', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the sources dropdown and the KQL query input when KQL mode is selected', async () => {
+  it('should render the sources dropdown and the KQL query input', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-    await switchMode(getByTestId, 'KQL');
-    // find the dropdown
-    expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
+    });
 
     expect(kqlMock.QueryStringInput).toHaveBeenCalled();
   });
 
   it('should display the available sources in the dropdown list', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-    await switchMode(getByTestId, 'KQL');
 
-    // Open the dropdown
+    await waitFor(() => {
+      expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
+    });
+
     const dropdownButton = getByTestId('visorSourcesDropdownButton');
     await act(async () => {
       await userEvent.click(dropdownButton);
@@ -136,60 +110,21 @@ describe('Quick search visor', () => {
 
   it('should default to the first fetched source when query has no source', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x =1' }));
-    await switchMode(getByTestId, 'KQL');
 
     await waitFor(() => {
       expect(getByTestId('visorSourcesDropdownButton')).toHaveTextContent('test_index');
     });
   });
 
-  it('should not render the mode selector when license is not enterprise', async () => {
-    const invalidLicense = {
-      status: 'active',
-      hasAtLeast: jest.fn().mockReturnValue(false),
-      getFeature: jest.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
-    };
-    services.esql.getLicense.mockResolvedValue(invalidLicense);
+  it('should not show a submit button', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+    await act(async () => {});
+    expect(queryByTestId('esqlVisorKQLSubmit')).not.toBeInTheDocument();
+  });
+
+  it('should not show a mode selector', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
     await act(async () => {});
     expect(queryByTestId('esqlVisorModeSelect')).not.toBeInTheDocument();
-    services.esql.getLicense.mockResolvedValue(validLicense);
-  });
-
-  it('should render the mode selector when license is enterprise', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-    await waitFor(() => {
-      expect(getByTestId('esqlVisorModeSelect')).toBeInTheDocument();
-    });
-  });
-
-  it('should default to NL mode and show the NL input when connectors are available', async () => {
-    const { getByTestId, queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-
-    await waitFor(() => {
-      expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
-    });
-
-    expect(queryByTestId('ESQLEditor-visor-sources-dropdown')).not.toBeInTheDocument();
-  });
-
-  it('should show the no connector message when no connectors are configured', async () => {
-    (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
-      if (url.includes('/internal/esql/autocomplete/sources/')) {
-        return Promise.resolve([{ name: 'test_index', hidden: false, type: 'index' }]);
-      }
-      if (url.includes('/internal/inference/connectors')) {
-        return Promise.resolve({ connectors: [] });
-      }
-      return Promise.resolve([]);
-    });
-
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-
-    await waitFor(() => {
-      expect(getByTestId('esqlVisorNoConnectorMessage')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('setup a connector')).toBeInTheDocument();
   });
 });
