@@ -120,7 +120,6 @@ const ESQLEditorInternal = function ESQLEditor({
   dataErrorsControl,
   mergeExternalMessages,
   hideQuickSearch,
-  showAiOption,
   queryStats,
   enableResourceBrowser = false,
   onESQLDocsFlyoutVisibilityChanged,
@@ -698,7 +697,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 query={code}
                 isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
                 isInline={Boolean(editorIsInline)}
-                showAiOption={showAiOption}
+
                 onUpdateAndSubmitQuery={(newQuery) =>
                   onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
                 }

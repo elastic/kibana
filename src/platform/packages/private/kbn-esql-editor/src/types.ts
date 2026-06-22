@@ -70,9 +70,7 @@ export interface ESQLEditorProps {
   hideQueryHistory?: boolean;
   /** hide quick search **/
   hideQuickSearch?: boolean;
-  /** show the "Ask AI" option in the quick search visor when the KQL bar is focused **/
-  showAiOption?: boolean;
-  /** adds border in the editor **/
+/** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;

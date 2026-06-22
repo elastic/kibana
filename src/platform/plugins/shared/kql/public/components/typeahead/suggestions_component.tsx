@@ -196,10 +196,10 @@ function SuggestionFooterItem({
   const fontSize = euiFontSize(euiThemeContext, 'xs').fontSize;
 
   return (
-    // eslint-disable-next-line jsx-a11y/interactive-supports-focus
     <div
       ref={innerRef}
       role="option"
+      tabIndex={-1}
       aria-selected={selected ?? false}
       data-test-subj="kbnSuggestionFooterOption"
       css={css({
@@ -219,6 +219,12 @@ function SuggestionFooterItem({
       onMouseDown={(e) => {
         e.preventDefault();
         option.onClick();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          option.onClick();
+        }
       }}
     >
       {option.iconType && (

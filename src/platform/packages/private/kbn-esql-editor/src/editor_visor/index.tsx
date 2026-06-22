@@ -36,8 +36,6 @@ export interface QuickSearchVisorProps {
   isSpaceReduced?: boolean;
   // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
   isInline?: boolean;
-  // Whether to show the "Ask AI" option when the KQL bar is focused
-  showAiOption?: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
@@ -71,7 +69,6 @@ export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isInline,
-  showAiOption,
   onUpdateAndSubmitQuery,
   telemetryService,
 }: QuickSearchVisorProps) {
@@ -194,12 +191,12 @@ export function QuickSearchVisor({
   }, []);
 
   useEffect(() => {
-    if (!showAiOption || !isNlToEsqlEnabled) return;
+    if (!isNlToEsqlEnabled) return;
     core.http
       .get<{ connectors: unknown[] }>('/internal/inference/connectors')
       .then((res) => setHasConnector(res.connectors.length > 0))
       .catch(() => setHasConnector(false));
-  }, [showAiOption, isNlToEsqlEnabled, core.http]);
+  }, [isNlToEsqlEnabled, core.http]);
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
@@ -262,7 +259,7 @@ export function QuickSearchVisor({
   }
 
   const showFooterOption =
-    showAiOption && isNlToEsqlEnabled && hasConnector === true && searchValue.trim().length > 0;
+    isNlToEsqlEnabled && hasConnector === true && searchValue.trim().length > 0;
   const footerOption = showFooterOption
     ? { label: askAiLabel, iconType: 'productAgent' as const, onClick: onAskAiClick }
     : undefined;
@@ -315,7 +312,7 @@ export function QuickSearchVisor({
                   }}
                   disableAutoFocus={true}
                   placeholder={
-                    showAiOption && isNlToEsqlEnabled
+                    isNlToEsqlEnabled
                       ? searchPlaceholderWithAi
                       : useShortPlaceholder
                       ? searchPlaceholderShort
