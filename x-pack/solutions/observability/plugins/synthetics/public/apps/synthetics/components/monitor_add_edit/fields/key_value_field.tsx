@@ -154,6 +154,7 @@ export const KeyValuePairsField = ({
                 fullWidth
                 append={
                   <EuiFormAppend
+                    element="button"
                     iconLeft="trash"
                     isDisabled={readOnly}
                     onClick={() => handleDeletePair(index)}

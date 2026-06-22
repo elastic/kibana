@@ -57,6 +57,29 @@ describe('<KeyValuePairsField />', () => {
     expect(onBlur).toHaveBeenCalledTimes(2);
   });
 
+  it('handles deleting a row', async () => {
+    const { getAllByTestId, queryByTestId } = render(
+      <WrappedComponent defaultValue={[['a', '1'] as Pair, ['b', '2'] as Pair]} />
+    );
+
+    expect((getAllByTestId('keyValuePairsKey0')[0] as HTMLInputElement).value).toEqual('a');
+    expect((getAllByTestId('keyValuePairsValue0')[0] as HTMLInputElement).value).toEqual('1');
+
+    const deleteButtons = getAllByTestId('syntheticsKeyValuePairsFieldButton');
+    expect(deleteButtons.length).toEqual(2);
+    // Must render as an interactive <button>; otherwise the trash control is
+    // inert and labels cannot be deleted (see kibana#274387).
+    expect(deleteButtons[0].tagName).toEqual('BUTTON');
+
+    fireEvent.click(deleteButtons[0]);
+
+    await waitFor(() => {
+      expect(queryByTestId('keyValuePairsKey1')).not.toBeInTheDocument();
+      expect((getAllByTestId('keyValuePairsKey0')[0] as HTMLInputElement).value).toEqual('b');
+      expect(onChange).toHaveBeenLastCalledWith([['b', '2']]);
+    });
+  });
+
   it('handles adding and editing a new row', async () => {
     const { getByTestId, queryByTestId, getByText } = render(
       <WrappedComponent defaultValue={[]} />
