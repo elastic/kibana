@@ -18,7 +18,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const makeResponse = (actions: string[]): GetIamPermissionsResponse => ({
-  merged: { Version: '2012-10-17', Statement: [{ Sid: 'All', Effect: 'Allow', Resource: '*', Action: actions }] },
+  merged: {
+    Version: '2012-10-17',
+    Statement: [{ Sid: 'All', Effect: 'Allow', Resource: '*', Action: actions }],
+  },
   byService: {},
 });
 
