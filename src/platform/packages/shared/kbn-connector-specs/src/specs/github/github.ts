@@ -86,6 +86,13 @@ export const GithubConnector: ConnectorSpec = {
           tokenUrl: 'https://github.com/login/oauth/access_token',
           scope: 'repo',
         },
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
       },
       {
         type: 'bearer',
