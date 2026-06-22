@@ -22,8 +22,18 @@ permissions:
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test') && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}"
 
 concurrency:
-  group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
+  # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
+  group: >-
+    failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'failed-test' &&
+        github.event.label.name
+      ) ||
+      'investigate'
+    }}
   cancel-in-progress: true
+  job-discriminator: ${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
