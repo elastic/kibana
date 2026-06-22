@@ -131,6 +131,3 @@ export type {
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
-
-export { buildEntityEsqlQuery } from './esql/entity_query_builder';
-export type { EntityQueryOptions } from './esql/entity_query_builder';

@@ -14,7 +14,6 @@ import {
   getEntityMetadataAlias,
   getMetadataEntityIndexPattern,
   ENTITY_LATEST,
-  ENTITY_METADATA,
 } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
