@@ -163,6 +163,7 @@ export class Simulator {
    * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
    */
   public unmount(): void {
+    this.unmounted = true;
     this.wrapper.unmount();
   }
 
@@ -227,13 +228,25 @@ export class Simulator {
   }
 
   /**
+   * Whether `unmount()` has been called. Used to guard against setState/update calls on a
+   * detached enzyme wrapper, which throw and would leave the Promise in `map()` permanently
+   * unresolved.
+   */
+  private unmounted = false;
+
+  /**
    * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
    * This forces any `AutoSizer` instances to have a large size.
    */
   private forceAutoSizerOpen() {
-    this.wrapper
-      .find('AutoSizer')
-      .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+    if (this.unmounted) return;
+    try {
+      this.wrapper
+        .find('AutoSizer')
+        .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+    } catch {
+      // swallow errors on stale/unmounted wrappers
+    }
   }
 
   /**
@@ -249,10 +262,10 @@ export class Simulator {
       await new Promise<void>((resolve) => {
         setTimeout(() => {
           try {
-            this.forceAutoSizerOpen();
-            this.wrapper.update();
-          } catch (_e) {
-            // ignore errors from enzyme on stale or mid-unmount wrappers
+            if (!this.unmounted) {
+              this.forceAutoSizerOpen();
+              this.wrapper.update();
+            }
           } finally {
             resolve();
           }
