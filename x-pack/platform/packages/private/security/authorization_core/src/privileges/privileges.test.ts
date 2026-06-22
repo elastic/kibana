@@ -578,6 +578,7 @@ describe('features', () => {
         'bulkEditParams',
         'getGapAutoFillScheduler',
         'findGapAutoFillSchedulerLogs',
+        'getHistory',
       ],
       ...[
         'create',
@@ -753,6 +754,7 @@ describe('features', () => {
         'bulkEditParams',
         'getGapAutoFillScheduler',
         'findGapAutoFillSchedulerLogs',
+        'getHistory',
       ],
       ...[
         'create',
