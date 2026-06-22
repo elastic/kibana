@@ -12,6 +12,12 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
    ```
    From the returned comments array, find the one whose body starts with `<!-- test-plan-generated -->` and store its `updatedAt` field.
 
+   **Also parse the published body** and build a map keyed by *scenario title within feature area* called `PUBLISHED_EXECUTION_STATE`:
+   - For each `#### Scenario:` heading, capture the title and the contents of the immediately following ```` ```gherkin … ``` ```` block.
+   - For each scenario, capture the verbatim state of its canonical `Execution:` block if present (the three checkbox lines and any preceding `_Scenario updated on …_` callout). Recognise the canonical shape only — non-canonical blocks or scenarios without one are flagged as **no published state** (legacy plan published before this feature shipped).
+
+   This map is consumed by the *Execution block preservation* sub-step in step 6.
+
 2. **Re-fetch all non-PR GitHub sources** — the issue, sub-issues, comments, and the parent issue (if any). Use the exact `gh` commands for each source type defined in [`gathering-context.md`](gathering-context.md) (*GitHub fetches*, *Parent issue*, *Sub-issues*, *Acceptance criterion extraction and origin tagging*). The *one level up only* and *background context only* constraints from the [Parent issue](gathering-context.md#parent-issue) section still apply.
 
    **Re-apply URL categorization** to all re-fetched content (issue body, comments, sub-issues, parent). For each URL not already present in the published plan: categorize per the [URL categorization](gathering-context.md#url-categorization) table and fetch via the matching section (Images, Figma, Google Docs, Linked GitHub issues). New images, Figma nodes, or Google Docs added since publication must be analyzed before continuing — silently skipping them is the most common update-mode regression.
@@ -50,6 +56,22 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
 
    If new scenarios must be written, follow the [Writing scenarios](../SKILL.md#writing-scenarios) procedures from Step 3 of SKILL.md.
 
+   **Execution block preservation.** Each emitted scenario must carry the canonical `Execution:` block (defined in [`output-formats.md`](output-formats.md#scenario-format)). Apply the **preserve-on-match** strategy when populating it, using the `PUBLISHED_EXECUTION_STATE` map from step 1:
+
+   | Scenario state in updated draft | Match in `PUBLISHED_EXECUTION_STATE` | Behavior |
+   |---|---|---|
+   | Title + Gherkin unchanged | Canonical block present | Carry over the three checkbox lines verbatim. Preserve any existing `_Scenario updated on …_` callout. |
+   | Title + Gherkin unchanged | No published state (legacy plan or non-canonical block) | Initialize an empty `Execution` block with all three boxes unchecked. **No callout.** Increment a `legacy_migrations` counter for the post-save announcement in step 7. |
+   | Title preserved, Gherkin substantively changed | Any | Reset all three checkboxes to unchecked **and** insert the callout `_Scenario updated on YYYY-MM-DD, please re-execute_` immediately above the three checkboxes. |
+   | Scenario new (no title match) | n/a | Empty `Execution` block, all unchecked, no callout. |
+   | Scenario removed (matched scenario dropped from updated draft) | n/a | Drop. The execution history lives in GitHub's comment edit log. |
+
+   **Matching rule.** Match by scenario title within feature area — already required to be unique by [`common-mistakes.md`](common-mistakes.md) § *Redundant scenarios*. If a title-match is found but the feature area changed, treat as **changed** (row 3) rather than new — the scenario was relocated, not re-authored.
+
+   **"Substantively changed" definition.** A Gherkin block is substantively changed when one or more of: a step was added or removed; a `Given`/`When`/`Then`/`And` keyword changed; or a step's natural-language text changed in a way that alters the assertion. Pure whitespace, capitalisation, or punctuation changes do not count — leave the checkboxes alone.
+
+   **Date format.** Use `YYYY-MM-DD` for the callout — same format as the document footer.
+
    **Self-review applies to the full updated document, not just the changes.** Run the Gherkin self-review and the three mechanical sum-checks from [`output-formats.md`](output-formats.md) against the entire updated draft, re-review [`common-mistakes.md`](common-mistakes.md), and re-run the [draft coherence review](draft-coherence-review.md) end-to-end against the full updated document. Updates frequently introduce internal contradictions — a *Scope* bullet kept from the previous version that no longer matches the refreshed scenarios, a *Known Limitations* `⚠️` whose source is now accessible, or a Pending-work block that was not fully migrated. Verify Test Coverage Summary totals column-wise and row-wise explicitly.
 
    **Re-run Step 3.5 — Issue Clarity Assessment (second half)** on the updated draft. The per-issue scores and combined readability **from the Step 1.5 re-run performed within step 2 above** are reused as-is (step 2 itself is the re-fetch; it does not produce scores — the scores come from the Step 1.5 re-run it invokes). The Coverage Ratio must be recomputed because the scenario count and per-scenario origins may have changed. Assemble the refreshed assessment block per [`output-formats.md`](output-formats.md#issue-clarity-assessment-section) and replace the existing assessment section in the draft — do not append a second one.
@@ -57,5 +79,7 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
    **Save the updated draft** to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md`, overwriting any existing draft at that path. This save is unconditional — it applies whether the changes involved new scenarios, edits to existing scenarios, Pending-work migrations, an assessment refresh, or only metadata updates (Known Limitations, AC list, feature-flag names, etc.). The publish step will PATCH the existing GitHub comment with this file's contents. Skip the Sources Summary sub-step inside [Saving the draft](../SKILL.md#saving-the-draft) — the update-mode version with PR re-read info is emitted in step 8 below.
 
 7. Replace Step 3's generic *"Draft saved…"* message: tell the user exactly what changed and what was left unchanged. If any Issue Clarity Assessment scores or Coverage Ratio changed, explicitly call that out — e.g. *"Combined readability moved from 3/5 to 4/5 after #16938 was rewritten with numbered ACs; Coverage Ratio rose from 62% to 78%."*
+
+   **If `legacy_migrations` > 0** (one or more scenarios had no published `Execution` block before this update — typical when refreshing a plan published before this feature shipped), explicitly tell the user how many: *"Migrated N legacy scenarios — added empty Execution blocks; please re-execute and mark Pass/Fail/Blocked when done."* Do not bury this in the generic message; it is the only signal devs get that the next checkbox click starts fresh state, not appended to prior runs.
 
 8. Output the Sources Summary as defined in [`output-formats.md`](output-formats.md). Include one row per linked PR showing whether it was re-read or skipped. **Render the refreshed Issue Clarity Assessment block in the chat after the Sources Summary**, identical to the one written into the draft.
