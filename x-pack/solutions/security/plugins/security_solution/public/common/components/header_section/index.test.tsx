@@ -11,7 +11,7 @@ import 'jest-styled-components';
 // Make sure expect().toHaveStyleRule is using emotion's matchers
 import { matchers as emotionMatchers } from '@emotion/jest';
 expect.extend(emotionMatchers);
-import { render, screen, renderHook, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, renderHook, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../mock';
@@ -81,8 +81,8 @@ describe('HeaderSection', () => {
 
     fireEvent.mouseOver(tooltip);
 
-    await waitFor(() => expect(screen.getByText(tooltipTitle)).toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText(tooltipContent)).toBeInTheDocument());
+    expect(await screen.findByText(tooltipTitle)).toBeInTheDocument();
+    expect(await screen.findByText(tooltipContent)).toBeInTheDocument();
   });
 
   test('it renders supplements when children provided', () => {
