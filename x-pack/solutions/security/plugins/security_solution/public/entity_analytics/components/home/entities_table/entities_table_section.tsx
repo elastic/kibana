@@ -10,7 +10,7 @@ import { GroupWrapper } from '@kbn/cloud-security-posture';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import { ENTITY_FIELDS, TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from './constants';
 import { useEntityGrouping } from './grouping/use_entity_grouping';
-import { DEFAULT_ENTITIES_TABLE_CONFIG, type EntitiesTableConfig } from '.';
+import { type EntitiesTableConfig } from '.';
 
 const ENTITY_ANALYTICS_TEST_SUBJECTS = {
   grouping: TEST_SUBJ_GROUPING,
@@ -21,17 +21,14 @@ import { EntitiesDataTable } from './entities_data_table';
 export interface EntitiesTableSectionProps {
   state: EntityURLStateResult;
   /**
-   * Per-instance identifiers/localStorage keys. Defaults to the EA home page
-   * values so existing call sites are unaffected; consumers like the case
-   * attachments accordion supply their own to avoid collisions.
+   * Per-instance identifiers/localStorage keys. Required so each shared mount
+   * (EA home page, case attachments accordion, …) declares its own and never
+   * silently reuses another surface's keys.
    */
-  config?: EntitiesTableConfig;
+  config: EntitiesTableConfig;
 }
 
-export const EntitiesTableSection = ({
-  state,
-  config = DEFAULT_ENTITIES_TABLE_CONFIG,
-}: EntitiesTableSectionProps) => {
+export const EntitiesTableSection = ({ state, config }: EntitiesTableSectionProps) => {
   const { grouping } = useEntityGrouping({
     state,
     tableId: config.tableId,

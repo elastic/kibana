@@ -43,4 +43,3 @@ export const EntityAttachmentPayloadSchema = z
 
 export type EntityAttachmentPayload = z.infer<typeof EntityAttachmentPayloadSchema>;
 export type EntityAttachmentMetadata = z.infer<typeof EntityAttachmentMetadataSchema>;
-export type EntityAttachmentType = (typeof ENTITY_ATTACHMENT_TYPES)[number];

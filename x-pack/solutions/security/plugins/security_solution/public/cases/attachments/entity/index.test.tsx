@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
@@ -28,7 +29,7 @@ describe('Entity attachment', () => {
 
     expect(entityType).toStrictEqual({
       id: SECURITY_ENTITY_ATTACHMENT_TYPE,
-      icon: 'user',
+      icon: 'globe',
       displayName: 'Entities',
       schema: EntityAttachmentPayloadSchema,
       getAttachmentViewObject: expect.any(Function),
@@ -43,5 +44,27 @@ describe('Entity attachment', () => {
     render(<TestProvidersComponent>{event}</TestProvidersComponent>);
 
     expect(screen.getByText('added an entity')).toBeInTheDocument();
+  });
+
+  describe('timeline avatar icon', () => {
+    const getIconType = (metadata: Props['metadata']): unknown => {
+      const props = { ...baseProps, metadata } as Props;
+      const timelineAvatar = getEntityAttachment().getAttachmentViewObject(props)
+        .timelineAvatar as ReactElement<{ iconType: unknown }>;
+      return timelineAvatar.props.iconType;
+    };
+
+    it.each([
+      ['user', 'user'],
+      ['host', 'storage'],
+      ['service', 'node'],
+      ['generic', 'globe'],
+    ])('uses the %s entity icon', (entityType, expectedIcon) => {
+      expect(getIconType({ entityName: 'foo', entityType } as Props['metadata'])).toBe(expectedIcon);
+    });
+
+    it('falls back to the globe icon when the entity type is missing', () => {
+      expect(getIconType(undefined)).toBe('globe');
+    });
   });
 });

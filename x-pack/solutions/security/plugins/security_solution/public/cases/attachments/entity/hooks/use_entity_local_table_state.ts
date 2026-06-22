@@ -6,13 +6,9 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type {
-  EntityURLStateResult,
-  URLQuery,
-} from '../../../../entity_analytics/components/home/entities_table';
+import type { EntityURLStateResult } from '../../../../entity_analytics/components/home/entities_table';
 
 type SortOrder = [string, string];
 
@@ -73,13 +69,11 @@ export const useEntityLocalTableState = ({
 
   const onSort = useCallback((next: string[][]) => setSort(next as SortOrder[]), []);
 
-  // No URL/Redux/filterManager backing here on purpose; `EntitiesDataTable`
-  // and `useEntityGrouping` invoke `setUrlQuery` for sort/page/groupBy/filter
-  // echoes. Page/sort already flow through dedicated callbacks; the rest are
-  // intentionally dropped so accordion interactions stay local.
+  // No URL/Redux/filterManager backing here on purpose; `EntitiesDataTable` and
+  // `useEntityGrouping` invoke `setUrlQuery` for sort/page/groupBy/filter echoes.
+  // Page/sort already flow through dedicated callbacks, so this is intentionally a
+  // no-op to keep accordion interactions local.
   const setUrlQuery = useCallback(() => undefined, []);
-  const handleUpdateQuery = useCallback(() => undefined, []);
-  const setTableOptions = useCallback(() => undefined, []);
   // No filter bar to reset inside the accordion.
   const onResetFilters = useCallback(() => undefined, []);
 
@@ -89,38 +83,17 @@ export const useEntityLocalTableState = ({
     []
   );
 
-  // `urlQuery` is exposed on `EntityURLStateResult` for downstream consumers
-  // that round-trip URL state; the table itself doesn't read it, so a stable
-  // empty shape is sufficient.
-  const urlQuery = useMemo<URLQuery>(
-    () => ({
-      query: { query: '', language: 'kuery' },
-      filters: [],
-      pageFilters: [],
-    }),
-    []
-  );
-
   return {
     setUrlQuery,
     sort,
     filters: [],
-    pageFilters: [],
     query,
     pageIndex,
-    urlQuery,
-    setTableOptions,
-    handleUpdateQuery,
     pageSize,
-    setPageSize: setPageSize as Dispatch<SetStateAction<number | undefined>>,
     onChangeItemsPerPage,
     onChangePage: setPageIndex,
     onSort,
     onResetFilters,
-    // Column persistence is overridden via the `EntitiesTableConfig` we pass
-    // to `EntitiesTableSection`, so this field exists only to satisfy the
-    // shared `EntityURLStateResult` shape.
-    columnsLocalStorageKey: '',
     getRowsFromPages,
   };
 };

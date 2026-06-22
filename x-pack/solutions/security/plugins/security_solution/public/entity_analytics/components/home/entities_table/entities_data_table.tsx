@@ -68,7 +68,7 @@ import { RiskScoreCell } from './risk_score_cell';
 
 import { AdditionalControls } from './additional_controls';
 import { EntitiesEmptyState } from './empty_state';
-import { DataViewContext, DEFAULT_ENTITIES_TABLE_CONFIG, type EntitiesTableConfig } from '.';
+import { DataViewContext, type EntitiesTableConfig } from '.';
 import { getEntityFields } from './utils';
 import { useStyles } from './hooks/use_styles';
 import { useFetchGridData } from './hooks/use_fetch_grid_data';
@@ -167,11 +167,11 @@ export interface EntitiesDataTableProps {
   groupSelectorComponent?: JSX.Element;
   selectedGroup?: string;
   /**
-   * Per-instance identifiers/localStorage keys. Defaults to the EA home page
-   * values so existing call sites are unaffected; consumers like the case
-   * attachments accordion supply their own to avoid collisions.
+   * Per-instance identifiers/localStorage keys. Required so each shared mount
+   * (EA home page, case attachments accordion, …) declares its own and never
+   * silently reuses another surface's keys.
    */
-  config?: EntitiesTableConfig;
+  config: EntitiesTableConfig;
 }
 
 export const EntitiesDataTable = ({
@@ -179,7 +179,7 @@ export const EntitiesDataTable = ({
   height,
   groupSelectorComponent,
   selectedGroup,
-  config = DEFAULT_ENTITIES_TABLE_CONFIG,
+  config,
 }: EntitiesDataTableProps) => {
   const { tableId, columnsLocalStorageKey, columnsSettingsLocalStorageKey } = config;
   const {

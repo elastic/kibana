@@ -24,12 +24,7 @@ import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
-import {
-  ENTITY_FIELDS,
-  ENTITY_GROUPING_OPTIONS,
-  ENTITY_TYPE_FILTER,
-  LOCAL_STORAGE_GROUPING_KEY,
-} from '../constants';
+import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS, ENTITY_TYPE_FILTER } from '../constants';
 import {
   type EntitiesGroupingAggregation,
   type EntitiesGroupingQuery,
@@ -169,20 +164,19 @@ export const useEntityGrouping = ({
   groupFilters = [],
   selectedGroup,
   tableId,
-  groupingId = LOCAL_STORAGE_GROUPING_KEY,
+  groupingId,
 }: {
   state: EntityURLStateResult;
   groupFilters?: Filter[];
   selectedGroup?: string;
   /** Forwarded to `createGroupPanelRenderer` so resolution group flyouts open in the right scope. */
-  tableId?: string;
+  tableId: string;
   /**
    * Identifier used by `@kbn/grouping` to persist the active grouping
-   * selection. Defaults to the EA home page key; independent mounts (e.g. the
-   * cases attachments accordion) must pass their own so grouping state doesn't
-   * leak between tables.
+   * selection. Required so independent mounts (e.g. the cases attachments
+   * accordion) pass their own and grouping state doesn't leak between tables.
    */
-  groupingId?: string;
+  groupingId: string;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);

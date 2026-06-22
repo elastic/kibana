@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
@@ -23,8 +23,7 @@ import { useEntityStoreDataView } from '../../../../entity_analytics/components/
 import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useEntityEnginePrivileges } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_engine_privileges';
 import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
-import { getEntityAnalyticsReadPrivilegesCallOutMessage } from '../../../../entity_analytics/components/entity_analytics_read_privileges_callout';
-import { CallOut } from '../../../../common/components/callouts';
+import { EntityAnalyticsReadPrivilegesCallout } from '../../../../entity_analytics/components/entity_analytics_read_privileges_callout';
 import { EntityStoreDisabledEmptyPromptBody } from '../../../../entity_analytics/pages/entity_store_disabled_empty_prompt';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useEntityLocalTableState } from '../hooks/use_entity_local_table_state';
@@ -54,7 +53,7 @@ export const EntityTabContent: React.FC<CommonAttachmentTabViewProps> = ({
     return (
       <EuiEmptyPrompt
         data-test-subj={ENTITY_TAB_EMPTY_TEST_ID}
-        iconType="user"
+        iconType="globe"
         iconColor="default"
         titleSize="xs"
         body={
@@ -116,19 +115,27 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
   }
 
   if (isEntityStoreDisabled) {
-    return <EntityStoreDisabledEmptyPromptBody />;
+    // Space the embedded prompt so the `color="plain"` panel's borders aren't
+    // clipped by the accordion's edges (the shared body keeps its page styling).
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EntityStoreDisabledEmptyPromptBody />
+        <EuiSpacer size="s" />
+      </>
+    );
   }
 
-  // Non-dismissible callout reusing the EA home page wording. Null when no
-  // privileges are missing; shown as a banner above the table otherwise.
-  const privilegesCalloutMessage = getEntityAnalyticsReadPrivilegesCallOutMessage({
-    riskEngineReadPrivileges,
-    entityEnginePrivileges: privileges,
-    idPrefix: 'entity-analytics-cases-missing-privileges',
-  });
-  const privilegesCallout = privilegesCalloutMessage ? (
-    <CallOut message={privilegesCalloutMessage} showDismissButton={false} />
-  ) : null;
+  // Non-dismissible callout reusing the EA home page wording. Renders nothing
+  // when no privileges are missing; shown as a banner above the table otherwise.
+  const privilegesCallout = (
+    <EntityAnalyticsReadPrivilegesCallout
+      riskEngineReadPrivileges={riskEngineReadPrivileges}
+      entityEnginePrivileges={privileges}
+      id="entity-analytics-cases"
+      dismissible={false}
+    />
+  );
 
   // Hide the table when entity store read is denied to avoid a misleading empty grid.
   if (hasNoReadPrivileges) {

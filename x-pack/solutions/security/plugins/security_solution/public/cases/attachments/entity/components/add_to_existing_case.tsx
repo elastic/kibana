@@ -11,8 +11,8 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useEntityCasePermissions } from '../hooks/use_case_permission';
-import type { EntityToAttach, EntityAttachmentMetadata } from '..';
-import { generateEntityAttachmentsMetadata, generateEntityAttachmentsWithoutOwner } from '..';
+import type { EntityToAttach } from '..';
+import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface AddToExistingCaseProps {
@@ -45,11 +45,7 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
   const { cases } = useKibana().services;
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
-  const attachmentMetadata: EntityAttachmentMetadata = generateEntityAttachmentsMetadata(entity);
-  const attachments: CaseAttachmentsWithoutOwner = generateEntityAttachmentsWithoutOwner(
-    entity.id,
-    attachmentMetadata
-  );
+  const attachments: CaseAttachmentsWithoutOwner = generateEntityAttachmentsWithoutOwner(entity);
   const { canAddToExistingCase } = useEntityCasePermissions();
 
   const menuItemClicked = useCallback(() => {
@@ -57,7 +53,7 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
     selectCaseModal.open({ getAttachments: () => attachments });
   }, [attachments, onClick, selectCaseModal]);
 
-  const disabled: boolean = !attachmentMetadata.entityName || !canAddToExistingCase;
+  const disabled: boolean = !entity.name || !canAddToExistingCase;
 
   return (
     <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj} disabled={disabled}>

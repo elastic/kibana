@@ -11,8 +11,8 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useEntityCasePermissions } from '../hooks/use_case_permission';
-import type { EntityToAttach, EntityAttachmentMetadata } from '..';
-import { generateEntityAttachmentsMetadata, generateEntityAttachmentsWithoutOwner } from '..';
+import type { EntityToAttach } from '..';
+import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface AddToNewCaseProps {
@@ -45,11 +45,7 @@ export const AddToNewCase: FC<AddToNewCaseProps> = ({
   const { cases } = useKibana().services;
   const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
 
-  const attachmentMetadata: EntityAttachmentMetadata = generateEntityAttachmentsMetadata(entity);
-  const attachments: CaseAttachmentsWithoutOwner = generateEntityAttachmentsWithoutOwner(
-    entity.id,
-    attachmentMetadata
-  );
+  const attachments: CaseAttachmentsWithoutOwner = generateEntityAttachmentsWithoutOwner(entity);
   const { canAddToNewCase } = useEntityCasePermissions();
 
   const menuItemClicked = useCallback(() => {
@@ -57,7 +53,7 @@ export const AddToNewCase: FC<AddToNewCaseProps> = ({
     createCaseFlyout.open({ attachments });
   }, [attachments, createCaseFlyout, onClick]);
 
-  const disabled: boolean = !attachmentMetadata.entityName || !canAddToNewCase;
+  const disabled: boolean = !entity.name || !canAddToNewCase;
 
   return (
     <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj} disabled={disabled}>

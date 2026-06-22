@@ -16,6 +16,8 @@ import React, { Suspense, type ComponentType } from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
 import type { EntityAttachmentMetadata } from '../../../../common/cases/attachments/entity';
 import { EntityAttachmentPayloadSchema } from '../../../../common/cases/attachments/entity';
 
@@ -58,59 +60,61 @@ const DISPLAY_NAME = i18n.translate('xpack.securitySolution.entityAnalytics.case
 export const getEntityAttachment = () =>
   defineAttachment({
     id: SECURITY_ENTITY_ATTACHMENT_TYPE,
-    icon: 'user',
+    icon: 'globe',
     displayName: DISPLAY_NAME,
     schema: EntityAttachmentPayloadSchema,
-    getAttachmentViewObject: () => ({
-      eventColor: 'subdued' as const,
-      event: (
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.cases.eventDescription"
-          defaultMessage="added an entity"
-        />
-      ),
-      timelineAvatar: <EuiAvatar name="entity" color="subdued" iconType="user" />,
-      children: EntityAttachmentChildrenLazy,
-    }),
+    getAttachmentViewObject: (props) => {
+      const entityType = props.metadata?.entityType;
+      // Reflect the entity kind in the timeline icon (host/service/generic), falling
+      // back to the generic globe rather than the misleading person icon.
+      const iconType = entityType ? EntityIconByType[entityType as EntityType] ?? 'globe' : 'globe';
+      return {
+        eventColor: 'subdued' as const,
+        event: (
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.cases.eventDescription"
+            defaultMessage="added an entity"
+          />
+        ),
+        timelineAvatar: <EuiAvatar name="entity" color="subdued" iconType={iconType} />,
+        children: EntityAttachmentChildrenLazy,
+      };
+    },
     getAttachmentTabViewObject: () => ({
       children: EntityTabContentWrapper,
     }),
   });
 
 /**
- * Builds the metadata persisted alongside the entity attachment so the attachment view
- * can render without re-fetching the entity.
+ * Builds the unified `security.entity` attachment payload posted to a case, including the
+ * metadata persisted alongside it so the attachment view can render without re-fetching the
+ * entity.
+ *
+ * Returns the cases-framework "without owner" payload — the cases UI injects the `owner` at
+ * creation time, so callers hand the attachment over without it. Returns an empty array when
+ * the entity has no id.
  *
  * @param entity the entity we're attaching to a case
  */
-export const generateEntityAttachmentsMetadata = (
-  entity: EntityToAttach
-): EntityAttachmentMetadata => ({
-  entityName: entity.name,
-  entityType: entity.type,
-  ...(entity.riskScore != null ? { riskScore: entity.riskScore } : {}),
-  ...(entity.riskLevel != null ? { riskLevel: entity.riskLevel } : {}),
-});
-
-/**
- * Builds the unified `security.entity` attachment payload posted to a case.
- *
- * @param entityId the entity id (stored as `attachmentId`)
- * @param attachmentMetadata entity fields persisted alongside the attachment for display
- */
 export const generateEntityAttachmentsWithoutOwner = (
-  entityId: string,
-  attachmentMetadata: EntityAttachmentMetadata
+  entity: EntityToAttach
 ): CaseAttachmentsWithoutOwner => {
-  if (!entityId) {
+  if (!entity.id) {
     return [];
   }
+
+  const metadata: EntityAttachmentMetadata = {
+    entityName: entity.name,
+    entityType: entity.type,
+    ...(entity.riskScore != null ? { riskScore: entity.riskScore } : {}),
+    ...(entity.riskLevel != null ? { riskLevel: entity.riskLevel } : {}),
+  };
 
   return [
     {
       type: SECURITY_ENTITY_ATTACHMENT_TYPE,
-      attachmentId: entityId,
-      metadata: attachmentMetadata as unknown as { [p: string]: JsonValue },
+      attachmentId: entity.id,
+      metadata: metadata as unknown as { [p: string]: JsonValue },
     },
   ];
 };
