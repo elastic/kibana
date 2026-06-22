@@ -522,7 +522,6 @@ apiTest.describe(
         // Response shape
         expect(body.entityId).toBe(CAROL_EUID);
         expect(body.entityType).toBe('user');
-        expect(Array.isArray(body.anomalies)).toBe(true);
         expect(typeof body.from).toBe('number');
         expect(typeof body.to).toBe('number');
         expect(body.to).toBeGreaterThan(body.from);
@@ -530,14 +529,12 @@ apiTest.describe(
         // Carol has 2 indexed anomaly records: pad_windows_rare_region_name_by_user_ea and auth_high_count_logon_events_ea
         expect(body.totalAnomaliesCount).toBe(2);
 
-        // Per-bucket entry shape
-        expect(body.anomalies.length).toBeGreaterThanOrEqual(1);
-        for (const entry of body.anomalies) {
-          expect(typeof entry.timestamp).toBe('string');
-          expect(new Date(entry.timestamp).toISOString()).toBe(entry.timestamp);
-          expect(typeof entry.maxScore).toBe('number');
-          expect(entry.maxScore).toBeGreaterThan(0);
-          expect(Array.isArray(entry.threatTactics)).toBe(true);
+        // recentAnomalies shape
+        expect(body.recentAnomalies.length).toBeGreaterThanOrEqual(1);
+        for (const hit of body.recentAnomalies) {
+          expect(typeof hit.jobId).toBe('string');
+          expect(typeof hit.timestamp).toBe('string');
+          expect(new Date(hit.timestamp).toISOString()).toBe(hit.timestamp);
         }
 
         // auth_high_count_logon_events_ea contributes 'Credential Access' and 'Initial Access'
@@ -550,10 +547,9 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: maxScore in each bucket is the highest record_score within that bucket',
+      'Anomaly overview API: recentAnomalies contains the most recent hit for entity with anomaly records',
       async ({ apiClient }) => {
         // WIN_APP01 has 2 suspicious_login_activity_ea records with scores 5.65 and 31.06.
-        // Both have the same timestamp so they land in the same bucket; max should be ~31.06.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
@@ -562,9 +558,11 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
-        expect(body.anomalies.length).toBeGreaterThanOrEqual(1);
-        const highestBucketMax = Math.max(...body.anomalies.map((a) => a.maxScore));
-        expect(highestBucketMax).toBeGreaterThanOrEqual(31);
+        expect(body.recentAnomalies.length).toBeGreaterThanOrEqual(1);
+        for (const hit of body.recentAnomalies) {
+          expect(typeof hit.jobId).toBe('string');
+          expect(typeof hit.timestamp).toBe('string');
+        }
       }
     );
 
@@ -580,7 +578,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
         expect(body.entityId).toBe(NO_BEHAVIORS_EUID);
-        expect(body.anomalies).toHaveLength(0);
+        expect(body.recentAnomalies).toHaveLength(0);
         expect(body.totalAnomaliesCount).toBe(0);
         expect(body.tacticCounts).toStrictEqual({});
       }
@@ -647,7 +645,7 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
-        expect(body.anomalies).toHaveLength(0);
+        expect(body.recentAnomalies).toHaveLength(0);
         expect(body.totalAnomaliesCount).toBe(0);
       }
     );
@@ -665,10 +663,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
         expect(body.totalAnomaliesCount).toBe(1);
-        expect(body.anomalies.length).toBeGreaterThanOrEqual(1);
-        for (const entry of body.anomalies) {
-          expect(entry.maxScore).toBeGreaterThanOrEqual(10);
-        }
+        expect(body.recentAnomalies.length).toBeGreaterThanOrEqual(1);
       }
     );
 
@@ -685,10 +680,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
         expect(body.totalAnomaliesCount).toBe(1);
-        expect(body.anomalies.length).toBeGreaterThanOrEqual(1);
-        for (const entry of body.anomalies) {
-          expect(entry.maxScore).toBeLessThanOrEqual(10);
-        }
+        expect(body.recentAnomalies.length).toBeGreaterThanOrEqual(1);
       }
     );
 
@@ -703,7 +695,7 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
-        expect(body.anomalies).toHaveLength(0);
+        expect(body.recentAnomalies).toHaveLength(0);
         expect(body.totalAnomaliesCount).toBe(0);
         expect(body.tacticCounts).toStrictEqual({});
       }

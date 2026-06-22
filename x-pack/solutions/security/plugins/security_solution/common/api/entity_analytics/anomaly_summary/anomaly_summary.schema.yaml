@@ -302,28 +302,6 @@ components:
             maxLength: 150
           description: Filter results to jobs associated with the specified MITRE ATT&CK tactic names; returns all tactics when omitted
 
-    AnomalyOverviewEntry:
-      type: object
-      required:
-        - timestamp
-        - maxScore
-        - threatTactics
-      properties:
-        timestamp:
-          type: string
-          maxLength: 100
-          description: ISO-8601 start of the time bucket
-        maxScore:
-          type: number
-          description: Highest anomaly record_score within this time bucket
-        threatTactics:
-          type: array
-          maxItems: 100
-          items:
-            type: string
-            maxLength: 150
-          description: MITRE ATT&CK tactic names for all jobs that fired in this bucket
-
     AnomalyOverviewHit:
       type: object
       required:
@@ -354,7 +332,6 @@ components:
       type: object
       required:
         - entityId
-        - anomalies
         - recentAnomalies
         - tacticCounts
         - totalAnomaliesCount
@@ -367,10 +344,6 @@ components:
         entityType:
           type: string
           maxLength: 100
-        anomalies:
-          type: array
-          items:
-            $ref: '#/components/schemas/AnomalyOverviewEntry'
         recentAnomalies:
           type: array
           maxItems: 3
