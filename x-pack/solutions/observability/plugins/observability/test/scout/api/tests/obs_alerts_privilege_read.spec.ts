@@ -37,6 +37,17 @@ apiTest.describe(
       await teardownObsAlertsPrivilegeRules(apiClient, state.adminCreds, state.createdRules);
     });
 
+    apiTest.describe('rule read', () => {
+      apiTest('can get a rule by ID', async ({ apiClient }) => {
+        const { ruleId } = state.createdRules[0];
+        const response = await apiClient.get(`api/alerting/rule/${ruleId}`, {
+          headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+      });
+    });
+
     apiTest.describe('alert read', () => {
       apiTest('can find alerts via RAC', async ({ apiClient }) => {
         const response = await apiClient.post('internal/rac/alerts/find', {

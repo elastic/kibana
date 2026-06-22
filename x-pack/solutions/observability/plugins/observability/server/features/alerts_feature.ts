@@ -40,6 +40,7 @@ export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
         savedObject: { all: [], read: [] },
         alerting: {
           alert: { read: OBS_ALERTING_FEATURES },
+          rule: { read: OBS_ALERTING_FEATURES },
         },
         api: ['rac'],
         ui: ['show'],
