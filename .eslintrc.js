@@ -3043,9 +3043,9 @@ module.exports = {
 };
 
 /**
- * Navigation title sentence-case rule.
- * The rule activates only in files that import from @kbn/core-chrome-browser, so no
- * filename-specific globs are needed — the rule is self-scoping via import detection.
+ * Navigation title sentence-case rule. Self-scoping (no globs needed): it checks
+ * nav trees (files importing @kbn/core-chrome-browser), navigation modules, and
+ * `registerApp` / `deepLinks` titles detected by AST context in any file.
  */
 module.exports.overrides.push({
   files: ['**/*.{ts,tsx}'],

@@ -12,92 +12,39 @@ import type { Rule } from 'eslint';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
 /**
- * Genuine brand names, trademarks, and product names that must always appear
- * with specific capitalisation in navigation titles.
- *
- * Add new entries here only for real brand or trademark terms — not for generic
- * feature names that happen to look nicer in Title Case.
- *
- * Pure acronyms (API, TLS, AI, SIEM, KQL…) are detected automatically and do
- * not need to appear here.
+ * Proper nouns kept in exact casing that currently appear in nav. Unused brand
+ * names are omitted; add one only when it lands in nav.
+ * Everything else is sentence case; acronyms are auto-detected.
  */
-const BRAND_GLOSSARY = [
-  'Machine Learning', // Elastic product / technical discipline
-  'AI Assistant', // Elastic AI Assistant product — plural "AI Assistants" is matched automatically
-  'Elastic Inference', // Elastic Inference Service brand
-  'Cloud Connect', // Cloud Connect product
-  'Logstash Pipelines', // Logstash is a branded product
-  'Ingest Hub', // Ingest Hub product
-  'SIEM Readiness', // SIEM acronym + companion word
-  'MITRE ATT&CK® Coverage', // MITRE organisation + ATT&CK® framework trademark
-  'Cross-Cluster Replication', // Elasticsearch compound technical term
-  'Universal Profiling', // Elastic Universal Profiling product
-] as const;
-
-const BRAND_GLOSSARY_MAP = new Map(BRAND_GLOSSARY.map((t) => [t.toLowerCase(), t]));
-
-/**
- * Looks up a brand entry by key, also checking the singular form when the key
- * ends with 's'. This lets a single glossary entry cover both singular and plural
- * (e.g. 'AI Assistant' covers 'AI Assistants' automatically).
- */
-function findBrandEntry(key: string): string | undefined {
-  const direct = BRAND_GLOSSARY_MAP.get(key);
-  if (direct !== undefined) return direct;
-  if (key.endsWith('s')) {
-    const singular = BRAND_GLOSSARY_MAP.get(key.slice(0, -1));
-    if (singular !== undefined) return singular + 's';
-  }
-  return undefined;
-}
-
-/**
- * Navigation terms that were in the original runtime glossary and whose Title Case
- * must be preserved for UI consistency. These are NOT brand names — they are
- * grandfathered in so that existing strings do not generate noise.
- *
- * Do NOT add new entries here. New navigation titles should either be genuine brand
- * names (→ BRAND_GLOSSARY) or use sentence case.
- */
-const KNOWN_TERMS = [
-  'Developer Tools',
-  'Stack Management',
-  'Index Management',
-  'Index Lifecycle Policies',
-  'Snapshot and Restore',
-  'Rollup Jobs',
-  'Data Set Quality',
-  'Ingest Pipelines',
+const CANONICAL_NAV_TERMS = [
+  // Brand/feature names used in nav.
+  'Significant Events',
+  'Universal Profiling',
+  // Kibana UI names the brand guide capitalises.
+  'Machine Learning',
   'Stack Monitoring',
-  'Maintenance Windows',
-  'Trained Models',
-  'Anomaly Detection Jobs',
-  'Data Frame Analytics Jobs',
-  'Role Mappings',
-  'Remote Clusters',
-  'Saved Objects',
-  'Advanced Settings',
-  'Data Views',
-  'License Management',
-  'Alerts and Insights',
-  'Ingest and Integrations',
-  'V2 Alerting Preview',
+  'User Experience',
+  'Elastic AI SOC Engine',
+  'Elastic Inference',
 ] as const;
 
-const KNOWN_TERMS_MAP = new Map(KNOWN_TERMS.map((t) => [t.toLowerCase(), t]));
+const CANONICAL_NAV_TERMS_MAP = new Map(CANONICAL_NAV_TERMS.map((t) => [t.toLowerCase(), t]));
 
-function isAllowedMidWord(word: string): boolean {
-  if (/[^a-zA-Z]/.test(word)) return true; // contains special chars: ATT&CK®, Cross-Cluster, punctuation-only
-  return /^[A-Z]+$/.test(word); // pure acronym: API, TLS, AI, SIEM, KQL
+/** Navigation-module files: check label/title only, for cases without the core-chrome import. */
+const NAV_PATH_SEGMENT = /[\\/]navigation[\\/]/;
+
+/**
+ * Excluded from sentence case: acronyms (API), mixed-case brand tokens (GenAI, macOS),
+ * and tokens with symbols (ATT&CK®, Cross-Cluster, ES|QL).
+ */
+function isTitleCasedWord(word: string): boolean {
+  return /^[A-Z][a-z]+$/.test(word);
 }
 
-function findSentenceCaseViolation(str: string): string | null {
-  const words = str.trim().split(/\s+/);
-  if (words.length < 2) return null;
-  for (let i = 1; i < words.length; i++) {
-    if (!isAllowedMidWord(words[i]) && /^[A-Z]/.test(words[i])) return words[i];
-  }
-  return null;
+/** A plain lowercase word ("workflows") — the first word must be capitalised.
+ *  Mixed-case/symbol tokens (macOS, n-gram, ES|QL) are left alone. */
+function isLowercaseWord(word: string): boolean {
+  return /^[a-z]+$/.test(word);
 }
 
 function toSentenceCaseSuggestion(str: string): string {
@@ -105,30 +52,121 @@ function toSentenceCaseSuggestion(str: string): string {
     .trim()
     .split(/\s+/)
     .map((word, i) => {
-      if (i === 0 || isAllowedMidWord(word)) return word;
-      return word.charAt(0).toLowerCase() + word.slice(1);
+      if (i === 0) return isLowercaseWord(word) ? word[0].toUpperCase() + word.slice(1) : word;
+      return isTitleCasedWord(word) ? word[0].toLowerCase() + word.slice(1) : word;
     })
     .join(' ');
 }
 
+/**
+ * True for a label/title in a `*.registerApp(...)` object or a `deepLinks: [...]`
+ * element. Bare `application.register(...)` is excluded (an app isn't nav).
+ */
+function isInNavRegistrationContext(prop: TSESTree.Property): boolean {
+  const objExpr = prop.parent;
+  if (!objExpr || objExpr.type !== AST_NODE_TYPES.ObjectExpression) return false;
+
+  const objParent = objExpr.parent;
+  if (!objParent) return false;
+
+  // registerApp(...) — management section apps
+  if (
+    objParent.type === AST_NODE_TYPES.CallExpression &&
+    objParent.arguments.includes(objExpr as TSESTree.CallExpressionArgument) &&
+    objParent.callee.type === AST_NODE_TYPES.MemberExpression &&
+    objParent.callee.property.type === AST_NODE_TYPES.Identifier &&
+    objParent.callee.property.name === 'registerApp'
+  ) {
+    return true;
+  }
+
+  // element of a `deepLinks: [...]` array
+  if (objParent.type === AST_NODE_TYPES.ArrayExpression) {
+    const arrParent = objParent.parent;
+    if (
+      arrParent &&
+      arrParent.type === AST_NODE_TYPES.Property &&
+      arrParent.key.type === AST_NODE_TYPES.Identifier &&
+      arrParent.key.name === 'deepLinks'
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/** True when the object has a literal `visibleIn: []` (hidden everywhere). A
+ *  referenced const or spread is not resolved — only the empty-array literal. */
+function isHiddenFromNav(prop: TSESTree.Property): boolean {
+  const obj = prop.parent;
+  if (!obj || obj.type !== AST_NODE_TYPES.ObjectExpression) return false;
+  return obj.properties.some(
+    (p) =>
+      p.type === AST_NODE_TYPES.Property &&
+      p.key.type === AST_NODE_TYPES.Identifier &&
+      p.key.name === 'visibleIn' &&
+      p.value.type === AST_NODE_TYPES.ArrayExpression &&
+      p.value.elements.length === 0
+  );
+}
+
+/** String value of a string literal, or null. */
+function getStaticString(node: TSESTree.Node): string | null {
+  return node.type === AST_NODE_TYPES.Literal && typeof node.value === 'string' ? node.value : null;
+}
+
+function getTranslateDefaultMessage(node: TSESTree.Node): string | null {
+  if (node.type !== AST_NODE_TYPES.CallExpression) return null;
+
+  const { callee } = node;
+  if (
+    callee.type !== AST_NODE_TYPES.MemberExpression ||
+    callee.object.type !== AST_NODE_TYPES.Identifier ||
+    callee.property.type !== AST_NODE_TYPES.Identifier ||
+    callee.object.name !== 'i18n' ||
+    callee.property.name !== 'translate'
+  ) {
+    return null;
+  }
+
+  const optionsArg = node.arguments[1];
+  if (!optionsArg || optionsArg.type !== AST_NODE_TYPES.ObjectExpression) return null;
+
+  const defaultMessageProp = optionsArg.properties.find(
+    (p): p is TSESTree.Property =>
+      p.type === AST_NODE_TYPES.Property &&
+      p.key.type === AST_NODE_TYPES.Identifier &&
+      p.key.name === 'defaultMessage'
+  );
+
+  return defaultMessageProp ? getStaticString(defaultMessageProp.value) : null;
+}
+
 export const MESSAGES = {
   brandMismatch:
-    '"{{message}}" is a known brand/trademark term — use the exact casing "{{expected}}".',
+    '"{{message}}" is a known canonical nav term — use the exact casing "{{expected}}".',
+  capitalizeFirst:
+    'Navigation title "{{message}}" should start with a capital letter (e.g. "{{suggestion}}").',
   sentenceCase:
     'Navigation title "{{message}}" should use sentence case (e.g. "{{suggestion}}").' +
-    ' Only the first word, acronyms, and brand names should be capitalised.' +
-    ' If "{{word}}" is a brand term that must be capitalised, add it to BRAND_GLOSSARY' +
-    ' in nav_link_should_use_sentence_case.ts.',
+    ' Only the first word, acronyms, and approved proper nouns are capitalised.' +
+    ' If "{{word}}" is a product or feature name that must keep specific casing,' +
+    ' confirm the official format in the Elastic brand writing style guide' +
+    ' (https://brand.elastic.co/302f66895/p/194a3b-writing-style-guide) or with the brand team,' +
+    ' then add the exact name to CANONICAL_NAV_TERMS in' +
+    ' nav_link_should_use_sentence_case.ts.',
 } as const;
 
 export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
+    // Intentionally not fixable (no `meta.fixable`, no `fix`): `eslint --fix`
+    // must never auto-rewrite a shipped nav label.
     docs: {
       description:
-        'Navigation link titles must use sentence case. Known brand/trademark terms must' +
-        ' match their exact canonical casing from BRAND_GLOSSARY. Grandfathered terms in' +
-        ' KNOWN_TERMS are silently accepted as-is.',
+        'Navigation link titles must use sentence case. Terms in CANONICAL_NAV_TERMS' +
+        ' must match their exact canonical casing.',
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-i18n/rules/nav_link_should_use_sentence_case.ts',
     },
     messages: MESSAGES,
@@ -136,105 +174,106 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
   },
 
   create(context) {
-    // Only activate in files that import from @kbn/core-chrome-browser.
-    // This avoids relying on fragile file-path globs in .eslintrc.js.
-    let isNavFile = false;
+    // Where titles are checked:
+    //  - importNavFile: imports @kbn/core-chrome-browser — label/title + title consts.
+    //  - pathNavFile: inside a navigation module — label/title only.
+    //  - registration: *.registerApp / deepLinks titles in any file (not bare register).
+    const pathNavFile = NAV_PATH_SEGMENT.test(context.filename);
+    let importNavFile = false;
 
     function checkString(message: string, reportNode: Rule.Node) {
-      if (!message || message.includes('{')) return; // skip ICU placeholders
-
-      const key = message.toLowerCase().trim();
-
-      // 1. Brand / trademark term — must use exact canonical casing
-      const brandEntry = findBrandEntry(key);
-      if (brandEntry !== undefined) {
-        if (message !== brandEntry) {
+      // Canonical term: enforce exact casing
+      const canonicalTerm = CANONICAL_NAV_TERMS_MAP.get(message.toLowerCase().trim());
+      if (canonicalTerm !== undefined) {
+        if (message !== canonicalTerm) {
           context.report({
             node: reportNode,
             messageId: 'brandMismatch',
-            data: { message, expected: brandEntry },
+            data: { message, expected: canonicalTerm },
           });
         }
         return;
       }
 
-      // 2. Grandfathered known term — silently accepted, no enforcement
-      if (KNOWN_TERMS_MAP.has(key)) return;
+      const words = message.trim().split(/\s+/);
 
-      // 3. Everything else — must be sentence case
-      const violatingWord = findSentenceCaseViolation(message);
-      if (violatingWord) {
+      // First word must be capitalised
+      if (isLowercaseWord(words[0])) {
         context.report({
           node: reportNode,
-          messageId: 'sentenceCase',
-          data: { message, suggestion: toSentenceCaseSuggestion(message), word: violatingWord },
+          messageId: 'capitalizeFirst',
+          data: { message, suggestion: toSentenceCaseSuggestion(message) },
         });
+        return;
+      }
+
+      // Later words must be lowercase (unless acronym/brand/proper noun)
+      for (let i = 1; i < words.length; i++) {
+        if (isTitleCasedWord(words[i])) {
+          context.report({
+            node: reportNode,
+            messageId: 'sentenceCase',
+            data: { message, suggestion: toSentenceCaseSuggestion(message), word: words[i] },
+          });
+          return;
+        }
       }
     }
 
+    // Property catches titles written inline (title:/label:); CallExpression catches titles defined as standalone i18n.translate consts.
     return {
       ImportDeclaration(node) {
         const importNode = node as TSESTree.ImportDeclaration;
         if (importNode.source.value === '@kbn/core-chrome-browser') {
-          isNavFile = true;
+          importNavFile = true;
         }
       },
 
-      // i18n.translate('key', { defaultMessage: '...' })
+      // Title consts in nav-tree files: `const FOO_TITLE = i18n.translate(...)`.
+      // Restricted to const initializers so non-title values (description,
+      // tooltip, aria label) and inline title/label (owned by Property) are
+      // not also reported here.
       CallExpression(node) {
-        if (!isNavFile) return;
+        if (!importNavFile) return;
 
-        const { callee } = node as TSESTree.CallExpression;
+        const callNode = node as TSESTree.CallExpression;
+        if (callNode.parent?.type !== AST_NODE_TYPES.VariableDeclarator) return;
 
-        if (
-          callee.type !== AST_NODE_TYPES.MemberExpression ||
-          callee.object.type !== AST_NODE_TYPES.Identifier ||
-          callee.property.type !== AST_NODE_TYPES.Identifier ||
-          callee.object.name !== 'i18n' ||
-          callee.property.name !== 'translate'
-        ) {
-          return;
-        }
+        const defaultMessage = getTranslateDefaultMessage(callNode);
+        if (defaultMessage === null) return;
 
-        const args = (node as TSESTree.CallExpression).arguments;
-        if (args.length < 2) return;
-
-        const optionsArg = args[1];
-        if (optionsArg.type !== AST_NODE_TYPES.ObjectExpression) return;
-
-        const defaultMessageProp = optionsArg.properties.find(
-          (p): p is TSESTree.Property =>
-            p.type === AST_NODE_TYPES.Property &&
-            p.key.type === AST_NODE_TYPES.Identifier &&
-            (p.key as TSESTree.Identifier).name === 'defaultMessage'
-        );
-
-        if (!defaultMessageProp) return;
-        const valueNode = defaultMessageProp.value;
-        if (valueNode.type !== AST_NODE_TYPES.Literal || typeof valueNode.value !== 'string')
-          return;
-
-        checkString(valueNode.value, valueNode as unknown as Rule.Node);
+        checkString(defaultMessage, callNode as unknown as Rule.Node);
       },
 
-      // Raw label/title string properties in direct nav data
+      // Checks `label`/`title` values (a string literal or an i18n.translate)
+      // in nav-tree files, navigation modules, and registerApp/deepLinks objects.
       Property(node) {
-        if (!isNavFile) return;
-
         const prop = node as TSESTree.Property;
 
         if (
           prop.key.type !== AST_NODE_TYPES.Identifier ||
-          !(['label', 'title'] as string[]).includes((prop.key as TSESTree.Identifier).name)
+          (prop.key.name !== 'label' && prop.key.name !== 'title')
         ) {
           return;
         }
 
-        const valueNode = prop.value;
-        if (valueNode.type !== AST_NODE_TYPES.Literal || typeof valueNode.value !== 'string')
-          return;
+        const inRegistrationContext = isInNavRegistrationContext(prop);
+        if (!importNavFile && !pathNavFile && !inRegistrationContext) return;
 
-        checkString(valueNode.value, valueNode as unknown as Rule.Node);
+        if (isHiddenFromNav(prop)) return; // not rendered in nav (visibleIn: [])
+
+        const valueNode = prop.value;
+
+        const literal = getStaticString(valueNode);
+        if (literal !== null) {
+          checkString(literal, valueNode as unknown as Rule.Node);
+          return;
+        }
+
+        const defaultMessage = getTranslateDefaultMessage(valueNode);
+        if (defaultMessage !== null) {
+          checkString(defaultMessage, valueNode as unknown as Rule.Node);
+        }
       },
     };
   },
