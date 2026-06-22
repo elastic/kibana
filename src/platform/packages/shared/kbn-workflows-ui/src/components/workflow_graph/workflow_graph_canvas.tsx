@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import {
   Background,
   type ColorMode,
   type EdgeTypes,
   MiniMap,
   type NodeTypes,
+  Panel,
   ReactFlow,
   type ReactFlowInstance,
   ReactFlowProvider,
+  useReactFlow,
   type Viewport,
 } from '@xyflow/react';
 import React, { Component, type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -88,6 +90,78 @@ const PRO_OPTIONS = { hideAttribution: true } as const;
 const INITIAL_ZOOM = 1;
 const TOP_PADDING = 80;
 
+const CANVAS_CONTROLS_SHADOW =
+  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
+
+function CanvasZoomControls() {
+  const { euiTheme } = useEuiTheme();
+  const { zoomIn, zoomOut, getViewport, setViewport } = useReactFlow();
+
+  const zoomOutLabel = i18n.translate('workflowsUi.graph.zoomOut', {
+    defaultMessage: 'Zoom out',
+  });
+  const zoomInLabel = i18n.translate('workflowsUi.graph.zoomIn', {
+    defaultMessage: 'Zoom in',
+  });
+  const resetZoomLabel = i18n.translate('workflowsUi.graph.resetZoom', {
+    defaultMessage: 'Reset zoom',
+  });
+
+  const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);
+  const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
+  const handleResetZoom = useCallback(() => {
+    const { x, y } = getViewport();
+    setViewport({ x, y, zoom: 1 }, { duration: 200 });
+  }, [getViewport, setViewport]);
+
+  return (
+    <Panel position="bottom-right" style={{ margin: 12 }}>
+      <div
+        css={{
+          background: euiTheme.colors.backgroundBasePlain,
+          borderRadius: 8,
+          boxShadow: CANVAS_CONTROLS_SHADOW,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: 4,
+          gap: 2,
+        }}
+      >
+        <EuiToolTip content={zoomOutLabel} position="left" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="minusInCircle"
+            aria-label={zoomOutLabel}
+            color="text"
+            size="s"
+            onClick={handleZoomOut}
+            data-test-subj="workflowCanvas-zoom-out"
+          />
+        </EuiToolTip>
+        <EuiToolTip content={zoomInLabel} position="left" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="plusInCircle"
+            aria-label={zoomInLabel}
+            color="text"
+            size="s"
+            onClick={handleZoomIn}
+            data-test-subj="workflowCanvas-zoom-in"
+          />
+        </EuiToolTip>
+        <EuiToolTip content={resetZoomLabel} position="left" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="bullseye"
+            aria-label={resetZoomLabel}
+            color="text"
+            size="s"
+            onClick={handleResetZoom}
+            data-test-subj="workflowCanvas-reset-zoom"
+          />
+        </EuiToolTip>
+      </div>
+    </Panel>
+  );
+}
+
 export interface WorkflowGraphCanvasProps {
   readonly workflow: WorkflowYaml | undefined;
   /** Optional precomputed transform result for this workflow snapshot. */
@@ -134,6 +208,8 @@ export interface WorkflowGraphCanvasProps {
   };
   /** Whether to render the minimap. Pass false to suppress it (e.g. for exports). */
   readonly showMinimap?: boolean;
+  /** Whether to render the floating zoom controls in the bottom-right corner. */
+  readonly showZoomControls?: boolean;
   /**
    * Whether to render the dot-pattern background and the coloured wrapper div
    * background. Pass false for export canvases that need a transparent output.
@@ -187,6 +263,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     fitView: fitViewProp = false,
     fitViewOptions: fitViewOptionsProp,
     showMinimap = true,
+    showZoomControls = false,
     showBackground = true,
     edgeZIndex = -1,
     onReady,
@@ -491,6 +568,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 />
               )}
               {toolbar}
+              {showZoomControls && <CanvasZoomControls />}
               {showMinimap && (
                 <MiniMap
                   pannable

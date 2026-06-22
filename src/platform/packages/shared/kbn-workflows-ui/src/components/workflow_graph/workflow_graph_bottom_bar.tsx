@@ -17,7 +17,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { CSSObject } from '@emotion/react';
-import { useReactFlow, useStore } from '@xyflow/react';
 import React, {
   createContext,
   type ReactNode,
@@ -95,146 +94,6 @@ const TOGGLE_ACTIVE_SHADOW =
 // to the compact "…" pill. Chosen to give the full bar enough room before it
 // starts overlapping the minimap (bottom-left of the canvas).
 const COMPACT_THRESHOLD_PX = 800;
-
-function ZoomControls() {
-  const zoomOutLabel = i18n.translate('workflowsUi.bottomBar.zoomOut', {
-    defaultMessage: 'Zoom out',
-  });
-  const zoomInLabel = i18n.translate('workflowsUi.bottomBar.zoomIn', {
-    defaultMessage: 'Zoom in',
-  });
-
-  const { zoomIn, zoomOut } = useReactFlow();
-  const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);
-  const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
-
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={zoomInLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="plusInCircle"
-            aria-label={zoomInLabel}
-            color="text"
-            size="s"
-            onClick={handleZoomIn}
-            data-test-subj="workflowBottomBar-zoom-in"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={zoomOutLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            aria-label={zoomOutLabel}
-            color="text"
-            size="s"
-            onClick={handleZoomOut}
-            data-test-subj="workflowBottomBar-zoom-out"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </>
-  );
-}
-
-// Treat any zoom within this tolerance of 1.0 as "default" (not zoomed).
-const ZOOM_RESET_EPS = 0.01;
-
-// Visual width of the pill, of which 12px tucks behind the bar via z-index.
-const ZOOM_RESET_PILL_WIDTH = 64;
-const ZOOM_RESET_PILL_OVERLAP = 12;
-
-/**
- * Yellow bullseye pill that slides out from under the left edge of the bar
- * whenever the graph is zoomed. Click to reset to zoom = 1. Sits at a lower
- * z-index than the bar so its right edge tucks under (and is hidden by) the
- * bar's solid background.
- */
-function ZoomResetPill({
-  editorView,
-  isExpanded,
-  onMouseEnter,
-  onMouseLeave,
-}: {
-  editorView: WorkflowDetailBottomBarView;
-  isExpanded: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const zoom = useStore((s) => s.transform[2]);
-  const isZoomed = Math.abs(zoom - 1) > ZOOM_RESET_EPS;
-  const { setViewport, getViewport } = useReactFlow();
-
-  const handleReset = useCallback(() => {
-    const { x, y } = getViewport();
-    setViewport({ x, y, zoom: 1 }, { duration: 200 });
-  }, [getViewport, setViewport]);
-
-  const show = editorView === 'graph' && isZoomed && isExpanded;
-  const label = i18n.translate('workflowsUi.bottomBar.zoomReset', {
-    defaultMessage: 'Reset zoom',
-  });
-
-  return (
-    <div
-      role="button"
-      tabIndex={show ? 0 : -1}
-      aria-label={label}
-      title={label}
-      data-test-subj="workflowBottomBar-zoom-reset"
-      onClick={handleReset}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleReset();
-        }
-      }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      aria-hidden={!show}
-      css={{
-        position: 'absolute',
-        right: '100%',
-        top: 0,
-        bottom: 0,
-        width: ZOOM_RESET_PILL_WIDTH,
-        transform: show
-          ? `translateX(${ZOOM_RESET_PILL_OVERLAP}px)`
-          : `translateX(${ZOOM_RESET_PILL_WIDTH}px)`,
-        opacity: show ? 1 : 0,
-        pointerEvents: show ? 'auto' : 'none',
-        transition:
-          'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease, filter 120ms ease',
-        zIndex: 0,
-        background: '#fde9b5',
-        // Only the left side is rounded; the right side stays square and tucks
-        // under the bar (Figma rectangleCornerRadii [10, 0, 0, 10]).
-        borderTopLeftRadius: 10,
-        borderBottomLeftRadius: 10,
-        borderTopRightRadius: 0,
-        borderBottomRightRadius: 0,
-        boxShadow: BAR_SHADOW,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        // Centers the 16px icon within the visible 52px portion of the pill
-        // (visible = ZOOM_RESET_PILL_WIDTH - ZOOM_RESET_PILL_OVERLAP = 52,
-        //  (52 - 16) / 2 = 18).
-        paddingLeft: 18,
-        cursor: 'pointer',
-        '&:hover': { filter: 'brightness(0.97)' },
-        '&:focus-visible': {
-          outline: `2px solid ${euiTheme.colors.primary}`,
-          outlineOffset: 2,
-        },
-      }}
-    >
-      <EuiIcon type="bullseye" size="m" color="#1d2a3e" aria-hidden />
-    </div>
-  );
-}
 
 function ViewToggle({
   editorView,
@@ -516,15 +375,6 @@ export function WorkflowDetailBottomBar({
   return (
     <WorkflowBottomBarContext.Provider value={{ isExpanded }}>
       <div ref={containerRef} css={barCss} data-test-subj="workflowDetailBottomBar">
-        {/* Wrapper provides the positioning context the ZoomResetPill anchors to
-            (right: 100% of this wrapper = left edge of the inner bar). */}
-        <div css={{ position: 'relative', pointerEvents: 'none' }}>
-        <ZoomResetPill
-          editorView={editorView}
-          isExpanded={isExpanded}
-          onMouseEnter={handleExpandedMouseEnter}
-          onMouseLeave={handleExpandedMouseLeave}
-        />
         <div
           css={{
             pointerEvents: isExpanded ? 'auto' : 'none',
@@ -545,56 +395,15 @@ export function WorkflowDetailBottomBar({
           onMouseLeave={handleExpandedMouseLeave}
         >
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
-          {/* Left section — cross-fades between zoom (graph) and yaml actions
-              (yaml). Both variants live in the same grid cell so layout stays
-              stable across the 200ms opacity transition. */}
-          <EuiFlexItem grow={false}>
-            <div
-              css={{
-                display: 'grid',
-                gridTemplateAreas: '"stack"',
-                alignItems: 'center',
-              }}
-            >
-              <div
-                css={{
-                  gridArea: 'stack',
-                  display: 'flex',
-                  alignItems: 'center',
-                  opacity: editorView === 'graph' ? 1 : 0,
-                  pointerEvents: editorView === 'graph' ? 'auto' : 'none',
-                  transition: 'opacity 200ms ease',
-                }}
-                aria-hidden={editorView !== 'graph'}
-              >
-                <EuiFlexGroup
-                  gutterSize="none"
-                  responsive={false}
-                  alignItems="center"
-                  wrap={false}
-                >
-                  <ZoomControls />
-                </EuiFlexGroup>
-              </div>
-              <div
-                css={{
-                  gridArea: 'stack',
-                  display: 'flex',
-                  alignItems: 'center',
-                  opacity: editorView === 'yaml' ? 1 : 0,
-                  pointerEvents: editorView === 'yaml' ? 'auto' : 'none',
-                  transition: 'opacity 200ms ease',
-                }}
-                aria-hidden={editorView !== 'yaml'}
-              >
-                {yamlActionsSlot}
-              </div>
-            </div>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <VerticalDivider />
-          </EuiFlexItem>
+          {/* Left section — yaml actions slot, only shown in yaml view. */}
+          {yamlActionsSlot && editorView === 'yaml' ? (
+            <>
+              <EuiFlexItem grow={false}>{yamlActionsSlot}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <VerticalDivider />
+              </EuiFlexItem>
+            </>
+          ) : null}
 
           {compact ? (
             <EuiFlexItem grow={false}>
@@ -628,7 +437,6 @@ export function WorkflowDetailBottomBar({
           ) : null}
         </EuiFlexGroup>
         </div>
-      </div>
 
       {/* Collapsed pill — hover to expand */}
       <div
