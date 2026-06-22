@@ -34,10 +34,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
     await kbnClient.spaces.create({ id: TEST_SPACE_ID, name: 'Scout sample data test space' });
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.spaces.delete(TEST_SPACE_ID);
-  });
-
   // Guarantee the default space is left clean after every test. The flights dashboard is a
   // multiple-isolated saved object, so a canonical-ID copy leaked into the default space by a
   // mid-test failure would force the importer to regenerate the ID when the non-default-space
@@ -48,6 +44,12 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
       headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
     });
   });
+
+  apiTest.afterAll(async ({ kbnClient }) => {
+    await kbnClient.spaces.delete(TEST_SPACE_ID);
+  });
+
+
 
   // ---------------------------------------------------------------------------
   // Negative path
