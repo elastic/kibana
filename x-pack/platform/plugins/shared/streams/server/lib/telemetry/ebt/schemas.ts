@@ -108,6 +108,12 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
         description: 'The number of significant events queries generated',
       },
     },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the LLM connector used for the inference',
+      },
+    },
     input_tokens_used: {
       type: 'long',
       _meta: {
@@ -233,6 +239,12 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
     type: 'keyword',
     _meta: {
       description: 'UUID identifying the full identification run (shared across iterations)',
+    },
+  },
+  connector_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The ID of the LLM connector used for the inference',
     },
   },
   iteration: {
