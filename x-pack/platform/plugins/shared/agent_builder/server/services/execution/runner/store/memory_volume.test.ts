@@ -26,7 +26,7 @@ const createFileEntry = (path: string, overrides: Partial<FileEntry> = {}): File
 describe('MemoryVolume', () => {
   describe('add', () => {
     it('adds a file entry to the volume', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       const entry = createFileEntry('/agents/agent1.json');
 
       volume.add(entry);
@@ -36,7 +36,7 @@ describe('MemoryVolume', () => {
     });
 
     it('normalizes paths', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       const entry = createFileEntry('agents//agent1.json');
 
       volume.add(entry);
@@ -45,7 +45,7 @@ describe('MemoryVolume', () => {
     });
 
     it('creates nested directories as needed', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       const entry = createFileEntry('/deep/nested/path/file.json');
 
       volume.add(entry);
@@ -56,7 +56,7 @@ describe('MemoryVolume', () => {
     });
 
     it('overwrites existing entry at the same path', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       const entry1 = createFileEntry('/agents/agent1.json', { content: { raw: { version: 1 } } });
       const entry2 = createFileEntry('/agents/agent1.json', { content: { raw: { version: 2 } } });
 
@@ -70,7 +70,7 @@ describe('MemoryVolume', () => {
 
   describe('remove', () => {
     it('removes a file entry', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/agent1.json'));
 
       const removed = volume.remove('/agents/agent1.json');
@@ -80,7 +80,7 @@ describe('MemoryVolume', () => {
     });
 
     it('returns false if entry does not exist', () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
 
       const removed = volume.remove('/agents/agent1.json');
 
@@ -88,7 +88,7 @@ describe('MemoryVolume', () => {
     });
 
     it('cleans up empty directories', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/a/b/c/file.json'));
 
       volume.remove('/a/b/c/file.json');
@@ -101,20 +101,20 @@ describe('MemoryVolume', () => {
 
   describe('has', () => {
     it('returns true for existing files', () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/agent1.json'));
 
       expect(volume.has('/agents/agent1.json')).toBe(true);
     });
 
     it('returns false for non-existing files', () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
 
       expect(volume.has('/agents/agent1.json')).toBe(false);
     });
 
     it('returns false for directories (only tracks files)', () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/agent1.json'));
 
       expect(volume.has('/agents')).toBe(false);
@@ -123,7 +123,7 @@ describe('MemoryVolume', () => {
 
   describe('list', () => {
     it('returns files in the specified directory', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       const entry1 = createFileEntry('/agents/agent1.json');
       const entry2 = createFileEntry('/agents/agent2.json');
       volume.add(entry1);
@@ -136,7 +136,7 @@ describe('MemoryVolume', () => {
     });
 
     it('returns subdirectories as DirEntry', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/custom/agent1.json'));
 
       const results = await volume.list('/agents');
@@ -146,7 +146,7 @@ describe('MemoryVolume', () => {
     });
 
     it('returns both files and subdirectories', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       const fileEntry = createFileEntry('/agents/agent1.json');
       volume.add(fileEntry);
       volume.add(createFileEntry('/agents/custom/agent2.json'));
@@ -160,7 +160,7 @@ describe('MemoryVolume', () => {
     });
 
     it('returns empty array for empty directory', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
 
       const results = await volume.list('/agents');
 
@@ -168,7 +168,7 @@ describe('MemoryVolume', () => {
     });
 
     it('does not return nested files (only immediate children)', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/level1/level2/deep.json'));
 
       const results = await volume.list('/agents');
@@ -178,72 +178,23 @@ describe('MemoryVolume', () => {
     });
   });
 
-  describe('glob', () => {
-    it('matches files with glob pattern', async () => {
-      const volume = new MemoryVolume('test');
-      const entry1 = createFileEntry('/agents/agent1.json');
-      const entry2 = createFileEntry('/agents/agent2.json');
-      volume.add(entry1);
-      volume.add(entry2);
-      volume.add(createFileEntry('/other/file.txt'));
-
-      const results = await volume.glob('/agents/*.json');
-
-      expect(results).toHaveLength(2);
-      expect(results).toEqual(expect.arrayContaining([entry1, entry2]));
-    });
-
-    it('supports ** for recursive matching', async () => {
-      const volume = new MemoryVolume('test');
-      const entry1 = createFileEntry('/agents/agent1.json');
-      const entry2 = createFileEntry('/agents/custom/agent2.json');
-      volume.add(entry1);
-      volume.add(entry2);
-
-      const results = await volume.glob('/agents/**/*.json');
-
-      expect(results).toHaveLength(2);
-      expect(results).toEqual(expect.arrayContaining([entry1, entry2]));
-    });
-
-    it('supports onlyFiles option', async () => {
-      const volume = new MemoryVolume('test');
-      volume.add(createFileEntry('/agents/custom/agent1.json'));
-
-      const results = await volume.glob('/agents/*', { onlyFiles: true });
-
-      expect(results).toHaveLength(0); // /agents/custom is a directory
-    });
-
-    it('supports onlyDirectories option', async () => {
-      const volume = new MemoryVolume('test');
-      volume.add(createFileEntry('/agents/agent1.json'));
-      volume.add(createFileEntry('/agents/custom/agent2.json'));
-
-      const results = await volume.glob('/agents/*', { onlyDirectories: true });
-
-      expect(results).toHaveLength(1);
-      expect(results[0]).toEqual({ path: '/agents/custom', type: 'dir' });
-    });
-  });
-
   describe('exists', () => {
     it('returns true for existing files', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/agent1.json'));
 
       expect(await volume.exists('/agents/agent1.json')).toBe(true);
     });
 
     it('returns true for implicit directories', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/agent1.json'));
 
       expect(await volume.exists('/agents')).toBe(true);
     });
 
     it('returns false for non-existing paths', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
 
       expect(await volume.exists('/agents/agent1.json')).toBe(false);
     });
@@ -251,7 +202,7 @@ describe('MemoryVolume', () => {
 
   describe('clear', () => {
     it('removes all entries from the volume', async () => {
-      const volume = new MemoryVolume('test');
+      const volume = new MemoryVolume();
       volume.add(createFileEntry('/agents/agent1.json'));
       volume.add(createFileEntry('/agents/agent2.json'));
 
