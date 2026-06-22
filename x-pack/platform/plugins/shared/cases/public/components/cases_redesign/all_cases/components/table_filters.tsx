@@ -26,6 +26,7 @@ import { TableSearch } from '../../../all_cases/search';
 import { DateRangeFilter } from '../../../all_cases/date_range_filter';
 import type { CasesColumnSelection } from '../types';
 import { ColumnsPopover } from './columns_popover';
+import { SortFilter } from './sort_filter';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -46,6 +47,8 @@ export interface CasesTableFiltersProps {
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
   listFields: CasesColumnSelection[];
   onListFieldsChange: (fields: CasesColumnSelection[]) => void;
+  sortOrder: 'asc' | 'desc';
+  onSortOrderChange: (sortOrder: 'asc' | 'desc') => void;
 }
 
 const mergeCustomizer = (objValue: string | string[], srcValue: string | string[], key: string) => {
@@ -73,6 +76,8 @@ const CasesTableFiltersComponent = ({
   onSelectedColumnsChange,
   listFields,
   onListFieldsChange,
+  sortOrder,
+  onSortOrderChange,
 }: CasesTableFiltersProps) => {
   const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
@@ -178,6 +183,11 @@ const CasesTableFiltersComponent = ({
           )}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {viewMode !== VIEW_TOGGLE_TABLE_ID && (
+        <EuiFlexItem grow={false}>
+          <SortFilter sortOrder={sortOrder} onChange={onSortOrderChange} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {viewMode === VIEW_TOGGLE_TABLE_ID ? (
           <ColumnsPopover
