@@ -42,6 +42,11 @@ export const getFriendlyRuleHttpErrorToastMessage = (error: Error): string => {
       return i18n.translate('xpack.alertingV2.httpError.timeout', {
         defaultMessage: 'The request timed out. Check your connection and try again.',
       });
+    case 409:
+      return i18n.translate('xpack.alertingV2.httpError.conflict', {
+        defaultMessage:
+          'This conflicts with the current state of the rule. See the full error for details.',
+      });
     case 500:
     case 502:
     case 503:
