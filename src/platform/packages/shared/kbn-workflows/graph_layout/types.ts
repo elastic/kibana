@@ -138,9 +138,6 @@ export interface LayoutedNode extends PreLayoutNodeBase {
   sourcePosition?: HandleSide;
 }
 
-export const SWITCH_DEFAULT_HANDLE = 'switch-default' as const;
-export const switchCaseHandleId = (index: number): string => `switch-case-${index}`;
-
 export function isStep(value: unknown): value is Step {
   if (typeof value !== 'object' || value === null) return false;
   const record = value as Record<string, unknown>;
