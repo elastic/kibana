@@ -71,44 +71,48 @@ export const DashboardItemActionMenu = ({
     ];
 
     if (showWriteControls) {
-      items.push({
-        name: i18n.translate('dashboard.nav.deleteDashboard', {
-          defaultMessage: 'Delete',
-        }),
-        icon: 'trash' as const,
-        onClick: () => {
-          onClose();
-          void coreServices.overlays
-            .openConfirm(
-              i18n.translate('dashboard.nav.deleteDashboardConfirm', {
-                defaultMessage: 'Delete "{title}"?',
-                values: { title },
-              }),
-              {
-                title: i18n.translate('dashboard.nav.deleteDashboardConfirmTitle', {
-                  defaultMessage: 'Delete dashboard',
+      items.push(
+        { isSeparator: true },
+        {
+          name: i18n.translate('dashboard.nav.deleteDashboard', {
+            defaultMessage: 'Delete',
+          }),
+          icon: 'trash' as const,
+          color: 'danger' as const,
+          onClick: () => {
+            onClose();
+            void coreServices.overlays
+              .openConfirm(
+                i18n.translate('dashboard.nav.deleteDashboardConfirm', {
+                  defaultMessage: 'Delete "{title}"?',
+                  values: { title },
                 }),
-                confirmButtonText: i18n.translate('dashboard.nav.deleteDashboardConfirmButton', {
-                  defaultMessage: 'Delete',
-                }),
-                buttonColor: 'danger',
-              }
-            )
-            .then(async (confirmed) => {
-              if (!confirmed) {
-                return;
-              }
+                {
+                  title: i18n.translate('dashboard.nav.deleteDashboardConfirmTitle', {
+                    defaultMessage: 'Delete dashboard',
+                  }),
+                  confirmButtonText: i18n.translate('dashboard.nav.deleteDashboardConfirmButton', {
+                    defaultMessage: 'Delete',
+                  }),
+                  buttonColor: 'danger',
+                }
+              )
+              .then(async (confirmed) => {
+                if (!confirmed) {
+                  return;
+                }
 
-              try {
-                await dashboardClient.delete(dashboardId);
-              } catch (error) {
-                coreServices.notifications.toasts.addError(error, {
-                  title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
-                });
-              }
-            });
-        },
-      });
+                try {
+                  await dashboardClient.delete(dashboardId);
+                } catch (error) {
+                  coreServices.notifications.toasts.addError(error, {
+                    title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
+                  });
+                }
+              });
+          },
+        }
+      );
     }
 
     return [{ id: 0, items }];

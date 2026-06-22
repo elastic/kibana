@@ -58,7 +58,7 @@ export const SecondaryMenuItemActionMenuButton = ({
 
   return (
     <EuiPopover
-      anchorPosition="leftUp"
+      anchorPosition="rightUp"
       button={
         <EuiButtonIcon
           aria-label={ariaLabel}
