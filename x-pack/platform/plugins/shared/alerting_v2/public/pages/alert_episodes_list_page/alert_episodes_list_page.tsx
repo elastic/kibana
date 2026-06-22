@@ -38,6 +38,7 @@ import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hook
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeStatusCell,
@@ -45,6 +46,7 @@ import {
   EpisodeRuleCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -156,19 +158,22 @@ export const AlertEpisodesListPage = () => {
     [sortState.sortField, sortState.sortDirection]
   );
 
-  const onSort = useCallback((nextSort: string[][]) => {
-    if (!nextSort.length) {
-      setSortState(DEFAULT_SORT);
-      return;
-    }
-    const [field, dir] = nextSort[nextSort.length - 1];
-    if (field != null && dir != null) {
-      setSortState({
-        sortField: String(field),
-        sortDirection: dir === 'asc' ? 'asc' : 'desc',
-      });
-    }
-  }, []);
+  const onSort = useCallback(
+    (nextSort: string[][]) => {
+      if (!nextSort.length) {
+        setSortState(DEFAULT_SORT);
+        return;
+      }
+      const [field, dir] = nextSort[nextSort.length - 1];
+      if (field != null && dir != null) {
+        setSortState({
+          sortField: String(field),
+          sortDirection: dir === 'asc' ? 'asc' : 'desc',
+        });
+      }
+    },
+    [setSortState]
+  );
 
   const ruleIds = useMemo(
     () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
@@ -209,7 +214,9 @@ export const AlertEpisodesListPage = () => {
             share: services.share,
             capabilities: services.application.capabilities,
             uiSettings: services.uiSettings,
-            ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
+            ruleEsql: rulesCache[ruleId]?.query
+              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+              : undefined,
             episodeIsoTimestamp,
           }),
       }),
@@ -315,7 +322,16 @@ export const AlertEpisodesListPage = () => {
     >
       <EuiPageHeader
         bottomBorder
-        pageTitle={i18n.EPISODES_LIST_PAGE_TITLE}
+        pageTitle={
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              {i18n.EPISODES_LIST_PAGE_TITLE}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         rightSideItems={[
           <EuiButton
             key="manage-rules"
