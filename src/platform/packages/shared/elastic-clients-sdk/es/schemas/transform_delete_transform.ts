@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+// @ts-nocheck
+
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-redeclare */
+import { z } from '@kbn/zod/v4'
+
+/**
+ * We are still working on this type, it will arrive soon.
+ * If it's critical for you, please open an issue.
+ * https://github.com/elastic/elasticsearch-specification
+ */
+export const TODO = z.record(z.string(), z.any())
+export type TODO = z.infer<typeof TODO>
+
+export const AcknowledgedResponseBase = z.object({
+  acknowledged: z.boolean().describe('For a successful response, this value is always true. On failure, an exception is returned instead.')
+}).meta({ id: 'AcknowledgedResponseBase' })
+export type AcknowledgedResponseBase = z.infer<typeof AcknowledgedResponseBase>
+
+/**
+ * A duration. Units can be `nanos`, `micros`, `ms` (milliseconds), `s` (seconds), `m` (minutes), `h` (hours) and
+ * `d` (days). Also accepts "0" without a unit and "-1" to indicate an unspecified value.
+ */
+export const Duration = z.union([z.string(), z.literal(-1), z.literal(0)]).meta({ id: 'Duration' })
+export type Duration = z.infer<typeof Duration>
+
+export const Id = z.string().meta({ id: 'Id' })
+export type Id = z.infer<typeof Id>
+
+export const RequestBase = z.object({
+}).meta({ id: 'RequestBase' })
+export type RequestBase = z.infer<typeof RequestBase>
+
+/** Delete a transform. */
+export const TransformDeleteTransformRequest = z.object({
+  ...RequestBase.shape,
+  transform_id: Id.describe('Identifier for the transform.').meta({ found_in: 'path' }),
+  force: z.boolean().describe('If this value is false, the transform must be stopped before it can be deleted. If true, the transform is deleted regardless of its current state.').optional().meta({ found_in: 'query' }),
+  delete_dest_index: z.boolean().describe('If this value is true, the destination index is deleted together with the transform. If false, the destination index will not be deleted').optional().meta({ found_in: 'query' }),
+  timeout: Duration.describe('Period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error.').optional().meta({ found_in: 'query' })
+}).meta({ id: 'TransformDeleteTransformRequest' })
+export type TransformDeleteTransformRequest = z.infer<typeof TransformDeleteTransformRequest>
+
+export const TransformDeleteTransformResponse = AcknowledgedResponseBase.meta({ id: 'TransformDeleteTransformResponse' })
+export type TransformDeleteTransformResponse = z.infer<typeof TransformDeleteTransformResponse>
