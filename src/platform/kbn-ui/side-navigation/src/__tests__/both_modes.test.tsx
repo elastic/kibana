@@ -1216,9 +1216,8 @@ describe('Both modes', () => {
         const discoverLink = screen.getByTestId(primaryItemId('discover'));
         const gettingStartedLink = screen.getByTestId(footerItemId('getting_started'));
         const sidePanel = screen.getByTestId(sidePanelId);
-        const serviceInventoryLink = within(sidePanel).getByTestId(
-          sidePanelItemId('service-inventory')
-        );
+        const collapseButton = within(sidePanel).getByTestId('sideNavCollapseButton');
+        const resizeHandle = screen.getByTestId('secondaryNavResizeHandle');
 
         act(() => {
           solutionLogo.focus();
@@ -1236,10 +1235,14 @@ describe('Both modes', () => {
 
         expect(gettingStartedLink).toHaveFocus();
 
-        // Tab to side panel - should land on first focusable item (Service inventory)
+        // Tab to side panel - collapse button, then resize handle, before leaving the nav
         await user.tab();
 
-        expect(serviceInventoryLink).toHaveFocus();
+        expect(collapseButton).toHaveFocus();
+
+        await user.tab();
+
+        expect(resizeHandle).toHaveFocus();
       });
 
       /**
