@@ -53,7 +53,7 @@ export const mainTranslations = {
     },
     dataSets: {
       name: i18n.translate('dataSets.setsTable.columnName', {
-        defaultMessage: 'Dataset ID',
+        defaultMessage: 'Name',
       }),
       dataSourceId: i18n.translate('dataSets.setsTable.columnDataSourceId', {
         defaultMessage: 'Data source',

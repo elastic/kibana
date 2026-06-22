@@ -47,7 +47,7 @@ export const createDatasetFlyoutStrings = {
 
   nameLabel: () =>
     i18n.translate('dataSets.createDatasetFlyout.nameLabel', {
-      defaultMessage: 'Dataset ID',
+      defaultMessage: 'Name',
     }),
 
   nameHelp: () =>

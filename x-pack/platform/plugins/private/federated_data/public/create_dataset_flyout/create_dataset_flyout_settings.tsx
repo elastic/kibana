@@ -6,15 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiSelect, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -26,7 +18,6 @@ export function CreateDatasetFlyoutSettings({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
-  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const contentId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutOptionalSettings' });
 
@@ -46,13 +37,7 @@ export function CreateDatasetFlyoutSettings({
           ? createDatasetFlyoutStrings.optionalSettingsHide()
           : createDatasetFlyoutStrings.optionalSettingsShow()}
       </EuiButtonEmpty>
-      <div
-        id={contentId}
-        hidden={!isOpen}
-        css={css`
-          padding-left: ${euiTheme.size.l};
-        `}
-      >
+      <div id={contentId} hidden={!isOpen}>
         <EuiSpacer size="s" />
         <CreateDatasetFlyoutFileSettings control={control} />
       </div>
