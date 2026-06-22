@@ -403,7 +403,15 @@ describe('WHERE Autocomplete', () => {
     beforeEach(() => {
       mockCallbacks = {
         ...getMockCallbacks(),
-        getKqlSuggestions: jest.fn().mockResolvedValue(kqlSuggestions),
+        getKqlSuggestions: jest.fn().mockImplementation((kqlQuery: string) =>
+          Promise.resolve(
+            kqlSuggestions.map((suggestion) => ({
+              ...suggestion,
+              // Mimic the KQL provider's per-suggestion range: the current word (after last space to cursor).
+              range: { start: kqlQuery.lastIndexOf(' ') + 1, end: kqlQuery.length },
+            }))
+          )
+        ),
       };
     });
 
