@@ -136,7 +136,7 @@ const apiQueryToRuleQuery = (
   };
 };
 
-export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormValues> => {
+export const mapRuleResponseToFormValues = (rule: RuleResponse): FormValues => {
   const stateTransition: StateTransition = {
     pendingCount: rule.state_transition?.pending_count ?? null,
     pendingTimeframe: rule.state_transition?.pending_timeframe ?? null,

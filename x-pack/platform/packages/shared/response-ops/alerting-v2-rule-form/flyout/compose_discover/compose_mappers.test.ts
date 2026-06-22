@@ -12,9 +12,9 @@ import type { ComposeFormValues } from './compose_form_types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
-  mapRuleToComposeFormValues,
   mapYamlFormValuesToComposeFormValues,
 } from './compose_mappers';
+import { mapRuleResponseToFormValues } from '../../form/utils/rule_request_mappers';
 
 // ── fixtures ─────────────────────────────────────────────────────────────────
 
@@ -254,11 +254,11 @@ describe('composeFormToUpdateRequest', () => {
   });
 });
 
-// ── mapRuleToComposeFormValues ───────────────────────────────────────────────
+// ── mapRuleResponseToFormValues ───────────────────────────────────────────────
 
-describe('mapRuleToComposeFormValues', () => {
+describe('mapRuleResponseToFormValues', () => {
   it('maps basic required fields', () => {
-    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    const result = mapRuleResponseToFormValues(baseRuleResponse);
     expect(result.kind).toBe('alert');
     expect(result.timeField).toBe('@timestamp');
     expect(result.metadata).toEqual({
@@ -272,18 +272,18 @@ describe('mapRuleToComposeFormValues', () => {
   });
 
   it('maps schedule with lookback', () => {
-    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    const result = mapRuleResponseToFormValues(baseRuleResponse);
     expect(result.schedule).toEqual({ every: '5m', lookback: '2m' });
   });
 
   it('defaults lookback to 1m when absent', () => {
     const rule = { ...baseRuleResponse, schedule: { every: '10m' } } as RuleResponse;
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     expect(result.schedule.lookback).toBe('1m');
   });
 
   it('maps composed query from rule response', () => {
-    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    const result = mapRuleResponseToFormValues(baseRuleResponse);
     expect(result.query.format).toBe('composed');
     if (result.query.format === 'composed') {
       expect(result.query.base).toBe(BASE);
@@ -302,14 +302,14 @@ describe('mapRuleToComposeFormValues', () => {
         recovery: { segment: RECOVERY_SEGMENT },
       },
     };
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     if (result.query.format === 'composed') {
       expect(result.query.recovery?.segment).toBe(RECOVERY_SEGMENT);
     }
   });
 
   it('omits recovery when absent from query', () => {
-    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    const result = mapRuleResponseToFormValues(baseRuleResponse);
     if (result.query.format === 'composed') {
       expect(result.query.recovery).toBeUndefined();
     }
@@ -325,7 +325,7 @@ describe('mapRuleToComposeFormValues', () => {
         breach: { segment: ALERT_SEGMENT },
       },
     };
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     if (result.query.format === 'composed') {
       expect(result.query.recovery).toBeUndefined();
     }
@@ -336,7 +336,7 @@ describe('mapRuleToComposeFormValues', () => {
       ...baseRuleResponse,
       query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     } as RuleResponse;
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     expect(result.query).toEqual({
       format: 'standalone',
       breach: { query: 'FROM logs-* | LIMIT 10' },
@@ -353,7 +353,7 @@ describe('mapRuleToComposeFormValues', () => {
         recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
       },
     };
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     expect(result.query).toEqual({
       format: 'standalone',
       breach: { query: 'FROM logs-*' },
@@ -366,12 +366,12 @@ describe('mapRuleToComposeFormValues', () => {
       ...baseRuleResponse,
       grouping: { fields: ['host.name'] },
     } as RuleResponse;
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     expect(result.grouping).toEqual({ fields: ['host.name'] });
   });
 
   it('omits grouping when absent', () => {
-    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    const result = mapRuleResponseToFormValues(baseRuleResponse);
     expect(result.grouping).toBeUndefined();
   });
 
@@ -380,7 +380,7 @@ describe('mapRuleToComposeFormValues', () => {
       ...baseRuleResponse,
       state_transition: { pending_count: 3, pending_timeframe: '10m' },
     } as RuleResponse;
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     expect(result.stateTransition).toEqual({
       pendingCount: 3,
       pendingTimeframe: '10m',
@@ -392,7 +392,7 @@ describe('mapRuleToComposeFormValues', () => {
   });
 
   it('initializes stateTransition with null fields when absent from response', () => {
-    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    const result = mapRuleResponseToFormValues(baseRuleResponse);
     expect(result.stateTransition).toEqual({
       pendingCount: null,
       pendingTimeframe: null,
@@ -410,7 +410,7 @@ describe('mapRuleToComposeFormValues', () => {
         { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
       ],
     } as RuleResponse;
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', value: 'host-a' }]);
     expect(result.runbookArtifacts).toEqual([
       { id: 'runbook-id', type: 'runbook', value: 'steps here' },
@@ -425,7 +425,7 @@ describe('mapRuleToComposeFormValues', () => {
       ...baseRuleResponse,
       state_transition: { recovering_count: 5 },
     } as RuleResponse;
-    const result = mapRuleToComposeFormValues(rule);
+    const result = mapRuleResponseToFormValues(rule);
     expect(result.stateTransitionRecoveryDelayMode).toBe('recoveries');
   });
 });

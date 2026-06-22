@@ -35,9 +35,9 @@ import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
-  mapRuleToComposeFormValues,
   mapYamlFormValuesToComposeFormValues,
 } from './compose_mappers';
+import { mapRuleResponseToFormValues } from '../../form/utils/rule_request_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { isAlertTabDisabled } from './compose_discover_tabs';
@@ -103,7 +103,7 @@ export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
-  rule?: Parameters<typeof mapRuleToComposeFormValues>[0];
+  rule?: Parameters<typeof mapRuleResponseToFormValues>[0];
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
@@ -179,7 +179,7 @@ export function ComposeDiscoverFlyout({
   const baseServices = services;
 
   const initialMapped =
-    (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
+    (mode === 'edit' || mode === 'clone') && rule ? mapRuleResponseToFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
@@ -223,7 +223,7 @@ export function ComposeDiscoverFlyout({
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<FormValues>(() => {
     if (rule) {
-      const mapped = mapRuleToComposeFormValues(rule);
+      const mapped = mapRuleResponseToFormValues(rule);
       if (mode === 'clone') {
         return {
           ...mapped,

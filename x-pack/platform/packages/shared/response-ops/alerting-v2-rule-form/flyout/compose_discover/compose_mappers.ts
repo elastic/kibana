@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { splitArtifactsByType } from '../../form/utils/artifact_mappers';
 import { DELAY_MODE } from '../../form/types';
 import type { FormValues } from '../../form/types';
@@ -16,7 +16,6 @@ import {
 import {
   mapFormValuesToCreateRequest as baseCreateRequest,
   mapFormValuesToUpdateRequest as baseUpdateRequest,
-  mapRuleResponseToFormValues,
 } from '../../form/utils/rule_request_mappers';
 import type { ComposeFormValues } from './compose_form_types';
 
@@ -86,9 +85,6 @@ export const composeFormToUpdateRequest = (
     state_transition: applyDelayModeFilter(formValues) ?? null,
   };
 };
-
-export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValues =>
-  mapRuleResponseToFormValues(rule) as ComposeFormValues;
 
 /** Bridge YAML parse output into compose form values for the Discover flyout. */
 export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): ComposeFormValues => ({
