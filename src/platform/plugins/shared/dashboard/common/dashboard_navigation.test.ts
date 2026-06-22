@@ -72,6 +72,15 @@ describe('createDashboardsNavigationNode', () => {
           ],
         },
         {
+          id: 'dashboards_starred',
+          title: 'Starred',
+          emptyState: {
+            iconType: 'starEmpty',
+            message: 'Star a dashboard to see it here',
+          },
+          children: [],
+        },
+        {
           id: 'dashboards_recent',
           title: 'Recent',
           animateItemReorder: true,
@@ -108,6 +117,10 @@ describe('createDashboardsNavigationNode', () => {
     expect(node.children?.[1]).toMatchObject({
       id: 'dashboards_starred',
       title: 'Starred',
+      emptyState: {
+        iconType: 'starEmpty',
+        message: 'Star a dashboard to see it here',
+      },
     });
     expect(node.children?.[2]).toMatchObject({
       id: 'dashboards_recent',
@@ -120,7 +133,7 @@ describe('createDashboardsNavigationNode', () => {
     });
   });
 
-  it('always shows the recent section with an empty state in the side panel', () => {
+  it('always shows starred and recent sections with empty states in the side panel', () => {
     const deepLinks = {
       [DASHBOARD_APP_ID]: getDeepLink(DASHBOARD_APP_ID, 'app/dashboards#/list', 'Dashboards'),
       [DASHBOARD_ALL_NAV_LINK]: getDeepLink(
@@ -148,6 +161,15 @@ describe('createDashboardsNavigationNode', () => {
 
     expect(dashboardsItem?.sections).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          id: 'dashboards_starred',
+          label: 'Starred',
+          items: [],
+          emptyState: {
+            iconType: 'starEmpty',
+            message: 'Star a dashboard to see it here',
+          },
+        }),
         expect.objectContaining({
           id: 'dashboards_recent',
           label: 'Recent',

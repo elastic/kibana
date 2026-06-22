@@ -92,15 +92,19 @@ export const createDashboardsNavigationNode = (
     },
   ];
 
-  if (options.starredDashboards?.length) {
-    children.push({
-      id: 'dashboards_starred',
-      title: i18n.translate('dashboard.nav.starred', {
-        defaultMessage: 'Starred',
+  children.push({
+    id: 'dashboards_starred',
+    title: i18n.translate('dashboard.nav.starred', {
+      defaultMessage: 'Starred',
+    }),
+    emptyState: {
+      iconType: 'starEmpty',
+      message: i18n.translate('dashboard.nav.starredEmpty', {
+        defaultMessage: 'Dashboards you starred',
       }),
-      children: options.starredDashboards.map(createDashboardPanelItem),
-    });
-  }
+    },
+    children: options.starredDashboards?.map(createDashboardPanelItem) ?? [],
+  });
 
   children.push({
     id: 'dashboards_recent',
@@ -111,7 +115,7 @@ export const createDashboardsNavigationNode = (
     emptyState: {
       iconType: 'clockCounter',
       message: i18n.translate('dashboard.nav.recentEmpty', {
-        defaultMessage: 'Recently visited dashboards will show here',
+        defaultMessage: 'Dashboards you recently visited',
       }),
     },
     children: options.recentDashboards?.map(createDashboardPanelItem) ?? [],
