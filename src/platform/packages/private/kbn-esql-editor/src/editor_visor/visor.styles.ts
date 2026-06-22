@@ -42,9 +42,12 @@ export const visorStyles = (
     comboBoxWrapper: css`
       justify-content: center;
       padding-left: ${euiTheme.size.xs};
-      flex-grow: 1;
-      max-width: ${isSpaceReduced ? `calc(${visorWidthPercentage * 100}%)` : `${comboBoxWidth}px`};
       overflow: hidden;
+      ${isInline
+        ? 'flex: 1 0 100%;'
+        : `flex-grow: 1; max-width: ${
+            isSpaceReduced ? `calc(${visorWidthPercentage * 100}%)` : `${comboBoxWidth}px`
+          };`}
     `,
     separator: css`
       width: 1px;

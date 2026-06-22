@@ -289,7 +289,7 @@ export function QuickSearchVisor({
           responsive={false}
           css={styles.visorBox}
         >
-          <EuiFlexItem grow={false} css={styles.comboBoxWrapper}>
+          <EuiFlexItem grow={isInline ? true : false} css={styles.comboBoxWrapper}>
             <SourcesDropdown
               currentSources={selectedSources.map((source) => source.label)}
               isDisabled={isNlLoading}
