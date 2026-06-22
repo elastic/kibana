@@ -8,7 +8,7 @@
 import { tags, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-import { SECOND_CLIENT_P12, KIBANA_TLS_ORIGIN } from '../fixtures/constants';
+import { KIBANA_TLS_ORIGIN, SECOND_CLIENT_P12 } from '../fixtures/constants';
 
 test.use({
   clientCertificates: [{ origin: KIBANA_TLS_ORIGIN, pfx: SECOND_CLIENT_P12, passphrase: '' }],
