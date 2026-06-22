@@ -30,7 +30,7 @@ import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { useIsAgentBuilderAvailable } from '../../hooks/use_is_agent_builder_available';
+import { useIsRuleManagementABSkillAvailable } from '../../hooks/use_is_rule_management_ab_skill_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 
 import { RulesListTableContainer } from './rules_list_table_container';
@@ -67,8 +67,7 @@ export const RulesListPage = () => {
   const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
-  const { hasAgentBuilderCapability, isExperimentalEnabled } = useIsAgentBuilderAvailable();
-  const isAgentBuilderAvailable = hasAgentBuilderCapability && isExperimentalEnabled;
+  const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -211,7 +210,7 @@ export const RulesListPage = () => {
                                   },
                                   'data-test-subj': 'createEsqlRuleButton',
                                 },
-                                ...(isAgentBuilderAvailable
+                                ...(isRuleManagementABSkillAvailable
                                   ? [
                                       {
                                         name: i18n.translate(
@@ -268,7 +267,7 @@ export const RulesListPage = () => {
       {showEmptyState ? (
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
-          onCreateWithAgent={isAgentBuilderAvailable ? navigateToAgentBuilder : undefined}
+          onCreateWithAgent={isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
@@ -322,7 +321,7 @@ export const RulesListPage = () => {
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={
-            isAgentBuilderAvailable ? onCreateWithAgentFromOptionsFlyout : undefined
+            isRuleManagementABSkillAvailable ? onCreateWithAgentFromOptionsFlyout : undefined
           }
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />

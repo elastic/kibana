@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { useIsAgentBuilderAvailable } from './use_is_agent_builder_available';
+import { useIsRuleManagementABSkillAvailable } from './use_is_rule_management_ab_skill_available';
 
 jest.mock('@kbn/core-di-browser');
 
@@ -46,56 +46,44 @@ const setupMocks = ({
   });
 };
 
-describe('useIsAgentBuilderAvailable', () => {
+describe('useIsRuleManagementABSkillAvailable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns both flags as true when agent builder capability is enabled and experimental features are on', () => {
+  it('returns true when agent builder capability is enabled and experimental features are on', () => {
     setupMocks({ agentBuilderShow: true, experimentalFeaturesEnabled: true });
 
-    const { result } = renderHook(() => useIsAgentBuilderAvailable());
+    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
 
-    expect(result.current).toEqual({
-      hasAgentBuilderCapability: true,
-      isExperimentalEnabled: true,
-    });
+    expect(result.current).toBe(true);
   });
 
-  it('returns hasAgentBuilderCapability false when agent builder capability is disabled', () => {
+  it('returns false when agent builder capability is disabled', () => {
     setupMocks({ agentBuilderShow: false, experimentalFeaturesEnabled: true });
 
-    const { result } = renderHook(() => useIsAgentBuilderAvailable());
+    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
 
-    expect(result.current).toEqual({
-      hasAgentBuilderCapability: false,
-      isExperimentalEnabled: true,
-    });
+    expect(result.current).toBe(false);
   });
 
-  it('returns isExperimentalEnabled false when experimental features are disabled', () => {
+  it('returns false when experimental features are disabled', () => {
     setupMocks({ agentBuilderShow: true, experimentalFeaturesEnabled: false });
 
-    const { result } = renderHook(() => useIsAgentBuilderAvailable());
+    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
 
-    expect(result.current).toEqual({
-      hasAgentBuilderCapability: true,
-      isExperimentalEnabled: false,
-    });
+    expect(result.current).toBe(false);
   });
 
-  it('returns both flags as false when both are disabled', () => {
+  it('returns false when both are disabled', () => {
     setupMocks({ agentBuilderShow: false, experimentalFeaturesEnabled: false });
 
-    const { result } = renderHook(() => useIsAgentBuilderAvailable());
+    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
 
-    expect(result.current).toEqual({
-      hasAgentBuilderCapability: false,
-      isExperimentalEnabled: false,
-    });
+    expect(result.current).toBe(false);
   });
 
-  it('returns hasAgentBuilderCapability false when agentBuilder capabilities are missing entirely', () => {
+  it('returns false when agentBuilder capabilities are missing entirely', () => {
     mockCoreStart.mockImplementation((key: string) => key as any);
     mockUseService.mockImplementation((service: unknown) => {
       if (service === 'uiSettings') {
@@ -109,11 +97,8 @@ describe('useIsAgentBuilderAvailable', () => {
       return undefined as any;
     });
 
-    const { result } = renderHook(() => useIsAgentBuilderAvailable());
+    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
 
-    expect(result.current).toEqual({
-      hasAgentBuilderCapability: false,
-      isExperimentalEnabled: true,
-    });
+    expect(result.current).toBe(false);
   });
 });

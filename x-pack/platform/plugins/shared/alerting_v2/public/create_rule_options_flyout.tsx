@@ -24,7 +24,7 @@ import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
-import { getAgentBuilderAvailability } from './hooks/use_is_agent_builder_available';
+import { getIsRuleManagementABSkillAvailable } from './hooks/use_is_rule_management_ab_skill_available';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 
@@ -237,11 +237,10 @@ const CreateRuleOptionsFlyoutInner = ({
 
   const { services, ComposeDiscoverFlyout } = value;
 
-  const { hasAgentBuilderCapability, isExperimentalEnabled } = getAgentBuilderAvailability(
+  const isRuleManagementABSkillAvailable = getIsRuleManagementABSkillAvailable(
     services.application,
     services.uiSettings
   );
-  const isAgentBuilderAvailable = hasAgentBuilderCapability && isExperimentalEnabled;
 
   if (step.type === 'esql') {
     return (
@@ -283,7 +282,7 @@ const CreateRuleOptionsFlyoutInner = ({
     <RuleCreateOptionsFlyout
       onClose={onClose}
       onCreateEsqlRule={() => setStep({ type: 'esql' })}
-      onCreateWithAgent={isAgentBuilderAvailable ? navigateToAgentBuilder : undefined}
+      onCreateWithAgent={isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined}
       onCreateThresholdAlert={() => setStep({ type: 'threshold' })}
       legacyRuleTypes={legacyPanelItems}
     />

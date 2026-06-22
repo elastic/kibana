@@ -10,30 +10,25 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
-export interface AgentBuilderAvailability {
-  hasAgentBuilderCapability: boolean;
-  isExperimentalEnabled: boolean;
-}
-
 /**
  * Pure function usable outside of the DI context (e.g. the Discover flyout).
  */
-export const getAgentBuilderAvailability = (
+export const getIsRuleManagementABSkillAvailable = (
   application: ApplicationStart,
   uiSettings: IUiSettingsClient
-): AgentBuilderAvailability => {
-  const hasAgentBuilderCapability = application.capabilities.agentBuilder?.show === true;
+): boolean => {
+  const hasCapability = application.capabilities.agentBuilder?.show === true;
   const isExperimentalEnabled = uiSettings.get<boolean>(
     AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
   );
-  return { hasAgentBuilderCapability, isExperimentalEnabled };
+  return hasCapability && isExperimentalEnabled;
 };
 
 /**
  * Hook for components rendered inside the Inversify DI context.
  */
-export const useIsAgentBuilderAvailable = (): AgentBuilderAvailability => {
+export const useIsRuleManagementABSkillAvailable = (): boolean => {
   const uiSettings = useService(CoreStart('uiSettings'));
   const application = useService(CoreStart('application'));
-  return getAgentBuilderAvailability(application, uiSettings);
+  return getIsRuleManagementABSkillAvailable(application, uiSettings);
 };
