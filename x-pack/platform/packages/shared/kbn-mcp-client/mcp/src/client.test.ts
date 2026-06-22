@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 import { McpClient } from './client';
+import { McpConnectionError } from './errors';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import {
   StreamableHTTPClientTransport,
@@ -362,6 +363,44 @@ describe('McpClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error connecting to MCP server test-client, 1.0.0: [object Object]'
       );
+    });
+
+    it('throws McpConnectionError with httpStatus from StreamableHTTPError.code', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const error = new StreamableHTTPError(500, 'Connection failed');
+      mockClient.connect.mockRejectedValue(error);
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(McpConnectionError);
+      expect((thrown as McpConnectionError).httpStatus).toBe(500);
+      expect((thrown as McpConnectionError).message).toBe(
+        'Streamable HTTP error: Connection failed'
+      );
+    });
+
+    it('throws McpConnectionError with httpStatus 401 for UnauthorizedError', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const error = new UnauthorizedError('Auth failed');
+      mockClient.connect.mockRejectedValue(error);
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(McpConnectionError);
+      expect((thrown as McpConnectionError).httpStatus).toBe(401);
+      expect((thrown as McpConnectionError).message).toContain('Unauthorized error');
+    });
+
+    it('throws McpConnectionError with no httpStatus for generic errors', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const error = new Error('Generic error');
+      mockClient.connect.mockRejectedValue(error);
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(McpConnectionError);
+      expect((thrown as McpConnectionError).httpStatus).toBeUndefined();
+      expect((thrown as McpConnectionError).message).toContain('Error connecting to MCP server');
     });
   });
 

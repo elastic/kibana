@@ -8,7 +8,7 @@
  */
 
 import type { AxiosInstance } from 'axios';
-import { McpClient } from '@kbn/mcp-client';
+import { McpClient, McpConnectionError } from '@kbn/mcp-client';
 import type { FetchLike } from '@kbn/mcp-client';
 import type { ClientTypeSpec } from './client_type_spec';
 
@@ -60,6 +60,12 @@ export const mcpClientType: ClientTypeSpec<McpClient> = {
   },
 
   isUserError(err: unknown): boolean {
-    return err instanceof Error && err.message === 'config.serverUrl is required';
+    if (err instanceof Error && err.message === 'config.serverUrl is required') {
+      return true;
+    }
+    if (err instanceof McpConnectionError) {
+      return err.httpStatus === 401 || err.httpStatus === 403;
+    }
+    return false;
   },
 };

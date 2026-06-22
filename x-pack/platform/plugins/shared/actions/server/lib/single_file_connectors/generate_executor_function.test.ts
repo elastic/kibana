@@ -379,6 +379,83 @@ describe('generateExecutorFunction', () => {
       expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
     });
 
+    it('MCP 401 connect failure surfaces with USER tag (end-to-end via isUserError seam)', async () => {
+      const mcpError = Object.assign(
+        new Error('Unauthorized error: Error POSTing to endpoint: Unauthorized'),
+        { httpStatus: 401 }
+      );
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockRejectedValue(mcpError),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        isUserError: (err: unknown) => {
+          const e = err as { httpStatus?: number };
+          return (
+            typeof e?.httpStatus === 'number' && (e.httpStatus === 401 || e.httpStatus === 403)
+          );
+        },
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('mcp');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getClientLeasePool: () => pool,
+        network: mockNetwork,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
+    });
+
+    it('MCP 500 connect failure surfaces with FRAMEWORK tag', async () => {
+      const mcpError = Object.assign(new Error('Streamable HTTP error: Internal Server Error'), {
+        httpStatus: 500,
+      });
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockRejectedValue(mcpError),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        isUserError: (err: unknown) => {
+          const e = err as { httpStatus?: number };
+          return (
+            typeof e?.httpStatus === 'number' && (e.httpStatus === 401 || e.httpStatus === 403)
+          );
+        },
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('mcp');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getClientLeasePool: () => pool,
+        network: mockNetwork,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
     it('returns {status:error} for an untagged handler error — no getClient involved (regression)', async () => {
       mockHandler.mockRejectedValue(new Error('direct handler failure'));
 

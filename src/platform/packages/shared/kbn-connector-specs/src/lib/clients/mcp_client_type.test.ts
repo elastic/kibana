@@ -10,12 +10,16 @@
 import { mcpClientType } from './mcp_client_type';
 import { mysqlClientType } from './mysql_client_type';
 import { clientTypes } from '.';
-import { McpClient } from '@kbn/mcp-client';
+import { McpClient, McpConnectionError } from '@kbn/mcp-client';
 import type { FetchLike, McpClientOptions } from '@kbn/mcp-client';
 
-jest.mock('@kbn/mcp-client', () => ({
-  McpClient: jest.fn(),
-}));
+jest.mock('@kbn/mcp-client', () => {
+  const actual = jest.requireActual('@kbn/mcp-client');
+  return {
+    ...actual,
+    McpClient: jest.fn(),
+  };
+});
 
 const MockMcpClient = McpClient as unknown as jest.Mock;
 
@@ -84,7 +88,11 @@ describe('mcpClientType', () => {
 
       expect(MockMcpClient).toHaveBeenCalledWith(
         fakeLogger,
-        { name: 'kibana-mcp-http://mcp.example.com', version: '1.0.0', url: 'http://mcp.example.com' },
+        {
+          name: 'kibana-mcp-http://mcp.example.com',
+          version: '1.0.0',
+          url: 'http://mcp.example.com',
+        },
         expect.objectContaining({
           headers: expect.objectContaining({ Authorization: 'Bearer test-token' }),
           fetch: expect.any(Function),
@@ -154,7 +162,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch!;
+      const guardedFetch = options.fetch;
 
       fakeNetwork.ensureUriAllowed.mockClear();
       await guardedFetch('http://mcp.example.com/mcp', { method: 'POST' });
@@ -168,7 +176,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch!;
+      const guardedFetch = options.fetch;
 
       fakeNetwork.ensureUriAllowed.mockClear();
       const urlObj = new URL('http://mcp.example.com/mcp');
@@ -182,7 +190,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch!;
+      const guardedFetch = options.fetch;
 
       fakeNetwork.ensureUriAllowed.mockImplementation(() => {
         throw new Error('URI not allowed');
@@ -215,19 +223,37 @@ describe('mcpClientType', () => {
   });
 
   describe('isUserError', () => {
+    const isUserError = mcpClientType.isUserError as (err: unknown) => boolean;
+
     it('returns true for the missing serverUrl pre-connect error', () => {
-      expect(mcpClientType.isUserError!(new Error('config.serverUrl is required'))).toBe(true);
+      expect(isUserError(new Error('config.serverUrl is required'))).toBe(true);
     });
 
     it('returns false for other Error instances', () => {
-      expect(mcpClientType.isUserError!(new Error('something else went wrong'))).toBe(false);
-      expect(mcpClientType.isUserError!(new Error('Error connecting to MCP server: timeout'))).toBe(false);
+      expect(isUserError(new Error('something else went wrong'))).toBe(false);
+      expect(isUserError(new Error('Error connecting to MCP server: timeout'))).toBe(false);
     });
 
     it('returns false for non-Error values', () => {
-      expect(mcpClientType.isUserError!('config.serverUrl is required')).toBe(false);
-      expect(mcpClientType.isUserError!(null)).toBe(false);
-      expect(mcpClientType.isUserError!(undefined)).toBe(false);
+      expect(isUserError('config.serverUrl is required')).toBe(false);
+      expect(isUserError(null)).toBe(false);
+      expect(isUserError(undefined)).toBe(false);
+    });
+
+    it('returns true for McpConnectionError with httpStatus 401', () => {
+      expect(isUserError(new McpConnectionError('Unauthorized', { httpStatus: 401 }))).toBe(true);
+    });
+
+    it('returns true for McpConnectionError with httpStatus 403', () => {
+      expect(isUserError(new McpConnectionError('Forbidden', { httpStatus: 403 }))).toBe(true);
+    });
+
+    it('returns false for McpConnectionError with httpStatus 500', () => {
+      expect(isUserError(new McpConnectionError('Server error', { httpStatus: 500 }))).toBe(false);
+    });
+
+    it('returns false for McpConnectionError with no httpStatus', () => {
+      expect(isUserError(new McpConnectionError('Unknown connection error'))).toBe(false);
     });
   });
 });
