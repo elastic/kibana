@@ -129,12 +129,17 @@ const formatHeader = (baseContext: ValidationBaseContext) => {
 
   const { contract, runContext } = baseContext;
 
-  if (runContext.kind === 'affected' && runContext.resolvedBase && contract.scope === 'branch') {
+  if (
+    runContext.kind === 'affected' &&
+    runContext.resolvedBase &&
+    (contract.scope === 'branch' || contract.scope === 'prepush')
+  ) {
+    const label = contract.scope === 'prepush' ? 'prepush' : 'branch';
     const base = runContext.resolvedBase.baseRef;
     const sha = runContext.resolvedBase.base.slice(0, 12);
     const commits =
       runContext.branchCommitCount !== undefined ? `  ${runContext.branchCommitCount} commits` : '';
-    return `check  branch  ${base} (${sha})..HEAD${commits}`;
+    return `check  ${label}  ${base} (${sha})..HEAD${commits}`;
   }
 
   return `check  scope=${contract.scope}`;
@@ -541,6 +546,7 @@ run(
         node scripts/check --scope local
         node scripts/check --profile agent
         node scripts/check --scope branch --base-ref origin/main
+        node scripts/check --scope prepush
     `,
     flags: {
       string: [...VALIDATION_RUN_STRING_FLAGS],

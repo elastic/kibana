@@ -66,7 +66,7 @@ export const describeValidationScope = (baseContext: ValidationBaseContext): str
       `head=HEAD`
     );
 
-    if (contract.scope === 'branch') {
+    if (contract.scope === 'branch' || contract.scope === 'prepush') {
       parts.push(`commits=${runContext.branchCommitCount ?? 'unknown'}`);
     }
   } else if (runContext.kind === 'full' && runContext.reason) {
@@ -83,7 +83,11 @@ export const describeValidationNoTargetsScope = (baseContext: ValidationBaseCont
   }
 
   const { contract, runContext } = baseContext;
-  if (contract.scope === 'branch' && runContext.kind === 'affected' && runContext.resolvedBase) {
+  if (
+    (contract.scope === 'branch' || contract.scope === 'prepush') &&
+    runContext.kind === 'affected' &&
+    runContext.resolvedBase
+  ) {
     return `between ${runContext.resolvedBase.baseRef} (${formatShortRevision(
       runContext.resolvedBase.base
     )}) and HEAD`;
@@ -95,6 +99,10 @@ export const describeValidationNoTargetsScope = (baseContext: ValidationBaseCont
 
   if (contract.scope === 'local') {
     return 'in local changes';
+  }
+
+  if (contract.scope === 'prepush') {
+    return 'in unpushed commits';
   }
 
   return 'for the selected validation scope';
@@ -122,7 +130,11 @@ export const describeValidationScoping = ({
   const { contract, runContext } = baseContext;
   const contractSummary = `scope=${contract.scope}, test-mode=${contract.testMode}, downstream=${contract.downstream}`;
 
-  if (runContext.kind === 'affected' && runContext.resolvedBase && contract.scope === 'branch') {
+  if (
+    runContext.kind === 'affected' &&
+    runContext.resolvedBase &&
+    (contract.scope === 'branch' || contract.scope === 'prepush')
+  ) {
     const changeSummary =
       runContext.branchCommitCount === undefined
         ? 'commits'
@@ -138,6 +150,10 @@ export const describeValidationScoping = ({
 
   if (runContext.kind === 'affected' && contract.scope === 'local') {
     return `Checking ${targetSummary} affected by local changes (${contractSummary}).`;
+  }
+
+  if (runContext.kind === 'affected' && contract.scope === 'prepush') {
+    return `Checking ${targetSummary} affected by unpushed commits (${contractSummary}).`;
   }
 
   return `Checking ${targetSummary} (${contractSummary}).`;
