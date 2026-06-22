@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type {
+  AuditLogger,
+  CallerSnapshot,
+  CoreSecurityDelegateContract,
+} from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
@@ -111,6 +116,244 @@ describe('buildSecurityApi', () => {
       const result = await api.authc.getRedactedSessionId(request);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('authc.captureCaller / authc.replayCaller / authc.stampCaller / authc.adoptPersistedCaller', () => {
+    // `captureCaller` reads `request.fakeRawRequest?.spaceId` directly (it does NOT
+    // use the public `KibanaRequest.spaceId` field). This shim mirrors that exact access
+    // path so the tests exercise the production code path without depending on internal
+    // details of `kibanaRequestFactory`.
+    const buildCaptureInput = (overrides: {
+      authorization?: string;
+      spaceId?: string;
+    }): KibanaRequest => {
+      const headers = overrides.authorization ? { authorization: overrides.authorization } : {};
+      return {
+        headers,
+        fakeRawRequest: overrides.spaceId ? { spaceId: overrides.spaceId } : undefined,
+      } as unknown as KibanaRequest;
+    };
+
+    describe('captureCaller', () => {
+      it('returns undefined when the request has no authorization, no spaceId, and no resolved profile', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const request = httpServerMock.createKibanaRequest();
+
+        await expect(api.authc.captureCaller(request)).resolves.toBeUndefined();
+      });
+
+      it('returns a v:1 snapshot with authorization only when only auth is set', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).toEqual({ v: 1, authorization: 'ApiKey abc' });
+      });
+
+      it('returns a v:1 snapshot with authorization and spaceId when both are set', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const request = buildCaptureInput({ authorization: 'ApiKey abc', spaceId: 'marketing' });
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).toEqual({ v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' });
+      });
+
+      it('includes userProfileId when getCurrentUser resolves a profile_uid', async () => {
+        authc.getCurrentUser.mockReturnValue(
+          securityMock.createMockAuthenticatedUser({ profile_uid: 'uid-abc-123' })
+        );
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).toEqual({
+          v: 1,
+          authorization: 'ApiKey abc',
+          userProfileId: 'uid-abc-123',
+        });
+      });
+
+      it('omits userProfileId when getCurrentUser returns null', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).not.toHaveProperty('userProfileId');
+      });
+
+      it('omits userProfileId when getCurrentUser throws (best-effort)', async () => {
+        authc.getCurrentUser.mockImplementation(() => {
+          throw new Error('auth failure');
+        });
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).not.toHaveProperty('userProfileId');
+      });
+
+      it('returns a snapshot with only userProfileId when no auth and no spaceId but profile resolves', async () => {
+        authc.getCurrentUser.mockReturnValue(
+          securityMock.createMockAuthenticatedUser({ profile_uid: 'uid-only' })
+        );
+        const request = buildCaptureInput({});
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).toEqual({ v: 1, userProfileId: 'uid-only' });
+      });
+    });
+
+    describe('replayCaller', () => {
+      it('returns undefined for a snapshot with unknown v', () => {
+        const snapshot = { v: 2, authorization: 'ApiKey abc' } as unknown as CallerSnapshot;
+
+        expect(api.authc.replayCaller(snapshot)).toBeUndefined();
+      });
+
+      it('returns undefined when snapshot is missing v entirely', () => {
+        const snapshot = api.authc.adoptPersistedCaller({
+          authorization: 'ApiKey abc',
+        });
+        // adoptPersistedCaller requires numeric v — without it, returns undefined
+        expect(snapshot).toBeUndefined();
+      });
+
+      it('returns undefined for v1 snapshot without authorization', () => {
+        const snapshot = { v: 1, spaceId: 'marketing' } as unknown as CallerSnapshot;
+
+        expect(api.authc.replayCaller(snapshot)).toBeUndefined();
+      });
+
+      it('rebuilds a KibanaRequest with the persisted authorization header', () => {
+        const snapshot = { v: 1, authorization: 'ApiKey abc' } as unknown as CallerSnapshot;
+
+        const replayed = api.authc.replayCaller(snapshot);
+
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
+      });
+
+      it('rebuilds a KibanaRequest with the persisted spaceId', () => {
+        const snapshot = {
+          v: 1,
+          authorization: 'ApiKey abc',
+          spaceId: 'marketing',
+        } as unknown as CallerSnapshot;
+
+        const replayed = api.authc.replayCaller(snapshot);
+
+        expect(replayed).toBeDefined();
+        expect(replayed!.spaceId).toBe('marketing');
+      });
+    });
+
+    describe('stampCaller', () => {
+      it('returns undefined when all parts are empty', () => {
+        expect(api.authc.stampCaller({})).toBeUndefined();
+      });
+
+      it('mints a v:1 snapshot with provided fields, omitting absent ones', () => {
+        const snapshot = api.authc.stampCaller({
+          authorization: 'Bearer tok',
+          spaceId: 'sales',
+        }) as unknown as Record<string, unknown> | undefined;
+
+        expect(snapshot).toEqual({ v: 1, authorization: 'Bearer tok', spaceId: 'sales' });
+      });
+
+      it('round-trips through replayCaller', () => {
+        const snapshot = api.authc.stampCaller({
+          authorization: 'ApiKey abc',
+          spaceId: 'marketing',
+        });
+        expect(snapshot).toBeDefined();
+
+        const replayed = api.authc.replayCaller(snapshot!);
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
+        expect(replayed!.spaceId).toBe('marketing');
+      });
+    });
+
+    describe('adoptPersistedCaller', () => {
+      it('returns undefined for null', () => {
+        expect(api.authc.adoptPersistedCaller(null)).toBeUndefined();
+      });
+
+      it('returns undefined for non-objects', () => {
+        expect(api.authc.adoptPersistedCaller('string')).toBeUndefined();
+        expect(api.authc.adoptPersistedCaller(42)).toBeUndefined();
+        expect(api.authc.adoptPersistedCaller(undefined)).toBeUndefined();
+      });
+
+      it('returns undefined when v is missing', () => {
+        expect(api.authc.adoptPersistedCaller({ authorization: 'ApiKey abc' })).toBeUndefined();
+      });
+
+      it('returns undefined when v is not a number', () => {
+        expect(
+          api.authc.adoptPersistedCaller({ v: '1', authorization: 'ApiKey abc' })
+        ).toBeUndefined();
+      });
+
+      it('returns the value brand-cast for an object with numeric v', () => {
+        const persisted = { v: 1, authorization: 'ApiKey abc', spaceId: 'sales' };
+        const snapshot = api.authc.adoptPersistedCaller(persisted);
+
+        expect(snapshot).toBeDefined();
+        expect(snapshot).toBe(persisted);
+      });
+
+      it('the returned value can be passed to replayCaller without further casts', () => {
+        const persisted = { v: 1, authorization: 'ApiKey abc' };
+        const snapshot = api.authc.adoptPersistedCaller(persisted);
+        expect(snapshot).toBeDefined();
+
+        const replayed = api.authc.replayCaller(snapshot!);
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
+      });
+    });
+
+    describe('round-trip', () => {
+      it('captureCaller -> replayCaller reproduces authorization and spaceId', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const source = buildCaptureInput({
+          authorization: 'ApiKey abc',
+          spaceId: 'marketing',
+        });
+
+        const snapshot = await api.authc.captureCaller(source);
+        expect(snapshot).toBeDefined();
+
+        const replayed = api.authc.replayCaller(snapshot!);
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
+        expect(replayed!.spaceId).toBe('marketing');
+      });
     });
   });
 

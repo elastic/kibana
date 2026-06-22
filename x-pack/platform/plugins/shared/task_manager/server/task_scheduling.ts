@@ -8,7 +8,8 @@
 import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CallerSnapshot, CoreAuthenticationService } from '@kbn/core-security-server';
 import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
@@ -59,6 +60,16 @@ export interface TaskSchedulingOpts {
   middleware: Middleware;
   taskManagerId: string;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  /**
+   * Lazy accessor for Core's security authc service. When provided,
+   * `schedule()` and `bulkSchedule()` will `await captureCaller(request)`
+   * for any task scheduled with a `request` option, and stamp the resulting
+   * `CallerSnapshot` onto `task.callerSnapshot`. Optional: when not provided
+   * (e.g. very early bootstrap, or when no security implementation is
+   * registered), no snapshot is captured and the runner falls back to the
+   * legacy api-key-based fake request path at run time.
+   */
+  getCoreAuthc?: () => CoreAuthenticationService | undefined;
 }
 
 /**
@@ -99,6 +110,7 @@ export class TaskScheduling {
   private logger: Logger;
   private middleware: Middleware;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly getCoreAuthc?: () => CoreAuthenticationService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -110,6 +122,31 @@ export class TaskScheduling {
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.getCoreAuthc = opts.getCoreAuthc;
+  }
+
+  /**
+   * Captures the caller's identity context as a `CallerSnapshot` when the
+   * schedule was initiated via an authenticated request and Core/Security
+   * is available. Returns `undefined` to indicate "no snapshot" (the runner
+   * will fall back to the legacy api-key path at run time).
+   *
+   * Best-effort: any error from `captureCaller` is logged at debug and
+   * swallowed — task scheduling must not fail because identity capture
+   * couldn't run.
+   */
+  private async maybeCaptureCaller(request?: KibanaRequest): Promise<CallerSnapshot | undefined> {
+    if (!request) return undefined;
+    const coreAuthc = this.getCoreAuthc?.();
+    if (!coreAuthc) return undefined;
+    try {
+      return await coreAuthc.captureCaller(request);
+    } catch (e) {
+      this.logger.debug(
+        `captureCaller failed during task scheduling; falling back to legacy path: ${e.message}`
+      );
+      return undefined;
+    }
   }
 
   /**
@@ -132,11 +169,14 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
+    const callerSnapshot = await this.maybeCaptureCaller(options?.request);
+
     return await this.store.schedule(
       {
         ...modifiedTask,
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
+        ...(callerSnapshot ? { callerSnapshot } : {}),
       },
       scheduleOptionsToStoreApiKeyOptions(options)
     );
@@ -156,6 +196,10 @@ export class TaskScheduling {
       agent.currentTransaction && agent.currentTransaction.type !== 'request'
         ? agent.currentTraceparent
         : '';
+
+    // Capture once for the whole batch — `options.request` is shared across tasks.
+    const callerSnapshot = await this.maybeCaptureCaller(options?.request);
+
     const modifiedTasks = await Promise.all(
       taskInstances.map(async (taskInstance, i, arr) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
@@ -177,6 +221,7 @@ export class TaskScheduling {
           traceparent: traceparent || '',
           enabled,
           ...scheduling,
+          ...(callerSnapshot ? { callerSnapshot } : {}),
         };
       })
     );

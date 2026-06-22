@@ -17,6 +17,10 @@ describe('convertSecurityApi', () => {
       authc: {
         getCurrentUser: jest.fn(),
         getRedactedSessionId: jest.fn(),
+        captureCaller: jest.fn(),
+        replayCaller: jest.fn(),
+        stampCaller: jest.fn(),
+        adoptPersistedCaller: jest.fn(),
         apiKeys: {
           areAPIKeysEnabled: jest.fn(),
           areCrossClusterAPIKeysEnabled: jest.fn(),

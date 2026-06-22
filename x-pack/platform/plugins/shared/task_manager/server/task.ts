@@ -11,6 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { CallerSnapshot } from '@kbn/core-security-server';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -90,8 +91,35 @@ export interface RunContext {
   /**
    * If an API key is associated with the task, a fake KibanaRequest object
    * is generated using the API key and passed as part of the run context.
+   *
+   * This field is the historical adapter to existing scoped-client factories
+   * (e.g. `core.savedObjects.getScopedClient(request)`,
+   * `core.elasticsearch.client.asScoped(request)`). Task definitions written
+   * today are expected to consume `fakeRequest`. New task definitions that
+   * want to interact with snapshot-aware APIs as those are introduced should
+   * prefer `caller` and treat `fakeRequest` as a fallback for scoped-client
+   * factories that still require a `KibanaRequest`.
    */
   fakeRequest?: KibanaRequest;
+
+  /**
+   * Durable identity context for the originating caller, captured at schedule
+   * time via `core.security.authc.captureCaller()`. When present, `fakeRequest`
+   * was reconstructed from this snapshot via `replayCaller()`.
+   *
+   * `caller` is the longer-term currency for "who scheduled this task" —
+   * unlike `fakeRequest`, it carries no transport-layer fakeness (no URL,
+   * method, body, abort signal) and is safe to round-trip through persistence
+   * or pass to snapshot-native APIs as those become available. The
+   * `fakeRequest` field above is an adapter for the existing scoped-client
+   * API surface; the underlying durable identity is this `CallerSnapshot`.
+   *
+   * Absent when the task was scheduled by a code path that does not provide
+   * a `request` (e.g. internal recurring TM tasks), or when no security
+   * implementation is registered.
+   */
+  caller?: CallerSnapshot;
+
   abortController: AbortController;
 }
 
@@ -415,6 +443,19 @@ export interface TaskInstance {
    */
   userScope?: TaskUserScope;
 
+  /**
+   * Identity context captured at schedule time by `core.security.authc.captureCaller()`
+   * and replayed at run time via `core.security.authc.replayCaller()`.
+   * Task Manager persists this untouched and MUST NOT inspect individual fields.
+   *
+   * NOTE: when reading this value out of persistence and passing it to
+   * `replayCaller()`, go through `core.security.authc.adoptPersistedCaller()`
+   * to forge the brand at the persistence trust boundary. The TypeScript
+   * declaration here is a documentation aid; the runtime audit point is
+   * `adoptPersistedCaller`.
+   */
+  callerSnapshot?: CallerSnapshot;
+
   /*
    * Optionally override the priority defined in the task type for this specific task instance
    */
@@ -562,6 +603,7 @@ export type SerializedConcreteTaskInstance = Omit<
   apiKey?: string;
   uiamApiKey?: string;
   userScope?: TaskUserScope;
+  callerSnapshot?: CallerSnapshot;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {

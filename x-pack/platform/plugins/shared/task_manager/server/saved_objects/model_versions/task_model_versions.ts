@@ -17,6 +17,7 @@ import {
   taskSchemaV8,
   taskSchemaV9,
   taskSchemaV10,
+  taskSchemaV11,
 } from '../schemas/task';
 
 import { InstanceTaskCost } from '../../task';
@@ -159,6 +160,20 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
         };
       },
       create: taskSchemaV10,
+    },
+  },
+  '11': {
+    // Additive only: `callerSnapshot` is the identity context captured at
+    // schedule time and replayed via `core.security.authc.replayCaller()`
+    // at run time. No mappings change because the field is not indexed
+    // (taskMappings has `dynamic: false`).
+    changes: [],
+    schemas: {
+      // Permissive forward-compat: older nodes accept additive unknown keys
+      // inside `callerSnapshot` rather than stripping or rejecting them, so
+      // newer identity hints round-trip safely during rolling upgrades.
+      forwardCompatibility: taskSchemaV11.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV11,
     },
   },
 };

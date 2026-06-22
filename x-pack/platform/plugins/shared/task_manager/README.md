@@ -4,6 +4,10 @@ The task manager is a generic system for running background tasks.
 
 [Documentation](https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management)
 
+## Design spikes
+
+- [Caller snapshot design](./docs/caller_snapshot_design.md) (Core/Security-owned identity capture for deferred operations; complements [#261423](https://github.com/elastic/kibana/pull/261423))
+
 It supports:
 
 - Single-run and recurring tasks

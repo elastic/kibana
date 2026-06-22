@@ -8,7 +8,7 @@
  */
 
 export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts';
-export type { CoreAuthenticationService } from './src/authc';
+export type { CoreAuthenticationService, CallerSnapshot } from './src/authc';
 export type { CoreAuditService } from './src/audit';
 export type {
   CoreSecurityDelegateContract,

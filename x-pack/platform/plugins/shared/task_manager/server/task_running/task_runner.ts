@@ -24,6 +24,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { CoreAuthenticationService } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -138,6 +139,15 @@ type Opts = {
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  /**
+   * Lazy accessor for Core's security authc service. Used at run time to
+   * replay a fake `KibanaRequest` from the task's `callerSnapshot`
+   * (see `core.security.authc.replayCaller`). Optional: when not provided
+   * (e.g. very early bootstrap, or when no security implementation is
+   * registered), the runner falls back to the legacy api-key-based fake
+   * request path.
+   */
+  getCoreAuthc?: () => CoreAuthenticationService | undefined;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -194,6 +204,7 @@ export class TaskManagerRunner implements TaskRunner {
   private getPollInterval: () => number;
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
+  private getCoreAuthc?: () => CoreAuthenticationService | undefined;
   private isCancelled = false;
 
   /**
@@ -223,6 +234,7 @@ export class TaskManagerRunner implements TaskRunner {
     getPollInterval,
     apiKeyStrategy,
     eventLogger,
+    getCoreAuthc,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -245,6 +257,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
+    this.getCoreAuthc = getCoreAuthc;
   }
 
   /**
@@ -444,20 +457,42 @@ export class TaskManagerRunner implements TaskRunner {
             'apiKey',
             'uiamApiKey',
             'userScope',
+            'callerSnapshot',
           ]);
-          const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
-            modifiedContext.taskInstance
-          );
-          const fakeRequest = this.getFakeKibanaRequest(
-            apiKeyForRequest,
-            modifiedContext.taskInstance.userScope?.spaceId
-          );
+          // Prefer the Core/Security replay path when the task carries a
+          // `callerSnapshot`. This keeps identity replay logic centralized in
+          // Core/Security and avoids Task-Manager-specific per-attribute knowledge.
+          let fakeRequest: KibanaRequest | undefined;
+          const coreAuthc = this.getCoreAuthc?.();
+          // Persistence trust boundary: the value came from the SO store.
+          // `adoptPersistedCaller` is the one place where we forge the
+          // `CallerSnapshot` brand, and is auditable in `git grep adoptPersistedCaller`.
+          // `replayCaller` then re-validates the version.
+          const callerSnapshot = coreAuthc
+            ? coreAuthc.adoptPersistedCaller(modifiedContext.taskInstance.callerSnapshot)
+            : undefined;
+          if (callerSnapshot) {
+            fakeRequest = coreAuthc?.replayCaller(callerSnapshot);
+          }
+          if (!fakeRequest) {
+            const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
+              modifiedContext.taskInstance
+            );
+            fakeRequest = this.getFakeKibanaRequest(
+              apiKeyForRequest,
+              modifiedContext.taskInstance.userScope?.spaceId
+            );
+          }
 
           const abortController = new AbortController();
 
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
+            // Surface the durable identity snapshot too. `fakeRequest` is the
+            // adapter for existing scoped-client factories; `caller` is the
+            // longer-term currency for snapshot-aware APIs. See `RunContext`.
+            caller: callerSnapshot,
             abortController,
           });
 

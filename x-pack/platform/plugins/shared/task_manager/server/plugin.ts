@@ -460,6 +460,10 @@ export class TaskManagerPlugin
         startingCapacity,
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
+        // Forward Core's security authc service so task runners can replay
+        // scoped fake requests from a task's `callerSnapshot` via
+        // `core.security.authc.replayCaller()`.
+        getCoreAuthc: () => security.authc,
       });
     }
 
@@ -488,6 +492,7 @@ export class TaskManagerPlugin
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      getCoreAuthc: () => security.authc,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
