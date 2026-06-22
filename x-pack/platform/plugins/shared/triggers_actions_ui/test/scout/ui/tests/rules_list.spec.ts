@@ -21,14 +21,6 @@ import { test, makeEsQueryRule, deleteRulesByPrefix } from '../fixtures';
 
 // ── API helpers ──────────────────────────────────────────────────────────────
 
-const disableRule = async (kbnClient: KbnClient, ruleId: string) => {
-  await kbnClient.request({
-    method: 'POST',
-    path: `/api/alerting/rule/${ruleId}/_disable`,
-    headers: { 'kbn-xsrf': 'scout' },
-  });
-};
-
 const snoozeRule = async (kbnClient: KbnClient, ruleId: string) => {
   await kbnClient.request({
     method: 'POST',
@@ -43,41 +35,8 @@ const snoozeRule = async (kbnClient: KbnClient, ruleId: string) => {
   });
 };
 
-const createSlackConnector = async (kbnClient: KbnClient, name: string) => {
-  const resp = await kbnClient.request<{ id: string; name: string }>({
-    method: 'POST',
-    path: '/api/actions/connector',
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      name,
-      connector_type_id: '.slack',
-      config: {},
-      secrets: {
-        webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
-      },
-    },
-  });
-  return resp.data;
-};
-
-const deleteConnector = async (kbnClient: KbnClient, connectorId: string) => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/api/actions/connector/${connectorId}`,
-    headers: { 'kbn-xsrf': 'scout' },
-  });
-};
-
 // Unknown query type — ES rejects it at search time, causing rule execution to fail
 const FAILING_ES_QUERY = JSON.stringify({ query: { not_a_real_query_type: {} } });
-
-const runRuleSoon = async (kbnClient: KbnClient, ruleId: string) => {
-  await kbnClient.request({
-    method: 'POST',
-    path: `/internal/alerting/rule/${ruleId}/_run_soon`,
-    headers: { 'kbn-xsrf': 'scout' },
-  });
-};
 
 const getAlertSummary = async (kbnClient: KbnClient, ruleId: string) => {
   const resp = await kbnClient.request<{ alerts: Record<string, { tracked: boolean }> }>({
@@ -88,68 +47,34 @@ const getAlertSummary = async (kbnClient: KbnClient, ruleId: string) => {
   return resp.data;
 };
 
-const createFailingRule = async (kbnClient: KbnClient, name: string, ruleTags: string[]) => {
-  const resp = await kbnClient.request<{ id: string; name: string }>({
-    method: 'POST',
-    path: '/api/alerting/rule',
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      name,
-      rule_type_id: '.es-query',
-      consumer: 'alerts',
-      enabled: true,
-      schedule: { interval: '24h' },
-      actions: [],
-      tags: ruleTags,
-      params: {
-        searchType: 'esQuery',
-        esQuery: FAILING_ES_QUERY,
-        size: 100,
-        thresholdComparator: '>',
-        threshold: [0],
-        timeWindowSize: 5,
-        timeWindowUnit: 'm',
-        index: ['.kibana'],
-        timeField: 'updated_at',
-        aggType: 'count',
-        groupBy: 'all',
-        termSize: 5,
-      },
-    },
-  });
-  return resp.data;
+const FAILING_RULE_PARAMS = {
+  searchType: 'esQuery',
+  esQuery: FAILING_ES_QUERY,
+  size: 100,
+  thresholdComparator: '>',
+  threshold: [0],
+  timeWindowSize: 5,
+  timeWindowUnit: 'm',
+  index: ['.kibana'],
+  timeField: 'updated_at',
+  aggType: 'count',
+  groupBy: 'all',
+  termSize: 5,
 };
 
-const createAlwaysFiringRule = async (kbnClient: KbnClient, name: string) => {
-  const resp = await kbnClient.request<{ id: string; name: string }>({
-    method: 'POST',
-    path: '/api/alerting/rule',
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      name,
-      rule_type_id: '.es-query',
-      consumer: 'alerts',
-      enabled: true,
-      schedule: { interval: '24h' },
-      actions: [],
-      tags: [],
-      params: {
-        searchType: 'esQuery',
-        esQuery: JSON.stringify({ query: { match_all: {} } }),
-        size: 100,
-        thresholdComparator: '>=',
-        threshold: [0],
-        timeWindowSize: 5,
-        timeWindowUnit: 'm',
-        index: ['.kibana'],
-        timeField: 'updated_at',
-        aggType: 'count',
-        groupBy: 'all',
-        termSize: 5,
-      },
-    },
-  });
-  return resp.data;
+const ALWAYS_FIRING_RULE_PARAMS = {
+  searchType: 'esQuery',
+  esQuery: JSON.stringify({ query: { match_all: {} } }),
+  size: 100,
+  thresholdComparator: '>=',
+  threshold: [0],
+  timeWindowSize: 5,
+  timeWindowUnit: 'm',
+  index: ['.kibana'],
+  timeField: 'updated_at',
+  aggType: 'count',
+  groupBy: 'all',
+  termSize: 5,
 };
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
@@ -214,14 +139,14 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('rulesTab');
   });
 
-  test.afterEach(async ({ apiServices, kbnClient }) => {
+  test.afterEach(async ({ apiServices }) => {
     const ruleIds = [...createdRuleIds];
     createdRuleIds.length = 0;
     await Promise.allSettled(ruleIds.map((id) => apiServices.alerting.rules.delete(id)));
 
     const connectorIds = [...createdConnectorIds];
     createdConnectorIds.length = 0;
-    await Promise.allSettled(connectorIds.map((id) => deleteConnector(kbnClient, id)));
+    await Promise.allSettled(connectorIds.map((id) => apiServices.alerting.connectors.delete(id)));
   });
 
   test('should display alerts in alphabetical order', async ({ page, apiServices }) => {
@@ -352,13 +277,13 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await ensureRuleStatus(page, rule.data.name as string, 'disabled');
   });
 
-  test('should re-enable single alert', async ({ page, apiServices, kbnClient }) => {
+  test('should re-enable single alert', async ({ page, apiServices }) => {
     const rule = await apiServices.alerting.rules.create(makeEsQueryRule('reenable-single'));
     createdRuleIds.push(rule.data.id);
 
     // Disable via API so we can focus on testing the re-enable UI path without
     // the UntrackAlertsModal timing interfering.
-    await disableRule(kbnClient, rule.data.id);
+    await apiServices.alerting.rules.disable(rule.data.id);
 
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
@@ -413,10 +338,10 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await ensureRuleStatus(page, rule.data.name as string, 'disabled');
   });
 
-  test('should enable all selection', async ({ page, apiServices, kbnClient }) => {
+  test('should enable all selection', async ({ page, apiServices }) => {
     const rule = await apiServices.alerting.rules.create(makeEsQueryRule('bulk-enable'));
     createdRuleIds.push(rule.data.id);
-    await disableRule(kbnClient, rule.data.id);
+    await apiServices.alerting.rules.disable(rule.data.id);
 
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
@@ -502,7 +427,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(getTableRows(page)).toHaveCount(0);
   });
 
-  test('should filter alerts by the status', async ({ page, apiServices, kbnClient }) => {
+  test('should filter alerts by the status', async ({ page, apiServices }) => {
     const tag = `outcome-filter-${Date.now()}`;
 
     const normalRule = await apiServices.alerting.rules.create({
@@ -511,12 +436,20 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     });
     createdRuleIds.push(normalRule.data.id);
 
-    const failRule = await createFailingRule(kbnClient, `fail-${Date.now()}`, [tag]);
-    createdRuleIds.push(failRule.id);
+    const failRule = await apiServices.alerting.rules.create({
+      name: `fail-${Date.now()}`,
+      ruleTypeId: '.es-query',
+      consumer: 'alerts',
+      enabled: true,
+      schedule: { interval: '24h' },
+      tags: [tag],
+      params: FAILING_RULE_PARAMS,
+    });
+    createdRuleIds.push(failRule.data.id);
 
     await Promise.all([
-      runRuleSoon(kbnClient, normalRule.data.id),
-      runRuleSoon(kbnClient, failRule.id),
+      apiServices.alerting.rules.runSoon(normalRule.data.id),
+      apiServices.alerting.rules.runSoon(failRule.data.id),
     ]);
 
     // Wait until the failing rule shows 'Failed' last run outcome
@@ -537,7 +470,6 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
   test('should display total alerts by status and error banner only when exists alerts with status error', async ({
     page,
     apiServices,
-    kbnClient,
   }) => {
     const tag = `error-banner-${Date.now()}`;
 
@@ -546,7 +478,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       tags: [tag],
     });
     createdRuleIds.push(normalRule.data.id);
-    await runRuleSoon(kbnClient, normalRule.data.id);
+    await apiServices.alerting.rules.runSoon(normalRule.data.id);
 
     // Wait for normal rule to succeed
     await expect(async () => {
@@ -563,9 +495,17 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // No error banner before any failures
     await expect(page.testSubj.locator('rulesErrorBanner')).toHaveCount(0);
 
-    const failRule = await createFailingRule(kbnClient, `fail-${Date.now()}`, [tag]);
-    createdRuleIds.push(failRule.id);
-    await runRuleSoon(kbnClient, failRule.id);
+    const failRule = await apiServices.alerting.rules.create({
+      name: `fail-${Date.now()}`,
+      ruleTypeId: '.es-query',
+      consumer: 'alerts',
+      enabled: true,
+      schedule: { interval: '24h' },
+      tags: [tag],
+      params: FAILING_RULE_PARAMS,
+    });
+    createdRuleIds.push(failRule.data.id);
+    await apiServices.alerting.rules.runSoon(failRule.data.id);
 
     // Wait until error banner and status counts update
     await expect(async () => {
@@ -597,7 +537,6 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
   test('Expand error in rules table when there is rule with an error associated', async ({
     page,
     apiServices,
-    kbnClient,
   }) => {
     const tag = `expand-error-${Date.now()}`;
 
@@ -606,7 +545,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       tags: [tag],
     });
     createdRuleIds.push(normalRule.data.id);
-    await runRuleSoon(kbnClient, normalRule.data.id);
+    await apiServices.alerting.rules.runSoon(normalRule.data.id);
 
     // Wait for normal rule to execute — no expand error link yet
     await expect(async () => {
@@ -616,9 +555,17 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       await expect(page.testSubj.locator('expandRulesError')).toHaveCount(0);
     }).toPass({ timeout: 60_000, intervals: [3_000] });
 
-    const failRule = await createFailingRule(kbnClient, `fail-${Date.now()}`, [tag]);
-    createdRuleIds.push(failRule.id);
-    await runRuleSoon(kbnClient, failRule.id);
+    const failRule = await apiServices.alerting.rules.create({
+      name: `fail-${Date.now()}`,
+      ruleTypeId: '.es-query',
+      consumer: 'alerts',
+      enabled: true,
+      schedule: { interval: '24h' },
+      tags: [tag],
+      params: FAILING_RULE_PARAMS,
+    });
+    createdRuleIds.push(failRule.data.id);
+    await apiServices.alerting.rules.runSoon(failRule.data.id);
 
     // Wait until the expand error link appears
     await expect(async () => {
@@ -676,11 +623,15 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     ).toBeVisible();
   });
 
-  test('should filter alerts by the action type', async ({ page, apiServices, kbnClient }) => {
-    const slackConnector = await createSlackConnector(
-      kbnClient,
-      `slack-action-filter-${Date.now()}`
-    );
+  test('should filter alerts by the action type', async ({ page, apiServices }) => {
+    const slackConnector = await apiServices.alerting.connectors.create({
+      name: `slack-action-filter-${Date.now()}`,
+      connectorTypeId: '.slack',
+      config: {},
+      secrets: {
+        webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+      },
+    });
     createdConnectorIds.push(slackConnector.id);
 
     const uniqueTag = `action-filter-${Date.now()}`;
@@ -744,10 +695,10 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       rSnoozedDisabled.data.id
     );
 
-    await disableRule(kbnClient, rDisabled.data.id);
+    await apiServices.alerting.rules.disable(rDisabled.data.id);
     await snoozeRule(kbnClient, rSnoozed.data.id);
     await snoozeRule(kbnClient, rSnoozedDisabled.data.id);
-    await disableRule(kbnClient, rSnoozedDisabled.data.id);
+    await apiServices.alerting.rules.disable(rSnoozedDisabled.data.id);
 
     await refreshRulesList(page);
     await searchRules(page, uniqueTag);
@@ -885,9 +836,15 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
   test('should not prevent rules with action execution capabilities from being edited', async ({
     page,
     apiServices,
-    kbnClient,
   }) => {
-    const slackConnector = await createSlackConnector(kbnClient, `slack-edit-cap-${Date.now()}`);
+    const slackConnector = await apiServices.alerting.connectors.create({
+      name: `slack-edit-cap-${Date.now()}`,
+      connectorTypeId: '.slack',
+      config: {},
+      secrets: {
+        webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+      },
+    });
     createdConnectorIds.push(slackConnector.id);
 
     const rule = await apiServices.alerting.rules.create({
@@ -910,15 +867,23 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
   test('should untrack disable rule if untrack switch is true', async ({
     page,
+    apiServices,
     kbnClient,
     esClient,
   }) => {
     // Up to 60s waiting for the alert to fire + up to 60s waiting for untracking,
     // plus UI steps — exceeds the 60s default test timeout.
     test.setTimeout(150_000);
-    const rule = await createAlwaysFiringRule(kbnClient, `untrack-true-${Date.now()}`);
-    createdRuleIds.push(rule.id);
-    await runRuleSoon(kbnClient, rule.id);
+    const rule = await apiServices.alerting.rules.create({
+      name: `untrack-true-${Date.now()}`,
+      ruleTypeId: '.es-query',
+      consumer: 'alerts',
+      enabled: true,
+      schedule: { interval: '24h' },
+      params: ALWAYS_FIRING_RULE_PARAMS,
+    });
+    createdRuleIds.push(rule.data.id);
+    await apiServices.alerting.rules.runSoon(rule.data.id);
 
     // Wait for the rule to fire and create a tracked alert instance. Refresh the
     // alerts index on each poll so the active alert is searchable before we
@@ -927,14 +892,14 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // its retries, and the alert stays tracked (no later re-attempt once disabled).
     await expect(async () => {
       await esClient.indices.refresh({ index: '.alerts-stack.alerts-default' }, { ignore: [404] });
-      const summary = await getAlertSummary(kbnClient, rule.id);
+      const summary = await getAlertSummary(kbnClient, rule.data.id);
       if (!summary.alerts['query matched']?.tracked) {
         throw new Error('Alert instance not yet tracked');
       }
     }).toPass({ timeout: 60_000, intervals: [2_000] });
 
     await refreshRulesList(page);
-    await searchRules(page, rule.name);
+    await searchRules(page, rule.data.name as string);
 
     await page.testSubj.click('collapsedItemActions');
     await page.testSubj.click('disableButton');
@@ -951,7 +916,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // asynchronously (alert doc update + index refresh), so allow the same budget
     // as the initial "became tracked" wait — 30s is too tight on a loaded CI agent.
     await expect(async () => {
-      const summary = await getAlertSummary(kbnClient, rule.id);
+      const summary = await getAlertSummary(kbnClient, rule.data.id);
       const instance = summary.alerts['query matched'];
       if (!instance || instance.tracked !== false) {
         throw new Error('Alert instance still tracked');
@@ -961,25 +926,33 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
   test('should not untrack disable rule if untrack switch if false', async ({
     page,
+    apiServices,
     kbnClient,
   }) => {
     // Up to 60s waiting for the alert to fire plus UI steps — exceeds the 60s
     // default test timeout.
     test.setTimeout(150_000);
-    const rule = await createAlwaysFiringRule(kbnClient, `untrack-false-${Date.now()}`);
-    createdRuleIds.push(rule.id);
-    await runRuleSoon(kbnClient, rule.id);
+    const rule = await apiServices.alerting.rules.create({
+      name: `untrack-false-${Date.now()}`,
+      ruleTypeId: '.es-query',
+      consumer: 'alerts',
+      enabled: true,
+      schedule: { interval: '24h' },
+      params: ALWAYS_FIRING_RULE_PARAMS,
+    });
+    createdRuleIds.push(rule.data.id);
+    await apiServices.alerting.rules.runSoon(rule.data.id);
 
     // Wait for the rule to fire and create a tracked alert instance
     await expect(async () => {
-      const summary = await getAlertSummary(kbnClient, rule.id);
+      const summary = await getAlertSummary(kbnClient, rule.data.id);
       if (!summary.alerts['query matched']?.tracked) {
         throw new Error('Alert instance not yet tracked');
       }
     }).toPass({ timeout: 60_000, intervals: [2_000] });
 
     await refreshRulesList(page);
-    await searchRules(page, rule.name);
+    await searchRules(page, rule.data.name as string);
 
     await page.testSubj.click('collapsedItemActions');
     await page.testSubj.click('disableButton');

@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-// Migrated from:
-//   x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/alert_create_flyout.ts
-//
-// 13 of 13 tests migrated.
-//
-// Substitutions from original:
-//   - Slack#xyztest → Slack connector created via API in beforeAll
-//   - test.always-firing rule → .es-query rule (tests 5-6)
-//   - defineIndexThresholdAlert → Scout equivalent helper (tests 1-4)
-
-import type { KbnClient, ScoutPage } from '@kbn/scout';
+import type { ApiServicesFixture, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule, defineIndexThresholdRule, THRESHOLD_TEST_INDEX } from '../fixtures';
@@ -24,9 +14,8 @@ const searchRules = async (page: ScoutPage, query: string) => {
   const field = page.testSubj.locator('ruleSearchField');
   await field.fill(query);
   await field.press('Enter');
-  await page
-    .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
-    .waitFor();
+  await expect(page.testSubj.locator('rulesList')).toBeVisible();
+  await expect(page.testSubj.locator('rulesList')).not.toHaveClass(/euiBasicTable-loading/);
 };
 
 const defineEsQueryAlert = async (page: ScoutPage, alertName: string) => {
@@ -49,14 +38,9 @@ const defineEsQueryAlert = async (page: ScoutPage, alertName: string) => {
   // late field re-fetch can't silently reset the <select> to the placeholder —
   // which would leave the form invalid and the Test query button disabled.
   const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
-  const firstFieldOption = timeFieldSelect.locator('option:nth-child(2)');
-  await firstFieldOption.waitFor({ state: 'attached' });
-  const firstFieldValue = await firstFieldOption.getAttribute('value');
-  if (!firstFieldValue) {
-    throw new Error('No time-field options available on thresholdAlertTimeFieldSelect');
-  }
-  await timeFieldSelect.selectOption(firstFieldValue);
-  await expect(timeFieldSelect).toHaveValue(firstFieldValue);
+  await expect(timeFieldSelect.locator('option[value="@timestamp"]')).toBeAttached();
+  await timeFieldSelect.selectOption('@timestamp');
+  await expect(timeFieldSelect).toHaveValue('@timestamp');
   await page.testSubj.click('closePopover');
   await page.testSubj.locator('ruleDetailsNameInput').click();
 };
@@ -112,21 +96,11 @@ const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => 
   await defineIndexThresholdRule(page, alertName);
 };
 
-// Find and delete a rule by name via API
-const deleteRuleByName = async (kbnClient: KbnClient, name: string) => {
-  const resp = await kbnClient.request({
-    method: 'GET',
-    path: '/api/alerting/rules/_find',
-    headers: {},
-    query: { search: name, search_fields: 'name' },
-  });
+const deleteRuleByName = async (apiServices: ApiServicesFixture, name: string) => {
+  const resp = await apiServices.alerting.rules.find({ search: name, search_fields: 'name' });
   for (const rule of (resp.data as any).data ?? []) {
     if (rule.name === name) {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/internal/alerting/rule/${rule.id}`,
-        headers: { 'kbn-xsrf': 'scout' },
-      });
+      await apiServices.alerting.rules.delete(rule.id);
     }
   }
 };
@@ -134,8 +108,8 @@ const deleteRuleByName = async (kbnClient: KbnClient, name: string) => {
 // Click the Slack connector card in the actions connector modal
 const selectConnectorInModal = async (page: ScoutPage, connectorName: string) => {
   await expect(page.testSubj.locator('ruleActionsConnectorsModal')).toBeVisible();
-  await page
-    .locator('[data-test-subj="ruleActionsConnectorsModalCard"]')
+  await page.testSubj
+    .locator('ruleActionsConnectorsModalCard')
     .filter({ hasText: connectorName })
     .locator('button')
     .click();
@@ -194,7 +168,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
 
   test('should delete the right action when the same action has been added twice', async ({
     page,
-    kbnClient,
+    apiServices,
   }) => {
     const ruleName = `scout-flyout-del-${Date.now()}`;
     await defineEsQueryAlert(page, ruleName);
@@ -217,7 +191,10 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, ruleName);
-      const ruleRow = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: ruleName });
+      const ruleRow = page.testSubj
+        .locator('rulesList')
+        .locator('tr')
+        .filter({ hasText: ruleName });
       await expect(ruleRow).toHaveCount(1);
       await ruleRow.locator('[data-test-subj="selectActionButton"]').click();
       await page.testSubj.click('editRule');
@@ -243,11 +220,11 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await expect(page.testSubj.locator('messageTextArea')).toHaveCount(1);
       await expect(page.testSubj.locator('messageTextArea')).toHaveValue('myUniqueKey1');
     } finally {
-      await deleteRuleByName(kbnClient, ruleName);
+      await deleteRuleByName(apiServices, ruleName);
     }
   });
 
-  test('should create an alert', async ({ page, kbnClient }) => {
+  test('should create an alert', async ({ page, apiServices }) => {
     const alertName = `scout-flyout-create-${Date.now()}`;
     await defineIndexThresholdAlert(page, alertName);
 
@@ -319,18 +296,18 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, alertName);
-      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      const row = page.testSubj.locator('rulesList').locator('tr').filter({ hasText: alertName });
       await expect(row).toBeVisible();
       await expect(row).toContainText('Index threshold');
       await expect(row).toContainText('1 min');
     } finally {
-      await deleteRuleByName(kbnClient, alertName);
+      await deleteRuleByName(apiServices, alertName);
     }
   });
 
   test('should create an alert with composite query in filter for conditional action', async ({
     page,
-    kbnClient,
+    apiServices,
   }) => {
     const alertName = `scout-flyout-composite-${Date.now()}`;
     await defineIndexThresholdAlert(page, alertName);
@@ -394,18 +371,18 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, alertName);
-      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      const row = page.testSubj.locator('rulesList').locator('tr').filter({ hasText: alertName });
       await expect(row).toBeVisible();
       await expect(row).toContainText('Index threshold');
       await expect(row).toContainText('1 min');
     } finally {
-      await deleteRuleByName(kbnClient, alertName);
+      await deleteRuleByName(apiServices, alertName);
     }
   });
 
   test('should create an alert with DSL filter for conditional action', async ({
     page,
-    kbnClient,
+    apiServices,
   }) => {
     const alertName = `scout-flyout-dsl-${Date.now()}`;
     await defineIndexThresholdAlert(page, alertName);
@@ -463,8 +440,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, alertName);
-      const ruleRow = page
-        .locator('[data-test-subj="rulesList"] tr')
+      const ruleRow = page.testSubj
+        .locator('rulesList')
+        .locator('tr')
         .filter({ hasText: alertName });
       await expect(ruleRow).toHaveCount(1);
       await ruleRow.locator('[data-test-subj="selectActionButton"]').click();
@@ -475,11 +453,11 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
         timeout: 5_000,
       });
     } finally {
-      await deleteRuleByName(kbnClient, alertName);
+      await deleteRuleByName(apiServices, alertName);
     }
   });
 
-  test('should create an alert with actions in multiple groups', async ({ page, kbnClient }) => {
+  test('should create an alert with actions in multiple groups', async ({ page, apiServices }) => {
     const alertName = `scout-flyout-multigroup-${Date.now()}`;
     await defineEsQueryAlert(page, alertName);
 
@@ -508,18 +486,18 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, alertName);
-      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      const row = page.testSubj.locator('rulesList').locator('tr').filter({ hasText: alertName });
       await expect(row).toBeVisible();
       await expect(row).toContainText('Elasticsearch query');
       await expect(row).toContainText('1 min');
     } finally {
-      await deleteRuleByName(kbnClient, alertName);
+      await deleteRuleByName(apiServices, alertName);
     }
   });
 
   test('should show save confirmation before creating alert with no actions', async ({
     page,
-    kbnClient,
+    apiServices,
   }) => {
     const alertName = `scout-flyout-confirm-${Date.now()}`;
     await defineEsQueryAlert(page, alertName);
@@ -553,12 +531,12 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, alertName);
-      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      const row = page.testSubj.locator('rulesList').locator('tr').filter({ hasText: alertName });
       await expect(row).toBeVisible();
       await expect(row).toContainText('Elasticsearch query');
       await expect(row).toContainText('1 min');
     } finally {
-      await deleteRuleByName(kbnClient, alertName);
+      await deleteRuleByName(apiServices, alertName);
     }
   });
 
@@ -644,8 +622,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await searchRules(page, esQueryRuleName);
     // Scope the action menu to this rule's row so we don't open a different row
     // that may still be visible before the search filter fully applies.
-    const ruleRow = page
-      .locator('[data-test-subj="rulesList"] tr')
+    const ruleRow = page.testSubj
+      .locator('rulesList')
+      .locator('tr')
       .filter({ hasText: esQueryRuleName });
     await expect(ruleRow).toHaveCount(1);
     await ruleRow.locator('[data-test-subj="selectActionButton"]').click();

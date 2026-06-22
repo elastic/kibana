@@ -17,36 +17,9 @@
 // behavior is covered without depending on preconfigured connectors.
 
 import { v4 as uuidv4 } from 'uuid';
-import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-
-const createSlackConnector = async (kbnClient: KbnClient, name: string) => {
-  const resp = await kbnClient.request<{ id: string; name: string }>({
-    method: 'POST',
-    path: '/api/actions/connector',
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      name,
-      connector_type_id: '.slack',
-      config: {},
-      secrets: {
-        webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
-      },
-    },
-  });
-  return resp.data;
-};
-
-const deleteConnector = async (kbnClient: KbnClient, connectorId: string) => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/api/actions/connector/${connectorId}`,
-    headers: { 'kbn-xsrf': 'scout' },
-    ignoreErrors: [404],
-  });
-};
 
 test.describe(
   'Rule Details - Edit rule with deleted connector',
@@ -58,14 +31,25 @@ test.describe(
     let replacementSlackConnectorId: string;
     let replacementSlackConnectorName: string;
 
-    test.beforeAll(async ({ kbnClient }) => {
-      const connector = await createSlackConnector(kbnClient, `scout-slack-del-${Date.now()}`);
+    test.beforeAll(async ({ apiServices, kbnClient }) => {
+      const connector = await apiServices.alerting.connectors.create({
+        name: `scout-slack-del-${Date.now()}`,
+        connectorTypeId: '.slack',
+        config: {},
+        secrets: {
+          webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+        },
+      });
       deletedSlackConnectorId = connector.id;
 
-      const replacementConnector = await createSlackConnector(
-        kbnClient,
-        `scout-slack-replace-${Date.now()}`
-      );
+      const replacementConnector = await apiServices.alerting.connectors.create({
+        name: `scout-slack-replace-${Date.now()}`,
+        connectorTypeId: '.slack',
+        config: {},
+        secrets: {
+          webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+        },
+      });
       replacementSlackConnectorId = replacementConnector.id;
       replacementSlackConnectorName = replacementConnector.name;
 
@@ -108,7 +92,7 @@ test.describe(
 
       // Delete the connector while it is still referenced by the rule so the rule
       // now points at a missing connector.
-      await deleteConnector(kbnClient, deletedSlackConnectorId);
+      await apiServices.alerting.connectors.delete(deletedSlackConnectorId);
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -117,10 +101,10 @@ test.describe(
       await expect(pageObjects.ruleDetailsPage.ruleDetailsTitle).toBeVisible({ timeout: 20_000 });
     });
 
-    test.afterAll(async ({ apiServices, kbnClient }) => {
+    test.afterAll(async ({ apiServices }) => {
       if (ruleId) await apiServices.alerting.rules.delete(ruleId);
       if (replacementSlackConnectorId) {
-        await deleteConnector(kbnClient, replacementSlackConnectorId);
+        await apiServices.alerting.connectors.delete(replacementSlackConnectorId);
       }
     });
 
@@ -140,8 +124,8 @@ test.describe(
       // Add a replacement connector of the same kind via the connectors modal.
       await page.testSubj.click('ruleActionsAddActionButton');
       await expect(page.testSubj.locator('ruleActionsConnectorsModal')).toBeVisible();
-      await page
-        .locator('[data-test-subj="ruleActionsConnectorsModalCard"]')
+      await page.testSubj
+        .locator('ruleActionsConnectorsModalCard')
         .filter({ hasText: replacementSlackConnectorName })
         .locator('button')
         .click();

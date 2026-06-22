@@ -16,28 +16,9 @@
 // across environments).
 
 import { v4 as uuidv4 } from 'uuid';
-import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-
-const createServerLogConnector = async (kbnClient: KbnClient, name: string) => {
-  const resp = await kbnClient.request<{ id: string; name: string }>({
-    method: 'POST',
-    path: '/api/actions/connector',
-    headers: { 'kbn-xsrf': 'scout' },
-    body: { name, connector_type_id: '.server-log', config: {}, secrets: {} },
-  });
-  return resp.data;
-};
-
-const deleteConnector = async (kbnClient: KbnClient, connectorId: string) => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/api/actions/connector/${connectorId}`,
-    headers: { 'kbn-xsrf': 'scout' },
-  });
-};
 
 test.describe('Rule Details - Legacy notify values', { tag: tags.stateful.classic }, () => {
   const ruleName = `legacy-notify-${uuidv4()}`;
@@ -45,45 +26,45 @@ test.describe('Rule Details - Legacy notify values', { tag: tags.stateful.classi
   let ruleId: string;
   let connectorId: string;
 
-  test.beforeAll(async ({ kbnClient }) => {
-    const connector = await createServerLogConnector(kbnClient, `scout-log-${Date.now()}`);
+  test.beforeAll(async ({ apiServices }) => {
+    const connector = await apiServices.alerting.connectors.create({
+      name: `scout-log-${Date.now()}`,
+      connectorTypeId: '.server-log',
+      config: {},
+      secrets: {},
+    });
     connectorId = connector.id;
 
     // Rule-level notify_when + throttle (legacy) with an action that has no
     // action-level frequency — the edit flyout should convert these to
     // action-level "On custom action intervals" with a 2 day throttle.
-    const resp = await kbnClient.request<{ id: string }>({
-      method: 'POST',
-      path: '/api/alerting/rule',
-      headers: { 'kbn-xsrf': 'scout' },
-      body: {
-        name: ruleName,
-        rule_type_id: '.index-threshold',
-        consumer: 'alerts',
-        schedule: { interval: '1m' },
-        notify_when: 'onThrottleInterval',
-        throttle: '2d',
-        actions: [
-          {
-            id: connectorId,
-            group: 'threshold met',
-            params: { level: 'info', message: 'from alert 1s' },
-          },
-        ],
-        params: {
-          aggType: 'count',
-          termSize: 5,
-          thresholdComparator: '>',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          groupBy: 'all',
-          threshold: [1000],
-          index: ['.kibana'],
-          timeField: '@timestamp',
+    const rule = await apiServices.alerting.rules.create({
+      name: ruleName,
+      ruleTypeId: '.index-threshold',
+      consumer: 'alerts',
+      schedule: { interval: '1m' },
+      notifyWhen: 'onThrottleInterval',
+      throttle: '2d',
+      actions: [
+        {
+          id: connectorId,
+          group: 'threshold met',
+          params: { level: 'info', message: 'from alert 1s' },
         },
+      ],
+      params: {
+        aggType: 'count',
+        termSize: 5,
+        thresholdComparator: '>',
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        groupBy: 'all',
+        threshold: [1000],
+        index: ['.kibana'],
+        timeField: '@timestamp',
       },
     });
-    ruleId = resp.data.id;
+    ruleId = rule.data.id;
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -92,9 +73,9 @@ test.describe('Rule Details - Legacy notify values', { tag: tags.stateful.classi
     await expect(pageObjects.ruleDetailsPage.ruleDetailsTitle).toBeVisible({ timeout: 20_000 });
   });
 
-  test.afterAll(async ({ apiServices, kbnClient }) => {
+  test.afterAll(async ({ apiServices }) => {
     if (ruleId) await apiServices.alerting.rules.delete(ruleId);
-    if (connectorId) await deleteConnector(kbnClient, connectorId);
+    if (connectorId) await apiServices.alerting.connectors.delete(connectorId);
   });
 
   test('should convert rule-level params to action-level params and save the rule successfully', async ({
