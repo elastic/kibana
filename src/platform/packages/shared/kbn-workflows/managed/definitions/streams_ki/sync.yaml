@@ -13,10 +13,10 @@
 # disabled -> enabled transition is what schedules it). See
 # `createSyncWorkflowService` in the streams plugin.
 
-version: "1"
-name: ".streams-ki-sync"
+version: '1'
+name: '.streams-ki-sync'
 enabled: false
-description: "This workflow is used by the system and should not be modified."
+description: 'This workflow is used by the system and should not be modified.'
 tags:
   - observability
   - streams
@@ -24,7 +24,7 @@ tags:
   - sync
 settings:
   # Timeout is 5 minutes shorter than the schedule to avoid overlapping runs.
-  timeout: "55m"
+  timeout: '3m'
   # Only one instance runs at a time; overlapping scheduled triggers are dropped.
   concurrency:
     key: streams-ki-sync
@@ -33,7 +33,7 @@ settings:
 triggers:
   - type: scheduled
     with:
-      every: "1h"
+      every: '3m'
   - type: manual
 steps:
   - name: sync
@@ -42,9 +42,9 @@ steps:
       method: POST
       path: /internal/streams/_sync
       headers:
-        x-elastic-internal-origin: "kibana"
+        x-elastic-internal-origin: 'kibana'
     on-failure:
       retry:
         max-attempts: 3
-        delay: "30s"
+        delay: '30s'
         strategy: exponential
