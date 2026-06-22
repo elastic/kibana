@@ -301,7 +301,7 @@ function getRelatedStaticQuery(
       if (childQuery) {
         // found a child with a query that references this variable, so return it;
         // only one query can be used to build suggestions
-        return childQuery ?? '';
+        return childQuery;
       }
     }
   }
