@@ -73,9 +73,14 @@ export class LensFieldsListPage {
 
   async findFieldIdsByType(type: FieldType, group: FieldGroup = 'available'): Promise<string[]> {
     const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
-    const fields = this.page.locator(
-      `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldListItemButton--${type}`
-    );
+    const selector = `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldListItemButton--${type}`;
+    const fields = this.page.locator(selector);
+
+    try {
+      await fields.first().waitFor({ state: 'visible' });
+    } catch {
+      throw new Error(`No ${type} fields found in the ${group} fields list.`);
+    }
 
     const allFields = await fields.all();
     const ids: string[] = [];
@@ -85,6 +90,11 @@ export class LensFieldsListPage {
       if (testSubj) {
         ids.push(testSubj);
       }
+    }
+    if (ids.length === 0) {
+      throw new Error(
+        `Found ${type} fields in the ${group} fields list, but none had parent data-test-subj attributes.`
+      );
     }
     return ids;
   }
@@ -99,6 +109,7 @@ export class LensFieldsListPage {
   }
 
   async getStatsFooterRecordCount(): Promise<number> {
+    await this.statsFooter.waitFor({ state: 'visible' });
     const text = await this.statsFooter.innerText();
     const cleaned = text.replaceAll(/(Calculated from | records\.)/g, '').replace(',', '');
     return parseInt(cleaned, 10);

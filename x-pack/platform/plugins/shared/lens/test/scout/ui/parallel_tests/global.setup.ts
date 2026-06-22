@@ -8,18 +8,6 @@
 import { globalSetupHook } from '@kbn/scout';
 import { testData } from '../fixtures';
 
-globalSetupHook('Setup environment for Lens tests', async ({ esArchiver, esClient }) => {
+globalSetupHook('Setup environment for Lens tests', async ({ esArchiver }) => {
   await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
-
-  // Add runtime_string field to logstash indices for fields_list tests.
-  // runtime_number already exists in the archive mappings.
-  await esClient.indices.putMapping({
-    index: 'logstash-*',
-    runtime: {
-      runtime_string: {
-        type: 'keyword',
-        script: { source: "emit('abc')" },
-      },
-    },
-  });
 });

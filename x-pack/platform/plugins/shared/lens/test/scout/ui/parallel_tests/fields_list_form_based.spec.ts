@@ -20,6 +20,14 @@ spaceTest.describe(
         timeFieldName: '@timestamp',
         override: true,
         spaceId: scoutSpace.id,
+        runtimeFieldMap: {
+          runtime_string: {
+            type: 'keyword',
+            script: {
+              source: "emit('abc')",
+            },
+          },
+        },
       });
 
       await scoutSpace.uiSettings.set({
@@ -66,22 +74,19 @@ spaceTest.describe(
       }
     );
 
-    spaceTest.only(
-      'should show a top values popover for a keyword field',
-      async ({ pageObjects }) => {
-        const { lensFieldsList } = pageObjects;
-        const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+    spaceTest('should show a top values popover for a keyword field', async ({ pageObjects }) => {
+      const { lensFieldsList } = pageObjects;
+      const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
 
-        await lensFieldsList.clickField(fieldId);
-        await expect(lensFieldsList.popoverTitle).toBeVisible();
-        await expect(lensFieldsList.topValuesChart).toBeVisible();
-        await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-        const otherBucket = lensFieldsList.getLastTopValuesBucket();
-        await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
-        await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('99.9%');
-        await expect(lensFieldsList.getPopoverChart()).toBeHidden();
-      }
-    );
+      await lensFieldsList.clickField(fieldId);
+      await expect(lensFieldsList.popoverTitle).toBeVisible();
+      await expect(lensFieldsList.topValuesChart).toBeVisible();
+      await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
+      const otherBucket = lensFieldsList.getLastTopValuesBucket();
+      await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
+      await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('99.9%');
+      await expect(lensFieldsList.getPopoverChart()).toBeHidden();
+    });
 
     spaceTest('should show a date histogram popover for a date field', async ({ pageObjects }) => {
       const { lensFieldsList } = pageObjects;
@@ -109,8 +114,7 @@ spaceTest.describe(
 
         await spaceTest.step('verify numeric runtime field stats', async () => {
           await lensFieldsList.searchField('runtime');
-          await expect(lensFieldsList.getFieldLocator('Records')).toBeHidden();
-          await expect(lensFieldsList.getFieldLocator('runtime_number')).toBeVisible();
+          await expect(lensFieldsList.availableFieldsCount).toHaveText('2');
           const [fieldId] = await lensFieldsList.findFieldIdsByType('number');
 
           await lensFieldsList.clickField(fieldId);
@@ -126,6 +130,7 @@ spaceTest.describe(
 
         await spaceTest.step('verify keyword runtime field stats', async () => {
           await lensFieldsList.searchField('runtime');
+          await expect(lensFieldsList.availableFieldsCount).toHaveText('2');
           await expect(lensFieldsList.getFieldLocator('runtime_string')).toBeVisible();
           const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
 
@@ -133,40 +138,56 @@ spaceTest.describe(
           await expect(lensFieldsList.popoverTitle).toBeVisible();
           await expect(lensFieldsList.topValuesChart).toBeVisible();
           await expect(lensFieldsList.getPopoverChart()).toBeHidden();
+          // Close popover
+          await lensFieldsList.clickField(fieldId);
           await lensFieldsList.searchField('');
         });
 
-        await spaceTest.step('verify filter changes popover content', async () => {
-          const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
-          await lensFieldsList.clickField(fieldId);
-          const initialCount = await lensFieldsList.getStatsFooterRecordCount();
+        await spaceTest.step(
+          'should change popover content if user defines a filter that affects field values',
+          async () => {
+            const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+            await lensFieldsList.clickField(fieldId);
+            const initialCount = await lensFieldsList.getStatsFooterRecordCount();
 
-          await pageObjects.filterBar.addFilter({ field: 'geo.src', operator: 'is', value: 'CN' });
+            await pageObjects.filterBar.addFilter({
+              field: 'geo.src',
+              operator: 'is',
+              value: 'CN',
+            });
+            await lensFieldsList.clickField(fieldId);
 
-          await expect
-            .poll(async () => {
-              await lensFieldsList.clickField(fieldId);
-              return lensFieldsList.getStatsFooterRecordCount();
-            })
-            .toBeLessThan(initialCount);
-        });
+            await expect
+              .poll(async () => {
+                return await lensFieldsList.getStatsFooterRecordCount();
+              })
+              .toBeLessThan(initialCount);
 
-        await spaceTest.step('verify excluded filter shows no data', async () => {
-          await page.testSubj.click('queryBarMenu');
-          await page.testSubj.click('filter-sets-removeAllFilters');
-          await pageObjects.filterBar.addFilter({ field: 'bytes', operator: 'is', value: '-1' });
+            // Close popover
+            await lensFieldsList.clickField(fieldId);
+            await lensFieldsList.searchField('');
+          }
+        );
 
-          const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
-          await expect
-            .poll(async () => {
-              await lensFieldsList.clickField(fieldId);
-              return lensFieldsList.missingFieldStats.isVisible();
-            })
-            .toBe(true);
-        });
+        await spaceTest.step(
+          'should detect fields have no data in popup if filter excludes them',
+          async () => {
+            await page.testSubj.click('showQueryBarMenu');
+            await page.testSubj.click('filter-sets-removeAllFilters');
+            await pageObjects.filterBar.addFilter({ field: 'bytes', operator: 'is', value: '-1' });
+
+            const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+            await lensFieldsList.clickField(fieldId);
+            await expect
+              .poll(async () => {
+                return lensFieldsList.missingFieldStats.isVisible();
+              })
+              .toBe(true);
+          }
+        );
 
         await spaceTest.step('verify time range affects field availability', async () => {
-          await page.testSubj.click('queryBarMenu');
+          await page.testSubj.click('showQueryBarMenu');
           await page.testSubj.click('filter-sets-removeAllFilters');
           await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE);
           await expect(lensFieldsList.emptyFieldsCount).toHaveText('52');
