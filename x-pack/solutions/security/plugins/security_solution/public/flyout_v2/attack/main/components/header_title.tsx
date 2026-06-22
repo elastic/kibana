@@ -29,10 +29,7 @@ export interface HeaderTitleProps {
 }
 
 /**
- * Prop-driven header title section for the attack flyout v2.
- * Renders the timestamp, attack title, and the "Attack" badge. The status,
- * alerts count, assignees and notes blocks are rendered in the parent Header
- * so all four blocks share a single flex layout.
+ * Renders the timestamp, attack title, and the "Attack" badge in the flyout header.
  */
 export const HeaderTitle = memo(({ hit }: HeaderTitleProps) => {
   const title = useMemo(() => (getFieldValue(hit, FIELD_ATTACK_TITLE) as string) ?? '', [hit]);

@@ -13,8 +13,8 @@ import { flyoutHeaderBlockStyles } from '../../../flyout_v2/shared/components/fl
 import { Notes } from '../../../flyout_v2/shared/components/notes';
 import { AlertsCount } from '../../../flyout_v2/attack/main/components/alerts_count';
 import { HeaderTitle as V2HeaderTitle } from '../../../flyout_v2/attack/main/components/header_title';
-import { Status } from './status';
-import { Assignees } from './assignees';
+import { Status } from '../../../flyout_v2/attack/main/components/status';
+import { Assignees } from '../../../flyout_v2/attack/main/components/assignees';
 import { useAttackDetailsContext } from '../context';
 import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
 
@@ -25,7 +25,7 @@ import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_at
  * layout as the v2 flyout so both flyouts stay visually identical.
  */
 export const HeaderTitle = memo(() => {
-  const { searchHit, attackId } = useAttackDetailsContext();
+  const { searchHit, attackId, refetch } = useAttackDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
 
@@ -37,7 +37,7 @@ export const HeaderTitle = memo(() => {
         <EuiFlexItem css={flyoutHeaderBlockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
-              <Status />
+              <Status hit={hit} onAttackUpdated={refetch} />
             </EuiFlexItem>
             <EuiFlexItem>
               <AlertsCount hit={hit} />
@@ -47,7 +47,7 @@ export const HeaderTitle = memo(() => {
         <EuiFlexItem css={flyoutHeaderBlockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
-              <Assignees />
+              <Assignees hit={hit} onAttackUpdated={refetch} />
             </EuiFlexItem>
             <EuiFlexItem>
               <Notes documentId={attackId} onShowNotes={openNotesTab} />

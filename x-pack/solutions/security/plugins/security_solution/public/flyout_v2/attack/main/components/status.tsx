@@ -29,8 +29,7 @@ export interface StatusProps {
 }
 
 /**
- * Prop-driven status block for the attack flyout v2 header.
- * Reads workflow status directly from hit — no context dependency.
+ * Displays the workflow status of the attack and provides a popover to change it.
  */
 export const Status = memo(({ hit, onAttackUpdated }: StatusProps) => {
   const workflowStatus = useMemo(() => getFieldValue(hit, FIELD_WORKFLOW_STATUS), [hit]);

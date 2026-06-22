@@ -22,8 +22,8 @@ export interface AlertsCountProps {
 }
 
 /**
- * Prop-driven alerts count block for the attack flyout v2 header.
- * Reads the alert IDs from `hit.flattened` (using the raw value because
+ * Displays the number of alerts associated with the attack.
+ * Reads alert IDs from `hit.flattened` (using the raw value because
  * `getFieldValue` only returns the first element of array fields).
  */
 export const AlertsCount: FC<AlertsCountProps> = memo(({ hit }) => {

@@ -74,8 +74,7 @@ const AssigneesButton: FC<{
 AssigneesButton.displayName = 'AssigneesButton';
 
 /**
- * Prop-driven assignees block for the attack flyout v2 header.
- * Reads all data from hit — no context dependency.
+ * Displays the list of users assigned to the attack and provides a popover to manage them.
  */
 export const Assignees = memo(({ hit, onAttackUpdated }: AssigneesProps) => {
   const attackId = useMemo(() => hit.raw._id ?? (getFieldValue(hit, '_id') as string) ?? '', [hit]);

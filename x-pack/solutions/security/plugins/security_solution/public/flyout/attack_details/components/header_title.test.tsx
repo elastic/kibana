@@ -32,11 +32,11 @@ jest.mock('../hooks/use_navigate_to_attack_details_left_panel', () => ({
   useNavigateToAttackDetailsLeftPanel: jest.fn(),
 }));
 
-jest.mock('./status', () => ({
+jest.mock('../../../flyout_v2/attack/main/components/status', () => ({
   Status: () => <div data-test-subj="status" />,
 }));
 
-jest.mock('./assignees', () => ({
+jest.mock('../../../flyout_v2/attack/main/components/assignees', () => ({
   Assignees: () => <div data-test-subj="assignees" />,
 }));
 
@@ -68,6 +68,7 @@ describe('HeaderTitle (legacy wrapper)', () => {
     mockedUseAttackDetailsContext.mockReturnValue({
       attackId: 'attack-1',
       searchHit: mockSearchHit,
+      refetch: jest.fn(),
     });
     mockedUseNavigateToAttackDetailsLeftPanel.mockReturnValue(jest.fn());
   });

@@ -41,8 +41,8 @@ export interface StatusPopoverButtonProps {
 }
 
 /**
- * Renders a button and its popover + menu to display and change the workflow status of an attack.
- * All data is read directly from hit — no context dependency.
+ * Renders a button showing the current workflow status of an attack. Clicking it opens a
+ * popover menu to change the status.
  */
 export const StatusPopoverButton = memo(
   ({ hit, disabled, onAttackUpdated }: StatusPopoverButtonProps) => {

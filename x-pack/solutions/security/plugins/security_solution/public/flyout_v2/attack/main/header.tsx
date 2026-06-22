@@ -33,18 +33,11 @@ export interface HeaderProps {
 }
 
 /**
- * Assembled header for the attack flyout v2. Renders the title, status,
+ * Assembled header for the attack flyout. Renders the title, status,
  * alerts count, assignees, and notes. All four summary blocks share a single
  * 2-column flex layout so they wrap together on narrow widths. Padding is
- * provided by the parent `EuiFlyoutHeader` (paddingSize on the surrounding
- * system flyout); the header itself adds no extra panel padding.
- *
- * Unlike the legacy attack flyout, v2 does not render a "Share attack"
- * action: the system flyout already renders its own close button in the
- * header, and the v2 design (matching the document flyout) keeps the
- * header free of action buttons.
- *
- * All data is read from the hit — no context.
+ * provided by the parent `EuiFlyoutHeader`; the header itself adds no extra
+ * panel padding.
  */
 export const Header: FC<HeaderProps> = memo(({ hit, onAttackUpdated, onShowNotes }) => {
   const documentId = useMemo(() => hit.raw._id ?? '', [hit]);
