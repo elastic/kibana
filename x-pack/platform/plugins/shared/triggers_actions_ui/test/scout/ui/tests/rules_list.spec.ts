@@ -225,10 +225,12 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toHaveCount(2);
     await expect(page.testSubj.locator('rulesTableCell-duration')).toHaveCount(2);
 
-    // Narrowing to r1's name filters down to a single rule.
+    // Narrowing to r1's name: r1 is visible, r2 is filtered out.
+    // Avoid toHaveCount(1) — tokenized OR search can match stale cluster rules
+    // that share UUID fragment tokens, producing spurious extra rows.
     await searchRules(page, r1.data.name as string);
-    await expect(getTableRows(page)).toHaveCount(1);
     await expect(page.testSubj.locator(`rulesListTableRowName-${r1.data.name}`)).toBeVisible();
+    await expect(page.testSubj.locator(`rulesListTableRowName-${r2.data.name}`)).toBeHidden();
     await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
     await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('1');
     await expectDurationCell(page);
@@ -321,8 +323,9 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await ensureRuleStatus(page, rule.data.name as string, 'disabled');
     // Press Escape in case the EUI focus-trap listener reactivated the modal
     // during ensureRuleStatus. Escape safely cancels it (rule is already disabled).
-    // Playwright's click() below retries for 10 s while the overlay closes.
     await page.keyboard.press('Escape');
+    // Wait for any re-triggered overlay backdrop to fully unmount before clicking.
+    await expect(page.locator('.euiOverlayMask')).toHaveCount(0, { timeout: 15_000 });
 
     // Re-enable via UI — no confirmation modal when enabling a disabled rule.
     // Open the menu and wait for the item to read "Enable" before clicking,
