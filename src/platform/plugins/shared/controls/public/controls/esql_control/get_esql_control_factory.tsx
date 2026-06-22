@@ -278,7 +278,7 @@ function getRelatedStaticQuery(
   parentApi: unknown,
   variableKey: string,
   relatedPanels$: BehaviorSubject<string[]>
-): string | undefined {
+): string {
   /**
    * For non-field type static controls, we do not populate suggestions based on another query
    */
@@ -309,4 +309,5 @@ function getRelatedStaticQuery(
       }
     }
   }
+  return relatedQuery ?? '';
 }
