@@ -451,4 +451,40 @@ describe('buildResultsQuery', () => {
       expect(queryString).not.toContain('schedule_id');
     });
   });
+
+  describe('space_id scoping', () => {
+    const baseOptions: ResultsRequestOptions = {
+      actionId: 'action-123',
+      pagination: { activePage: 0, querySize: 100, cursorStart: 0 },
+      sort: [{ field: '@timestamp', direction: Direction.desc }],
+      kuery: '',
+    };
+
+    it('adds no space_id clause when spaceId is omitted (backward compatible)', () => {
+      const result = buildResultsQuery(baseOptions);
+      const filter = (result.query as any).bool.filter;
+      expect(JSON.stringify(filter)).not.toContain('space_id');
+    });
+
+    it('matches default space OR missing space_id when spaceId is "default"', () => {
+      const result = buildResultsQuery({ ...baseOptions, spaceId: 'default' });
+      const filter = (result.query as any).bool.filter;
+      expect(filter).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
+        },
+      });
+    });
+
+    it('matches the space exactly in a named space', () => {
+      const result = buildResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      const filter = (result.query as any).bool.filter;
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+      // must NOT match other spaces or docs without a space_id
+      expect(JSON.stringify(filter)).not.toContain('exists');
+    });
+  });
 });

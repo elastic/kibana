@@ -17,6 +17,7 @@ import {
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
+import { buildSpaceIdFilter } from '../../../../../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 
 export const buildActionResultsQuery = ({
@@ -30,6 +31,7 @@ export const buildActionResultsQuery = ({
   ccsEnabled,
   useNewDataStream,
   integrationNamespaces,
+  spaceId,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   let filter = `action_id: ${actionId}`;
   if (!isEmpty(kuery)) {
@@ -65,10 +67,13 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
+  const spaceIdFilter = buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer | undefined;
+
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
     ...agentIdsFilter,
     getQueryFilter({ filter }),
+    ...(spaceIdFilter ? [spaceIdFilter] : []),
   ];
 
   let baseIndex: string;
@@ -108,6 +113,7 @@ export const buildActionResultsQuery = ({
                       action_id: actionId,
                     },
                   },
+                  ...(spaceIdFilter ? [spaceIdFilter] : []),
                 ],
               },
             },

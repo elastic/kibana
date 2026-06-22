@@ -9,6 +9,7 @@ import type { ISearchRequestParams } from '@kbn/search-types';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
+import { buildSpaceIdFilter } from '../../../../utils/build_space_id_filter';
 
 export const buildScheduledActionResultsQuery = ({
   scheduleId,
@@ -19,21 +20,10 @@ export const buildScheduledActionResultsQuery = ({
   ccsEnabled,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
   // Scheduled action_responses emitted by osquerybeat may not carry a
-  // `space_id` field. Mirror the history aggregation (buildScheduledResponsesQuery):
-  // in the default space match `space_id: default` OR a missing `space_id`;
-  // in a named space match the space exactly.
-  const spaceIdFilter: Record<string, unknown> | undefined = !spaceId
-    ? undefined
-    : spaceId === 'default'
-    ? {
-        bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
-          ],
-        },
-      }
-    : { term: { space_id: spaceId } };
+  // `space_id` field. The shared helper mirrors the history aggregation
+  // (buildScheduledResponsesQuery): in the default space match `space_id: default`
+  // OR a missing `space_id`; in a named space match the space exactly.
+  const spaceIdFilter = buildSpaceIdFilter(spaceId);
 
   const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },

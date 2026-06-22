@@ -223,4 +223,32 @@ describe('buildExportResultsQuery', () => {
       expect(dsl.sort).toEqual([{ '@timestamp': { order: 'desc' } }, '_doc']);
     });
   });
+
+  describe('space_id scoping', () => {
+    it('adds no space_id clause when spaceId is omitted (backward compatible)', () => {
+      const dsl = buildExportResultsQuery(baseOptions);
+      expect(JSON.stringify((dsl.query as any).bool.filter)).not.toContain('space_id');
+    });
+
+    it('matches default space OR missing space_id when spaceId is "default"', () => {
+      const dsl = buildExportResultsQuery({ ...baseOptions, spaceId: 'default' });
+      expect((dsl.query as any).bool.filter).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
+        },
+      });
+    });
+
+    it('matches the space exactly in a named space', () => {
+      const dsl = buildExportResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      const filter = (dsl.query as any).bool.filter;
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+      // Named space matches the term exactly — it must NOT introduce the
+      // default-space missing-field fallback (which would leak docs w/o space_id).
+      expect(JSON.stringify(filter)).not.toContain('exists');
+    });
+  });
 });

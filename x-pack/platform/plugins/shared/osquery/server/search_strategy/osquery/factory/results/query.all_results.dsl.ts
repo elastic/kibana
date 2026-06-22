@@ -12,6 +12,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
+import { buildSpaceIdFilter } from '../../../../utils/build_space_id_filter';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
@@ -27,6 +28,7 @@ export const buildResultsQuery = ({
   integrationNamespaces,
   scheduleId,
   executionCount,
+  spaceId,
   ccsEnabled,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
@@ -69,7 +71,14 @@ export const buildResultsQuery = ({
       ? buildQueryFromFilters(parsedEsFilters, undefined)
       : { filter: [], must_not: [] };
 
-  const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
+  const spaceIdFilter = buildSpaceIdFilter(spaceId);
+
+  const filterQuery = [
+    ...timeRangeFilter,
+    kqlFilterClause,
+    ...esFilterClauses,
+    ...(spaceIdFilter ? [spaceIdFilter] : []),
+  ];
 
   let index: string;
 

@@ -12,6 +12,7 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ExportResultsRequestOptions } from '../../../../../common/search_strategy/osquery';
 import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
+import { buildSpaceIdFilter } from '../../../../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 import { composeExportKuery } from '../../../../lib/compose_export_kuery';
 
@@ -25,9 +26,12 @@ export const buildExportResultsQuery = ({
   size,
   ecsMapping,
   integrationNamespaces,
+  spaceId,
   trackTotalHits,
   ccsEnabled,
-}: ExportResultsRequestOptions & { ccsEnabled?: boolean }): ISearchRequestParams => {
+}: ExportResultsRequestOptions & {
+  ccsEnabled?: boolean;
+}): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
   const filter = composeExportKuery({ baseFilter, kuery, agentIds });
@@ -37,6 +41,8 @@ export const buildExportResultsQuery = ({
     esFilters && esFilters.length > 0
       ? buildQueryFromFilters(esFilters, undefined)
       : { filter: [], must_not: [] };
+
+  const spaceIdFilter = buildSpaceIdFilter(spaceId);
 
   // Resolve namespace-aware index pattern (mirrors query.all_results.dsl.ts).
   let index: string;
@@ -63,7 +69,11 @@ export const buildExportResultsQuery = ({
     pit,
     query: {
       bool: {
-        filter: [kqlFilterClause, ...(esFilterClauses as Array<Record<string, unknown>>)],
+        filter: [
+          kqlFilterClause,
+          ...(esFilterClauses as Array<Record<string, unknown>>),
+          ...(spaceIdFilter ? [spaceIdFilter] : []),
+        ],
         ...(esFilterMustNotClauses.length > 0 ? { must_not: esFilterMustNotClauses } : {}),
       },
     },

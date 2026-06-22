@@ -9,6 +9,7 @@ import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
 import { getQueryFilter } from '../../../../../utils/build_query';
+import { buildSpaceIdFilter } from '../../../../../utils/build_space_id_filter';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
 
@@ -28,25 +29,8 @@ export const buildActionDetailsQuery = ({
     bool: { filter: baseFilter },
   } = getQueryFilter({ filter });
 
-  let extendedFilter = baseFilter;
-
-  if (spaceId === 'default') {
-    // For default space, include docs where space_id matches 'default' OR where space_id field does not exist
-    extendedFilter = [
-      {
-        bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
-          ],
-        },
-      },
-      ...baseFilter,
-    ];
-  } else {
-    // For other spaces, only include docs where space_id matches the current spaceId
-    extendedFilter = [...baseFilter, { term: { space_id: spaceId } }];
-  }
+  const spaceIdFilter = buildSpaceIdFilter(spaceId);
+  const extendedFilter = spaceIdFilter ? [...baseFilter, spaceIdFilter] : baseFilter;
 
   const dslQuery = {
     allow_no_indices: true,

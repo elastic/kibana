@@ -41,6 +41,11 @@ export interface ExportResultsRequestOptions extends RequestBasicOptions {
   ecsMapping?: ECSMapping;
   /** Integration namespaces used to resolve the space-aware index pattern. */
   integrationNamespaces?: string[];
+  /**
+   * Active space of the request. Used to enforce a `space_id` filter so results
+   * from other spaces are never exported (cross-space read prevention).
+   */
+  spaceId?: string;
   /** When true, requests `track_total_hits: true` (first page only). */
   trackTotalHits?: boolean;
 }
