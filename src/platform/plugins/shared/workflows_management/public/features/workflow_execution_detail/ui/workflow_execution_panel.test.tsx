@@ -342,6 +342,7 @@ describe('WorkflowExecutionPanel', () => {
 
       expect(onReRunExecution).toHaveBeenCalledWith({
         workflowId: 'workflow-123',
+        executionId: 'exec-123',
         context: { inputs: { foo: 'bar' } },
       });
       expect(mockNavigateToApp).not.toHaveBeenCalled();

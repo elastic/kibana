@@ -50,7 +50,6 @@ describe('searchWorkflowExecutions', () => {
                   tags: ['reporting'],
                 },
                 managed: true,
-                context: { inputs: { foo: 'bar' } },
                 triggeredBy: 'manual',
                 executedBy: 'elastic',
                 concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
@@ -75,7 +74,6 @@ describe('searchWorkflowExecutions', () => {
           workflowName: 'Example Workflow',
           tags: ['reporting'],
           managed: true,
-          context: { inputs: { foo: 'bar' } },
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
         })
       );

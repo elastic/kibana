@@ -51,7 +51,11 @@ const ActionsCellHarness = ({
   onViewAllExecutionsForWorkflow,
   execution,
 }: {
-  onReRunExecution?: (params: { workflowId: string; context?: Record<string, unknown> }) => void;
+  onReRunExecution?: (params: {
+    workflowId: string;
+    executionId?: string;
+    context?: Record<string, unknown>;
+  }) => void;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   execution: WorkflowExecutionListItemDto;
 }) => {
@@ -176,6 +180,7 @@ describe('workflow executions actions column', () => {
 
     expect(onReRunExecution).toHaveBeenCalledWith({
       workflowId: 'wf-1',
+      executionId: 'exec-1',
       context: { inputs: { foo: 'bar' } },
     });
     expect(mockNavigateToApp).not.toHaveBeenCalled();

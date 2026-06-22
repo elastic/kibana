@@ -193,7 +193,7 @@ const ReplayExecutionButton = React.memo<{
     }
 
     if (onReRunExecution) {
-      void onReRunExecution({ workflowId, context });
+      void onReRunExecution({ workflowId, executionId, context });
       return;
     }
 

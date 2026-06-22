@@ -28,6 +28,7 @@ import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
 const mockRunWorkflow = jest.fn();
+const mockGetExecution = jest.fn();
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canExecuteWorkflow: true,
 }));
@@ -37,6 +38,7 @@ jest.mock('@kbn/workflows-ui', () => {
   return {
     ...actual,
     useRunWorkflow: () => ({ mutateAsync: mockRunWorkflow }),
+    useWorkflowsApi: () => ({ getExecution: mockGetExecution }),
     useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   };
 });
@@ -66,6 +68,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
     jest.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow: true });
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
+    mockGetExecution.mockResolvedValue({ context: {} });
     mockCopyToClipboard.mockReturnValue(true);
   });
 
@@ -205,10 +208,14 @@ describe('useWorkflowExecutionsBulkActions', () => {
     const mockNavigateToApp = jest.fn();
     services.application.navigateToApp = mockNavigateToApp;
 
-    const executions = [
-      createExecution('exec-1', 'wf-1', { inputs: { foo: 'bar' }, event: { type: 'alert' } }),
-      createExecution('exec-2', 'wf-2', { inputs: { baz: 1 } }),
-    ];
+    const executions = [createExecution('exec-1', 'wf-1'), createExecution('exec-2', 'wf-2')];
+    // The list omits `context`; the full execution is fetched per id on re-run.
+    mockGetExecution.mockImplementation(async (executionId: string) => ({
+      context:
+        executionId === 'exec-1'
+          ? { inputs: { foo: 'bar' }, event: { type: 'alert' } }
+          : { inputs: { baz: 1 } },
+    }));
     const { result } = renderHook(
       () =>
         useWorkflowExecutionsBulkActions({
@@ -250,9 +257,10 @@ describe('useWorkflowExecutionRerun', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
+    mockGetExecution.mockResolvedValue({ context: {} });
   });
 
-  it('re-runs execution and opens the flyout', async () => {
+  it('re-runs execution with provided context without fetching the execution', async () => {
     const services = createStartServicesMock();
 
     const { result } = renderHook(
@@ -263,16 +271,41 @@ describe('useWorkflowExecutionRerun', () => {
     await act(async () => {
       await result.current({
         workflowId: 'wf-1',
+        executionId: 'exec-1',
         context: { inputs: { foo: 'bar' }, event: { type: 'alert' } },
       });
     });
 
+    expect(mockGetExecution).not.toHaveBeenCalled();
     expect(mockRunWorkflow).toHaveBeenCalledWith({
       id: 'wf-1',
       inputs: { foo: 'bar', event: { type: 'alert' } },
     });
     expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-exec');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+  });
+
+  it('fetches the execution to recover context when only an executionId is given', async () => {
+    const services = createStartServicesMock();
+    mockGetExecution.mockResolvedValue({
+      context: { inputs: { foo: 'bar' }, event: { type: 'alert' } },
+    });
+
+    const { result } = renderHook(
+      () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await act(async () => {
+      await result.current({ workflowId: 'wf-1', executionId: 'exec-1' });
+    });
+
+    expect(mockGetExecution).toHaveBeenCalledWith('exec-1');
+    expect(mockRunWorkflow).toHaveBeenCalledWith({
+      id: 'wf-1',
+      inputs: { foo: 'bar', event: { type: 'alert' } },
+    });
+    expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-exec');
   });
 
   it('shows an error toast when re-run fails', async () => {

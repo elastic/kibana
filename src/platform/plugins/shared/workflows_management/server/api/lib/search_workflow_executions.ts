@@ -124,7 +124,6 @@ function transformToWorkflowExecutionListModel(
           workflowName: source.workflowDefinition?.name,
           tags: source.workflowDefinition?.tags,
           managed: source.managed,
-          context: source.context,
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
           concurrencyGroupKey: source.concurrencyGroupKey,

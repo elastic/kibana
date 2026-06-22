@@ -57,7 +57,7 @@ const menuAriaLabel = i18n.translate('workflowsManagement.executionsPage.actions
 });
 
 const useExecutionActionListItems = (
-  { workflowId, context }: WorkflowExecutionActionContext,
+  { executionId, workflowId, context }: WorkflowExecutionActionContext,
   onClosePopover: () => void,
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void,
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => void
@@ -89,7 +89,7 @@ const useExecutionActionListItems = (
           }
 
           onClosePopover();
-          void onReRunExecution({ workflowId, context });
+          void onReRunExecution({ workflowId, executionId, context });
         },
         isDisabled: !workflowId || !onReRunExecution,
         'data-test-subj': 'workflowExecutionActionReRun',
@@ -137,6 +137,7 @@ const useExecutionActionListItems = (
     canReadWorkflowExecution,
     canUpdateWorkflow,
     context,
+    executionId,
     navigateToWorkflow,
     onClosePopover,
     onReRunExecution,

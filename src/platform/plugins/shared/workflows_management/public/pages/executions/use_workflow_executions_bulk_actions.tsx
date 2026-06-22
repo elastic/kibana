@@ -12,7 +12,7 @@ import { copyToClipboard } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useRunWorkflow, useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { buildReplayInputsFromExecutionContext } from './build_replay_inputs_from_execution_context';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
 import { formatWorkflowExecutionsForCopy } from './format_workflow_executions_for_copy';
@@ -25,13 +25,19 @@ export const useWorkflowExecutionRerun = ({
 }) => {
   const { notifications } = useKibana().services;
   const { mutateAsync: runWorkflow } = useRunWorkflow();
+  const api = useWorkflowsApi();
 
   return useCallback(
-    async ({ workflowId, context }: RerunWorkflowExecutionParams) => {
+    async ({ workflowId, executionId, context }: RerunWorkflowExecutionParams) => {
       try {
+        // The executions list omits `context` for payload size, so recover the
+        // original inputs/event from the full execution before re-running.
+        const replayContext =
+          context ?? (executionId ? (await api.getExecution(executionId)).context : undefined);
+
         const { workflowExecutionId } = await runWorkflow({
           id: workflowId,
-          inputs: buildReplayInputsFromExecutionContext(context),
+          inputs: buildReplayInputsFromExecutionContext(replayContext),
         });
 
         notifications.toasts.addSuccess(
@@ -54,7 +60,7 @@ export const useWorkflowExecutionRerun = ({
         });
       }
     },
-    [notifications.toasts, runWorkflow, setSelectedExecution]
+    [api, notifications.toasts, runWorkflow, setSelectedExecution]
   );
 };
 
@@ -72,6 +78,7 @@ export const useWorkflowExecutionsBulkActions = ({
   const { notifications } = useKibana().services;
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { mutateAsync: runWorkflow } = useRunWorkflow();
+  const api = useWorkflowsApi();
   const executionsById = useMemo(
     () => new Map(executions.map((execution) => [execution.id, execution])),
     [executions]
@@ -116,9 +123,7 @@ export const useWorkflowExecutionsBulkActions = ({
     async (executionIdsToRerun: string[]) => {
       const executionsToRerun = executionIdsToRerun.flatMap((executionId) => {
         const execution = executionsById.get(executionId);
-        return execution?.workflowId
-          ? [{ workflowId: execution.workflowId, context: execution.context }]
-          : [];
+        return execution?.workflowId ? [{ executionId, workflowId: execution.workflowId }] : [];
       });
 
       if (executionsToRerun.length === 0) {
@@ -126,12 +131,15 @@ export const useWorkflowExecutionsBulkActions = ({
       }
 
       const results = await Promise.allSettled(
-        executionsToRerun.map(({ workflowId, context }) =>
-          runWorkflow({
+        executionsToRerun.map(async ({ executionId, workflowId }) => {
+          // The executions list omits `context`, so fetch the full execution to
+          // recover the original inputs/event before re-running.
+          const { context } = await api.getExecution(executionId);
+          return runWorkflow({
             id: workflowId,
             inputs: buildReplayInputsFromExecutionContext(context),
-          })
-        )
+          });
+        })
       );
 
       const successCount = results.filter((result) => result.status === 'fulfilled').length;
@@ -165,7 +173,7 @@ export const useWorkflowExecutionsBulkActions = ({
 
       onRefresh();
     },
-    [executionsById, notifications.toasts, onRefresh, runWorkflow]
+    [api, executionsById, notifications.toasts, onRefresh, runWorkflow]
   );
 
   return useMemo(() => {
