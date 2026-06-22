@@ -36,5 +36,10 @@ export const clientTypes: Readonly<Record<ClientTypeId, ClientTypeSpec<unknown>>
   mysql: mysqlClientType,
 };
 
-export type { ClientTypeSpec, BuildContext, ConnectorNetwork } from './client_type_spec';
+export type {
+  ClientTypeSpec,
+  BuildContext,
+  ConnectorNetwork,
+  CredentialAccessor,
+} from './client_type_spec';
 export type { MysqlPool } from './mysql_client_type';

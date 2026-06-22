@@ -35,6 +35,7 @@ export const createConnectorTypeFromSpec = (
     ? generateExecutorFunction({
         actions: spec.actions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
+        getCredential: actions.getCredential,
         getClientLeasePool: actions.getClientLeasePool,
         network,
       })

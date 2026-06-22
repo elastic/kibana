@@ -46,6 +46,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import type { CredentialAccessor } from '@kbn/connector-specs';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -124,8 +125,8 @@ import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
-import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
-import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
+import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
+import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 
 export interface PluginSetupContract {
   registerType<
@@ -145,6 +146,8 @@ export interface PluginSetupContract {
   ): void;
 
   getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
+
+  getCredential(opts: GetCredentialFnOpts): CredentialAccessor;
 
   /** PoC: process-wide pool for reusable connector clients (MCP, future DB/gRPC). */
   getClientLeasePool(): LeasePool<unknown>;
@@ -494,6 +497,7 @@ export class ActionsPlugin
         actionsConfigUtils,
         plugins.cloud
       ),
+      getCredential: this.getCredentialHelper(actionsConfigUtils),
       getClientLeasePool: () => this.clientLeasePool!,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
@@ -1088,6 +1092,14 @@ export class ActionsPlugin
     return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
       return await getAxiosInstanceFn(getAxiosParams);
     };
+  };
+
+  private getCredentialHelper = (actionsConfigUtils: ActionsConfigurationUtilities) => {
+    return getCredentialWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
   };
 
   private registerDynamicConnector = (connector: InMemoryConnector): boolean => {

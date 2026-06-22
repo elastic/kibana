@@ -20,7 +20,7 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
-import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
+import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import type { LeasePool } from '../lease_pool';
 import { buildClientLeaseKey } from './build_client_lease_key';
 
@@ -71,12 +71,14 @@ const getErrorMeta = ({
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
+  getCredential,
   getClientLeasePool,
   network,
   clientTypes = defaultClientTypes,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
   network: ConnectorNetwork;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
@@ -113,6 +115,14 @@ export const generateExecutorFunction = ({
         : {}),
     });
 
+    const credential = getCredential({
+      connectorId,
+      secrets,
+      connectorTokenClient,
+      authMode,
+      profileUid,
+    });
+
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
       logger.error(errorMessage);
@@ -128,7 +138,7 @@ export const generateExecutorFunction = ({
       try {
         return await pool.lease(
           buildClientLeaseKey(connectorId, id),
-          () => clientType.build({ logger, axiosInstance, config, network }),
+          () => clientType.build({ logger, axiosInstance, config, network, credential }),
           clientType.terminate
         );
       } catch (err) {

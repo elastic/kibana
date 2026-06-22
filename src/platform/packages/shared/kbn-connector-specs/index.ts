@@ -47,6 +47,7 @@ export type {
   ClientTypeSpec,
   BuildContext,
   ConnectorNetwork,
+  CredentialAccessor,
   ClientRegistry,
   ClientTypeId,
   MysqlPool,

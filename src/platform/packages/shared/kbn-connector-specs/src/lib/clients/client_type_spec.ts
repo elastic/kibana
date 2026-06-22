@@ -15,11 +15,16 @@ export interface ConnectorNetwork {
   ensureHostnameAllowed(host: string): void;
 }
 
+export interface CredentialAccessor {
+  getAuthHeaders(): Promise<Record<string, string>>;
+}
+
 export interface BuildContext {
   logger: Logger;
   axiosInstance: AxiosInstance;
   config?: Record<string, unknown>;
   network: ConnectorNetwork;
+  credential: CredentialAccessor;
 }
 
 export interface ClientTypeSpec<TClient> {

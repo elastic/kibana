@@ -11,7 +11,7 @@ import { mcpClientType } from './mcp_client_type';
 import { mysqlClientType } from './mysql_client_type';
 import { clientTypes } from '.';
 import { McpClient, McpConnectionError } from '@kbn/mcp-client';
-import type { FetchLike, McpClientOptions } from '@kbn/mcp-client';
+import type { FetchLike } from '@kbn/mcp-client';
 
 jest.mock('@kbn/mcp-client', () => {
   const actual = jest.requireActual('@kbn/mcp-client');
@@ -47,6 +47,7 @@ describe('mcpClientType', () => {
   } as unknown as import('@kbn/logging').Logger;
 
   let fakeNetwork: { ensureUriAllowed: jest.Mock; ensureHostnameAllowed: jest.Mock };
+  let fakeGetAuthHeaders: jest.Mock;
   let mockConnect: jest.Mock;
   let mockTerminate: jest.Mock;
   let mockClientInstance: { connect: jest.Mock; terminate: jest.Mock };
@@ -56,6 +57,7 @@ describe('mcpClientType', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     fakeNetwork = { ensureUriAllowed: jest.fn(), ensureHostnameAllowed: jest.fn() };
+    fakeGetAuthHeaders = jest.fn().mockResolvedValue({ Authorization: 'Bearer test-token' });
     mockConnect = jest.fn().mockResolvedValue(undefined);
     mockTerminate = jest.fn().mockResolvedValue(undefined);
     mockClientInstance = { connect: mockConnect, terminate: mockTerminate };
@@ -69,20 +71,15 @@ describe('mcpClientType', () => {
 
   const makeBuildContext = (overrides: Record<string, unknown> = {}) => ({
     logger: fakeLogger,
-    axiosInstance: {
-      defaults: {
-        headers: {
-          common: { Authorization: 'Bearer test-token', 'User-Agent': 'kibana' },
-        },
-      },
-    } as unknown as import('axios').AxiosInstance,
+    axiosInstance: {} as unknown as import('axios').AxiosInstance,
     config: { serverUrl: 'http://mcp.example.com' },
     network: fakeNetwork,
+    credential: { getAuthHeaders: fakeGetAuthHeaders },
     ...overrides,
   });
 
   describe('build', () => {
-    it('constructs McpClient with extracted headers and guarded fetch, then connects', async () => {
+    it('constructs McpClient with guarded fetch, then connects', async () => {
       const ctx = makeBuildContext();
       const result = await mcpClientType.build(ctx);
 
@@ -93,10 +90,7 @@ describe('mcpClientType', () => {
           version: '1.0.0',
           url: 'http://mcp.example.com',
         },
-        expect.objectContaining({
-          headers: expect.objectContaining({ Authorization: 'Bearer test-token' }),
-          fetch: expect.any(Function),
-        })
+        { fetch: expect.any(Function) }
       );
       expect(mockConnect).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockClientInstance);
@@ -123,38 +117,29 @@ describe('mcpClientType', () => {
       expect(mockConnect).not.toHaveBeenCalled();
     });
 
-    it('extracts static auth headers from axiosInstance.defaults.headers.common', async () => {
-      const ctx = makeBuildContext({
-        axiosInstance: {
-          defaults: {
-            headers: {
-              common: {
-                Authorization: 'ApiKey abc123',
-                'X-Custom-Header': 'custom-value',
-              },
-            },
-          },
-        },
-      });
+    it('guardedFetch calls getAuthHeaders and merges auth headers into the outgoing request', async () => {
+      fakeGetAuthHeaders.mockResolvedValue({ Authorization: 'Bearer merged-token' });
 
+      const ctx = makeBuildContext();
       await mcpClientType.build(ctx);
 
-      const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, McpClientOptions];
-      expect(options.headers).toEqual({
-        Authorization: 'ApiKey abc123',
-        'X-Custom-Header': 'custom-value',
-      });
-    });
+      const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
+      const guardedFetch = options.fetch!;
 
-    it('passes an empty headers object when no common headers exist', async () => {
-      const ctx = makeBuildContext({
-        axiosInstance: { defaults: { headers: {} } },
-      });
+      fakeNetwork.ensureUriAllowed.mockClear();
+      await guardedFetch('http://mcp.example.com/mcp', { method: 'POST' });
 
-      await mcpClientType.build(ctx);
+      expect(fakeGetAuthHeaders).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://mcp.example.com/mcp',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.any(Headers),
+        })
+      );
 
-      const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, McpClientOptions];
-      expect(options.headers).toEqual({});
+      const fetchInit = (global.fetch as jest.Mock).mock.calls[0][1] as { headers: Headers };
+      expect(fetchInit.headers.get('Authorization')).toBe('Bearer merged-token');
     });
 
     it('guardedFetch calls ensureUriAllowed then delegates to native fetch', async () => {
@@ -162,13 +147,18 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch;
+      const guardedFetch = options.fetch!;
 
       fakeNetwork.ensureUriAllowed.mockClear();
+      fakeGetAuthHeaders.mockClear();
       await guardedFetch('http://mcp.example.com/mcp', { method: 'POST' });
 
       expect(fakeNetwork.ensureUriAllowed).toHaveBeenCalledWith('http://mcp.example.com/mcp');
-      expect(global.fetch).toHaveBeenCalledWith('http://mcp.example.com/mcp', { method: 'POST' });
+      expect(fakeGetAuthHeaders).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://mcp.example.com/mcp',
+        expect.objectContaining({ method: 'POST' })
+      );
     });
 
     it('guardedFetch handles URL objects', async () => {
@@ -176,7 +166,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch;
+      const guardedFetch = options.fetch!;
 
       fakeNetwork.ensureUriAllowed.mockClear();
       const urlObj = new URL('http://mcp.example.com/mcp');
@@ -190,7 +180,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch;
+      const guardedFetch = options.fetch!;
 
       fakeNetwork.ensureUriAllowed.mockImplementation(() => {
         throw new Error('URI not allowed');
