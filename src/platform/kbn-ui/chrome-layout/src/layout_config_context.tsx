@@ -30,6 +30,8 @@ export type LayoutConfig = Pick<
   | 'applicationMarginRight'
 > & {
   chromeStyle?: ChromeStyle;
+  /** CSS transition value for navigation width changes, e.g. `250ms linear`. */
+  navigationWidthTransition?: string;
 };
 
 /** Update function type for layout config */
@@ -156,6 +158,14 @@ export function useLayoutUpdate(): LayoutUpdateFn {
     throw new Error('useLayoutUpdate must be used within a LayoutConfigProvider');
   }
   return updateLayout;
+}
+
+/**
+ * Returns the layout update function when available, otherwise undefined.
+ * @internal
+ */
+export function useOptionalLayoutUpdate(): LayoutUpdateFn | undefined {
+  return useContext(LayoutUpdateContext);
 }
 
 /**

@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 
 import { SIDE_PANEL_CONTENT_GAP } from '@kbn/ui-chrome-layout-constants';
 import type { SecondaryMenuItem } from '../../../types';
+import { useSidePanelWidthValue } from '../../context/side_panel_width_context';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
@@ -59,6 +60,7 @@ export const SecondaryMenuItemComponent = ({
   const { euiTheme } = useEuiTheme();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
+  const sidePanelWidth = useSidePanelWidthValue();
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
 
   const iconSide = iconType ? 'left' : 'right';
@@ -96,7 +98,7 @@ export const SecondaryMenuItemComponent = ({
 
   const getMaxWidth = () => {
     const isInSidePanel = testSubjPrefix?.includes('sidePanel');
-    let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
+    let maxWidth = (isInSidePanel ? sidePanelWidth : SIDE_PANEL_WIDTH) - ITEM_HORIZONTAL_SPACING_OFFSET;
     // Secondary item label inside side panel (narrower)
     if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
     // Secondary item label + badge

@@ -20,14 +20,14 @@ import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_sty
 
 export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
   id: string;
-  isCollapsed: boolean;
+  hidePrimaryLabels: boolean;
   isCurrent?: boolean;
   isHighlighted: boolean;
   onClick?: () => void;
 }
 
 export const Logo = ({
-  isCollapsed,
+  hidePrimaryLabels,
   isCurrent,
   isHighlighted,
   label,
@@ -49,8 +49,8 @@ export const Logo = ({
    */
   const wrapperStyles = css`
     position: relative;
-    padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    padding-top: ${hidePrimaryLabels ? euiTheme.size.s : euiTheme.size.m};
+    padding-bottom: ${hidePrimaryLabels ? euiTheme.size.s : euiTheme.size.m};
 
     ${getHighContrastSeparator(euiThemeContext)}
 
@@ -77,7 +77,7 @@ export const Logo = ({
         data-test-subj={logoTestSubj}
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
-        isLabelVisible={!isCollapsed}
+        isLabelVisible={!hidePrimaryLabels}
         isTruncated={false}
         {...props}
       >
@@ -86,7 +86,7 @@ export const Logo = ({
     </div>
   );
 
-  if (isCollapsed) {
+  if (hidePrimaryLabels) {
     return (
       <EuiToolTip content={label} disableScreenReaderOutput position="right" repositionOnScroll>
         {menuItem}

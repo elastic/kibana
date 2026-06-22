@@ -22,20 +22,20 @@ import { SecondaryMenu } from '../secondary_menu';
 import { SidePanel } from './side_panel';
 import { NAVIGATION_ROOT_SELECTOR } from '../../constants';
 
-const getNavWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
+const getNavWrapperStyles = (theme: UseEuiTheme['euiTheme'], hidePrimaryLabels: boolean) => css`
   box-sizing: border-box;
   background-color: ${theme.colors.backgroundTransparent};
   display: flex;
   flex-direction: column;
-  gap: ${isCollapsed ? theme.size.s : theme.size.m};
+  gap: ${hidePrimaryLabels ? theme.size.s : theme.size.m};
   height: 100%;
   padding-bottom: ${theme.size.s};
-  width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
+  width: ${hidePrimaryLabels ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
 `;
 
 export interface SideNavProps {
   children: ReactNode;
-  isCollapsed: boolean;
+  hidePrimaryLabels: boolean;
 }
 
 interface SideNavComponent extends FC<SideNavProps> {
@@ -57,12 +57,12 @@ interface SideNavComponent extends FC<SideNavProps> {
  * - the footer,
  * - the side panel.
  */
-export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
+export const SideNav: SideNavComponent = ({ children, hidePrimaryLabels }) => {
   const { euiTheme } = useEuiTheme();
 
   const wrapperStyles = useMemo(
-    () => getNavWrapperStyles(euiTheme, isCollapsed),
-    [euiTheme, isCollapsed]
+    () => getNavWrapperStyles(euiTheme, hidePrimaryLabels),
+    [euiTheme, hidePrimaryLabels]
   );
 
   return (

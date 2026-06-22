@@ -24,12 +24,12 @@ import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { PRIMARY_NAVIGATION_ID } from '../../constants';
 
-const getPrimaryMenuStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
+const getPrimaryMenuStyles = (theme: UseEuiTheme['euiTheme'], hidePrimaryLabels: boolean) => css`
   align-items: center;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: ${isCollapsed ? theme.size.xs : theme.size.base};
+  gap: ${hidePrimaryLabels ? theme.size.xs : theme.size.base};
   min-height: 0;
 `;
 
@@ -41,7 +41,7 @@ export type PrimaryMenuChildren = ReactNode | ((ids: PrimaryMenuIds) => ReactNod
 
 export interface PrimaryMenuProps {
   children: PrimaryMenuChildren;
-  isCollapsed: boolean;
+  hidePrimaryLabels: boolean;
 }
 
 interface PrimaryMenuComponent
@@ -50,15 +50,15 @@ interface PrimaryMenuComponent
 }
 
 export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
-  ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
+  ({ children, hidePrimaryLabels }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
     const mainNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'main-navigation-instructions',
     });
 
     const styles = useMemo(
-      () => getPrimaryMenuStyles(euiTheme, isCollapsed),
-      [euiTheme, isCollapsed]
+      () => getPrimaryMenuStyles(euiTheme, hidePrimaryLabels),
+      [euiTheme, hidePrimaryLabels]
     );
 
     const handleRef = (node: HTMLElement | null) => {
