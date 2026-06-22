@@ -198,7 +198,9 @@ export const getCategoriesSchema = schema.object({
 });
 
 export const getModelSnapshotsSchema = schema.object({
-  snapshotId: schema.maybe(schema.string({ maxLength: 10000, meta: { description: 'Snapshot ID' } })),
+  snapshotId: schema.maybe(
+    schema.string({ maxLength: 10000, meta: { description: 'Snapshot ID' } })
+  ),
   ...jobIdSchemaBasic,
 });
 

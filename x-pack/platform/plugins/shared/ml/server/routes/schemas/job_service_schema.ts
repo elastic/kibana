@@ -58,7 +58,9 @@ export const forceStartDatafeedSchema = schema.object({
 });
 
 const jobIds = {
-  jobIds: schema.arrayOf(schema.string({ maxLength: 10000 }), { meta: { description: 'List of job IDs.' } }),
+  jobIds: schema.arrayOf(schema.string({ maxLength: 10000 }), {
+    meta: { description: 'List of job IDs.' },
+  }),
 };
 
 export const jobIdsSchema = schema.object({
@@ -86,7 +88,10 @@ export const lookBackProgressSchema = {
   end: schema.number(),
 };
 
-export const topCategoriesSchema = { jobId: schema.string({ maxLength: 10000 }), count: schema.number() };
+export const topCategoriesSchema = {
+  jobId: schema.string({ maxLength: 10000 }),
+  count: schema.number(),
+};
 
 export const updateGroupsSchema = schema.object({
   jobs: schema.arrayOf(

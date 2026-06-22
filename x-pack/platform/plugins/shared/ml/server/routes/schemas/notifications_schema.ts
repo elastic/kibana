@@ -10,7 +10,10 @@ import { schema } from '@kbn/config-schema';
 
 export const getNotificationsQuerySchema = schema.object({
   queryString: schema.maybe(
-    schema.string({ maxLength: 10000, meta: { description: 'Search string for the message content' } })
+    schema.string({
+      maxLength: 10000,
+      meta: { description: 'Search string for the message content' },
+    })
   ),
   sortField: schema.oneOf(
     [
