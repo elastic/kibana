@@ -26,13 +26,8 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_GAUGE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': JSON.stringify({
-        from: testData.LOGSTASH_IN_RANGE_DATES.from,
-        to: testData.LOGSTASH_IN_RANGE_DATES.to,
-      }),
-    });
+    await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
+    await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
