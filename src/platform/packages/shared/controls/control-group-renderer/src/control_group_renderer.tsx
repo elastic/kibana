@@ -8,22 +8,11 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  BehaviorSubject,
-  Subject,
-  Subscription,
-  combineLatest,
-  combineLatestWith,
-  filter,
-  map,
-  pipe,
-  type OperatorFunction,
-} from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   apiHasSerializableState,
   useSearchApi,
@@ -46,6 +35,7 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
+import { gatePublishingSubjectWhileLoading } from './gate_publishing_subject_while_loading';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -154,28 +144,28 @@ export const ControlGroupRenderer = ({
     if (!parentApi || !input$) return;
 
     /**
-     * the ControlGroupRenderer will render before the children are available and combineCompatibleChildrenApis
-     * will default to the empty value; however, we shouldn't publish this until the value is real
+     * The ControlGroupRenderer will render before the children are available and
+     * combineCompatibleChildrenApis will default to the empty value; however, we
+     * shouldn't publish this until the value is real. Gate subscribers on
+     * childrenLoading$ and expose getValue/value from the latest post-load value.
      */
-    const ignoreWhileLoading = <T,>(): OperatorFunction<T, T> =>
-      pipe(
-        combineLatestWith(parentApi.childrenLoading$),
-        filter(([, loading]) => !loading),
-        map(([result]) => result)
-      );
-
-    // Pipe these parent subjects into fresh BehaviorSubjects so we can pipe them through `ignoreWhileLoading` without
-    // breaking the BehaviorSubject contract; some consumers use `.value` or `.getValue()` downstream
     const subscriptions = new Subscription();
-    function bridge<T>(source$: PublishingSubject<T>): BehaviorSubject<T> {
-      const out = new BehaviorSubject(source$.getValue());
-      subscriptions.add(source$.pipe(ignoreWhileLoading()).subscribe((v) => out.next(v)));
-      return out;
-    }
 
-    const esqlVariables$ = bridge(parentApi.esqlVariables$);
-    const appliedFilters$ = bridge(parentApi.appliedFilters$);
-    const appliedTimeslice$ = bridge(parentApi.appliedTimeslice$);
+    const esqlVariables$ = gatePublishingSubjectWhileLoading(
+      parentApi.esqlVariables$,
+      parentApi.childrenLoading$,
+      subscriptions
+    );
+    const appliedFilters$ = gatePublishingSubjectWhileLoading(
+      parentApi.appliedFilters$,
+      parentApi.childrenLoading$,
+      subscriptions
+    );
+    const appliedTimeslice$ = gatePublishingSubjectWhileLoading(
+      parentApi.appliedTimeslice$,
+      parentApi.childrenLoading$,
+      subscriptions
+    );
 
     const publicApi = {
       ...parentApi,
