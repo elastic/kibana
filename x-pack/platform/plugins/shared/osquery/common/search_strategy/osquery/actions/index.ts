@@ -111,5 +111,5 @@ export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   startDate?: string;
   useNewDataStream?: boolean;
   integrationNamespaces?: string[];
-  spaceId?: string;
+  spaceId: string;
 }

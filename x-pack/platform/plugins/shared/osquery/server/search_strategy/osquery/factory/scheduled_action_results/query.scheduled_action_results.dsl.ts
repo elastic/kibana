@@ -24,7 +24,7 @@ export const buildScheduledActionResultsQuery = ({
   // the top-level query does not constrain, so it is scoped explicitly here.
   // Scheduled action_responses emitted by osquerybeat may not carry a `space_id`
   // field; buildSpaceIdFilter matches a missing field in the default space.
-  const spaceIdFilter = spaceId ? buildSpaceIdFilter(spaceId) : undefined;
+  const spaceIdFilter = buildSpaceIdFilter(spaceId);
 
   const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },
@@ -50,7 +50,7 @@ export const buildScheduledActionResultsQuery = ({
                 must: [
                   { term: { schedule_id: scheduleId } },
                   { term: { schedule_execution_count: executionCount } },
-                  ...(spaceIdFilter ? [spaceIdFilter] : []),
+                  spaceIdFilter,
                 ],
               },
             },

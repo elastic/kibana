@@ -21,8 +21,8 @@ export const getActionResponses = (
   search: IScopedSearchClient,
   actionId: string,
   agentsCount: number,
-  integrationNamespaces?: string[],
-  spaceId?: string
+  integrationNamespaces: string[] | undefined,
+  spaceId: string
 ): Observable<{
   action_id: string;
   docs: number;

@@ -85,6 +85,23 @@ const filterContainsSpaceId = (dsl: ISearchRequestParams): boolean => {
   return JSON.stringify(filter ?? []).includes('space_id');
 };
 
+const collectGlobalAggs = (node: unknown, found: Array<Record<string, unknown>> = []) => {
+  if (node == null || typeof node !== 'object') {
+    return found;
+  }
+
+  const record = node as Record<string, unknown>;
+  if ('global' in record) {
+    found.push(record);
+  }
+
+  for (const value of Object.values(record)) {
+    collectGlobalAggs(value, found);
+  }
+
+  return found;
+};
+
 describe('osquery search strategy space scoping invariant', () => {
   // Every registered factory type, derived from the live registry so new types
   // are picked up automatically.
@@ -117,4 +134,29 @@ describe('osquery search strategy space scoping invariant', () => {
       expect(JSON.stringify(filter)).toContain('"space_id":"my-space"');
     }
   });
+
+  // Second-level invariant: enforceSpaceScope only scopes the hit query, not
+  // `global` aggregations (which ignore the query filter). Any builder that
+  // emits a `global` aggregation must therefore scope it itself, or its counts
+  // would aggregate across all spaces while the hits are space-scoped. Driven
+  // off the live registry so a future `global`-agg builder that forgets to
+  // scope its aggregation fails this test.
+  it.each(factoryTypes)(
+    'scopes every `global` aggregation by space_id for factory type "%s"',
+    (factoryQueryType) => {
+      const request = {
+        ...baseRequest(factoryQueryType),
+        spaceId: 'my-space',
+      } as StrategyRequestType<FactoryQueryTypes>;
+
+      const dsl = osqueryFactory[factoryQueryType].buildDsl(request);
+      const globalAggs = collectGlobalAggs(dsl.aggs);
+
+      // Builders that do not use a `global` aggregation rely solely on
+      // enforceSpaceScope (covered above) — nothing to assert here.
+      for (const globalAgg of globalAggs) {
+        expect(JSON.stringify(globalAgg)).toContain('"space_id":"my-space"');
+      }
+    }
+  );
 });

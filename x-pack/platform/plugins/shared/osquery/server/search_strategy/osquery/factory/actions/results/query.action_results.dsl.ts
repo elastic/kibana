@@ -67,9 +67,7 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const spaceIdFilter = spaceId
-    ? (buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer)
-    : undefined;
+  const spaceIdFilter = buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer;
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
@@ -114,7 +112,7 @@ export const buildActionResultsQuery = ({
                       action_id: actionId,
                     },
                   },
-                  ...(spaceIdFilter ? [spaceIdFilter] : []),
+                  spaceIdFilter,
                 ],
               },
             },

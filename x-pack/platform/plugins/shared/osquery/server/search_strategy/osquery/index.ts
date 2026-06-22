@@ -87,6 +87,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           const dsl = enforceSpaceScope(
             queryFactory.buildDsl({
               ...strictRequest,
+              spaceId,
               componentTemplateExists: actionsIndexExists,
               ccsEnabled,
             } as StrategyRequestType<T>),
@@ -137,6 +138,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
                 const dataStreamDsl = enforceSpaceScope(
                   queryFactory.buildDsl({
                     ...strictRequest,
+                    spaceId,
                     componentTemplateExists: actionsIndexExists,
                     ccsEnabled,
                     useNewDataStream: true,

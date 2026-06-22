@@ -18,9 +18,15 @@ import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
  * the filter. It is fail-closed: `spaceId` is required and a clause is always
  * added.
  *
- * Note: aggregation-level filters are query-shape specific and remain the
- * responsibility of the individual builders (defense-in-depth). This helper
- * guarantees the hit-level scoping that prevents cross-space `_source` leaks.
+ * Note on the "spaceId is applied twice" appearance at the dispatch site: the
+ * `action_results` and `scheduled_action_results` builders compute their count
+ * aggregations inside a `global` aggregation, which by ES semantics IGNORES the
+ * top-level `query` filter this helper scopes. The hit context and that global
+ * aggregation context are therefore two independent filter scopes — this helper
+ * cannot reach the latter, so those builders inject `buildSpaceIdFilter(spaceId)`
+ * into the aggregation's own filter as well. Same value, two distinct controls:
+ * this one scopes the returned hits (`_source`), the builder scopes the counts
+ * (`rows_count` / responded / success / error) so they match the hits.
  */
 export const enforceSpaceScope = (
   dsl: ISearchRequestParams,
