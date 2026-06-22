@@ -635,6 +635,9 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 **Alerting**:
 * Fixes the **Stack Alerts** page fetching alerts twice on initial load by deferring table rendering until filter controls have finished initializing [#271441]({{kib-pull}}271441).
 
+**Connectivity**:
+* Removes the **Content Connectors** page from the menu for users who didn't have the appropriate role privileges [#271709]({{kib-pull}}271709).
+
 **Dashboards and Visualizations**:
 * Fixes a stale closure in the Canvas autoplay timer that could advance to the wrong slide when slides were added or removed while autoplay was running [#268398]({{kib-pull}}268398).
 
@@ -659,9 +662,6 @@ For the Elastic Security 9.3.6 release information, refer to [Elastic Security S
 
 **Kibana platform**:
 * Adds `notifications.connectors.default.email` to the list of supported Docker environment variables [#272761]({{kib-pull}}272761).
-
-**Search**:
-* Fixes the **Content Connectors** entry appearing in the **Stack Management** sidebar for users who lack the required `content_connectors` capability [#271709]({{kib-pull}}271709).
 
 ## 9.3.5 [kibana-9.3.5-release-notes]
 
