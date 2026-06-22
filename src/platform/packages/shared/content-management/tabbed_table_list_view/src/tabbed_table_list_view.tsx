@@ -85,22 +85,26 @@ export const TabbedTableListView = ({
     loadTableList();
   }, [activeTabId, tabs, getActiveTab, onFetchSuccess, getBreadcrumbs, showCreateButton]);
 
+  const hideHeader = !title && !description && hideTabs;
+
   return (
     <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
-      <KibanaPageTemplate.Header
-        pageTitle={title ? <span id={headingId}>{title}</span> : undefined}
-        description={description}
-        data-test-subj="top-nav"
-        tabs={
-          hideTabs
-            ? undefined
-            : tabs.map((tab) => ({
-                onClick: () => changeActiveTab(tab.id),
-                isSelected: tab.id === getActiveTab().id,
-                label: tab.title,
-              }))
-        }
-      />
+      {!hideHeader && (
+        <KibanaPageTemplate.Header
+          pageTitle={title ? <span id={headingId}>{title}</span> : undefined}
+          description={description}
+          data-test-subj="top-nav"
+          tabs={
+            hideTabs
+              ? undefined
+              : tabs.map((tab) => ({
+                  onClick: () => changeActiveTab(tab.id),
+                  isSelected: tab.id === getActiveTab().id,
+                  label: tab.title,
+                }))
+          }
+        />
+      )}
       <KibanaPageTemplate.Section
         aria-labelledby={hasInitialFetchReturned && title ? headingId : undefined}
       >
