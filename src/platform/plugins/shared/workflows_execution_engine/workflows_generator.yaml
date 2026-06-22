@@ -22,11 +22,6 @@ triggers:
         description: The expected size in MB of the child workflow
         required: true
         default: 5
-      - name: metrics_collection_interval
-        type: number
-        description: The interval in minutes at which to collect metrics
-        required: true
-        default: 10
       - name: delete_workflow_metrics_collector_index
         type: boolean
         description: Whether to delete the workflow metrics collector index
@@ -87,21 +82,19 @@ steps:
           name: Workflow metrics collector
           enabled: true
           triggers:
-            - type: scheduled
-              with:
-                every: {{inputs.metrics_collection_interval}}m
+            - type: manual
           consts:
             WORKFLOW_METRICS_COLLECTOR_INDEX: workflow-metrics-collector
           {% raw %}
           settings:
-            concurrency:
-              key: ${{workflow.id}}
-              strategy: drop
+           concurrency:
+             key: ${{workflow.id}}
+             strategy: drop
           
           steps:
             - name: long_loop
               type: foreach
-              foreach: '${{ (0..2000) | json }}'
+              foreach: '${{ (0..3) | json }}'
               steps:
                 - name: loop
                   type: foreach
@@ -206,6 +199,7 @@ steps:
                           metric: '{{foreach.item.group}}.overall_size'
                           value: '${{steps.get_alias_disk_size.output._all.total.store.size_in_bytes | divided_by: 1048576}}'
                           unit: mb
+
                     - name: loop_mappings
                       type: foreach
                       foreach: "${{foreach.item.metrics_mapping | default: '[]' | json_parse}}"
@@ -216,7 +210,7 @@ steps:
                             continue: true
                           with:
                             method: POST
-                            path: /_reindex?wait_for_completion=false
+                            path: /_reindex?wait_for_completion=true
                             body:
                               conflicts: proceed
                               source:
@@ -316,10 +310,14 @@ steps:
                           metric: '{{foreach.item.metric}}'
                           value: ${{steps.get_workflow_executions_count_by_status.output.count}}
                           unit: int
-                - name: sleep
-                  type: wait
-                  with:
-                    duration: 30s
+                - name: if
+                  type: if
+                  condition: ${{foreach.index > 0}}
+                  steps:
+                    - name: sleep
+                      type: wait
+                      with:
+                        duration: 7s
           {% endraw %}
   - name: create_metrics_collector_data_view
     type: kibana.request
@@ -500,12 +498,13 @@ steps:
                     include_empty_rows: true
                     drop_partial_intervals: false
                   y:
-                    - operation: average
+                    - operation: last_value
                       field: value
+                      time_field: "@timestamp"
               axis:
                 y:
                   title:
-                    text: Avg backing indexes
+                    text: Backing indexes count
           - grid:
               x: 0
               y: 48
@@ -602,9 +601,7 @@ steps:
           enabled: true
           description: This is a new workflow
           triggers:
-            - type: scheduled
-              with:
-                every: 1m
+            - type: manual
           outputs:
             - name: file1
               type: string
@@ -678,41 +675,31 @@ steps:
             - type: scheduled
               with:
                 every: 1m
+          consts:
+            METRICS_COLLECTOR_WORKFLOW_ID: {{steps.create_metrics_collector_workflow.output.id}}
+            CHILD_WORKFLOW_ID: {{steps.create_child_workflow.output.id}}
           steps:
             - name: loop
               type: foreach
               {% raw %}
-              foreach: ${{ (1..100) | json }}
-              {% endraw %}
+              foreach: ${{ (1..6) | json }}
+
               steps:
-                {% raw %}
-                - name: log_should_sleep
-                  type: console
+                - name: schedule_child_workflow
+                  type: kibana.request
                   with:
-                    message: |
-                      {%- assign modulo = foreach.index | modulo: 100 -%}
-                      {%- assign trueVar = 'true' -%}
-                      {%- if foreach.index > 0 and modulo == 0 -%}
-                      {{trueVar}}
-                      {%- endif -%}
-                - name: maybe_sleep
-                  type: if
-                  condition: '${{ steps.log_should_sleep.output == "true" }}'
-                  steps:
-                    - name: sleep
-                      type: wait
-                      with:
-                        duration: 7s
-               
-                - name: foreach
-                  type: foreach
-                  foreach: ${{ (0..1) | json }}
-                  timeout: 1s
-                  on-failure:
-                    continue: true
-                {% endraw %}
-                  steps:
-                    - name: schedule_child_workflow
-                      type: workflow.executeAsync
-                      with:
-                        workflow-id: {{steps.create_child_workflow.output.id}}
+                    method: POST
+                    path: '/api/workflows/workflow/{{ consts.CHILD_WORKFLOW_ID }}/run'
+                    body:
+                      inputs: {}
+                
+                - name: sleep
+                  type: wait
+                  with:
+                    duration: 7s
+
+            - name: trigger_workflow_metrics_collector
+              type: workflow.executeAsync
+              with:
+                workflow-id: '${{ consts.METRICS_COLLECTOR_WORKFLOW_ID }}'
+              {% endraw %}
