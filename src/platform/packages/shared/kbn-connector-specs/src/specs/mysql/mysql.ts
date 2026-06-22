@@ -29,10 +29,12 @@ export const MysqlConnector: ConnectorSpec = {
     id: '.mysql',
     displayName: 'MySQL',
     description: i18n.translate('core.kibanaConnectorSpecs.mysql.metadata.description', {
-      defaultMessage: 'Connect to MySQL to search and query your databases.',
+      defaultMessage:
+        'Query tables, search rows, and explore schema in a MySQL database using read-only SQL',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   schema: z.object({
@@ -132,7 +134,9 @@ export const MysqlConnector: ConnectorSpec = {
 
   actions: {
     query: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Execute a read-only SQL SELECT query against the MySQL database. Only SELECT statements are permitted; INSERT, UPDATE, DELETE, and DDL are blocked. Returns up to maxRows rows (default 100). Use listTables first to discover available tables, and describeTable to inspect column names before writing queries. Prefer WHERE clauses and explicit column lists to keep result size manageable.',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) =>
         getClient().runReadonlyQuery(
@@ -144,13 +148,17 @@ export const MysqlConnector: ConnectorSpec = {
     },
 
     listDatabases: {
-      isTool: false,
+      isTool: true,
+      description:
+        'List all databases available on the connected MySQL server. Use this first to discover what databases are accessible before querying tables.',
       input: ListDatabasesInputSchema,
       handler: async (ctx) => getClient().runQuery(ctx, 'SHOW DATABASES'),
     },
 
     listTables: {
-      isTool: false,
+      isTool: true,
+      description:
+        'List all tables in a MySQL database. Specify database to target a specific database, or omit to use the configured default. Use describeTable to inspect column names and types before querying.',
       input: ListTablesInputSchema,
       handler: async (ctx, input: ListTablesInput) => {
         const db = resolveDatabase(input.database, ctx);
@@ -159,7 +167,9 @@ export const MysqlConnector: ConnectorSpec = {
     },
 
     describeTable: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Describe the structure of a MySQL table — returns column names, data types, nullability, and default values. Use this before query or searchRows to discover available columns and build correct queries.',
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
         const db = resolveDatabase(input.database, ctx);
@@ -171,7 +181,9 @@ export const MysqlConnector: ConnectorSpec = {
     },
 
     searchRows: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Search for rows in a MySQL table by matching a text value against one or more columns using LIKE pattern matching (case-insensitive partial match). Returns up to maxRows results (default 100). Use describeTable first to discover searchable column names. Prefer query (SQL SELECT) for structured filtering; use searchRows for broad text discovery across known columns.',
       input: SearchRowsInputSchema,
       handler: async (ctx, input: SearchRowsInput) => {
         const db = resolveDatabase(input.database, ctx);

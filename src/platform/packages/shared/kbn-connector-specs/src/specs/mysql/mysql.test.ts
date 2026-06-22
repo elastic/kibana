@@ -27,7 +27,21 @@ describe('MysqlConnector', () => {
     expect(MysqlConnector.actions).toHaveProperty('searchRows');
   });
 
-  it('should use bearer auth', () => {
-    expect(MysqlConnector.auth?.types).toContain('bearer');
+  it('should not use auth types (credentials are in the schema)', () => {
+    expect(MysqlConnector.auth).toBeUndefined();
+  });
+
+  it('should be marked as technical preview', () => {
+    expect(MysqlConnector.metadata.isTechnicalPreview).toBe(true);
+  });
+
+  it('should support agentBuilder feature', () => {
+    expect(MysqlConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+  });
+
+  it('should mark all actions as tools', () => {
+    for (const action of Object.values(MysqlConnector.actions)) {
+      expect(action.isTool).toBe(true);
+    }
   });
 });

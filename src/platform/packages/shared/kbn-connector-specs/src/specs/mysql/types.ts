@@ -56,7 +56,7 @@ export const SearchRowsInputSchema = z.object({
     .array(z.string())
     .min(1)
     .describe(
-      'Column names to search in (e.g. ["name", "email", "notes"]). At least one column is required. Use describe_table to discover available columns.'
+      'Column names to search in (e.g. ["name", "email", "notes"]). At least one column is required. Use describeTable to discover available columns.'
     ),
   maxRows: z.number().optional().describe('Maximum number of rows to return (default: 100)'),
   database: z
