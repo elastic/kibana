@@ -34,6 +34,16 @@ export const visitStepChildren = (
       }
     }
   }
+  if ('cases' in record && Array.isArray(record.cases)) {
+    for (const caseItem of record.cases as Array<{ steps?: unknown[] }>) {
+      if (Array.isArray(caseItem.steps)) {
+        callback(caseItem.steps.filter(isStep), 'cases');
+      }
+    }
+  }
+  if ('default' in record && Array.isArray(record.default)) {
+    callback((record.default as unknown[]).filter(isStep), 'default');
+  }
 };
 
 /**

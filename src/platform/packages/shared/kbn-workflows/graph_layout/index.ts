@@ -10,7 +10,9 @@
 export {
   DEFAULT_NODE_STYLE,
   FLOW_CONTROL_STEP_TYPES,
+  SWITCH_DEFAULT_HANDLE,
   TRIGGER_STEP_TYPES,
+  switchCaseHandleId,
   type EdgeBranchType,
   type ForeachGroup,
   type ForeachGroupNodeData,
