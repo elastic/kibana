@@ -393,6 +393,21 @@ export function InternalDashboardTopNav({
     };
   }, [badges]);
 
+  const historyConfig = useMemo(() => {
+    return {
+      undo: {
+        onClick: () => {
+          console.log('UNDO');
+        },
+      },
+      redo: {
+        onClick: () => {
+          console.log('REDO');
+        },
+      },
+    };
+  }, []);
+
   useEffect(() => {
     return coreServices.chrome.setBreadcrumbsAppendExtension({
       content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
@@ -413,8 +428,8 @@ export function InternalDashboardTopNav({
         config={
           visibilityProps.showTopNavMenu
             ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
+              ? { ...editModeTopNavConfig, historyConfig }
+              : { ...viewModeTopNavConfig, historyConfig }
             : undefined
         }
       />

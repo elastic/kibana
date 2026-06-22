@@ -16,6 +16,7 @@ import { AppMenuOverflowButton } from './app_menu_overflow_button';
 import { AppMenuSwitchComponent } from './app_menu_switch';
 import type { AppMenuConfig, AppMenuStaticItem } from '../types';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+import { AppMenuHistoryComponent } from './app_menu_history';
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -64,6 +65,7 @@ export const AppMenuComponent = ({
 
   const primaryActionItem = config?.primaryActionItem;
   const switchConfig = config?.switch;
+  const historyConfig = config?.historyConfig;
   const showMoreButtonId = 'show-more';
 
   const headerLinksProps = {
@@ -141,6 +143,7 @@ export const AppMenuComponent = ({
   if (isAboveXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
+        {historyConfig && <AppMenuHistoryComponent historyConfig={historyConfig} />}
         {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
         {displayedItems?.length > 0 &&
           displayedItems.map((menuItem) => (
