@@ -105,7 +105,8 @@ const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => 
 const selectComboBoxOption = async (page: ScoutPage, testSubj: string, value: string) => {
   await page.testSubj.click(`${testSubj} > comboBoxInput`);
   await page.testSubj.locator(`${testSubj} > comboBoxSearchInput`).pressSequentially(value);
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
+  // CI field-suggestion API can be slow; use a generous timeout for the dropdown option.
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 30_000 });
 };
 
 const selectComboBoxOptionIn = async (
@@ -118,7 +119,7 @@ const selectComboBoxOptionIn = async (
   const combo = container.locator(`[data-test-subj="${testSubj}"]`);
   await combo.locator('[data-test-subj="comboBoxInput"]').click();
   await combo.locator('[data-test-subj="comboBoxSearchInput"]').pressSequentially(value);
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 30_000 });
 };
 
 const addStructuredFilterCondition = async (
