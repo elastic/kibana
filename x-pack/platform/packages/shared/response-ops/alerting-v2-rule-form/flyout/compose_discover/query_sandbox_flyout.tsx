@@ -143,7 +143,19 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
   const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
 
-  const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
+  /*
+   * Unified composed mode: the editor holds the whole pipeline, so write it to
+   * `base` with an empty `segment` and `getBreachQuery` returns it verbatim.
+   * Writing to `segment` would re-join base + segment and duplicate lines; the
+   * heuristic split runs on Apply, not here.
+   */
+  const handleQueryChange = useCallback(
+    (v: string) =>
+      query.format === 'composed'
+        ? updateQuery({ base: v, breach: '' })
+        : updateQuery({ breach: v }),
+    [query.format, updateQuery]
+  );
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
     if (!tabs?.length) return undefined;
@@ -197,6 +209,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           autoRun
+          showUnifiedAlertHelper={query.format === 'composed' && !tabs?.length}
           tabProps={tabProps}
         />
       </EuiFlyoutBody>

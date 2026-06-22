@@ -209,7 +209,7 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
-    it('disables Next when base query is present but breach segment is empty', () => {
+    it('enables Next when base query is present but breach segment is empty (no alert condition)', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true },
         formValues: {
@@ -217,7 +217,12 @@ describe('ComposeDiscoverFooter', () => {
           query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
         },
       });
-      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+      /*
+       * Base-only (no_where) is allowed to proceed; saving is gated on the
+       * final submit instead (base-only save deferred — see
+       * https://github.com/elastic/rna-program/issues/622).
+       */
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
 
     it('disables Next when both base and breach segments are empty', () => {
@@ -277,6 +282,18 @@ describe('ComposeDiscoverFooter', () => {
     it('disables Submit when hasValidationErrors is true', () => {
       renderFooter({
         propsOverrides: { isLastStep: true, hasValidationErrors: true },
+      });
+      expect(screen.getByTestId('composeDiscoverSubmit')).toBeDisabled();
+    });
+
+    it('disables Submit for a base-only alert (no alert condition, base-only save deferred per #622)', () => {
+      renderFooter({
+        propsOverrides: { isLastStep: true },
+        stateOverrides: { queryCommitted: true },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+        },
       });
       expect(screen.getByTestId('composeDiscoverSubmit')).toBeDisabled();
     });

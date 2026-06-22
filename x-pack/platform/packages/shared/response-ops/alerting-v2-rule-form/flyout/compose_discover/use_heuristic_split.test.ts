@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { splitQuery, guessRecoveryBlock, discoverQueryToComposed } from './use_heuristic_split';
+import {
+  splitQuery,
+  guessRecoveryBlock,
+  discoverQueryToComposed,
+  splitResultToComposed,
+} from './use_heuristic_split';
 
 // ── splitQuery ────────────────────────────────────────────────────────────────
 
@@ -242,10 +247,12 @@ describe('guessRecoveryBlock', () => {
     expect(result).toBe('| WHERE count >= 100');
   });
 
-  // Intentionally a naive per-operator flip, NOT De Morgan's logical negation.
-  // True negation of (a > 1 AND b < 2) would be (a <= 1 OR b >= 2), but
-  // guessRecoveryBlock only flips operators and preserves connectives. This is
-  // fine as a heuristic seed — users refine the result in the Recovery editor.
+  /*
+   * Intentionally a naive per-operator flip, NOT De Morgan's logical negation.
+   * True negation of (a > 1 AND b < 2) would be (a <= 1 OR b >= 2), but
+   * guessRecoveryBlock only flips operators and preserves connectives. This is
+   * fine as a heuristic seed — users refine the result in the Recovery editor.
+   */
   it('handles multiple operators in one expression', () => {
     const result = guessRecoveryBlock('| WHERE a > 1 AND b < 2');
     expect(result).toBe('| WHERE a < 1 AND b > 2');
@@ -258,5 +265,59 @@ describe('guessRecoveryBlock', () => {
 
   it('returns the input unchanged for an empty string', () => {
     expect(guessRecoveryBlock('')).toBe('');
+  });
+});
+
+// ── splitResultToComposed ───────────────────────────────────────────────────
+
+describe('splitResultToComposed', () => {
+  it('returns a composed query with outcome "success" when base and alert are found', () => {
+    const { query, outcome } = splitResultToComposed(
+      'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
+    );
+
+    expect(outcome).toBe('success');
+    expect(query.format).toBe('composed');
+    expect(query.base).toContain('STATS');
+    expect(query.breach.segment).toContain('WHERE count > 100');
+  });
+
+  it('returns outcome "no_alert_condition" with the full pipeline as base when there is no WHERE', () => {
+    const { query, outcome } = splitResultToComposed(
+      'FROM logs-*\n| STATS count = COUNT(*) BY host.name'
+    );
+
+    expect(outcome).toBe('no_alert_condition');
+    expect(query.format).toBe('composed');
+    expect(query.base).toContain('STATS');
+    expect(query.breach.segment).toBe('');
+  });
+
+  it('returns outcome "empty" for an empty query', () => {
+    const { query, outcome } = splitResultToComposed('   ');
+
+    expect(outcome).toBe('empty');
+    expect(query.base).toBe('');
+    expect(query.breach.segment).toBe('');
+  });
+
+  it('returns outcome "split_failed" when the heuristic cannot isolate a base', () => {
+    // A leading-WHERE-only pipeline has no non-WHERE base command.
+    const { query, outcome } = splitResultToComposed('| WHERE count > 100');
+
+    expect(outcome).toBe('split_failed');
+    expect(query.base).toBe('');
+    expect(query.breach.segment).toContain('WHERE count > 100');
+  });
+
+  it('never produces a duplicated base when re-applied to its own joined output', () => {
+    const first = splitResultToComposed(
+      'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
+    );
+    const joined = `${first.query.base}\n${first.query.breach.segment}`;
+    const second = splitResultToComposed(joined);
+
+    expect(second.query.base).toBe(first.query.base);
+    expect(second.query.breach.segment).toBe(first.query.breach.segment);
   });
 });

@@ -62,7 +62,13 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       const kind = methods.getValues('kind');
       const query = methods.getValues('query');
       if (kind === 'alert' && query.format === 'composed') {
-        return query.base.trim().length > 0 && query.breach.segment.trim().length > 0;
+        /*
+         * A base-only query (no_where) is allowed to advance — final Create stays
+         * gated in the footer until base-only save is supported (see
+         * https://github.com/elastic/rna-program/issues/622). Only the
+         * empty-query case (no base) blocks navigation.
+         */
+        return query.base.trim().length > 0;
       }
       return getBreachQuery(query).trim().length > 0;
     },

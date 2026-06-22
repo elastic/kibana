@@ -48,7 +48,7 @@ export const createInitialState = ({
     step: 0,
     recoveryType,
     activeTab: defaultTabForTabs(
-      getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType })
+      getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType, mode })
     ),
     childOpen: mode === 'create' && !isBuilderMode,
     queryCommitted: mode === 'edit' || isQueryPrePopulated,
@@ -59,27 +59,37 @@ export const createInitialState = ({
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * isAlert + alertCondition     → ['base', 'alert']
+ * create + alertCondition      → undefined (single unified editor; split runs on Apply)
+ * edit   + alertCondition      → ['base', 'alert']
  * isAlert + recoveryCondition  + custom → ['recovery']
  * everything else              → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
-  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType'>
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode'>
 ): QueryTab[] | undefined {
   if (!isAlert) return undefined;
 
   const stepId = getStepIds(isAlert)[state.step];
 
-  if (stepId === 'alertCondition') return ['base', 'alert'];
+  if (stepId === 'alertCondition') {
+    /*
+     * Create authors a single unified ES|QL query; the heuristic split into
+     * base/alert runs on Apply, not in the editor. Edit mode keeps the split
+     * tabs so its behavior is unchanged.
+     */
+    return state.mode === 'create' ? undefined : ['base', 'alert'];
+  }
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;
 }
 
 function defaultTabForTabs(tabs: QueryTab[] | undefined): QueryTab {
   if (tabs?.includes('recovery')) return 'recovery';
-  // When the split editor is open (base + alert), start on the base query —
-  // users build the base query first, then layer the alert condition on top.
+  /*
+   * When the split editor is open (base + alert), start on the base query —
+   * users build the base query first, then layer the alert condition on top.
+   */
   if (tabs?.includes('base')) return 'base';
   return 'alert';
 }

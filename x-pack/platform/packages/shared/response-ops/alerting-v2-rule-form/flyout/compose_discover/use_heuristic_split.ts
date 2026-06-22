@@ -6,6 +6,7 @@
  */
 
 import { Parser } from '@elastic/esql';
+import type { ComposedQuery } from './compose_form_types';
 
 export type SplitConfidence = 'high' | 'low' | 'none';
 
@@ -64,9 +65,11 @@ export function splitQuery(query: string): SplitResult {
   }
 
   if (lastStatsIdx === -1) {
-    // No STATS — find the last non-WHERE command that precedes the last WHERE.
-    // All commands from that point onward (a trailing chain of WHEREs, possibly
-    // interspersed with SORT/LIMIT/EVAL tail commands) become the alert block.
+    /*
+     * No STATS — find the last non-WHERE command that precedes the last WHERE.
+     * All commands from that point onward (a trailing chain of WHEREs, possibly
+     * interspersed with SORT/LIMIT/EVAL tail commands) become the alert block.
+     */
     let lastWhereIdx = -1;
     for (let j = commands.length - 1; j >= 0; j--) {
       if (commands[j].name === 'where') {
@@ -136,6 +139,40 @@ export function discoverQueryToComposed(inlinedQuery: string): {
 } {
   const { base, alertBlock } = splitQuery(inlinedQuery);
   return { format: 'composed', base, breach: { segment: alertBlock } };
+}
+
+/**
+ * Outcome of splitting a unified query for the form summary:
+ *
+ * - 'success'            — base and alert condition both identified
+ * - 'no_alert_condition' — base defined, no alert condition (every row is a breach)
+ * - 'split_failed'       — heuristic could not isolate a base (empty base)
+ * - 'empty'              — no query entered
+ */
+export type SplitOutcome = 'success' | 'no_alert_condition' | 'split_failed' | 'empty';
+
+export interface ComposedSplitResult {
+  query: ComposedQuery;
+  outcome: SplitOutcome;
+}
+
+/**
+ * Maps a unified ES|QL query into the `composed` rule query shape used by alert
+ * rules, alongside an outcome that drives the form summary copy/callouts. Alert
+ * rules are always `composed` (the `alert ⇒ composed` invariant); a base-only
+ * result is represented as a composed query with an empty `breach.segment`.
+ */
+export function splitResultToComposed(fullQuery: string): ComposedSplitResult {
+  const { base, alertBlock } = splitQuery(fullQuery);
+  const query: ComposedQuery = { format: 'composed', base, breach: { segment: alertBlock } };
+
+  const hasBase = base.trim().length > 0;
+  const hasAlert = alertBlock.trim().length > 0;
+
+  if (!hasBase && !hasAlert) return { query, outcome: 'empty' };
+  if (hasBase && hasAlert) return { query, outcome: 'success' };
+  if (hasBase) return { query, outcome: 'no_alert_condition' };
+  return { query, outcome: 'split_failed' };
 }
 
 /**
