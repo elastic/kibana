@@ -41,6 +41,7 @@ const createMockServices = (): AlertingV2KibanaServices => {
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings,
     expressions: {} as AlertingV2KibanaServices['expressions'],
+    container: {} as AlertingV2KibanaServices['container'],
   };
 };
 

@@ -23,6 +23,7 @@ const createMockServices = (): AlertingV2KibanaServices => ({
   expressions: {} as AlertingV2KibanaServices['expressions'],
   uiActions: {} as AlertingV2KibanaServices['uiActions'],
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  container: {} as AlertingV2KibanaServices['container'],
 });
 
 describe('kibana_services', () => {
