@@ -7,19 +7,15 @@
 
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,6 +30,7 @@ import { ConfirmRuleClose } from '../confirm_rule_close';
 import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/types';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
+import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
   composeFormToCreateRequest,
@@ -84,48 +81,6 @@ const CREATE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.cre
 const EDIT_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.editTitleLabel', {
   defaultMessage: 'Edit alert rule',
 });
-
-const CREATE_RULE_BUTTON_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
-  { defaultMessage: 'Create rule' }
-);
-
-const SAVE_RULE_BUTTON_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.saveButtonLabel',
-  { defaultMessage: 'Save rule' }
-);
-
-const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.cancelButtonLabel',
-  { defaultMessage: 'Cancel' }
-);
-
-const BACK_BUTTON_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.backButtonLabel',
-  { defaultMessage: 'Back' }
-);
-
-const NEXT_BUTTON_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.nextButtonLabel',
-  { defaultMessage: 'Next' }
-);
-
-const NEXT_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.nextDisabledTooltip',
-  { defaultMessage: 'Define a query in the editor before continuing' }
-);
-
-const NEXT_BUILDER_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.nextBuilderDisabledTooltip',
-  { defaultMessage: 'Complete the required fields before continuing' }
-);
-
-const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.validationErrorsNextTooltip',
-  {
-    defaultMessage: 'Resolve ES|QL control placeholders before continuing',
-  }
-);
 
 const EDIT_MODE_OPTIONS = [
   { id: 'form', label: FORM_VIEW_LABEL, iconType: 'tableDensityNormal' },
@@ -552,24 +507,6 @@ export function ComposeDiscoverFlyout({
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
-  const builderFirstStepValid = useMemo(() => {
-    if (!isBuilderMode || currentStep?.id !== 'builderCondition') {
-      return true;
-    }
-    const definition = builderType ? RULE_BUILDER_REGISTRY[builderType] : undefined;
-    return definition?.validate?.(uiState, builderState) ?? false;
-  }, [isBuilderMode, builderType, currentStep?.id, uiState, builderState]);
-
-  const isFirstStepReady = useMemo(() => {
-    if (currentStep?.id === 'builderCondition') {
-      return builderFirstStepValid;
-    }
-    if (currentStep?.id === 'alertCondition') {
-      return uiState.queryCommitted;
-    }
-    return true;
-  }, [currentStep?.id, builderFirstStepValid, uiState.queryCommitted]);
-
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
   yamlTextRef.current = yamlText;
@@ -867,93 +804,20 @@ export function ComposeDiscoverFlyout({
             )}
           </EuiFlyoutBody>
 
-          <EuiFlyoutFooter>
-            {uiState.yamlMode ? (
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    onClick={handleYamlSave}
-                    isLoading={isSaving}
-                    isDisabled={hasValidationErrors}
-                    data-test-subj="composeDiscoverYamlSubmit"
-                  >
-                    {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      closeSourceRef.current = 'button';
-                      handleRequestClose();
-                    }}
-                    data-test-subj="composeDiscoverCancel"
-                  >
-                    {CANCEL_BUTTON_LABEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" responsive={false}>
-                    {uiState.step > 0 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          iconType="arrowLeft"
-                          isDisabled={uiState.childOpen}
-                          onClick={() => dispatch({ type: 'GO_BACK' })}
-                          data-test-subj="composeDiscoverBack"
-                        >
-                          {BACK_BUTTON_LABEL}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>
-                      {isLastStep ? (
-                        <EuiButton
-                          fill
-                          isLoading={isSaving}
-                          isDisabled={hasValidationErrors}
-                          onClick={handleFinalSubmit}
-                          data-test-subj="composeDiscoverSubmit"
-                        >
-                          {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
-                        </EuiButton>
-                      ) : (
-                        <EuiToolTip
-                          content={
-                            hasValidationErrors
-                              ? VALIDATION_ERRORS_NEXT_TOOLTIP
-                              : !isFirstStepReady &&
-                                (currentStep?.id === 'alertCondition' ||
-                                  currentStep?.id === 'builderCondition')
-                              ? currentStep?.id === 'builderCondition'
-                                ? NEXT_BUILDER_DISABLED_TOOLTIP
-                                : NEXT_DISABLED_TOOLTIP
-                              : undefined
-                          }
-                        >
-                          <EuiButton
-                            fill
-                            iconType="arrowRight"
-                            iconSide="right"
-                            isDisabled={
-                              uiState.childOpen || hasValidationErrors || !isFirstStepReady
-                            }
-                            onClick={handleNext}
-                            data-test-subj="composeDiscoverNext"
-                          >
-                            {NEXT_BUTTON_LABEL}
-                          </EuiButton>
-                        </EuiToolTip>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiFlyoutFooter>
+          <ComposeDiscoverFooter
+            uiState={uiState}
+            dispatch={dispatch}
+            currentStep={currentStep}
+            isLastStep={isLastStep}
+            isCreate={isCreate}
+            hasValidationErrors={hasValidationErrors}
+            isSaving={isSaving}
+            onNext={handleNext}
+            onFinalSubmit={handleFinalSubmit}
+            onYamlSave={handleYamlSave}
+            onRequestClose={handleRequestClose}
+            closeSourceRef={closeSourceRef}
+          />
 
           {uiState.childOpen && (
             <QuerySandboxFlyout
