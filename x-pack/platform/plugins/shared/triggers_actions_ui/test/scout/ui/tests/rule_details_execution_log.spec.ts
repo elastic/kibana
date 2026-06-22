@@ -34,7 +34,14 @@ const expectDurationCells = async (page: ScoutPage, colId: string) => {
 };
 
 const sortEventLogColumnAscending = async (page: ScoutPage, colId: string) => {
-  await page.testSubj.locator(`dataGridHeaderCell-${colId}`).hover();
+  const headerCell = page.testSubj.locator(`dataGridHeaderCell-${colId}`);
+  // EUI DataGrid uses its own horizontal scroll container; Playwright's built-in
+  // scrollIntoView only scrolls the page, not nested containers. Call the native
+  // DOM scrollIntoView via evaluate so all ancestor scroll containers are reached.
+  await headerCell.evaluate((el) =>
+    el.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' })
+  );
+  await headerCell.hover();
   await page.testSubj.click(`dataGridHeaderCellActionButton-${colId}`);
   await page.testSubj.locator(`dataGridHeaderCellActionGroup-${colId}`).waitFor();
   await page.testSubj
