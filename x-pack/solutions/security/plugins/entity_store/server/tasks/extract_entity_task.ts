@@ -78,6 +78,13 @@ async function runTask({
       logger.error(
         `Logs extraction failed for ${entityType}: ${extractionResult.error.message}, took ${extractionDuration}ms`
       );
+      entityStoreMetrics.extractionTaskError.add(1, {
+          entity_type: entityType,
+          namespace,
+          error_type: extractionResult.error.name ?? 'UnknownError',
+          remote,
+        }
+      );
     } else {
       logger.info(
         `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
