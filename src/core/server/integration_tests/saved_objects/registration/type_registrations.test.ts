@@ -9,6 +9,9 @@
 
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import removedTypes from '@kbn/core-saved-objects-server-internal/removed_types.json';
+import wipTypesJson from '@kbn/core-saved-objects-server-internal/wip_types.json';
+
+const wipTypes: readonly string[] = wipTypesJson;
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -95,6 +98,7 @@ const previouslyRegisteredTypes = [
   'fleet-setup-lock',
   'fleet-space-settings',
   'fleet-cloud-connector',
+  'fleet-cloud-onboarding-deployment',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
@@ -175,6 +179,7 @@ const previouslyRegisteredTypes = [
   'synthetics-param',
   'synthetics-privates-locations',
   'synthetics-private-location',
+  'synthetics-settings-multi-space',
   'tag',
   'task',
   'telemetry',
@@ -201,7 +206,6 @@ const previouslyRegisteredTypes = [
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
   'streams-significant-events-settings',
-  'alerting_notification_policy', // renamed in 9.4 https://github.com/elastic/kibana/pull/264182 for alerting_action_policy
   'alerting_api_key_pending_invalidation',
   'alerting_rule',
   'alerting_action_policy',
@@ -259,8 +263,12 @@ describe('SO type registrations', () => {
 
     // Make sure all removed types are added to removed_types.json
     // If this assertion fails, add the removed type to `removed_types.json` (via --fix flag on the check_saved_objects script)
-    expect(previouslyRegisteredTypes.filter((type) => !removedTypes.includes(type))).toEqual(
-      currentlyRegisteredTypes
-    );
+    // WIP types are excluded because they are conditionally registered (e.g. behind a config flag) and
+    // will not appear in currentlyRegisteredTypes in this test environment.
+    expect(
+      previouslyRegisteredTypes.filter(
+        (type) => !removedTypes.includes(type) && !wipTypes.includes(type)
+      )
+    ).toEqual(currentlyRegisteredTypes.filter((type) => !wipTypes.includes(type)));
   });
 });

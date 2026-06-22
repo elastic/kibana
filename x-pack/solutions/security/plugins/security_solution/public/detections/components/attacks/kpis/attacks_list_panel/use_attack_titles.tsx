@@ -12,7 +12,10 @@ import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/aler
 
 interface AttackDetails {
   _id: string;
-  _source: { 'kibana.alert.attack_discovery.title'?: string };
+  _source: {
+    'kibana.alert.attack_discovery.title'?: string;
+    'kibana.alert.attack_discovery.alert_ids'?: string[];
+  };
 }
 
 export interface UseAttackTitlesProps {
@@ -21,9 +24,9 @@ export interface UseAttackTitlesProps {
 }
 
 /**
- * Hook for fetching attack titles
+ * Hook for fetching attack titles and context counts
  * @param props - The props for the hook
- * @returns The attack titles
+ * @returns The attack titles and context counts
  */
 export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
   // Get the attack details query
@@ -31,7 +34,7 @@ export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
     if (attackIds.length === 0) return {};
     return {
       size: attackIds.length,
-      _source: ['kibana.alert.attack_discovery.title'],
+      _source: ['kibana.alert.attack_discovery.title', 'kibana.alert.attack_discovery.alert_ids'],
       query: { ids: { values: attackIds } },
     };
   }, [attackIds]);
@@ -54,23 +57,25 @@ export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
     setDetailsQuery(attacksDetailsQuery);
   }, [attacksDetailsQuery, setDetailsQuery]);
 
-  // Extract the attack titles
-  const attackTitles = useMemo(() => {
-    const titles: Record<string, string> = {};
+  // Extract the attack titles and counts
+  const attackDetails = useMemo(() => {
+    const details: Record<string, { title: string; count: number }> = {};
     if (detailsData?.hits?.hits) {
       detailsData.hits.hits.forEach((hit) => {
         const source = hit._source;
         const title = source?.['kibana.alert.attack_discovery.title'];
+        const alertIds = source?.['kibana.alert.attack_discovery.alert_ids'];
+        const count = Array.isArray(alertIds) ? alertIds.length : 0;
         if (title) {
-          titles[hit._id] = title;
+          details[hit._id] = { title, count };
         }
       });
     }
-    return titles;
+    return details;
   }, [detailsData]);
 
   return {
-    attackTitles,
+    attackDetails,
     isLoading: isDetailsLoading,
     refetch: refetchDetails,
   };

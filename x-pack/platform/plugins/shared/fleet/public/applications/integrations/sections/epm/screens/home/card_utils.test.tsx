@@ -258,6 +258,46 @@ describe('Card utils', () => {
 
       expect(cardItem).toMatchObject({ isDeprecated: true });
     });
+
+    it('should derive signalTypes from data_streams for integration packages', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'nginx',
+          name: 'nginx',
+          version: '1.0.0',
+          type: 'integration',
+          data_streams: [{ type: 'logs' }, { type: 'metrics' }, { type: 'logs' }],
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem.signalTypes).toEqual(['logs', 'metrics']);
+    });
+
+    it('should match all signal types for input packages', () => {
+      // The EPR search response strips the policy template type/dynamic_signal_types,
+      // so input packages match every signal filter regardless of template fields.
+      const cardItem = mapToCard({
+        item: {
+          id: 'nginx_otel_input',
+          name: 'nginx_otel_input',
+          version: '1.0.0',
+          type: 'input',
+          policy_templates: [
+            {
+              name: 'nginxreceiver',
+              title: 'NGINX OpenTelemetry Input',
+              description: 'Collect NGINX metrics using OpenTelemetry Collector',
+            },
+          ],
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem.signalTypes).toEqual(['logs', 'metrics', 'traces']);
+    });
   });
   describe('getIntegrationLabels', () => {
     it('should return an empty list for an integration without errors', () => {

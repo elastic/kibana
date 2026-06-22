@@ -16,7 +16,7 @@
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
-Always run `node scripts/check_changes.ts` to validate your changes
+Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jest, types, linting).
 
 ### Jest unit
 `node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`
@@ -95,4 +95,3 @@ Follow existing patterns in the target area first; below are common defaults.
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
-- Always open PRs as draft.

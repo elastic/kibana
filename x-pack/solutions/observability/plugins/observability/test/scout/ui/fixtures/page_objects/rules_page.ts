@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
@@ -434,8 +435,8 @@ export class RulesPage {
    */
   async clickExploreMatchingIndices() {
     await this.exploreMatchingIndicesButton.click();
-    // Wait for data view to be selected
-    await expect(this.dataViewExpression).toContainText('.alerts-*', { timeout: SHORTER_TIMEOUT });
+    // Wait for the button to disappear, which signals the ad-hoc data view was applied
+    await expect(this.exploreMatchingIndicesButton).toBeHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   /**
@@ -519,6 +520,195 @@ export class RulesPage {
   async typeInKqlFilter(text: string) {
     await this.kqlSearchField.click();
     await this.kqlSearchField.fill(text);
+  }
+
+  // Custom Threshold full-form methods (ported from FTR `pages/alerts/custom_threshold.ts`)
+
+  /**
+   * Adds a custom tag to the rule via the tags EuiComboBox. The tag is created
+   * on the fly (it isn't a pre-existing option), mirroring the FTR
+   * `comboBox.setCustom('ruleDetailsTagsInput', ...)`.
+   */
+  async addRuleTag(tag: string) {
+    const tagsComboBox = new EuiComboBoxWrapper(
+      this.page,
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_TAGS_INPUT
+    );
+    await tagsComboBox.setCustomMultiOption(tag);
+  }
+
+  /**
+   * Sets tags via the EUI ComboBox (creates custom options)
+   */
+  async setTags(tags: string[]) {
+    for (const tag of tags) {
+      await this.addRuleTag(tag);
+    }
+  }
+
+  /**
+   * Selects a *saved* data view by name from the data-view switcher. Unlike
+   * `setIndexPatternAndWaitForButton` (which creates an ad-hoc data view from a
+   * pattern), this picks a persisted data view so its real fields populate the
+   * aggregation-field and group-by comboboxes.
+   */
+  async selectSavedDataView(name: string) {
+    await this.dataViewExpression.click();
+    await expect(this.indexPatternInput).toBeVisible();
+    await this.indexPatternInput.fill(name);
+    await this.page.locator(`[data-test-subj="indexPattern-switcher"] [title="${name}"]`).click();
+    await expect(this.dataViewExpression).toContainText(name, { timeout: BIGGER_TIMEOUT });
+  }
+
+  /** Aggregation expression button for metric B (present after adding a 2nd metric). */
+  public get aggregationExpressionB() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_NAME_B);
+  }
+
+  /**
+   * Clicks the add-aggregation button and waits for metric B to appear
+   */
+  async addSecondAggregation() {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.ADD_AGGREGATION_BUTTON);
+    await expect(this.aggregationExpressionB).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Opens the metric B aggregation row popover
+   */
+  async openAggregationBPopover() {
+    await expect(this.aggregationExpressionB).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.aggregationExpressionB.click();
+    await expect(this.aggregationTypeSelect).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Closes an Observability expression popover (aggregation / custom equation),
+   * which exposes a dedicated closable-title button.
+   */
+  async closeMetricPopover() {
+    const closeButton = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CLOSE_POPOVER_BUTTON
+    );
+    await expect(closeButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await closeButton.click();
+    await expect(closeButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Closes the currently open o11y closable popover
+   */
+  async closeCurrentPopover() {
+    await this.closeMetricPopover();
+  }
+
+  /**
+   * Closes a shared triggers-actions expression popover (threshold / time
+   * window). These render a generic EUI "Close" button (no test-subj) inside an
+   * accessible `dialog`. A previously opened expression popover can still be
+   * detaching when the next one opens, so scope the close to the dialog by its
+   * accessible name to avoid a Playwright strict-mode violation, then wait for
+   * it to close before continuing so the following step never sees two open
+   * panels.
+   */
+  async closeExpressionPopover(dialogName: string) {
+    const popover = this.page.getByRole('dialog', { name: dialogName });
+    await popover.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(popover).toBeHidden({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Sets metric A to an `avg` aggregation over the given field. Opens the metric
+   * row popover, picks the aggregation type, selects the field, then closes the
+   * popover.
+   */
+  async setAverageAggregation(field: string) {
+    await this.openMetricRowPopover();
+    await this.aggregationTypeSelect.selectOption('avg');
+    const fieldComboBox = new EuiComboBoxWrapper(
+      this.page,
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_FIELD
+    );
+    await fieldComboBox.selectSingleOption(field);
+    await this.closeMetricPopover();
+  }
+
+  /**
+   * Adds a second metric (B), which defaults to a `count` aggregation, and sets
+   * its KQL filter.
+   */
+  async addCountAggregationWithFilter(filter: string) {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.ADD_AGGREGATION_BUTTON);
+    await expect(this.aggregationExpressionB).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.aggregationExpressionB.click();
+    await expect(this.kqlSearchField).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.kqlSearchField.fill(filter);
+    await this.closeMetricPopover();
+  }
+
+  /** Sets the custom equation (e.g. `A - B`) in the equation popover. */
+  async setCustomEquation(equation: string) {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION);
+    const equationField = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION_FIELD
+    );
+    await expect(equationField).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await equationField.fill(equation);
+    await this.closeCurrentPopover();
+  }
+
+  /** Sets the inline equation label field (rendered directly on the form). */
+  async setEquationLabel(label: string) {
+    await this.page.testSubj.fill(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION_LABEL, label);
+  }
+
+  /**
+   * Sets the threshold comparator and bounds. For two-bound comparators
+   * (e.g. `notBetween`) both inputs are provided.
+   */
+  async setThreshold(comparator: string, thresholds: [number] | [number, number]) {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_POPOVER);
+    await this.page.testSubj
+      .locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.COMPARATOR_SELECT)
+      .selectOption(comparator);
+    await this.page.testSubj.fill(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_INPUT_0,
+      String(thresholds[0])
+    );
+    if (thresholds.length === 2) {
+      await this.page.testSubj.fill(
+        CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_INPUT_1,
+        String(thresholds[1])
+      );
+    }
+    await this.closeExpressionPopover('Threshold');
+  }
+
+  /** Sets the rule's evaluation time window (size + unit). */
+  async setTimeWindow(size: number, unit: 's' | 'm' | 'h' | 'd') {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.FOR_LAST_EXPRESSION);
+    await this.page.testSubj.fill(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.TIME_SIZE_INPUT,
+      String(size)
+    );
+    await this.page.testSubj
+      .locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.TIME_UNIT_SELECT)
+      .selectOption(unit);
+    await this.closeExpressionPopover('For the last');
+  }
+
+  /** Sets the rule's evaluation time window (size + unit as strings). */
+  async setTimeRange(size: string, unit: string) {
+    await this.setTimeWindow(Number(size), unit as 's' | 'm' | 'h' | 'd');
+  }
+
+  /** Adds a "group by" field via its EuiComboBox. */
+  async setGroupBy(field: string) {
+    const groupByComboBox = new EuiComboBoxWrapper(
+      this.page,
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.GROUP_BY
+    );
+    await groupByComboBox.selectMultiOption(field);
   }
 
   // Rule Status Dropdown methods

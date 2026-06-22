@@ -14,6 +14,8 @@ import { bulkDeleteAttackDiscoverySchedules } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 export const BULK_DELETE_ATTACK_DISCOVERY_SCHEDULES_MUTATION_KEY = [
   'POST',
@@ -25,6 +27,9 @@ interface BulkDeleteAttackDiscoverySchedulesParams {
 }
 
 export const useBulkDeleteAttackDiscoverySchedules = () => {
+  const {
+    services: { telemetry },
+  } = useKibana();
   const { addError, addSuccess } = useAppToasts();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
@@ -40,9 +45,15 @@ export const useBulkDeleteAttackDiscoverySchedules = () => {
       ids.forEach(invalidateGetAttackDiscoverySchedule);
       invalidateFindAttackDiscoverySchedule();
       addSuccess(i18n.DELETE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS(ids.length));
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.BulkDeleteSuccess, {
+        count: ids.length,
+      });
     },
     onError: (error, { ids }) => {
       addError(error, { title: i18n.DELETE_ATTACK_DISCOVERY_SCHEDULES_FAILURE(ids.length) });
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.BulkDeleteFailed, {
+        count: ids.length,
+      });
     },
   });
 };

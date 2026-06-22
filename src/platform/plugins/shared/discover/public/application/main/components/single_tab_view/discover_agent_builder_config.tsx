@@ -26,6 +26,10 @@ import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../../../../common/agent_builder';
+import {
+  useProfileAccessor,
+  type DeepAnalysisPlaybookExtension,
+} from '../../../../context_awareness';
 
 const SESSION_TAG = 'discover';
 const MAX_SAMPLE_ROWS = 10;
@@ -99,7 +103,8 @@ export const buildEsqlResultsAttachment = (
   esqlQueryColumns: Array<{ name: string; meta?: { type?: string } }>,
   result: Array<{ flattened: Record<string, unknown> }>,
   totalHits: number,
-  timeRange: { from: string; to: string } | undefined
+  timeRange: { from: string; to: string } | undefined,
+  playbookContribution?: DeepAnalysisPlaybookExtension
 ): AttachmentInput => {
   // Build a set of base field names to detect .keyword duplicates
   const columnNames = new Set(esqlQueryColumns.map((col) => col.name));
@@ -142,6 +147,7 @@ export const buildEsqlResultsAttachment = (
       sampleRows,
       totalHits,
       timeRange,
+      ...(playbookContribution ? { playbookContribution } : {}),
     },
   };
 };
@@ -160,6 +166,7 @@ export const DiscoverAgentBuilderConfig = () => {
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const { totalHits } = useFetchMoreRecords();
+  const getDeepAnalysisPlaybookAccessor = useProfileAccessor('getDeepAnalysisPlaybook');
 
   const isEsqlMode = isOfAggregateQueryType(query);
   const hasEsqlResults =
@@ -212,13 +219,22 @@ export const DiscoverAgentBuilderConfig = () => {
 
     if (hasEsqlResults && documentState.esqlQueryColumns && documentState.result) {
       const esqlQuery = isOfAggregateQueryType(query) ? query.esql : '';
+      const playbookContribution = getDeepAnalysisPlaybookAccessor(() => undefined)({
+        dataView,
+        query,
+        columns: documentState.esqlQueryColumns.map((col) => ({
+          name: col.name,
+          type: col.meta?.type,
+        })),
+      });
       attachments.push(
         buildEsqlResultsAttachment(
           esqlQuery,
           documentState.esqlQueryColumns,
           documentState.result,
           totalHits ?? documentState.result.length,
-          normalizedTimeRange
+          normalizedTimeRange,
+          playbookContribution
         )
       );
     }
@@ -240,6 +256,7 @@ export const DiscoverAgentBuilderConfig = () => {
     dataView,
     documentState.esqlQueryColumns,
     documentState.result,
+    getDeepAnalysisPlaybookAccessor,
     hasEsqlResults,
     isEsqlMode,
     query,

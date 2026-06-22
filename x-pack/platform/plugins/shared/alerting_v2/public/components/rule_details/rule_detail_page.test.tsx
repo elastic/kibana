@@ -64,6 +64,10 @@ jest.mock('./sidebar/rule_sidebar', () => ({
   ),
 }));
 
+jest.mock('./overview', () => ({
+  RuleOverviewSection: () => <div data-test-subj="ruleOverviewSectionMock">overview</div>,
+}));
+
 jest.mock('./rule_details_actions_menu', () => ({
   RuleDetailsActionsMenu: ({ showDeleteConfirmation }: { showDeleteConfirmation: () => void }) => (
     <button
@@ -83,7 +87,10 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Signal Rule', tags: ['prod', 'infra'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
+  },
   createdBy: 'alice@example.com',
   createdAt: '2026-03-01T12:00:00.000Z',
   updatedBy: 'bob@example.com',
@@ -141,7 +148,7 @@ describe('RuleDetailPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteRule).toHaveBeenCalledWith(
-      'rule-1',
+      { id: 'rule-1', name: 'Test Signal Rule' },
       expect.objectContaining({
         onSuccess: expect.any(Function),
       })

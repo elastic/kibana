@@ -10,6 +10,7 @@
 export { Append } from './append';
 export { Attachment } from './attachment';
 export { Bytes } from './bytes';
+export { Cef } from './cef';
 export { Circle } from './circle';
 export { CommunityId } from './community_id';
 export { Convert } from './convert';

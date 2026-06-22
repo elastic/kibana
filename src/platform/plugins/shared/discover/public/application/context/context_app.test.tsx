@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DocViewsRegistry, type DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ContextApp, type ContextAppProps } from './context_app';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
@@ -30,8 +30,6 @@ jest.mock('./hooks/use_context_app_fetch');
 jest.mock('./hooks/use_context_app_state');
 
 const services = createDiscoverServicesMock();
-const addFiltersMock = jest.spyOn(services.filterManager, 'addFilters');
-const updateSavedObjectMock = jest.spyOn(services.dataViews, 'updateSavedObject');
 const mockUseContextAppFetch = jest.mocked(useContextAppFetch);
 const mockUseContextAppState = jest.mocked(useContextAppState);
 
@@ -91,15 +89,44 @@ const setDocViewerRegistry = (render: (props: DocViewRenderProps) => React.React
 };
 
 describe('ContextApp test', () => {
+  const addFilterMock = jest.fn();
+  const setExpandedDocMock = jest.fn();
+  const docViewerRef = React.createRef<DocViewerApi>();
   const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
+    addFilter: addFilterMock,
+    expandedDoc: undefined,
+    initialDocViewerTabId: undefined,
+    docViewerRef,
+    setExpandedDoc: setExpandedDocMock,
   };
 
   const renderComponent = () => {
+    const StatefulContextApp = () => {
+      const [expandedDoc, setExpandedDocState] = React.useState(defaultProps.expandedDoc);
+      const [initialDocViewerTabId, setInitialDocViewerTabId] = React.useState(
+        defaultProps.initialDocViewerTabId
+      );
+      const setExpandedDoc: ContextAppProps['setExpandedDoc'] = (doc, options) => {
+        setExpandedDocMock(doc, options);
+        setExpandedDocState(doc);
+        setInitialDocViewerTabId(options?.initialTabId);
+      };
+
+      return (
+        <ContextApp
+          {...defaultProps}
+          expandedDoc={expandedDoc}
+          initialDocViewerTabId={initialDocViewerTabId}
+          setExpandedDoc={setExpandedDoc}
+        />
+      );
+    };
+
     renderWithKibanaRenderContext(
       <DiscoverTestProvider services={services}>
-        <ContextApp {...defaultProps} />
+        <StatefulContextApp />
       </DiscoverTestProvider>
     );
   };
@@ -148,7 +175,7 @@ describe('ContextApp test', () => {
     );
   });
 
-  it('should set filters correctly', async () => {
+  it('should call addFilter from the doc viewer', async () => {
     const user = userEvent.setup();
 
     setDocViewerRegistry(({ filter }) => (
@@ -168,15 +195,7 @@ describe('ContextApp test', () => {
 
     await user.click(await screen.findByTestId('docViewFilterButton'));
 
-    expect(addFiltersMock).toHaveBeenCalledTimes(1);
-    expect(addFiltersMock).toHaveBeenCalledWith([
-      {
-        $state: { store: 'appState' },
-        meta: { alias: null, disabled: false, index: 'the-data-view-id', negate: false },
-        query: { match_phrase: { extension: 'jpg' } },
-      },
-    ]);
-    expect(updateSavedObjectMock).toHaveBeenCalledTimes(1);
-    expect(updateSavedObjectMock).toHaveBeenCalledWith(dataViewMock, 0, true);
+    expect(addFilterMock).toHaveBeenCalledTimes(1);
+    expect(addFilterMock).toHaveBeenCalledWith('extension', 'jpg', '+');
   });
 });
