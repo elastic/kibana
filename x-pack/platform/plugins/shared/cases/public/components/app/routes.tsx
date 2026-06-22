@@ -55,8 +55,10 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
 // Temporary: placeholder pages for the Cases UX redesign (elastic/security-team#17398).
 // These will progressively replace the current pages and the FF will be removed.
 const AllCasesRedesignLazy = lazy(() => import('../cases_redesign/all_cases'));
-const CaseViewRedesignLazy = lazy(() => import('../cases_redesign/case_view'));
-const ConfigureCasesRedesignLazy = lazy(() => import('../cases_redesign/configure_cases'));
+const CaseViewRedesignLazy: FC<CaseViewProps> = lazy(() => import('../cases_redesign/case_view'));
+const ConfigureCasesRedesignLazy = lazy(
+  () => import('../cases_redesign/configure_cases/configure_cases')
+);
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
   const { basePath, permissions } = useCasesContext();
@@ -157,7 +159,10 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <Suspense fallback={<EuiLoadingSpinner />}>
             {casesRedesign.details ? (
-              <CaseViewRedesignLazy />
+              <CaseViewRedesignLazy
+                refreshRef={refreshRef}
+                timelineIntegration={timelineIntegration}
+              />
             ) : (
               <CaseViewLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
             )}

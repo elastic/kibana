@@ -24,7 +24,7 @@ const eventToSmlContent = (event: SigEvent): string => {
     event.title,
     event.summary,
     event.root_cause,
-    `status: ${event.verdict}`,
+    `status: ${event.status}`,
     `impact: ${event.impact}`,
     `criticality: ${event.criticality}`,
     `confidence: ${event.confidence}`,
@@ -99,7 +99,10 @@ export const createSignificantEventSmlType = ({
               type: SIGNIFICANT_EVENT_SML_TYPE,
               title: event.title,
               content: eventToSmlContent(event),
-              permissions: [`api:${STREAMS_API_PRIVILEGES.read}`],
+              permissions: {
+                kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
+                elasticsearch: { indices: [] },
+              },
             },
           ],
         };
@@ -112,6 +115,9 @@ export const createSignificantEventSmlType = ({
     },
 
     toAttachment: async (item, context) => {
+      if (!item.origin_id) {
+        return undefined;
+      }
       const { getEventClient } = await getScopedClients({ request: context.request });
       const { hits } = await getEventClient().findByDiscoverySlug(item.origin_id);
       const event = hits.at(-1);
