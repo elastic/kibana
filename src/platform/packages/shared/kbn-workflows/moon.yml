@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/repo-info'
   - '@kbn/human-readable-id'
+  - '@kbn/crypto'
 tags:
   - shared-common
   - package

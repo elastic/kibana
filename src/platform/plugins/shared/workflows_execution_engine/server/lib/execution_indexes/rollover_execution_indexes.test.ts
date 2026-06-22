@@ -11,10 +11,7 @@ import {
   rolloverExecutionIndexIfRequired,
   rolloverWorkflowExecutionIndexes,
 } from './rollover_execution_indexes';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../../common/workflow_executions_index';
 
 const CONDITIONS = { maxAge: '1m', maxPrimaryShardSize: '1gb' };
