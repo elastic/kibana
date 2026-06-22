@@ -26,7 +26,14 @@ const createMockServices = (): AlertingV2KibanaServices => {
   const application = applicationServiceMock.createStartContract();
   application.capabilities = {
     ...application.capabilities,
-    agentBuilder: { show: true, write: true, manageAgents: true, manageTools: true, manageSkills: true, isAdmin: true },
+    agentBuilder: {
+      show: true,
+      write: true,
+      manageAgents: true,
+      manageTools: true,
+      manageSkills: true,
+      isAdmin: true,
+    },
   };
   const uiSettings = uiSettingsServiceMock.createStartContract();
   (uiSettings.get as jest.Mock).mockReturnValue(true);
@@ -229,7 +236,14 @@ describe('CreateRuleOptionsFlyout', () => {
     it('does not pass onCreateWithAgent when agentBuilder capability is missing', async () => {
       mockServices.application.capabilities = {
         ...mockServices.application.capabilities,
-        agentBuilder: { show: false, write: false, manageAgents: false, manageTools: false, manageSkills: false, isAdmin: false },
+        agentBuilder: {
+          show: false,
+          write: false,
+          manageAgents: false,
+          manageTools: false,
+          manageSkills: false,
+          isAdmin: false,
+        },
       };
       renderFlyout();
       resolveServices(mockServices);
