@@ -80,13 +80,13 @@ export const createBasicAuth = (username: string, password: string): string =>
   Buffer.from(`${username}:${password}`).toString('base64');
 
 /**
- * EIS gateway authorization path. Elasticsearch calls this endpoint (with the
- * CCM key as a Bearer token) to validate the key before storing it via
- * `PUT _inference/_ccm` (see elastic/elasticsearch#139088). We mirror that call
- * here so we can validate a resolved key up front and avoid a confusing
- * mid-startup failure.
+ * EIS gateway authorization path. Elasticsearch calls this endpoint to validate
+ * the CCM key before storing it via `PUT _inference/_ccm` (see
+ * elastic/elasticsearch#139088). ES moved to the v2 endpoint in
+ * elastic/elasticsearch#138249; we mirror that here so our pre-use validation
+ * matches what ES actually does.
  */
-const EIS_AUTHORIZATIONS_PATH = '/api/v1/authorizations';
+const EIS_AUTHORIZATIONS_PATH = '/api/v2/authorizations';
 
 /**
  * Validates a CCM API key against the EIS gateway by mirroring the
@@ -94,6 +94,11 @@ const EIS_AUTHORIZATIONS_PATH = '/api/v1/authorizations';
  * accepted, `false` when the gateway rejects it (401/403). Returns `true` on
  * transient/unknown failures (network error, 5xx) so a flaky gateway doesn't
  * block startup — ES will surface a real problem when it sets the key.
+ *
+ * The key is sent with the `ApiKey` scheme to match Elasticsearch, which
+ * switched from `Bearer` to `ApiKey` in elastic/elasticsearch#138590. The
+ * gateway rejects `Bearer` with a 401, so using the wrong scheme here would
+ * wrongly discard a perfectly valid key.
  */
 export const validateCcmApiKey = async (
   apiKey: string,
@@ -103,7 +108,7 @@ export const validateCcmApiKey = async (
   try {
     const { statusCode } = await eisHttpRequest(`${eisUrl}${EIS_AUTHORIZATIONS_PATH}`, {
       method: 'GET',
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: { Authorization: `ApiKey ${apiKey}` },
     });
 
     if (statusCode === 401 || statusCode === 403) {
