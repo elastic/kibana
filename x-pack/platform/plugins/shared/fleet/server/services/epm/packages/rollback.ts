@@ -127,7 +127,11 @@ export async function rollbackAvailableCheck(
     };
   }
   // checking is_managed flag on agent policy, it is not always set on package policy
-  const agentPolicyIds = uniq(packagePolicySOs.flatMap((so) => so.attributes.policy_ids ?? []));
+  const agentPolicyIds = uniq(
+    packagePolicySOs
+      .filter((so) => !so.id.endsWith(':prev'))
+      .flatMap((so) => so.attributes.policy_ids ?? [])
+  );
   const agentPolicies = await agentPolicyService.getByIds(
     savedObjectsClient,
     agentPolicyIds.map((id) => ({ id, spaceId: '*' }))
