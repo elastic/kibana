@@ -123,7 +123,12 @@ export type {
   FieldDefinition,
   FlagDefinition,
 } from './src/query_model';
-export { EMPTY_MODEL, toFindItemsFilters, useQueryModel } from './src/query_model';
+export {
+  EMPTY_MODEL,
+  toFindItemsFilters,
+  useActiveFilters,
+  useQueryModel,
+} from './src/query_model';
 
 // Services.
 export {

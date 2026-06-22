@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 144
+ * Registry groups: 145
  * Metric groups: 534
  * Hardcoded fields: 34
- * Total fields: 1200
+ * Total fields: 1201
  *
  * @internal
  *
- * WARNING: This object contains 1200+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1201+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -54,6 +54,12 @@ export const semconvFlat = {
     description: 'Unique identifier for a particular build or compilation of the application.',
     type: 'keyword',
     example: '6cff0a7e-cefc-4668-96f5-1273d8b334d0',
+  },
+  'app.crash.id': {
+    name: 'app.crash.id',
+    description: 'A unique identifier representing an instance of an end-user facing app crash.',
+    type: 'keyword',
+    example: '083d3d2d-9a0e-47f8-be3d-bc3c5538ba38',
   },
   'app.installation.id': {
     name: 'app.installation.id',
@@ -681,6 +687,13 @@ export const semconvFlat = {
     type: 'long',
     example: '1000',
   },
+  'azure.resource_group.name': {
+    name: 'azure.resource_group.name',
+    description:
+      'The name of the Azure [resource group](https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal) the resource belongs to.',
+    type: 'keyword',
+    example: 'my-resource-group',
+  },
   'azure.resource_provider.namespace': {
     name: 'azure.resource_provider.namespace',
     description:
@@ -864,7 +877,7 @@ export const semconvFlat = {
     name: 'cicd.worker.state',
     description: 'The state of a CI/CD worker / agent.',
     type: 'keyword',
-    example: 'idle',
+    example: 'available',
   },
   'cicd.worker.url.full': {
     name: 'cicd.worker.url.full',
@@ -1455,6 +1468,7 @@ export const semconvFlat = {
     description:
       'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
     type: 'keyword',
+    example: '2',
   },
   'faas.instance': {
     name: 'faas.instance',
@@ -1502,6 +1516,7 @@ export const semconvFlat = {
     description:
       'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
     type: 'keyword',
+    example: '2',
   },
   'faas.trigger': {
     name: 'faas.trigger',
@@ -1576,7 +1591,7 @@ export const semconvFlat = {
     name: 'file.accessed',
     description: 'Time when the file was last accessed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.attributes': {
     name: 'file.attributes',
@@ -1588,13 +1603,13 @@ export const semconvFlat = {
     name: 'file.changed',
     description: 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.created': {
     name: 'file.created',
     description: 'Time when the file was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.directory': {
     name: 'file.directory',
@@ -1664,7 +1679,7 @@ export const semconvFlat = {
     name: 'file.modified',
     description: 'Time when the file content was last modified, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.name': {
     name: 'file.name',
@@ -1972,7 +1987,7 @@ export const semconvFlat = {
     name: 'heroku.release.creation_timestamp',
     description: 'Time and date the release was created',
     type: 'keyword',
-    example: 'Sun Oct 23 2022 18:00:42 GMT+0000 (Coordinated Universal Time)',
+    example: '2022-10-23T18:00:42Z',
   },
   'host.arch': {
     name: 'host.arch',
@@ -2744,7 +2759,7 @@ export const semconvFlat = {
     name: 'k8s.pod.start_time',
     description: 'The start timestamp of the Pod.',
     type: 'keyword',
-    example: 'Thu Dec 04 2025 08:41:03 GMT+0000 (Coordinated Universal Time)',
+    example: '2025-12-04T08:41:03Z',
   },
   'k8s.pod.status.phase': {
     name: 'k8s.pod.status.phase',
@@ -5454,11 +5469,6 @@ export const semconvFlat = {
     description: 'Garbage collection duration.',
     type: 'double',
   },
-  'metrics.v8js.memory.heap.limit': {
-    name: 'metrics.v8js.memory.heap.limit',
-    description: 'Maximum heap size allowed by the V8 engine.',
-    type: 'double',
-  },
   'metrics.v8js.memory.heap.space.available_size': {
     name: 'metrics.v8js.memory.heap.space.available_size',
     description: 'Heap space available size.',
@@ -5960,7 +5970,7 @@ export const semconvFlat = {
     name: 'process.creation.time',
     description: 'The date and time the process was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 09:25:34 GMT+0000 (Coordinated Universal Time)',
+    example: '2023-11-21T09:25:34.853Z',
   },
   'process.environment_variable': {
     name: 'process.environment_variable',
@@ -6011,7 +6021,7 @@ export const semconvFlat = {
     name: 'process.exit.time',
     description: 'The date and time the process exited, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 09:26:12 GMT+0000 (Coordinated Universal Time)',
+    example: '2023-11-21T09:26:12.315Z',
   },
   'process.group_leader.pid': {
     name: 'process.group_leader.pid',
@@ -6585,13 +6595,13 @@ export const semconvFlat = {
     name: 'tls.client.not_after',
     description: 'Date/Time indicating when client certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T00:00:00.000Z',
   },
   'tls.client.not_before': {
     name: 'tls.client.not_before',
     description: 'Date/Time indicating when client certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '1970-01-01T00:00:00.000Z',
   },
   'tls.client.subject': {
     name: 'tls.client.subject',
@@ -6697,13 +6707,13 @@ export const semconvFlat = {
     name: 'tls.server.not_after',
     description: 'Date/Time indicating when server certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T00:00:00.000Z',
   },
   'tls.server.not_before': {
     name: 'tls.server.not_before',
     description: 'Date/Time indicating when server certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '1970-01-01T00:00:00.000Z',
   },
   'tls.server.subject': {
     name: 'tls.server.subject',

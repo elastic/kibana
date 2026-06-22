@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiTitle,
+  EuiToolTip,
   EuiTourStep,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -383,19 +384,29 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     )}
                     id={splitButtonPopoverActionsId}
                     button={
-                      <EuiButtonIcon
-                        disabled={createMode || isInitialLoading || rules.length === 0}
-                        data-test-subj="searchQueryRulesQueryRulesetActionsButton"
-                        size="m"
-                        iconType="boxesVertical"
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
                           {
                             defaultMessage: 'More',
                           }
                         )}
-                        onClick={() => setPopoverActions(!isPopoverActionsOpen)}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          disabled={createMode || isInitialLoading || rules.length === 0}
+                          data-test-subj="searchQueryRulesQueryRulesetActionsButton"
+                          size="m"
+                          iconType="boxesVertical"
+                          aria-label={i18n.translate(
+                            'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
+                            {
+                              defaultMessage: 'More',
+                            }
+                          )}
+                          onClick={() => setPopoverActions(!isPopoverActionsOpen)}
+                        />
+                      </EuiToolTip>
                     }
                     isOpen={isPopoverActionsOpen}
                     closePopover={() => setPopoverActions(false)}
