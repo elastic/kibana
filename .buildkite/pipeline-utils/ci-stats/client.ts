@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { gzipSync } from 'zlib';
 import type { Method, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+
+// Version of the ci-stats _pick_test_group_run_order endpoint. v3 is a
+// drop-in replacement for v2 (same request/response/auth) with server-side
+// caching and compression. Override to roll back, e.g. `v2`.
+const PICK_RUN_ORDER_VERSION = 'v3';
 
 export interface CiStatsClientConfig {
   baseUrl?: string;
@@ -183,12 +189,21 @@ export class CiStatsClient {
     console.log('requesting test group run order from ci-stats:');
     console.log(JSON.stringify(body, null, 2));
 
+    // gzip the request body; v3 accepts Content-Encoding: gzip and is backward
+    // compatible with uncompressed bodies. axios sends Accept-Encoding: gzip by
+    // default and decompresses the response transparently.
+    const compressedBody = gzipSync(Buffer.from(JSON.stringify(body)));
+
     const resp = await axios.request<TestGroupRunOrderResponse>({
       method: 'POST',
       baseURL: this.baseUrl,
-      headers: this.defaultHeaders,
-      url: '/v2/_pick_test_group_run_order',
-      data: body,
+      headers: {
+        ...this.defaultHeaders,
+        'Content-Type': 'application/json',
+        'Content-Encoding': 'gzip',
+      },
+      url: `/${PICK_RUN_ORDER_VERSION}/_pick_test_group_run_order`,
+      data: compressedBody,
     });
 
     return resp.data;
