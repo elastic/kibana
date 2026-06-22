@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PlatformIcons } from './queries/platforms';
@@ -31,36 +31,56 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
 }) => {
   const renderDeleteAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="danger"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onDeleteClick && onDeleteClick(item)}
-        iconType="trash"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
           defaultMessage: 'Delete {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="danger"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onDeleteClick && onDeleteClick(item)}
+          iconType="trash"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+            defaultMessage: 'Delete {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onDeleteClick]
   );
 
   const renderEditAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="primary"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onEditClick && onEditClick(item)}
-        iconType="pencil"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
           defaultMessage: 'Edit {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="primary"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onEditClick && onEditClick(item)}
+          iconType="pencil"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+            defaultMessage: 'Edit {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onEditClick]
   );

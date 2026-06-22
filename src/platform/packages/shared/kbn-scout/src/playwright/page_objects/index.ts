@@ -18,6 +18,7 @@ import { DashboardLinks } from './dashboard_links';
 import { DataViewEditorPage } from './data_view_editor_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
+import { HomePage } from './home_page';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { QueryBar } from './query_bar';
@@ -50,6 +51,7 @@ export interface PageObjects {
   dashboardLinks: DashboardLinks;
   dataViewEditor: DataViewEditorPage;
   filterBar: FilterBar;
+  home: HomePage;
   maps: MapsPage;
   queryBar: QueryBar;
   renderable: RenderablePage;
@@ -80,6 +82,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     queryBar: createLazyPageObject(QueryBar, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),

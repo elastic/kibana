@@ -95,6 +95,7 @@ import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage, workflowIndexName } from '../storage/workflow_storage';
+import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
@@ -1083,18 +1084,7 @@ export class WorkflowsService {
   }
 
   private async unscheduleDeletedWorkflowTasks(successfulIds: string[]): Promise<void> {
-    if (this.taskScheduler && successfulIds.length > 0) {
-      const results = await Promise.allSettled(
-        successfulIds.map((workflowId) => this.taskScheduler?.unscheduleWorkflowTasks(workflowId))
-      );
-      results.forEach((result, i) => {
-        if (result.status === 'rejected') {
-          this.logger.warn(
-            `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
-          );
-        }
-      });
-    }
+    await unscheduleWorkflowTasks(successfulIds, this.taskScheduler);
   }
 
   /**

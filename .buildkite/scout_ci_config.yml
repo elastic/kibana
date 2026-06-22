@@ -8,6 +8,7 @@ plugins:
     - apm
     - automatic_import
     - banners
+    - canvas
     - cloud_security_posture
     - console
     - cross_cluster_replication
@@ -60,6 +61,7 @@ plugins:
     - unified_search
     - uptime
     - ux
+    - watcher
     - workflows_extensions
     - workflows_management
   disabled:
