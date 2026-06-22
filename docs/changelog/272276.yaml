@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-06-16
 title: Fix announcement modal reappearing after dismissal on fast navigation
-description: '> Fixes an issue where the Agent Builder announcement modal could reappear on page navigation after being dismissed, particularly in high-latency or proxy environments.'
+description: 'Fixes an issue where the Agent Builder announcement modal could reappear on page navigation after being dismissed, particularly in high-latency or proxy environments.'

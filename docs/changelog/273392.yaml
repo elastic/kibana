@@ -8,5 +8,5 @@ products:
   target: 2026-06-18
 areas:
 - Alerting and reporting
-title: Fix mute, unmute, and snooze failing without connector privileges
+title: Fix the mute, unmute, and snooze actions failing without connector privileges
 description: Users with alerting privileges but no connector privileges can now mute, unmute, and snooze alert rules and instances without authorization errors.
