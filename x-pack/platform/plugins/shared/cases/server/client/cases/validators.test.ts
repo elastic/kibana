@@ -1223,7 +1223,9 @@ describe('validators', () => {
             status: CaseStatuses.closed,
             extended_fields: { resolution_as_keyword: '' },
           },
-          originalCase: makeOriginalCase({ extendedFields: { resolution_as_keyword: 'was filled' } }),
+          originalCase: makeOriginalCase({
+            extendedFields: { resolution_as_keyword: 'was filled' },
+          }),
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
