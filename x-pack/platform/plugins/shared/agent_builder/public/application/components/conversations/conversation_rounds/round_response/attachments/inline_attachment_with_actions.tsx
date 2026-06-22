@@ -177,7 +177,9 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
             screenContext,
             openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
           },
-          { registerActionButtons }
+          {
+            registerActionButtons,
+          }
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

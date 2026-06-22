@@ -152,7 +152,7 @@ describe('conversation_sidebar_list_cache', () => {
       expect(result?.find((c) => c.id === 'B')?.title).toBe('unrelated');
     });
 
-    it('is a no-op when the conversation is not in the list (preserves reference)', () => {
+    it('is a no-op when the conversation is not in the list cache (preserves reference)', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [buildRow('A')]);
       const before = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
