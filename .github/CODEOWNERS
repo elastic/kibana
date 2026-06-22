@@ -3065,6 +3065,16 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/timelines.gen.ts @elastic/security-threat-hunting
 
+## Security Threat Hunting owner workflow steps
+
+# Public step types
+x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/set_alert_status_step @elastic/security-threat-hunting
+
+# Server step types
+x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_alert_status_step @elastic/security-threat-hunting
+
 ## Security Threat Hunting owner connectors
 # OpenAI
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-threat-hunting
