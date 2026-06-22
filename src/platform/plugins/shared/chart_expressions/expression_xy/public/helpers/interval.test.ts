@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import type { DataLayerConfig, XYChartProps } from '../../common';
 import { sampleArgs } from '../../common/test_utils';
@@ -107,5 +108,38 @@ describe('calculateMinInterval', () => {
     xyProps.args.minTimeBarInterval = '1h';
     const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(60 * 60 * 1000);
+  });
+
+  describe('ES|QL mode', () => {
+    const configureEsqlLayer = (bucket?: { interval: number; unit?: string }) => {
+      layer.table.meta = { type: ESQL_TABLE_TYPE };
+      layer.table.columns[2].meta = {
+        ...layer.table.columns[2].meta,
+        sourceParams: {
+          indexPattern: 'logs-*',
+          sourceField: 'order_date',
+          ...(bucket ? { bucket } : {}),
+        },
+      };
+      xyProps.args.layers[0] = layer;
+    };
+
+    it('should return interval in ms from ES|QL bucket metadata', async () => {
+      configureEsqlLayer({ interval: 5, unit: 'minute' });
+      const result = await calculateMinInterval(datatableUtilities, xyProps);
+      expect(result).toEqual(5 * 60 * 1000);
+    });
+
+    it('should return raw interval when ES|QL bucket has no unit', async () => {
+      configureEsqlLayer({ interval: 5000, unit: undefined });
+      const result = await calculateMinInterval(datatableUtilities, xyProps);
+      expect(result).toEqual(5000);
+    });
+
+    it('should return undefined when ES|QL bucket metadata is missing', async () => {
+      configureEsqlLayer();
+      const result = await calculateMinInterval(datatableUtilities, xyProps);
+      expect(result).toEqual(undefined);
+    });
   });
 });
