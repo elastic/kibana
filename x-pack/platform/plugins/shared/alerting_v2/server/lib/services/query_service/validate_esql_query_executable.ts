@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
+
+export interface ValidateEsqlQueryExecutableOptions {
+  filter?: EsqlQueryRequest['filter'];
+  params?: EsqlQueryRequest['params'];
+}
 
 export const ESQL_ARROW_EXECUTION_ERROR_PREFIX =
   'ES|QL query cannot be executed using the Arrow format required for rule evaluation';
@@ -28,7 +34,8 @@ export function formatEsqlArrowExecutionErrorMessage(esErrorMessage: string): st
  */
 export async function validateEsqlQueryExecutable(
   esClient: ElasticsearchClient,
-  query: string
+  query: string,
+  { filter, params }: ValidateEsqlQueryExecutableOptions = {}
 ): Promise<void> {
   const validationQuery = appendEsqlLimitZero(query);
   let reader: AsyncRecordBatchStreamReader | undefined;
@@ -39,6 +46,8 @@ export async function validateEsqlQueryExecutable(
         {
           query: validationQuery,
           drop_null_columns: false,
+          filter,
+          params,
         },
         {}
       )

@@ -26,6 +26,7 @@ import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
+import { getQueryPayload } from '../rule_executor/get_query_payload';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -121,10 +122,21 @@ export class RulesClient {
 
   private async validateEvaluationQuery(
     query: string,
-    context: 'create' | 'update' | 'upsert'
+    context: 'create' | 'update' | 'upsert',
+    executionContext: { timeField: string; lookbackWindow: string }
   ): Promise<void> {
+    const queryPayload = getQueryPayload({
+      query,
+      timeField: executionContext.timeField,
+      lookbackWindow: executionContext.lookbackWindow,
+    });
+
     try {
-      await this.queryService.validateQueryExecutable({ query });
+      await this.queryService.validateQueryExecutable({
+        query,
+        filter: queryPayload.filter,
+        params: queryPayload.params,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       throw Boom.badRequest(formatEsqlArrowExecutionErrorMessage(message), {
@@ -198,7 +210,10 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
 
-    await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'create');
+    await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'create', {
+      timeField: parsed.time_field,
+      lookbackWindow: parsed.schedule.lookback ?? parsed.schedule.every,
+    });
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
@@ -250,14 +265,19 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
 
-    if (parsed.query) {
-      await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'update');
-    }
-
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    if (parsed.query) {
+      const scheduleEvery = parsed.schedule?.every ?? existingAttrs.schedule.every;
+      await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'update', {
+        timeField: parsed.time_field ?? existingAttrs.time_field,
+        lookbackWindow:
+          parsed.schedule?.lookback ?? existingAttrs.schedule.lookback ?? scheduleEvery,
+      });
+    }
 
     if (
       !isStateTransitionAllowed({
@@ -749,13 +769,17 @@ export class RulesClient {
       return { rule, created: true };
     }
 
-    await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'upsert');
-
     const { spaceId } = this.getSpaceContext();
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    const scheduleEvery = parsed.schedule.every ?? existingAttrs.schedule.every;
+    await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'upsert', {
+      timeField: parsed.time_field ?? existingAttrs.time_field,
+      lookbackWindow: parsed.schedule.lookback ?? existingAttrs.schedule.lookback ?? scheduleEvery,
+    });
 
     assertImmutableUnchanged(parsed, existingAttrs);
 

@@ -19,7 +19,7 @@ import { keyBy } from 'lodash';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { AlertEvent } from '../../../../server/resources/datastreams/alert_events';
-import { apiTest, buildCreateRuleData, testData } from '../fixtures';
+import { apiTest, ALERTING_V2_RULES_ALL_ROLE, buildCreateRuleData, testData } from '../fixtures';
 
 const { SCHEDULE_INTERVAL } = testData;
 
@@ -1775,12 +1775,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     expect(after).toBe(baseline);
   });
 
-  apiTest('an invalid ES|QL query writes no events', async ({ apiServices }) => {
-    // Targets an index that does not exist. The ES|QL parser accepts the query
-    // (so rule creation succeeds) but execution fails at runtime. The executor
-    // surfaces the failure through error middleware and writes nothing.
-    const rule = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({
+  apiTest(
+    'rejects an unexecutable ES|QL query at create time',
+    async ({ apiClient, requestAuth }) => {
+      const credentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
+      const body = buildCreateRuleData({
         metadata: { name: 'executor-invalid-query' },
         query: {
           format: 'standalone',
@@ -1789,15 +1788,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
               'FROM nonexistent-index-rule-executor-spec-zzz | STATS count = COUNT(*) | WHERE count >= 1',
           },
         },
-      })
-    );
+      });
 
-    await apiServices.alertingV2.ruleExecutions.waitForRuns({
-      ruleId: rule.id,
-      runs: 2,
-    });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+        body,
+      });
 
-    const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-    expect(events).toHaveLength(0);
-  });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('Arrow format required for rule evaluation');
+    }
+  );
 });

@@ -67,6 +67,35 @@ describe('validateEsqlQueryExecutable', () => {
     expect(reader.cancel).not.toHaveBeenCalled();
   });
 
+  it('forwards filter and params to the Arrow helper', async () => {
+    const reader = createMockArrowReader([]);
+    const toArrowReader = jest.fn().mockResolvedValue(reader);
+    mockHelpersEsqlToArrowReader(mockEsClient, toArrowReader);
+    const filter = {
+      bool: {
+        filter: [{ range: { '@timestamp': { gt: '2024-12-31T23:59:00.000Z' } } }],
+      },
+    };
+    const params = [{ _tstart: '2024-12-31T23:59:00.000Z' }, { _tend: '2025-01-01T00:00:00.000Z' }];
+
+    await validateEsqlQueryExecutable(
+      mockEsClient,
+      'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | LIMIT 10',
+      { filter, params }
+    );
+
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+      {
+        query:
+          'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | LIMIT 10 | LIMIT 0',
+        drop_null_columns: false,
+        filter,
+        params,
+      },
+      {}
+    );
+  });
+
   it('propagates Arrow helper errors such as unsupported ES|QL types', async () => {
     mockHelpersEsqlToArrowReader(
       mockEsClient,

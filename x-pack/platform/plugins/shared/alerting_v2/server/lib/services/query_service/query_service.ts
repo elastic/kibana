@@ -24,6 +24,8 @@ export interface ExecuteQueryParams {
 
 export interface ValidateQueryParams {
   query: EsqlQueryRequest['query'];
+  filter?: EsqlQueryRequest['filter'];
+  params?: EsqlQueryRequest['params'];
 }
 
 export interface QueryServiceContract {
@@ -82,13 +84,13 @@ export class QueryService implements QueryServiceContract {
     return this.toRows<T>(response);
   }
 
-  async validateQueryExecutable({ query }: ValidateQueryParams): Promise<void> {
+  async validateQueryExecutable({ query, filter, params }: ValidateQueryParams): Promise<void> {
     this.logger.debug({
       message: () => `QueryService: Validating ES|QL query for rule execution`,
     });
 
     try {
-      await validateEsqlQueryExecutable(this.esClient, query);
+      await validateEsqlQueryExecutable(this.esClient, query, { filter, params });
     } catch (error) {
       this.logger.error({
         error,

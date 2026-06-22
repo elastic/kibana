@@ -18,6 +18,7 @@ import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createRuleSoAttributes } from '../test_utils';
+import { getQueryPayload } from '../rule_executor/get_query_payload';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
@@ -49,6 +50,23 @@ const baseSoAttrs = createRuleSoAttributes({
   schedule: { every: '1m', lookback: '1m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 });
+
+const getExpectedValidationCall = ({
+  query,
+  timeField = '@timestamp',
+  lookbackWindow = '1m',
+}: {
+  query: string;
+  timeField?: string;
+  lookbackWindow?: string;
+}) => {
+  const queryPayload = getQueryPayload({ query, timeField, lookbackWindow });
+  return {
+    query,
+    filter: queryPayload.filter,
+    params: queryPayload.params,
+  };
+};
 
 describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
@@ -275,9 +293,9 @@ describe('RulesClient', () => {
         },
       });
 
-      expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
-        query: getBreachEsqlQuery(baseCreateData.query),
-      });
+      expect(queryService.validateQueryExecutable).toHaveBeenCalledWith(
+        getExpectedValidationCall({ query: getBreachEsqlQuery(baseCreateData.query) })
+      );
       expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
@@ -622,9 +640,9 @@ describe('RulesClient', () => {
         },
       });
 
-      expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
-        query: updatedQuery,
-      });
+      expect(queryService.validateQueryExecutable).toHaveBeenCalledWith(
+        getExpectedValidationCall({ query: updatedQuery })
+      );
       expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
@@ -691,9 +709,9 @@ describe('RulesClient', () => {
           created: true,
           rule: expect.objectContaining({ id: 'rule-id-1', enabled: true }),
         });
-        expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
-          query: getBreachEsqlQuery(baseCreateData.query),
-        });
+        expect(queryService.validateQueryExecutable).toHaveBeenCalledWith(
+          getExpectedValidationCall({ query: getBreachEsqlQuery(baseCreateData.query) })
+        );
       });
 
       it('cleans up the saved object if scheduling fails', async () => {
@@ -905,7 +923,7 @@ describe('RulesClient', () => {
           references: [],
         };
 
-        mockSavedObjectsClient.get.mockResolvedValueOnce(existingDoc);
+        mockSavedObjectsClient.get.mockResolvedValue(existingDoc);
         queryService.validateQueryExecutable.mockRejectedValueOnce(
           new Error(
             'illegal_argument_exception: ES|QL type [flattened] is not supported by the Arrow format'
@@ -923,9 +941,9 @@ describe('RulesClient', () => {
           },
         });
 
-        expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
-          query: getBreachEsqlQuery(baseCreateData.query),
-        });
+        expect(queryService.validateQueryExecutable).toHaveBeenCalledWith(
+          getExpectedValidationCall({ query: getBreachEsqlQuery(baseCreateData.query) })
+        );
         expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       });
     });
