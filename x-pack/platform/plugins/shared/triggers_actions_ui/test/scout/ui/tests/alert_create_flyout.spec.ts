@@ -10,6 +10,9 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule, defineIndexThresholdRule, THRESHOLD_TEST_INDEX } from '../fixtures';
 
+const TEST_RUN_ID = Date.now();
+const STATEFUL_ALERTS_INDEX = '.internal.alerts-stack.alerts-default-000001';
+
 const INDEX_THRESHOLD_DEFAULT_MESSAGE = `Rule {{rule.name}} is active for group {{context.group}}:
 
 - Value: {{context.value}}
@@ -105,8 +108,8 @@ const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => 
 const selectComboBoxOption = async (page: ScoutPage, testSubj: string, value: string) => {
   await page.testSubj.click(`${testSubj} > comboBoxInput`);
   await page.testSubj.locator(`${testSubj} > comboBoxSearchInput`).pressSequentially(value);
-  // CI field-suggestion API can be slow; use a generous timeout for the dropdown option.
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 30_000 });
+  // CI field-capability API calls can be very slow (> 30 s on loaded agents).
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 60_000 });
 };
 
 const selectComboBoxOptionIn = async (
@@ -119,7 +122,7 @@ const selectComboBoxOptionIn = async (
   const combo = container.locator(`[data-test-subj="${testSubj}"]`);
   await combo.locator('[data-test-subj="comboBoxInput"]').click();
   await combo.locator('[data-test-subj="comboBoxSearchInput"]').pressSequentially(value);
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 30_000 });
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 60_000 });
 };
 
 const addStructuredFilterCondition = async (
@@ -205,6 +208,22 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     });
     await esClient.indices.refresh({ index: THRESHOLD_TEST_INDEX });
 
+    await esClient.index({
+      index: STATEFUL_ALERTS_INDEX,
+      refresh: 'wait_for',
+      document: {
+        '@timestamp': new Date().toISOString(),
+        'kibana.alert.uuid': `scout-alert-create-flyout-${TEST_RUN_ID}`,
+        'kibana.alert.status': 'active',
+        'kibana.alert.workflow_status': 'open',
+        'kibana.alert.rule.uuid': `scout-rule-${TEST_RUN_ID}`,
+        'kibana.alert.action_group': 'threshold met',
+        'kibana.space_ids': ['default'],
+        'event.kind': 'signal',
+        'event.action': 'open',
+      },
+    });
+
     const rule = makeEsQueryRule('scout-alert-flyout');
     const resp = await apiServices.alerting.rules.create(rule);
     esQueryRuleId = resp.data.id;
@@ -234,6 +253,17 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     if (esQueryRuleId) await apiServices.alerting.rules.delete(esQueryRuleId);
     if (slackConnectorId) await apiServices.alerting.connectors.delete(slackConnectorId);
     await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
+    await esClient.deleteByQuery(
+      {
+        index: STATEFUL_ALERTS_INDEX,
+        refresh: true,
+        conflicts: 'proceed',
+        query: {
+          term: { 'kibana.alert.uuid': `scout-alert-create-flyout-${TEST_RUN_ID}` },
+        },
+      },
+      { ignore: [404] }
+    );
   });
 
   test('should delete the right action when the same action has been added twice', async ({
@@ -295,6 +325,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
   });
 
   test('should create an alert', async ({ page, apiServices }) => {
+    // Field-capability API calls on loaded CI agents can exceed 30 s each;
+    // allow 120 s so the two combobox waits don't exhaust the test budget.
+    test.setTimeout(120_000);
     const alertName = `scout-flyout-create-${Date.now()}`;
     await defineIndexThresholdAlert(page, alertName);
 
@@ -344,7 +377,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('addFilter');
     await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
     await addStructuredFilterCondition(page, {
-      field: '_id',
+      field: 'kibana.alert.rule.uuid',
       operator: 'is not',
       value: 'fake-rule-id',
     });
@@ -352,7 +385,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('saveFilter');
     await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
     await expect(page.testSubj.locator('^filter-badge')).toBeVisible();
-    await page.testSubj.locator('queryInput').fill('_id: *');
+    await page.testSubj.locator('queryInput').fill('kibana.alert.rule.uuid: *');
 
     try {
       await page.testSubj.click('rulePageFooterSaveButton');
@@ -379,6 +412,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     page,
     apiServices,
   }) => {
+    test.setTimeout(120_000);
     const alertName = `scout-flyout-composite-${Date.now()}`;
     await defineIndexThresholdAlert(page, alertName);
 
@@ -420,7 +454,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('addFilter');
     await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
     await addStructuredFilterCondition(page, {
-      field: '_id',
+      field: 'kibana.alert.rule.uuid',
       operator: 'is not',
       value: 'fake-rule-id',
     });
@@ -434,7 +468,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('saveFilter');
     await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
     await expect(page.testSubj.locator('^filter-badge')).toBeVisible();
-    await page.testSubj.locator('queryInput').fill('_id: *');
+    await page.testSubj.locator('queryInput').fill('kibana.alert.rule.uuid: *');
 
     try {
       await page.testSubj.click('rulePageFooterSaveButton');
@@ -460,6 +494,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     page,
     apiServices,
   }) => {
+    test.setTimeout(120_000);
     const alertName = `scout-flyout-dsl-${Date.now()}`;
     await defineIndexThresholdAlert(page, alertName);
 
