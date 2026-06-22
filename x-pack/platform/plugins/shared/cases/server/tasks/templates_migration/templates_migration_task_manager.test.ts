@@ -157,6 +157,13 @@ describe('TemplatesMigrationTaskManager', () => {
       ]);
     });
 
+    it('removes any existing task before rescheduling to ensure a fresh run on startup', async () => {
+      await buildAndSchedule();
+      expect(taskManagerStartMock.removeIfExists).toHaveBeenCalledWith(
+        CASES_TEMPLATES_MIGRATION_TASK_ID
+      );
+    });
+
     it('calls ensureScheduled with the migration task id', async () => {
       await buildAndSchedule();
       expect(taskManagerStartMock.ensureScheduled).toHaveBeenCalledWith(
@@ -365,7 +372,6 @@ describe('TemplatesMigrationTaskManager', () => {
 
       repo.find
         .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
-        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // field-defs
         .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
 
       repo.create.mockRejectedValueOnce(new Error('ES write failed'));
@@ -373,15 +379,13 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      // Per-item failures are caught and logged; flags are still written to avoid
+      // Per-item failures are caught and logged; the templates flag is still written to avoid
       // re-processing on the next restart (intentional best-effort behaviour).
+      // The custom fields flag is NOT written because the configure SO has no custom fields.
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        expect.objectContaining({
-          legacyTemplatesMigrated: true,
-          legacyCustomFieldsMigrated: true,
-        }),
+        { legacyTemplatesMigrated: true },
         expect.anything()
       );
     });
@@ -419,14 +423,27 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('continues to next configure SO even if one fails entirely', async () => {
-      const configSO1 = buildConfigureSO({ id: 'config-1', owner: 'cases' });
-      const configSO2 = buildConfigureSO({ id: 'config-2', owner: 'securitySolution' });
+      // config-1 has a template that will fail to look up; config-2 has a template that succeeds.
+      // Using filter-based discrimination avoids ordering issues from concurrent pMap execution.
+      const configSO1 = buildConfigureSO({
+        id: 'config-1',
+        owner: 'cases',
+        templates: [buildLegacyTemplate('T1')],
+      });
+      const configSO2 = buildConfigureSO({
+        id: 'config-2',
+        owner: 'securitySolution',
+        templates: [buildLegacyTemplate('T2')],
+      });
 
       repo.find
         .mockResolvedValueOnce({ saved_objects: [configSO1, configSO2], total: 2 })
-        .mockRejectedValueOnce(new Error('field-def lookup failed for config-1'))
-        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // field-defs for config-2
-        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates for config-2
+        .mockImplementation((query: { filter?: string }) => {
+          if (typeof query.filter === 'string' && query.filter.includes('"cases"')) {
+            return Promise.reject(new Error('template lookup failed for config-1'));
+          }
+          return Promise.resolve({ saved_objects: [], total: 0 });
+        });
 
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
@@ -448,14 +465,10 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      // No SO creates; flags still written
+      // No SO creates; no flags written (empty arrays — flags are set only when there is data to
+      // migrate, so the next startup can detect newly-added custom fields or templates).
       expect(repo.create).not.toHaveBeenCalled();
-      expect(repo.update).toHaveBeenCalledWith(
-        CASE_CONFIGURE_SAVED_OBJECT,
-        configSO.id,
-        { legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true },
-        expect.anything()
-      );
+      expect(repo.update).not.toHaveBeenCalled();
     });
 
     it('runs field-def phase but skips template phase when legacyTemplatesMigrated is already true', async () => {

@@ -34,6 +34,9 @@ import {
 
 const MAX_CONCURRENT_MIGRATIONS = 3;
 
+type LegacyCustomField = NonNullable<ConfigurationPersistedAttributes['customFields']>[number];
+type LegacyTemplate = NonNullable<ConfigurationPersistedAttributes['templates']>[number];
+
 export class TemplatesMigrationTaskManager {
   private readonly logger: Logger;
   private internalRepo?: ISavedObjectsRepository;
@@ -136,6 +139,11 @@ export class TemplatesMigrationTaskManager {
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
     ]);
 
+    // Remove any lingering task record so the migration re-runs on every Kibana startup.
+    // Each configure SO's own legacyCustomFieldsMigrated / legacyTemplatesMigrated flags
+    // make individual phases idempotent — already-migrated SOs are cheap no-ops.
+    await taskManager.removeIfExists(CASES_TEMPLATES_MIGRATION_TASK_ID);
+
     try {
       await taskManager.ensureScheduled({
         id: CASES_TEMPLATES_MIGRATION_TASK_ID,
@@ -188,6 +196,171 @@ export class TemplatesMigrationTaskManager {
     return all;
   }
 
+  private async migrateFieldDefinitions(
+    repo: ISavedObjectsRepository,
+    owner: string,
+    namespace: string,
+    nsOption: string | undefined,
+    legacyCustomFields: LegacyCustomField[],
+    executionId: string,
+    log: Logger
+  ): Promise<{ refNamesByKey: Map<string, string>; created: number; reused: number }> {
+    const refNamesByKey = new Map<string, string>();
+    let created = 0;
+    let reused = 0;
+
+    // perPage: 10000 is intentionally unbounded for this one-shot migration scan.
+    // The number of field-definitions per owner is expected to be O(10s) in practice.
+    const existingFieldDefs = await repo.find<FieldDefinition>({
+      type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      namespaces: nsOption ? [nsOption] : ['default'],
+      perPage: 10000,
+      page: 1,
+      // owner is one of cases/securitySolution/observability — a controlled enum, not user input
+      filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${owner}"`,
+    });
+    const existingByName = new Map(
+      existingFieldDefs.saved_objects.map((fd) => [fd.attributes.name, fd])
+    );
+
+    for (const cf of legacyCustomFields) {
+      const existingDef = existingByName.get(cf.key);
+      if (existingDef) {
+        const existingParsed = parseYaml(existingDef.attributes.definition ?? '') as Record<
+          string,
+          unknown
+        >;
+        const { yaml: expectedYaml } = buildFieldDefinitionYaml(cf);
+        const expectedParsed = parseYaml(expectedYaml) as Record<string, unknown>;
+        if (
+          existingParsed?.control !== expectedParsed?.control ||
+          existingParsed?.type !== expectedParsed?.type
+        ) {
+          log.warn(
+            `[${executionId}] Field definition "${cf.key}" (owner: "${owner}", namespace: "${namespace}") already exists ` +
+              `but has control="${existingParsed?.control}" / type="${existingParsed?.type}", ` +
+              `expected control="${expectedParsed?.control}" / type="${expectedParsed?.type}" from legacy data — ` +
+              `reusing existing; templates referencing this field may reference a type-mismatched definition`
+          );
+        } else {
+          log.debug(
+            `[${executionId}] Field definition "${cf.key}" already exists for owner "${owner}" in namespace "${namespace}" — reusing`
+          );
+        }
+        refNamesByKey.set(cf.key, cf.key);
+        reused++;
+      } else {
+        try {
+          const { yaml } = buildFieldDefinitionYaml(cf);
+          const fdId = uuidv4();
+          await repo.create<FieldDefinition>(
+            CASE_FIELD_DEFINITION_SAVED_OBJECT,
+            {
+              fieldDefinitionId: fdId,
+              name: cf.key,
+              owner,
+              definition: yaml,
+              description: cf.label,
+              isGlobal: true,
+            },
+            { id: fdId, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
+          );
+          refNamesByKey.set(cf.key, cf.key);
+          created++;
+        } catch (err) {
+          log.error(
+            `[${executionId}] Failed to create field definition for key "${
+              cf.key
+            }" (owner: ${owner}): ${err instanceof Error ? err.message : String(err)}`
+          );
+        }
+      }
+    }
+
+    return { refNamesByKey, created, reused };
+  }
+
+  private async migrateTemplates(
+    repo: ISavedObjectsRepository,
+    owner: string,
+    namespace: string,
+    nsOption: string | undefined,
+    legacyTemplates: LegacyTemplate[],
+    refNamesByKey: Map<string, string>,
+    executionId: string,
+    log: Logger
+  ): Promise<{ created: number; reused: number }> {
+    let created = 0;
+    let reused = 0;
+
+    // perPage: 10000 is intentionally unbounded for this one-shot migration scan.
+    // The number of templates per owner is expected to be O(10s) in practice.
+    const existingTemplates = await repo.find<Template>({
+      type: CASE_TEMPLATE_SAVED_OBJECT,
+      namespaces: nsOption ? [nsOption] : ['default'],
+      perPage: 10000,
+      page: 1,
+      // owner is one of cases/securitySolution/observability — a controlled enum, not user input
+      filter:
+        `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.owner: "${owner}" AND ` +
+        `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.isLatest: true`,
+    });
+    const existingNameSet = new Set(existingTemplates.saved_objects.map((t) => t.attributes.name));
+
+    for (const legacyTemplate of legacyTemplates) {
+      if (existingNameSet.has(legacyTemplate.name)) {
+        log.debug(
+          `[${executionId}] Template "${legacyTemplate.name}" already exists for owner "${owner}" in namespace "${namespace}" — reusing`
+        );
+        reused++;
+      } else {
+        try {
+          const definition = trimFieldDefaults(
+            buildTemplateYaml(legacyTemplate, refNamesByKey, log)
+          );
+          const parseResult = ParsedTemplateDefinitionSchema.safeParse(parseYaml(definition));
+          if (!parseResult.success) {
+            throw new Error(
+              `Template "${legacyTemplate.name}" produced an invalid definition: ${parseResult.error.message}`
+            );
+          }
+          const parsedDefinition = parseResult.data;
+          const templateId = uuidv4();
+          const id = uuidv4();
+
+          await repo.create<Template>(
+            CASE_TEMPLATE_SAVED_OBJECT,
+            {
+              templateVersion: 1,
+              isLatest: true,
+              deletedAt: null,
+              definition,
+              name: parsedDefinition.name,
+              owner,
+              templateId,
+              description: parsedDefinition.description ?? legacyTemplate.description,
+              tags: parsedDefinition.tags ?? legacyTemplate.tags,
+              author: 'system',
+              fieldCount: parsedDefinition.fields.length,
+              fieldNames: toFieldNames(parsedDefinition.fields),
+              isEnabled: true,
+            } as Template,
+            { id, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
+          );
+          created++;
+        } catch (err) {
+          log.error(
+            `[${executionId}] Failed to create template "${
+              legacyTemplate.name
+            }" (owner: ${owner}): ${err instanceof Error ? err.message : String(err)}`
+          );
+        }
+      }
+    }
+
+    return { created, reused };
+  }
+
   private async migrateOneConfigure(
     repo: ISavedObjectsRepository,
     so: SavedObject<ConfigurationPersistedAttributes>,
@@ -211,78 +384,23 @@ export class TemplatesMigrationTaskManager {
     // ── Field definitions phase ──────────────────────────────────────────────
     let fieldDefsCreated = 0;
     let fieldDefsReused = 0;
-    const refNamesByKey = new Map<string, string>();
+    let refNamesByKey = new Map<string, string>();
 
     if (!attributes.legacyCustomFieldsMigrated && legacyCustomFields.length > 0) {
-      // perPage: 10000 is intentionally unbounded for this one-shot migration scan.
-      // The number of field-definitions per owner is expected to be O(10s) in practice.
-      const existingFieldDefs = await repo.find<FieldDefinition>({
-        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
-        namespaces: nsOption ? [nsOption] : ['default'],
-        perPage: 10000,
-        page: 1,
-        // owner is one of cases/securitySolution/observability — a controlled enum, not user input
-        filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${owner}"`,
-      });
-      const existingByName = new Map(
-        existingFieldDefs.saved_objects.map((fd) => [fd.attributes.name, fd])
+      const result = await this.migrateFieldDefinitions(
+        repo,
+        owner,
+        namespace,
+        nsOption,
+        legacyCustomFields,
+        executionId,
+        log
       );
-
-      for (const cf of legacyCustomFields) {
-        const existingDef = existingByName.get(cf.key);
-        if (existingDef) {
-          const existingParsed = parseYaml(existingDef.attributes.definition ?? '') as Record<
-            string,
-            unknown
-          >;
-          const { yaml: expectedYaml } = buildFieldDefinitionYaml(cf);
-          const expectedParsed = parseYaml(expectedYaml) as Record<string, unknown>;
-          if (
-            existingParsed?.control !== expectedParsed?.control ||
-            existingParsed?.type !== expectedParsed?.type
-          ) {
-            log.warn(
-              `[${executionId}] Field definition "${cf.key}" (owner: "${owner}", namespace: "${namespace}") already exists ` +
-                `but has control="${existingParsed?.control}" / type="${existingParsed?.type}", ` +
-                `expected control="${expectedParsed?.control}" / type="${expectedParsed?.type}" from legacy data — ` +
-                `reusing existing; templates referencing this field may reference a type-mismatched definition`
-            );
-          } else {
-            log.debug(
-              `[${executionId}] Field definition "${cf.key}" already exists for owner "${owner}" in namespace "${namespace}" — reusing`
-            );
-          }
-          refNamesByKey.set(cf.key, cf.key);
-          fieldDefsReused++;
-        } else {
-          try {
-            const { yaml } = buildFieldDefinitionYaml(cf);
-            const fdId = uuidv4();
-            await repo.create<FieldDefinition>(
-              CASE_FIELD_DEFINITION_SAVED_OBJECT,
-              {
-                fieldDefinitionId: fdId,
-                name: cf.key,
-                owner,
-                definition: yaml,
-                description: cf.label,
-                isGlobal: true,
-              },
-              { id: fdId, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
-            );
-            refNamesByKey.set(cf.key, cf.key);
-            fieldDefsCreated++;
-          } catch (err) {
-            log.error(
-              `[${executionId}] Failed to create field definition for key "${
-                cf.key
-              }" (owner: ${owner}): ${err instanceof Error ? err.message : String(err)}`
-            );
-          }
-        }
-      }
+      refNamesByKey = result.refNamesByKey;
+      fieldDefsCreated = result.created;
+      fieldDefsReused = result.reused;
     } else {
-      // Already migrated or no custom fields — build refMap from existing field-defs for template phase
+      // Already migrated or no custom fields — build refMap from legacy keys for template phase
       for (const cf of legacyCustomFields) {
         refNamesByKey.set(cf.key, cf.key);
       }
@@ -293,85 +411,31 @@ export class TemplatesMigrationTaskManager {
     let templatesReused = 0;
 
     if (!attributes.legacyTemplatesMigrated && legacyTemplates.length > 0) {
-      // perPage: 10000 is intentionally unbounded for this one-shot migration scan.
-      // The number of templates per owner is expected to be O(10s) in practice.
-      const existingTemplates = await repo.find<Template>({
-        type: CASE_TEMPLATE_SAVED_OBJECT,
-        namespaces: nsOption ? [nsOption] : ['default'],
-        perPage: 10000,
-        page: 1,
-        // owner is one of cases/securitySolution/observability — a controlled enum, not user input
-        filter:
-          `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.owner: "${owner}" AND ` +
-          `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.isLatest: true`,
-      });
-      const existingNameSet = new Set(
-        existingTemplates.saved_objects.map((t) => t.attributes.name)
+      const result = await this.migrateTemplates(
+        repo,
+        owner,
+        namespace,
+        nsOption,
+        legacyTemplates,
+        refNamesByKey,
+        executionId,
+        log
       );
-
-      for (const legacyTemplate of legacyTemplates) {
-        if (existingNameSet.has(legacyTemplate.name)) {
-          log.debug(
-            `[${executionId}] Template "${legacyTemplate.name}" already exists for owner "${owner}" in namespace "${namespace}" — reusing`
-          );
-          templatesReused++;
-        } else {
-          try {
-            const definition = trimFieldDefaults(
-              buildTemplateYaml(legacyTemplate, refNamesByKey, log)
-            );
-            const parseResult = ParsedTemplateDefinitionSchema.safeParse(parseYaml(definition));
-            if (!parseResult.success) {
-              throw new Error(
-                `Template "${legacyTemplate.name}" produced an invalid definition: ${parseResult.error.message}`
-              );
-            }
-            const parsedDefinition = parseResult.data;
-            const templateId = uuidv4();
-            const id = uuidv4();
-
-            await repo.create<Template>(
-              CASE_TEMPLATE_SAVED_OBJECT,
-              {
-                templateVersion: 1,
-                isLatest: true,
-                deletedAt: null,
-                definition,
-                name: parsedDefinition.name,
-                owner,
-                templateId,
-                description: parsedDefinition.description ?? legacyTemplate.description,
-                tags: parsedDefinition.tags ?? legacyTemplate.tags,
-                author: 'system',
-                fieldCount: parsedDefinition.fields.length,
-                fieldNames: toFieldNames(parsedDefinition.fields),
-                isEnabled: true,
-              } as Template,
-              { id, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
-            );
-            templatesCreated++;
-          } catch (err) {
-            log.error(
-              `[${executionId}] Failed to create template "${
-                legacyTemplate.name
-              }" (owner: ${owner}): ${err instanceof Error ? err.message : String(err)}`
-            );
-          }
-        }
-      }
+      templatesCreated = result.created;
+      templatesReused = result.reused;
     }
 
     // ── Write migration flags ────────────────────────────────────────────────
-    // Flags are written after both phases regardless of per-item failures. Individual failures
-    // (e.g. a single field-def ES write error) are logged and skipped above; the flag signals
-    // "this configure SO has been processed" so subsequent restarts don't re-scan it. A custom
-    // field that failed to migrate won't be retried — the template is created without that $ref
-    // (buildTemplateYaml emits a warning and omits it). This is intentional best-effort behaviour.
+    // Flags are written only when the phase ran (non-empty array). Leaving the flag unset for
+    // empty arrays allows subsequent startups to pick up newly-added custom fields or templates
+    // without requiring a manual reset. Individual per-item failures (e.g. a single field-def
+    // ES write error) are logged and skipped above — the flag still marks the phase as processed
+    // so we don't re-attempt the whole batch on the next run (intentional best-effort behaviour).
     const flagsToWrite: Partial<ConfigurationPersistedAttributes> = {};
-    if (!attributes.legacyCustomFieldsMigrated) {
+    if (!attributes.legacyCustomFieldsMigrated && legacyCustomFields.length > 0) {
       flagsToWrite.legacyCustomFieldsMigrated = true;
     }
-    if (!attributes.legacyTemplatesMigrated) {
+    if (!attributes.legacyTemplatesMigrated && legacyTemplates.length > 0) {
       flagsToWrite.legacyTemplatesMigrated = true;
     }
 
