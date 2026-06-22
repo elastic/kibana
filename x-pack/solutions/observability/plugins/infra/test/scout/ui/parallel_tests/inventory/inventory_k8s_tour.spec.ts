@@ -22,7 +22,9 @@ test.describe(
     });
 
     test.afterEach(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.unset('hideAnnouncements');
+      // `beforeEach` writes `hideAnnouncements` via `updateGlobal` (global settings).
+      // `unset` only deletes the per-space value, so restore the default globally instead.
+      await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: false });
     });
 
     test('Render and dismiss k8s tour', async ({ pageObjects: { inventoryPage } }) => {
