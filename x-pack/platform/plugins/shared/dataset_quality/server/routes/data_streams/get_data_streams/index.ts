@@ -53,7 +53,7 @@ export async function getDataStreams(options: {
     ? await datasetQualityPrivileges.getHasIndexPrivileges(
         esClient,
         filteredDataStreams.map(({ name }) => name),
-        ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
+        ['monitor', 'view_index_metadata', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
         isSecurityEnabled
       )
     : {};

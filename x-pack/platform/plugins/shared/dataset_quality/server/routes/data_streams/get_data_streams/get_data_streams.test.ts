@@ -78,6 +78,53 @@ describe('getDataStreams', () => {
     expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
   });
 
+  it('requests view_index_metadata privilege per stream and maps it to canMonitor', async () => {
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const result = await getDataStreams({
+      esClient: esClientMock,
+      types: ['logs'],
+      uncategorisedOnly: false,
+      isSecurityEnabled: true,
+    });
+
+    expect(datasetQualityPrivileges.getHasIndexPrivileges).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(Array),
+      expect.arrayContaining(['view_index_metadata']),
+      true
+    );
+    expect(datasetQualityPrivileges.getHasIndexPrivileges).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(Array),
+      expect.arrayContaining(['monitor']),
+      expect.anything()
+    );
+
+    result.dataStreams.forEach((stream) => {
+      expect(stream.userPrivileges.canMonitor).toBe(true);
+    });
+  });
+
+  it('sets canMonitor true when view_index_metadata is granted but monitor is not', async () => {
+    mockGetMockDataStreamPrivileges.mockResolvedValueOnce(
+      Object.fromEntries(
+        MATCHING_DATA_STREAMS.map(({ name }) => [name, { view_index_metadata: true }])
+      )
+    );
+
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const result = await getDataStreams({
+      esClient: esClientMock,
+      types: ['logs'],
+      uncategorisedOnly: false,
+      isSecurityEnabled: true,
+    });
+
+    result.dataStreams.forEach((stream) => {
+      expect(stream.userPrivileges.canMonitor).toBe(true);
+    });
+  });
+
   it('Returns data streams even when wildcard canMonitor is false', async () => {
     mockGetDatasetPrivileges.mockResolvedValueOnce({
       datasetsPrivilages: {
@@ -215,7 +262,6 @@ const MATCHING_DATA_STREAMS = [
 ];
 
 const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
-  acc[stream.name] = true;
-
+  acc[stream.name] = { view_index_metadata: true };
   return acc;
-}, {} as Record<string, boolean>);
+}, {} as Record<string, { view_index_metadata: boolean }>);

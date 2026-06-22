@@ -38,6 +38,21 @@ const datasetQualityMonitorUserRole: KibanaRoleDescriptors = {
   kibana: [],
 };
 
+// Has `read` and `view_index_metadata` on logs but no `monitor`. Used to verify
+// that `canMonitor` is derived from `view_index_metadata` alone (consistent with
+// `getDatasetPrivileges`) and that the data streams list is still shown correctly.
+const readAndViewMetadataUserRole: KibanaRoleDescriptors = {
+  elasticsearch: {
+    indices: [
+      {
+        names: ['logs-*-*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: [],
+};
+
 // Grants access to every index except system indices, ILM history and `logs-apm*`,
 // using a Lucene complement (negated) index pattern. The wildcard `_has_privileges`
 // check for `logs-*-*` therefore returns false, even though individual logs data
@@ -59,11 +74,13 @@ type CustomRoleNames =
   | 'noAccessUserRole'
   | 'readUserRole'
   | 'datasetQualityMonitorUserRole'
+  | 'readAndViewMetadataUserRole'
   | 'negatedLogsUserRole';
 
 export const customRoles: Record<CustomRoleNames, KibanaRoleDescriptors> = {
   noAccessUserRole,
   readUserRole,
   datasetQualityMonitorUserRole,
+  readAndViewMetadataUserRole,
   negatedLogsUserRole,
 };

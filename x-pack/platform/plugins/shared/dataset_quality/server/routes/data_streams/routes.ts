@@ -261,6 +261,7 @@ const totalDocsRoute = createDatasetQualityServerRoute({
       };
     }
 
+    // Use the wildcard; ES enforces per-stream auth and only counts accessible docs.
     const totalDocs = await getAggregatedDatasetPaginatedResults({
       esClient,
       start,

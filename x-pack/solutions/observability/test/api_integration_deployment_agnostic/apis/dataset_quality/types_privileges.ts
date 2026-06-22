@@ -138,6 +138,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    // A role with `read` + `view_index_metadata` but no `monitor` should report
+    // `canMonitor: true` because Dataset Quality maps `canMonitor` from
+    // `view_index_metadata`, not `monitor`.
+    describe('Read + view_index_metadata user (no monitor)', () => {
+      let supertestReadViewMetaWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await saml.setCustomRole(customRoles.readAndViewMetadataUserRole);
+        supertestReadViewMetaWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+      });
+
+      it('reports canRead and canMonitor true for view_index_metadata without monitor', async () => {
+        const resp = await callApiAs(supertestReadViewMetaWithCookieCredentials, ['logs']);
+
+        expect(resp.body.datasetTypesPrivileges['logs-*-*'].canRead).to.be(true);
+        expect(resp.body.datasetTypesPrivileges['logs-*-*'].canMonitor).to.be(true);
+      });
+    });
+
     // Documents the intentional divergence for negated/complement roles: the wildcard
     // `logs-*-*` privilege check reports `canRead: false`, yet the user can still read
     // individual logs data streams (verified by the stats/total_docs endpoints). The

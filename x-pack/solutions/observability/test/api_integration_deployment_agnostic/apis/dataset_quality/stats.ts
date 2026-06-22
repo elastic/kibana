@@ -158,6 +158,63 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    // A role with `read` + `view_index_metadata` but no `monitor` should report
+    // `canMonitor: true` because Dataset Quality maps `canMonitor` from
+    // `view_index_metadata`, not `monitor`.
+    describe('Read + view_index_metadata user (no monitor)', () => {
+      let supertestReadViewMetaWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await saml.setCustomRole(customRoles.readAndViewMetadataUserRole);
+        supertestReadViewMetaWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+
+        await synthtraceLogsEsClient.index([
+          timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) =>
+              log
+                .create()
+                .message('This is a log message')
+                .timestamp(timestamp)
+                .dataset('synth.1')
+                .defaults({ 'log.file.path': '/my-service.log' })
+            ),
+        ]);
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+        await synthtraceLogsEsClient.clean();
+      });
+
+      it('reports canMonitor true and canRead true for the wildcard', async () => {
+        const resp = await callApiAs(supertestReadViewMetaWithCookieCredentials);
+
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canRead).to.be(true);
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).to.be(
+          true
+        );
+      });
+
+      it('reports canMonitor true per data stream', async () => {
+        const resp = await callApiAs(supertestReadViewMetaWithCookieCredentials);
+
+        const streamWithMonitor = resp.body.dataStreamsStats.find(
+          ({ name }: { name: string }) => name === 'logs-synth.1-default'
+        );
+        expect(streamWithMonitor).to.be.ok();
+        expect(streamWithMonitor.userPrivileges.canMonitor).to.be(true);
+      });
+    });
+
     // A role built with a negated/complement index pattern (excluding `logs-apm*`)
     // can read most logs data streams while the wildcard `logs-*-*` privilege check
     // returns false. Stats must still list the accessible streams and omit the
