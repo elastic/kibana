@@ -357,7 +357,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         const solutionType = this.config.onboarding?.default_solution;
 
         if (queryOnboardingToken || queryOnboardingSecurity || queryResourceData) {
-          core
+          // Wait for onboarding data to persist before redirecting so the next app can read it.
+          await core
             .getStartServices()
             .then(async ([coreStart]) => {
               const soClient = coreStart.savedObjects.getScopedClient(request, {
