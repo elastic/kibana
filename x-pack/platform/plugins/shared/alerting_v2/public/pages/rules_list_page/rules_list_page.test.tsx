@@ -25,6 +25,8 @@ jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
+jest.mock('@kbn/app-header', () => jest.requireActual('../../test_utils/mock_app_header'));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
@@ -42,6 +44,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     }
     if (token === 'notifications') {
       return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
+    }
+    if (token === 'docLinks') {
+      return { links: { alerting: { guide: 'https://elastic.co/guide/alerting' } } };
     }
     if (
       token === 'data' ||
@@ -784,7 +789,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
@@ -805,7 +810,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
