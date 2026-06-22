@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import {
-  EuiBasicTable,
-  EuiBadge,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -24,10 +17,11 @@ import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
-import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { DiscoveryFlyout } from './discovery_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
+import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
@@ -126,30 +120,16 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
   },
 ];
 
-const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
-
 export const DiscoveriesTab = () => {
-  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
-    useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
+  const { timeState } = useTimefilter();
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
 
-  // Discovery state is shared at the provider level, so re-resolve this tab's
-  // locked time range locally when a run finishes (isRunning true -> false) to
-  // surface documents generated after the range was frozen.
-  const wasRunningRef = useRef(isRunning);
-  useEffect(() => {
-    if (wasRunningRef.current && !isRunning) {
-      refreshAbsoluteRange();
-    }
-    wasRunningRef.current = isRunning;
-  }, [isRunning, refreshAbsoluteRange]);
-
   const { data, isLoading, isError, refetch, pagination, setPagination } =
     useFetchDiscoveriesEntities({
-      from: absoluteRange.from,
-      to: absoluteRange.to,
+      from: timeState.start,
+      to: timeState.end,
     });
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
@@ -175,21 +155,9 @@ export const DiscoveriesTab = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem>
-            <EuiSuperDatePicker
-              start={pickerRange.from}
-              end={pickerRange.to}
-              onTimeChange={handleTimeChange}
-              onRefresh={() => {
-                refreshAbsoluteRange();
-                refetch();
-              }}
-              compressed
-              width="full"
-              showUpdateButton="iconOnly"
-              updateButtonProps={{ size: 's', fill: false }}
-            />
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap={false}>
+          <EuiFlexItem grow={false}>
+            <StreamsAppSearchBar showDatePicker enableDateRangePicker />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FindSignificantEventsButton
@@ -198,7 +166,6 @@ export const DiscoveriesTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning}
-              size="s"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
