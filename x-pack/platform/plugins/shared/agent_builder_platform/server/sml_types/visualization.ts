@@ -88,7 +88,10 @@ export const visualizationSmlType: SmlTypeDefinition = {
             type: VISUALIZATION_SML_TYPE,
             title,
             content: contentParts.join('\n'),
-            permissions: ['saved_object:lens/get'],
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
