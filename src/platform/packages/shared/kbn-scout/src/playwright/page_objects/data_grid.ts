@@ -11,8 +11,6 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 
-const META_FIELDS = new Set(['_score', '_id', '_index']);
-
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
 
@@ -24,17 +22,16 @@ export class DataGrid {
     return `[data-gridcell-column-id="${escapedField}"]`;
   }
 
-  private async getColumnResizer(field: string): Promise<Locator> {
-    const droppableHeader = this.page.testSubj.locator('euiDataGridHeaderDroppable');
-
-    if (await droppableHeader.isVisible()) {
-      return droppableHeader
-        .locator(':scope > div')
-        .filter({ has: this.page.locator(this.getColumnIdSelector(field)) })
-        .locator('[data-test-subj="dataGridColumnResizer"]');
-    }
-
+  private getColumnResizerInDiscover(field: string): Locator {
     return this.getColumnHeader(field).locator('[data-test-subj="dataGridColumnResizer"]');
+  }
+
+  private getColumnResizerInDashboard(field: string): Locator {
+    return this.page.testSubj
+      .locator('euiDataGridHeaderDroppable')
+      .locator(':scope > div')
+      .filter({ has: this.page.locator(this.getColumnIdSelector(field)) })
+      .locator('[data-test-subj="dataGridColumnResizer"]');
   }
 
   private getRowSelectionCheckbox(rowIndex: number): Locator {
@@ -43,7 +40,7 @@ export class DataGrid {
     );
   }
 
-  private async openColumnMenuByField(field: string) {
+  async openColumnMenuByField(field: string) {
     await expect(async () => {
       await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
       await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
@@ -64,16 +61,6 @@ export class DataGrid {
     await expandButton.click({ delay: 50 });
   }
 
-  private async openMetaFieldsSectionIfNeeded(field: string) {
-    if (!META_FIELDS.has(field)) return;
-
-    const metaFieldsSection = this.page.testSubj.locator('fieldListGroupedMetaFields');
-    await expect(metaFieldsSection).toBeVisible();
-
-    const isExpanded = (await metaFieldsSection.getAttribute('aria-expanded')) === 'true';
-    if (!isExpanded) await metaFieldsSection.click();
-  }
-
   private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
     return scope
       .locator('.kbnFieldIcon svg')
@@ -90,12 +77,8 @@ export class DataGrid {
   }
 
   async addFieldFromSidebar(field: string) {
-    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
-    if (await sidebarToggleButton.isVisible()) await sidebarToggleButton.click();
-
     await this.waitUntilFieldListHasCountOfFields();
     await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
-    await this.openMetaFieldsSectionIfNeeded(field);
     await this.page.testSubj.click(`fieldToggle-${field}`);
     await this.waitUntilSearchingHasFinished();
   }
@@ -235,6 +218,12 @@ export class DataGrid {
     await this.page.testSubj.click('dataGridDisplaySelectorButton');
   }
 
+  async expandMetaFieldsSection() {
+    const metaFieldsSection = this.page.testSubj.locator('fieldListGroupedMetaFields');
+    await metaFieldsSection.click();
+    await expect(metaFieldsSection).toHaveAttribute('aria-expanded', 'true');
+  }
+
   async openSelectedRowsMenu() {
     await this.page.testSubj.click('unifiedDataTableSelectionBtn');
     await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'visible' });
@@ -253,30 +242,18 @@ export class DataGrid {
     await this.page.testSubj.click('unifiedDataTableResetColumnWidth');
   }
 
-  async resizeColumn(
+  async resizeColumnInDashboard(
     field: string,
     delta: number
   ): Promise<{ originalWidth: number; newWidth: number }> {
-    const originalWidth = await this.getColumnWidth(field);
-    const resizer = await this.getColumnResizer(field);
-    await expect(resizer).toBeVisible();
+    return this.resizeColumn(field, delta, this.getColumnResizerInDashboard(field));
+  }
 
-    const resizerBox = await resizer.boundingBox();
-    if (!resizerBox) {
-      throw new Error(`Unable to find column resizer for field ${field}`);
-    }
-
-    const startX = resizerBox.x + resizerBox.width / 2;
-    const startY = resizerBox.y + resizerBox.height / 2;
-
-    await this.page.mouse.move(startX, startY);
-    await this.page.mouse.down();
-    await this.page.mouse.move(startX + delta, startY, { steps: 5 });
-    await this.page.mouse.up();
-
-    await expect.poll(() => this.getColumnWidth(field)).not.toBe(originalWidth);
-
-    return { originalWidth, newWidth: await this.getColumnWidth(field) };
+  async resizeColumnInDiscover(
+    field: string,
+    delta: number
+  ): Promise<{ originalWidth: number; newWidth: number }> {
+    return this.resizeColumn(field, delta, this.getColumnResizerInDiscover(field));
   }
 
   async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
@@ -364,5 +341,31 @@ export class DataGrid {
       state: 'hidden',
       timeout: 30_000,
     });
+  }
+
+  private async resizeColumn(
+    field: string,
+    delta: number,
+    resizer: Locator
+  ): Promise<{ originalWidth: number; newWidth: number }> {
+    const originalWidth = await this.getColumnWidth(field);
+    await expect(resizer).toBeVisible();
+
+    const resizerBox = await resizer.boundingBox();
+    if (!resizerBox) {
+      throw new Error(`Unable to find column resizer for field ${field}`);
+    }
+
+    const startX = resizerBox.x + resizerBox.width / 2;
+    const startY = resizerBox.y + resizerBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + delta, startY, { steps: 5 });
+    await this.page.mouse.up();
+
+    await expect.poll(() => this.getColumnWidth(field)).not.toBe(originalWidth);
+
+    return { originalWidth, newWidth: await this.getColumnWidth(field) };
   }
 }

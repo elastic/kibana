@@ -26,25 +26,15 @@ const WIDTH_TOLERANCE_PX = 4;
 const expectWidthAbout = (actual: number, expected: number) =>
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(WIDTH_TOLERANCE_PX);
 
-const openColumnMenuByField = async (page: ScoutPage, field: string) => {
-  await expect(async () => {
-    await page.testSubj.hover(`dataGridHeaderCell-${field}`);
-    await page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
-    await page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
-      state: 'visible',
-    });
-  }).toPass();
-};
-
 const removeColumn = async (page: ScoutPage, dataGrid: DataGridPage, field: string) => {
-  await openColumnMenuByField(page, field);
+  await dataGrid.openColumnMenuByField(field);
   await page.getByRole('button', { name: 'Remove column' }).click();
   await expect(dataGrid.getColumnHeader(field)).toBeHidden();
   await dataGrid.waitUntilSearchingHasFinished();
 };
 
 const testResizeColumn = async (dataGrid: DataGridPage, field: string) => {
-  const { originalWidth, newWidth } = await dataGrid.resizeColumn(field, -100);
+  const { originalWidth, newWidth } = await dataGrid.resizeColumnInDiscover(field, -100);
   expectWidthAbout(newWidth, originalWidth - 100);
 
   await dataGrid.resetColumnWidth(field);
@@ -78,7 +68,7 @@ spaceTest.describe('Discover data grid column widths', { tag: '@local-stateful-c
       await dataGrid.addFieldFromSidebar('@message');
       await dataGrid.waitUntilSearchingHasFinished();
 
-      await openColumnMenuByField(page, '@message');
+      await dataGrid.openColumnMenuByField('@message');
       await expect(page.testSubj.locator('unifiedDataTableResetColumnWidth')).toBeHidden();
     }
   );
@@ -101,12 +91,12 @@ spaceTest.describe('Discover data grid column widths', { tag: '@local-stateful-c
       const { dataGrid } = pageObjects;
       await dataGrid.addFieldFromSidebar('@message');
 
-      const message = await dataGrid.resizeColumn('@message', -300);
+      const message = await dataGrid.resizeColumnInDiscover('@message', -300);
       expect(message.newWidth).toBeLessThan(message.originalWidth);
       expectWidthAbout(message.newWidth, message.originalWidth - 300);
 
       await dataGrid.addFieldFromSidebar('bytes');
-      const bytes = await dataGrid.resizeColumn('bytes', -100);
+      const bytes = await dataGrid.resizeColumnInDiscover('bytes', -100);
       expectWidthAbout(bytes.newWidth, bytes.originalWidth - 100);
 
       expectWidthAbout(await dataGrid.getColumnWidth('@message'), message.newWidth);
@@ -123,12 +113,12 @@ spaceTest.describe('Discover data grid column widths', { tag: '@local-stateful-c
       await dataGrid.addFieldFromSidebar('@message');
       await dataGrid.addFieldFromSidebar('bytes');
 
-      const bytes = await dataGrid.resizeColumn('bytes', -200);
+      const bytes = await dataGrid.resizeColumnInDiscover('bytes', -200);
       expect(bytes.newWidth).toBeLessThan(bytes.originalWidth);
       expectWidthAbout(bytes.newWidth, bytes.originalWidth - 200);
 
       await dataGrid.addFieldFromSidebar('agent');
-      const agent = await dataGrid.resizeColumn('agent', -100);
+      const agent = await dataGrid.resizeColumnInDiscover('agent', -100);
       expectWidthAbout(agent.newWidth, agent.originalWidth - 100);
 
       await removeColumn(page, dataGrid, 'bytes');

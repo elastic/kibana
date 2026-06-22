@@ -33,7 +33,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       // Saving searches and creating dashboard panels require write access.
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.setQueryMode('classic');
     });
 

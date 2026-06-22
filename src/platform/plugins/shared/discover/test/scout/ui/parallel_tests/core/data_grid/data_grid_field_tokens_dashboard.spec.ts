@@ -29,7 +29,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       // Saving a search + creating a dashboard requires write access.
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
       await pageObjects.dataGrid.waitUntilSearchingHasFinished();

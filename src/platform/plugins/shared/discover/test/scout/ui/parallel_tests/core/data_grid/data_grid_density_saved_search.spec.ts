@@ -10,7 +10,7 @@
 /**
  * Discover data-grid density on a saved search: saving a density change as an
  * unsaved-changes update, then reverting it. This writes to a saved search, so
- * it runs with admin privileges.
+ * it runs with write privileges.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -29,7 +29,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       // Saving over a saved search requires write access.
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
       await pageObjects.dataGrid.waitUntilSearchingHasFinished();

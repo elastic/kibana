@@ -46,14 +46,8 @@ const getDataGridHeaderFields = (page: ScoutPage): Promise<string[]> => {
     );
 };
 
-const tryReadClipboard = async (page: ScoutPage): Promise<string | null> => {
-  try {
-    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-
-    return await page.evaluate(() => navigator.clipboard.readText());
-  } catch {
-    return null;
-  }
+const readClipboard = async (page: ScoutPage): Promise<string> => {
+  return await page.evaluate(() => navigator.clipboard.readText());
 };
 
 const copySelectedRowsAsText = async ({
@@ -64,7 +58,7 @@ const copySelectedRowsAsText = async ({
   actionTestSubj: string;
   page: ScoutPage;
   pageObjects: ScoutTestFixtures['pageObjects'];
-}): Promise<string | null> => {
+}): Promise<string> => {
   const { dataGrid } = pageObjects;
 
   await dataGrid.selectRow(2);
@@ -77,7 +71,7 @@ const copySelectedRowsAsText = async ({
   await dataGrid.openSelectedRowsMenu();
   await clickSelectedRowsMenuAction(page, actionTestSubj);
 
-  return await tryReadClipboard(page);
+  return await readClipboard(page);
 };
 
 const copyVisibleColumnsForSelectedRowsAsText = async ({
@@ -88,7 +82,7 @@ const copyVisibleColumnsForSelectedRowsAsText = async ({
   actionTestSubj: string;
   page: ScoutPage;
   pageObjects: ScoutTestFixtures['pageObjects'];
-}): Promise<string | null> => {
+}): Promise<string> => {
   const { dataGrid } = pageObjects;
 
   await dataGrid.addFieldFromSidebar('extension');
@@ -108,7 +102,7 @@ const copyVisibleColumnsForSelectedRowsAsText = async ({
   await dataGrid.openSelectedRowsMenu();
   await clickSelectedRowsMenuAction(page, actionTestSubj);
 
-  return await tryReadClipboard(page);
+  return await readClipboard(page);
 };
 
 spaceTest.describe(
@@ -123,6 +117,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ page, browserAuth, pageObjects }) => {
+      await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
       await page.setViewportSize({ width: 1600, height: 1200 });
       await browserAuth.loginAsViewer();
       await pageObjects.discover.setQueryMode('classic');
@@ -153,9 +148,9 @@ spaceTest.describe(
       await dataGrid.openSelectedRowsMenu();
       await clickSelectedRowsMenuAction(page, 'dscGridCopySelectedDocumentsJSON');
 
-      const clipboardData = await tryReadClipboard(page);
+      const clipboardData = await readClipboard(page);
       expect(
-        clipboardData === null || clipboardData.startsWith(EXPECTED_SELECTED_ROWS_JSON_PREFIX),
+        clipboardData.startsWith(EXPECTED_SELECTED_ROWS_JSON_PREFIX),
         `copied selected rows JSON "${clipboardData}" should start with the expected row data`
       ).toBe(true);
     });
@@ -168,7 +163,7 @@ spaceTest.describe(
       });
 
       expect(
-        clipboardData === null || clipboardData.startsWith(EXPECTED_SELECTED_ROWS_TEXT_PREFIX),
+        clipboardData.startsWith(EXPECTED_SELECTED_ROWS_TEXT_PREFIX),
         `copied selected rows tabular text "${clipboardData}" should start with the expected data`
       ).toBe(true);
     });
@@ -181,7 +176,7 @@ spaceTest.describe(
       });
 
       expect(
-        clipboardData === null || clipboardData.startsWith(EXPECTED_SELECTED_ROWS_MARKDOWN_PREFIX),
+        clipboardData.startsWith(EXPECTED_SELECTED_ROWS_MARKDOWN_PREFIX),
         `copied selected rows Markdown text "${clipboardData}" should start with the expected data`
       ).toBe(true);
     });
@@ -196,9 +191,9 @@ spaceTest.describe(
         });
 
         expect(
-          clipboardData === null || clipboardData === EXPECTED_SELECTED_COLUMNS_TEXT,
+          clipboardData,
           `copied selected columns tabular text "${clipboardData}" should equal the expected data`
-        ).toBe(true);
+        ).toBe(EXPECTED_SELECTED_COLUMNS_TEXT);
       }
     );
 
@@ -212,9 +207,9 @@ spaceTest.describe(
         });
 
         expect(
-          clipboardData === null || clipboardData === EXPECTED_SELECTED_COLUMNS_MARKDOWN,
+          clipboardData,
           `copied selected columns Markdown text "${clipboardData}" should equal the expected data`
-        ).toBe(true);
+        ).toBe(EXPECTED_SELECTED_COLUMNS_MARKDOWN);
       }
     );
   }

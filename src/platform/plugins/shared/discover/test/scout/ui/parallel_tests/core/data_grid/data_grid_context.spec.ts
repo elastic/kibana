@@ -33,9 +33,6 @@ const addFilterForFieldValueFromSidebar = async ({
   field: string;
   value: string;
 }) => {
-  const sidebarToggleButton = page.testSubj.locator('discover-sidebar-fields-button');
-  if (await sidebarToggleButton.isVisible()) await sidebarToggleButton.click();
-
   await page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
     state: 'hidden',
   });

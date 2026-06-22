@@ -11,7 +11,7 @@
  * Data-grid column-name and column-value copy-to-clipboard actions.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { EuiToastWrapper, spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../../fixtures/common';
@@ -22,13 +22,15 @@ const EXPECTED_TIMESTAMP_COLUMN_PREFIX =
   '"\'@timestamp"\n"Sep 22, 2015 @ 23:50:13.253"\n"Sep 22, 2015 @ 23:43:58.175"';
 const EXPECTED_SOURCE_COLUMN_PREFIX = 'Summary\n{"@message":["238.171.34.42';
 
-const clickCopyColumnName = async (page: ScoutPage, field: string) => {
-  await openColumnMenuByField(page, field);
+type DataGridPage = PageObjects['dataGrid'];
+
+const clickCopyColumnName = async (page: ScoutPage, dataGrid: DataGridPage, field: string) => {
+  await dataGrid.openColumnMenuByField(field);
   await page.getByRole('button', { name: 'Copy name' }).click();
 };
 
-const clickCopyColumnValues = async (page: ScoutPage, field: string) => {
-  await openColumnMenuByField(page, field);
+const clickCopyColumnValues = async (page: ScoutPage, dataGrid: DataGridPage, field: string) => {
+  await dataGrid.openColumnMenuByField(field);
   await page.getByRole('button', { name: 'Copy column' }).click();
 };
 
@@ -40,31 +42,8 @@ const expectSingleToastThenDismiss = async (page: ScoutPage) => {
   await toasts.closeAllToasts();
 };
 
-const openColumnMenuByField = async (page: ScoutPage, field: string) => {
-  await expect(async () => {
-    await page.testSubj.hover(`dataGridHeaderCell-${field}`);
-    await page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
-    await page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
-      state: 'visible',
-    });
-  }).toPass();
-};
-
-/**
- * Best-effort clipboard read mirroring the FTR `canReadClipboard` guard: copying
- * always works (and always shows the success toast) regardless of permissions,
- * but reading the clipboard is only possible when the browser grants the
- * `clipboard-read` permission. Returns `null` when the clipboard can't be read so
- * callers can skip the content assertion instead of failing the whole test.
- */
-const tryReadClipboard = async (page: ScoutPage): Promise<string | null> => {
-  try {
-    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-
-    return await page.evaluate(() => navigator.clipboard.readText());
-  } catch {
-    return null;
-  }
+const readClipboard = async (page: ScoutPage): Promise<string> => {
+  return await page.evaluate(() => navigator.clipboard.readText());
 };
 
 spaceTest.describe(
@@ -77,7 +56,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ page, browserAuth, pageObjects }) => {
+      await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
       await browserAuth.loginAsViewer();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
@@ -90,48 +70,42 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('copies a column values to clipboard', async ({ page }) => {
-      await clickCopyColumnValues(page, '@timestamp');
-      // `null` means the clipboard wasn't readable in this environment, so the
-      // content check is skipped (best-effort) while the toast check below stays.
-      const copiedTimestampData = await tryReadClipboard(page);
+    spaceTest('copies a column values to clipboard', async ({ page, pageObjects }) => {
+      const { dataGrid } = pageObjects;
+
+      await clickCopyColumnValues(page, dataGrid, '@timestamp');
+      const copiedTimestampData = await readClipboard(page);
       expect(
-        copiedTimestampData === null ||
-          copiedTimestampData.startsWith(EXPECTED_TIMESTAMP_COLUMN_PREFIX),
+        copiedTimestampData.startsWith(EXPECTED_TIMESTAMP_COLUMN_PREFIX),
         `copied @timestamp column "${copiedTimestampData}" should start with the expected values`
       ).toBe(true);
       await expectSingleToastThenDismiss(page);
 
-      await clickCopyColumnValues(page, '_source');
-      const copiedSourceData = await tryReadClipboard(page);
+      await clickCopyColumnValues(page, dataGrid, '_source');
+      const copiedSourceData = await readClipboard(page);
       expect(
-        copiedSourceData === null ||
-          (copiedSourceData.startsWith(EXPECTED_SOURCE_COLUMN_PREFIX) &&
-            copiedSourceData.endsWith('}')),
+        copiedSourceData.startsWith(EXPECTED_SOURCE_COLUMN_PREFIX) &&
+          copiedSourceData.endsWith('}'),
         `copied _source column "${copiedSourceData}" should start with the summary and end with "}"`
       ).toBe(true);
 
       await expectSingleToastThenDismiss(page);
     });
 
-    spaceTest('copies a column name to clipboard', async ({ page }) => {
-      await clickCopyColumnName(page, '@timestamp');
+    spaceTest('copies a column name to clipboard', async ({ page, pageObjects }) => {
+      const { dataGrid } = pageObjects;
 
-      const copiedTimestampName = await tryReadClipboard(page);
-      expect(
-        copiedTimestampName === null || copiedTimestampName === '@timestamp',
-        `copied column name "${copiedTimestampName}" should be "@timestamp"`
-      ).toBe(true);
+      await clickCopyColumnName(page, dataGrid, '@timestamp');
+
+      const copiedTimestampName = await readClipboard(page);
+      expect(copiedTimestampName, `copied column name should be "@timestamp"`).toBe('@timestamp');
 
       await expectSingleToastThenDismiss(page);
 
-      await clickCopyColumnName(page, '_source');
+      await clickCopyColumnName(page, dataGrid, '_source');
 
-      const copiedSourceName = await tryReadClipboard(page);
-      expect(
-        copiedSourceName === null || copiedSourceName === 'Summary',
-        `copied column name "${copiedSourceName}" should be "Summary"`
-      ).toBe(true);
+      const copiedSourceName = await readClipboard(page);
+      expect(copiedSourceName, `copied column name should be "Summary"`).toBe('Summary');
 
       await expectSingleToastThenDismiss(page);
     });

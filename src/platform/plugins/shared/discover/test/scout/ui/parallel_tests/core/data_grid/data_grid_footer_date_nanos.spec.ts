@@ -81,6 +81,7 @@ spaceTest.describe(
       const footer = footerLocator(page);
       const loadMore = page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
 
+      await pageObjects.dataGrid.expandMetaFieldsSection();
       await pageObjects.dataGrid.addFieldFromSidebar('_id');
       await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 

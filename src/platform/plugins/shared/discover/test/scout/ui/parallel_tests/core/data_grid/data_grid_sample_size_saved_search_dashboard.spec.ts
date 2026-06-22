@@ -45,7 +45,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.setQueryMode('classic');
       await scoutSpace.uiSettings.set({
         'discover:sampleSize': DEFAULT_SAMPLE_SIZE,

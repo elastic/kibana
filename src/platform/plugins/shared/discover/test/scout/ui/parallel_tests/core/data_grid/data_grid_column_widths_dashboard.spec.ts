@@ -32,7 +32,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       // Creating + saving a dashboard requires write access.
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary(testData.SAVED_SEARCH_TITLE);
       await pageObjects.dashboard.waitForRenderComplete();
@@ -45,7 +45,7 @@ spaceTest.describe(
 
     spaceTest('allows resetting column width in a Dashboard panel', async ({ pageObjects }) => {
       const { dataGrid } = pageObjects;
-      const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
+      const { originalWidth, newWidth } = await dataGrid.resizeColumnInDashboard('_source', -100);
       expect(newWidth).toBeLessThan(originalWidth);
       expectWidthAbout(newWidth, originalWidth - 100);
 
@@ -55,7 +55,7 @@ spaceTest.describe(
 
     spaceTest('uses a custom column width on a saved Dashboard', async ({ page, pageObjects }) => {
       const { dashboard, dataGrid } = pageObjects;
-      const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
+      const { originalWidth, newWidth } = await dataGrid.resizeColumnInDashboard('_source', -100);
       expect(newWidth).toBeLessThan(originalWidth);
       expectWidthAbout(newWidth, originalWidth - 100);
 
