@@ -61,14 +61,6 @@ Get file metadata
 :   Get detailed metadata for specific files, including ownership, sharing status, permissions, and descriptions. Use after a search or list action to inspect specific files.
     - `fileIds` (required): Array of file IDs to retrieve metadata for.
 
-### Finding files shared indirectly through a folder [google-drive-indirect-sharing]
-
-The **Search files** action relies on Google Drive's search index, which only surfaces files that are shared **directly** with the authenticated account (or that the account owns). A file you can reach **only** because a parent folder was shared with you — rather than the file itself being shared — might not appear in **Search files** results, even when you provide its exact name.
-
-The **List files** action browses a folder by ID and reads its contents directly, bypassing the search index. It returns every file you can access in that folder, including files shared indirectly through the folder hierarchy.
-
-If **Search files** can't find a file you expect to have access to, use **Search files** (or start at `root`) to locate the shared parent folder, then use **List files** to navigate into its subfolders until you reach the file.
-
 ## Connector networking configuration [google-drive-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
