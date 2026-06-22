@@ -6,4 +6,4 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-06-16
-title: Show browser monitor TLS certificates on the certificates page
+title: Show browser monitor TLS certificates on the TLS Certificates page
