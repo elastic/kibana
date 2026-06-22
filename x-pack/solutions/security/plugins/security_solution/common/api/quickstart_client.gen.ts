@@ -2930,7 +2930,10 @@ the immediately preceding revision in `old_values`.
     this.log.info(`${new Date().toISOString()} Calling API RuleChangesHistory`);
     return this.kbnClient
       .request<RuleChangesHistoryResponse>({
-        path: replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/history/_list',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
