@@ -186,7 +186,10 @@ export const AlertEpisodesListPage = () => {
   const { data: totalKpis } = useEpisodesKpisQuery({ services, timeRange });
 
   const filteredAlertEpisodesCount = filteredKpis?.alertsCount ?? 0;
-  const totalAlertEpisodesCount = totalKpis?.alertsCount ?? 0;
+  /* The two KPI queries resolve independently; clamping avoids briefly showing an
+  impossible "filtered > total" state when the filtered count updates first.
+  */
+  const totalAlertEpisodesCount = Math.max(totalKpis?.alertsCount ?? 0, filteredAlertEpisodesCount);
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
