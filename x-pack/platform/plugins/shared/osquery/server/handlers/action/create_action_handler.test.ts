@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { createActionHandler } from './create_action_handler';
 import { createDynamicQueries } from './create_queries';
@@ -104,7 +103,7 @@ describe('createActionHandler', () => {
     );
 
     const [actions] = bulkCreate.mock.calls[0];
-    expect(actions[0].space_id).toBe(DEFAULT_SPACE_ID);
+    expect(actions[0].space_id).toBe('default');
   });
 
   it('writes space_id on the osquery action document and the Fleet action with the same space', async () => {
