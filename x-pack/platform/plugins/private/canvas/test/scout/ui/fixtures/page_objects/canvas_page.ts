@@ -111,6 +111,24 @@ export class CanvasPage {
   }
 
   /**
+   * Navigate to the Kibana home page inside a specific space.
+   *
+   * Use instead of gotoInSpace when the target app may be disabled — a disabled app
+   * returns a bare 404 JSON with no Kibana shell, so the nav toggle never renders.
+   *
+   * Suppresses the "Welcome to Elastic" interstitial via addInitScript (not evaluate):
+   * browserAuth sets auth cookies without navigating, leaving the page on about:blank
+   * (opaque origin) where localStorage access would throw a SecurityError. addInitScript
+   * schedules the flag to be written before any page scripts on the next navigation.
+   */
+  async gotoSpaceHome(spaceId: string) {
+    await this.page.addInitScript(() => {
+      window.localStorage.setItem('home:welcome:show', 'false');
+    });
+    await this.page.goto(this.kbnUrl.app('home', { space: spaceId }));
+  }
+
+  /**
    * Navigate to a specific workpad by ID in the default space.
    * Constructs the URL as /app/canvas/workpad/<id>/page/<pageNum>.
    */

@@ -22,6 +22,9 @@ import { test, testData } from '../../fixtures';
 
 const { SAVED_SEARCH } = testData.EMBEDDABLES;
 const EXTENDED_TIMEOUT = 20_000;
+// Discover's multi-phase async init (root profile → route → tabs → per-tab) can exceed
+// 20 s on CI when navigating via Canvas state transfer.
+const DISCOVER_LOAD_TIMEOUT = 60_000;
 
 test.describe('Canvas saved search embeddable', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -59,9 +62,17 @@ test.describe('Canvas saved search embeddable', { tag: ['@local-stateful-classic
       timeout: EXTENDED_TIMEOUT,
     });
 
+    // In 9.x clicking "Edit" navigates directly to Discover via state transfer
+    // (the inline-edit flyout was introduced in main).
     await canvas.editPanel();
-    await canvas.clickEditInDiscover();
 
-    await expect(page.testSubj.locator('dscPage')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    // Confirm navigation happened before asserting page content.
+    await page.waitForURL(/\/app\/discover/, { timeout: DISCOVER_LOAD_TIMEOUT });
+
+    // dscMainContent is absent when resultState === 'none' (no results for logstash-*
+    // over "last 15 minutes"). Use discoverSaveButton which is always in the TopNav.
+    await expect(page.testSubj.locator('discoverSaveButton')).toBeVisible({
+      timeout: DISCOVER_LOAD_TIMEOUT,
+    });
   });
 });

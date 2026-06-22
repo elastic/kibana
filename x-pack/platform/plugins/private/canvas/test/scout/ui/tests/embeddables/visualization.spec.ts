@@ -53,7 +53,10 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
   });
 
   test('creates a by-value Vega panel via the editor menu', async ({ pageObjects: { canvas } }) => {
-    await canvas.addNewPanel('Vega');
+    // In 9.x the Vega action's titleInWizard is "Custom visualization"; on main it is "Vega".
+    // The canvas editor-menu data-test-subj is built from the action display name, so we must
+    // use the name that matches this branch.
+    await canvas.addNewPanel('Custom visualization');
     await canvas.saveVisualizeAndReturn();
 
     // A fresh workpad starts empty, so saving the Vega panel adds exactly one panel.

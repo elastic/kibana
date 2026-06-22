@@ -50,7 +50,9 @@ test.describe(
       pageObjects: { canvas, collapsibleNav },
     }) => {
       // Navigate to the space home page so the navigation is rendered in this space context.
-      await canvas.gotoInSpace(spaceId);
+      // We must NOT navigate to the canvas app here — when canvas is disabled the app URL
+      // returns a bare 404 JSON response with no Kibana shell, so the nav toggle never renders.
+      await canvas.gotoSpaceHome(spaceId);
       // Expand the nav before asserting absence — the nav must be open for links to exist in the DOM.
       await collapsibleNav.expandNav();
 
