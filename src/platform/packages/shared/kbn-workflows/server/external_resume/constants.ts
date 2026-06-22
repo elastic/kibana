@@ -10,6 +10,4 @@
 export const EXTERNAL_RESUME_API_PATH =
   '/api/workflows/executions/{executionId}/resume/external' as const;
 
-export const DEFAULT_EXTERNAL_RESUME_TTL = '1h' as const;
-
-export const MAX_EXTERNAL_RESUME_TTL_MS = 24 * 60 * 60 * 1000;
+export const DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT = '24h' as const;

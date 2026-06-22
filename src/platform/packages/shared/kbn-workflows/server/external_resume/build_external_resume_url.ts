@@ -14,15 +14,20 @@ export function buildExternalResumeUrl({
   spaceId,
   executionId,
   token,
+  approved,
 }: {
   kibanaUrl: string;
   spaceId: string;
   executionId: string;
   token: string;
+  approved?: boolean;
 }): string {
   const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
   const path = EXTERNAL_RESUME_API_PATH.replace('{executionId}', executionId);
   const url = new URL(`${kibanaUrl}${spacePrefix}${path}`);
   url.searchParams.set('token', token);
+  if (approved !== undefined) {
+    url.searchParams.set('approved', String(approved));
+  }
   return url.toString();
 }

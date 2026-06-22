@@ -13,11 +13,11 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExternalResumeError } from './external_resume_error';
 import {
   ExternalResumeTokenVerificationError,
   verifyExternalResumeToken,
-} from './external_resume_token';
+} from '@kbn/workflows/server';
+import { ExternalResumeError } from './external_resume_error';
 import type { WorkflowsService } from '../workflows_management_service';
 
 export interface ExternalResumeWorkflowExecutionParams {

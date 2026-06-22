@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { KibanaResponseFactory } from '@kbn/core/server';
-import { EXTERNAL_RESUME_API_PATH } from '../../../../common/external_resume/constants';
+import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import {
   renderExternalResumeErrorPage,

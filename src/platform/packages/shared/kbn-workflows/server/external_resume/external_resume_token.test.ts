@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildExternalResumeUrl } from './build_external_resume_url';
 import {
   createExternalResumeTokenPayload,
   ExternalResumeTokenVerificationError,
   signExternalResumeToken,
   verifyExternalResumeToken,
 } from './external_resume_token';
-import { buildExternalResumeUrl } from '../../../common/external_resume/build_external_resume_url';
 
 const SIGNING_KEY = 'test-signing-key-with-at-least-32-characters';
 
@@ -67,5 +67,18 @@ describe('external resume token', () => {
         token
       )}`
     );
+  });
+
+  it('builds a resume URL with an approved query parameter', () => {
+    const token = signExternalResumeToken(basePayload, SIGNING_KEY);
+    const url = buildExternalResumeUrl({
+      kibanaUrl: 'https://kibana.example',
+      spaceId: 'default',
+      executionId: 'exec-1',
+      token,
+      approved: true,
+    });
+
+    expect(url).toContain('approved=true');
   });
 });

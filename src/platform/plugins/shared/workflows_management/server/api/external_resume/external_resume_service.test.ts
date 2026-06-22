@@ -9,13 +9,13 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { createExternalResumeTokenPayload, signExternalResumeToken } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { ExternalResumeError } from './external_resume_error';
 import {
   parseApprovedQueryParam,
   resumeWorkflowExecutionExternally,
 } from './external_resume_service';
-import { createExternalResumeTokenPayload, signExternalResumeToken } from './external_resume_token';
 import type { WorkflowsService } from '../workflows_management_service';
 
 const SIGNING_KEY = 'test-signing-key-with-at-least-32-characters';

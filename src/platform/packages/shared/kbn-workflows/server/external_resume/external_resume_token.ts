@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable import/no-nodejs-modules -- server-only HMAC signing for external resume links */
+
 import { createHmac, randomUUID, timingSafeEqual } from 'crypto';
 
 export const EXTERNAL_RESUME_TOKEN_VERSION = 1 as const;
