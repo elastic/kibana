@@ -8,7 +8,7 @@
   "visibility": "private",
   "description": "Data sets and data sources apis and management",
   "plugin": {
-    "id": "data_sets",
+    "id": "data_federation",
     "browser": true,
     "server": true,
     "requiredPlugins": [

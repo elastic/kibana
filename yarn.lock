@@ -6398,7 +6398,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-sets-plugin@link:x-pack/platform/plugins/private/data_sets":
+"@kbn/data-sets-plugin@link:x-pack/platform/plugins/private/federated_data":
   version "0.0.0"
   uid ""
 

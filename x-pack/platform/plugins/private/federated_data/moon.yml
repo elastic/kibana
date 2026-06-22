@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/data-sets-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  sourceRoot: x-pack/platform/plugins/private/data_sets
+  sourceRoot: x-pack/platform/plugins/private/federated_data
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'

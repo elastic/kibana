@@ -14,10 +14,10 @@ export {
   DATA_SOURCE_TYPES_TO_ICONS,
 } from './datasource_types';
 
-export const PLUGIN_ID = 'data_sets';
+export const PLUGIN_ID = 'data_federation';
 
 /** Base path for this plugin's HTTP APIs (internal). */
-export const INTERNAL_API_BASE_PATH = '/internal/data_sets' as const;
+export const INTERNAL_API_BASE_PATH = '/internal/data_federation' as const;
 
 /** GET — list data sources (proxies to Elasticsearch `GET /_query/datasource`). */
 export const DATA_SOURCES_LIST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources` as const;
@@ -60,7 +60,7 @@ export const PLUGIN_NAME = i18n.translate('dataSets.pluginName', {
 export const LIST_BREADCRUMB = [
   {
     text: PLUGIN_NAME,
-    href: '#/management/kibana/data_sets',
+    href: '#/management/kibana/data_federation',
   },
 ];
 
