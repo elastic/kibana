@@ -62,7 +62,13 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./goal'));
+    after(async () => {
+      await esNode.unload(esArchive);
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
+      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
+    });
+
     loadTestFile(require.resolve('./table'));
   });
 }
