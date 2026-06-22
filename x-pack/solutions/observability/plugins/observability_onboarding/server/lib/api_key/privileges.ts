@@ -24,8 +24,9 @@ export const INDEX_LOGS_METRICS_AND_TRACES: estypes.SecurityIndicesPrivileges = 
   privileges: ['auto_configure', 'create_doc'],
 };
 
+// https://www.elastic.co/observability-labs/blog/prometheus-remote-write-elasticsearch
 export const INDEX_PROMETHEUS_REMOTE_WRITE: estypes.SecurityIndicesPrivileges = {
-  names: ['metrics-*.prometheus-*'],
+  names: ['metrics-*'],
   privileges: ['auto_configure', 'create_doc'],
 };
 

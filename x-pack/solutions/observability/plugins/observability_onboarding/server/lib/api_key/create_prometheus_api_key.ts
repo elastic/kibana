@@ -17,7 +17,7 @@ export function createPrometheusApiKey(esClient: ElasticsearchClient, name: stri
       managed: true,
     },
     role_descriptors: {
-      prometheus_remote_write: {
+      indices: {
         cluster: [],
         indices: [INDEX_PROMETHEUS_REMOTE_WRITE],
       },
