@@ -20,7 +20,7 @@ export class DatasetsPlugin
       order: 2,
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
 
         const { docTitle } = coreStart.chrome;
         docTitle.change(PLUGIN_NAME);
@@ -28,10 +28,8 @@ export class DatasetsPlugin
         const { setBreadcrumbs } = params;
         setBreadcrumbs(LIST_BREADCRUMB);
 
-        const enableFederatedIdentityAuth = true;
-
         const unmountAppCallback = mountManagementSection(coreStart, params, {
-          enableFederatedIdentityAuth,
+          cloud: pluginsStart.cloud,
         });
         return () => {
           docTitle.reset();

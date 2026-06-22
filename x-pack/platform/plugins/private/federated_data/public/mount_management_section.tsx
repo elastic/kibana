@@ -9,14 +9,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 import { Main } from './main';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
   { element }: ManagementAppMountParams,
-  { enableFederatedIdentityAuth }: { enableFederatedIdentityAuth: boolean }
+  { cloud }: { cloud?: CloudStart }
 ) => {
+  const enableFederatedIdentityAuth = Boolean(cloud?.isCloudEnabled);
+
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Main
