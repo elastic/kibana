@@ -1,6 +1,3 @@
-# Glob config for the "Label Scout PRs" workflow (actions/labeler).
-# Mirrors the include globs in .macroscope/scout-review.md (source of truth for
-# what the Scout reviewer considers in scope).
 'reviewer:scout':
   - changed-files:
       - any-glob-to-any-file:
