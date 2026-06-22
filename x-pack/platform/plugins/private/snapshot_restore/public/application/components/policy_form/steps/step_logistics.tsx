@@ -281,6 +281,12 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           fullWidth
           data-test-subj="repositorySelect"
           disabled={policy?.isManagedPolicy && isEditing}
+          aria-label={i18n.translate(
+            'xpack.snapshotRestore.policyForm.stepLogistics.policyRepositorySelectAriaLabel',
+            {
+              defaultMessage: 'Repository',
+            }
+          )}
         />
       </DisableToolTip>
     );
