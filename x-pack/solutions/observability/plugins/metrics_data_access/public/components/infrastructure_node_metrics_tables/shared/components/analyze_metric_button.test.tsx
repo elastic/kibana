@@ -106,8 +106,8 @@ describe('AnalyzeMetricButton', () => {
 
     expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: { esql: 'TS "otel-metrics-*" | WHERE k8s.pod.uid IN ("pod-1")' },
-        breakdownField: 'resource.attributes.k8s.pod.uid',
+        query: { esql: 'TS "otel-metrics-*" | WHERE k8s.pod.name IN ("pod-1")' },
+        breakdownField: 'resource.attributes.k8s.pod.name',
       })
     );
   });

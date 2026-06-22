@@ -86,7 +86,7 @@ export const CompareMetricNodesLink = ({
     );
     const discoverParams = {
       timeRange: { from: timerange.from, to: timerange.to },
-      breakdownField: getDiscoverBreakdownForNodeType(nodeType as NodeTypeForLink),
+      breakdownField: getDiscoverBreakdownForNodeType(nodeType),
       query: {
         esql: esqlQuery.toRequest().query,
       },

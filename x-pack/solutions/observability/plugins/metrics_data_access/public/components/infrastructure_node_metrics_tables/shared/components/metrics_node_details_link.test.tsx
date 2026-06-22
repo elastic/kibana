@@ -366,9 +366,9 @@ describe('CompareMetricNodesLink', () => {
     expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
-          esql: 'TS "metrics-*" | WHERE k8s.pod.uid IN ("pod-uid-1", "pod-uid-2")',
+          esql: 'TS "metrics-*" | WHERE k8s.pod.name IN ("pod-uid-1", "pod-uid-2")',
         },
-        breakdownField: 'resource.attributes.k8s.pod.uid',
+        breakdownField: 'resource.attributes.k8s.pod.name',
         timeRange: timerange,
       })
     );
@@ -430,7 +430,7 @@ describe('CompareMetricNodesLink', () => {
 
     expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: { esql: 'TS "metrics-*" | WHERE k8s.pod.uid IN ("x")' },
+        query: { esql: 'TS "metrics-*" | WHERE k8s.pod.name IN ("x")' },
         timeRange: timerange,
       })
     );
