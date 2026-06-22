@@ -10,6 +10,7 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -79,6 +80,7 @@ interface LogsExtractionOptions {
 
 interface ExtractedLogsSummarySuccess {
   success: true;
+  isRemote: boolean;
   count: number;
   pages: number;
   scannedIndices: string[];
@@ -89,6 +91,7 @@ interface ExtractedLogsSummarySuccess {
 
 interface ExtractedLogsSummaryError {
   success: false;
+  isRemote: boolean;
   error: Error;
 }
 
@@ -148,10 +151,13 @@ export class LogsExtractionClient {
   ): Promise<ExtractedLogsSummary> {
     this.logger.debug('starting entity extraction');
 
+    let isRemote = false;
+
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
       const entityDefinition = getEntityDefinition(type, this.namespace);
       const {
+        isRemote: resolvedIsRemote,
         count,
         pages,
         indexPatterns,
@@ -168,8 +174,11 @@ export class LogsExtractionClient {
         entityDefinition,
       });
 
+      isRemote = resolvedIsRemote;
+
       const operationResult = {
         success: true as const,
+        isRemote,
         count,
         pages,
         scannedIndices: indexPatterns,
@@ -201,7 +210,7 @@ export class LogsExtractionClient {
 
       return operationResult;
     } catch (error) {
-      return await this.handleError(error, type);
+      return await this.handleError(error, type, isRemote);
     }
   }
 
@@ -263,6 +272,7 @@ export class LogsExtractionClient {
     opts?: LogsExtractionOptions;
     entityDefinition: ManagedEntityDefinition;
   }): Promise<{
+    isRemote: boolean;
     count: number;
     pages: number;
     indexPatterns: string[];
@@ -276,6 +286,7 @@ export class LogsExtractionClient {
       config.additionalIndexPatterns,
       config.excludedIndexPatterns
     );
+    const isRemote = remoteIndexPatterns.length > 0;
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
     const mainPromise = this.runMainPath({
@@ -288,7 +299,7 @@ export class LogsExtractionClient {
       latestIndex,
     });
 
-    if (remoteIndexPatterns.length > 0) {
+    if (isRemote) {
       const ccsPromise = this.ccsLogsExtractionClient.extractToUpdates({
         type,
         remoteIndexPatterns,
@@ -309,12 +320,13 @@ export class LogsExtractionClient {
 
       return {
         ...mainResult,
+        isRemote,
         indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],
         ccsError: ccsResult.error,
       };
     }
 
-    return await mainPromise;
+    return { ...(await mainPromise), isRemote };
   }
 
   /**
@@ -374,10 +386,21 @@ export class LogsExtractionClient {
         this.logger.warn(
           `Entity extraction volume cap reached for entity type "${type}": processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". This is a manual (force) run — cursor is not persisted.`
         );
+        entityStoreMetrics.extractionLogsCapApplied.add(1, {
+          entity_type: type,
+          namespace: this.namespace,
+          behavior: maxLogsPerWindowCapBehavior,
+          remote: false,
+        });
         if (maxLogsPerWindowCapBehavior === 'drop') {
           lastSearchTimestamp = toDateISO;
         }
       }
+      entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
+      });
       return {
         ...result,
         lastSearchTimestamp,
@@ -454,6 +477,12 @@ export class LogsExtractionClient {
         this.logger.warn(
           `Entity extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
         );
+        entityStoreMetrics.extractionLogsCapApplied.add(1, {
+          entity_type: type,
+          namespace: this.namespace,
+          behavior: maxLogsPerWindowCapBehavior,
+          remote: false,
+        });
         if (maxLogsPerWindowCapBehavior === 'drop') {
           this.logger.warn(
             `Dropping remaining logs in window. Advancing cursor to end of window: ${effectiveWindowEnd}.`
@@ -464,6 +493,11 @@ export class LogsExtractionClient {
             `Deferring remaining logs in window. Task will resume from last processed position on next run.`
           );
         }
+        entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
+          entity_type: type,
+          namespace: this.namespace,
+          remote: false,
+        });
         return {
           count: totalCount,
           pages: totalPages,
@@ -481,6 +515,11 @@ export class LogsExtractionClient {
       currentEngineState = FRESH_ENGINE_LOG_EXTRACTION_STATE;
     }
 
+    entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
+      entity_type: type,
+      namespace: this.namespace,
+      remote: false,
+    });
     return {
       count: totalCount,
       pages: totalPages,
@@ -529,7 +568,14 @@ export class LogsExtractionClient {
     let logsCapTimestamp: string | undefined;
     let state: EngineLogExtractionState = { ...initialEngineState };
 
-    const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
+    const onAbort = () => {
+      this.logger.debug('Aborting execution mid logs extraction');
+      entityStoreMetrics.extractionTaskAborted.add(1, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
+      });
+    };
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
     /** One-shot `paginationId` from a prior run: consumed by the first bounded extraction batch for entity-level pagination. */
@@ -581,6 +627,11 @@ export class LogsExtractionClient {
         );
         if (bumpedCursorEnd) {
           logsPageCursorEnd = bumpedCursorEnd;
+          entityStoreMetrics.extractionLogsPerPageDropped.add(1, {
+            entity_type: type,
+            namespace: this.namespace,
+            remote: false,
+          });
         } else {
           totalLogs += probe.sliceLogCount;
 
@@ -664,10 +715,16 @@ export class LogsExtractionClient {
       maxLogsPerPage,
     });
 
+    const probeStart = Date.now();
     const logPaginationCursorProbeResponse = await executeEsqlQuery({
       esClient: this.esClient,
       query: logPaginationCursorProbeQuery,
       abortController: opts?.abortController,
+    });
+    entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
+      entity_type: type,
+      namespace: this.namespace,
+      remote: false,
     });
 
     const parsedLogPaginationCursor = parseLogPaginationCursorRow(logPaginationCursorProbeResponse);
@@ -761,10 +818,16 @@ export class LogsExtractionClient {
         }`
       );
 
+      const queryStart = Date.now();
       const esqlResponse = await executeEsqlQuery({
         esClient: this.esClient,
         query,
         abortController: opts?.abortController,
+      });
+      entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
       });
 
       addedToTotalCount += esqlResponse.values.length;
@@ -774,6 +837,7 @@ export class LogsExtractionClient {
       }
 
       this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+      const ingestStart = Date.now();
       await ingestEntities({
         esClient: this.esClient,
         esqlResponse,
@@ -783,6 +847,22 @@ export class LogsExtractionClient {
         logger: this.logger,
         abortController: opts?.abortController,
         refresh: true,
+        onDropped: () =>
+          entityStoreMetrics.extractionBulkDropped.add(1, {
+            entity_type: type,
+            namespace: this.namespace,
+            remote: false,
+          }),
+      });
+      entityStoreMetrics.extractionIngestDurationMs.record(Date.now() - ingestStart, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
+      });
+      entityStoreMetrics.extractionEntitiesUpserted.add(esqlResponse.values.length, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
       });
 
       if (pagination) {
@@ -846,20 +926,26 @@ export class LogsExtractionClient {
     });
   }
 
-  private async handleError(error: any, type: EntityType): Promise<ExtractedLogsSummary> {
-    this.logger.error(error);
-
+  private async handleError(
+    error: any,
+    type: EntityType,
+    isRemote: boolean
+  ): Promise<ExtractedLogsSummary> {
     if (
       SavedObjectsErrorHelpers.isNotFoundError(error) ||
       error instanceof EntityStoreNotRunningError
     ) {
-      return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
+      return {
+        success: false,
+        isRemote,
+        error: new Error(`Entity store is not started for type ${type}`),
+      };
     }
 
     await this.engineDescriptorClient.update(type, {
       error: { message: error.message, action: 'extractLogs' },
     });
-    return { success: false, error };
+    return { success: false, isRemote, error };
   }
 
   /**
