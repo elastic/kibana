@@ -1052,6 +1052,35 @@ describe('runServerlessCluster()', () => {
     });
     expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
   });
+
+  test('should stop already-started containers when UIAM container fails to become healthy', async () => {
+    const runningContainerIds = ['es01-id', 'es02-id', 'es03-id'];
+    mockFs({
+      [baseEsPath]: {},
+    });
+    // ES node starts (and other async docker calls) succeed
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    // Cleanup queries running containers synchronously then kills them
+    execa.commandSync.mockImplementation(() => ({
+      stdout: runningContainerIds.join('\n'),
+    }));
+    // Simulate the recurring CI failure: UIAM healthcheck times out
+    const uiamError = new Error('The "uiam" container failed to start within the expected time');
+    runUiamContainerMock.mockRejectedValueOnce(uiamError);
+
+    await expect(
+      runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true })
+    ).rejects.toThrow(uiamError);
+
+    // Cleanup must have been triggered: enumerate via docker ps, then docker kill
+    const commands: string[] = execa.commandSync.mock.calls.map((call: unknown[]) =>
+      String(call[0])
+    );
+    expect(commands.some((c: string) => c.startsWith('docker ps'))).toBe(true);
+    expect(commands.some((c: string) => c === `docker kill ${runningContainerIds.join(' ')}`)).toBe(
+      true
+    );
+  });
 });
 
 describe('stopServerlessCluster()', () => {

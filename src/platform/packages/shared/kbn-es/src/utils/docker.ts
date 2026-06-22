@@ -995,27 +995,42 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   const portCmd = resolvePort(options);
 
   log.info('[runServerlessCluster] Starting ES nodes...');
-  // This is where nodes are started
-  const nodeNames = await Promise.all(
-    SERVERLESS_NODES.map(async (node, i) => {
-      await runServerlessEsNode(log, {
-        ...node,
-        image: esServerlessImage,
-        params: node.params.concat(
-          resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
-          i === 0 ? portCmd : [],
-          volumeCmd
-        ),
-      });
-      return node.name;
-    }).concat(
-      options.uiam
-        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
-            runUiamContainer(log, container)
-          )
-        : []
-    )
-  );
+  // This is where nodes are started. If any container start (ES or UIAM) fails,
+  // stop any containers that did start so they don't hold ports (e.g. 9220) and
+  // poison subsequent jest-integration configs on the same CI agent.
+  let nodeNames: string[];
+  try {
+    nodeNames = await Promise.all(
+      SERVERLESS_NODES.map(async (node, i) => {
+        await runServerlessEsNode(log, {
+          ...node,
+          image: esServerlessImage,
+          params: node.params.concat(
+            resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
+            i === 0 ? portCmd : [],
+            volumeCmd
+          ),
+        });
+        return node.name;
+      }).concat(
+        options.uiam
+          ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
+              runUiamContainer(log, container)
+            )
+          : []
+      )
+    );
+  } catch (error) {
+    log.warning(
+      `[runServerlessCluster] Container startup failed (${elapsed()}); stopping any started containers`
+    );
+    try {
+      teardownServerlessClusterSync(log, options);
+    } catch (cleanupError) {
+      log.warning(`[runServerlessCluster] Cleanup failed: ${cleanupError.message}`);
+    }
+    throw error;
+  }
   log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
 
   log.success(`Serverless ES cluster running.
