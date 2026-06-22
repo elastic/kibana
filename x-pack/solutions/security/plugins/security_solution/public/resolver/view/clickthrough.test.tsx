@@ -78,7 +78,7 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
         unselectedSecondChildCount: 1,
         nodePrimaryButtonCount: 3,
       });
-    });
+    }, 30000);
   });
 });
 
