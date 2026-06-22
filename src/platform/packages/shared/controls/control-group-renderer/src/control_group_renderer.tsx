@@ -19,7 +19,7 @@ import {
 } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiHasSerializableState,
@@ -53,7 +53,7 @@ export interface ControlGroupRendererProps {
   viewMode?: ViewMode;
   filters?: Filter[];
   timeRange?: TimeRange;
-  query?: Query;
+  query?: Query | AggregateQuery;
   dataLoading?: boolean;
   compressed?: boolean;
 }
