@@ -29,8 +29,8 @@ import {
 import {
   getUpdateAlertsWorkflowStatusScript,
   updateAlertsWorkflowStatus,
-} from '../common/update_alerts_workflow_status';
-import { validateClosingReason } from '../common/validate_closing_reason';
+} from '../common/operations/update_alerts_workflow_status';
+import { validateClosingReason } from '../common/validators/validate_closing_reason';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,

@@ -12,8 +12,8 @@ import type {
   Sort,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { QueryAlertsBodyParams } from '../../../../../common/api/detection_engine/signals';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
+import type { QueryAlertsBodyParams } from '../../../../../../common/api/detection_engine/signals';
 
 interface SearchAlertsArgs {
   context: SecuritySolutionRequestHandlerContext;

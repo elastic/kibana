@@ -9,9 +9,9 @@ import {
   typicalSignalsQuery,
   typicalSignalsQueryAggs,
   getEmptySignalsResponse,
-} from '../__mocks__/request_responses';
-import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock } from '../__mocks__';
+} from '../../__mocks__/request_responses';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__';
 import { searchAlerts } from './search_alerts';
 
 describe('searchAlerts', () => {

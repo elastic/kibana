@@ -13,9 +13,9 @@ import { SearchAlertsRequestBody } from '../../../../../common/api/detection_eng
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { searchAlerts } from '../common/search_alerts';
-import { validateSearchAlertsParams } from '../common/validate_search_alerts_params';
-import { withSiemErrorHandling } from '../common/with_siem_error_handling';
+import { searchAlerts } from '../common/operations/search_alerts';
+import { validateSearchAlertsParams } from '../common/validators/validate_search_alerts_params';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const querySignalsRoute = (
   router: SecuritySolutionPluginRouter,

@@ -16,10 +16,10 @@ import { SetUnifiedAlertsTagsRequestBody } from '../../../../../common/api/detec
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { validateAlertTagsArrays } from '../signals/helpers';
-import { updateAlertsTags } from '../common/update_alerts_tags';
-import { getUnifiedAlertsIndex } from '../common/get_unified_alerts_index';
-import { withSiemErrorHandling } from '../common/with_siem_error_handling';
+import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
+import { updateAlertsTags } from '../common/operations/update_alerts_tags';
+import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const setUnifiedAlertsTagsRoute = (
   router: SecuritySolutionPluginRouter,

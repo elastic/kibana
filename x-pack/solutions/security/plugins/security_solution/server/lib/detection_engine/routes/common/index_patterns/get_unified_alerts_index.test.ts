@@ -7,8 +7,8 @@
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
-import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock } from '../__mocks__';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__';
 import { getUnifiedAlertsIndex } from './get_unified_alerts_index';
 
 describe('getUnifiedAlertsIndex', () => {

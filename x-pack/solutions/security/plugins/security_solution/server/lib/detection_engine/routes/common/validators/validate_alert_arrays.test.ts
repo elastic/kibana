@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateAlertAssigneesArrays, validateAlertTagsArrays } from './helpers';
+import { validateAlertAssigneesArrays, validateAlertTagsArrays } from './validate_alert_arrays';
 
 describe('signals route helpers', () => {
   describe('validateAlertTagsArrays', () => {

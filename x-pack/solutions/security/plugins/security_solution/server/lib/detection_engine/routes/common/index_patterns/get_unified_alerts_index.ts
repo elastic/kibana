@@ -7,7 +7,7 @@
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { getAttackAlertsIndex } from './get_attack_alerts_index';
 
 /**

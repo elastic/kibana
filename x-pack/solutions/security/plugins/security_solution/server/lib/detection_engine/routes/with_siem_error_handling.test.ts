@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { responseMock } from '../__mocks__';
-import { responseAdapter } from '../__mocks__/test_adapters';
+import { responseMock } from './__mocks__';
+import { responseAdapter } from './__mocks__/test_adapters';
 import { withSiemErrorHandling } from './with_siem_error_handling';
 
 describe('withSiemErrorHandling', () => {

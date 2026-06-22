@@ -13,10 +13,10 @@ import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detect
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { searchAlerts } from '../common/search_alerts';
-import { validateSearchAlertsParams } from '../common/validate_search_alerts_params';
-import { getUnifiedAlertsIndex } from '../common/get_unified_alerts_index';
-import { withSiemErrorHandling } from '../common/with_siem_error_handling';
+import { searchAlerts } from '../common/operations/search_alerts';
+import { validateSearchAlertsParams } from '../common/validators/validate_search_alerts_params';
+import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const searchUnifiedAlertsRoute = (
   router: SecuritySolutionPluginRouter,

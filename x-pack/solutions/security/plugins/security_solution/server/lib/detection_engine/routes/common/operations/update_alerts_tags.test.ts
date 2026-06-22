@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
-import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock } from '../__mocks__';
-import { getUpdateAlertAssigneesScript, updateAlertsAssignees } from './update_alerts_assignees';
+import { getSuccessfulSignalUpdateResponse } from '../../__mocks__/request_responses';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__';
+import { getUpdateAlertTagsScript, updateAlertsTags } from './update_alerts_tags';
 
-describe('updateAlertsAssignees', () => {
+describe('updateAlertsTags', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   const defaultArgs = {
     index: '.alerts-security.alerts-default',
     ids: ['somefakeid1', 'somefakeid2'],
-    assignees: {
-      add: ['user1', 'user2'],
-      remove: [],
+    tags: {
+      tags_to_add: ['tag1', 'tag2'],
+      tags_to_remove: [],
     },
   };
 
@@ -36,7 +36,7 @@ describe('updateAlertsAssignees', () => {
   });
 
   it('returns the updateByQuery response', async () => {
-    const result = await updateAlertsAssignees({
+    const result = await updateAlertsTags({
       ...defaultArgs,
       context: requestContextMock.convertContext(context),
     });
@@ -45,7 +45,7 @@ describe('updateAlertsAssignees', () => {
   });
 
   it('queries by the provided IDs', async () => {
-    await updateAlertsAssignees({
+    await updateAlertsTags({
       ...defaultArgs,
       context: requestContextMock.convertContext(context),
     });
@@ -68,7 +68,7 @@ describe('updateAlertsAssignees', () => {
       '.alerts-security.attack.discovery.alerts-default',
     ];
 
-    await updateAlertsAssignees({
+    await updateAlertsTags({
       ...defaultArgs,
       context: requestContextMock.convertContext(context),
       index,
@@ -85,24 +85,21 @@ describe('updateAlertsAssignees', () => {
     );
 
     await expect(
-      updateAlertsAssignees({
+      updateAlertsTags({
         ...defaultArgs,
         context: requestContextMock.convertContext(context),
       })
     ).rejects.toThrow('Test error');
   });
 
-  describe('getUpdateAlertAssigneesScript', () => {
-    it('deduplicates and maps the assignees to add/remove', () => {
-      const script = getUpdateAlertAssigneesScript({
-        add: ['new-user', 'new-user'],
-        remove: ['old-user'],
+  describe('getUpdateAlertTagsScript', () => {
+    it('deduplicates and maps the tags to add/remove', () => {
+      const script = getUpdateAlertTagsScript({
+        tags_to_add: ['new-tag', 'new-tag'],
+        tags_to_remove: ['old-tag'],
       });
 
-      expect(script.params).toEqual({
-        assigneesToAdd: ['new-user'],
-        assigneesToRemove: ['old-user'],
-      });
+      expect(script.params).toEqual({ tagsToAdd: ['new-tag'], tagsToRemove: ['old-tag'] });
     });
   });
 });

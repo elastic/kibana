@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock } from '../__mocks__';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__';
 import { getAttackAlertsIndex } from './get_attack_alerts_index';
 
 describe('getAttackAlertsIndex', () => {

@@ -16,10 +16,10 @@ import { SetUnifiedAlertsAssigneesRequestBody } from '../../../../../common/api/
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { validateAlertAssigneesArrays } from '../signals/helpers';
-import { updateAlertsAssignees } from '../common/update_alerts_assignees';
-import { getUnifiedAlertsIndex } from '../common/get_unified_alerts_index';
-import { withSiemErrorHandling } from '../common/with_siem_error_handling';
+import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
+import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
+import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const setUnifiedAlertsAssigneesRoute = (
   router: SecuritySolutionPluginRouter,

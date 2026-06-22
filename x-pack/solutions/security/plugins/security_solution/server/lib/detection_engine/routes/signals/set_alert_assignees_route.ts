@@ -17,9 +17,9 @@ import {
   DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { validateAlertAssigneesArrays } from './helpers';
-import { updateAlertsAssignees } from '../common/update_alerts_assignees';
-import { withSiemErrorHandling } from '../common/with_siem_error_handling';
+import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
+import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

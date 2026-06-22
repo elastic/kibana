@@ -14,8 +14,8 @@ import {
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { SetAlertsStatusByIds } from '../../../../../common/api/detection_engine/signals';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
+import type { SetAlertsStatusByIds } from '../../../../../../common/api/detection_engine/signals';
 
 interface UpdateAlertsWorkflowStatusArgs {
   context: SecuritySolutionRequestHandlerContext;

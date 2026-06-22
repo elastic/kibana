@@ -8,7 +8,7 @@
 import type { HttpResponsePayload, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { buildSiemResponse } from '../utils';
+import { buildSiemResponse } from './utils';
 
 /**
  * Runs an Elasticsearch operation and maps its outcome to an HTTP response:

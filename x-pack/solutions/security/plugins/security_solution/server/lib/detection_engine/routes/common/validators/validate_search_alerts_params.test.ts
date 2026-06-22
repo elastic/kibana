@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryAlertsBodyParams } from '../../../../../common/api/detection_engine/signals';
+import type { QueryAlertsBodyParams } from '../../../../../../common/api/detection_engine/signals';
 import { validateSearchAlertsParams } from './validate_search_alerts_params';
 
 describe('validateSearchAlertsParams', () => {

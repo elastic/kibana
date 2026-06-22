@@ -7,9 +7,9 @@
 
 import type { AuthenticatedUser } from '@kbn/core/server';
 
-import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
-import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock } from '../__mocks__';
+import { getSuccessfulSignalUpdateResponse } from '../../__mocks__/request_responses';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__';
 import { updateAlertsWorkflowStatus } from './update_alerts_workflow_status';
 
 describe('updateAlertsWorkflowStatus', () => {

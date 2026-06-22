@@ -17,9 +17,9 @@ import {
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { validateAlertTagsArrays } from './helpers';
-import { updateAlertsTags } from '../common/update_alerts_tags';
-import { withSiemErrorHandling } from '../common/with_siem_error_handling';
+import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
+import { updateAlertsTags } from '../common/operations/update_alerts_tags';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

@@ -8,8 +8,8 @@
 import { uniq } from 'lodash/fp';
 import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
+import type { SetAlertAssigneesRequestBody } from '../../../../../../common/api/detection_engine/alert_assignees';
 
 interface UpdateAlertsAssigneesArgs {
   context: SecuritySolutionRequestHandlerContext;

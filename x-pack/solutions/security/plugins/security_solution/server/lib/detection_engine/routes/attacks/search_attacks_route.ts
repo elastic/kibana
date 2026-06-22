@@ -12,10 +12,10 @@ import { SearchAttacksRequestBody } from '../../../../../common/api/detection_en
 import { DETECTION_ENGINE_ATTACKS_SEARCH_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildSiemResponse } from '../utils';
-import { searchAlerts } from '../common/search_alerts';
-import { validateSearchAlertsParams } from '../common/validate_search_alerts_params';
-import { getAttackAlertsIndex } from '../common/get_attack_alerts_index';
-import { withSiemErrorHandling } from '../common/with_siem_error_handling';
+import { searchAlerts } from '../common/operations/search_alerts';
+import { validateSearchAlertsParams } from '../common/validators/validate_search_alerts_params';
+import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

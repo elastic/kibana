@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryAlertsBodyParams } from '../../../../../common/api/detection_engine/signals';
+import type { QueryAlertsBodyParams } from '../../../../../../common/api/detection_engine/signals';
 
 /**
  * Ensures a search request carries at least one searchable parameter.

@@ -8,8 +8,8 @@
 import { uniq } from 'lodash/fp';
 import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
+import type { SetAlertTagsRequestBody } from '../../../../../../common/api/detection_engine/alert_tags';
 
 interface UpdateAlertsTagsArgs {
   context: SecuritySolutionRequestHandlerContext;

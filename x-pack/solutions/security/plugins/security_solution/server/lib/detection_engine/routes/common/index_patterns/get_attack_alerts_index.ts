@@ -10,7 +10,7 @@ import {
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
 } from '@kbn/elastic-assistant-common';
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 
 /**
  * Builds the index pattern targeted by the attacks routes: scheduled and adhoc
