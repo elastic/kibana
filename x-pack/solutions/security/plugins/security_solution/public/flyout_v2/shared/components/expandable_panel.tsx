@@ -159,7 +159,6 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
               <EuiIcon
                 color={link?.callback ? 'primary' : 'text'}
                 type={iconType}
-                aria-hidden={true}
                 css={css`
                   margin: ${euiTheme.size.s} 0;
                 `}
