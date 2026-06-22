@@ -7,16 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WORKFLOW_TERMINATED_EVENT_TYPE } from '@kbn/domain-events/events/workflows';
 import {
   commonWorkflowExecutionFailedTriggerDefinition,
   WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
   workflowExecutionFailedEventSchema,
 } from '../../common/triggers/workflow_execution_failed';
-import type { ServerTriggerDefinition } from '../types';
+import { createServerTriggerDefinition } from '../trigger_registry/types';
 
 export { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID, workflowExecutionFailedEventSchema };
 export type { WorkflowExecutionFailedEvent } from '../../common/triggers/workflow_execution_failed';
 
-export const workflowExecutionFailedTriggerDefinition: ServerTriggerDefinition = {
+export const workflowExecutionFailedTriggerDefinition = createServerTriggerDefinition({
   ...commonWorkflowExecutionFailedTriggerDefinition,
-};
+  domainEventType: WORKFLOW_TERMINATED_EVENT_TYPE,
+  matchesDomainEvent: (event) => event.payload.status === 'failed',
+  mapEvent: (event) => ({
+    workflow: event.payload.workflow,
+    execution: event.payload.execution,
+    error: event.payload.error,
+  }),
+});

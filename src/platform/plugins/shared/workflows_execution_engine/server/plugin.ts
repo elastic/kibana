@@ -1346,7 +1346,7 @@ export class WorkflowsExecutionEnginePlugin
 
     domainEventBus.subscribe(WORKFLOW_TERMINATED_EVENT_TYPE, (event) => {
       if (event.payload.status === 'failed') {
-        triggerEvents.emitEvent({
+        triggerEventHandler.handleEvent({
           triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
           payload: omit(event.payload, 'status'),
           request: event.request,
