@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rule';
 
@@ -114,8 +114,8 @@ const evaluateFieldChange = (
   if (!snoozeSnapshot || !(fieldPath in snoozeSnapshot)) {
     return false;
   }
-  const current = getAlertFieldValue(alertAsData, fieldPath);
+
+  const current = getAlertFieldValue(alertAsData, fieldPath) ?? null;
   const snapshot = snoozeSnapshot[fieldPath];
-  // Use JSON.stringify for structural comparison to handle objects and arrays correctly.
-  return JSON.stringify(current) !== JSON.stringify(snapshot);
+  return !isEqual(current, snapshot);
 };

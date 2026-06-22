@@ -78,7 +78,10 @@ export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
 export interface RunRuleResult {
   metrics: RuleRunMetrics;
   state: RuleTaskState;
-  prunedSnoozedInstances?: RawRuleSnoozedInstance[];
+  /**
+   * Instance IDs of per-alert snooze entries that expired (TTL or condition met) during this run.
+   */
+  expiredSnoozedInstanceIds?: string[];
   /**
    * Audit context for `alert_auto_unsnooze`
    */

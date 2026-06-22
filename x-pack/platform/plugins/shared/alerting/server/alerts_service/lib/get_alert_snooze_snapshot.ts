@@ -39,8 +39,7 @@ export async function getAlertSnoozeSnapshot({
       index: indices,
       allow_no_indices: true,
       size: 1,
-      fields,
-      _source: false,
+      _source: fields,
       query: {
         bool: {
           must: [
@@ -57,15 +56,11 @@ export async function getAlertSnoozeSnapshot({
       return null;
     }
 
-    const hitFields = hit.fields ?? {};
+    // Alert documents use flat dot-notation keys in _source
+    const source = (hit._source ?? {}) as Record<string, unknown>;
     return fields.reduce<Record<string, unknown>>((snapshot, field) => {
-      const values = hitFields[field] as unknown[] | undefined;
-      if (values && values.length > 0) {
-        // Return single value for scalar fields; keep array for multi-value fields.
-        snapshot[field] = values.length === 1 ? values[0] : values;
-      } else {
-        snapshot[field] = null;
-      }
+      const value = source[field];
+      snapshot[field] = value !== undefined ? value : null;
       return snapshot;
     }, {});
   } catch (error) {

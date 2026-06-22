@@ -2198,13 +2198,13 @@ describe('Alerts Client', () => {
           expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
         });
 
-        test('logs error and rethrows when updateByQuery fails', async () => {
+        test('logs error and swallows when updateByQuery fails', async () => {
           clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
           const alertsClient = await setupAndPersist();
 
           await expect(
             alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId])
-          ).rejects.toThrow('ES unavailable');
+          ).resolves.toBeUndefined();
 
           expect(logger.error).toHaveBeenCalledWith(
             expect.stringContaining('Error clearing snoozed status for condition-expired alerts'),

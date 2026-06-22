@@ -3613,7 +3613,7 @@ describe('Task Runner', () => {
     );
   });
 
-  test('should write back pruned snoozedInstances when expired entries are removed', async () => {
+  test('should atomically remove expired snoozedInstances using a Painless script', async () => {
     const expiredSnooze = {
       instanceId: 'alert-1',
       expiresAt: '1969-12-31T23:59:59.000Z',
@@ -3647,12 +3647,24 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
+    // The script-based atomic remove should have been called with the expired ID only.
+    // The surviving active snooze ('alert-2') should NOT be listed — it is preserved
+    // in ES because the script only removes the specified IDs, not the whole array.
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
       expect.objectContaining({
+        script: expect.objectContaining({
+          lang: 'painless',
+          params: { expiredInstanceIds: ['alert-1'] },
+        }),
+      }),
+      expect.anything()
+    );
+
+    // Must not replace the whole array via a doc update — that would cause the race condition
+    expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({
         doc: expect.objectContaining({
-          alert: expect.objectContaining({
-            snoozedInstances: [activeSnooze],
-          }),
+          alert: expect.objectContaining({ snoozedInstances: expect.anything() }),
         }),
       }),
       expect.anything()
@@ -3678,7 +3690,45 @@ describe('Task Runner', () => {
     );
   });
 
-  test('should remove snoozed instance when field_change condition is met', async () => {
+  test('should not call the atomic remove script when no snooze entries have expired', async () => {
+    const activeSnooze = {
+      instanceId: 'alert-2',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    const rawRuleSOWithSnooze: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: true,
+        snoozedInstances: [activeSnooze],
+      },
+    };
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
+
+    await taskRunner.run();
+
+    // No expired entries → the atomic script should not be called
+    expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ script: expect.anything() }),
+      expect.anything()
+    );
+    expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ script: expect.anything() })
+    );
+  });
+
+  test('should atomically remove snoozed instance when field_change condition is met', async () => {
     const conditionSnooze = {
       instanceId: 'alert-1',
       snoozedAt: '1969-12-01T00:00:00.000Z',
@@ -3720,10 +3770,9 @@ describe('Task Runner', () => {
 
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        doc: expect.objectContaining({
-          alert: expect.objectContaining({
-            snoozedInstances: [],
-          }),
+        script: expect.objectContaining({
+          lang: 'painless',
+          params: { expiredInstanceIds: ['alert-1'] },
         }),
       }),
       expect.anything()
@@ -3832,7 +3881,7 @@ describe('Task Runner', () => {
     expect(alertsClient.clearSnoozedStatusForAlerts).not.toHaveBeenCalled();
   });
 
-  test('should NOT remove snoozed instance when field_change condition is not met', async () => {
+  test('should NOT call the atomic remove script when field_change condition is not met', async () => {
     const conditionSnooze = {
       instanceId: 'alert-1',
       snoozedAt: '1969-12-01T00:00:00.000Z',
@@ -3872,15 +3921,13 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
+    // No entries expired → the atomic script should not be called
     expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        doc: expect.objectContaining({
-          alert: expect.objectContaining({
-            snoozedInstances: expect.anything(),
-          }),
-        }),
-      }),
+      expect.objectContaining({ script: expect.anything() }),
       expect.anything()
+    );
+    expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ script: expect.anything() })
     );
 
     expect(auditService.withoutRequest.log).not.toHaveBeenCalled();
@@ -3924,15 +3971,13 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
+    // No entries expired → the atomic script should not be called
     expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        doc: expect.objectContaining({
-          alert: expect.objectContaining({
-            snoozedInstances: expect.anything(),
-          }),
-        }),
-      }),
+      expect.objectContaining({ script: expect.anything() }),
       expect.anything()
+    );
+    expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ script: expect.anything() })
     );
 
     expect(auditService.withoutRequest.log).not.toHaveBeenCalled();
@@ -3989,12 +4034,18 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
+    // Both expired IDs should be passed together to the atomic script,
+    // while 'alert-still-snoozed' is untouched in ES.
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        doc: expect.objectContaining({
-          alert: expect.objectContaining({
-            snoozedInstances: [stillActiveSnooze],
-          }),
+        script: expect.objectContaining({
+          lang: 'painless',
+          params: {
+            expiredInstanceIds: expect.arrayContaining([
+              'alert-expired-time',
+              'alert-condition-change',
+            ]),
+          },
         }),
       }),
       expect.anything()
@@ -4059,6 +4110,73 @@ describe('Task Runner', () => {
     await taskRunner.run();
 
     expect(auditService.withoutRequest.log).not.toHaveBeenCalled();
+  });
+
+  test('concurrent snooze: atomic script preserves user-added entry despite concurrent TTL expiry', async () => {
+    // Simulates the race condition described in kibana-team#3176:
+    //   T0: rule run loads SO with snoozedInstances = [A, B_expired]
+    //   T1: user API adds C → SO now has [A, B_expired, C]
+    //   T2: rule run finishes, should only remove B_expired (not overwrite with [A])
+    //
+    // Because we use a Painless removeIf script instead of a full-array doc update,
+    // the script only removes the IDs we found expired at T0, so C is preserved by ES.
+    // This test verifies the correct IDs are sent and that no doc-level array write happens.
+    const expiredSnooze = {
+      instanceId: 'alert-expired',
+      expiresAt: '1969-12-31T23:59:59.000Z',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    const stillActiveSnooze = {
+      instanceId: 'alert-active',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    // The rule SO loaded at the start of the run (before the concurrent user snooze)
+    const rawRuleSOAtRunStart: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: true,
+        snoozedInstances: [expiredSnooze, stillActiveSnooze],
+      },
+    };
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOAtRunStart);
+
+    await taskRunner.run();
+
+    // The post-run write must use the Painless script with only the expired ID.
+    // Even if a user concurrently added 'alert-concurrent' to the SO, that entry
+    // remains untouched in ES because we never replace the full array.
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          lang: 'painless',
+          params: { expiredInstanceIds: ['alert-expired'] },
+        }),
+      }),
+      expect.anything()
+    );
+
+    // Confirm no full-array doc replacement was made for snoozedInstances
+    expect(elasticsearchService.client.asInternalUser.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          alert: expect.objectContaining({ snoozedInstances: expect.anything() }),
+        }),
+      }),
+      expect.anything()
+    );
   });
 
   function testAlertingEventLogCalls({

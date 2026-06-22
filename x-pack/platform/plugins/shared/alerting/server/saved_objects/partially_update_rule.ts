@@ -75,6 +75,43 @@ const RuleAttributesAllowedForPartialUpdate = [
   'snoozedInstances',
 ];
 
+// Painless script that atomically removes snoozed instance entries by ID.
+// Using removeIf avoids a full-array replacement
+const REMOVE_SNOOZED_INSTANCES_SCRIPT = `
+  if (ctx._source.alert.snoozedInstances != null) {
+    ctx._source.alert.snoozedInstances.removeIf(
+      instance -> params.expiredInstanceIds.contains(instance.instanceId)
+    );
+  }
+`;
+
+// Atomically removes per-alert snooze entries whose IDs are in expiredInstanceIds.
+// Uses retry_on_conflict - removing an already-absent entry is a no-op, retrying on a version conflict is safe.
+export async function atomicRemoveSnoozedInstancesWithEs(
+  esClient: ElasticsearchClient,
+  id: string,
+  expiredInstanceIds: string[],
+  options: Pick<PartiallyUpdateRuleSavedObjectOptions, 'ignore404' | 'refresh'> = {}
+): Promise<void> {
+  const updateParams = {
+    id: `alert:${id}`,
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    retry_on_conflict: 3,
+    script: {
+      lang: 'painless' as const,
+      source: REMOVE_SNOOZED_INSTANCES_SCRIPT,
+      params: { expiredInstanceIds },
+    },
+    ...(options.refresh ? { refresh: options.refresh } : {}),
+  };
+
+  if (options.ignore404) {
+    await esClient.update(updateParams, { ignore: [404] });
+  } else {
+    await esClient.update(updateParams);
+  }
+}
+
 // direct, partial update to a rule saved object via ElasticsearchClient
 
 // we do this direct partial update to avoid the overhead of the SavedObjectsClient for
