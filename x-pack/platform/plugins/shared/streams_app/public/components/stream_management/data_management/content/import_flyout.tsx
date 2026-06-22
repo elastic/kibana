@@ -95,8 +95,7 @@ export function ImportContentPackFlyout({
             initialPromptText={i18n.translate(
               'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
               {
-                defaultMessage:
-                  'You can drop your streams .zip content here and install them right away.',
+                defaultMessage: 'Drop a content pack .zip here to preview and import it.',
               }
             )}
             fullWidth
@@ -228,7 +227,7 @@ export function ImportContentPackFlyout({
                   setContentPackObjects(undefined);
                   setFile(undefined);
                   notifications.toasts.addSuccess(
-                    i18n.translate('xpack.streams.exportContentPackFlyout.importSuccess', {
+                    i18n.translate('xpack.streams.importContentPackFlyout.importSuccess', {
                       defaultMessage: 'Content imported successfully',
                     })
                   );

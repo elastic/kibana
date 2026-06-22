@@ -32,7 +32,8 @@ export function isEmptyContentPack(entries: ContentPackEntry[]): boolean {
 
   const streams = entries.filter((entry): entry is ContentPackStream => entry.type === 'stream');
   if (entries.length === streams.length && streams.length === 1) {
-    // only root stream included
+    // the pack contains only the root stream (no child streams), so it is empty unless the
+    // root carries field mappings
     return isEmpty(streams[0].request.stream.ingest.wired.fields);
   }
 

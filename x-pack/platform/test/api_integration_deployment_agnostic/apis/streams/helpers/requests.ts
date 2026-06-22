@@ -572,6 +572,29 @@ export async function importContent(
     .then((response) => response.body);
 }
 
+export async function previewContent(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: {
+    content: Readable;
+    filename: string;
+  },
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .sendFile('POST /internal/streams/{name}/content/preview', {
+      params: {
+        path: { name },
+        body: {
+          content: body.content,
+        },
+      },
+      file: { key: 'content', filename: body.filename },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 export async function upsertFeature(
   client: StreamsSupertestRepositoryClient,
   streamName: string,

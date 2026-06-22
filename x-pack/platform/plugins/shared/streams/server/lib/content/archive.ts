@@ -34,18 +34,44 @@ import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
 
-// Strict wired upsert schema, mirroring `Streams.WiredStream.UpsertRequest.is`, applied so the
-// parsed request can be `safeParse`d without a type assertion.
+// Strict wired upsert schema: `DeepStrict` over the wired upsert shape (equivalent to
+// `Streams.WiredStream.UpsertRequest.is`), applied so the parsed request can be `safeParse`d
+// without a type assertion.
 const wiredUpsertRequestSchema = DeepStrict(Streams.WiredStream.UpsertRequest.right);
 
 /**
  * Content-pack stream entries match the wired stream upsert request. Significant-event
- * queries are not part of content packs (they are managed via the dedicated sig-events
- * `/queries` endpoints), so any `queries` field carried by older or hand-authored archives
- * is stripped by `extractEntries` before this guard validates the strict wired upsert shape.
+ * queries are not part of content packs (they are managed via the dedicated
+ * `/api/streams/{name}/queries` endpoints), so this guard validates the strict wired upsert
+ * shape. `extractEntries` calls `stripQueriesOrReject` first, so an absent or empty
+ * `queries: []` is stripped before this guard runs and any other `queries` value is rejected
+ * upfront.
  */
 export function isContentPackStreamRequest(value: unknown): value is ContentPackStreamRequest {
   return wiredUpsertRequestSchema.safeParse(value).success;
+}
+
+/**
+ * Significant-event queries are not part of content packs; they are managed via the dedicated
+ * `/api/streams/{name}/queries` endpoints. Reject a stream entry that still carries queries so
+ * detections are never silently dropped on import. Only an absent field or an empty
+ * `queries: []` is allowed (and stripped); any other value is rejected regardless of its shape
+ * (non-empty array, object, etc.). Returns the request with the `queries` key removed.
+ */
+export function stripQueriesOrReject(
+  streamName: string | undefined,
+  entryName: string,
+  request: Record<string, unknown>
+): Record<string, unknown> {
+  const queries = request.queries;
+  const isAbsentOrEmpty = queries === undefined || (Array.isArray(queries) && queries.length === 0);
+  if (!isAbsentOrEmpty) {
+    throw new InvalidContentPackError(
+      `Stream [${streamName}] in entry [${entryName}] contains significant-event queries, which are not supported by content packs. Manage them via the /api/streams/{name}/queries endpoints.`
+    );
+  }
+
+  return omit(request, 'queries');
 }
 
 export async function parseArchive(archive: Readable): Promise<ContentPack> {
@@ -168,13 +194,14 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
               name?: string;
               request?: Record<string, unknown>;
             };
-            // Significant-event queries are no longer part of content packs. Strip any
-            // `queries` field carried by older or hand-authored archives so they still
-            // import as structural-only packs; the queries are ignored.
-            const request =
-              parsed.request && typeof parsed.request === 'object'
-                ? omit(parsed.request, 'queries')
-                : parsed.request;
+            const requestObject =
+              parsed.request && typeof parsed.request === 'object' && !Array.isArray(parsed.request)
+                ? parsed.request
+                : undefined;
+
+            const request = requestObject
+              ? stripQueriesOrReject(parsed.name, entry.entryName, requestObject)
+              : parsed.request;
             if (!parsed.name || !isContentPackStreamRequest(request)) {
               throw new InvalidContentPackError(
                 `Invalid stream definition in entry [${entry.entryName}]`

@@ -56,9 +56,10 @@ export function asTree({
 }
 
 /**
- * merges the root streams provided.
- * this is not called recursively on the children as we currently
- * fail when trying to merge a child that already exists.
+ * Merges two root stream trees into one: the roots' routing rules and field definitions
+ * are combined (after `assertNoConflicts` rejects conflicting destinations or mappings),
+ * and their child subtrees are concatenated rather than merged recursively, so a child
+ * that exists on both sides surfaces as a conflict.
  */
 export function mergeTrees({
   existing,

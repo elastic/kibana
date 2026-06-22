@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Row } from './row';
 import { ImportContentPackFlyout } from '../../content/import_flyout';
 import { ExportContentPackFlyout } from '../../content/export_flyout';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 
 export function ImportExportPanel({
   definition,
@@ -22,6 +23,10 @@ export function ImportExportPanel({
 }) {
   const [isExportFlyoutOpen, setIsExportFlyoutOpen] = React.useState(false);
   const [isImportFlyoutOpen, setIsImportFlyoutOpen] = React.useState(false);
+  const {
+    features: { significantEvents },
+  } = useStreamsPrivileges();
+  const isSignificantEventsEnabled = !!significantEvents?.enabled && !!significantEvents?.available;
 
   return (
     <>
@@ -41,10 +46,18 @@ export function ImportExportPanel({
             left={
               <EuiFlexItem>
                 <EuiText color="subdued" size="s">
-                  {i18n.translate('xpack.streams.streamDetailView.importAndExportDescription', {
-                    defaultMessage:
-                      "Package and export this stream's configuration and child streams, or import a package with a guided preview.",
-                  })}
+                  {isSignificantEventsEnabled
+                    ? i18n.translate('xpack.streams.streamDetailView.importAndExportDescription', {
+                        defaultMessage:
+                          "Package and export this stream's routing, mappings, and child streams, or import a package with a guided preview. Significant events are managed separately in the Significant events tab.",
+                      })
+                    : i18n.translate(
+                        'xpack.streams.streamDetailView.importAndExportDescriptionNoSignificantEvents',
+                        {
+                          defaultMessage:
+                            "Package and export this stream's routing, mappings, and child streams, or import a package with a guided preview. Significant events are managed separately.",
+                        }
+                      )}
                 </EuiText>
               </EuiFlexItem>
             }

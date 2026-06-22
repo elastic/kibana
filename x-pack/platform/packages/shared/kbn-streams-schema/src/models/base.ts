@@ -40,8 +40,9 @@ export namespace BaseStream {
 
   /**
    * Stream write model. Significant-event queries are intentionally not part of the upsert;
-   * manage them via the `/api/streams/{name}/queries` endpoints. A `queries` field sent to
-   * `PUT` is ignored.
+   * manage them via the `/api/streams/{name}/queries` endpoints. The `PUT` routes validate the
+   * body with `DeepStrict`, so a stray `queries` field is rejected as an unrecognized key (HTTP
+   * 400); the GET→PUT converter (`convertGetResponseIntoUpsertRequest`) never emits one.
    */
   export interface UpsertRequest<TDefinition extends Definition = Definition> {
     dashboards: string[];

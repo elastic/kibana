@@ -35,7 +35,8 @@ const exportContentRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Export stream content',
-    description: 'Exports the content associated to a stream.',
+    description:
+      'Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included; manage them via the /api/streams/{name}/queries endpoints.',
     availability: {
       since: '9.1.0',
       stability: 'experimental',
@@ -153,7 +154,8 @@ const importContentRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Import content into a stream',
-    description: 'Links content objects to a stream.',
+    description:
+      'Imports stream structure (routing, mappings, and processing) from a content pack into a stream.',
     availability: {
       since: '9.1.0',
       stability: 'experimental',
@@ -237,9 +239,7 @@ const importContentRoute = createServerRoute({
 
     const streams = prepareStreamsForImport({ existing: existingTree, incoming: incomingTree });
 
-    return await streamsClient.bulkUpsert(
-      streams.map(({ name, request: entryRequest }) => ({ name, request: entryRequest }))
-    );
+    return await streamsClient.bulkUpsert(streams);
   },
 });
 

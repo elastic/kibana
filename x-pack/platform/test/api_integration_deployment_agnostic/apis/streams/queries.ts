@@ -134,6 +134,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
+    it('rejects a stray top-level `queries` field on PUT and leaves detections unchanged', async () => {
+      // Significant-event queries are not part of the stream upsert; request validation rejects a
+      // stray `queries` field (DeepStrict) instead of silently dropping it. Cast past the type
+      // that no longer allows `queries`.
+      await putStream(
+        apiClient,
+        STREAM_NAME,
+        {
+          stream,
+          ...emptyAssets,
+          queries: [
+            {
+              id: v4(),
+              title: 'stray query',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'stray'")`,
+              },
+            },
+          ],
+        } as Streams.WiredStream.UpsertRequest,
+        400
+      );
+
+      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+      expect(getQueriesResponse.queries).to.eql([]);
+    });
+
     describe('PUT /api/streams/{name}/queries/{queryId}', () => {
       it('inserts a query when inexistant', async () => {
         const query = {

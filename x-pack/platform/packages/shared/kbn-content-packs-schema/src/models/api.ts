@@ -33,7 +33,7 @@ export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjec
     z.union([
       includeAllSchema,
       z.object({
-        objects: z.object({
+        objects: z.strictObject({
           mappings: z.boolean(),
           routing: z.array(
             contentPackIncludedObjectsSchema.and(

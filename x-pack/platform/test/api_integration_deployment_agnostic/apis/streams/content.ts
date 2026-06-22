@@ -16,16 +16,22 @@ import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { emptyAssets } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+} from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
+  bulkQueries,
   disableStreams,
   enableStreams,
   exportContent,
+  getQueries,
   getStream,
   importContent,
+  previewContent,
   putStream,
 } from './helpers/requests';
 
@@ -59,6 +65,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
+        // Significant events are seeded via the queries API in some tests below to prove export
+        // never carries them; that API is gated behind this feature flag.
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
       await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
@@ -125,6 +134,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+      });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Export', () => {
@@ -341,6 +354,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await exportContent(apiClient, 'logs.otel.branch_a', exportBody, 400);
       });
+
+      it('omits significant-event queries from the exported pack', async () => {
+        // Significant-event queries live outside the stream definition (in the knowledge-indicator
+        // data stream), so export must never carry them even when the stream has detections.
+        await bulkQueries(apiClient, 'logs.otel.branch_a', [
+          {
+            index: {
+              id: 'export-omits-me',
+              title: 'detector',
+              description: '',
+              esql: {
+                query: `FROM logs.otel.branch_a,logs.otel.branch_a.* METADATA _id, _source | WHERE KQL("message:'ERROR'")`,
+              },
+            },
+          },
+        ]);
+
+        const archiveBuffer = await exportContent(apiClient, 'logs.otel.branch_a', {
+          name: 'branch_a_pack',
+          description: 'export should not carry queries',
+          version: '1.0.0',
+          include: { objects: { all: {} } },
+        });
+        const contentPack = await parseArchive(Readable.from(archiveBuffer));
+
+        const streamEntries = contentPack.entries.filter(
+          (entry): entry is ContentPackStream => entry.type === 'stream'
+        );
+        expect(streamEntries.length).to.be.greaterThan(0);
+        streamEntries.forEach((entry) => {
+          expect(entry.request).to.not.have.property('queries');
+        });
+
+        // the detection still exists on the stream, it is just not part of the pack
+        const { queries } = await getQueries(apiClient, 'logs.otel.branch_a');
+        expect(queries.map((query) => query.id)).to.contain('export-omits-me');
+
+        await bulkQueries(apiClient, 'logs.otel.branch_a', [{ delete: { id: 'export-omits-me' } }]);
+      });
     });
 
     describe('Import', () => {
@@ -515,7 +567,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('ignores significant-event queries carried by older packs', async () => {
+      it('rejects significant-event queries carried by older packs', async () => {
         const archive = await generateArchive(
           {
             name: 'legacy_pack',
@@ -523,10 +575,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             version: '1.0.0',
           },
           [
-            // Content packs are structural-only now, but older or hand-authored archives may
-            // still carry significant-event queries. Import must tolerate and ignore them
-            // (no knowledge-indicator writes, no alerting rules), so cast past the type that
-            // no longer allows `queries`.
+            // Content packs are structural-only. Older or hand-authored archives may still
+            // carry significant-event queries; import must reject them (no partial structural
+            // import, no knowledge-indicator writes) so detections are never silently dropped.
+            // Cast past the type that no longer allows `queries`.
             {
               type: 'stream',
               name: ROOT_STREAM_ID,
@@ -585,13 +637,146 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, 'logs.otel.branch_e', upsertRequest({}));
 
-        const importResponse = await importContent(apiClient, 'logs.otel.branch_e', {
+        const response = await importContent(
+          apiClient,
+          'logs.otel.branch_e',
+          {
+            include: { objects: { all: {} } },
+            content: Readable.from(archive),
+            filename: 'legacy_pack-1.0.0.zip',
+          },
+          400
+        );
+
+        expect((response as unknown as { message: string }).message).to.contain(
+          'contains significant-event queries'
+        );
+
+        // the rejected import must not partially create any streams
+        await getStream(apiClient, 'logs.otel.branch_e.detector', 404);
+      });
+
+      it('strips an empty `queries: []` and imports structure', async () => {
+        const archive = await generateArchive(
+          {
+            name: 'empty_queries_pack',
+            description: 'pack carrying an empty queries array',
+            version: '1.0.0',
+          },
+          [
+            // An empty `queries: []` is harmless and must be stripped (not rejected) so the pack
+            // still imports as structure-only. Cast past the type that no longer allows `queries`.
+            {
+              type: 'stream',
+              name: ROOT_STREAM_ID,
+              request: {
+                stream: {
+                  type: 'wired',
+                  description: '',
+                  ingest: {
+                    processing: { steps: [] },
+                    settings: {},
+                    wired: {
+                      fields: {},
+                      routing: [{ destination: 'child', where: { never: {} }, status: 'disabled' }],
+                    },
+                    lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
+                  },
+                },
+                ...emptyAssets,
+                queries: [],
+              },
+            } as ContentPackStream,
+            {
+              type: 'stream',
+              name: 'child',
+              request: {
+                stream: {
+                  type: 'wired',
+                  description: '',
+                  ingest: {
+                    processing: { steps: [] },
+                    settings: {},
+                    wired: { fields: {}, routing: [] },
+                    lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
+                  },
+                },
+                ...emptyAssets,
+              },
+            },
+          ]
+        );
+
+        await putStream(apiClient, 'logs.otel.branch_f', upsertRequest({}));
+
+        const importResponse = await importContent(apiClient, 'logs.otel.branch_f', {
           include: { objects: { all: {} } },
           content: Readable.from(archive),
-          filename: 'legacy_pack-1.0.0.zip',
+          filename: 'empty_queries_pack-1.0.0.zip',
         });
+        expect(importResponse.result.created).to.eql(['logs.otel.branch_f.child']);
 
-        expect(importResponse.result.created).to.eql(['logs.otel.branch_e.detector']);
+        await getStream(apiClient, 'logs.otel.branch_f.child');
+      });
+
+      it('rejects significant-event queries at preview time', async () => {
+        const archive = await generateArchive(
+          {
+            name: 'legacy_preview_pack',
+            description: 'pack that still carries queries',
+            version: '1.0.0',
+          },
+          [
+            // Preview shares the parse path with import, so a pack carrying queries must be
+            // rejected before the UI can render it. Cast past the type that no longer allows
+            // `queries`.
+            {
+              type: 'stream',
+              name: ROOT_STREAM_ID,
+              request: {
+                stream: {
+                  type: 'wired',
+                  description: '',
+                  ingest: {
+                    processing: { steps: [] },
+                    settings: {},
+                    wired: { fields: {}, routing: [] },
+                    lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
+                  },
+                },
+                ...emptyAssets,
+                queries: [
+                  {
+                    id: 'legacy-query',
+                    type: 'match',
+                    title: 'legacy query',
+                    description: '',
+                    esql: {
+                      query: 'FROM logs.otel METADATA _id, _source | WHERE KQL("message: ERROR")',
+                    },
+                  },
+                ],
+              },
+            } as ContentPackStream,
+          ]
+        );
+
+        const response = await previewContent(
+          apiClient,
+          'logs.otel',
+          {
+            content: Readable.from(archive),
+            filename: 'legacy_preview_pack-1.0.0.zip',
+          },
+          400
+        );
+
+        expect((response as unknown as { message: string }).message).to.contain(
+          'contains significant-event queries'
+        );
       });
 
       it('fails when importing conflicting mappings', async () => {
