@@ -2371,7 +2371,7 @@ describe('MS Defender response actions client', () => {
           msStatusValue  | responseState
           ${'Failed'}    | ${'failed'}
           ${'TimeOut'}   | ${'failed'}
-          ${'Cancelled'} | ${'failed'}
+          ${'Cancelled'} | ${'canceled'}
           ${'Succeeded'} | ${'successful'}
         `(
           'should send telemetry for $responseState action response if MS machine action status is $msStatusValue',
@@ -2483,7 +2483,7 @@ describe('MS Defender response actions client', () => {
           msStatusValue  | responseState
           ${'Failed'}    | ${'failed'}
           ${'TimeOut'}   | ${'failed'}
-          ${'Cancelled'} | ${'failed'}
+          ${'Cancelled'} | ${'canceled'}
           ${'Succeeded'} | ${'successful'}
         `(
           'should generate $responseState action response if MS runscript machine action status is $msStatusValue',
