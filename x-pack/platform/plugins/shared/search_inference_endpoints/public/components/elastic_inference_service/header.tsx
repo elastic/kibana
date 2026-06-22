@@ -11,11 +11,14 @@ import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
+import { isInferencePreferencesEnabled } from '../../feature_flag';
 
 export const ElasticInferenceServiceModelsHeader = () => {
   const {
-    services: { cloud },
+    services: { cloud, uiSettings },
   } = useKibana();
+
+  const showManageRegions = isInferencePreferencesEnabled(uiSettings);
 
   const [billingUrl, setBillingUrl] = useState<string>();
   useEffect(() => {
@@ -40,6 +43,16 @@ export const ElasticInferenceServiceModelsHeader = () => {
       paddingSize="none"
       bottomBorder={true}
       rightSideItems={[
+        ...(showManageRegions
+          ? [
+              <EuiButton data-test-subj="eisManageRegionsButton" onClick={() => {}}>
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.eisModelsPage.manageRegions.button',
+                  { defaultMessage: 'Manage regions' }
+                )}
+              </EuiButton>,
+            ]
+          : []),
         ...(cloud?.isCloudEnabled && billingUrl
           ? [
               <EuiButton
