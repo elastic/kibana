@@ -27,7 +27,7 @@ The general skill instructs you to check for and apply a solution-specific exten
 
 `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`
 
-Skill invocation is disabled in this environment — read the file directly with the file tool. Apply its Security-specific checks once, only to files under those paths. Ignore any output format instructions and the `## Skill improvement` section — use the workflow's collapsible inline-comment format defined in this file.
+Skill invocation is disabled in this environment — read the file directly with the file tool. Apply its Security-specific checks **after completing the general skill's full checklist**, once, and only to files under those paths. Ignore any output format instructions and the `## Skill improvement` section — use the workflow's collapsible inline-comment format defined in this file.
 
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 
