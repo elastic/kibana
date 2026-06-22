@@ -59,6 +59,11 @@ import {
   WorkflowValidationError,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import {
+  type ExternalResumeWorkflowExecutionParams,
+  parseApprovedQueryParam,
+  resumeWorkflowExecutionExternally,
+} from './external_resume/external_resume_service';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -236,7 +241,8 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    public readonly isWorkflowsAvailable: boolean
+    public readonly isWorkflowsAvailable: boolean,
+    private readonly externalResumeSigningKey: string
   ) {}
 
   private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
@@ -877,6 +883,18 @@ export class WorkflowsManagementApi {
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+  }
+
+  public async resumeWorkflowExecutionExternally(
+    params: Omit<ExternalResumeWorkflowExecutionParams, 'signingKey'> & {
+      approved: boolean | 'true' | 'false';
+    }
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternally(this.workflowsService, {
+      ...params,
+      approved: parseApprovedQueryParam(params.approved),
+      signingKey: this.externalResumeSigningKey,
+    });
   }
 
   /**

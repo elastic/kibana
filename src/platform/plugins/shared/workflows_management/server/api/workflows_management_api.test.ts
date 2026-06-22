@@ -50,7 +50,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
-    api = new WorkflowsManagementApi(mockWorkflowsService, true);
+    api = new WorkflowsManagementApi(mockWorkflowsService, true, 'a'.repeat(32));
     const mockZodSchema = createMockZodSchema();
     mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
     mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
@@ -1038,7 +1038,7 @@ steps:
     });
 
     it('does not notify SML when setSmlIndexAttachment has not been called', async () => {
-      const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true);
+      const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true, 'a'.repeat(32));
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto());
 
       await freshApi.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
