@@ -71,41 +71,30 @@ describe('AiRuleCreationService', () => {
     });
   });
 
-  describe('boundAttachmentId$', () => {
-    it('starts null', async () => {
-      const value = await firstValueFrom(service.boundAttachmentId$);
-      expect(value).toBeNull();
+  describe('boundAttachmentId', () => {
+    it('starts null', () => {
+      expect(service.getBoundAttachmentId()).toBeNull();
     });
 
-    it('setBoundAttachment updates the bound id', async () => {
+    it('setBoundAttachment updates the bound id', () => {
       service.setBoundAttachment(ATT_A);
-      const value = await firstValueFrom(service.boundAttachmentId$);
-      expect(value).toBe(ATT_A);
+      expect(service.getBoundAttachmentId()).toBe(ATT_A);
     });
 
-    it('releaseBind sets the bound id back to null', async () => {
+    it('releaseBind sets the bound id back to null', () => {
       service.setBoundAttachment(ATT_A);
       service.releaseBind();
-      const value = await firstValueFrom(service.boundAttachmentId$);
-      expect(value).toBeNull();
+      expect(service.getBoundAttachmentId()).toBeNull();
     });
 
-    it('setAiCreatedRule with attachmentId sets the bound id', async () => {
+    it('setAiCreatedRule with attachmentId sets the bound id', () => {
       service.setAiCreatedRule(mockRule, ATT_B);
-      const value = await firstValueFrom(service.boundAttachmentId$);
-      expect(value).toBe(ATT_B);
+      expect(service.getBoundAttachmentId()).toBe(ATT_B);
     });
 
-    it('setAiCreatedRule without attachmentId does not change the bound id', async () => {
+    it('setAiCreatedRule without attachmentId does not change the bound id', () => {
       service.setBoundAttachment(ATT_A);
       service.setAiCreatedRule(mockRule);
-      const value = await firstValueFrom(service.boundAttachmentId$);
-      expect(value).toBe(ATT_A);
-    });
-
-    it('getBoundAttachmentId returns current value synchronously', () => {
-      expect(service.getBoundAttachmentId()).toBeNull();
-      service.setBoundAttachment(ATT_A);
       expect(service.getBoundAttachmentId()).toBe(ATT_A);
     });
 

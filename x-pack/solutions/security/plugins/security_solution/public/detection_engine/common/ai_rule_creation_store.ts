@@ -30,7 +30,8 @@ export class AiRuleCreationService {
   // Keyed `"${attachmentId}:${version}"` so saving card A-v1 can't trigger the warning on card B-v1.
   private readonly savedCreateVersionsSubject = new BehaviorSubject<ReadonlySet<string>>(new Set());
   // `null` = form idle (no active bind). Released when a brand-new rule card is minted.
-  private readonly boundAttachmentIdSubject = new BehaviorSubject<string | null>(null);
+  // Plain field, not a subject: every consumer reads it imperatively via `getBoundAttachmentId`.
+  private boundAttachmentId: string | null = null;
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
@@ -39,9 +40,6 @@ export class AiRuleCreationService {
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
   public readonly savedCreateVersions$ = this.savedCreateVersionsSubject.asObservable();
-  public readonly boundAttachmentId$ = this.boundAttachmentIdSubject
-    .asObservable()
-    .pipe(distinctUntilChanged());
 
   public startSession = (): AiRuleCreationSession => {
     this.session = {
@@ -102,20 +100,20 @@ export class AiRuleCreationService {
   public setAiCreatedRule = (rule: RuleResponse, attachmentId?: string): void => {
     this.aiRuleSubject.next(rule);
     if (attachmentId !== undefined) {
-      this.boundAttachmentIdSubject.next(attachmentId);
+      this.boundAttachmentId = attachmentId;
     }
   };
 
   public setBoundAttachment = (attachmentId: string): void => {
-    this.boundAttachmentIdSubject.next(attachmentId);
+    this.boundAttachmentId = attachmentId;
   };
 
   public releaseBind = (): void => {
-    this.boundAttachmentIdSubject.next(null);
+    this.boundAttachmentId = null;
   };
 
   public getBoundAttachmentId = (): string | null => {
-    return this.boundAttachmentIdSubject.getValue();
+    return this.boundAttachmentId;
   };
 
   public clearAiCreatedRule = (): void => {
@@ -139,7 +137,7 @@ export class AiRuleCreationService {
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
     this.savedCreateVersionsSubject.next(new Set());
-    this.boundAttachmentIdSubject.next(null);
+    this.boundAttachmentId = null;
     this.session = null;
   };
 }
