@@ -525,8 +525,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
           await timePicker.setAbsoluteRange(fromTime, toTime);
-          await visChart.waitForVisualizationRenderingStabilized();
-          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          await retry.waitFor('scaled label to update to "to 30 seconds"', async () => {
+            helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+            return helperScaledLabelText.includes('to 30 seconds');
+          });
           expect(helperScaledLabelText).to.include.string('to 30 seconds');
         });
 
@@ -542,8 +544,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
           await timePicker.setAbsoluteRange(fromTime, toTime);
-          await visChart.waitForVisualizationRenderingStabilized();
-          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          await retry.waitFor('scaled label to update to "to minute"', async () => {
+            helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+            return helperScaledLabelText.includes('to minute');
+          });
           expect(helperScaledLabelText).to.include.string('to minute');
         });
       });
