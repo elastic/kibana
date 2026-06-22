@@ -8,7 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useInstallEntityStoreV2, type Services } from './useInstallEntityStoreV2';
 import { EntityStoreStatus } from '../../common';
-import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
+import { ENTITY_STORE_ROUTES } from '../../common';
 
 interface MockServices {
   http: { get: jest.Mock; post: jest.Mock; fetch: jest.Mock };
@@ -31,23 +31,8 @@ describe('useInstallEntityStoreV2', () => {
     jest.clearAllMocks();
   });
 
-  it('should not install when feature flag is disabled', async () => {
-    const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(false);
-
-    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
-
-    await waitFor(() => {
-      expect(mockServices.uiSettings.get).toHaveBeenCalledWith(FF_ENABLE_ENTITY_STORE_V2);
-    });
-
-    expect(mockServices.spaces.getActiveSpace).not.toHaveBeenCalled();
-    expect(mockServices.http.post).not.toHaveBeenCalled();
-  });
-
   it('should not auto-install in non-default space when v1 was never installed', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
     mockServices.http.fetch.mockResolvedValueOnce({ total: 0 });
@@ -67,7 +52,7 @@ describe('useInstallEntityStoreV2', () => {
 
   it('should auto-install in non-default space when v1 was previously installed', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
+
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
     mockServices.http.fetch.mockResolvedValueOnce({ total: 2 });
@@ -87,7 +72,7 @@ describe('useInstallEntityStoreV2', () => {
 
   it('should init entity maintainers when not in default space and entity store is already running', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
+
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.running });
     mockServices.http.post.mockResolvedValue({});
@@ -108,7 +93,7 @@ describe('useInstallEntityStoreV2', () => {
 
   it('should init entity maintainers when entity store status is running in the default space', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
+
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.running });
     mockServices.http.post.mockResolvedValue({});
@@ -136,7 +121,7 @@ describe('useInstallEntityStoreV2', () => {
 
   it('installs entity store in the default space when not installed (install API inits maintainers)', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
+
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
     mockServices.http.post.mockResolvedValue({});

@@ -10,7 +10,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { EntityStoreStatus } from '../../common';
-import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
+import { ENTITY_STORE_ROUTES } from '../../common';
 import type { StatusRequestQuery } from '../../server/routes/apis/status';
 
 export interface Services {
@@ -62,9 +62,6 @@ export const useInstallEntityStoreV2 = (services: Services) => {
   useEffect(() => {
     async function install() {
       try {
-        const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
-        if (!isEntityStoreV2Enabled) return;
-
         const space = await services.spaces.getActiveSpace();
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest

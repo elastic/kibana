@@ -27,7 +27,6 @@ import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab
 import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
 import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
 import { EntityResolutionTab } from '../components/entity_resolution';
-import { useUiSetting$ } from '../../common/lib/kibana';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
@@ -89,7 +88,6 @@ export const EntityAnalyticsManagementPage = () => {
   }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
-  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   const entityStoreStatus = useEntityStoreStatus();
@@ -141,16 +139,12 @@ export const EntityAnalyticsManagementPage = () => {
     if (selectedTabId === TabId.Status && !isStatusDataLoading && !shouldDisplayEngineStatusTab) {
       history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
-    if (
-      selectedTabId === TabId.EntityResolution &&
-      (!isEntityStoreV2Enabled || !hasEntityResolutionLicense)
-    ) {
+    if (selectedTabId === TabId.EntityResolution && !hasEntityResolutionLicense) {
       history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
   }, [
     shouldDisplayEngineStatusTab,
     isStatusDataLoading,
-    isEntityStoreV2Enabled,
     hasEntityResolutionLicense,
     selectedTabId,
     history,
@@ -269,7 +263,7 @@ export const EntityAnalyticsManagementPage = () => {
             />
           </EuiTab>
         )}
-        {isEntityStoreV2Enabled && hasEntityResolutionLicense && (
+        {hasEntityResolutionLicense && (
           <EuiTab
             key={TabId.EntityResolution}
             isSelected={selectedTabId === TabId.EntityResolution}
@@ -329,7 +323,7 @@ export const EntityAnalyticsManagementPage = () => {
         </div>
       )}
 
-      {isEntityStoreV2Enabled && hasEntityResolutionLicense && (
+      {hasEntityResolutionLicense && (
         <div hidden={selectedTabId !== TabId.EntityResolution}>
           <EntityResolutionTab />
         </div>

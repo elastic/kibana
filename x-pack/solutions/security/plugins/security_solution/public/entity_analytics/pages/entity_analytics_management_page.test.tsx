@@ -21,7 +21,6 @@ import {
   WATCHLISTS_TAB_TEST_ID,
   ENGINE_STATUS_TAB_TEST_ID,
 } from '../test_ids';
-import { useUiSetting$ } from '../../common/lib/kibana';
 import { useHasEntityResolutionLicense } from '../../common/hooks/use_has_entity_resolution_license';
 
 const mockAddSuccess = jest.fn();
@@ -79,7 +78,6 @@ jest.mock('../../common/lib/kibana', () => ({
       },
     },
   }),
-  useUiSetting$: jest.fn(() => [false]),
 }));
 
 jest.mock('../../common/hooks/use_has_entity_resolution_license', () => ({
@@ -232,7 +230,6 @@ const buildConfig = (overrides: Record<string, unknown> = {}) => {
 describe('EntityAnalyticsManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useUiSetting$ as jest.Mock).mockReturnValue([false]);
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
     mockUseConfigurableRiskEngineSettings.mockReturnValue(buildConfig());
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
@@ -275,15 +272,13 @@ describe('EntityAnalyticsManagementPage', () => {
     expect(screen.getByTestId(ASSET_CRITICALITY_TAB_TEST_ID)).toBeInTheDocument();
   });
 
-  it('shows the Resolution tab when entityStoreEnableV2 setting is enabled and license is active', () => {
-    (useUiSetting$ as jest.Mock).mockReturnValue([true]);
+  it('shows the Resolution tab when license is active', () => {
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
     render(pageComponent());
     expect(screen.getByTestId('entityResolutionTab')).toBeInTheDocument();
   });
 
   it('hides the Resolution tab when license is inactive', () => {
-    (useUiSetting$ as jest.Mock).mockReturnValue([true]);
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
     render(pageComponent());
     expect(screen.queryByTestId('entityResolutionTab')).not.toBeInTheDocument();
