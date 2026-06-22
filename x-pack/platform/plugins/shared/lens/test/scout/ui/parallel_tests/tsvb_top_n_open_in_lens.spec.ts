@@ -151,27 +151,25 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
       await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Top N - Static value');
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
-      // Verify 2 layers
-      const layerTabs = page.testSubj.locator('lns-layerPanel');
-      await expect(layerTabs).toHaveCount(2);
+      // Verify 2 layer tabs exist (Lens renders one layer panel at a time, switched via tabs)
+      const layerTab1 = page.getByRole('tab', { name: 'Data layer 1' });
+      const layerTab2 = page.getByRole('tab', { name: 'Data layer 2' });
+      await expect(layerTab1).toBeVisible();
+      await expect(layerTab2).toBeVisible();
 
-      // Layer 0: Count of records
-      const layer0YDimension = page.testSubj
-        .locator('lns-layerPanel')
-        .filter({ hasText: 'Count of records' })
-        .locator(
-          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-dimensionTrigger"]'
-        );
-      await expect(layer0YDimension).toHaveText('Count of records');
-
-      // Layer 1: Static value 10
+      // Layer 1: Count of records
+      await layerTab1.click();
       const layer1YDimension = page.testSubj
-        .locator('lns-layerPanel')
-        .filter({ hasText: '10' })
-        .locator(
-          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-dimensionTrigger"]'
-        );
-      await expect(layer1YDimension).toHaveText('10');
+        .locator('lnsXY_yDimensionPanel')
+        .locator('[data-test-subj="lns-dimensionTrigger"]');
+      await expect(layer1YDimension).toHaveText('Count of records');
+
+      // Layer 2: Static value 10
+      await layerTab2.click();
+      const layer2YDimension = page.testSubj
+        .locator('lnsXY_yDimensionPanel')
+        .locator('[data-test-subj="lns-dimensionTrigger"]');
+      await expect(layer2YDimension).toHaveText('10');
     }
   );
 
