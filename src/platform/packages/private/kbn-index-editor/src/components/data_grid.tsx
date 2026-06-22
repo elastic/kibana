@@ -78,7 +78,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
-  const savingDocs = useObservable(indexUpdateService.savingDocs$, new Map());
 
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
@@ -157,10 +156,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   // is performed server-side and unsaved values do not participate in it.
   const getRowIndicator = useCallback(
     (row: DataTableRecord, euiThemeComputed: EuiThemeComputed) => {
-      const pendingUpdate = savingDocs.get(row.id);
-      // Only highlight rows that carry an actual pending value (a new row with content or an edit
-      // that still differs from the stored value). Reverted edits and empty new rows are not dirty.
-      if (pendingUpdate?.type !== 'add-doc' || Object.keys(pendingUpdate.update).length === 0) {
+      if (!indexUpdateService.isDirtyRow(row.id)) {
         return undefined;
       }
       return {
@@ -170,7 +166,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         }),
       };
     },
-    [savingDocs]
+    [indexUpdateService]
   );
 
   const dataTableRef = useRef<EuiDataGridRefProps & RestorableStateProviderApi>(null);

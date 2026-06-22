@@ -429,7 +429,17 @@ export class IndexUpdateService {
     );
   }
 
-  public readonly savingDocs$ = this._savingDocs$;
+  /** Latest snapshot of the pending docs, kept for synchronous per-row lookups */
+  private _latestSavingDocs: PendingSave = new Map();
+
+  /**
+   * Whether a row has unsaved content: a new row with values, or an edit that still differs from
+   * the stored value. Reverted edits and empty new rows are not considered dirty.
+   */
+  public isDirtyRow(rowId: string): boolean {
+    const pendingUpdate = this._latestSavingDocs.get(rowId);
+    return pendingUpdate?.type === 'add-doc' && Object.keys(pendingUpdate.update).length > 0;
+  }
 
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
@@ -536,6 +546,9 @@ export class IndexUpdateService {
     // Result rows
     this._subscription.add(
       combineLatest([this._docs$, this._savingDocs$]).subscribe(([rows, savingDocs]) => {
+        // Keep the latest pending docs for synchronous per-row dirty checks (see isDirtyRow)
+        this._latestSavingDocs = savingDocs;
+
         const resultRows = rows
           // Filter out docs that are scheduled for deletion or placeholder rows (that are handled apart)
           .filter((v) => {

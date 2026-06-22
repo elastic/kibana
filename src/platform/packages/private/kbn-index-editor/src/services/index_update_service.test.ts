@@ -136,12 +136,12 @@ describe('IndexUpdateService', () => {
       // Editing the value to something new marks the doc as dirty
       service.updateDoc('1', { name: 'DBoris' });
       expect(await firstValueFrom(service.hasUnsavedChanges$)).toBe(true);
-      expect((await firstValueFrom(service.savingDocs$)).has('1')).toBe(true);
+      expect(service.isDirtyRow('1')).toBe(true);
 
       // Reverting the value back to the original clears the dirty state
       service.updateDoc('1', { name: 'Boris' });
       expect(await firstValueFrom(service.hasUnsavedChanges$)).toBe(false);
-      expect((await firstValueFrom(service.savingDocs$)).has('1')).toBe(false);
+      expect(service.isDirtyRow('1')).toBe(false);
     });
 
     it('does not mark unsaved changes if the only change is deleting a placeholder row', async () => {
