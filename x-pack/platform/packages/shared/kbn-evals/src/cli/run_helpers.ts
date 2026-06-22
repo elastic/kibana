@@ -186,6 +186,77 @@ export const resolveEvalSuite = async (
   };
 };
 
+export interface ResolvedProfileEnv {
+  datasetsProfile?: string;
+  exportProfile?: string;
+  profileEnvOverrides: Record<string, string>;
+}
+
+export interface ResolveProfileEnvOverridesOptions {
+  repoRoot: string;
+  log: ToolingLog;
+  flagsReader: FlagsReader;
+  profile?: string;
+}
+
+export const resolveProfileEnvOverrides = async ({
+  repoRoot,
+  log,
+  flagsReader,
+  profile,
+}: ResolveProfileEnvOverridesOptions): Promise<ResolvedProfileEnv> => {
+  const datasetsProfile = flagsReader.string('datasets-profile') ?? profile;
+  const exportProfile =
+    flagsReader.string('export-profile') ?? profile ?? defaultExportProfile(repoRoot);
+
+  const profileEnvOverrides: Record<string, string> = {
+    ...envFromDatasetsProfile(repoRoot, datasetsProfile),
+    ...envFromExportProfile(repoRoot, exportProfile, {
+      defaultTracingExporters: exportProfile === 'local',
+    }),
+  };
+
+  if (!profile && isExportProfileImplicitLocal(flagsReader, exportProfile)) {
+    const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
+
+    const tracingReachable = tracingEsUrl
+      ? await probeHttp(stripTrailingSlash(tracingEsUrl))
+      : true;
+
+    if (!tracingReachable) {
+      log.warning(
+        `Export profile "local" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+          'Continuing without external trace queries. To require export, pass --export-profile local.'
+      );
+      delete profileEnvOverrides.TRACING_ES_URL;
+      delete profileEnvOverrides.TRACING_ES_API_KEY;
+    }
+  }
+
+  return { datasetsProfile, exportProfile, profileEnvOverrides };
+};
+
+export const resolveEvaluationConnectorId = async (
+  repoRoot: string,
+  log: ToolingLog,
+  flagsReader: FlagsReader
+): Promise<string> => {
+  const evaluationConnectorId =
+    flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
+
+  if (evaluationConnectorId) {
+    return evaluationConnectorId;
+  }
+
+  if (isTTY()) {
+    return promptForConnector(repoRoot, log);
+  }
+
+  throw createFlagError(
+    'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
+  );
+};
+
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
 
 export interface EvalRunContext {
@@ -210,18 +281,7 @@ export const resolveEvalRunContext = async ({
   flagsReader,
   profile,
 }: ResolveEvalRunContextOptions): Promise<EvalRunContext> => {
-  let evaluationConnectorId =
-    flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
-
-  if (!evaluationConnectorId) {
-    if (isTTY()) {
-      evaluationConnectorId = await promptForConnector(repoRoot, log);
-    } else {
-      throw createFlagError(
-        'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
-      );
-    }
-  }
+  const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
 
   let projects: string[] = [];
   const projectFlag = flagsReader.string('project');
@@ -251,36 +311,12 @@ export const resolveEvalRunContext = async ({
     }
   }
 
-  const baseProfile = profile;
-  const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
-  const exportProfile =
-    flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
-
-  const profileEnvOverrides: Record<string, string> = {
-    ...envFromDatasetsProfile(repoRoot, datasetsProfile),
-    ...envFromExportProfile(repoRoot, exportProfile, {
-      defaultTracingExporters: exportProfile === 'local',
-    }),
-  };
-
-  const exportProfileIsImplicit =
-    !profile && isExportProfileImplicitLocal(flagsReader, exportProfile);
-  if (exportProfileIsImplicit) {
-    const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
-
-    const tracingReachable = tracingEsUrl
-      ? await probeHttp(stripTrailingSlash(tracingEsUrl))
-      : true;
-
-    if (!tracingReachable) {
-      log.warning(
-        `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
-          'Continuing without external trace queries. To require export, pass --export-profile local.'
-      );
-      delete profileEnvOverrides.TRACING_ES_URL;
-      delete profileEnvOverrides.TRACING_ES_API_KEY;
-    }
-  }
+  const { datasetsProfile, exportProfile, profileEnvOverrides } = await resolveProfileEnvOverrides({
+    repoRoot,
+    log,
+    flagsReader,
+    profile,
+  });
 
   return {
     evaluationConnectorId,
