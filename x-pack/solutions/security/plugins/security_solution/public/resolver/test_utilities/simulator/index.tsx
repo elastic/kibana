@@ -248,9 +248,14 @@ export class Simulator {
       yield mapper();
       await new Promise<void>((resolve) => {
         setTimeout(() => {
-          this.forceAutoSizerOpen();
-          this.wrapper.update();
-          resolve();
+          try {
+            this.forceAutoSizerOpen();
+            this.wrapper.update();
+          } catch (_e) {
+            // ignore errors from enzyme on stale or mid-unmount wrappers
+          } finally {
+            resolve();
+          }
         }, 0);
       });
     }
