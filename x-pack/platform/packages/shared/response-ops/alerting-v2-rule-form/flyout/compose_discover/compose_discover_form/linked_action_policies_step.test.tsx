@@ -77,10 +77,6 @@ describe('LinkedActionPoliciesStep', () => {
           actionPolicy: { id: 'ap-2', name: 'Tag Filtered Policy' } as any,
           category: 'global-filtered',
         },
-        {
-          actionPolicy: { id: 'ap-3', name: 'Direct Policy' } as any,
-          category: 'direct',
-        },
       ],
     });
 
@@ -88,10 +84,8 @@ describe('LinkedActionPoliciesStep', () => {
 
     expect(screen.getByText('Global Policy')).toBeInTheDocument();
     expect(screen.getByText('Tag Filtered Policy')).toBeInTheDocument();
-    expect(screen.getByText('Direct Policy')).toBeInTheDocument();
-    expect(screen.getByText('global')).toBeInTheDocument();
-    expect(screen.getByText('global-filtered')).toBeInTheDocument();
-    expect(screen.getByText('direct')).toBeInTheDocument();
+    expect(screen.getByText('Global policies')).toBeInTheDocument();
+    expect(screen.getByText('Matching global policies')).toBeInTheDocument();
   });
 
   it('shows an error callout when the fetch fails', () => {
@@ -117,14 +111,14 @@ describe('LinkedActionPoliciesStep', () => {
     );
   });
 
-  it('ignores form values and passes ruleId when ruleId is provided', () => {
+  it('passes current form name and tags alongside ruleId so unsaved changes are reflected', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
 
     renderComponent({ ruleId: 'rule-abc' });
 
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ ruleId: 'rule-abc', name: undefined, tags: undefined })
+      expect.objectContaining({ ruleId: 'rule-abc', name: 'My Rule', tags: ['env:prod'] })
     );
   });
 });

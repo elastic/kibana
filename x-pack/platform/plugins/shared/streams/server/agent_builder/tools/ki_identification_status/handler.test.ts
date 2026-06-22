@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
@@ -16,6 +16,7 @@ describe('getKiIdentificationStatusToolHandler', () => {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
         getWorkflowExecution: jest.fn().mockResolvedValue(null),
       } as never,
+      telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });
 
     const result = await getKiIdentificationStatusToolHandler({
@@ -26,7 +27,7 @@ describe('getKiIdentificationStatusToolHandler', () => {
     expect(result).toEqual({
       stream_name: 'logs.nginx',
       execution_id: null,
-      status: StreamsKIsOnboardingStatus.NotStarted,
+      status: SigEventsWorkflowStatus.NotStarted,
     });
   });
 });
