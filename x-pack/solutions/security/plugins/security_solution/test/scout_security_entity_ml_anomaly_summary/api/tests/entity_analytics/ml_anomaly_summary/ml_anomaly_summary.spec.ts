@@ -209,14 +209,14 @@ apiTest.describe(
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
         expect(body.entity_id).toBe(CAROL_EUID);
-        expect(Array.isArray(body.anomalyByTimeBucket)).toBe(true);
-        expect(body.anomalyByTimeBucket).toHaveLength(2);
+        expect(Array.isArray(body.anomalies)).toBe(true);
+        expect(body.anomalies).toHaveLength(2);
 
-        const jobIds = body.anomalyByTimeBucket.map((a) => a.jobId);
+        const jobIds = body.anomalies.map((a) => a.jobId);
         expect(jobIds).toContain('auth_high_count_logon_events_ea');
         expect(jobIds).toContain('pad_windows_rare_region_name_by_user_ea');
 
-        for (const anomaly of body.anomalyByTimeBucket) {
+        for (const anomaly of body.anomalies) {
           expect(typeof anomaly.jobId).toBe('string');
           expect(typeof anomaly.detectorFunction).toBe('string');
           expect(typeof anomaly.recordScore).toBe('number');
@@ -228,7 +228,7 @@ apiTest.describe(
 
         // auth_high_count_logon_events_ea is defined in the local security_auth ML module with
         // known custom_settings: security_app_display_name, threat_tactics, threat_techniques
-        const countAnomaly = body.anomalyByTimeBucket.find(
+        const countAnomaly = body.anomalies.find(
           (a) => a.jobId === 'auth_high_count_logon_events_ea'
         );
         expect(countAnomaly?.jobName).toBe('Spike in Logon Events');
@@ -253,9 +253,9 @@ apiTest.describe(
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
         expect(body.entity_id).toBe(DAVID_EUID);
-        expect(body.anomalyByTimeBucket).toHaveLength(1);
+        expect(body.anomalies).toHaveLength(1);
 
-        const anomaly = body.anomalyByTimeBucket[0];
+        const anomaly = body.anomalies[0];
         expect(anomaly.jobId).toBe('suspicious_login_activity_ea');
         expect(anomaly.jobName).toBe('Unusual Login Activity');
         expect(anomaly.threatTactics).toStrictEqual(['Credential Access']);
@@ -275,7 +275,7 @@ apiTest.describe(
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
         expect(body.entity_id).toBe(NO_BEHAVIORS_EUID);
-        expect(body.anomalyByTimeBucket).toHaveLength(0);
+        expect(body.anomalies).toHaveLength(0);
       }
     );
 
@@ -317,8 +317,8 @@ apiTest.describe(
 
       expect(response.statusCode).toBe(200);
       const body = response.body as AnomalySummaryResponse;
-      expect(body.anomalyByTimeBucket).toHaveLength(1);
-      expect(body.anomalyByTimeBucket[0].jobId).toBe('auth_high_count_logon_events_ea');
+      expect(body.anomalies).toHaveLength(1);
+      expect(body.anomalies[0].jobId).toBe('auth_high_count_logon_events_ea');
     });
 
     apiTest('Anomaly summary API: respects pageSize and page', async ({ apiClient }) => {
@@ -360,10 +360,8 @@ apiTest.describe(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.anomalyByTimeBucket).toHaveLength(2);
-        expect(body.anomalyByTimeBucket[0].recordScore).toBeGreaterThanOrEqual(
-          body.anomalyByTimeBucket[1].recordScore
-        );
+        expect(body.anomalies).toHaveLength(2);
+        expect(body.anomalies[0].recordScore).toBeGreaterThanOrEqual(body.anomalies[1].recordScore);
       }
     );
 
@@ -379,7 +377,7 @@ apiTest.describe(
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
 
-        const rareAnomaly = body.anomalyByTimeBucket.find(
+        const rareAnomaly = body.anomalies.find(
           (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'
         );
         expect(rareAnomaly).toBeDefined();
@@ -390,7 +388,7 @@ apiTest.describe(
         expect(rareAnomaly?.baselineValues?.[0]).toBe('New York');
         expect(rareAnomaly?.anomalousValueCount).toBe(1);
 
-        const countAnomaly = body.anomalyByTimeBucket.find(
+        const countAnomaly = body.anomalies.find(
           (a) => a.jobId === 'auth_high_count_logon_events_ea'
         );
         expect(countAnomaly).toBeDefined();
@@ -412,8 +410,8 @@ apiTest.describe(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.anomalyByTimeBucket).toHaveLength(1);
-        expect(body.anomalyByTimeBucket[0].recordScore).toBeGreaterThanOrEqual(10);
+        expect(body.anomalies).toHaveLength(1);
+        expect(body.anomalies[0].recordScore).toBeGreaterThanOrEqual(10);
       }
     );
 
@@ -429,8 +427,8 @@ apiTest.describe(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.anomalyByTimeBucket).toHaveLength(1);
-        expect(body.anomalyByTimeBucket[0].recordScore).toBeLessThanOrEqual(10);
+        expect(body.anomalies).toHaveLength(1);
+        expect(body.anomalies[0].recordScore).toBeLessThanOrEqual(10);
       }
     );
 
@@ -446,10 +444,10 @@ apiTest.describe(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.anomalyByTimeBucket).toHaveLength(1);
-        expect(body.anomalyByTimeBucket[0].jobId).toBe('auth_high_count_logon_events_ea');
-        expect(body.anomalyByTimeBucket[0].recordScore).toBeGreaterThanOrEqual(24);
-        expect(body.anomalyByTimeBucket[0].recordScore).toBeLessThanOrEqual(25);
+        expect(body.anomalies).toHaveLength(1);
+        expect(body.anomalies[0].jobId).toBe('auth_high_count_logon_events_ea');
+        expect(body.anomalies[0].recordScore).toBeGreaterThanOrEqual(24);
+        expect(body.anomalies[0].recordScore).toBeLessThanOrEqual(25);
       }
     );
 
@@ -464,7 +462,7 @@ apiTest.describe(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.anomalyByTimeBucket).toHaveLength(0);
+        expect(body.anomalies).toHaveLength(0);
         expect(body.total).toBe(0);
       }
     );
