@@ -62,17 +62,23 @@ When a request is broad or underspecified, still give a useful recommendation gr
 
 When the ask is open-ended ("what should I install first?", "the most important rules"), rank candidates by the default below. **A stated intent — a threat scenario, named tactic, data source, or compliance need — overrides this entirely** (a ransomware ask, for instance, follows the kill chain rather than this table).
 
-Three axes, applied in order:
+The goal is to surface rules that are **worth installing here.** Four factors make a rule a better recommendation, all else equal: the user **has the data** for it, it covers a **more critical / higher-severity** threat, it targets a threat **commonly seen in the wild** (vs rarely), and it is **easy to set up** (vs hard). The three axes below operationalize these, applied in order:
 
-1. **Data availability gates the set.** Lead with rules whose related integrations the user already has; surface high-value rules that need missing integrations separately, not interleaved (see Integration Coverage). This decides what is recommendable, not the order within it.
-2. **Tactic criticality sets the rank.** Within recommendable rules, prefer higher-criticality MITRE tactics, read from each rule's triage \`threat\` (its \`tactic\` entries; a multi-tactic rule takes its highest-ranked tactic). v18 order, highest first:
-   - **Critical:** Credential Access, Lateral Movement, Privilege Escalation, Defense Evasion
-   - **High:** Command and Control, Execution, Exfiltration, Impact
-   - **Medium:** Persistence, Initial Access, Collection
-   - **Lower:** Discovery, Resource Development, Reconnaissance
+1. **Data availability gates the set.** Lead with rules whose related integrations the user already has; surface high-value rules that need missing integrations separately, not interleaved (see Integration Coverage). This decides what is recommendable, not the order within it. (Factor: *user has the data*.)
+2. **Threat impact sets the rank.** Within recommendable rules, prefer the ones that matter most, weighing three things together:
+   - **Tactic criticality** — read from each rule's triage \`threat\` (its \`tactic\` entries; a multi-tactic rule takes its highest-ranked tactic). v18 order, highest first:
+     - **Critical:** Credential Access, Lateral Movement, Privilege Escalation, Defense Evasion
+     - **High:** Command and Control, Execution, Exfiltration, Impact
+     - **Medium:** Persistence, Initial Access, Collection
+     - **Lower:** Discovery, Resource Development, Reconnaissance
 
-   Rules with no MITRE mapping sort to the bottom unless they fit a stated intent.
-3. **Fidelity, then data source, break ties.** Among rules of similar tactic rank, prefer high-fidelity rules over noisy ones — judge from rule metadata and your own detection knowledge (broad anomaly/ML rules and generic discovery rules tend to be noisier). When rules are still tied and no focus is stated, cover data sources in the order endpoint > identity > cloud > network.
+     Rules with no MITRE mapping sort to the bottom unless they fit a stated intent.
+   - **Severity** — prefer higher-severity rules (\`severity\` / \`risk_score\` are triage fields). Treat as a strong signal *within* a tactic band, not a reason to float a low-criticality rule above a far more critical one.
+   - **Prevalence in the wild** — prefer rules for threats, techniques, and behaviors commonly seen in the wild over rarely-seen ones. This draws on your own threat-landscape knowledge; rule metadata carries no frequency field.
+3. **Fidelity and ease of setup, then data source, break ties.** Among rules of similar impact:
+   - Prefer **high-fidelity** rules over noisy ones — judge from rule metadata and your own detection knowledge (broad anomaly/ML rules and generic discovery rules tend to be noisier).
+   - Prefer rules that are **easy to set up** over hard ones. A rule whose related integration is already installed needs no new data onboarding; rules needing a new integration, ML-job enablement, or value-list/index setup are heavier lifts. (Axis 1 already favors installed integrations; this extends the same preference to other setup cost.)
+   - When still tied and no focus is stated, cover data sources in the order endpoint > identity > cloud > network.
 
 ## Tools
 
