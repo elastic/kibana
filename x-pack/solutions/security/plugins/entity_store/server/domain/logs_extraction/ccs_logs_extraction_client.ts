@@ -162,7 +162,7 @@ export class CcsLogsExtractionClient {
           entity_type: type,
           namespace: this.namespace,
           behavior: maxLogsPerWindowCapBehavior,
-          ccs: true,
+          remote: true,
         });
         this.logger.warn(
           `CCS extraction volume cap reached for entity type "${type}" (manual run): processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
@@ -171,7 +171,7 @@ export class CcsLogsExtractionClient {
       entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed ?? 0, {
         entity_type: type,
         namespace: this.namespace,
-        ccs: true,
+        remote: true,
       });
       return result;
     }
@@ -227,12 +227,12 @@ export class CcsLogsExtractionClient {
           entity_type: type,
           namespace: this.namespace,
           behavior: maxLogsPerWindowCapBehavior,
-          ccs: true,
+          remote: true,
         });
         entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
           entity_type: type,
           namespace: this.namespace,
-          ccs: true,
+          remote: true,
         });
         this.logger.warn(
           `CCS extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
@@ -254,12 +254,6 @@ export class CcsLogsExtractionClient {
         };
       }
 
-      entityStoreMetrics.extractionLogsProcessed.record(subResult.logsProcessed ?? 0, {
-        entity_type: type,
-        namespace: this.namespace,
-        ccs: true,
-      });
-
       // if the window was capped we consider we have a next page
       hasNextPage = isCapped;
       currentFromDateISO = subWindowEnd;
@@ -268,6 +262,12 @@ export class CcsLogsExtractionClient {
     if (totalCount === 0) {
       await this.ccsStateClient.clearRecoveryId(type);
     }
+
+    entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
+      entity_type: type,
+      namespace: this.namespace,
+      remote: true,
+    });
 
     return { count: totalCount, pages: totalPages };
   }
@@ -351,7 +351,7 @@ export class CcsLogsExtractionClient {
         entityStoreMetrics.extractionLogsPerPageDropped.add(1, {
           entity_type: type,
           namespace: this.namespace,
-          ccs: true,
+          remote: true,
         });
       } else {
         totalLogs += logPaginationCursor.sliceLogCount;
@@ -459,7 +459,7 @@ export class CcsLogsExtractionClient {
     entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
       entity_type: type,
       namespace: this.namespace,
-      ccs: true,
+      remote: true,
     });
 
     return interpretLogPaginationCursorRows(
@@ -546,7 +546,7 @@ export class CcsLogsExtractionClient {
       entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
         entity_type: type,
         namespace: this.namespace,
-        ccs: true,
+        remote: true,
       });
 
       count += esqlResponse.values.length;
@@ -557,7 +557,7 @@ export class CcsLogsExtractionClient {
         entityStoreMetrics.extractionEntitiesUpserted.add(esqlResponse.values.length, {
           entity_type: type,
           namespace: this.namespace,
-          ccs: true,
+          remote: true,
         });
         const ingestStart = Date.now();
         await ingestEntities({
@@ -573,13 +573,13 @@ export class CcsLogsExtractionClient {
             entityStoreMetrics.extractionBulkDropped.add(1, {
               entity_type: type,
               namespace: this.namespace,
-              ccs: true,
+              remote: true,
             }),
         });
         entityStoreMetrics.extractionIngestDurationMs.record(Date.now() - ingestStart, {
           entity_type: type,
           namespace: this.namespace,
-          ccs: true,
+          remote: true,
         });
       }
 

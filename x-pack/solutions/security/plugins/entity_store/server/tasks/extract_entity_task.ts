@@ -57,7 +57,7 @@ async function runTask({
     };
   }
 
-  let ccs = false;
+  let remote = false;
 
   try {
     const { logsExtractionClient } = await createLogsExtractionClient({
@@ -73,7 +73,7 @@ async function runTask({
     });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
-    ccs = extractionResult.success && extractionResult.isCcs;
+    remote = extractionResult.success && extractionResult.isRemote;
 
     if (!extractionResult.success) {
       logger.error(
@@ -85,7 +85,7 @@ async function runTask({
       );
     }
 
-    entityStoreMetrics.extractionTaskSuccess.add(1, { entity_type: entityType, namespace, ccs });
+    entityStoreMetrics.extractionTaskSuccess.add(1, { entity_type: entityType, namespace, remote });
 
     const updatedState = {
       namespace,
@@ -103,13 +103,13 @@ async function runTask({
     logger.error(`Error running extract entity task, received ${e.message}`);
 
     if (abortController?.signal.aborted) {
-      entityStoreMetrics.extractionTaskAborted.add(1, { entity_type: entityType, namespace, ccs });
+      entityStoreMetrics.extractionTaskAborted.add(1, { entity_type: entityType, namespace, remote });
     } else {
       entityStoreMetrics.extractionTaskError.add(1, {
         entity_type: entityType,
         namespace,
         error_type: e.name ?? 'UnknownError',
-        ccs,
+        remote,
       });
     }
 
