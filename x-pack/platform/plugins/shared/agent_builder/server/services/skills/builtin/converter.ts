@@ -10,7 +10,7 @@ import { AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER } from '../../../dashboard/c
 
 export const convertBuiltinSkill = (
   skill: SkillDefinition,
-  spaceId: string
+  spaceId?: string
 ): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,

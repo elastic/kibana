@@ -12,7 +12,7 @@ import { convertBuiltinSkill } from './converter';
 
 export const createBuiltinSkillProvider = (
   skills: SkillDefinition[],
-  spaceId: string
+  spaceId?: string
 ): ReadonlySkillProvider => {
   const skillsMap = new Map(skills.map((s) => [s.id, s]));
 
