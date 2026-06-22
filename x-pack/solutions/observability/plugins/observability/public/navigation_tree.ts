@@ -81,6 +81,16 @@ function createNavTree({
         link: 'workflows',
       },
       {
+        // Error Sentry app (registered by the error_sentry plugin). Cast because the app id is not
+        // part of the typed AppDeepLinkId union; chrome resolves it from the registered deep link
+        // at runtime and hides the entry if the app is unavailable.
+        link: 'errorSentry' as AppDeepLinkId,
+        title: i18n.translate('xpack.observability.obltNav.errorSentry', {
+          defaultMessage: 'Error Sentry',
+        }),
+        icon: 'inspect',
+      },
+      {
         link: 'observability-overview:alerts',
         icon: 'warning',
       },
@@ -99,16 +109,6 @@ function createNavTree({
       {
         link: 'slo',
         icon: 'visGauge',
-      },
-      {
-        // Error Sentry app (registered by the error_sentry plugin). Cast because the app id is not
-        // part of the typed AppDeepLinkId union; chrome resolves it from the registered deep link
-        // at runtime and hides the entry if the app is unavailable.
-        link: 'errorSentry' as AppDeepLinkId,
-        title: i18n.translate('xpack.observability.obltNav.errorSentry', {
-          defaultMessage: 'Error Sentry',
-        }),
-        icon: 'inspect',
       },
       ...(streamsAvailable
         ? [

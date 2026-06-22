@@ -28,6 +28,8 @@ import { registerStepDefinitions } from './step_types';
 import { registerGetStatusRoute } from './routes/get_status';
 import { registerGetCasesStatsRoute } from './routes/get_cases_stats';
 import { registerGetCaptureTimingRoute } from './routes/get_capture_timing';
+import { registerGetActiveExecutionsRoute } from './routes/get_active_executions';
+import { registerGetCaptureConfigRoute } from './routes/get_capture_config';
 import { registerInstallRoutes } from './routes/install';
 import { registerRunCaptureRoute } from './routes/run_capture';
 
@@ -101,6 +103,13 @@ export class ErrorSentryServerPlugin
       }
       return this.workflowsManagementApi;
     });
+    registerGetActiveExecutionsRoute(router, () => {
+      if (!this.workflowsManagementApi) {
+        throw new Error('ErrorSentry workflows management API not yet available');
+      }
+      return this.workflowsManagementApi;
+    });
+    registerGetCaptureConfigRoute(router);
   }
 
   async start(_core: CoreStart, plugins: ErrorSentryServerPluginStartDeps): Promise<void> {

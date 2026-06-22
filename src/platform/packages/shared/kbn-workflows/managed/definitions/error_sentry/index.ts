@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ManagedWorkflowDefinition } from '../types';
+import type { ManagedWorkflowDefinition } from '../../types';
 
 export const ERROR_SENTRY_CAPTURE_WORKFLOW_ID = 'system-error-sentry-capture';
 export const ERROR_SENTRY_ESCALATE_GITHUB_WORKFLOW_ID = 'system-error-sentry-escalate-github';
@@ -18,14 +18,14 @@ export const ERROR_SENTRY_RALPH_INVESTIGATION_WORKFLOW_ID =
 
 const ERROR_SENTRY_WORKFLOW_MANAGEMENT = {
   lifecycle: 'dynamic',
-  versionStrategy: 'auto',
+  versionStrategy: 'on_adopt',
   enablement: 'restorable',
 } as const;
 
 export const ERROR_SENTRY_CAPTURE_WORKFLOW = {
   id: ERROR_SENTRY_CAPTURE_WORKFLOW_ID,
   pluginId: 'errorSentry',
-  version: 2,
+  version: 7,
   yaml: `version: "1"
 name: Error Sentry - Capture log error patterns
 enabled: true
@@ -53,14 +53,15 @@ steps:
         type: elasticsearch.request
         with:
           method: POST
-          path: "/{{ steps.read_config.output.index }}/_search"
+          path: /{{ steps.read_config.output.index }}/_search
           body:
             size: 1
             sort:
               - "@timestamp": desc
             query:
               simple_query_string:
-                fields: ["{{ steps.read_config.output.categoryField }}"]
+                fields:
+                  - "{{ steps.read_config.output.categoryField }}"
                 query: "{{ foreach.item.key }}"
                 default_operator: AND
                 flags: NONE
@@ -122,15 +123,26 @@ steps:
                     **Pattern signature:** \`{{ foreach.item.key }}\`
                     **Category hash:** \`{{ foreach.item.hash }}\`
 
-                    | | |
-                    |---|---|
-                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} |
-                    | 🚨 **Severity** | {{ foreach.item.severity }} |
-                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} |
-                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} |
-                    | 🖥️ **Service (most recent)** | {% if deployment != "" %}{% if namespace != "" %}\`{{ namespace }}/{{ deployment }}\`{% else %}\`{{ deployment }}\`{% endif %} — [Open in APM](/kbn/app/apm/services/{{ deployment }}/overview?rangeFrom=now-7d&rangeTo=now){% else %}_(unknown)_{% endif %} |
-                    | 🧊 **Pod (most recent)** | {% if pod != "" %}\`{{ pod }}\`{% else %}_(unknown)_{% endif %} |
-                    | 🏠 **Collector host** | \`{{ host_name }}\` |
+                    | | | |
+                    |---|---|---|
+                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} | |
+                    | 🚨 **Severity** | {{ foreach.item.severity }} | |
+                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} | |
+                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} | |
+                    | 🖥️ **Service (most recent)** | {% if deployment != "" %}{% if namespace != "" %}\`{{ namespace }}/{{ deployment }}\`{% else %}\`{{ deployment }}\`{% endif %}{% else %}_(unknown)_{% endif %} | {% if deployment != "" %}[APM](/kbn/app/apm/services/{{ deployment }}/overview?rangeFrom=now-7d&rangeTo=now) · [Metrics Hosts](/kbn/app/metrics/hosts?_a=(dateRange:(from:now-7d,to:now),filters:!(),limit:100,panelFilters:!((meta:(controlledBy:service.name,index:%27metrics-*,metricbeat-*%27,key:service.name),query:(match_phrase:(service.name:{{ deployment | replace: " ", "%20" }})))),preferredSchema:semconv,query:(language:kuery,query:%27%27))&controlPanels=(os.type:(exclude:!f,existsSelected:!f,fieldName:os.type,grow:!t,id:os.type,ignore_validations:!f,order:0,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!(),single_select:!f,sort:(by:_count,direction:desc),title:%27Operating%20System%27,type:options_list_control,use_global_filters:!t,width:small),service.name:(exclude:!f,existsSelected:!f,fieldName:service.name,grow:!t,id:service.name,ignore_validations:!f,order:2,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!({{ deployment | replace: " ", "%20" }}),single_select:!f,sort:(by:_count,direction:desc),title:%27Service%20Name%27,type:options_list_control,use_global_filters:!t,width:small))){% endif %} |
+                    | 🧊 **Pod (most recent)** | {% if pod != "" %}\`{{ pod }}\`{% else %}_(unknown)_{% endif %} | {% if pod != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20resource.attributes.k8s.pod.name%20==%20%22{{ pod | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    | 🏠 **Collector host** | {% if host_name != "" %}\`{{ host_name }}\`{% else %}_(unknown)_{% endif %} | {% if host_name != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20host.name%20==%20%22{{ host_name | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    {% if severity_text_sample != "" %}| 🔖 **Severity text** | \`{{ severity_text_sample }}\` | |
+                    {% endif %}{% if trace_id_sample != "" %}| 🧵 **Trace ID** | \`{{ trace_id_sample }}\` | |
+                    {% endif %}
+
+                    **Sample log** ({{ sample_time }}):
+
+                    \`\`\`
+                    {{ sample_body }}
+                    \`\`\`
+
+                    [🔎 Open in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20|%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20|%20WHERE%20MATCH({{ steps.read_config.output.categoryField }},%20%22{{ foreach.item.key | replace: " ", "%20" }}%22)%20|%20SORT%20@timestamp%20DESC%20|%20LIMIT%20500')))
 
                     <!-- lpit-category-hash: {{ foreach.item.hash }} -->
                   owner: observability
@@ -139,7 +151,8 @@ steps:
                     - error-sentry
                     - error-category
                     - error-sentry:{{ foreach.item.hash }}
-                  title: "[Kibana Log] {{ foreach.item.key | truncate: 144 }}"
+                    - volume:high
+                  title: "[Error Sentry] {{ foreach.item.key | truncate: 144 }}"
                 push-case: false
           - name: create_case_high
             type: if
@@ -151,10 +164,11 @@ steps:
                   description: |
                     {%- liquid
                       assign src = steps.fetch_sample.output.hits.hits[0]._source
-                      assign deployment = src.resource.attributes.k8s.deployment.name | default: ""
-                      assign namespace = src.resource.attributes.k8s.namespace.name | default: ""
-                      assign pod = src.resource.attributes.k8s.pod.name | default: ""
-                      assign host_name = src.host.name | default: ""
+                      assign attrs = src.resource.attributes
+                      assign deployment = attrs["k8s.deployment.name"] | default: ""
+                      assign namespace = attrs["k8s.namespace.name"] | default: ""
+                      assign pod = attrs["k8s.pod.name"] | default: ""
+                      assign host_name = attrs["host.name"] | default: ""
                       assign sample_time = src["@timestamp"] | default: ""
                       assign sample_body = src.body.text | default: ""
                       assign severity_text_sample = src.severity_text | default: ""
@@ -163,12 +177,26 @@ steps:
                     **Pattern signature:** \`{{ foreach.item.key }}\`
                     **Category hash:** \`{{ foreach.item.hash }}\`
 
-                    | | |
-                    |---|---|
-                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} |
-                    | 🚨 **Severity** | {{ foreach.item.severity }} |
-                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} |
-                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} |
+                    | | | |
+                    |---|---|---|
+                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} | |
+                    | 🚨 **Severity** | {{ foreach.item.severity }} | |
+                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} | |
+                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} | |
+                    | 🖥️ **Service (most recent)** | {% if deployment != "" %}{% if namespace != "" %}\`{{ namespace }}/{{ deployment }}\`{% else %}\`{{ deployment }}\`{% endif %}{% else %}_(unknown)_{% endif %} | {% if deployment != "" %}[APM](/kbn/app/apm/services/{{ deployment }}/overview?rangeFrom=now-7d&rangeTo=now) · [Metrics Hosts](/kbn/app/metrics/hosts?_a=(dateRange:(from:now-7d,to:now),filters:!(),limit:100,panelFilters:!((meta:(controlledBy:service.name,index:%27metrics-*,metricbeat-*%27,key:service.name),query:(match_phrase:(service.name:{{ deployment | replace: " ", "%20" }})))),preferredSchema:semconv,query:(language:kuery,query:%27%27))&controlPanels=(os.type:(exclude:!f,existsSelected:!f,fieldName:os.type,grow:!t,id:os.type,ignore_validations:!f,order:0,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!(),single_select:!f,sort:(by:_count,direction:desc),title:%27Operating%20System%27,type:options_list_control,use_global_filters:!t,width:small),service.name:(exclude:!f,existsSelected:!f,fieldName:service.name,grow:!t,id:service.name,ignore_validations:!f,order:2,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!({{ deployment | replace: " ", "%20" }}),single_select:!f,sort:(by:_count,direction:desc),title:%27Service%20Name%27,type:options_list_control,use_global_filters:!t,width:small))){% endif %} |
+                    | 🧊 **Pod (most recent)** | {% if pod != "" %}\`{{ pod }}\`{% else %}_(unknown)_{% endif %} | {% if pod != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20resource.attributes.k8s.pod.name%20==%20%22{{ pod | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    | 🏠 **Collector host** | {% if host_name != "" %}\`{{ host_name }}\`{% else %}_(unknown)_{% endif %} | {% if host_name != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20host.name%20==%20%22{{ host_name | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    {% if severity_text_sample != "" %}| 🔖 **Severity text** | \`{{ severity_text_sample }}\` | |
+                    {% endif %}{% if trace_id_sample != "" %}| 🧵 **Trace ID** | \`{{ trace_id_sample }}\` | |
+                    {% endif %}
+
+                    **Sample log** ({{ sample_time }}):
+
+                    \`\`\`
+                    {{ sample_body }}
+                    \`\`\`
+
+                    [🔎 Open in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20|%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20|%20WHERE%20MATCH({{ steps.read_config.output.categoryField }},%20%22{{ foreach.item.key | replace: " ", "%20" }}%22)%20|%20SORT%20@timestamp%20DESC%20|%20LIMIT%20500')))
 
                     <!-- lpit-category-hash: {{ foreach.item.hash }} -->
                   owner: observability
@@ -177,7 +205,8 @@ steps:
                     - error-sentry
                     - error-category
                     - error-sentry:{{ foreach.item.hash }}
-                  title: "[Kibana Log] {{ foreach.item.key | truncate: 144 }}"
+                    - volume:high
+                  title: "[Error Sentry] {{ foreach.item.key | truncate: 144 }}"
                 push-case: false
           - name: create_case_medium
             type: if
@@ -189,10 +218,11 @@ steps:
                   description: |
                     {%- liquid
                       assign src = steps.fetch_sample.output.hits.hits[0]._source
-                      assign deployment = src.resource.attributes.k8s.deployment.name | default: ""
-                      assign namespace = src.resource.attributes.k8s.namespace.name | default: ""
-                      assign pod = src.resource.attributes.k8s.pod.name | default: ""
-                      assign host_name = src.host.name | default: ""
+                      assign attrs = src.resource.attributes
+                      assign deployment = attrs["k8s.deployment.name"] | default: ""
+                      assign namespace = attrs["k8s.namespace.name"] | default: ""
+                      assign pod = attrs["k8s.pod.name"] | default: ""
+                      assign host_name = attrs["host.name"] | default: ""
                       assign sample_time = src["@timestamp"] | default: ""
                       assign sample_body = src.body.text | default: ""
                       assign severity_text_sample = src.severity_text | default: ""
@@ -201,12 +231,26 @@ steps:
                     **Pattern signature:** \`{{ foreach.item.key }}\`
                     **Category hash:** \`{{ foreach.item.hash }}\`
 
-                    | | |
-                    |---|---|
-                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} |
-                    | 🚨 **Severity** | {{ foreach.item.severity }} |
-                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} |
-                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} |
+                    | | | |
+                    |---|---|---|
+                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} | |
+                    | 🚨 **Severity** | {{ foreach.item.severity }} | |
+                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} | |
+                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} | |
+                    | 🖥️ **Service (most recent)** | {% if deployment != "" %}{% if namespace != "" %}\`{{ namespace }}/{{ deployment }}\`{% else %}\`{{ deployment }}\`{% endif %}{% else %}_(unknown)_{% endif %} | {% if deployment != "" %}[APM](/kbn/app/apm/services/{{ deployment }}/overview?rangeFrom=now-7d&rangeTo=now) · [Metrics Hosts](/kbn/app/metrics/hosts?_a=(dateRange:(from:now-7d,to:now),filters:!(),limit:100,panelFilters:!((meta:(controlledBy:service.name,index:%27metrics-*,metricbeat-*%27,key:service.name),query:(match_phrase:(service.name:{{ deployment | replace: " ", "%20" }})))),preferredSchema:semconv,query:(language:kuery,query:%27%27))&controlPanels=(os.type:(exclude:!f,existsSelected:!f,fieldName:os.type,grow:!t,id:os.type,ignore_validations:!f,order:0,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!(),single_select:!f,sort:(by:_count,direction:desc),title:%27Operating%20System%27,type:options_list_control,use_global_filters:!t,width:small),service.name:(exclude:!f,existsSelected:!f,fieldName:service.name,grow:!t,id:service.name,ignore_validations:!f,order:2,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!({{ deployment | replace: " ", "%20" }}),single_select:!f,sort:(by:_count,direction:desc),title:%27Service%20Name%27,type:options_list_control,use_global_filters:!t,width:small))){% endif %} |
+                    | 🧊 **Pod (most recent)** | {% if pod != "" %}\`{{ pod }}\`{% else %}_(unknown)_{% endif %} | {% if pod != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20resource.attributes.k8s.pod.name%20==%20%22{{ pod | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    | 🏠 **Collector host** | {% if host_name != "" %}\`{{ host_name }}\`{% else %}_(unknown)_{% endif %} | {% if host_name != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20host.name%20==%20%22{{ host_name | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    {% if severity_text_sample != "" %}| 🔖 **Severity text** | \`{{ severity_text_sample }}\` | |
+                    {% endif %}{% if trace_id_sample != "" %}| 🧵 **Trace ID** | \`{{ trace_id_sample }}\` | |
+                    {% endif %}
+
+                    **Sample log** ({{ sample_time }}):
+
+                    \`\`\`
+                    {{ sample_body }}
+                    \`\`\`
+
+                    [🔎 Open in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20|%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20|%20WHERE%20MATCH({{ steps.read_config.output.categoryField }},%20%22{{ foreach.item.key | replace: " ", "%20" }}%22)%20|%20SORT%20@timestamp%20DESC%20|%20LIMIT%20500')))
 
                     <!-- lpit-category-hash: {{ foreach.item.hash }} -->
                   owner: observability
@@ -215,7 +259,8 @@ steps:
                     - error-sentry
                     - error-category
                     - error-sentry:{{ foreach.item.hash }}
-                  title: "[Kibana Log] {{ foreach.item.key | truncate: 144 }}"
+                    - volume:medium
+                  title: "[Error Sentry] {{ foreach.item.key | truncate: 144 }}"
                 push-case: false
           - name: create_case_low
             type: if
@@ -227,10 +272,11 @@ steps:
                   description: |
                     {%- liquid
                       assign src = steps.fetch_sample.output.hits.hits[0]._source
-                      assign deployment = src.resource.attributes.k8s.deployment.name | default: ""
-                      assign namespace = src.resource.attributes.k8s.namespace.name | default: ""
-                      assign pod = src.resource.attributes.k8s.pod.name | default: ""
-                      assign host_name = src.host.name | default: ""
+                      assign attrs = src.resource.attributes
+                      assign deployment = attrs["k8s.deployment.name"] | default: ""
+                      assign namespace = attrs["k8s.namespace.name"] | default: ""
+                      assign pod = attrs["k8s.pod.name"] | default: ""
+                      assign host_name = attrs["host.name"] | default: ""
                       assign sample_time = src["@timestamp"] | default: ""
                       assign sample_body = src.body.text | default: ""
                       assign severity_text_sample = src.severity_text | default: ""
@@ -239,12 +285,26 @@ steps:
                     **Pattern signature:** \`{{ foreach.item.key }}\`
                     **Category hash:** \`{{ foreach.item.hash }}\`
 
-                    | | |
-                    |---|---|
-                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} |
-                    | 🚨 **Severity** | {{ foreach.item.severity }} |
-                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} |
-                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} |
+                    | | | |
+                    |---|---|---|
+                    | 📊 **Occurrences (7d)** | {{ foreach.item.docCount }} | |
+                    | 🚨 **Severity** | {{ foreach.item.severity }} | |
+                    | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} | |
+                    | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} | |
+                    | 🖥️ **Service (most recent)** | {% if deployment != "" %}{% if namespace != "" %}\`{{ namespace }}/{{ deployment }}\`{% else %}\`{{ deployment }}\`{% endif %}{% else %}_(unknown)_{% endif %} | {% if deployment != "" %}[APM](/kbn/app/apm/services/{{ deployment }}/overview?rangeFrom=now-7d&rangeTo=now) · [Metrics Hosts](/kbn/app/metrics/hosts?_a=(dateRange:(from:now-7d,to:now),filters:!(),limit:100,panelFilters:!((meta:(controlledBy:service.name,index:%27metrics-*,metricbeat-*%27,key:service.name),query:(match_phrase:(service.name:{{ deployment | replace: " ", "%20" }})))),preferredSchema:semconv,query:(language:kuery,query:%27%27))&controlPanels=(os.type:(exclude:!f,existsSelected:!f,fieldName:os.type,grow:!t,id:os.type,ignore_validations:!f,order:0,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!(),single_select:!f,sort:(by:_count,direction:desc),title:%27Operating%20System%27,type:options_list_control,use_global_filters:!t,width:small),service.name:(exclude:!f,existsSelected:!f,fieldName:service.name,grow:!t,id:service.name,ignore_validations:!f,order:2,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!({{ deployment | replace: " ", "%20" }}),single_select:!f,sort:(by:_count,direction:desc),title:%27Service%20Name%27,type:options_list_control,use_global_filters:!t,width:small))){% endif %} |
+                    | 🧊 **Pod (most recent)** | {% if pod != "" %}\`{{ pod }}\`{% else %}_(unknown)_{% endif %} | {% if pod != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20resource.attributes.k8s.pod.name%20==%20%22{{ pod | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    | 🏠 **Collector host** | {% if host_name != "" %}\`{{ host_name }}\`{% else %}_(unknown)_{% endif %} | {% if host_name != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20host.name%20==%20%22{{ host_name | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                    {% if severity_text_sample != "" %}| 🔖 **Severity text** | \`{{ severity_text_sample }}\` | |
+                    {% endif %}{% if trace_id_sample != "" %}| 🧵 **Trace ID** | \`{{ trace_id_sample }}\` | |
+                    {% endif %}
+
+                    **Sample log** ({{ sample_time }}):
+
+                    \`\`\`
+                    {{ sample_body }}
+                    \`\`\`
+
+                    [🔎 Open in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20|%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20|%20WHERE%20MATCH({{ steps.read_config.output.categoryField }},%20%22{{ foreach.item.key | replace: " ", "%20" }}%22)%20|%20SORT%20@timestamp%20DESC%20|%20LIMIT%20500')))
 
                     <!-- lpit-category-hash: {{ foreach.item.hash }} -->
                   owner: observability
@@ -253,7 +313,8 @@ steps:
                     - error-sentry
                     - error-category
                     - error-sentry:{{ foreach.item.hash }}
-                  title: "[Kibana Log] {{ foreach.item.key | truncate: 144 }}"
+                    - volume:low
+                  title: "[Error Sentry] {{ foreach.item.key | truncate: 144 }}"
                 push-case: false
 `,
   management: ERROR_SENTRY_WORKFLOW_MANAGEMENT,
@@ -262,7 +323,7 @@ steps:
 export const ERROR_SENTRY_RALPH_INVESTIGATION_WORKFLOW = {
   id: ERROR_SENTRY_RALPH_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'errorSentry',
-  version: 1,
+  version: 6,
   yaml: `version: "1"
 name: Error Sentry - Detective Ralph investigation
 description: Runs an AI investigation (Detective Ralph) on each Error Sentry case when it is created, then posts the findings back as a comment on the case.
@@ -291,14 +352,32 @@ steps:
           schema:
             type: object
             properties:
+              summary:
+                type: string
+                description: A single sentence summarising the root cause and what the on-call engineer should focus on first. No markdown.
               root_cause:
                 type: string
                 description: The most likely root cause of the issue, based on the log pattern and case details.
+              history:
+                type: string
+                description: The history of commits that lead up to the issue based on commit history
               next_steps:
                 type: array
                 description: 2-3 concrete next investigation steps for the on-call engineer.
                 items:
                   type: string
+              severity:
+                type: string
+                description: >
+                  The true business-impact severity of this error. Base this on what the error actually means —
+                  error type (crash, OOM, data corruption, auth failure → higher), affected service criticality,
+                  blast radius, and whether it is persistent or intermittent. Do NOT derive severity solely from
+                  occurrence count: a rare crash can be critical while a frequent harmless warning is low.
+                enum:
+                  - low
+                  - medium
+                  - high
+                  - critical
               confidence:
                 type: string
                 description: Confidence rating for the analysis.
@@ -307,18 +386,31 @@ steps:
                   - medium
                   - high
             required:
+              - summary
               - root_cause
+              - history
               - next_steps
+              - severity
               - confidence
           message: |
             You are investigating a new Error Sentry case.
 
             - Title: {{ steps.get_case.output.case.title }}
-            - Severity: {{ steps.get_case.output.case.severity }}
+            - Initial severity (from occurrence count — you will reassess this): {{ steps.get_case.output.case.severity }}
 
             {{ steps.get_case.output.case.description }}
         agent-id: detective-ralph
         create-conversation: true
+      - name: update_severity
+        type: kibana.request
+        with:
+          method: PATCH
+          path: /api/cases
+          body:
+            cases:
+              - id: "{{ event.caseId }}"
+                version: "{{ steps.get_case.output.case.version }}"
+                severity: "{{ steps.detective_ralph.output.structured_output.severity }}"
       - name: post_investigation
         type: cases.addComment
         with:
@@ -326,8 +418,13 @@ steps:
           comment: |
             ## 🕵️ Detective Ralph investigation
 
+            > {{ steps.detective_ralph.output.structured_output.summary }}
+
             **Likely root cause**
             {{ steps.detective_ralph.output.structured_output.root_cause }}
+
+            **How we got here**
+            {{ steps.detective_ralph.output.structured_output.history }}
 
             **Suggested next steps**
             {% for step in steps.detective_ralph.output.structured_output.next_steps -%}
@@ -338,6 +435,7 @@ steps:
             ---
             👉 To escalate this to a GitHub issue, comment \`/escalate-github\` on this case.
 
+            <!-- ralph-summary: {{ steps.detective_ralph.output.structured_output.summary }} -->
             <!-- ralph-conversation: {{ steps.detective_ralph.output.conversation_id }} -->
         push-case: false
 `,
@@ -375,7 +473,7 @@ steps:
 export const ERROR_SENTRY_ESCALATE_GITHUB_WORKFLOW = {
   id: ERROR_SENTRY_ESCALATE_GITHUB_WORKFLOW_ID,
   pluginId: 'errorSentry',
-  version: 1,
+  version: 2,
   yaml: `version: "1"
 name: Error Sentry - Escalate case to GitHub issue
 description: Listens for comments added to Observability (Error Sentry) cases. When a user posts the /escalate-github sentinel in a comment, creates a mirrored GitHub issue and replies on the case with the issue link.
@@ -460,6 +558,22 @@ steps:
             title: "{{ steps.get_case.output.case.title }}"
             body: |
               {{ steps.get_case.output.case.description }}
+              {%- liquid
+                assign ralph_comment = ""
+                for att in steps.get_attachments.output.attachments
+                  if att.comment contains "<!-- ralph-conversation:"
+                    assign ralph_comment = att.comment
+                  endif
+                endfor
+              -%}
+              {% if ralph_comment != "" %}
+
+              ---
+
+              ## 🔍 Detective Ralph's Investigation
+
+              {{ ralph_comment }}
+              {% endif %}
 
               ---
               Escalated from Kibana case: {{ event.spaceId | default: "default" | prepend: "/s/" | append: "/app/observability/cases/" | append: event.caseId }}

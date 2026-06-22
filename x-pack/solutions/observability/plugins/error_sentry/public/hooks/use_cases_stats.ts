@@ -12,8 +12,12 @@ export interface CaseItem {
   id: string;
   title: string;
   status: 'open' | 'in-progress' | 'closed';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  volume?: 'low' | 'medium' | 'high';
   createdAt: string;
   commentCount: number;
+  investigated: boolean;
+  investigationSummary?: string;
 }
 
 export interface CasesStats {
@@ -21,6 +25,7 @@ export interface CasesStats {
   open: number;
   inProgress: number;
   closed: number;
+  investigated: number;
   recentCases: CaseItem[];
 }
 

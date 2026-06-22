@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ErrorSentryPublicStartDeps } from './plugin';
-import { Overview } from './components/overview';
+import { Page } from './components/page';
 
 const queryClient = new QueryClient();
 
@@ -22,7 +22,7 @@ export const renderApp = (
   ReactDOM.render(
     core.rendering.addContext(
       <QueryClientProvider client={queryClient}>
-        <Overview
+        <Page
           http={core.http}
           notifications={core.notifications}
           discover={startPlugins.discover}

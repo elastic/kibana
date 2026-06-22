@@ -11,6 +11,13 @@ import { CASES_OWNER } from '../../common/constants';
 
 const ERROR_SENTRY_TAG = 'error-sentry';
 const RECENT_CASES_LIMIT = 10;
+const RALPH_INVESTIGATION_MARKER = '<!-- ralph-conversation:';
+
+// Parse the summary embedded by the workflow as <!-- ralph-summary: ... -->.
+const parseInvestigationSummary = (body: string): string | undefined => {
+  const match = body.match(/<!--\s*ralph-summary:\s*(.*?)\s*-->/s);
+  return match?.[1]?.trim() || undefined;
+};
 
 export const registerGetCasesStatsRoute = (
   router: IRouter,
@@ -36,19 +43,52 @@ export const registerGetCasesStatsRoute = (
         perPage: RECENT_CASES_LIMIT,
       });
 
+      const investigationResults = await Promise.all(
+        result.cases.map(async (c) => {
+          if (c.totalComment === 0) return { investigated: false, investigationSummary: undefined };
+          const attachments = await casesClient.attachments.getAll({ caseID: c.id });
+          const ralphComment = attachments.find(
+            (a) =>
+              'comment' in a &&
+              typeof a.comment === 'string' &&
+              a.comment.includes(RALPH_INVESTIGATION_MARKER)
+          );
+          if (!ralphComment || !('comment' in ralphComment)) {
+            return { investigated: false, investigationSummary: undefined };
+          }
+          return {
+            investigated: true,
+            investigationSummary: parseInvestigationSummary(ralphComment.comment as string),
+          };
+        })
+      );
+
+      const recentCases = result.cases.map((c, i) => {
+        const volumeTag = c.tags.find((t) => t.startsWith('volume:'));
+        const volume = volumeTag
+          ? (volumeTag.slice('volume:'.length) as 'low' | 'medium' | 'high')
+          : undefined;
+        return {
+          id: c.id,
+          title: c.title,
+          status: c.status,
+          severity: c.severity,
+          volume,
+          createdAt: c.created_at,
+          commentCount: c.totalComment,
+          investigated: investigationResults[i].investigated,
+          investigationSummary: investigationResults[i].investigationSummary,
+        };
+      });
+
       return response.ok({
         body: {
           total: result.total,
           open: result.count_open_cases,
           inProgress: result.count_in_progress_cases,
           closed: result.count_closed_cases,
-          recentCases: result.cases.map((c) => ({
-            id: c.id,
-            title: c.title,
-            status: c.status,
-            createdAt: c.created_at,
-            commentCount: c.totalComment,
-          })),
+          investigated: investigationResults.filter((r) => r.investigated).length,
+          recentCases,
         },
       });
     }
