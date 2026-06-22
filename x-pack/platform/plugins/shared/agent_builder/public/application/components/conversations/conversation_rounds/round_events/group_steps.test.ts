@@ -275,7 +275,8 @@ describe('groupSteps', () => {
   it('does not flush the tool buffer when an AskUserQuestionStep arrives mid-stream between tool calls', () => {
     const askUserQuestion: AskUserQuestionStep = {
       type: ConversationRoundStepType.askUserQuestion,
-      questions: [{ id: 'q1', question: 'Do you want to proceed?' }],
+      prompt_id: 'prompt-1',
+      questions: [{ question: 'Do you want to proceed?', options: [], multi_select: false }],
     };
     const a = toolStep('a');
     const b = toolStep('b');
