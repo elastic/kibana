@@ -287,27 +287,23 @@ function getRelatedStaticQuery(
   /**
    * For static ??field controls, we need to know which query to pull suggestions from
    */
-  let relatedQuery;
-
   const getRelatedQuery = (_api: unknown) => {
     const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
     return query && getESQLQueryVariables(query).includes(variableKey) ? query : undefined;
   };
 
-  relatedQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
-  if (!relatedQuery && apiPublishesChildren(parentApi)) {
+  const parentQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
+  if (!parentQuery && apiPublishesChildren(parentApi)) {
     // the parent API does not publish a related query, so check all related children
     for (const panel of relatedPanels$.getValue()) {
       const child = parentApi.children$.getValue()[panel];
       const childQuery = getRelatedQuery(child);
       if (childQuery) {
-        // found a child with a query that references this variable, so break out of loop;
+        // found a child with a query that references this variable, so return it;
         // only one query can be used to build suggestions
-        relatedQuery = childQuery;
-        break;
+        return childQuery ?? '';
       }
     }
   }
-
-  return relatedQuery ?? '';
+  return parentQuery ?? '';
 }
