@@ -239,6 +239,26 @@ describe('dataFilterStepDefinition', () => {
       expect(result.error?.message).toContain('Expected items to be an array');
     });
 
+    it('should skip non-object items with a warning and keep filtering', async () => {
+      const config = {
+        items: [{ status: 'active', id: 1 }, null, { status: 'active', id: 3 }],
+      };
+      const input = {
+        condition: 'item.status: active',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataFilterStepDefinition.handler(context);
+
+      // A `null` item cannot satisfy an `item.<field>` condition; it is skipped
+      // with a warning and excluded from the filtered output.
+      expect(result.output).toEqual([
+        { status: 'active', id: 1 },
+        { status: 'active', id: 3 },
+      ]);
+      expect(context.logger.warn).toHaveBeenCalled();
+    });
+
     it('should continue filtering even if one item evaluation fails', async () => {
       const badItem: Record<string, unknown> = {};
       Object.defineProperty(badItem, 'status', {

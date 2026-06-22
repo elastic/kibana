@@ -169,6 +169,10 @@ function readContextPath(
  * remaining segments on each element and merge matches (any-element semantics,
  * aligned with multi-valued ES fields). Numeric segments still select by index
  * (`users.0.name`) when they are valid array indices.
+ *
+ * A path segment can only be read from an object. When an intermediate value is a
+ * scalar/null/undefined, the next segment does not exist — treat it as "not found"
+ * rather than letting `segment in result` throw `TypeError: Cannot use 'in' operator`.
  */
 function resolvePathSegments(
   value: unknown,
