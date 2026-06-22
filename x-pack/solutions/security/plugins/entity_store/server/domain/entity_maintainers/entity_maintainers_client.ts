@@ -228,23 +228,45 @@ export class EntityMaintainersClient {
 
   public async stopAll(request: KibanaRequest): Promise<void> {
     this.logger.debug('Stopping all entity maintainer tasks');
-    try {
-      const tasks = entityMaintainersRegistry.getAll();
-      await Promise.all(tasks.map(({ id }) => this.stop(id, request)));
-    } catch (error) {
-      this.logger.error('Failed to stop all entity maintainer tasks', { error });
-      throw error;
+    const tasks = entityMaintainersRegistry.getAll();
+    const results = await Promise.allSettled(tasks.map(({ id }) => this.stop(id, request)));
+    const failures = results
+      .map((r, i) => ({ result: r, id: tasks[i].id }))
+      .filter(
+        (x): x is { result: PromiseRejectedResult; id: string } => x.result.status === 'rejected'
+      );
+    if (failures.length > 0) {
+      failures.forEach(({ result, id }) => {
+        this.logger.error(`Failed to stop entity maintainer task: ${id}`, { error: result.reason });
+      });
+      throw new Error(
+        `Failed to stop ${failures.length} of ${tasks.length} entity maintainer tasks: ${failures
+          .map(({ id }) => id)
+          .join(', ')}`
+      );
     }
   }
 
   public async startAll(request: KibanaRequest): Promise<void> {
     this.logger.debug('Starting all entity maintainer tasks');
-    try {
-      const tasks = entityMaintainersRegistry.getAll();
-      await Promise.all(tasks.map(({ id }) => this.start(id, request)));
-    } catch (error) {
-      this.logger.error('Failed to start all entity maintainer tasks', { error });
-      throw error;
+    const tasks = entityMaintainersRegistry.getAll();
+    const results = await Promise.allSettled(tasks.map(({ id }) => this.start(id, request)));
+    const failures = results
+      .map((r, i) => ({ result: r, id: tasks[i].id }))
+      .filter(
+        (x): x is { result: PromiseRejectedResult; id: string } => x.result.status === 'rejected'
+      );
+    if (failures.length > 0) {
+      failures.forEach(({ result, id }) => {
+        this.logger.error(`Failed to start entity maintainer task: ${id}`, {
+          error: result.reason,
+        });
+      });
+      throw new Error(
+        `Failed to start ${failures.length} of ${tasks.length} entity maintainer tasks: ${failures
+          .map(({ id }) => id)
+          .join(', ')}`
+      );
     }
   }
 
