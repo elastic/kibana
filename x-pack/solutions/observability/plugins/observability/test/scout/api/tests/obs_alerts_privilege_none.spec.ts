@@ -48,17 +48,14 @@ apiTest.describe(
           expect(response).toHaveStatusCode(403);
         });
 
-        apiTest(
-          `cannot unmute an alert instance for ${spec.ruleTypeId}`,
-          async ({ apiClient }) => {
-            const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
-            const response = await apiClient.post(
-              `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
-              { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
-            );
-            expect(response).toHaveStatusCode(403);
-          }
-        );
+        apiTest(`cannot unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+          const response = await apiClient.post(
+            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+            { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
+          );
+          expect(response).toHaveStatusCode(403);
+        });
       }
     });
 
