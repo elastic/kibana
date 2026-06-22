@@ -7,56 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { metaFields } from '@kbn/config-schema';
+import { isEqual } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 
 const ISSUE_URL = 'https://github.com/elastic/kibana/issues/271809';
 
-const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
-
 /**
- * Internal annotations the OAS converter writes onto schemas mid-parse and
- * strips at the end of {@link parse}. Ignored when comparing two registrations
- * of the same shared schema id: the existing entry in the master map has
- * already been stripped, but a freshly generated entry from a `maybe(shared)`
- * site still has them attached at registration time.
+ * Shared schemas are stripped of transient internal annotations before registration.
  */
-const TRANSIENT_KEYS = new Set<string>([META_FIELD_X_OAS_OPTIONAL]);
-
-const visibleKeys = (value: object): string[] => {
-  return Object.keys(value).filter((key) => !TRANSIENT_KEYS.has(key));
-};
-
-/**
- * Deep-equality that ignores transient internal annotations on schema objects
- * (see {@link TRANSIENT_KEYS}). Drop-in replacement for `lodash.isEqual` for
- * the shared-schema comparison, scoped to plain JSON-shaped values.
- */
-export const schemasMatch = (a: unknown, b: unknown): boolean => {
-  if (a === b) return true;
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
-    return false;
-  }
-  if (Array.isArray(a)) {
-    if (!Array.isArray(b) || a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (!schemasMatch(a[i], b[i])) return false;
-    }
-    return true;
-  }
-  if (Array.isArray(b)) return false;
-
-  const aKeys = visibleKeys(a as object);
-  const bKeys = visibleKeys(b as object);
-  if (aKeys.length !== bKeys.length) return false;
-
-  const bRecord = b as Record<string, unknown>;
-  for (const key of aKeys) {
-    if (!Object.prototype.hasOwnProperty.call(bRecord, key)) return false;
-    if (!schemasMatch((a as Record<string, unknown>)[key], bRecord[key])) return false;
-  }
-  return true;
-};
+export const schemasMatch = isEqual;
 
 const propertyNames = (schema: OpenAPIV3.SchemaObject): string[] => {
   return schema.properties ? Object.keys(schema.properties).sort() : [];
