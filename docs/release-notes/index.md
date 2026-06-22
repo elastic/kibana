@@ -71,8 +71,6 @@ For the Elastic Security 9.4.3 release information, refer to [Elastic Security S
 
 **Kibana platform**:
 * Adds `notifications.connectors.default.email` as a Docker environment variable [#272761]({{kib-pull}}272761).
-
-**Kibana security**:
 * Fixes user profile retrieval in reverse proxy `run_as` configurations, ensuring the nav bar displays the effective user's avatar and name rather than the proxy user's [#271314]({{kib-pull}}271314).
 
 **Machine Learning**:
