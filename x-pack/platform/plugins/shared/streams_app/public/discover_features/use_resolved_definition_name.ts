@@ -64,7 +64,7 @@ export function useResolvedDefinitionName({
           const remoteInfo = parseRemoteIndex(index);
           if (remoteInfo) {
             return {
-              name: remoteInfo.streamName,
+              name: remoteInfo.streamName ?? fallbackStreamName,
               existsLocally: false,
               remoteProject: remoteInfo.projectName,
             };
@@ -77,17 +77,21 @@ export function useResolvedDefinitionName({
   );
 }
 
-function parseRemoteIndex(index: string): { projectName: string; streamName: string } | undefined {
+function parseRemoteIndex(
+  index: string
+): { projectName: string; streamName: string | undefined } | undefined {
   const colonIdx = index.indexOf(':');
   if (colonIdx <= 0) return undefined;
 
   const projectName = index.substring(0, colonIdx);
   const backingIndex = index.substring(colonIdx + 1);
 
+  // Try to recover the logical stream name from a data-stream backing index
+  // (.ds-<name>-YYYY.MM.DD-<gen>). For any other index form (e.g. legacy
+  // filebeat indices) we still know the remote cluster, so we keep projectName
+  // and leave streamName undefined so the caller can fall back gracefully.
   const match = backingIndex.match(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/);
-  if (!match) return undefined;
-
-  return { projectName, streamName: match[1] };
+  return { projectName, streamName: match ? match[1] : undefined };
 }
 
 export function adaptDocToResolverInputs(doc: DataTableRecord) {
