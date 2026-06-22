@@ -11,7 +11,7 @@ import { useFormContext } from 'react-hook-form';
 import { RecoveryDelayField } from './recovery_delay_field';
 import { AlertDelayField } from './alert_delay_field';
 import type { FormValues } from '../types';
-import { mapFormValuesToUpdateRequest } from '../utils/rule_request_mappers';
+import { composeFormToUpdateRequest } from '../../flyout/compose_discover/compose_mappers';
 import { createFormWrapper, createMockServices } from '../../test_utils';
 
 let getFormValues: (() => FormValues) | undefined;
@@ -181,7 +181,7 @@ describe('RecoveryDelayField', () => {
     expect(values.stateTransition?.recoveringTimeframe).toBeNull();
     expect(values.stateTransition?.pendingCount).toBe(2);
 
-    expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
+    expect(composeFormToUpdateRequest(values).state_transition).toEqual({
       pending_count: 2,
       recovering_count: 0,
     });

@@ -391,9 +391,14 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
   });
 
-  it('sets stateTransition to undefined when absent from response', () => {
+  it('initializes stateTransition with null fields when absent from response', () => {
     const result = mapRuleToComposeFormValues(baseRuleResponse);
-    expect(result.stateTransition).toBeUndefined();
+    expect(result.stateTransition).toEqual({
+      pendingCount: null,
+      pendingTimeframe: null,
+      recoveringCount: null,
+      recoveringTimeframe: null,
+    });
   });
 
   it('splits artifacts by field ownership when present', () => {

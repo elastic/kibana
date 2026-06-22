@@ -6,7 +6,6 @@
  */
 
 import type { RuleResponse, CreateRuleData, Query, UpdateRuleData } from '@kbn/alerting-v2-schemas';
-import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition, RuleQuery } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
@@ -23,11 +22,12 @@ import {
 // FormValues → API request
 // ---------------------------------------------------------------------------
 
-const mapMetadata = (metadata: FormValues['metadata']) => ({
+const mapMetadata = (metadata: FormValues['metadata'], builderType?: string) => ({
   name: metadata.name,
   description: metadata.description,
   owner: metadata.owner,
   ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
+  ...(builderType ? { builder_type: builderType } : {}),
 });
 
 const mapSchedule = (schedule: FormValues['schedule']) => ({
@@ -48,53 +48,29 @@ const mapQuery = (query: RuleQuery): Query => {
     format: 'standalone',
     breach: { query: query.breach.query },
     ...(query.recovery ? { recovery: { query: query.recovery.query } } : {}),
+    ...(query.no_data ? { no_data: { query: query.no_data.query } } : {}),
   };
 };
 
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
 
-const mapStateTransition = (formValues: FormValues) => {
-  const { kind, stateTransition } = formValues;
-  if (kind !== 'alert') return undefined;
-
-  const alertMode =
-    formValues.stateTransitionAlertDelayMode ??
-    deriveAlertDelayModeFromStateTransition(stateTransition);
-  const recoveryMode =
-    formValues.stateTransitionRecoveryDelayMode ??
-    deriveRecoveryDelayModeFromStateTransition(stateTransition);
-
+/**
+ * Passthrough serialization of state transition (camelCase → snake_case).
+ * Field-level filtering by delay mode is intentionally not done here —
+ * the API's Zod schema handles validation, and the server's director
+ * strategies only read the fields relevant to the configured strategy.
+ */
+const mapStateTransition = (
+  st?: StateTransition
+): RuleRequestCommon['state_transition'] | undefined => {
+  if (!st) return undefined;
   const out: NonNullable<RuleRequestCommon['state_transition']> = {};
-
-  if (alertMode === DELAY_MODE.immediate) {
-    out.pending_count = 0;
-  } else if (alertMode === DELAY_MODE.breaches && stateTransition?.pendingCount != null) {
-    out.pending_count = stateTransition.pendingCount;
-  } else if (alertMode === DELAY_MODE.duration) {
-    if (stateTransition?.pendingTimeframe != null) {
-      out.pending_timeframe = stateTransition.pendingTimeframe;
-    }
-    if (stateTransition?.pendingCount != null) {
-      out.pending_count = stateTransition.pendingCount;
-    }
-  }
-
-  if (recoveryMode === DELAY_MODE.immediate) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_MODE.duration) {
-    if (stateTransition?.recoveringTimeframe != null) {
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    }
-    if (stateTransition?.recoveringCount != null) {
-      out.recovering_count = stateTransition.recoveringCount;
-    }
-  }
-
-  if (Object.keys(out).length === 0) return undefined;
-  return out;
+  if (st.pendingCount != null) out.pending_count = st.pendingCount;
+  if (st.pendingTimeframe != null) out.pending_timeframe = st.pendingTimeframe;
+  if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
+  if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
+  return Object.keys(out).length ? out : undefined;
 };
 
 /**
@@ -102,7 +78,13 @@ const mapStateTransition = (formValues: FormValues) => {
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
+  metadata: {
+    name: string;
+    description?: string;
+    owner?: string;
+    tags?: string[];
+    builder_type?: string;
+  };
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
@@ -117,33 +99,47 @@ export interface RuleRequestCommon {
   artifacts?: RuleArtifactPayload;
 }
 
-export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
-  const { metadata, timeField, schedule, query, grouping } = formValues;
+export const mapFormValuesToRuleRequest = (
+  formValues: FormValues,
+  builderType?: string
+): RuleRequestCommon => {
+  const { metadata, timeField, schedule, query, grouping, stateTransition } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const hasRecovery = query.recovery != null;
 
   return {
-    metadata: mapMetadata(metadata),
+    metadata: mapMetadata(metadata, builderType),
     time_field: timeField,
     schedule: mapSchedule(schedule),
     query: mapQuery(query),
     ...(hasRecovery ? { recovery_strategy: 'query' as const } : {}),
     grouping: mapGrouping(grouping),
-    state_transition: mapStateTransition(formValues),
+    state_transition: mapStateTransition(stateTransition),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
 };
 
-export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRuleData => ({
+export const mapFormValuesToCreateRequest = (
+  formValues: FormValues,
+  builderType?: string
+): CreateRuleData => ({
   kind: formValues.kind,
-  ...mapFormValuesToRuleRequest(formValues),
+  ...mapFormValuesToRuleRequest(formValues, builderType),
 });
 
-export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, ...rest } = mapFormValuesToRuleRequest(formValues);
+export const mapFormValuesToUpdateRequest = (
+  formValues: FormValues,
+  builderType?: string
+): UpdateRuleData => {
+  const { grouping, state_transition, artifacts, metadata, ...rest } =
+    mapFormValuesToRuleRequest(formValues, builderType);
 
   return {
     ...rest,
+    metadata: {
+      ...metadata,
+      builder_type: metadata.builder_type ?? null,
+    },
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,

@@ -77,13 +77,15 @@ describe('rule_request_mappers', () => {
       expect(result.grouping).toBeUndefined();
     });
 
-    it('maps state_transition for alert kind with pending count and timeframe', () => {
+    it('passes through state_transition fields as snake_case', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'duration',
-        stateTransitionRecoveryDelayMode: 'immediate',
-        stateTransition: { pendingCount: 3, pendingTimeframe: '10m' },
+        stateTransition: {
+          pendingCount: 3,
+          pendingTimeframe: '10m',
+          recoveringCount: 4,
+          recoveringTimeframe: '15m',
+        },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
@@ -91,26 +93,45 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
-        recovering_count: 0,
+        recovering_count: 4,
+        recovering_timeframe: '15m',
       });
     });
 
-    it('maps state_transition with only pending count (no timeframe)', () => {
+    it('omits null state_transition fields', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'breaches',
-        stateTransitionRecoveryDelayMode: 'immediate',
-        stateTransition: { pendingCount: 5 },
+        stateTransition: {
+          pendingCount: 5,
+          pendingTimeframe: null,
+          recoveringCount: null,
+          recoveringTimeframe: null,
+        },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 5, recovering_count: 0 });
-      expect(result.state_transition).not.toHaveProperty('pending_timeframe');
+      expect(result.state_transition).toEqual({ pending_count: 5 });
     });
 
-    it('returns undefined state_transition for signal kind even with stateTransition data', () => {
+    it('returns undefined state_transition when stateTransition is undefined', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.state_transition).toBeUndefined();
+    });
+
+    it('returns undefined state_transition when stateTransition is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        stateTransition: {},
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toBeUndefined();
+    });
+
+    it('does not filter state_transition by kind (API handles validation)', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'signal',
@@ -119,104 +140,9 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toBeUndefined();
-    });
-
-    it('emits pending_count: 0 and recovering_count: 0 for alert kind when both modes are immediate', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransition: {},
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
-    });
-
-    it('emits pending_count: 0 and recovering_count: 0 for alert kind when stateTransition is undefined', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
-    });
-
-    it('emits pending_count: 0 when alert delay mode is immediate even if pendingCount is stale', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'recoveries',
-        stateTransition: {
-          pendingCount: 2,
-          pendingTimeframe: null,
-          recoveringCount: 3,
-          recoveringTimeframe: null,
-        },
-      };
-
-      expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
-        pending_count: 0,
-        recovering_count: 3,
-      });
-    });
-
-    it('maps state_transition with recovering count and timeframe', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'duration',
-        stateTransition: { recoveringCount: 4, recoveringTimeframe: '15m' },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
       expect(result.state_transition).toEqual({
-        pending_count: 0,
-        recovering_count: 4,
-        recovering_timeframe: '15m',
-      });
-    });
-
-    it('maps state_transition with only recovering count (no timeframe)', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'recoveries',
-        stateTransition: { recoveringCount: 3 },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 3 });
-      expect(result.state_transition).not.toHaveProperty('recovering_timeframe');
-    });
-
-    it('maps state_transition with both pending and recovering fields', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'breaches',
-        stateTransitionRecoveryDelayMode: 'duration',
-        stateTransition: {
-          pendingCount: 2,
-          recoveringCount: 5,
-          recoveringTimeframe: '10m',
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({
-        pending_count: 2,
-        recovering_count: 5,
-        recovering_timeframe: '10m',
+        pending_count: 3,
+        pending_timeframe: '10m',
       });
     });
 
@@ -505,8 +431,6 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         grouping: { fields: ['host.name'] },
-        stateTransitionAlertDelayMode: 'duration',
-        stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
       };
 
@@ -516,7 +440,6 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toEqual({
         pending_count: 2,
         pending_timeframe: '5m',
-        recovering_count: 0,
       });
     });
 
@@ -539,6 +462,7 @@ describe('rule_request_mappers', () => {
         name: 'Test Rule',
         owner: 'test-owner',
         tags: ['tag1', 'tag2'],
+        builder_type: null,
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
@@ -804,7 +728,6 @@ describe('rule_request_mappers', () => {
       expect(createPayload.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
-        recovering_count: 0,
       });
     });
   });

@@ -12,7 +12,8 @@ import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from '../types';
-import { mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
+import { splitArtifactsByType } from './artifact_mappers';
+import { mapFormValuesToCreateRequest } from './rule_request_mappers';
 
 export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
 
@@ -35,101 +36,30 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   return parsedArtifacts.length ? parsedArtifacts : undefined;
 };
 
-interface YamlStateTransition {
-  pending_count?: number;
-  pending_timeframe?: string;
-  recovering_count?: number;
-  recovering_timeframe?: string;
-}
-
-interface YamlComposedQuery {
-  format: 'composed';
-  base: string;
-  breach: { segment: string };
-  recovery?: { segment: string };
-}
-
-interface YamlStandaloneQuery {
-  format: 'standalone';
-  breach: { query: string };
-  recovery?: { query: string };
-  no_data?: { query: string };
-}
-
-type YamlQuery = YamlComposedQuery | YamlStandaloneQuery;
-
-interface YamlRuleObject {
-  kind: string;
-  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
-  time_field: string;
-  schedule: { every: string; lookback: string };
-  query: YamlQuery;
-  recovery_strategy?: string;
-  grouping?: { fields: string[] };
-  state_transition?: YamlStateTransition;
-  artifacts?: Array<{ id: string; type: string; value: string }>;
-}
-
-const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
-  if (!st) return undefined;
-  const out: YamlStateTransition = {};
-  if (st.pendingCount != null) out.pending_count = st.pendingCount;
-  if (st.pendingTimeframe != null) out.pending_timeframe = st.pendingTimeframe;
-  if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
-  if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
-  return Object.keys(out).length ? out : undefined;
-};
-
-const serializeQuery = (query: RuleQuery): YamlQuery => {
-  if (query.format === 'composed') {
-    return {
-      format: 'composed',
-      base: query.base,
-      breach: { segment: query.breach.segment },
-      ...(query.recovery ? { recovery: { segment: query.recovery.segment } } : {}),
-    };
+/**
+ * Strip undefined/null values from an object tree so js-yaml produces clean output.
+ */
+const stripEmpty = (obj: Record<string, unknown>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value == null) continue;
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const cleaned = stripEmpty(value as Record<string, unknown>);
+      if (Object.keys(cleaned).length) result[key] = cleaned;
+    } else {
+      result[key] = value;
+    }
   }
-  return {
-    format: 'standalone',
-    breach: { query: query.breach.query },
-    ...(query.recovery ? { recovery: { query: query.recovery.query } } : {}),
-    ...(query.no_data ? { no_data: { query: query.no_data.query } } : {}),
-  };
+  return result;
 };
 
 /**
- * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
- *
- * Note: `metadata.enabled` is intentionally NOT serialized. The API's `metadataSchema`
- * is strict and only accepts { name, description?, owner?, tags? }; `enabled` lives at
- * the top level of the update/response schemas, never under metadata, and is not part
- * of the create payload at all.
+ * Convert FormValues to a YAML-compatible object by reusing the shared
+ * create-request mapper, then stripping undefined/null values so the
+ * YAML output stays clean (no `description: null` noise).
  */
-export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
-  const st = serializeStateTransition(values.stateTransition);
-  const hasRecovery = values.query.recovery != null;
-  const allArtifacts = mergeArtifactsByType(values);
-
-  return {
-    kind: values.kind,
-    metadata: {
-      name: values.metadata.name,
-      ...(values.metadata.description && { description: values.metadata.description }),
-      ...(values.metadata.owner && { owner: values.metadata.owner }),
-      ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
-    },
-    time_field: values.timeField,
-    schedule: {
-      every: values.schedule.every,
-      lookback: values.schedule.lookback,
-    },
-    query: serializeQuery(values.query),
-    ...(hasRecovery ? { recovery_strategy: 'query' } : {}),
-    ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
-    ...(st && { state_transition: st }),
-    ...(allArtifacts?.length && { artifacts: allArtifacts }),
-  };
-};
+export const formValuesToYamlObject = (values: FormValues): Record<string, unknown> =>
+  stripEmpty(mapFormValuesToCreateRequest(values) as unknown as Record<string, unknown>);
 
 /**
  * Lenient extractor for a nested `{ query: string }` or `{ segment: string }` block.
