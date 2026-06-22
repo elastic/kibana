@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -17,13 +17,15 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import type { DashboardListingProps, DashboardListingTab } from './types';
+import { DashboardListingTableLayoutSwitcher } from './dashboard_listing_table_layout_switcher';
+import type { DashboardListingProps, DashboardListingTab, DashboardListingTableLayout } from './types';
+import { RESTRICTED_TABLE_TITLE_COLUMN_MAX_WIDTH } from './types';
 
 export const DashboardListing = ({
   children,
@@ -40,6 +42,14 @@ export const DashboardListing = ({
 
   const history = useHistory();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
+  const [tableLayout, setTableLayout] = useState<DashboardListingTableLayout>('fullWidth');
+
+  const onTableLayoutChange = useCallback((layout: DashboardListingTableLayout) => {
+    setTableLayout(layout);
+  }, []);
+
+  const titleColumnMaxWidth =
+    tableLayout === 'restricted' ? RESTRICTED_TABLE_TITLE_COLUMN_MAX_WIDTH : undefined;
 
   const tabs = useMemo(
     () =>
@@ -57,9 +67,23 @@ export const DashboardListing = ({
     return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
   }, [tabs, activeTabParam]);
 
-  const changeActiveTab = (tabId: string) => {
-    history.push(`/list/${tabId}`);
-  };
+  const changeActiveTab = useCallback(
+    (tabId: string) => {
+      history.push(`/list/${tabId}`);
+    },
+    [history]
+  );
+
+  const appHeaderTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        id: tab.id,
+        label: tab.title,
+        isSelected: tab.id === activeTabId,
+        onClick: () => changeActiveTab(tab.id),
+      })),
+    [tabs, activeTabId, changeActiveTab]
+  );
 
   const getBreadcrumbs = useCallback(
     (appId: string): EmbeddableEditorBreadcrumb[] => {
@@ -160,6 +184,7 @@ export const DashboardListing = ({
             defaultMessage: 'Dashboards',
           })}
           menu={appMenu}
+          tabs={appHeaderTabs}
         />
         <TabbedTableListView
           headingId="dashboardListingHeading"
@@ -168,6 +193,12 @@ export const DashboardListing = ({
           activeTabId={activeTabId}
           changeActiveTab={changeActiveTab}
           showCreateButton={false}
+          hideHeader
+          titleColumnMaxWidth={titleColumnMaxWidth}
+        />
+        <DashboardListingTableLayoutSwitcher
+          layout={tableLayout}
+          onLayoutChange={onTableLayoutChange}
         />
       </QueryClientProvider>
     </I18nProvider>

@@ -19,6 +19,7 @@ import { render, waitFor, act } from '@testing-library/react';
  */
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
 
+import { AppHeader } from '@kbn/app-header';
 import { DashboardListing } from './dashboard_listing';
 import type { DashboardListingProps, DashboardListingTab } from './types';
 
@@ -29,7 +30,7 @@ jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
 
 jest.mock('@kbn/app-header', () => ({
   __esModule: true,
-  AppHeader: () => null,
+  AppHeader: jest.fn().mockReturnValue(null),
 }));
 
 const renderDashboardListing = (
@@ -52,6 +53,7 @@ const renderDashboardListing = (
   );
 
 const mockTabbedTableListView = TabbedTableListView as jest.Mock;
+const mockAppHeader = jest.mocked(AppHeader);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -64,9 +66,27 @@ test('renders TabbedTableListView with correct title and dashboards tab', () => 
   const props = mockTabbedTableListView.mock.calls[0][0];
   expect(props).toMatchObject({
     headingId: 'dashboardListingHeading',
+    hideHeader: true,
   });
-  expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });
+  expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'All dashboards' });
   expect(props.tabs.length).toBe(1);
+});
+
+test('renders AppHeader with listing tabs', () => {
+  const mockAdditionalTab: DashboardListingTab = {
+    id: 'annotations',
+    title: 'Annotations',
+    getTableList: jest.fn(),
+  };
+
+  renderDashboardListing({ getTabs: () => [mockAdditionalTab] });
+
+  expect(mockAppHeader).toHaveBeenCalledTimes(1);
+  const props = mockAppHeader.mock.calls[0][0];
+  expect(props.tabs).toEqual([
+    { id: 'dashboards', label: 'All dashboards', isSelected: true, onClick: expect.any(Function) },
+    { id: 'annotations', label: 'Annotations', isSelected: false, onClick: expect.any(Function) },
+  ]);
 });
 
 test('works without getTabs (for embedded use cases)', () => {

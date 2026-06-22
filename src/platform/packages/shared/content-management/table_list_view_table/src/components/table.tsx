@@ -35,6 +35,8 @@ import {
   FavoritesEmptyState,
 } from '@kbn/content-management-favorites-public';
 
+import { getRestrictedTableLayoutStyles } from './restricted_table_layout.styles';
+
 import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
@@ -86,6 +88,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
+  titleColumnMaxWidth?: string;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -117,6 +120,7 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
+  titleColumnMaxWidth,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
@@ -362,6 +366,16 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
+  const tableCss = useMemo(
+    () => [
+      cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme),
+      ...(titleColumnMaxWidth
+        ? [getRestrictedTableLayoutStyles(euiTheme.euiTheme, titleColumnMaxWidth)]
+        : []),
+    ],
+    [euiTheme.euiTheme, titleColumnMaxWidth]
+  );
+
   return (
     <UserFilterContextProvider
       enabled={createdByEnabled}
@@ -402,7 +416,7 @@ export function Table<T extends UserContentCommonSchema>({
           scrollableInline
           tableLayout="auto"
           responsiveBreakpoint={false}
-          css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
+          css={tableCss}
         />
       </TagFilterContextProvider>
     </UserFilterContextProvider>

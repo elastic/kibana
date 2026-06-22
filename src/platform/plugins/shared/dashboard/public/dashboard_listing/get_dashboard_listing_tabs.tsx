@@ -92,6 +92,7 @@ const DashboardsTabContent = ({
       <TableListViewTable<DashboardSavedObjectUserContent>
         tableCaption={tableListViewTableProps.title}
         {...tableListViewTableProps}
+        titleColumnMaxWidth={parentProps.titleColumnMaxWidth}
         onFetchSuccess={parentProps.onFetchSuccess}
         setPageDataTestSubject={parentProps.setPageDataTestSubject}
       />
@@ -115,7 +116,7 @@ export const getDashboardListingTabs = ({
 
   const dashboardsTab: DashboardListingTab = {
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
-      defaultMessage: 'Dashboards',
+      defaultMessage: 'All dashboards',
     }),
     id: 'dashboards',
     getTableList: (parentProps) => (
