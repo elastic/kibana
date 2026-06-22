@@ -6,13 +6,11 @@
  */
 
 import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { agentBuilderDefaultAgentId, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
@@ -132,24 +130,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       try {
         const conversation = await services.conversationsService.get({ conversationId: id });
         setConversationId(conversation.id ?? undefined);
-      } catch (error) {
-        const httpError = error as IHttpFetchError;
-        if (httpError?.response?.status !== 404) {
-          // Only surface unexpected errors; a 404 simply means the conversation no longer exists.
-          coreStart.notifications.toasts.addError(
-            error instanceof Error ? error : new Error(String(error)),
-            {
-              title: i18n.translate(
-                'xpack.agentBuilder.embeddableConversations.failedToRestoreConversationTitle',
-                { defaultMessage: 'Failed to restore conversation' }
-              ),
-            }
-          );
-        }
+      } catch {
         setConversationId(undefined);
       }
     },
-    [coreStart.notifications.toasts, services.conversationsService, setConversationId]
+    [services.conversationsService, setConversationId]
   );
 
   // One-time initialization per provider instance:
@@ -163,7 +148,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     if (contextProps.newConversation) {
       setConversationId(undefined);
     } else if (persistedConversationId) {
-      validateAndSetConversationId(persistedConversationId).catch(() => {});
+      validateAndSetConversationId(persistedConversationId);
     } else {
       setConversationId(undefined);
     }
