@@ -53,7 +53,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     promptManager,
     stateManager,
-    filestore,
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
@@ -75,7 +74,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   ]);
 
   const experimentalFeatures: ExperimentalFeatures = {
-    filestore: true,
     skills: true,
     subagents: isExperimentalEnabled,
     todos: isExperimentalEnabled,
@@ -110,7 +108,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillsStore,
     attachmentStateManager,
     todoStateManager,
-    filestore,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({
