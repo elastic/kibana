@@ -47,7 +47,6 @@
     "@kbn/es-query",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
-    "@kbn/inference-prompt-utils",
     "@kbn/std",
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
@@ -96,6 +95,11 @@
     "@kbn/workflows",
     "@kbn/agent-builder-plugin",
     "@kbn/data-streams",
-    "@kbn/es-mappings"
+    "@kbn/es-mappings",
+    "@kbn/core-spaces-common",
+    "@kbn/elastic-agent-utils",
+    "@kbn/sample-log-parser",
+    "@kbn/workflows-extensions",
+    "@kbn/agent-context-layer-plugin"
   ]
 }

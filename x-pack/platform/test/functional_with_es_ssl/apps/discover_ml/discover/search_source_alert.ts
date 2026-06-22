@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { openDiscoverSearchThresholdRuleFlyout } from '../../../../functional/apps/discover/open_search_threshold_rule_flyout';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -199,13 +201,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openDiscoverAlertFlyout = async () => {
-    await testSubjects.click('app-menu-overflow-button');
-    await testSubjects.click('discoverAlertsButton');
-    await testSubjects.click('discoverCreateAlertButton');
+    await openDiscoverSearchThresholdRuleFlyout({ testSubjects, retry });
   };
 
   const openManagementAlertFlyout = async () => {
-    await PageObjects.common.navigateToApp('rules');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -266,7 +268,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openAlertRuleInManagement = async (ruleName: string) => {
-    await PageObjects.common.navigateToApp('rules');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     let retries = 0;
@@ -279,7 +283,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       }
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${ruleName}"]`
+      );
       await alertRule.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
@@ -658,7 +664,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newAlert = 'New Alert for checking its status';
       await createDataView(SOURCE_DATA_VIEW);
 
-      await PageObjects.common.navigateToApp('rules');
+      await PageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');

@@ -12,6 +12,8 @@ metadata:
 
 Generates comprehensive test plans from GitHub issues and posts them as comments. Navigates the full issue context: parent epics, sub-issues, linked PRs, Figma designs, and images.
 
+> **End-user setup** (GitHub token, Figma MCP, `gh` CLI, daily usage) lives in [`docs/testing/test_plans/test_plan_generator.md`](../../../docs/testing/test_plans/test_plan_generator.md). This SKILL.md contains the agent-only instructions.
+
 ---
 
 ## Core rule — never assume, always ask
@@ -37,6 +39,8 @@ If you catch yourself thinking any of these, STOP. The thought itself is the sig
 | "The image / Figma / Google Doc fetch failed, but I can describe it from the alt text or surrounding text." | Flag the source with `⚠️` in Known Limitations and write scenarios only from what you actually read. |
 | "The total scenarios count looks close enough — I'll round." | Run the three mechanical sum-checks in `references/output-formats.md`. (Eyeballing produced a 7-scenario undercount in dry-run validation.) |
 | "This sub-issue's ACs apply even though the sub-issue is not yet implemented." | Use the Pending work pattern in `references/document-structure.md`. |
+| "The issue is thin but the PR fills the gaps — I'll just write the plan from the PR." | The skill records *Issue clarity*, not PR clarity. Run the Issue Clarity Assessment (Step 1.5) — if combined readability is 1, apply the stop-and-ask gate before continuing. See [`references/issue-clarity-assessment.md`](references/issue-clarity-assessment.md). |
+| "I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus." | Treat as **orphan**. Do not absorb silently — orphan PRs are the most common source of silent scope creep. Flag under Known Limitations with `⚠️` and ask the user whether to include before proceeding. See [`references/gathering-context.md`](references/gathering-context.md#orphan-prs). |
 
 ---
 
@@ -153,6 +157,26 @@ If the file does not exist: tell the user "No draft found for issue #1234. Run `
 
 ---
 
+## Step 1.5 — Issue Clarity Assessment (first half)
+
+**Runs in:** draft mode; generate option A; update fallback. Skip in publish mode.
+
+After context is gathered and before analyzing it, evaluate the **issue corpus only** (target + parent + every sub-issue and their comments, including images / Figma / Google Docs linked from those bodies — **never PR content**) against a fixed rubric.
+
+**Read [`references/issue-clarity-assessment.md`](references/issue-clarity-assessment.md) now and follow every step in that file** up to and including the *Stop-and-ask gate* section. The Coverage Ratio half is computed later, in Step 3.5.
+
+The output of this step is:
+- One per-issue score (1–5) and *critical gaps* note for each issue read in Step 1.
+- One combined readability score (1–5) and a one-sentence rationale.
+
+**Stop-and-ask gate:** if the combined readability score is **1**, apply the message from the *Stop-and-ask gate* section of `issue-clarity-assessment.md` and wait for the user's choice (A pause / B continue anyway / C cancel) before proceeding to Step 2. If the user chooses **B**, continue with the rest of the workflow and let the published assessment carry the feedback signal — do not lower or alter the combined-1 grade for the published assessment.
+
+Store the per-issue scores, the combined score, the combined rationale, and the per-issue *critical gaps* notes. They will be appended verbatim to the assessment section assembled in Step 3.5.
+
+**Checkpoint before Step 2:** Apply the Core rule — if the stop-and-ask gate fired and the user is unavailable, do not continue silently. Leave a `⚠️` flag in the assessment notes and ask again, or stop.
+
+---
+
 ## Step 2 — Analyze the context
 
 **Runs in:** draft mode; generate option A; update fallback. Skip in publish mode.
@@ -186,6 +210,15 @@ For A: write only the Overview, Feature Background, Scope, and a "Test Coverage"
 
 Find `TARGET_VERSION` from (in priority order): the issue's milestone name, project fields (`Target`, `Fix version`, etc.), version-pattern labels (`v9.3`, `release:9.3`), or explicit mentions in the issue body/comments. If not found, stop and ask the user — this affects whether upgrade scenarios are included.
 
+**User-unavailable fallback** (dry-run mode, async runs, batch generation). When `TARGET_VERSION` cannot be inferred from any source AND the user is not present to answer:
+
+| Situation | Action |
+|---|---|
+| Feature touches stored data, mappings, saved objects, or navigation | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; **omit upgrade scenarios** rather than guess; record the gap in Known Limitations |
+| Feature is a pure parser, pure compute, or otherwise has no upgrade surface | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; skip the upgrade-section evaluation entirely |
+
+This fallback is the Core rule's `⚠️` escape: never guess the version, never publish an assumption as a fact, never insert speculative upgrade scenarios.
+
 **Checkpoint before Step 3:** Apply the Core rule — if the mental model has gaps or ambiguities, stop and ask the user before proceeding.
 
 ---
@@ -198,7 +231,14 @@ Apply the Core rule before starting: if any ambiguity about scope, acceptance cr
 
 ### Document structure
 
-Follow the template in [`references/document-structure.md`](references/document-structure.md) — it defines the required sections, their order, and the content expected in each. Read [`references/example-test-plan.md`](references/example-test-plan.md) for a complete worked example showing correct structure, scenario format, and automation coverage lines.
+Follow the template in [`references/document-structure.md`](references/document-structure.md) — it defines the required sections, their order, and the content expected in each. Read the worked example that matches the target feature:
+
+| Target feature type | Example |
+|---|---|
+| UI feature (flyouts, panels, forms, navigation) | [`references/example-test-plan.md`](references/example-test-plan.md) |
+| Backend / parser feature (no UI, no PR yet, unknown `TARGET_VERSION`) | [`references/example-test-plan-backend.md`](references/example-test-plan-backend.md) |
+
+Pick the closer match by shape, not by domain. The two examples differ in which optional sections apply, how `N/A` is handled in the Issue Clarity Assessment, and how the Coverage Ratio is computed when no PR exists.
 
 ### Optional sections
 
@@ -218,13 +258,34 @@ For each scenario, cross-reference the test coverage catalog from Step 1 and wri
 
 1. Run the Gherkin self-review from `references/output-formats.md`.
 2. Review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found.
-3. Append the footer (format defined in `references/output-formats.md`).
-4. Save to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md` (relative to repo root). The directory is gitignored via the root `.gitignore` (global `.agents/tmp/` pattern).
-5. Output the Sources Summary as defined in `references/output-formats.md`.
+3. **Run the draft coherence review.** Read [`references/draft-coherence-review.md`](references/draft-coherence-review.md) now and follow every step in that file. This is a holistic end-to-end re-read of the assembled draft against the gathered context corpus — it catches narrative drift, cross-section contradictions, and source-fidelity gaps that the Gherkin self-review (itemised) and `common-mistakes.md` (per-category) do not cover. Resolve every ⚠️ or ❌ finding before continuing; document any non-resolvable conflict as a `⚠️` entry in *Known Limitations*.
+4. **Run Step 3.5 — Issue Clarity Assessment (second half)** to compute the Coverage Ratio and assemble the assessment section. See the dedicated section below.
+5. Append the assembled assessment section to the draft. The footer follows in sub-step 6, so the assessment ends up as the last block before the footer. The exact placement and template are defined in [`references/document-structure.md`](references/document-structure.md#issue-clarity-assessment-section).
+6. Append the footer (format defined in `references/output-formats.md`).
+7. Save to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md` (relative to repo root). The directory is gitignored via the root `.gitignore` (global `.agents/tmp/` pattern).
+8. Output the Sources Summary as defined in `references/output-formats.md`, **followed by the same Issue Clarity Assessment block** rendered in the chat (identical content to the one appended to the draft).
 
 Tell the user:
 > Draft saved to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md`. Review and edit it in your editor — ask me to adjust any section before publishing. When ready: `publish test plan for issue #<issue_number>`
 > ⚠️ This file is temporary. Do not commit it — it is listed in the root `.gitignore` via the global `.agents/tmp/` pattern.
+
+---
+
+## Step 3.5 — Issue Clarity Assessment (second half)
+
+**Runs in:** draft mode; update fallback; update mode (after re-scoring per-issue + combined on the refreshed corpus). Skip in publish mode.
+
+This step is invoked from **Saving the draft** sub-step 4 above, after the Gherkin self-review, the `common-mistakes.md` review, and the draft coherence review have completed. The per-issue scores, combined readability score, combined rationale, and per-issue *critical gaps* notes already exist from Step 1.5 — do not recompute them here.
+
+1. **Compute the Issue Coverage Ratio.** Read the *Issue Coverage Ratio* section of [`references/issue-clarity-assessment.md`](references/issue-clarity-assessment.md) and follow it. Walk the finalized scenarios in the draft one by one and classify each scenario's origin as `issue` or `pr` using the classification rules in that file. Apply the conservative tie-breaker (any PR-only fact in the Gherkin → `pr`). Compute `issue_count / total_scenarios` as `X / Y scenarios (Z%)`, with Z rounded to the nearest integer percent. Write the one-sentence breakdown of which fact categories required PR analysis. The **denominator must equal the Total Scenarios cell in the Test Coverage Summary** — if it does not, recount before continuing.
+
+2. **Write the actionable feedback bullets** (only if at least one issue scored ≤ 3 **or** the Coverage Ratio is below 60%). Each bullet must point at a specific issue and a specific gap from the assessment — generic recommendations are not allowed. If neither condition holds, omit the Actionable feedback block entirely.
+
+3. **Assemble the markdown block** using the canonical format defined in [`references/output-formats.md`](references/output-formats.md#issue-clarity-assessment-section). One row per issue read in Step 1, no omissions, no aggregation. Wrap in `<details><summary>📊 Issue Clarity Assessment</summary>…</details>`.
+
+4. **Return the assembled block** to the *Saving the draft* sub-step 5, which appends it to the draft. The footer is appended after, in sub-step 6, leaving the assessment as the last block before the footer. Also render the **same block** in the chat after the Sources Summary so the user sees the assessment immediately.
+
+This step never silently produces an empty assessment. If any input (per-issue scores, combined score, scenario list) is missing, stop and ask the user — do not invent values.
 
 ---
 

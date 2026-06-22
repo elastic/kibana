@@ -122,7 +122,7 @@
     "@kbn/core-di",
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
-    "@kbn/spaces-utils",
+    "@kbn/core-spaces-common",
     "@kbn/setup-node-env",
     "@kbn/react-query",
     "@kbn/fs",
@@ -138,6 +138,7 @@
     "@kbn/yaml-loader",
     "@kbn/charts-theme",
     "@kbn/search-types",
-    "@kbn/human-readable-id"
+    "@kbn/human-readable-id",
+    "@kbn/elastic-agent-condition-language"
   ]
 }

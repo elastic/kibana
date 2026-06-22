@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
+import { splitQuery, guessRecoveryBlock, discoverQueryToComposed } from './use_heuristic_split';
 
 // ── splitQuery ────────────────────────────────────────────────────────────────
 
@@ -148,6 +148,34 @@ describe('splitQuery', () => {
     });
   });
 
+  describe('round-trip idempotency (join + re-split)', () => {
+    it('round-trips a STATS + WHERE query through join and re-split', () => {
+      const { base, alertBlock } = splitQuery('FROM logs-* | STATS c = COUNT(*) | WHERE c > 5');
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+
+    it('round-trips a multi-pipe query', () => {
+      const { base, alertBlock } = splitQuery(
+        'FROM logs-* | EVAL x = 1 | STATS c = COUNT(*) BY host | WHERE c > 10 | SORT c DESC'
+      );
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+
+    it('round-trips a WHERE-only (no STATS) query', () => {
+      const { base, alertBlock } = splitQuery('FROM logs-* | EVAL x = 1 | WHERE x > 0');
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+  });
+
   describe('reason field', () => {
     it('reason is no_stats when neither STATS nor WHERE found', () => {
       expect(splitQuery('FROM logs-*').reason).toBe('no_stats');
@@ -171,6 +199,20 @@ describe('splitQuery', () => {
 });
 
 // ── guessRecoveryBlock ────────────────────────────────────────────────────────
+
+describe('discoverQueryToComposed', () => {
+  it('splits a WHERE clause into base and breach segment', () => {
+    const result = discoverQueryToComposed('FROM logs-* | WHERE status == "error" | LIMIT 10');
+    expect(result.base).toBe('FROM logs-*');
+    expect(result.breach.segment).toContain('WHERE');
+  });
+
+  it('leaves breach segment empty when query has no WHERE', () => {
+    const result = discoverQueryToComposed('FROM logs-* | LIMIT 10');
+    expect(result.base).toBe('FROM logs-* | LIMIT 10');
+    expect(result.breach.segment).toBe('');
+  });
+});
 
 describe('guessRecoveryBlock', () => {
   it('flips > to <', () => {

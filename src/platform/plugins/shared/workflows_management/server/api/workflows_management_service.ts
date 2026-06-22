@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CoreStart,
@@ -26,6 +27,7 @@ import type {
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
+  WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
@@ -37,7 +39,10 @@ import type {
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
+  GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
+  ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type {
   ChildWorkflowExecutionItem,
@@ -63,12 +68,16 @@ import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   DeleteWorkflowsResponse,
   GetStepExecutionParams,
+  GetWorkflowAggsOptions,
   GetWorkflowsParams,
   SearchStepExecutionsParams,
 } from './workflows_management_api';
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
+import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
+import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
+import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
@@ -76,9 +85,18 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
+import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
+
+export interface SearchExecutionsViewParams {
+  query?: estypes.QueryDslQueryContainer;
+  sort?: estypes.SortCombinations;
+  from?: number;
+  size?: number;
+  trackTotalHits?: boolean;
+}
 
 export interface SearchWorkflowExecutionsParams {
-  workflowId: string;
+  workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -86,6 +104,7 @@ export interface SearchWorkflowExecutionsParams {
   omitStepRuns?: boolean;
   finishedAfter?: string;
   finishedBefore?: string;
+  collapse?: WorkflowExecutionCollapseField;
   sortField?: WorkflowExecutionSortField;
   sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
@@ -110,6 +129,8 @@ export class WorkflowsService {
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
   private managedWorkflowsService!: ManagedWorkflowsService;
+  private workflowVersioningEnabled!: boolean;
+  private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
     request: KibanaRequest
@@ -119,13 +140,27 @@ export class WorkflowsService {
 
   constructor(
     startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    kibanaVersion: string
   ) {
+    this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(startServices);
   }
 
   private async ensureInitialized(): Promise<void> {
     await this.initPromise;
+  }
+
+  private async initializeChangeHistoryService(coreStart: CoreStart): Promise<void> {
+    if (coreStart.security) {
+      await this.changeHistoryService.initialize({
+        elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
+        authService: coreStart.security.authc,
+      });
+      return;
+    }
+
+    this.logger.warn('Workflows Management: workflow change history is not initialized');
   }
 
   private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
@@ -165,6 +200,16 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
+    this.workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart);
+
+    if (this.workflowVersioningEnabled) {
+      await this.initializeChangeHistoryService(coreStart);
+    } else {
+      this.logger.debug(
+        'Workflow version history is disabled; skipping change-history data stream init'
+      );
+    }
+
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
       esClient: this.esClient,
@@ -174,6 +219,9 @@ export class WorkflowsService {
       getTaskScheduler: () => this.taskScheduler,
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
+      getCoreStart: () => this.coreStart,
+      changeHistoryService: this.changeHistoryService,
+      workflowVersioningEnabled: this.workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -210,6 +258,22 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto | null> {
     await this.ensureInitialized();
     return this.crudService.getWorkflow(id, spaceId, options);
+  }
+
+  public async getHistoryForWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { page?: number; perPage?: number }
+  ): Promise<WorkflowChangesHistoryResponse> {
+    await this.ensureInitialized();
+    return getHistoryForWorkflow(
+      {
+        changeHistoryService: this.changeHistoryService,
+        getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
+        workflowVersioningEnabled: this.workflowVersioningEnabled,
+      },
+      { workflowId: id, spaceId, ...options }
+    );
   }
 
   public async getWorkflowsByIds(
@@ -311,9 +375,15 @@ export class WorkflowsService {
     return this.searchService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
+  public async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
     await this.ensureInitialized();
-    return this.searchService.getWorkflowAggs(fields, spaceId);
+    return options
+      ? this.searchService.getWorkflowAggs(fields, spaceId, options)
+      : this.searchService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getWorkflowExecution(
@@ -339,6 +409,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async searchExecutionsView(
+    params: SearchExecutionsViewParams,
+    spaceId: string
+  ): Promise<estypes.SearchResponse<unknown>> {
+    await this.ensureInitialized();
+    return this.executionQueryService.searchExecutionsView(params, spaceId);
   }
 
   public async listWaitingForInputSteps(
@@ -421,7 +499,7 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
@@ -435,6 +513,15 @@ export class WorkflowsService {
   ): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
+  }
+
+  public async getManagedWorkflowStatus(
+    id: ManagedWorkflowId,
+    options: GetManagedWorkflowStatusOptions,
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowStatusReport> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.getManagedWorkflowStatus(id, options, registeredPluginId);
   }
 
   public async executeManagedWorkflow(

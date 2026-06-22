@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -20,6 +21,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
@@ -50,6 +52,9 @@ interface Props {
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isStateLoading?: boolean;
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
+  hasAnimation?: EuiFlyoutProps['hasAnimation'];
 }
 
 export const ActionPolicyDetailsFlyout = ({
@@ -64,6 +69,9 @@ export const ActionPolicyDetailsFlyout = ({
   onCancelSnooze,
   onUpdateApiKey,
   isStateLoading = false,
+  session,
+  ownFocus = true,
+  hasAnimation = true,
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
@@ -125,9 +133,10 @@ export const ActionPolicyDetailsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      hasAnimation
+      hasAnimation={hasAnimation}
       size="s"
-      ownFocus
+      ownFocus={ownFocus}
+      session={session}
       hideCloseButton
       paddingSize="none"
       onClose={onClose}
@@ -162,15 +171,25 @@ export const ActionPolicyDetailsFlyout = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              onClick={onClose}
-              aria-label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
+            <EuiToolTip
+              content={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
                 defaultMessage: 'Close',
               })}
-              data-test-subj="detailsFlyoutCloseIcon"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={onClose}
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                data-test-subj="detailsFlyoutCloseIcon"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -190,23 +209,6 @@ export const ActionPolicyDetailsFlyout = ({
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <ActionPolicyStateBadge policy={policy} isLoading={false} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {policy.type === 'single_rule' ? (
-                <EuiBadge color="hollow" iconType="link">
-                  <FormattedMessage
-                    id="xpack.alertingV2.actionPolicy.detailsFlyout.singleRuleBadge"
-                    defaultMessage="Single rule"
-                  />
-                </EuiBadge>
-              ) : (
-                <EuiBadge color="hollow">
-                  <FormattedMessage
-                    id="xpack.alertingV2.actionPolicy.detailsFlyout.globalBadge"
-                    defaultMessage="Global"
-                  />
-                </EuiBadge>
-              )}
             </EuiFlexItem>
             {snoozedActive && policy.snoozedUntil && (
               <EuiFlexItem grow={false}>

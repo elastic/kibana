@@ -14,7 +14,15 @@ steps:
         required: true
 
   - name: 'Upload trigger steps'
-    checkout: none
+    plugins:
+      - sparse-checkout#v1.6.0:
+          paths:
+            - .buildkite
+            - .node-version
+            - package.json
+            - tsconfig.base.json
+            - versions.json
+          cleanup_sparse_state: true
     command: |
       VM_IMAGES_BRANCH="$$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
       KIBANA_BRANCH="$$(buildkite-agent meta-data get "KIBANA_BRANCH")"

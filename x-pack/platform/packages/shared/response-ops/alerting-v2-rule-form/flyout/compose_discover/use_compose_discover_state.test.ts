@@ -16,12 +16,20 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
 // ── createInitialState ────────────────────────────────────────────────────────
 
 describe('createInitialState', () => {
-  it('creates default state for create mode (signal)', () => {
+  it('creates default state for create mode (alert)', () => {
     const state = createInitialState({ mode: 'create' });
 
     expect(state.mode).toBe('create');
     expect(state.childOpen).toBe(true);
     expect(state.queryCommitted).toBe(false);
+    // Split editor opens on the base query, not the alert query.
+    expect(state.activeTab).toBe('base');
+  });
+
+  it('starts on the alert tab for signal create (single editor)', () => {
+    const state = createInitialState({ mode: 'create', initialKind: 'signal' });
+
+    expect(state.activeTab).toBe('alert');
   });
 
   it('sets recoveryType to default when initialKind is alert', () => {
@@ -60,18 +68,39 @@ describe('createInitialState', () => {
     });
     expect(withSignal.recoveryType).toBe('default');
   });
+
+  it('keeps the query preview closed in builder create mode', () => {
+    const state = createInitialState({ mode: 'create', isBuilderMode: true });
+
+    expect(state.childOpen).toBe(false);
+    expect(state.queryCommitted).toBe(false);
+  });
+
+  it('sets queryCommitted true in create mode when isQueryPrePopulated is true', () => {
+    const state = createInitialState({ mode: 'create', isQueryPrePopulated: true });
+
+    expect(state.queryCommitted).toBe(true);
+    expect(state.childOpen).toBe(true);
+  });
+
+  it('sets queryCommitted false when Discover query has no splittable alert condition', () => {
+    const state = createInitialState({ mode: 'create', isQueryPrePopulated: false });
+
+    expect(state.queryCommitted).toBe(false);
+  });
 });
 
 // ── reducer ───────────────────────────────────────────────────────────────────
 
 describe('reducer', () => {
   describe('KIND_CHANGE', () => {
-    it('kind=alert opens child and resets to step 0', () => {
-      const state = createState({ step: 2, childOpen: false });
+    it('kind=alert opens child on the base tab and resets to step 0', () => {
+      const state = createState({ step: 2, childOpen: false, activeTab: 'alert' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
       expect(next.childOpen).toBe(true);
       expect(next.step).toBe(0);
+      expect(next.activeTab).toBe('base');
     });
 
     it('kind=signal keeps child open, resets step and recoveryType', () => {
@@ -85,12 +114,12 @@ describe('reducer', () => {
   });
 
   describe('COMMIT_QUERY', () => {
-    it('marks queryCommitted and closes child (non-yaml mode)', () => {
+    it('marks queryCommitted and preserves childOpen', () => {
       const state = createState({ queryCommitted: false, childOpen: true, yamlMode: false });
       const next = reducer(state, { type: 'COMMIT_QUERY' });
 
       expect(next.queryCommitted).toBe(true);
-      expect(next.childOpen).toBe(false);
+      expect(next.childOpen).toBe(true);
     });
 
     it('keeps childOpen when in yaml mode', () => {
@@ -110,6 +139,18 @@ describe('reducer', () => {
       expect(next.recoveryType).toBe('custom');
       expect(next.childOpen).toBe(true);
       expect(next.activeTab).toBe('recovery');
+    });
+
+    it('does not open child when switching to custom in builder mode', () => {
+      const state = createState({ recoveryType: 'default', childOpen: false });
+      const next = reducer(state, {
+        type: 'SET_RECOVERY_TYPE',
+        recoveryType: 'custom',
+        isBuilderMode: true,
+      });
+
+      expect(next.recoveryType).toBe('custom');
+      expect(next.childOpen).toBe(false);
     });
 
     it('does not open child when switching to default', () => {

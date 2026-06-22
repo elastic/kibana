@@ -10,7 +10,10 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { searchWorkflowExecutions } from './search_workflow_executions';
+import {
+  searchWorkflowExecutions,
+  WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES,
+} from './search_workflow_executions';
 
 describe('searchWorkflowExecutions', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
@@ -64,6 +67,53 @@ describe('searchWorkflowExecutions', () => {
         expect.objectContaining({
           id: 'exec-1',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
+        })
+      );
+    });
+  });
+
+  describe('search options', () => {
+    it('should request only list metadata fields from Elasticsearch', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 0 },
+          hits: [],
+        },
+      } as any);
+
+      await searchWorkflowExecutions({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        workflowExecutionIndex: '.workflows-executions',
+        query: { term: { workflowId: 'workflow-1' } },
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: { includes: [...WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES] },
+        })
+      );
+    });
+
+    it('should forward collapse to Elasticsearch search', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 0 },
+          hits: [],
+        },
+      } as any);
+
+      await searchWorkflowExecutions({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        workflowExecutionIndex: '.workflows-executions',
+        query: { term: { workflowId: 'workflow-1' } },
+        collapse: { field: 'concurrencyGroupKey' },
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collapse: { field: 'concurrencyGroupKey' },
         })
       );
     });

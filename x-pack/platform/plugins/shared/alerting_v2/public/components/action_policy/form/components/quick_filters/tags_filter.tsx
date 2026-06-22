@@ -24,7 +24,12 @@ import {
   mergeRuleTagsIntoMatcher,
   parseRuleTagsFromMatcher,
 } from '../../matcher_quick_filter_utils';
-import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
+import {
+  ALERT_KIND_FILTER,
+  POPOVER_PANEL_STYLE,
+  SELECTABLE_LIST_PROPS,
+  type QuickFiltersProps,
+} from './constants';
 
 interface TagSelectableMeta {
   value: string;
@@ -37,6 +42,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
 
   const { data: apiTags = [], isLoading } = useFetchRuleTags({
     enabled: isOpen,
+    filter: ALERT_KIND_FILTER,
   });
   const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
 

@@ -20,22 +20,22 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
+  GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
+  ManagedWorkflowStatus,
+  ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
+import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
+import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
-const VERSION_CONFLICT_STATUS = 409;
-
-const isVersionConflictError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false;
-  const e = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
-};
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -127,7 +127,7 @@ export class ManagedWorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     for (let attempt = 0; attempt <= MAX_MANAGED_INSTALL_RETRIES; attempt++) {
@@ -135,7 +135,7 @@ export class ManagedWorkflowsService {
         await this.installManagedWorkflowOnce(id, options, registeredPluginId);
         return;
       } catch (error) {
-        if (!isVersionConflictError(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
+        if (!isRetryableWorkflowWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
           throw error;
         }
 
@@ -148,7 +148,7 @@ export class ManagedWorkflowsService {
 
   private async installManagedWorkflowOnce(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
@@ -186,8 +186,18 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document, {
-        create: true,
+      const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
+      const documentWithVersion = maybeApplyWorkflowVersion(document, undefined, versioningEnabled);
+      const savedDocument = await this.deps.crudService.createWorkflowDocument(
+        workflowDocumentId,
+        spaceId,
+        documentWithVersion
+      );
+      await this.deps.crudService.logWorkflowChangesAfterWrite({
+        workflows: [{ id: workflowDocumentId, document: savedDocument }],
+        action: WorkflowChangeHistoryAction.workflowInstall,
+        spaceId,
+        timestamp: now,
       });
       return;
     }
@@ -200,7 +210,10 @@ export class ManagedWorkflowsService {
 
     // For unchanged definitions, preserve the current document as-is.
     // Enforced enablement is reapplied only when a managed update is installed.
-    if (existing.definitionHash === definitionHash) {
+    if (
+      existing.definitionHash === definitionHash &&
+      existing.managedVersion === definition.version
+    ) {
       if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
         return;
       }
@@ -222,9 +235,22 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document, {
-      ifSeqNo: existingDocument.seqNo,
-      ifPrimaryTerm: existingDocument.primaryTerm,
+    const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
+    const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
+    const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
+      workflowDocumentId,
+      spaceId,
+      {
+        document: documentWithVersion,
+        ifSeqNo: existingDocument.seqNo,
+        ifPrimaryTerm: existingDocument.primaryTerm,
+      }
+    );
+    await this.deps.crudService.logWorkflowChangesAfterWrite({
+      workflows: [{ id: workflowDocumentId, document: savedDocument }],
+      action: WorkflowChangeHistoryAction.workflowUpdate,
+      spaceId,
+      timestamp: now,
     });
   }
 
@@ -253,6 +279,78 @@ export class ManagedWorkflowsService {
     }
 
     await this.deps.crudService.deleteWorkflows([workflowDocumentId], spaceId, { force: true });
+  }
+
+  public async getManagedWorkflowStatus(
+    id: ManagedWorkflowId,
+    options: GetManagedWorkflowStatusOptions,
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowStatusReport> {
+    const definition = getManagedWorkflowDefinition(id);
+    if (!definition) {
+      throw new Error(`Unknown managed workflow id: ${id}`);
+    }
+    this.assertPluginRegistration(definition, registeredPluginId);
+
+    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
+    const spaceId = this.getRequiredSpaceId(options);
+    const registryHash = this.computeManagedDefinitionHash(definition);
+    const existing = await this.deps.crudService.getWorkflowDocumentSource(
+      workflowDocumentId,
+      spaceId,
+      {
+        includeDeleted: true,
+        includeGlobal: true,
+      }
+    );
+
+    if (!existing || existing.deleted_at) {
+      return this.createManagedWorkflowStatusReport({
+        status: 'missing',
+        workflowDocumentId,
+        definitionId: id,
+        spaceId,
+        definition,
+        registryHash,
+      });
+    }
+
+    if (existing.managed !== true) {
+      return this.createManagedWorkflowStatusReport({
+        status: 'not_managed',
+        workflowDocumentId,
+        definitionId: id,
+        spaceId,
+        definition,
+        registryHash,
+        existing,
+      });
+    }
+
+    const storedHash = existing.definitionHash ?? null;
+    const storedVersion = existing.managedVersion ?? null;
+    let status: ManagedWorkflowStatus = 'intact';
+    if (!existing.valid || !existing.definition) {
+      status = 'invalid';
+    } else if (!existing.enabled) {
+      status = 'disabled';
+    } else if (
+      storedHash !== registryHash ||
+      storedVersion !== definition.version ||
+      existing.originManagedWorkflowId !== definition.id
+    ) {
+      status = 'drifted';
+    }
+
+    return this.createManagedWorkflowStatusReport({
+      status,
+      workflowDocumentId,
+      definitionId: id,
+      spaceId,
+      definition,
+      registryHash,
+      existing,
+    });
   }
 
   public async executeManagedWorkflow(
@@ -435,6 +533,41 @@ export class ManagedWorkflowsService {
     };
   }
 
+  private createManagedWorkflowStatusReport(params: {
+    status: ManagedWorkflowStatus;
+    workflowDocumentId: string;
+    definitionId: ManagedWorkflowId;
+    spaceId: string;
+    definition: ManagedWorkflowDefinition;
+    registryHash: string;
+    existing?: WorkflowProperties;
+  }): ManagedWorkflowStatusReport {
+    const {
+      status,
+      workflowDocumentId,
+      definitionId,
+      spaceId,
+      definition,
+      registryHash,
+      existing,
+    } = params;
+
+    return {
+      status,
+      workflowId: workflowDocumentId,
+      definitionId,
+      spaceId: existing?.spaceId ?? spaceId,
+      installed: Boolean(existing),
+      enabled: existing?.enabled ?? null,
+      valid: existing?.valid ?? null,
+      managedBy: existing?.managedBy ?? null,
+      storedVersion: existing?.managedVersion ?? null,
+      registryVersion: definition.version,
+      storedHash: existing?.definitionHash ?? null,
+      registryHash,
+    };
+  }
+
   private async prepareManagedWorkflowDocument(params: {
     definition: ManagedWorkflowDefinition;
     workflowDocumentId: string;
@@ -461,6 +594,7 @@ export class ManagedWorkflowsService {
       id: workflowDocumentId,
       yaml,
       actor: MANAGED_WORKFLOW_SYSTEM_USER,
+      lightweightValidation: true,
       now,
       spaceId,
     });

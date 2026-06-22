@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
@@ -40,7 +41,11 @@ import type {
 } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowPartialDetailDto,
+  WorkflowSortField,
+} from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
@@ -55,13 +60,22 @@ import {
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
+import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
+import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import type {
+  SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
+import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
+
+const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
+  const fields = Object.keys(workflow);
+  return fields.length === 1 && fields[0] === 'enabled';
+};
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -73,6 +87,12 @@ export interface GetWorkflowsParams {
   query?: string;
   managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
+  sortField?: WorkflowSortField;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetWorkflowAggsOptions {
+  managedFilter?: GetWorkflowsParams['managedFilter'];
 }
 
 export interface DeleteWorkflowsResponse {
@@ -267,6 +287,14 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflow(id, spaceId);
   }
 
+  public async getHistoryForWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { page?: number; perPage?: number }
+  ): Promise<WorkflowChangesHistoryResponse> {
+    return this.workflowsService.getHistoryForWorkflow(id, spaceId, options);
+  }
+
   public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
     return this.workflowsService.getWorkflowsByIds(ids, spaceId);
   }
@@ -350,11 +378,20 @@ export class WorkflowsManagementApi {
     id: string,
     workflow: Partial<EsWorkflow>,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { allowManagedWorkflowMutation?: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
+    }
+
+    if (
+      originalWorkflow.managed === true &&
+      !isEnablementOnlyUpdate(workflow) &&
+      options?.allowManagedWorkflowMutation !== true
+    ) {
+      throw new ManagedWorkflowUpdateForbiddenError();
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
     this.notifySml(id, 'update', request);
@@ -367,6 +404,11 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
+    const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);
+    if (workflows.some(({ managed }) => managed === true)) {
+      throw new ManagedWorkflowDeleteForbiddenError();
+    }
+
     const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
     if (result.successfulIds) {
       for (const id of result.successfulIds) {
@@ -719,6 +761,13 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowExecutions(params, spaceId);
   }
 
+  public async searchExecutionsView(
+    params: SearchExecutionsViewParams,
+    spaceId: string
+  ): Promise<estypes.SearchResponse<unknown>> {
+    return this.workflowsService.searchExecutionsView(params, spaceId);
+  }
+
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
@@ -845,8 +894,14 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
-    return this.workflowsService.getWorkflowAggs(fields, spaceId);
+  public async getWorkflowAggs(
+    fields: string[] = [],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ) {
+    return options
+      ? this.workflowsService.getWorkflowAggs(fields, spaceId, options)
+      : this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getAvailableConnectors(

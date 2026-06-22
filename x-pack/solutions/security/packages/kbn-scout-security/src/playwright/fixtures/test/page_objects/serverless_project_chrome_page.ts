@@ -44,6 +44,11 @@ export class ServerlessProjectChromePage {
     return this.navItemInBodyById('agent_builder');
   }
 
+  /** AI Value Report nav item when present (deep link id `ai_value`). */
+  getAiValueReportNavItemInProjectChrome(): Locator {
+    return this.navItemInBodyById('ai_value');
+  }
+
   private async openMoreMenuIfTriggerVisible(): Promise<void> {
     if ((await this.moreMenuTrigger.count()) === 0 || !(await this.moreMenuTrigger.isVisible())) {
       return;

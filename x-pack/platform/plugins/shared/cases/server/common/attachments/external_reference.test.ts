@@ -6,7 +6,11 @@
  */
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
-import { LEGACY_FILE_ATTACHMENT_TYPE, INDICATOR_ATTACHMENT_TYPE } from '../../../common/constants';
+import {
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+} from '../../../common/constants';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const baseLegacyAttributes = {
@@ -43,9 +47,9 @@ const unifiedEndpointAttributes = {
   ...baseLegacyAttributes,
   type: 'security.endpoint',
   attachmentId: 'action-123',
+  data: { content: 'Test comment' },
   metadata: {
     command: 'isolate',
-    comment: 'Test comment',
     targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
   },
   owner: 'securitySolution',
@@ -53,17 +57,50 @@ const unifiedEndpointAttributes = {
 
 describe('externalReferenceAttachmentTransformer', () => {
   describe('toUnifiedSchema', () => {
-    it('converts legacy external reference to unified format', () => {
+    it('lifts externalReferenceMetadata.comment into data.content and leaves the rest in metadata', () => {
       const result =
         externalReferenceAttachmentTransformer.toUnifiedSchema(legacyEndpointAttributes);
       expect(result).toEqual(
         expect.objectContaining({
           type: 'security.endpoint',
           attachmentId: 'action-123',
-          metadata: legacyEndpointAttributes.externalReferenceMetadata,
+          data: { content: 'Test comment' },
+          metadata: {
+            command: 'isolate',
+            targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
+          },
           owner: 'securitySolution',
         })
       );
+      // metadata must NOT carry `comment` any more
+      expect((result as { metadata?: { comment?: unknown } }).metadata?.comment).toBeUndefined();
+    });
+
+    it('keeps the legacy metadata as the unified metadata when no comment is present', () => {
+      const noCommentLegacy = {
+        ...legacyEndpointAttributes,
+        externalReferenceMetadata: {
+          command: 'isolate',
+          targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
+        },
+      };
+      const result = externalReferenceAttachmentTransformer.toUnifiedSchema(noCommentLegacy);
+      expect(result).toEqual(
+        expect.objectContaining({
+          metadata: noCommentLegacy.externalReferenceMetadata,
+        })
+      );
+      expect((result as { data?: unknown }).data).toBeUndefined();
+    });
+
+    it('omits metadata when the legacy bag only contained `comment`', () => {
+      const commentOnlyLegacy = {
+        ...legacyEndpointAttributes,
+        externalReferenceMetadata: { comment: 'just a comment' },
+      };
+      const result = externalReferenceAttachmentTransformer.toUnifiedSchema(commentOnlyLegacy);
+      expect((result as { data?: unknown }).data).toEqual({ content: 'just a comment' });
+      expect((result as { metadata?: unknown }).metadata).toBeUndefined();
     });
 
     it('passes through already-unified attributes', () => {
@@ -74,7 +111,7 @@ describe('externalReferenceAttachmentTransformer', () => {
   });
 
   describe('toLegacySchema', () => {
-    it('converts unified format to legacy external reference', () => {
+    it('merges data.content back into externalReferenceMetadata.comment', () => {
       const result =
         externalReferenceAttachmentTransformer.toLegacySchema(unifiedEndpointAttributes);
       expect(result).toEqual(
@@ -85,9 +122,24 @@ describe('externalReferenceAttachmentTransformer', () => {
             type: ExternalReferenceStorageType.elasticSearchDoc,
           },
           externalReferenceAttachmentTypeId: 'endpoint',
-          externalReferenceMetadata: unifiedEndpointAttributes.metadata,
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment: 'Test comment',
+            targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
+          },
           owner: 'securitySolution',
         })
+      );
+    });
+
+    it('handles unified rows without data.content (no comment to merge)', () => {
+      const noCommentUnified = {
+        ...unifiedEndpointAttributes,
+        data: undefined,
+      };
+      const result = externalReferenceAttachmentTransformer.toLegacySchema(noCommentUnified);
+      expect((result as { externalReferenceMetadata?: unknown }).externalReferenceMetadata).toEqual(
+        unifiedEndpointAttributes.metadata
       );
     });
 
@@ -95,6 +147,27 @@ describe('externalReferenceAttachmentTransformer', () => {
       const result =
         externalReferenceAttachmentTransformer.toLegacySchema(legacyEndpointAttributes);
       expect(result).toEqual(legacyEndpointAttributes);
+    });
+
+    it('round-trips: legacy → unified → legacy preserves the analyst comment', () => {
+      const unified =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyEndpointAttributes);
+      const legacy = externalReferenceAttachmentTransformer.toLegacySchema(unified);
+      expect((legacy as { externalReferenceMetadata?: unknown }).externalReferenceMetadata).toEqual(
+        legacyEndpointAttributes.externalReferenceMetadata
+      );
+    });
+
+    it('round-trips: unified → legacy → unified preserves data.content and metadata', () => {
+      const legacy =
+        externalReferenceAttachmentTransformer.toLegacySchema(unifiedEndpointAttributes);
+      const unified = externalReferenceAttachmentTransformer.toUnifiedSchema(legacy);
+      expect(unified).toEqual(
+        expect.objectContaining({
+          data: unifiedEndpointAttributes.data,
+          metadata: unifiedEndpointAttributes.metadata,
+        })
+      );
     });
   });
 
@@ -167,7 +240,7 @@ describe('externalReferenceAttachmentTransformer', () => {
       externalReferenceAttachmentTypeId: 'endpoint',
       externalReferenceMetadata: {
         command: 'unisolate',
-        comment: '',
+        comment: 'release the host',
         targets: [{ endpointId: 'ep-2', hostname: 'host-2', agentType: 'endpoint' }],
       },
       owner: 'securitySolution',
@@ -176,15 +249,15 @@ describe('externalReferenceAttachmentTransformer', () => {
     const unifiedPayload = {
       type: 'security.endpoint',
       attachmentId: 'action-456',
+      data: { content: 'release the host' },
       metadata: {
         command: 'unisolate',
-        comment: '',
         targets: [{ endpointId: 'ep-2', hostname: 'host-2', agentType: 'endpoint' }],
       },
       owner: 'securitySolution',
     };
 
-    it('toUnifiedPayload converts legacy payload', () => {
+    it('toUnifiedPayload converts legacy payload and lifts comment to data.content', () => {
       const result = externalReferenceAttachmentTransformer.toUnifiedPayload(legacyPayload);
       expect(result).toEqual(unifiedPayload);
     });
@@ -195,7 +268,7 @@ describe('externalReferenceAttachmentTransformer', () => {
       );
     });
 
-    it('toLegacyPayload converts unified payload', () => {
+    it('toLegacyPayload converts unified payload and merges data.content back to externalReferenceMetadata.comment', () => {
       const result = externalReferenceAttachmentTransformer.toLegacyPayload(unifiedPayload);
       expect(result).toEqual(legacyPayload);
     });
@@ -315,12 +388,17 @@ describe('externalReferenceAttachmentTransformer', () => {
       expect(round).toEqual(legacyPayload);
     });
 
-    it('does not alter metadata for elasticSearchDoc-backed externalReferences', () => {
+    it('lifts comment into data.content and leaves the rest of metadata for elasticSearchDoc-backed externalReferences', () => {
       const result =
         externalReferenceAttachmentTransformer.toUnifiedSchema(legacyEndpointAttributes);
+      const { comment: _liftedComment, ...metadataWithoutComment } =
+        legacyEndpointAttributes.externalReferenceMetadata as Record<string, unknown> & {
+          comment?: string;
+        };
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: legacyEndpointAttributes.externalReferenceMetadata,
+          data: { content: legacyEndpointAttributes.externalReferenceMetadata.comment },
+          metadata: metadataWithoutComment,
         })
       );
       expect((result as { metadata?: Record<string, unknown> }).metadata).not.toHaveProperty(
@@ -338,6 +416,45 @@ describe('externalReferenceAttachmentTransformer', () => {
           },
         })
       );
+    });
+  });
+
+  describe('osquery', () => {
+    // Pre-existing on-disk shape from before the unified migration.
+    const legacyOsqueryAttributes = {
+      ...baseLegacyAttributes,
+      type: AttachmentType.externalReference as const,
+      externalReferenceId: 'action-osq-1',
+      externalReferenceStorage: {
+        type: ExternalReferenceStorageType.elasticSearchDoc as const,
+      },
+      externalReferenceAttachmentTypeId: 'osquery',
+      externalReferenceMetadata: {
+        actionId: 'action-osq-1',
+        agentIds: ['agent-1'],
+        queryId: 'query-1',
+      },
+      owner: 'securitySolution',
+    };
+
+    it('converts a legacy osquery externalReference SO to the unified osquery shape', () => {
+      const result =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyOsqueryAttributes);
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: OSQUERY_ATTACHMENT_TYPE,
+          attachmentId: 'action-osq-1',
+          metadata: legacyOsqueryAttributes.externalReferenceMetadata,
+          owner: 'securitySolution',
+        })
+      );
+    });
+
+    it('round-trips legacy osquery -> unified -> legacy without losing metadata.actionId', () => {
+      const unified =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyOsqueryAttributes);
+      const round = externalReferenceAttachmentTransformer.toLegacySchema(unified);
+      expect(round).toEqual(legacyOsqueryAttributes);
     });
   });
 

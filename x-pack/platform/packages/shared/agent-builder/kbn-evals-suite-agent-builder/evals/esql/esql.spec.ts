@@ -82,7 +82,7 @@ function createEvaluateEsqlDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task: executeToolTask,
       },
       [esqlEquivalenceEvaluator]
