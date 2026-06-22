@@ -9,18 +9,19 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { CcsLogsExtractionClient } from '.';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
-import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
-import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from './query_builder_commons';
-import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
+import { RemoteLogsExtractionClient } from './remote_logs_extraction_client';
+import type { RemoteExtractionStrategy } from './strategies';
+import type { RemoteLogExtractionStateClient } from '../../saved_objects/remote_log_extraction_state';
+import { getEntityDefinition } from '../../../../common/domain/definitions/registry';
+import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
+import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
+import { ingestEntities } from '../../../infra/elasticsearch/ingest';
+import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from '../query_builder_commons';
 import { get } from 'lodash';
 
-jest.mock('../../infra/elasticsearch/esql', () => {
-  const actual = jest.requireActual<typeof import('../../infra/elasticsearch/esql')>(
-    '../../infra/elasticsearch/esql'
+jest.mock('../../../infra/elasticsearch/esql', () => {
+  const actual = jest.requireActual<typeof import('../../../infra/elasticsearch/esql')>(
+    '../../../infra/elasticsearch/esql'
   );
   return {
     ...actual,
@@ -28,7 +29,7 @@ jest.mock('../../infra/elasticsearch/esql', () => {
   };
 });
 
-jest.mock('../../infra/elasticsearch/ingest', () => ({
+jest.mock('../../../infra/elasticsearch/ingest', () => ({
   ingestEntities: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -55,18 +56,25 @@ const EXPECTED_FROM_DATE_ISO = '2026-01-01T09:00:00.000Z';
 
 const DEFAULT_MAX_LOGS_PER_PAGE = 10000;
 
-describe('CcsLogsExtractionClient', () => {
+describe('RemoteLogsExtractionClient', () => {
   const mockLogger = loggerMock.create();
   const mockEsClient = {} as unknown as jest.Mocked<ElasticsearchClient>;
   const namespace = 'default';
 
-  const mockCcsStateClient = {
+  const mockStateClient = {
     findOrInit: jest.fn(),
     update: jest.fn().mockResolvedValue(undefined),
     clearRecoveryId: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<CcsLogExtractionStateClient>;
+  } as unknown as jest.Mocked<RemoteLogExtractionStateClient>;
 
-  let client: CcsLogsExtractionClient;
+  const mockStrategy: RemoteExtractionStrategy = {
+    id: 'ccs',
+    client: mockEsClient,
+    stateClient: mockStateClient,
+    buildPatterns: ({ remoteIndexPatterns }) => remoteIndexPatterns,
+  };
+
+  let client: RemoteLogsExtractionClient;
 
   const defaultExtractParams = {
     type: 'host' as const,
@@ -89,13 +97,13 @@ describe('CcsLogsExtractionClient', () => {
     jest.clearAllMocks();
     // Reset once-queue so leftover mocks from previous tests don't leak
     mockExecuteEsqlQuery.mockReset();
-    mockCcsStateClient.findOrInit.mockResolvedValue({
+    mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: null,
       paginationRecoveryId: null,
     });
-    mockCcsStateClient.update.mockResolvedValue(undefined);
-    mockCcsStateClient.clearRecoveryId.mockResolvedValue(undefined);
-    client = new CcsLogsExtractionClient(mockLogger, mockEsClient, namespace, mockCcsStateClient);
+    mockStateClient.update.mockResolvedValue(undefined);
+    mockStateClient.clearRecoveryId.mockResolvedValue(undefined);
+    client = new RemoteLogsExtractionClient(mockLogger, namespace, mockStrategy);
   });
 
   afterEach(() => {
@@ -125,16 +133,15 @@ describe('CcsLogsExtractionClient', () => {
     // probe + entity page; total_logs=2 < maxLogsPerPage=10000 → isLastLogsPage=true, no second probe
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
     expect(mockIngestEntities).toHaveBeenCalledTimes(1);
-    expect(mockIngestEntities).toHaveBeenCalledWith({
-      esClient: mockEsClient,
-      esqlResponse: entityPageResponse,
-      targetIndex: getUpdatesEntitiesDataStreamName(namespace),
-      logger: mockLogger,
-      fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
-      transformDocument: expect.any(Function),
-      refresh: false,
-      onDropped: expect.any(Function),
-    });
+    expect(mockIngestEntities).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esClient: mockEsClient,
+        esqlResponse: entityPageResponse,
+        targetIndex: getUpdatesEntitiesDataStreamName(namespace),
+        fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
+        transformDocument: expect.any(Function),
+      })
+    );
     const transformDocument = mockIngestEntities.mock.calls[0][0].transformDocument!;
     const doc1 = transformDocument({
       '@timestamp': '2024-06-15T12:00:00.000Z',
@@ -227,17 +234,17 @@ describe('CcsLogsExtractionClient', () => {
       expect.objectContaining({ esqlResponse: secondPage })
     );
     // State persisted after the first full entity page — checkpoint = last entity's _firstSeenLog
-    expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+    expect(mockStateClient.update).toHaveBeenCalledWith('host', {
       checkpointTimestamp: '2024-06-15T10:00:00.000Z',
       paginationRecoveryId: 'host:h2',
     });
     // Outer loop advance after slice completes
-    expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+    expect(mockStateClient.update).toHaveBeenCalledWith('host', {
       checkpointTimestamp: '2024-06-15T11:00:00.000Z',
       paginationRecoveryId: null,
     });
     // count > 0 → no clearRecoveryId
-    expect(mockCcsStateClient.clearRecoveryId).not.toHaveBeenCalled();
+    expect(mockStateClient.clearRecoveryId).not.toHaveBeenCalled();
   });
 
   it('should paginate across outer (log-slice) loop when probe signals more slices', async () => {
@@ -283,16 +290,16 @@ describe('CcsLogsExtractionClient', () => {
     expect(mockIngestEntities).toHaveBeenCalledTimes(2);
 
     // Slice boundary state persisted after each slice completes
-    expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+    expect(mockStateClient.update).toHaveBeenCalledWith('host', {
       checkpointTimestamp: '2024-06-15T10:00:00.000Z',
       paginationRecoveryId: null,
     });
-    expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+    expect(mockStateClient.update).toHaveBeenCalledWith('host', {
       checkpointTimestamp: '2024-06-15T11:00:00.000Z',
       paginationRecoveryId: null,
     });
     // count > 0 → no clearRecoveryId
-    expect(mockCcsStateClient.clearRecoveryId).not.toHaveBeenCalled();
+    expect(mockStateClient.clearRecoveryId).not.toHaveBeenCalled();
   });
 
   it('should return error when ESQL call is aborted during entity pagination', async () => {
@@ -328,7 +335,7 @@ describe('CcsLogsExtractionClient', () => {
   });
 
   it('should return zero count and pages when probe finds no logs', async () => {
-    mockCcsStateClient.findOrInit.mockResolvedValue({
+    mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: '2024-06-15T10:00:00.000Z',
       paginationRecoveryId: null,
     });
@@ -340,8 +347,8 @@ describe('CcsLogsExtractionClient', () => {
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
     expect(mockIngestEntities).not.toHaveBeenCalled();
     // clearRecoveryId called to clean up any stale recovery id; checkpoint unchanged
-    expect(mockCcsStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
-    expect(mockCcsStateClient.update).not.toHaveBeenCalledWith(
+    expect(mockStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
+    expect(mockStateClient.update).not.toHaveBeenCalledWith(
       'host',
       expect.objectContaining({ checkpointTimestamp: null })
     );
@@ -351,7 +358,7 @@ describe('CcsLogsExtractionClient', () => {
     // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
     const recoveryTimestamp = '2026-01-01T08:00:00.000Z';
     const recoveryId = 'host:h2';
-    mockCcsStateClient.findOrInit.mockResolvedValue({
+    mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: recoveryTimestamp,
       paginationRecoveryId: recoveryId,
     });
@@ -383,8 +390,8 @@ describe('CcsLogsExtractionClient', () => {
 
   it('should resume from slice-boundary recovery state (checkpointTimestamp set, paginationRecoveryId null)', async () => {
     // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
-    const sliceBoundaryTimestamp = '2026-01-01T08:00:00.000Z';
-    mockCcsStateClient.findOrInit.mockResolvedValue({
+    const sliceBoundaryTimestamp = '2026-01-01T10:00:00.000Z';
+    mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: sliceBoundaryTimestamp,
       paginationRecoveryId: null,
     });
@@ -411,7 +418,7 @@ describe('CcsLogsExtractionClient', () => {
   });
 
   it('should use lookback window on fresh start (no checkpoint)', async () => {
-    mockCcsStateClient.findOrInit.mockResolvedValue({
+    mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: null,
       paginationRecoveryId: null,
     });
@@ -426,8 +433,8 @@ describe('CcsLogsExtractionClient', () => {
 
   it('should use checkpointTimestamp as fromDateISO on normal continuation', async () => {
     // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
-    const checkpoint = '2026-01-01T08:00:00.000Z';
-    mockCcsStateClient.findOrInit.mockResolvedValue({
+    const checkpoint = '2026-01-01T10:00:00.000Z';
+    mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: checkpoint,
       paginationRecoveryId: null,
     });
@@ -459,10 +466,10 @@ describe('CcsLogsExtractionClient', () => {
     expect(result).toMatchObject({ count: 1, pages: 1 });
 
     // findOrInit must NOT be called for override runs
-    expect(mockCcsStateClient.findOrInit).not.toHaveBeenCalled();
+    expect(mockStateClient.findOrInit).not.toHaveBeenCalled();
     // State must NOT be modified for override runs
-    expect(mockCcsStateClient.update).not.toHaveBeenCalled();
-    expect(mockCcsStateClient.clearRecoveryId).not.toHaveBeenCalled();
+    expect(mockStateClient.update).not.toHaveBeenCalled();
+    expect(mockStateClient.clearRecoveryId).not.toHaveBeenCalled();
 
     // Probe must use the override window
     const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
@@ -472,7 +479,7 @@ describe('CcsLogsExtractionClient', () => {
 
   it('should return empty result immediately when window is empty (from >= to)', async () => {
     const futureCheckpoint = '2027-01-01T00:00:00.000Z'; // later than FIXED_NOW - 1min
-    mockCcsStateClient.findOrInit.mockResolvedValue({
+    mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: futureCheckpoint,
       paginationRecoveryId: null,
     });
@@ -481,7 +488,7 @@ describe('CcsLogsExtractionClient', () => {
 
     expect(result).toEqual({ count: 0, pages: 0 });
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(mockCcsStateClient.clearRecoveryId).not.toHaveBeenCalled();
+    expect(mockStateClient.clearRecoveryId).not.toHaveBeenCalled();
   });
 
   describe('sub-window cap', () => {
@@ -489,7 +496,7 @@ describe('CcsLogsExtractionClient', () => {
       // FIXED_NOW = 2026-01-01T12:00 ; delay = 1m → effectiveWindowEnd = 2026-01-01T11:59
       // checkpoint = 2026-01-01T11:29 → window ~30m, cap=5m, grace=30s → 6 sub-windows.
       const checkpoint = '2026-01-01T11:29:00.000Z';
-      mockCcsStateClient.findOrInit.mockResolvedValue({
+      mockStateClient.findOrInit.mockResolvedValue({
         checkpointTimestamp: checkpoint,
         paginationRecoveryId: null,
       });
@@ -507,15 +514,15 @@ describe('CcsLogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
       // No per-sub-window checkpoint persistence — inner per-slice persistence is the only
       // mechanism, and it didn't fire because every probe was empty.
-      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+      expect(mockStateClient.update).not.toHaveBeenCalled();
       // count=0 across all sub-windows → clearRecoveryId
-      expect(mockCcsStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
+      expect(mockStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
     });
 
     it('does not cap when the gap is within maxTimeWindowSize + grace', async () => {
       // Window ~ 5m + 10s, cap = 5m, grace = 30s → no cap, single sub-window.
       const checkpoint = '2026-01-01T11:53:50.000Z';
-      mockCcsStateClient.findOrInit.mockResolvedValue({
+      mockStateClient.findOrInit.mockResolvedValue({
         checkpointTimestamp: checkpoint,
         paginationRecoveryId: null,
       });
@@ -528,7 +535,7 @@ describe('CcsLogsExtractionClient', () => {
 
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       // Empty probe → no per-slice state updates either.
-      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+      expect(mockStateClient.update).not.toHaveBeenCalled();
     });
 
     it('bypasses the sub-window cap when windowOverride is provided', async () => {
@@ -548,14 +555,14 @@ describe('CcsLogsExtractionClient', () => {
       const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
       expect(probeQuery).toContain(overrideFrom);
       expect(probeQuery).toContain(overrideTo);
-      // Override runs do not touch CCS state.
-      expect(mockCcsStateClient.findOrInit).not.toHaveBeenCalled();
-      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+      // Override runs do not touch remote extraction state.
+      expect(mockStateClient.findOrInit).not.toHaveBeenCalled();
+      expect(mockStateClient.update).not.toHaveBeenCalled();
     });
 
     it('passes monotonically advancing fromDateISO/toDateISO to each sub-window probe', async () => {
       const checkpoint = '2026-01-01T11:44:00.000Z'; // 15m before effectiveWindowEnd
-      mockCcsStateClient.findOrInit.mockResolvedValue({
+      mockStateClient.findOrInit.mockResolvedValue({
         checkpointTimestamp: checkpoint,
         paginationRecoveryId: null,
       });
@@ -591,7 +598,7 @@ describe('CcsLogsExtractionClient', () => {
       const stalledTs = '2024-06-15T10:00:00.000Z';
       const bumpedTs = moment(stalledTs).add(1, 'ms').toISOString();
 
-      mockCcsStateClient.findOrInit.mockResolvedValue({
+      mockStateClient.findOrInit.mockResolvedValue({
         checkpointTimestamp: null,
         paginationRecoveryId: null,
       });
@@ -610,10 +617,10 @@ describe('CcsLogsExtractionClient', () => {
       expect(result.error).toBeUndefined();
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(`CCS log-slice probe stalled at ${stalledTs}`)
+        expect.stringContaining(`log-slice probe stalled at ${stalledTs}`)
       );
       // The outer loop persists the bumped value as checkpointTimestamp after the stalled slice.
-      expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+      expect(mockStateClient.update).toHaveBeenCalledWith('host', {
         checkpointTimestamp: bumpedTs,
         paginationRecoveryId: null,
       });
@@ -623,7 +630,7 @@ describe('CcsLogsExtractionClient', () => {
       const ts1 = '2024-06-15T10:00:00.000Z';
       const ts2 = '2024-06-15T10:00:01.000Z'; // different timestamp → no stall
 
-      mockCcsStateClient.findOrInit.mockResolvedValue({
+      mockStateClient.findOrInit.mockResolvedValue({
         checkpointTimestamp: null,
         paginationRecoveryId: null,
       });
@@ -646,7 +653,7 @@ describe('CcsLogsExtractionClient', () => {
     it('does not warn when page is partial even if timestamp unchanged', async () => {
       const ts1 = '2024-06-15T10:00:00.000Z';
 
-      mockCcsStateClient.findOrInit.mockResolvedValue({
+      mockStateClient.findOrInit.mockResolvedValue({
         checkpointTimestamp: null,
         paginationRecoveryId: null,
       });
@@ -666,7 +673,7 @@ describe('CcsLogsExtractionClient', () => {
 
     it('does not warn on first iteration (sliceStart is always undefined initially)', async () => {
       // The first probe always runs with sliceStart=undefined → stall guard is skipped.
-      mockCcsStateClient.findOrInit.mockResolvedValue({
+      mockStateClient.findOrInit.mockResolvedValue({
         checkpointTimestamp: null,
         paginationRecoveryId: null,
       });

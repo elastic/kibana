@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 
-export type CcsLogExtractionState = z.infer<typeof CcsLogExtractionState>;
-export const CcsLogExtractionState = z.object({
+export type RemoteLogExtractionState = z.infer<typeof RemoteLogExtractionState>;
+export const RemoteLogExtractionState = z.object({
   checkpointTimestamp: z.string().nullable().default(null),
   paginationRecoveryId: z.string().nullable().default(null),
 });
