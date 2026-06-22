@@ -76,7 +76,7 @@ describe('MicrosoftTeams', () => {
       expect(visibleTypes).toHaveLength(4);
       expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears', recommend: true }));
       expect(visibleTypes?.[1]).toEqual(
-        expect.objectContaining({ type: 'oauth_authorization_code', recommend: true })
+        expect.objectContaining({ type: 'oauth_authorization_code' })
       );
       expect(visibleTypes?.[2]).toEqual(
         expect.objectContaining({ type: 'oauth_client_credentials' })
@@ -84,6 +84,13 @@ describe('MicrosoftTeams', () => {
       expect(visibleTypes?.[3]).toEqual(
         expect.objectContaining({ type: 'oauth_client_credentials_private_key_jwt' })
       );
+    });
+
+    it('marks only ears (Quick Connect) as recommended', () => {
+      const recommended = (MicrosoftTeams.auth?.types as Array<string | AuthTypeDef>)
+        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.recommend))
+        .map((t) => t.type);
+      expect(recommended).toEqual(['ears']);
     });
 
     it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {

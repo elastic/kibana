@@ -57,7 +57,6 @@ export const JiraConnector: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
-        recommend: true,
         overrides: {
           meta: {
             authorizationUrl: { hidden: true },

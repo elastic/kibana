@@ -118,7 +118,7 @@ describe('SharepointOnline', () => {
       expect(types).toContain('oauth_client_credentials');
     });
 
-    it('lists recommended delegated auth (ears, oauth_authorization_code) before app-only credentials', () => {
+    it('lists delegated auth (ears, oauth_authorization_code) before app-only credentials', () => {
       const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
         typeof t === 'string' ? t : t.type
       );
@@ -130,11 +130,11 @@ describe('SharepointOnline', () => {
       ]);
     });
 
-    it('marks ears and oauth_authorization_code as recommended', () => {
+    it('marks ears (Quick Connect) as recommended', () => {
       const recommended = (SharepointOnline.auth?.types as Array<string | AuthTypeDef>)
         .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.recommend))
         .map((t) => t.type);
-      expect(recommended).toEqual(['ears', 'oauth_authorization_code']);
+      expect(recommended).toEqual(['ears']);
     });
 
     it('supports ears auth with microsoft provider and SharePoint scopes', () => {

@@ -77,7 +77,6 @@ export const SharepointOnline: ConnectorSpec = {
       },
       {
         type: 'oauth_authorization_code',
-        recommend: true,
         defaults: {
           scope: 'Sites.Selected Files.Read.All offline_access',
         },
