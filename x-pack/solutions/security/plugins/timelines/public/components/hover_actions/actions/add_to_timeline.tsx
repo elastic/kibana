@@ -139,6 +139,24 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       }
     }, [handleStartDragToTimeline, keyboardEvent, ownFocus]);
 
+    const tooltipContent = useMemo(
+      () =>
+        showTooltip ? (
+          <TooltipWithKeyboardShortcut
+            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+              field,
+              value,
+            })}
+            content={i18n.ADD_TO_TIMELINE}
+            shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
+            showShortcut={ownFocus}
+          />
+        ) : (
+          i18n.ADD_TO_TIMELINE
+        ),
+      [field, ownFocus, showTooltip, value]
+    );
+
     const button = useMemo(
       () =>
         Component ? (
@@ -154,39 +172,26 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
             {i18n.ADD_TO_TIMELINE}
           </Component>
         ) : (
-          <EuiToolTip content={i18n.ADD_TO_TIMELINE} disableScreenReaderOutput>
-            <EuiButtonIcon
-              aria-label={i18n.ADD_TO_TIMELINE}
-              buttonRef={defaultFocusedButtonRef}
-              className="timelines__hoverActionButton"
-              data-test-subj="add-to-timeline"
-              iconSize="s"
-              iconType="timeline"
-              onClick={handleStartDragToTimeline}
-            />
-          </EuiToolTip>
+          // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- wrapped with EuiToolTip below
+          <EuiButtonIcon
+            aria-label={i18n.ADD_TO_TIMELINE}
+            buttonRef={defaultFocusedButtonRef}
+            className="timelines__hoverActionButton"
+            data-test-subj="add-to-timeline"
+            iconSize="s"
+            iconType="timeline"
+            onClick={handleStartDragToTimeline}
+          />
         ),
       [Component, defaultFocusedButtonRef, handleStartDragToTimeline]
     );
 
-    return showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={i18n.ADD_TO_TIMELINE}
-            shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
-      >
+    return Component ? (
+      button
+    ) : (
+      <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
         {button}
       </EuiToolTip>
-    ) : (
-      button
     );
   }
 );

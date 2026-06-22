@@ -28,8 +28,9 @@ const Action = ({ isDisabled, deleteSchedule, scheduleId }: ActionProps) => {
     <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
         <WithMissingPrivileges>
-          {(enabled) => (
-            <EuiToolTip content={i18n.DELETE_ACTIONS_BUTTON_ARIAL_LABEL} disableScreenReaderOutput>
+          {(enabled) => {
+            const deleteButton = (
+              // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- wrapped with EuiToolTip below
               <EuiButtonIcon
                 data-test-subj="deleteButton"
                 aria-label={i18n.DELETE_ACTIONS_BUTTON_ARIAL_LABEL}
@@ -38,8 +39,19 @@ const Action = ({ isDisabled, deleteSchedule, scheduleId }: ActionProps) => {
                 onClick={onScheduleDeleteChange}
                 disabled={isDisabled || !enabled}
               />
-            </EuiToolTip>
-          )}
+            );
+
+            return enabled ? (
+              <EuiToolTip
+                content={i18n.DELETE_ACTIONS_BUTTON_ARIAL_LABEL}
+                disableScreenReaderOutput
+              >
+                {deleteButton}
+              </EuiToolTip>
+            ) : (
+              deleteButton
+            );
+          }}
         </WithMissingPrivileges>
       </EuiFlexItem>
     </EuiFlexGroup>
