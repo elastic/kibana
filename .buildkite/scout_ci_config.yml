@@ -67,6 +67,7 @@ plugins:
     - serverless_observability
     - share
     - slo
+    - snapshot_restore
     - spaces
     - stack_connectors
     - streams
