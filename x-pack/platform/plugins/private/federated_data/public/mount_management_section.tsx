@@ -14,11 +14,16 @@ import { Main } from './main';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
-  { element }: ManagementAppMountParams
+  { element }: ManagementAppMountParams,
+  { enableFederatedIdentityAuth }: { enableFederatedIdentityAuth: boolean }
 ) => {
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <Main httpClient={coreStart.http} toasts={coreStart.notifications.toasts} />
+      <Main
+        httpClient={coreStart.http}
+        toasts={coreStart.notifications.toasts}
+        enableFederatedIdentityAuth={enableFederatedIdentityAuth}
+      />
     ),
     element
   );

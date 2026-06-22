@@ -37,6 +37,24 @@ describe('create_data_source_flyout_authentication', () => {
         'federated_identity',
       ]);
     });
+
+    it('omits Federated Identity when disabled', () => {
+      expect(
+        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: false }).map(
+          (o) => o.value
+        )
+      ).toEqual(['access_and_secret_keys']);
+      expect(
+        getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: false }).map(
+          (o) => o.value
+        )
+      ).toEqual(['access_and_secret_keys']);
+      expect(
+        getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: false }).map(
+          (o) => o.value
+        )
+      ).toEqual(['credentials']);
+    });
   });
 
   describe('showsAuthenticationCredentialFields', () => {

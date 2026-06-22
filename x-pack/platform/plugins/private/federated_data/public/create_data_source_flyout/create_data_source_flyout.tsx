@@ -57,6 +57,7 @@ export interface CreateDataSourceFlyoutProps {
   initialDataSource?: DataSource;
   /** Existing names to prevent duplicates (create mode only). */
   existingDataSourceNames?: readonly string[];
+  enableFederatedIdentityAuth?: boolean;
   dataSourcesClient: DataSourcesClient;
   toasts: ToastsStart;
   onClose: () => void;
@@ -69,6 +70,7 @@ export interface CreateDataSourceFlyoutProps {
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
   initialDataSource,
   existingDataSourceNames = [],
+  enableFederatedIdentityAuth,
   dataSourcesClient,
   toasts,
   onClose,
@@ -319,6 +321,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}
+            enableFederatedIdentity={enableFederatedIdentityAuth}
             onAuthenticationModeChange={setAuthenticationMode}
           />
           <CreateDataSourceFlyoutAuthenticationFields

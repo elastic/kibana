@@ -39,7 +39,8 @@ export const getDefaultAuthenticationMode = (
 };
 
 export const getCreateDataSourceAuthenticationOptions = (
-  dataSourceType: DataSourceType
+  dataSourceType: DataSourceType,
+  { enableFederatedIdentity }: { enableFederatedIdentity?: boolean } = {}
 ): Array<{
   value: CreateDataSourceAuthenticationMode;
   text: string;
@@ -52,12 +53,16 @@ export const getCreateDataSourceAuthenticationOptions = (
           defaultMessage: 'Credentials',
         }),
       },
-      {
-        value: 'federated_identity',
-        text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
-          defaultMessage: 'Federated Identity',
-        }),
-      },
+      ...(enableFederatedIdentity
+        ? [
+            {
+              value: 'federated_identity' as const,
+              text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
+                defaultMessage: 'Federated Identity',
+              }),
+            },
+          ]
+        : []),
     ];
   }
 
@@ -69,12 +74,16 @@ export const getCreateDataSourceAuthenticationOptions = (
           defaultMessage: 'Access and Secret Keys',
         }),
       },
-      {
-        value: 'federated_identity',
-        text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
-          defaultMessage: 'Federated Identity',
-        }),
-      },
+      ...(enableFederatedIdentity
+        ? [
+            {
+              value: 'federated_identity' as const,
+              text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
+                defaultMessage: 'Federated Identity',
+              }),
+            },
+          ]
+        : []),
     ];
   }
 
@@ -86,12 +95,16 @@ export const getCreateDataSourceAuthenticationOptions = (
           defaultMessage: 'Access and Secret Keys',
         }),
       },
-      {
-        value: 'federated_identity',
-        text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
-          defaultMessage: 'Federated Identity',
-        }),
-      },
+      ...(enableFederatedIdentity
+        ? [
+            {
+              value: 'federated_identity' as const,
+              text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
+                defaultMessage: 'Federated Identity',
+              }),
+            },
+          ]
+        : []),
     ];
   }
 

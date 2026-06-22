@@ -28,7 +28,11 @@ export class DatasetsPlugin
         const { setBreadcrumbs } = params;
         setBreadcrumbs(LIST_BREADCRUMB);
 
-        const unmountAppCallback = mountManagementSection(coreStart, params);
+        const enableFederatedIdentityAuth = true;
+
+        const unmountAppCallback = mountManagementSection(coreStart, params, {
+          enableFederatedIdentityAuth,
+        });
         return () => {
           docTitle.reset();
           unmountAppCallback();

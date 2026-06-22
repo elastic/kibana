@@ -50,9 +50,14 @@ type DataSetFlyoutState =
 export interface MainProps {
   httpClient: HttpSetup;
   toasts: ToastsStart;
+  enableFederatedIdentityAuth?: boolean;
 }
 
-export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
+export const Main: FunctionComponent<MainProps> = ({
+  httpClient,
+  toasts,
+  enableFederatedIdentityAuth,
+}) => {
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
@@ -672,6 +677,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
           dataSourcesClient={dataClient}
           toasts={toasts}
           existingDataSourceNames={items.map((ds) => ds.name)}
+          enableFederatedIdentityAuth={enableFederatedIdentityAuth}
           onClose={() => setDataSourceFlyout({ kind: 'closed' })}
           onSave={handleDataSourceSave}
         />

@@ -19,15 +19,17 @@ import {
 export function CreateDataSourceFlyoutAuthenticationSelect({
   dataSourceType,
   authenticationMode,
+  enableFederatedIdentity,
   onAuthenticationModeChange,
 }: {
   dataSourceType: DataSourceType;
   authenticationMode: CreateDataSourceAuthenticationMode;
+  enableFederatedIdentity?: boolean;
   onAuthenticationModeChange: (mode: CreateDataSourceAuthenticationMode) => void;
 }) {
   const options = useMemo(
-    () => getCreateDataSourceAuthenticationOptions(dataSourceType),
-    [dataSourceType]
+    () => getCreateDataSourceAuthenticationOptions(dataSourceType, { enableFederatedIdentity }),
+    [dataSourceType, enableFederatedIdentity]
   );
 
   if (!DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType)) {
