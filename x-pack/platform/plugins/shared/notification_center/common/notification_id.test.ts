@@ -93,7 +93,11 @@ describe('buildEventNotificationId', () => {
 
   it('rejects segments containing the separator', () => {
     expect(() =>
-      buildEventNotificationId({ producer: 'auto:Ops', event: 'memoryLimit', epochMs: 1750118400000 })
+      buildEventNotificationId({
+        producer: 'auto:Ops',
+        event: 'memoryLimit',
+        epochMs: 1750118400000,
+      })
     ).toThrow(/separator/);
   });
 });
