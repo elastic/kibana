@@ -20,7 +20,14 @@ globalTeardownHook(
     await apmSynthtraceEsClient.clean();
     await esClient.indices
       .deleteIndexTemplate({ name: OTEL_NATIVE_JAVA_TEMPLATE_NAME })
-      .catch(() => {});
+      .catch((error) => {
+        // A 404 is expected if the template was never created; surface anything else.
+        if (error?.statusCode !== 404) {
+          log.warning(
+            `Failed to delete index template ${OTEL_NATIVE_JAVA_TEMPLATE_NAME}: ${error?.message}`
+          );
+        }
+      });
 
     log.info('APM UI global teardown complete');
   }

@@ -37,7 +37,7 @@ test.describe(
       await uiSettings.set({ defaultIndex: dataViewId });
     });
 
-    test.afterAll(async ({ apiServices, uiSettings, kbnClient }) => {
+    test.afterAll(async ({ apiServices, uiSettings, kbnClient, log }) => {
       await uiSettings.unset('defaultIndex');
       if (dataViewId) {
         await apiServices.dataViews.delete(dataViewId);
@@ -45,7 +45,12 @@ test.describe(
       if (savedDashboardId) {
         await kbnClient.savedObjects
           .delete({ type: 'dashboard', id: savedDashboardId })
-          .catch(() => {});
+          .catch((error) => {
+            // A 404 is expected if the dashboard was never persisted; surface anything else.
+            if (error?.status !== 404) {
+              log.warning(`Failed to delete dashboard saved object: ${error?.message}`);
+            }
+          });
       }
     });
 
