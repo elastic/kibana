@@ -23,13 +23,11 @@ Follow `.claude/skills/scout-best-practices-reviewer/SKILL.md` for the checklist
 
 ### Solution-specific checklists
 
-After applying the general checklist, check whether any changed in-scope file is under a **Security Solution Scout path**:
-- `x-pack/solutions/security/plugins/security_solution/test/scout/`
-- `x-pack/solutions/security/packages/kbn-scout-security/`
+The general skill instructs you to check for and apply a solution-specific extension when one exists. For Security Solution Scout files (`x-pack/solutions/security/plugins/security_solution/test/scout/` or `x-pack/solutions/security/packages/kbn-scout-security/`), that extension is at:
 
-If so, **additionally read and apply** `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md` for those files. This is an **additive** checklist — the general skill runs first for all in-scope Scout files; the Security-specific checks are layered on top and applied **only to files under the Security Solution Scout paths above**. Skill invocation is disabled in this environment — read the file directly with the file tool.
+`x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`
 
-Ignore any output format instructions and the `## Skill improvement` section in the Security skill file — use the workflow's collapsible inline-comment format defined in this file.
+Skill invocation is disabled in this environment — read the file directly with the file tool. Apply its Security-specific checks once, only to files under those paths. Ignore any output format instructions and the `## Skill improvement` section — use the workflow's collapsible inline-comment format defined in this file.
 
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 
