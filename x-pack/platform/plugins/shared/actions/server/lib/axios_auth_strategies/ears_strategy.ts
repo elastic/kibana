@@ -68,7 +68,7 @@ export class EarsStrategy implements AxiosAuthStrategy {
   }
 
   installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
-    const { secrets, connectorTokenClient } = deps;
+    const { secrets, connectorTokenClient, logger, connectorId } = deps;
 
     if (!connectorTokenClient) {
       throw new Error('ConnectorTokenClient is required for EARS authorization code flow');
@@ -83,7 +83,16 @@ export class EarsStrategy implements AxiosAuthStrategy {
         if (body.error !== 'token_expired') return response;
         // If we already retried after a refresh, let the response through so the
         // spec handler can throw its formatted error rather than looping forever.
-        if ((response.config as { _retry?: boolean })._retry) return response;
+        if ((response.config as { _retry?: boolean })._retry) {
+          logger.debug(
+            `[EARS] Slack returned token_expired after token refresh for connectorId: ${connectorId}; passing response through`
+          );
+          return response;
+        }
+
+        logger.debug(
+          `[EARS] Slack returned HTTP 200 with ok:false + token_expired for connectorId: ${connectorId}; attempting token refresh`
+        );
 
         return this.refreshAndRetry(
           axiosInstance,
