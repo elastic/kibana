@@ -33,6 +33,7 @@ test.describe('Indices', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsPrivilegedUser();
     await indicesPage.goto();
 
+    const originalErrorIndex = await (await indicesPage.getErrorIndexInput()).inputValue();
     const newErrorIndex = 'logs-*';
     const errorInput = await indicesPage.getErrorIndexInput();
     await expect(errorInput).toBeEnabled();
@@ -46,5 +47,12 @@ test.describe('Indices', { tag: tags.stateful.classic }, () => {
     await waitForApmSettingsHeaderLink(page);
 
     await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
+
+    await test.step('restore original error index', async () => {
+      await indicesPage.setErrorIndex(originalErrorIndex);
+      await indicesPage.clickApplyChanges();
+      await waitForApmSettingsHeaderLink(page);
+      await expect(await indicesPage.getErrorIndexInput()).toHaveValue(originalErrorIndex);
+    });
   });
 });

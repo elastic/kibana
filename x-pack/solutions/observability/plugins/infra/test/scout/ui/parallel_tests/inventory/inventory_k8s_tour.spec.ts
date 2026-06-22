@@ -21,6 +21,10 @@ test.describe(
       await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
     });
 
+    test.afterEach(async ({ kbnClient }) => {
+      await kbnClient.uiSettings.unset('hideAnnouncements');
+    });
+
     test('Render and dismiss k8s tour', async ({ pageObjects: { inventoryPage } }) => {
       await test.step('display k8s tour with proper message', async () => {
         await expect(inventoryPage.k8sTourText).toBeVisible();

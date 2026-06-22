@@ -91,6 +91,14 @@ test.describe(
         await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
+
+        await customLinksPage.clickEditCustomLinkForRow(uniqueLabel);
+        await customLinksPage.clickDelete();
+
+        await expect(page).toHaveURL(/.*custom-links$/);
+        await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeHidden({
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
     });
   }

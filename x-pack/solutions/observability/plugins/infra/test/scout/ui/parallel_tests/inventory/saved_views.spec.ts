@@ -68,7 +68,7 @@ test.describe(
       await inventoryPage.addDismissK8sTourInitScript();
     });
 
-    test.afterEach(async ({ apiServices: { inventoryViews } }) => {
+    test.afterEach(async ({ apiServices: { inventoryViews }, kbnClient }) => {
       await inventoryViews.deleteByName([
         'View without time',
         'View with time',
@@ -77,6 +77,7 @@ test.describe(
         'View updated',
       ]);
       await inventoryViews.makeDefault('0'); // Reset to default view whose id is fixed to '0'
+      await kbnClient.uiSettings.unset('hideAnnouncements');
     });
 
     test.afterAll(async ({ apiServices: { inventoryViews } }) => {

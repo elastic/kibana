@@ -16,6 +16,7 @@ import {
   test as base,
   createLazyPageObject,
   globalSetupHook as baseGlobalSetupHook,
+  globalTeardownHook as baseGlobalTeardownHook,
 } from '@kbn/scout-oblt';
 import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
 import { getSynthtraceClient, synthtraceFixture } from '@kbn/scout-synthtrace';
@@ -84,9 +85,7 @@ export const test = baseWithSynthtrace.extend<
   },
 });
 
-const globalSetupWithSynthtrace = mergeTests(baseGlobalSetupHook, synthtraceFixture);
-
-export const globalSetupHook = globalSetupWithSynthtrace.extend({
+const createInfraSynthtraceEsClientOverride = () => ({
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
     const { infraEsClient } = await getSynthtraceClient(
       'infraEsClient',
@@ -111,3 +110,15 @@ export const globalSetupHook = globalSetupWithSynthtrace.extend({
     await use({ index, clean });
   },
 });
+
+const globalSetupWithSynthtrace = mergeTests(baseGlobalSetupHook, synthtraceFixture);
+
+export const globalSetupHook = globalSetupWithSynthtrace.extend(
+  createInfraSynthtraceEsClientOverride()
+);
+
+const globalTeardownWithSynthtrace = mergeTests(baseGlobalTeardownHook, synthtraceFixture);
+
+export const globalTeardownHook = globalTeardownWithSynthtrace.extend(
+  createInfraSynthtraceEsClientOverride()
+);
