@@ -277,7 +277,7 @@ async function processScenario(
     await triggerSigEventsKIFeatureExtraction(config, log, logsIndex);
     await waitForSigEventsKIFeatureExtraction(config, log, logsIndex);
     await logSigEventsExtractedKIFeatures(config, log, logsIndex);
-    await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
+    await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id, logsIndex);
 
     // Step 7 — Create a snapshot of the logs and extracted features
     log.info('[7/8] Creating GCS snapshot...');

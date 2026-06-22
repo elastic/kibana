@@ -19,7 +19,7 @@ import {
   KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS,
   KI_FEATURE_EXTRACTION_TIMEOUT_MS,
   DEFAULT_LOGS_INDEX,
-  QUERIES_INDEX,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
 } from './constants';
 import {
   getSigeventsSnapshotKIFeaturesIndex,
@@ -236,7 +236,11 @@ export async function cleanupSigEventsExtractedKIsData(
 ): Promise<void> {
   log.info('Cleaning up ES data...');
 
-  for (const target of ['logs*', '.kibana_streams_features', SIGEVENTS_FEATURES_INDEX_PATTERN]) {
+  for (const target of [
+    'logs*',
+    KNOWLEDGE_INDICATORS_DATA_STREAM,
+    SIGEVENTS_FEATURES_INDEX_PATTERN,
+  ]) {
     try {
       await esClient.indices.deleteDataStream({ name: target });
     } catch {
@@ -291,14 +295,13 @@ export async function promoteQueries(config: ConnectionConfig): Promise<void> {
 
 export async function resetQueriesPromotion({ esClient }: { esClient: Client }): Promise<void> {
   await esClient.updateByQuery({
-    index: QUERIES_INDEX,
+    index: KNOWLEDGE_INDICATORS_DATA_STREAM,
     conflicts: 'proceed',
     refresh: true,
-    query: { match_all: {} },
+    query: { term: { type: 'query' } },
     script: {
       lang: 'painless',
-      source: `ctx._source['rule_backed'] = params.rb`,
-      params: { rb: false },
+      source: `if (ctx._source.query != null) { ctx._source.query.rule_backed = false; }`,
     },
   });
 }
