@@ -43,4 +43,10 @@ export const registerWorkflowSteps = (
       (m) => m.buildAlertEntityGraphStepDefinition
     );
   });
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_alert_status_step/set_alert_status_step').then(
+      (m) => m.setAlertStatusStepDefinition
+    )
+  );
 };
