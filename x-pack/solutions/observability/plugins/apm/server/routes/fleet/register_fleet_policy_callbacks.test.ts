@@ -9,7 +9,8 @@ import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { get } from 'lodash';
 import {
-  onPackagePolicyCreateOrUpdate,
+  onPackagePolicyCreate,
+  onPackagePolicyUpdate,
   onPackagePolicyPostCreate,
 } from './register_fleet_policy_callbacks';
 import {
@@ -32,6 +33,7 @@ jest.mock('../../lib/helpers/create_es_client/create_internal_es_client', () => 
 }));
 
 jest.mock('./api_keys/add_api_keys_to_policies_if_missing', () => ({
+  ...jest.requireActual('./api_keys/add_api_keys_to_policies_if_missing'),
   addApiKeysToPackagePolicyIfMissing: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -41,6 +43,29 @@ import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_p
 beforeEach(() => {
   jest.clearAllMocks();
 });
+
+const newApmPackagePolicy = {
+  name: 'apm-1',
+  description: '',
+  namespace: 'default',
+  policy_ids: ['agent-policy-id'],
+  enabled: true,
+  inputs: [
+    {
+      policy_template: 'apmserver',
+      streams: [],
+      vars: {},
+      type: 'apm',
+      enabled: true,
+      config: {
+        'apm-server': {
+          value: {},
+        },
+      },
+    },
+  ],
+  package: { name: 'apm', title: 'Elastic APM', version: '9.4.1' },
+};
 
 const apmPackagePolicy = {
   id: 'test-policy-id',
@@ -111,93 +136,107 @@ function buildMocks() {
   } as any;
 
   const getApmIndices = jest.fn().mockResolvedValue({});
+  const logger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as any;
 
   (getInternalSavedObjectsClient as jest.Mock).mockResolvedValue(soClient);
 
-  return { coreStart, soClient, esClient, fleetPluginStart, getApmIndices };
+  return { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger };
 }
 
-describe('onPackagePolicyCreateOrUpdate', () => {
-  describe('non-apm policy', () => {
-    it('returns the policy unchanged without decorating', async () => {
-      const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
-      const nonApmPolicy = {
-        ...apmPackagePolicy,
-        package: { name: 'system', title: 'System', version: '1.0.0' },
-      };
+describe('onPackagePolicyCreate', () => {
+  it('returns a non-apm policy unchanged', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
+    const nonApmPolicy = {
+      ...apmPackagePolicy,
+      package: { name: 'system', title: 'System', version: '1.0.0' },
+    };
 
-      const cb = onPackagePolicyCreateOrUpdate({ fleetPluginStart, getApmIndices, coreStart });
-      const result = await cb(nonApmPolicy as any, soClient, esClient);
+    const cb = onPackagePolicyCreate({ fleetPluginStart, getApmIndices, coreStart });
+    const result = await cb(nonApmPolicy as any, soClient, esClient);
 
-      expect(result).toBe(nonApmPolicy);
-      expect(getApmIndices).not.toHaveBeenCalled();
-    });
+    expect(result).toBe(nonApmPolicy);
+    expect(getApmIndices).not.toHaveBeenCalled();
   });
 
-  describe('apm policy', () => {
-    it('decorates the policy with agent configurations and source maps', async () => {
-      const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
-      const { decoratePackagePolicyWithAgentConfigAndSourceMap } = jest.requireMock(
-        './merge_package_policy_with_apm'
-      );
-      const decorated = { ...apmPackagePolicy, _decorated: true };
-      decoratePackagePolicyWithAgentConfigAndSourceMap.mockResolvedValueOnce(decorated);
+  it('decorates an apm policy with agent configurations and source maps', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
+    const { decoratePackagePolicyWithAgentConfigAndSourceMap } = jest.requireMock(
+      './merge_package_policy_with_apm'
+    );
+    const decorated = { ...newApmPackagePolicy, _decorated: true };
+    decoratePackagePolicyWithAgentConfigAndSourceMap.mockResolvedValueOnce(decorated);
 
-      const cb = onPackagePolicyCreateOrUpdate({ fleetPluginStart, getApmIndices, coreStart });
-      const result = await cb(apmPackagePolicy as any, soClient, esClient);
+    const cb = onPackagePolicyCreate({ fleetPluginStart, getApmIndices, coreStart });
+    const result = await cb(newApmPackagePolicy as any, soClient, esClient);
 
-      expect(decoratePackagePolicyWithAgentConfigAndSourceMap).toHaveBeenCalled();
-      expect(result).toEqual(decorated);
-    });
+    expect(decoratePackagePolicyWithAgentConfigAndSourceMap).toHaveBeenCalled();
+    expect(result).toEqual(decorated);
+    expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBeUndefined();
+    expect(get(result, SOURCE_MAP_API_KEY_PATH)).toBeUndefined();
+    expect(fleetPluginStart.packagePolicyService.get).not.toHaveBeenCalled();
+  });
+});
 
-    describe('api key handling on update', () => {
-      it('preserves api keys from the stored policy when an update omits them', async () => {
-        const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
-        fleetPluginStart.packagePolicyService.get.mockResolvedValue(apmPackagePolicyWithKeys);
+describe('onPackagePolicyUpdate', () => {
+  it('returns a non-apm policy unchanged', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger } = buildMocks();
+    const nonApmPolicy = {
+      ...apmPackagePolicy,
+      package: { name: 'system', title: 'System', version: '1.0.0' },
+    };
 
-        const cb = onPackagePolicyCreateOrUpdate({ fleetPluginStart, getApmIndices, coreStart });
-        const result = await cb(apmPackagePolicy as any, soClient, esClient);
+    const cb = onPackagePolicyUpdate({ fleetPluginStart, getApmIndices, coreStart, logger });
+    const result = await cb(nonApmPolicy as any, soClient, esClient);
 
-        expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe(
-          'stored-agent-key-id:stored-agent-key-secret'
-        );
-        expect(get(result, SOURCE_MAP_API_KEY_PATH)).toBe(
-          'stored-sourcemap-key-id:stored-sourcemap-key-secret'
-        );
-        expect(
-          coreStart.elasticsearch.client.asInternalUser.security.createApiKey
-        ).not.toHaveBeenCalled();
-      });
+    expect(result).toBe(nonApmPolicy);
+    expect(getApmIndices).not.toHaveBeenCalled();
+  });
 
-      it('creates new api keys when neither the incoming nor stored policy has them', async () => {
-        const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
-        fleetPluginStart.packagePolicyService.get.mockResolvedValue(apmPackagePolicy);
+  it('preserves api keys from the stored policy when an update omits them', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger } = buildMocks();
+    fleetPluginStart.packagePolicyService.get.mockResolvedValue(apmPackagePolicyWithKeys);
 
-        const cb = onPackagePolicyCreateOrUpdate({ fleetPluginStart, getApmIndices, coreStart });
-        const result = await cb(apmPackagePolicy as any, soClient, esClient);
+    const cb = onPackagePolicyUpdate({ fleetPluginStart, getApmIndices, coreStart, logger });
+    const result = await cb(apmPackagePolicy as any, soClient, esClient);
 
-        expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
-        expect(get(result, SOURCE_MAP_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
-        expect(
-          coreStart.elasticsearch.client.asInternalUser.security.createApiKey
-        ).toHaveBeenCalledTimes(2);
-      });
+    expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe(
+      'stored-agent-key-id:stored-agent-key-secret'
+    );
+    expect(get(result, SOURCE_MAP_API_KEY_PATH)).toBe(
+      'stored-sourcemap-key-id:stored-sourcemap-key-secret'
+    );
+    expect(
+      coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+    ).not.toHaveBeenCalled();
+  });
 
-      it('does not fetch the stored policy when the incoming policy already has api keys', async () => {
-        const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
+  it('creates new api keys when neither the incoming nor stored policy has them', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger } = buildMocks();
+    fleetPluginStart.packagePolicyService.get.mockResolvedValue(apmPackagePolicy);
 
-        const cb = onPackagePolicyCreateOrUpdate({ fleetPluginStart, getApmIndices, coreStart });
-        const result = await cb(apmPackagePolicyWithKeys as any, soClient, esClient);
+    const cb = onPackagePolicyUpdate({ fleetPluginStart, getApmIndices, coreStart, logger });
+    const result = await cb(apmPackagePolicy as any, soClient, esClient);
 
-        expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe(
-          'stored-agent-key-id:stored-agent-key-secret'
-        );
-        expect(fleetPluginStart.packagePolicyService.get).not.toHaveBeenCalled();
-        expect(
-          coreStart.elasticsearch.client.asInternalUser.security.createApiKey
-        ).not.toHaveBeenCalled();
-      });
-    });
+    expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
+    expect(get(result, SOURCE_MAP_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
+    expect(
+      coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+    ).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not fetch the stored policy when the incoming policy already has api keys', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger } = buildMocks();
+
+    const cb = onPackagePolicyUpdate({ fleetPluginStart, getApmIndices, coreStart, logger });
+    const result = await cb(apmPackagePolicyWithKeys as any, soClient, esClient);
+
+    expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe(
+      'stored-agent-key-id:stored-agent-key-secret'
+    );
+    expect(fleetPluginStart.packagePolicyService.get).not.toHaveBeenCalled();
+    expect(
+      coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+    ).not.toHaveBeenCalled();
   });
 });
 
