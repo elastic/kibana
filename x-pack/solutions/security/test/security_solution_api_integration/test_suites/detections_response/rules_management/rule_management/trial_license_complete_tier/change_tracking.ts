@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
   // Skip in Serverless until "xpack.alerting.ruleChangeTracking.enabled" and
   // xpack.securitySolution.enableExperimental: [ruleChangesHistoryEnabled] feature flags
   // permanently enabled
-  describe.skip('@ess @skipInServerless rule change history', () => {
+  describe('@ess @skipInServerless rule change history', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.page).toBe(1);
-        expect(body.perPage).toBe(20);
+        expect(body.per_page).toBe(20);
         expect(body.total).toBe(1);
         expect(body.items).toHaveLength(1);
 
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body.total).toBe(5);
           expect(body.page).toBe(1);
-          expect(body.perPage).toBe(2);
+          expect(body.per_page).toBe(2);
           expect(body.items).toHaveLength(2);
           expect(body.items[0].rule.revision).toBe(4);
           expect(body.items[1].rule.revision).toBe(3);
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('computes `old_values` against the next-older revision across page boundaries', async () => {
           // Oldest item on page 1 (revision 3) should still see revision 2 as
-          // its predecessor — provided by the perPage+1 lookback fetch.
+          // its predecessor — provided by the per_page+1 lookback fetch.
           const { body: page1 } = await detectionsApi
             .ruleChangesHistory({ params: { ruleId }, query: { page: 1, per_page: 2 } })
             .expect(200);
