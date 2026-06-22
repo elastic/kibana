@@ -11,6 +11,7 @@ import {
   mergeArtifactsByType,
   splitArtifactsByType,
 } from '../../form/utils/artifact_mappers';
+import { resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
 import type { FormValues } from '../../form/types';
 import type { ComposeFormValues } from './compose_form_types';
 
@@ -78,10 +79,7 @@ export const composeFormToCreateRequest = (
   builderType?: string
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
-  const hasRecovery = formValues.query.recovery != null;
-
-  const recoveryStrategy =
-    formValues.recoveryStrategy ?? (hasRecovery ? ('query' as const) : undefined);
+  const recoveryStrategy = resolveRecoveryStrategy(formValues);
 
   return {
     kind: formValues.kind,

@@ -18,6 +18,7 @@ import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from '../types';
+import { resolveRecoveryStrategy } from './rule_request_mappers';
 import { mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
 
 export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
@@ -114,10 +115,8 @@ const serializeQuery = (query: RuleQuery): YamlQuery => {
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition);
-  const hasRecovery = values.query.recovery != null;
   const allArtifacts = mergeArtifactsByType(values);
-
-  const recoveryStrategy = values.recoveryStrategy ?? (hasRecovery ? 'query' : undefined);
+  const recoveryStrategy = resolveRecoveryStrategy(values);
 
   return {
     kind: values.kind,

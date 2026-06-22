@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,7 +31,10 @@ import { ConfirmRuleClose } from '../confirm_rule_close';
 import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/types';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
-import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
+import {
+  isNonRepresentableRule,
+  isNonRepresentableFormValues,
+} from '../../form/utils/is_non_representable';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
@@ -343,6 +347,20 @@ export function ComposeDiscoverFlyout({
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
+  const watchedRecoveryStrategy = useWatch({ control: methods.control, name: 'recoveryStrategy' });
+  const watchedNoDataStrategy = useWatch({ control: methods.control, name: 'noDataStrategy' });
+
+  const isCurrentlyNonRepresentable = useMemo(
+    () =>
+      forceYamlMode &&
+      isNonRepresentableFormValues({
+        ...methods.getValues(),
+        query: watchedQuery,
+        recoveryStrategy: watchedRecoveryStrategy,
+        noDataStrategy: watchedNoDataStrategy,
+      }),
+    [forceYamlMode, watchedQuery, watchedRecoveryStrategy, watchedNoDataStrategy, methods]
+  );
 
   const timeFieldResolutionQuery = useMemo(
     () =>
@@ -601,7 +619,9 @@ export function ComposeDiscoverFlyout({
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
-      if (forceYamlMode) return;
+      if (!enabled && isCurrentlyNonRepresentable) {
+        return;
+      }
 
       if (enabled) {
         const serialized = serializeFormToYaml(methods.getValues());
@@ -633,7 +653,14 @@ export function ComposeDiscoverFlyout({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch, forceYamlMode]
+    [
+      cancelYamlParse,
+      methods,
+      yamlText,
+      applyYamlValuesToFormAndSandbox,
+      dispatch,
+      isCurrentlyNonRepresentable,
+    ]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -829,15 +856,20 @@ export function ComposeDiscoverFlyout({
                 )}
                 {!isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={EDIT_MODE_LEGEND}
-                      options={EDIT_MODE_OPTIONS}
-                      idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                      onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                      isIconOnly
-                      buttonSize="compressed"
-                      data-test-subj="composeDiscoverEditModeToggle"
-                    />
+                    <EuiToolTip
+                      content={isCurrentlyNonRepresentable ? YAML_ONLY_TOOLTIP : undefined}
+                    >
+                      <EuiButtonGroup
+                        legend={EDIT_MODE_LEGEND}
+                        options={EDIT_MODE_OPTIONS}
+                        idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                        onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                        isIconOnly
+                        isDisabled={isCurrentlyNonRepresentable}
+                        buttonSize="compressed"
+                        data-test-subj="composeDiscoverEditModeToggle"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

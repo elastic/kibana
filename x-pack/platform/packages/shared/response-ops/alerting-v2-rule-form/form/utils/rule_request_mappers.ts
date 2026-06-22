@@ -27,6 +27,21 @@ import {
 } from './artifact_mappers';
 
 // ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolves the recovery_strategy for an API request. If the form explicitly
+ * holds a value, use it; otherwise infer 'query' when a recovery query exists.
+ */
+export const resolveRecoveryStrategy = (
+  formValues: Pick<FormValues, 'recoveryStrategy' | 'query'>
+): RecoveryStrategy | undefined => {
+  if (formValues.recoveryStrategy) return formValues.recoveryStrategy;
+  return formValues.query.recovery != null ? ('query' as const) : undefined;
+};
+
+// ---------------------------------------------------------------------------
 // FormValues → API request
 // ---------------------------------------------------------------------------
 
@@ -129,10 +144,7 @@ export interface RuleRequestCommon {
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
   const { metadata, timeField, schedule, query, grouping } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
-  const hasRecovery = query.recovery != null;
-
-  const recoveryStrategy =
-    formValues.recoveryStrategy ?? (hasRecovery ? ('query' as const) : undefined);
+  const recoveryStrategy = resolveRecoveryStrategy(formValues);
 
   return {
     metadata: mapMetadata(metadata),

@@ -16,6 +16,9 @@ import type { FormValues } from '../types';
  * - `alert` kind with `standalone` query format (form requires composed base+segments)
  * - `recovery_strategy` other than `'query'` (form only supports custom recovery queries)
  * - `no_data_strategy` set to any active value (form has no UI for no-data handling)
+ *
+ * Note: `query.no_data` is not checked separately because it can only appear on
+ * standalone format queries, which the `format === 'standalone'` check already catches.
  */
 export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
   if (rule.kind !== 'alert') return false;
