@@ -400,7 +400,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         {
           field: '',
           width: '65px',
-          name: UX_MESSAGES.userActions,
+          name: TABLE_COLUMN_NAMES.actions,
           actions: [
             {
               render: (actionDetailsItem: ActionDetails) => {

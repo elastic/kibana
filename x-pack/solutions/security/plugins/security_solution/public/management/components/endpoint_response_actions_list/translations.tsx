@@ -113,6 +113,9 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   rule: i18n.translate('xpack.securitySolution.responseActionsList.list.rule', {
     defaultMessage: 'Rule',
   }),
+  actions: i18n.translate('xpack.securitySolution.responseActionsList.list.actions', {
+    defaultMessage: 'Actions',
+  }),
 });
 
 export const UX_MESSAGES = Object.freeze({
@@ -190,9 +193,6 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: 'Triggered by rule',
     }
   ),
-  userActions: i18n.translate('xpack.securitySolution.responseActionsList.list.userActions', {
-    defaultMessage: 'Actions',
-  }),
 });
 
 export const FILTER_NAMES = Object.freeze({
