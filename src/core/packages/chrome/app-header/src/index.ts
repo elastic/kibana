@@ -15,9 +15,15 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderTab,
+  AppHeaderEditableTitle,
+  AppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
   AppHeaderMenu,
   AppHeaderPadding,
   AppHeaderConfig,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
 } from './types';
-export type { AppHeaderWithFallbackProps } from './app_header_with_fallback';
-export { AppHeaderWithFallback } from './app_header_with_fallback';

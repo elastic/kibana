@@ -7,6 +7,7 @@
 import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
 import type { KbnClient, KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { EXECUTION_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 
 // redefine args type to make it easier to handle in a type-safe way
 type HttpHandlerArgs =
@@ -23,11 +24,13 @@ type HttpHandlerArgs =
 export function httpHandlerFromKbnClient({
   kbnClient,
   log,
-  getRunId,
+  getExecutionId,
+  getExperimentId,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
-  getRunId?: () => string | undefined;
+  getExecutionId?: () => string | undefined;
+  getExperimentId?: () => string | undefined;
 }) {
   const fetch: HttpHandler = async (...args: HttpHandlerArgs) => {
     const options: HttpFetchOptionsWithPath =
@@ -35,19 +38,26 @@ export function httpHandlerFromKbnClient({
 
     const { method = 'GET', body, asResponse, rawResponse, query, signal, headers } = options;
 
-    // Add a W3C baggage entry so Kibana can tag OTel spans with the eval run id.
-    // This enables correlating traces (traces-*) with eval score docs (kibana-evaluations*) via run_id.
-    const runId = getRunId?.() ?? process.env.TEST_RUN_ID;
+    // Add a W3C baggage entry so Kibana can tag OTEL spans with the per-model build run ID.
+    const executionId = getExecutionId?.() ?? process.env.TEST_RUN_ID;
     const nextHeaders: Record<string, string> = headers
       ? ({ ...(headers as Record<string, unknown>) } as Record<string, string>)
       : {};
 
-    if (runId) {
-      const baggageEntry = `kibana.evals.run_id=${encodeURIComponent(runId)}`;
+    const baggageEntries: string[] = [];
+    if (executionId) {
+      baggageEntries.push(`${EXECUTION_ID_BAGGAGE_KEY}=${encodeURIComponent(executionId)}`);
+    }
+    const experimentId = getExperimentId?.();
+    if (experimentId) {
+      baggageEntries.push(`${EVAL_EXPERIMENT_ID_BAGGAGE_KEY}=${encodeURIComponent(experimentId)}`);
+    }
+    if (baggageEntries.length > 0) {
       const existingKey = Object.keys(nextHeaders).find((k) => k.toLowerCase() === 'baggage');
       const existing = existingKey ? nextHeaders[existingKey] : undefined;
-
-      const merged = existing ? `${existing},${baggageEntry}` : baggageEntry;
+      const merged = existing
+        ? `${existing},${baggageEntries.join(',')}`
+        : baggageEntries.join(',');
       nextHeaders[existingKey ?? 'baggage'] = merged;
     }
 
@@ -129,10 +139,11 @@ export function httpHandlerFromKbnClient({
         // `kbnClient.request` only ever throws `KbnClientRequesterError`.
         const error = err as KbnClientRequesterError;
         const status = error.status;
-        const shouldRetry =
-          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
 
         lastError = error;
+
+        const shouldRetry =
+          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
 
         if (!shouldRetry) {
           throw error;

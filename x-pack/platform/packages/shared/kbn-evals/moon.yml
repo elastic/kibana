@@ -38,6 +38,8 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/test'
   - '@kbn/es-errors'
+  - '@kbn/es'
+  - '@kbn/dot-text'
 tags:
   - test-helper
   - package

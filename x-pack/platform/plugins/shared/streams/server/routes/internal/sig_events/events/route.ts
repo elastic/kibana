@@ -7,6 +7,7 @@
 
 import {
   sigEventSchema,
+  type Detection,
   type SigEvent,
   type Discovery,
   type LifecycleDetection,
@@ -21,26 +22,24 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 const toArray = (val: string | string[] | undefined): string[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-const collectDetections = (discoveries: Discovery[]): LifecycleDetection[] => {
+const isLifecycleDetection = (
+  hit: Detection
+): hit is Detection & { kind: LifecycleDetection['kind'] } => hit.kind !== 'handled';
+
+const collectEmbeddedDetections = (discoveries: Discovery[]) => {
   const seen = new Set<string>();
-  const detections: LifecycleDetection[] = [];
+  const result: Array<Omit<LifecycleDetection, 'kind' | '@timestamp'>> = [];
 
   for (const discovery of discoveries) {
     for (const det of discovery.detections ?? []) {
-      const { detection_id, rule_name, stream_name, change_point_type, detected_at } = det;
-      if (!detection_id || !detected_at || seen.has(detection_id)) continue;
+      const { detection_id, rule_name, stream_name, change_point_type } = det;
+      if (!detection_id || seen.has(detection_id)) continue;
       seen.add(detection_id);
-      detections.push({
-        detection_id,
-        rule_name,
-        stream_name,
-        change_point_type,
-        detected_at,
-      });
+      result.push({ detection_id, rule_name, stream_name, change_point_type });
     }
   }
 
-  return detections;
+  return result;
 };
 
 const eventsSearchRoute = createServerRoute({
@@ -61,7 +60,7 @@ const eventsSearchRoute = createServerRoute({
       to: z.iso.datetime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      verdict: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
+      status: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
     }),
@@ -76,11 +75,11 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { verdict, stream, search, ...rest } = params.query;
+    const { status, stream, search, ...rest } = params.query;
 
     return getEventClient().findLatestPaginated({
       ...rest,
-      verdict: toArray(verdict),
+      status: toArray(status),
       stream: toArray(stream),
       search: search || undefined,
     });
@@ -143,7 +142,7 @@ const eventsLifecycleRoute = createServerRoute({
     access: 'internal',
     summary: 'Get event lifecycle',
     description:
-      'Get the full lifecycle chain for a significant event: detections, discoveries, verdicts, and event versions.',
+      'Get the full lifecycle chain for a significant event: detections, discoveries, and event versions.',
   },
   security: {
     authz: {
@@ -161,30 +160,52 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getVerdictClient, licensing, uiSettingsClient } =
+    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing, uiSettingsClient } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { hits: initialHits } = await getEventClient().findById(params.path.id);
     if (initialHits.length === 0) {
-      return { detections: [], discoveries: [], verdicts: [], events: [] };
+      return { detections: [], discoveries: [], events: [] };
     }
 
     const { discovery_slug: slug } = initialHits[0];
 
-    const [{ hits: events }, { hits: discoveries }, { hits: verdicts }] = await Promise.all([
+    const [{ hits: events }, { hits: discoveries }] = await Promise.all([
       getEventClient().findByDiscoverySlug(slug),
       getDiscoveryClient().findBySlug(slug),
-      getVerdictClient().findByDiscoverySlug(slug),
     ]);
 
-    return {
-      detections: collectDetections(discoveries),
-      discoveries,
-      verdicts,
-      events,
-    };
+    const embedded = collectEmbeddedDetections(discoveries);
+    const { hits: allDetectionHits } = await getDetectionClient().findByIds(
+      embedded.map((e) => e.detection_id).filter(Boolean)
+    );
+    const hitsByDetectionId = new Map(
+      allDetectionHits.filter(isLifecycleDetection).map((h) => [h.detection_id, h])
+    );
+
+    const detections: LifecycleDetection[] = embedded.flatMap(
+      ({ detection_id, rule_name, stream_name, change_point_type }) => {
+        const hit = hitsByDetectionId.get(detection_id);
+        if (!hit) {
+          return [];
+        }
+
+        return [
+          {
+            detection_id,
+            rule_name: hit.rule_name ?? rule_name,
+            stream_name: hit.stream_name ?? stream_name,
+            change_point_type,
+            kind: hit.kind,
+            '@timestamp': hit['@timestamp'],
+          },
+        ];
+      }
+    );
+
+    return { detections, discoveries, events };
   },
 });
 

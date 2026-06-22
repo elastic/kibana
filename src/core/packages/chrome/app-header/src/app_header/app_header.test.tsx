@@ -11,11 +11,12 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
+import type { AppHeaderMetadataItems } from '../types';
 import { AppHeaderView } from './app_header';
 
 const renderAppHeader = (
@@ -55,7 +56,11 @@ describe('AppHeaderView', () => {
   it('renders when the only content is a favorite action', () => {
     renderAppHeader(
       <AppHeaderView
-        favorite={<EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />}
+        favorite={
+          <EuiToolTip content="Favorite" disableScreenReaderOutput>
+            <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
+          </EuiToolTip>
+        }
       />
     );
 
@@ -63,11 +68,57 @@ describe('AppHeaderView', () => {
     expect(screen.getByRole('button', { name: 'Favorite' })).toBeInTheDocument();
   });
 
+  it('renders metadata items as a wrapping row', () => {
+    const onInspect = jest.fn();
+
+    renderAppHeader(
+      <AppHeaderView
+        metadata={[
+          { type: 'health', label: 'Warning at llm 24', color: 'warning' },
+          { type: 'text', label: 'Created by: analyst', 'data-test-subj': 'createdByMetadata' },
+          { type: 'button', label: 'Updated by: analyst', onClick: onInspect },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId('appHeaderMetadata')).toBeInTheDocument();
+    expect(screen.getByText('Warning at llm 24')).toBeInTheDocument();
+    expect(screen.getByTestId('createdByMetadata')).toHaveTextContent('Created by: analyst');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Updated by: analyst' }));
+
+    expect(onInspect).toHaveBeenCalledTimes(1);
+  });
+
+  it('limits metadata rendering to three items', () => {
+    const metadata = [
+      { type: 'text', label: 'First' },
+      { type: 'text', label: 'Second' },
+      { type: 'text', label: 'Third' },
+    ] satisfies AppHeaderMetadataItems;
+    metadata.push({ type: 'text', label: 'Fourth' });
+
+    renderAppHeader(<AppHeaderView metadata={metadata} />);
+
+    expect(screen.getByText('First')).toBeInTheDocument();
+    expect(screen.getByText('Second')).toBeInTheDocument();
+    expect(screen.getByText('Third')).toBeInTheDocument();
+    expect(screen.queryByText('Fourth')).not.toBeInTheDocument();
+  });
+
   it('renders when the only content is a static app menu item', async () => {
     renderAppHeader(<AppHeaderView showAddIntegrations />);
 
     expect(screen.getByTestId('appHeader')).toBeInTheDocument();
     expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
+  });
+
+  it('renders when the only content is a title appendix', () => {
+    renderAppHeader(
+      <AppHeaderView titleAppend={<div data-test-subj="titleAppend">Title append</div>} />
+    );
+
+    expect(screen.getByTestId('titleAppend')).toBeInTheDocument();
   });
 
   it('renders legacy badge fallback content', () => {
@@ -80,6 +131,26 @@ describe('AppHeaderView', () => {
 
     expect(screen.getByTestId('appHeader')).toBeInTheDocument();
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
+  });
+
+  it('renders an xs title for a single row and an s title when a second row is present', () => {
+    const { unmount: unmountSingle } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
+    unmountSingle();
+
+    const { unmount: unmountTabs } = renderAppHeader(
+      <AppHeaderView title="Dashboard" tabs={[{ id: 'overview', label: 'Overview' }]} />
+    );
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
+    unmountTabs();
+
+    renderAppHeader(
+      <AppHeaderView
+        title="Dashboard"
+        metadata={[{ type: 'text', label: 'Created by: analyst' }]}
+      />
+    );
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
   });
 
   it('renders tab badge and test subject metadata', () => {

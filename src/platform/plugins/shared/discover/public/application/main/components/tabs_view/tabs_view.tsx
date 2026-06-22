@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { AppHeader } from '@kbn/app-header';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -27,8 +29,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
 
-const MAX_TABS_COUNT = 25;
-
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
@@ -40,6 +40,13 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+  const isChromeNextProjectHeader = useMemo(
+    () => services.chrome.next.isEnabled && services.chrome.getChromeStyle() === 'project',
+    [services.chrome]
+  );
 
   const {
     shouldCollapseAppMenu,
@@ -76,6 +83,34 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
+  const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
+    if (!isChromeNextProjectHeader) {
+      return undefined;
+    }
+
+    return (tabsBar) => (
+      <AppHeader
+        title={
+          persistedDiscoverSession?.title ??
+          i18n.translate('discover.pageTitleNewSession', {
+            defaultMessage: 'New session',
+          })
+        }
+        menu={topNavMenuItems}
+        sticky={false}
+        padding="m"
+        titleAppend={tabsBar}
+      />
+    );
+  }, [isChromeNextProjectHeader, persistedDiscoverSession?.title, topNavMenuItems]);
+
+  const appendRight = useMemo(() => {
+    if (!isChromeNextProjectHeader) {
+      return <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />;
+    }
+    return undefined;
+  }, [isChromeNextProjectHeader, topNavMenuItems, shouldCollapseAppMenu]);
+
   const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
     (droppedCount: number) => {
       services.toastNotifications.addWarning({
@@ -85,7 +120,7 @@ export const TabsView = (props: SingleTabViewProps) => {
         text: i18n.translate('discover.tabs.tabLimitReachedWarningText', {
           defaultMessage:
             'The last {droppedCount, plural, one {# tab} other {# tabs}} in the group {droppedCount, plural, one {was} other {were}} not restored because the maximum number of {maxTabs} tabs has been reached.',
-          values: { droppedCount, maxTabs: MAX_TABS_COUNT },
+          values: { droppedCount, maxTabs: MAX_DISCOVER_SESSION_TABS },
         }),
       });
     },
@@ -106,7 +141,7 @@ export const TabsView = (props: SingleTabViewProps) => {
             selectedItemId={currentTabId}
             recentlyClosedItems={recentlyClosedItems}
             unsavedItemIds={unsavedTabIds}
-            maxItemsCount={MAX_TABS_COUNT}
+            maxItemsCount={MAX_DISCOVER_SESSION_TABS}
             hideTabsBar={hideTabsBar}
             createItem={createItem}
             getPreviewData={getPreviewData}
@@ -117,9 +152,8 @@ export const TabsView = (props: SingleTabViewProps) => {
             onTabLimitReached={onTabLimitReached}
             getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
-            appendRight={
-              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
-            }
+            wrapTabsBar={wrapTabsBar}
+            appendRight={appendRight}
           />
         </div>
       )}

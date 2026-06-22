@@ -12,7 +12,7 @@ import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
-import { MCP_SERVER_PATH } from '../../common/mcp';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 
 const createMockTool = (
   id: string,
@@ -141,7 +141,8 @@ describe('filterToolsByNamespace', () => {
 
 describe('registerMCPRoutes', () => {
   const routeKey = `POST:${MCP_SERVER_PATH}`;
-  let routeHandlers: Record<string, { config: any; handler: Function }>;
+  const getRouteKey = `GET:${MCP_SERVER_PATH}`;
+  let routeHandlers: Record<string, { routeConfig: any; config: any; handler: Function }>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -156,18 +157,29 @@ describe('registerMCPRoutes', () => {
       tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
     });
 
+    const captureVersioned = (method: string) =>
+      jest.fn().mockImplementation((routeConfig: { path: string }) => {
+        const versionedRoute = { addVersion: jest.fn() };
+        versionedRoute.addVersion = jest
+          .fn()
+          .mockImplementation((vConfig: any, handler: Function) => {
+            routeHandlers[`${method}:${routeConfig.path}`] = {
+              routeConfig,
+              config: vConfig,
+              handler,
+            };
+            return versionedRoute;
+          });
+        return versionedRoute;
+      });
+
     const mockRouter = {
+      // The GET fallback is a non-versioned route registered directly on the router.
+      get: jest.fn().mockImplementation((routeConfig: { path: string }, handler: Function) => {
+        routeHandlers[`GET:${routeConfig.path}`] = { routeConfig, config: undefined, handler };
+      }),
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => {
-          const versionedRoute = { addVersion: jest.fn() };
-          versionedRoute.addVersion = jest
-            .fn()
-            .mockImplementation((vConfig: any, handler: Function) => {
-              routeHandlers[`POST:${config.path}`] = { config: vConfig, handler };
-              return versionedRoute;
-            });
-          return versionedRoute;
-        }),
+        post: captureVersioned('POST'),
       },
     } as unknown as jest.Mocked<IRouter>;
 
@@ -185,5 +197,33 @@ describe('registerMCPRoutes', () => {
 
     const querySchema = routeConfig?.validate?.request?.query;
     expect(querySchema).toBeDefined();
+  });
+
+  describe('GET (unsupported method)', () => {
+    it('registers a non-versioned GET handler on the MCP path to shadow the SPA catch-all', () => {
+      expect(routeHandlers[getRouteKey]).toBeDefined();
+    });
+
+    it('is public, skips authn/authz, and is excluded from the OAS', () => {
+      // public: an internal route would 400 for external clients (serverless internal-API
+      // restriction); the MCP client only treats 405 as benign, so it must reach the handler.
+      // No auth: an authenticated GET on an untagged route is rejected with a 401, which MCP
+      // clients treat as an auth failure and retry the OAuth flow instead of issuing POST.
+      // excludeFromOAS: it is a protocol-level stub, not a documented API.
+      const { routeConfig } = routeHandlers[getRouteKey];
+      expect(routeConfig.options.access).toBe('public');
+      expect(routeConfig.security.authc.enabled).toBe(false);
+      expect(routeConfig.security.authz.enabled).toBe(false);
+      expect(routeConfig.options.excludeFromOAS).toBe(true);
+    });
+
+    it('responds 405 so MCP clients ignore the stream and use POST', async () => {
+      const { handler } = routeHandlers[getRouteKey];
+      const response = { customError: jest.fn() };
+      await handler({}, {}, response);
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 405 })
+      );
+    });
   });
 });

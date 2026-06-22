@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Features identification is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError, type InferenceConnector } from '@kbn/inference-common';
 import {
   type IdentifyFeaturesResult,
   type IterationResult,
-  type Feature,
+  type FeatureUpsert,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
@@ -78,8 +83,35 @@ async function runFeaturesIdentification(
   const taskDurationMs = () => Date.now() - new Date(_task.created_at).getTime();
 
   const runId = uuid();
+
+  const {
+    taskClient,
+    scopedClusterClient,
+    getKnowledgeIndicatorClient,
+    streamsClient,
+    inferenceClient,
+    soClient,
+    tuningConfig,
+  } = await taskContext.getScopedClients({ request: fakeRequest });
+
+  const taskLogger = taskContext.logger.get('features_identification', streamName);
+
+  const [kiClient, connectorId] = await Promise.all([
+    getKnowledgeIndicatorClient(),
+    connectorIdOverride
+      ? Promise.resolve(connectorIdOverride)
+      : resolveConnectorForFeature({
+          searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+          featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          featureName: 'knowledge indicator extraction',
+          request: fakeRequest,
+        }),
+  ]);
+  taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
+
   const emptyTelemetryCtx = {
     run_id: runId,
+    connector_id: connectorId,
     iteration: 0,
     stream_name: streamName,
     stream_type: 'unknown' as const,
@@ -95,34 +127,9 @@ async function runFeaturesIdentification(
     );
   };
 
-  const {
-    taskClient,
-    scopedClusterClient,
-    getFeatureClient,
-    streamsClient,
-    inferenceClient,
-    soClient,
-    tuningConfig,
-  } = await taskContext.getScopedClients({ request: fakeRequest });
-
-  const taskLogger = taskContext.logger.get('features_identification', streamName);
-
-  const [featureClient, connectorId] = await Promise.all([
-    getFeatureClient(),
-    connectorIdOverride
-      ? Promise.resolve(connectorIdOverride)
-      : resolveConnectorForFeature({
-          searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-          featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-          featureName: 'knowledge indicator extraction',
-          request: fakeRequest,
-        }),
-  ]);
-  taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
-
   let hasTrackedIteration = false;
   const iterationResults: IterationResult[] = [];
-  let discoveredFeatures: Feature[] = [];
+  let discoveredFeatures: FeatureUpsert[] = [];
 
   try {
     const stream = await streamsClient.getStream(streamName);
@@ -141,7 +148,6 @@ async function runFeaturesIdentification(
     const { max_iterations: maxIterations } = tuningConfig;
     let tuning = {
       sample_size: tuningConfig.sample_size,
-      feature_ttl_days: tuningConfig.feature_ttl_days,
       entity_filtered_ratio: tuningConfig.entity_filtered_ratio,
       diverse_ratio: tuningConfig.diverse_ratio,
       max_excluded_features_in_prompt: tuningConfig.max_excluded_features_in_prompt,
@@ -159,9 +165,8 @@ async function runFeaturesIdentification(
       start,
       end,
       esClient,
-      featureClient,
+      kiClient,
       logger: taskLogger,
-      featureTtlDays: tuningConfig.feature_ttl_days,
       runId,
     }).catch((err) => {
       // Computed features generation is not expected to fail; surface it as
@@ -189,9 +194,10 @@ async function runFeaturesIdentification(
 
       const result = await identifyInferredFeatures({
         esClient,
-        featureClient,
+        kiClient,
         soClient,
         inferenceClient: boundInferenceClient,
+        connectorId,
         logger: taskLogger,
         signal: runContext.abortController.signal,
         streamName: stream.name,

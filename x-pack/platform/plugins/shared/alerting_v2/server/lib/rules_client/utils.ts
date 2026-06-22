@@ -115,15 +115,11 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    evaluation: {
-      query: {
-        base: data.evaluation.query.base,
-      },
-    },
-    recovery_policy: data.recovery_policy,
+    query: data.query,
+    recovery_strategy: data.recovery_strategy,
+    no_data_strategy: data.no_data_strategy,
     state_transition: data.state_transition,
     grouping: data.grouping,
-    no_data: data.no_data,
     artifacts: data.artifacts,
     ...serverFields,
   };
@@ -142,10 +138,14 @@ function resolveBuilderType(
   }
 
   const queryChanged =
-    updateData.evaluation?.query?.base != null &&
-    updateData.evaluation.query.base !== existingAttrs.evaluation.query.base;
+    updateData.query !== undefined && !isEqual(updateData.query, existingAttrs.query);
+  const strategyChanged =
+    (updateData.recovery_strategy !== undefined &&
+      updateData.recovery_strategy !== existingAttrs.recovery_strategy) ||
+    (updateData.no_data_strategy !== undefined &&
+      updateData.no_data_strategy !== existingAttrs.no_data_strategy);
 
-  if (queryChanged) {
+  if (queryChanged || strategyChanged) {
     return undefined;
   }
 
@@ -177,16 +177,15 @@ export function buildUpdateRuleAttributes(
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
-    evaluation: updateData.evaluation
-      ? {
-          query: {
-            ...existingAttrs.evaluation.query,
-            ...updateData.evaluation.query,
-          },
-        }
-      : existingAttrs.evaluation,
+    // `query` - callers must send a complete new shape (we can't merge across formats),
+    // so omitted = preserved, present = full replacement.
+    query: updateData.query ?? existingAttrs.query,
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
-    recovery_policy: nullToUndefined(updateData.recovery_policy, existingAttrs.recovery_policy),
+    recovery_strategy: nullToUndefined(
+      updateData.recovery_strategy,
+      existingAttrs.recovery_strategy
+    ),
+    no_data_strategy: nullToUndefined(updateData.no_data_strategy, existingAttrs.no_data_strategy),
     // `null` → clear (null). SO schema uses `maybe(nullable())`.
     state_transition: applyNullableUpdate(
       updateData.state_transition,
@@ -194,7 +193,6 @@ export function buildUpdateRuleAttributes(
     ),
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
-    no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
     enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
@@ -212,10 +210,12 @@ export function buildUpdateRuleAttributes(
  */
 export function transformRuleSoAttributesToRuleApiResponse(
   id: string,
-  attrs: RuleSavedObjectAttributes
+  attrs: RuleSavedObjectAttributes,
+  version?: string
 ): RuleResponse {
   return {
     id,
+    version,
     kind: attrs.kind,
     metadata: {
       name: attrs.metadata.name,
@@ -229,15 +229,11 @@ export function transformRuleSoAttributesToRuleApiResponse(
       every: attrs.schedule.every,
       lookback: attrs.schedule.lookback,
     },
-    evaluation: {
-      query: {
-        base: attrs.evaluation.query.base,
-      },
-    },
-    recovery_policy: attrs.recovery_policy,
+    query: attrs.query,
+    recovery_strategy: attrs.recovery_strategy,
+    no_data_strategy: attrs.no_data_strategy,
     state_transition: attrs.state_transition,
     grouping: attrs.grouping,
-    no_data: attrs.no_data,
     artifacts: attrs.artifacts,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,

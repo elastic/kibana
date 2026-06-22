@@ -60,6 +60,7 @@ import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
 import { registerInitializationRoutes } from '../lib/initialization';
+import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
 import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
 
 export const initRoutes = (
@@ -158,6 +159,7 @@ export const initRoutes = (
     logger,
     telemetrySender,
     ml,
+    hasEncryptionKey,
   });
   registerSiemMigrationsRoutes(router, config, logger);
 
@@ -173,6 +175,7 @@ export const initRoutes = (
   registerTrialCompanionRoutes(trialCompanionDeps);
 
   registerInitializationRoutes({ router, logger });
+  registerAlertAnalysisRoutes(router, logger);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);
