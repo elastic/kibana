@@ -8,8 +8,9 @@
  */
 
 import type { Pool as Mysql2Pool } from 'mysql2/promise';
+import { Sha256 } from '@kbn/crypto-browser';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { assertReadOnly, escapeLikePattern } from '../../lib/generic_db_connector';
 import {
@@ -37,100 +38,102 @@ export const MysqlConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
-  schema: z.object({
-    host: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.description', {
-          defaultMessage: 'The MySQL server hostname or IP address',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.label', {
-          defaultMessage: 'Host',
+  schema: lazySchema(() =>
+    z.object({
+      host: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.description', {
+            defaultMessage: 'The MySQL server hostname or IP address',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.label', {
+            defaultMessage: 'Host',
+          }),
+          placeholder: 'mysql.example.com',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.helpText', {
+            defaultMessage: 'The hostname or IP address of the MySQL server (no protocol prefix).',
+          }),
         }),
-        placeholder: 'mysql.example.com',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.helpText', {
-          defaultMessage: 'The hostname or IP address of the MySQL server (no protocol prefix).',
+      port: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(65535)
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.description', {
+            defaultMessage: 'The MySQL server port',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.label', {
+            defaultMessage: 'Port',
+          }),
+          placeholder: '3306',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.helpText', {
+            defaultMessage: 'The port number of the MySQL server (default: 3306)',
+          }),
         }),
-      }),
-    port: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(65535)
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.description', {
-          defaultMessage: 'The MySQL server port',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.label', {
-          defaultMessage: 'Port',
+      database: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.description', {
+            defaultMessage: 'The default database to connect to',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.label', {
+            defaultMessage: 'Database',
+          }),
+          placeholder: 'my_database',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.helpText', {
+            defaultMessage: 'The name of the default database to query',
+          }),
         }),
-        placeholder: '3306',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.helpText', {
-          defaultMessage: 'The port number of the MySQL server (default: 3306)',
+      username: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.description', {
+            defaultMessage: 'The MySQL username',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.label', {
+            defaultMessage: 'Username',
+          }),
+          placeholder: 'kibana_reader',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.helpText', {
+            defaultMessage: 'The MySQL user to authenticate as',
+          }),
         }),
-      }),
-    database: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.description', {
-          defaultMessage: 'The default database to connect to',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.label', {
-          defaultMessage: 'Database',
+      password: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.description', {
+            defaultMessage: 'The MySQL password',
+          })
+        )
+        .meta({
+          widget: 'password',
+          sensitive: true,
+          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.label', {
+            defaultMessage: 'Password',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.helpText', {
+            defaultMessage: 'The password for the MySQL user',
+          }),
         }),
-        placeholder: 'my_database',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.helpText', {
-          defaultMessage: 'The name of the default database to query',
-        }),
-      }),
-    username: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.description', {
-          defaultMessage: 'The MySQL username',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.label', {
-          defaultMessage: 'Username',
-        }),
-        placeholder: 'kibana_reader',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.helpText', {
-          defaultMessage: 'The MySQL user to authenticate as',
-        }),
-      }),
-    password: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.description', {
-          defaultMessage: 'The MySQL password',
-        })
-      )
-      .meta({
-        widget: 'password',
-        sensitive: true,
-        label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.label', {
-          defaultMessage: 'Password',
-        }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.helpText', {
-          defaultMessage: 'The password for the MySQL user',
-        }),
-      }),
-  }),
+    })
+  ),
 
   actions: {
     query: {
@@ -139,12 +142,7 @@ export const MysqlConnector: ConnectorSpec = {
         'Execute a read-only SQL SELECT query against the MySQL database. Only SELECT statements are permitted; INSERT, UPDATE, DELETE, and DDL are blocked. Returns up to maxRows rows (default 100). Use listTables first to discover available tables, and describeTable to inspect column names before writing queries. Prefer WHERE clauses and explicit column lists to keep result size manageable.',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) =>
-        getClient().runReadonlyQuery(
-          ctx,
-          input.sql,
-          ctx.config?.database as string,
-          input.maxRows ?? 100
-        ),
+        getClient().runReadonlyQuery(ctx, input.sql, input.maxRows ?? 100),
     },
 
     listDatabases: {
@@ -187,14 +185,15 @@ export const MysqlConnector: ConnectorSpec = {
       input: SearchRowsInputSchema,
       handler: async (ctx, input: SearchRowsInput) => {
         const db = resolveDatabase(input.database, ctx);
-        const escaped = escapeLikePattern(input.searchTerm);
+        const likeParam = `%${escapeLikePattern(input.searchTerm)}%`;
         const whereClause = input.columns
-          .map((col) => `${quoteIdentifier(col)} LIKE '%${escaped}%' ESCAPE '!'`)
+          .map((col) => `${quoteIdentifier(col)} LIKE ? ESCAPE '!'`)
           .join(' OR ');
         const sql =
           `SELECT * FROM ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}` +
-          ` WHERE ${whereClause}`;
-        return getClient().runReadonlyQuery(ctx, sql, db, input.maxRows ?? 100);
+          ` WHERE ${whereClause} LIMIT ?`;
+        const params = [...input.columns.map(() => likeParam), input.maxRows ?? 100];
+        return getClient().runParamQuery(ctx, sql, params);
       },
     },
   },
@@ -208,76 +207,63 @@ export const MysqlConnector: ConnectorSpec = {
         await getClient().runQuery(ctx, 'SELECT 1');
         return { ok: true, message: `Successfully connected to MySQL` };
       } catch (error) {
-        return { ok: false, message: error.message };
+        const message = error instanceof Error ? error.message : String(error);
+        return { ok: false, message };
       }
     },
   },
 };
-
-// ---------------------------------------------------------------------------
-// MysqlClient
-//
-// Encapsulates connection pooling and query execution.  Not exported — the
-// rest of this file accesses the singleton instance through `getClient()`.
-//
-// Pools are keyed by a config fingerprint and live for the Kibana process
-// lifetime.  mysql2 handles idle-connection cleanup internally.  If a
-// connector's credentials change the old pool is orphaned but harmless —
-// its connections will fail authentication on next use.
-// ---------------------------------------------------------------------------
 
 class MysqlClient {
   private static readonly MAX_POOLS = 10;
   private readonly pools = new Map<string, Mysql2Pool>();
 
   async runQuery(ctx: ActionContext, sql: string): Promise<unknown[]> {
-    const [rows] = await this.getPool(ctx).query(sql);
+    const [rows] = await (await this.getPool(ctx)).query(sql);
     return rows as unknown[];
   }
 
-  async runReadonlyQuery(
-    ctx: ActionContext,
-    sql: string,
-    database: string | undefined,
-    maxRows: number
-  ): Promise<unknown[]> {
+  async runReadonlyQuery(ctx: ActionContext, sql: string, maxRows: number): Promise<unknown[]> {
     assertReadOnly(sql);
-    const conn = await this.getPool(ctx).getConnection();
-    try {
-      if (database) await conn.query(`USE ${quoteIdentifier(database)}`);
-      const [rows] = await conn.execute(`SELECT * FROM (${sql}) AS _q LIMIT ?`, [maxRows]);
-      return rows as unknown[];
-    } finally {
-      conn.release();
-    }
+    const [rows] = await (
+      await this.getPool(ctx)
+    ).execute(`SELECT * FROM (\n${sql}\n) AS _q LIMIT ?`, [maxRows]);
+    return rows as unknown[];
   }
 
-  private getPool(ctx: ActionContext): Mysql2Pool {
+  async runParamQuery(ctx: ActionContext, sql: string, params: unknown[]): Promise<unknown[]> {
+    const [rows] = await (await this.getPool(ctx)).execute(sql, params);
+    return rows as unknown[];
+  }
+
+  private async getPool(ctx: ActionContext): Promise<Mysql2Pool> {
     const host = ctx.config?.host as string;
     const port = ctx.config?.port as number;
+    const database = ctx.config?.database as string;
     const username = ctx.config?.username as string;
     const password = ctx.config?.password as string;
 
-    const key = `${host}:${port}:${username}`;
+    const passwordHash = new Sha256().update(password).digest('hex');
+    const key = `${host}:${port}:${database}:${username}:${passwordHash}`;
     let pool = this.pools.get(key);
     if (!pool) {
       if (this.pools.size >= MysqlClient.MAX_POOLS) {
         const [oldestKey] = this.pools.keys();
         if (oldestKey) {
-          ctx.log.info(`[mysql] Pool cache full (${MysqlClient.MAX_POOLS}), evicting oldest pool`);
-          this.pools.get(oldestKey)?.end();
+          const oldPool = this.pools.get(oldestKey);
           this.pools.delete(oldestKey);
+          ctx.log.info(`[mysql] Pool cache full (${MysqlClient.MAX_POOLS}), evicting oldest pool`);
+          await oldPool?.end();
         }
       }
-      ctx.log.info(`[mysql] Creating connection pool for ${host}:${port} (user: ${username})`);
-      // require() is intentionally deferred here — this method only executes
-      // server-side (action handlers). A top-level import would cause
-      // "require is not defined" in browser bundles.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const lib: typeof import('mysql2/promise') = require('mysql2/promise');
+      ctx.log.info(
+        `[mysql] Creating connection pool for ${host}:${port}/${database} (user: ${username})`
+      );
+      const lib = await import('mysql2/promise');
       pool = lib.createPool({
         host,
         port,
+        database,
         user: username,
         password,
         waitForConnections: true,
@@ -290,18 +276,9 @@ class MysqlClient {
   }
 }
 
-// Module-level singleton — Node.js executes this once per process.
 const _client = new MysqlClient();
 const getClient = () => _client;
 
-// ---------------------------------------------------------------------------
-// MySQL-specific utilities
-// ---------------------------------------------------------------------------
-
-/**
- * Quote a MySQL identifier (table, column, or database name) with backticks,
- * escaping any embedded backtick characters.
- */
 const quoteIdentifier = (identifier: string): string => `\`${identifier.replace(/`/g, '``')}\``;
 
 const resolveDatabase = (inputDb: string | undefined, ctx: ActionContext): string => {
