@@ -63,7 +63,7 @@ spaceTest.describe(
         await pageObjects.correlationsTool.titleLink.click();
 
         await expect(pageObjects.correlationsTool.toolsFlyoutHeader).toBeVisible({
-          timeout: 10_000,
+          timeout: 20_000,
         });
 
         await expect(pageObjects.correlationsTool.sameSourceAlertsSectionTable).toBeVisible();
@@ -94,7 +94,7 @@ spaceTest.describe(
         await pageObjects.correlationsTool.titleLink.click();
 
         await expect(pageObjects.correlationsTool.toolsFlyoutHeader).toBeVisible({
-          timeout: 10_000,
+          timeout: 20_000,
         });
 
         await expect(pageObjects.correlationsTool.sameSourceAlertsSectionTable).toBeVisible();

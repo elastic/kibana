@@ -195,6 +195,7 @@ t1_analyst:
   indices:
     - names:
         - '.alerts-security*'
+        - '.internal.alerts-security.alerts-*'
         - '.siem-signals-*'
       privileges:
         - read

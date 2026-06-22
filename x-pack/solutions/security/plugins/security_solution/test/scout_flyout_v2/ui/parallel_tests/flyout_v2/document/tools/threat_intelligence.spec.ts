@@ -35,8 +35,16 @@ spaceTest.describe(
         await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
+        // Guard against re-render race: wait for TI enrichment count query to settle before clicking
+        await expect(pageObjects.threatIntelligenceTool.enrichedLoading).toHaveCount(0, {
+          timeout: 15_000,
+        });
         await pageObjects.threatIntelligenceTool.titleLink.click();
 
+        // Confirm the tool overlay opened before checking loading/content state
+        await expect(pageObjects.threatIntelligenceTool.toolsFlyoutTitle).toBeVisible({
+          timeout: 15_000,
+        });
         await expect(pageObjects.threatIntelligenceTool.detailsLoading).toHaveCount(0, {
           timeout: 15_000,
         });
@@ -58,6 +66,10 @@ spaceTest.describe(
         await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
+        // Guard against re-render race: wait for TI enrichment count query to settle before clicking
+        await expect(pageObjects.threatIntelligenceTool.enrichedLoading).toHaveCount(0, {
+          timeout: 15_000,
+        });
         await pageObjects.threatIntelligenceTool.titleLink.click();
 
         await expect(pageObjects.threatIntelligenceTool.detailsLoading).toHaveCount(0, {
