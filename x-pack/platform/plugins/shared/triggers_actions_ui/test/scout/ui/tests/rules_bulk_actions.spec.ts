@@ -149,15 +149,18 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
   });
 
   test('should allow rule snooze to be scheduled', async ({ page, apiServices }) => {
+    const searchText = `schedule-snooze-${Date.now()}`;
     const [r1, r2] = await Promise.all([
-      apiServices.alerting.rules.create(makeEsQueryRule('schedule-snooze-a')),
-      apiServices.alerting.rules.create(makeEsQueryRule('schedule-snooze-b')),
+      apiServices.alerting.rules.create(makeEsQueryRule(`${searchText}-a`)),
+      apiServices.alerting.rules.create(makeEsQueryRule(`${searchText}-b`)),
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
 
     await refreshRulesList(page);
 
-    await page.testSubj.locator('ruleSearchField').fill('');
+    await page.testSubj.locator('ruleSearchField').fill(searchText);
+    await page.keyboard.press('Enter');
+    await expect(page.testSubj.locator('totalRulesCount')).toContainText('2 rules');
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
     await page.testSubj.click('showBulkActionButton');
