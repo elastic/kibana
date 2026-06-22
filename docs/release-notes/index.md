@@ -42,6 +42,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Increases the maximum number of combined panels, sections, and controls on a dashboard from 100 to 1,000 [#272931]({{kib-pull}}272931).
 * Fixes **Save and return** not working for Maps visualizations opened from the **Visualize** library [#274002]({{kib-pull}}274002).
 * Fixes a stale closure in the Canvas autoplay timer that could skip pages after slides are added or removed [#268398]({{kib-pull}}268398).
+* Fixes Discover session panels in dashboards failing to load after **Copy to Spaces** or import when the target space already contains remapped sessions [#272610]({{kib-pull}}272610).
+
+**Connectivity**:
+* Fixes the **Content Connectors** entry in **Stack Management** appearing in the sidebar for users without the required role privileges [#271709]({{kib-pull}}271709).
 
 **Data ingestion and Fleet**:
 * Improves `POST /api/fleet/setup` performance for deployments with many configured outputs by fetching only the required outputs instead of decrypting all saved outputs on each call [#273848]({{kib-pull}}273848).
@@ -72,13 +76,10 @@ For the Elastic Security 9.4.3 release information, refer to [Elastic Security S
 **Kibana platform**:
 * Adds `notifications.connectors.default.email` as a Docker environment variable [#272761]({{kib-pull}}272761).
 * Fixes user profile retrieval in reverse proxy `run_as` configurations, ensuring the nav bar displays the effective user's avatar and name rather than the proxy user's [#271314]({{kib-pull}}271314).
-
-**Machine Learning**:
 * Fixes product documentation installation timing out when the ML inference endpoint scales up from zero replicas (cold-start), and improves error messages when installation fails [#270005]({{kib-pull}}270005).
 
 **Management**:
 * Logs Dev Tools Console requests through the `elasticsearch.query` debug logger (method, path, and response status; request bodies are not included since Console streams them), and adds support for URL path prefixes in `elasticsearch.hosts` for Console proxy requests [#271562]({{kib-pull}}271562).
-* Fixes the **Content Connectors** entry in **Stack Management** appearing in the sidebar for users without the required capability [#271709]({{kib-pull}}271709).
 
 **Workflows**:
 * Fixes workflow executions that become orphaned from Task Manager now being cancelled immediately rather than waiting indefinitely for an asynchronous cancel [#272672]({{kib-pull}}272672).
