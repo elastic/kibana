@@ -569,6 +569,34 @@ describe('AttachmentService', () => {
         expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       });
 
+      it('bulkCreate throws Boom 400 for unified-only types (no legacy equivalent) when attachments flag is off', async () => {
+        const entityAttrs = {
+          type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+          attachmentId: 'entity-1',
+          metadata: { entityName: 'alice', entityType: 'user' },
+          owner: SECURITY_SOLUTION_OWNER,
+          created_at: '2024-01-01T00:00:00.000Z',
+          created_by: { username: 'u', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        };
+
+        await expect(
+          service.bulkCreate({
+            attachments: [{ attributes: entityAttrs, references: [], id: '1' }],
+            refresh: false,
+          })
+        ).rejects.toMatchObject({
+          isBoom: true,
+          output: { statusCode: 400 },
+          message: expect.stringContaining(SECURITY_ENTITY_ATTACHMENT_TYPE),
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      });
+
       it('bulkCreate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
           saved_objects: [createUserAttachment()],
