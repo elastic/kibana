@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { isString } from 'lodash';
 import { authTypeSpecs } from '../..';
+import { getAuthModeForAuthTypeId } from '../auth_mode_by_auth_type_id';
 import type { AuthTypeDef, NormalizedAuthType } from '../connector_spec';
 
 export const AUTH_TYPE_DISCRIMINATOR = 'authType';
@@ -88,6 +89,10 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   // add the authType discriminator key
   const schemaMeta = {
     ...existingMeta,
+    // Surface the auth type's mode (per-user vs shared) so the UI can label how
+    // credentials are scoped. Resolved via the canonical helper, which is the single
+    // source of truth for the missing-authMode → 'shared' default.
+    authMode: getAuthModeForAuthTypeId(authTypeId),
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
     ...(recommendOverride !== undefined ? { recommend: recommendOverride } : {}),
     ...(hiddenOverride !== undefined ? { hidden: hiddenOverride } : {}),
