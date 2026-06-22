@@ -23,33 +23,12 @@ export class AppMenuRegistry {
   private items: Map<string, DiscoverAppMenuItemType & { isCustom?: boolean }> = new Map();
   private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
 
-  private addPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    const parent = this.items.get(parentId);
-    if (parent) {
-      const { href, render, run, target, ...parentSubmenuItem } = parent;
-
-      this.items.set(parentId, {
-        ...parentSubmenuItem,
-        items: [...(parent.items || []), popoverItem],
-      });
-    }
-  }
-
   /**
    * Register a custom menu item.
    * @param item The menu item to register
    */
   public registerCustomItem(item: DiscoverAppMenuItemType) {
     this.items.set(item.id, { ...item, isCustom: true });
-  }
-
-  /**
-   * Register a custom popover item under a parent menu item.
-   * @param parentId The ID of the parent menu item
-   * @param popoverItem The popover item to register
-   */
-  public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    this.addPopoverItem(parentId, popoverItem);
   }
 
   /**
@@ -82,13 +61,31 @@ export class AppMenuRegistry {
    * @param popoverItem The popover item to register
    */
   public registerPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    this.addPopoverItem(parentId, popoverItem);
+    const parent = this.items.get(parentId);
+    if (parent) {
+      const { href, render, run, target, ...parentSubmenuItem } = parent;
+
+      this.items.set(parentId, {
+        ...parentSubmenuItem,
+        items: [...(parent.items || []), popoverItem],
+      });
+    }
   }
 
+  /**
+   * Get popover items registered under a parent menu item.
+   * Returns a copy so callers cannot mutate registry state.
+   * @param parentId The ID of the parent menu item
+   */
   public getPopoverItems(parentId: string): DiscoverAppMenuPopoverItem[] {
     return [...(this.items.get(parentId)?.items ?? [])];
   }
 
+  /**
+   * Get a registered menu item by ID.
+   * Returns a copy of nested popover items so callers cannot mutate registry state.
+   * @param id The ID of the menu item
+   */
   public getItem(id: string): DiscoverAppMenuItemType | undefined {
     const item = this.items.get(id);
     if (!item) {

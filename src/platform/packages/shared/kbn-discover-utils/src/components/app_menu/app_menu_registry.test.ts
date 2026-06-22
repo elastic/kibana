@@ -413,7 +413,7 @@ describe('AppMenuRegistry', () => {
     });
   });
 
-  describe('registerCustomPopoverItem', () => {
+  describe('registerPopoverItem with custom items', () => {
     it('should register a popover item under a custom parent menu item', () => {
       const parentItem: DiscoverAppMenuItemType = {
         id: 'custom-parent',
@@ -432,7 +432,7 @@ describe('AppMenuRegistry', () => {
       };
 
       registry.registerCustomItem(parentItem);
-      registry.registerCustomPopoverItem('custom-parent', popoverItem);
+      registry.registerPopoverItem('custom-parent', popoverItem);
 
       const config = registry.getAppMenuConfig();
       const parent = config.items?.find((item) => item.id === 'custom-parent');
@@ -451,7 +451,7 @@ describe('AppMenuRegistry', () => {
       };
 
       // Register popover item first
-      registry.registerCustomPopoverItem('custom-parent', popoverItem);
+      registry.registerPopoverItem('custom-parent', popoverItem);
 
       const parentItem: DiscoverAppMenuItemType = {
         id: 'custom-parent',
@@ -495,8 +495,8 @@ describe('AppMenuRegistry', () => {
       };
 
       registry.registerCustomItem(parentItem);
-      registry.registerCustomPopoverItem('custom-parent', popoverItem1);
-      registry.registerCustomPopoverItem('custom-parent', popoverItem2);
+      registry.registerPopoverItem('custom-parent', popoverItem1);
+      registry.registerPopoverItem('custom-parent', popoverItem2);
 
       const config = registry.getAppMenuConfig();
       const parent = config.items?.find((item) => item.id === 'custom-parent');
