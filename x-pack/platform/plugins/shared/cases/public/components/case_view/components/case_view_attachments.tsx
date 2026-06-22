@@ -36,8 +36,7 @@ import type { OnUpdateFields } from '../types';
 import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { getAttachmentItemCount } from './helpers';
-import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY } from './translations';
-import { CLEAR_FILTERS } from './translations';
+import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY, CLEAR_FILTERS } from './translations';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
