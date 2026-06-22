@@ -17,14 +17,10 @@ test.describe('Indices', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ kbnClient }) => {
     // The settings are persisted as the `apm-indices` saved object. Deleting it
     // reverts APM back to its default indices so the shared lane isn't polluted.
-    try {
-      await kbnClient.savedObjects.delete({
-        type: APM_INDICES_SAVED_OBJECT_TYPE,
-        id: APM_INDICES_SAVED_OBJECT_ID,
-      });
-    } catch {
-      // Saved object may not exist if no test persisted a change; ignore 404s.
-    }
+    // 404 is expected when no test persisted a change.
+    await kbnClient.savedObjects
+      .delete({ type: APM_INDICES_SAVED_OBJECT_TYPE, id: APM_INDICES_SAVED_OBJECT_ID })
+      .catch(() => {});
   });
 
   test('Viewer should not be able to modify settings', async ({
