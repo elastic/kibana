@@ -9,6 +9,7 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
+import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -26,6 +27,7 @@ import type {
   StepWithOnFailure,
   SwitchStep,
   TimeoutProp,
+  WaitForApprovalStep,
   WaitForInputStep,
   WaitStep,
   WhileStep,
@@ -69,6 +71,7 @@ import type {
   LoopBreakNode,
   LoopContinueNode,
   LoopEnterNode,
+  WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WorkflowGraphType,
   WorkflowOutputGraphNode,
@@ -116,7 +119,15 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
   return parts.join('_');
 }
 
-function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
+function normalizeWaitForApprovalTimeout(step: BaseStep): BaseStep {
+  if (step.type === 'waitForApproval' && !(step as TimeoutProp).timeout) {
+    return { ...step, timeout: DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT };
+  }
+  return step;
+}
+
+function visitAbstractStep(originalStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
+  const currentStep = normalizeWaitForApprovalTimeout(originalStep);
   if ((currentStep as StepWithOnFailure)['on-failure']) {
     const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
 
@@ -182,6 +193,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'waitForInput') {
     return visitWaitForInputStep(currentStep as WaitForInputStep, context);
+  }
+
+  if (currentStep.type === 'waitForApproval') {
+    return visitWaitForApprovalStep(currentStep as WaitForApprovalStep, context);
   }
 
   if (currentStep.type === 'data.set') {
@@ -270,6 +285,26 @@ export function visitWaitForInputStep(
     },
   };
   graph.setNode(waitForInputNode.id, waitForInputNode);
+
+  return graph;
+}
+
+export function visitWaitForApprovalStep(
+  currentStep: WaitForApprovalStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const waitForApprovalNode: WaitForApprovalGraphNode = {
+    id: stepId,
+    type: 'waitForApproval',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(waitForApprovalNode.id, waitForApprovalNode);
 
   return graph;
 }

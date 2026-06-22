@@ -10,4 +10,4 @@
 export const EXTERNAL_RESUME_API_PATH =
   '/api/workflows/executions/{executionId}/resume/external' as const;
 
-export const DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT = '24h' as const;
+export { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';

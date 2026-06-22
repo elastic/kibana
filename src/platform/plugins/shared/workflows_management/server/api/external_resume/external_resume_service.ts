@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isHitlWaitStepType } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   ExternalResumeTokenVerificationError,
@@ -115,7 +115,7 @@ async function getWaitingStepExecution(
     (stepExecution) =>
       stepExecution.workflowRunId === executionId &&
       stepExecution.stepId === stepId &&
-      stepExecution.stepType === 'waitForInput' &&
+      isHitlWaitStepType(stepExecution.stepType) &&
       stepExecution.status === ExecutionStatus.WAITING_FOR_INPUT
   );
 }

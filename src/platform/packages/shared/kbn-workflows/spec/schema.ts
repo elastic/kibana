@@ -209,6 +209,44 @@ export const WaitForInputStepSchema = BaseStepSchema.extend({
 });
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
+export const WaitForApprovalSlackChannelSchema = z.object({
+  'connector-id': z.string().min(1).describe('Slack connector saved object id or name'),
+  channel: z.string().min(1).describe('Slack channel name, e.g. "#security-approvals"'),
+});
+
+export const WaitForApprovalSlackApiChannelSchema = z.object({
+  'connector-id': z.string().min(1).describe('Slack API connector saved object id or name'),
+  channels: z
+    .array(z.string().min(1))
+    .min(1)
+    .describe('Slack channel ids to post approval actions to'),
+});
+
+export const WaitForApprovalChannelsSchema = z
+  .object({
+    slack: WaitForApprovalSlackChannelSchema.optional(),
+    slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
+  })
+  .optional()
+  .describe('Optional external notification channels for approve/reject links');
+
+export const WaitForApprovalStepInputSchema = z
+  .object({
+    message: z.string().optional().describe('Message displayed to approvers'),
+    approveLabel: z.string().optional().describe('Label for the approve action (default: Approve)'),
+    rejectLabel: z.string().optional().describe('Label for the reject action (default: Decline)'),
+    channels: WaitForApprovalChannelsSchema,
+  })
+  .optional();
+
+export const WaitForApprovalStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('waitForApproval')
+    .describe('Pause execution until approval or rejection is received'),
+  with: WaitForApprovalStepInputSchema,
+}).merge(TimeoutPropSchema);
+export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
+
 export const DataSetStepInputSchema = z
   .record(z.string(), z.unknown())
   .describe(
@@ -660,6 +698,7 @@ const StepSchema = z.lazy(() =>
     SwitchStepSchema,
     WaitStepSchema,
     WaitForInputStepSchema,
+    WaitForApprovalStepSchema,
     DataSetStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -691,6 +730,7 @@ export const BuiltInStepTypes = [
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   WaitForInputStepSchema.shape.type.value,
+  WaitForApprovalStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
