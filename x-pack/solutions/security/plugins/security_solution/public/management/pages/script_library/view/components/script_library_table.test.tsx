@@ -112,7 +112,7 @@ describe('ScriptLibraryTable', () => {
       expect(columns).toHaveLength(7);
       const columnLabels = columns.map((column) => column.textContent).join(',');
       expect(columnLabels).toEqual(
-        'Name,Operating systems,Types,Updated by,Last updated,Size,Actions'
+        'Name,Operating systems,Categories,Updated by,Last updated,Size,Actions'
       );
     });
 
@@ -125,7 +125,11 @@ describe('ScriptLibraryTable', () => {
     it('shows `no records` are available', () => {
       render({ ...defaultProps, items: [], totalItemCount: 0 });
 
-      expect(renderResult.getByText('No scripts found')).toBeInTheDocument();
+      expect(
+        renderResult.getByText(
+          'No results match your search criteria! Try modifying your search or filter set.'
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -191,7 +195,7 @@ describe('ScriptLibraryTable', () => {
       });
     });
 
-    it('shows Types for each script', async () => {
+    it('shows `Categories` for each script', async () => {
       render();
 
       const { getByTestId } = renderResult;
@@ -203,7 +207,7 @@ describe('ScriptLibraryTable', () => {
       await act(async () => {
         await fireEvent.click(typesPopover);
       });
-      expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
+      expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Categories');
       const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
       expect(badges).toHaveLength(11);
       // verify all tags are present and are in sorted order

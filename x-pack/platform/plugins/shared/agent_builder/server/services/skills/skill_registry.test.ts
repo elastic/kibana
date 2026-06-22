@@ -18,6 +18,7 @@ const createMockInternalSkillDefinition = (
   description: 'A test skill',
   content: 'Skill body content',
   readonly: true,
+  experimental: false,
   basePath: 'skills/platform',
   getRegistryTools: () => [],
   referencedContentCount: 0,
@@ -69,6 +70,7 @@ const createMockPersistedProvider = (
       basePath: '/skills',
       getRegistryTools: () => params.tool_ids ?? [],
       referencedContentCount: params.referenced_content?.length ?? 0,
+      experimental: false,
     })),
     update: jest.fn(async (id, update) => ({
       id,
@@ -79,6 +81,7 @@ const createMockPersistedProvider = (
       basePath: '/skills',
       getRegistryTools: () => update.tool_ids ?? [],
       referencedContentCount: 0,
+      experimental: false,
     })),
     delete: jest.fn(async (_skillId: string) => undefined),
   };
@@ -109,6 +112,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       expect(await registry.has('builtin-skill-1')).toBe(true);
@@ -119,6 +123,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       expect(await registry.has('custom-skill-1')).toBe(true);
@@ -129,6 +134,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       expect(await registry.has('non-existent')).toBe(false);
@@ -141,6 +147,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       expect(await registry.get('builtin-skill-1')).toEqual(builtinSkill1);
@@ -151,6 +158,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       expect(await registry.get('custom-skill-1')).toEqual(persistedSkill1);
@@ -165,6 +173,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([overlapSkill]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       expect(await registry.get('builtin-skill-1')).toEqual(builtinSkill1);
@@ -175,6 +184,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       expect(await registry.get('non-existent')).toBeUndefined();
@@ -187,6 +197,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list();
@@ -200,6 +211,100 @@ describe('createSkillRegistry', () => {
     });
   });
 
+  describe('list with includePlugins filter', () => {
+    const pluginSkill = createMockInternalSkillDefinition({
+      id: 'plugin-skill-1',
+      name: 'plugin-skill-1-name',
+      readonly: false,
+      plugin_id: 'my-plugin',
+    });
+
+    it('excludes plugin skills by default (no options)', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list();
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(2);
+    });
+
+    it('excludes plugin skills when includePlugins is false', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ includePlugins: false });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(2);
+    });
+
+    it('includes plugin skills when includePlugins is true', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ includePlugins: true });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeDefined();
+      expect(result).toHaveLength(3);
+    });
+
+    it('always returns non-plugin skills regardless of the flag', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const withFlag = await registry.list({ includePlugins: true });
+      const withoutFlag = await registry.list({ includePlugins: false });
+
+      expect(withFlag).toHaveLength(2);
+      expect(withoutFlag).toHaveLength(2);
+    });
+
+    it('excludes plugin skills from built-in type filter', async () => {
+      const builtinPluginSkill = createMockInternalSkillDefinition({
+        id: 'builtin-plugin-skill',
+        readonly: true,
+        plugin_id: 'my-plugin',
+      });
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1, builtinPluginSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ type: 'built-in' });
+      expect(result.find((s) => s.id === 'builtin-plugin-skill')).toBeUndefined();
+      expect(result).toHaveLength(1);
+    });
+
+    it('excludes plugin skills from persisted type filter', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ type: 'persisted' });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(1);
+    });
+  });
+
   describe('list with summaryOnly', () => {
     it('forwards options to both providers', async () => {
       const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
@@ -208,6 +313,7 @@ describe('createSkillRegistry', () => {
         builtinProvider,
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list({ summaryOnly: true });
@@ -226,6 +332,7 @@ describe('createSkillRegistry', () => {
         builtinProvider,
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list({ type: 'built-in' });
@@ -242,6 +349,7 @@ describe('createSkillRegistry', () => {
         builtinProvider,
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list({ type: 'persisted' });
@@ -257,6 +365,7 @@ describe('createSkillRegistry', () => {
         builtinProvider,
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       await registry.list({ type: 'built-in', summaryOnly: true });
@@ -272,6 +381,7 @@ describe('createSkillRegistry', () => {
         builtinProvider,
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.bulkGet(['builtin-skill-1']);
@@ -286,6 +396,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.bulkGet(['custom-skill-1']);
@@ -299,6 +410,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.bulkGet(['builtin-skill-1', 'custom-skill-1']);
@@ -312,6 +424,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.bulkGet(['builtin-skill-1', 'non-existent']);
@@ -326,6 +439,7 @@ describe('createSkillRegistry', () => {
         builtinProvider,
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.bulkGet([]);
@@ -340,6 +454,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(['tool-a']),
+        experimentalFeaturesEnabled: false,
       });
 
       await registry.create({
@@ -364,6 +479,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       await expect(
@@ -382,6 +498,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(['tool-a']),
+        experimentalFeaturesEnabled: false,
       });
 
       await expect(
@@ -401,6 +518,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(toolIds),
+        experimentalFeaturesEnabled: false,
       });
 
       await expect(
@@ -421,6 +539,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(toolIds),
+        experimentalFeaturesEnabled: false,
       });
 
       await registry.create({
@@ -442,6 +561,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       await registry.update('custom-skill-1', { name: 'Updated Name' });
@@ -456,6 +576,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       await expect(registry.update('builtin-skill-1', { name: 'Updated' })).rejects.toThrow(
@@ -469,6 +590,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(toolIds),
+        experimentalFeaturesEnabled: false,
       });
 
       await expect(registry.update('custom-skill-1', { tool_ids: toolIds })).rejects.toThrow(
@@ -484,6 +606,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       await registry.delete('custom-skill-1');
@@ -495,6 +618,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       await expect(registry.delete('builtin-skill-1')).rejects.toThrow(
@@ -508,10 +632,169 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       await registry.delete('non-existent');
       expect(persistedProvider.delete).toHaveBeenCalledWith('non-existent');
+    });
+  });
+
+  describe('experimental filtering', () => {
+    const normalSkill = createMockInternalSkillDefinition({
+      id: 'normal-skill',
+      name: 'normal-skill',
+      experimental: false,
+      readonly: true,
+    });
+    const experimentalSkill = createMockInternalSkillDefinition({
+      id: 'experimental-skill',
+      name: 'experimental-skill',
+      experimental: true,
+      readonly: true,
+    });
+
+    describe('when experimentalFeaturesEnabled is false', () => {
+      it('has() returns false for experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: false,
+        });
+
+        expect(await registry.has('experimental-skill')).toBe(false);
+      });
+
+      it('has() returns true for non-experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([normalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: false,
+        });
+
+        expect(await registry.has('normal-skill')).toBe(true);
+      });
+
+      it('get() returns undefined for experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: false,
+        });
+
+        expect(await registry.get('experimental-skill')).toBeUndefined();
+      });
+
+      it('get() returns skill for non-experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([normalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: false,
+        });
+
+        expect(await registry.get('normal-skill')).toEqual(normalSkill);
+      });
+
+      it('bulkGet() omits experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([normalSkill, experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: false,
+        });
+
+        const result = await registry.bulkGet(['normal-skill', 'experimental-skill']);
+        expect(result.size).toBe(1);
+        expect(result.has('normal-skill')).toBe(true);
+        expect(result.has('experimental-skill')).toBe(false);
+      });
+
+      it('list() excludes experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([normalSkill, experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: false,
+        });
+
+        const result = await registry.list();
+        expect(result).toHaveLength(1);
+        expect(result[0].id).toBe('normal-skill');
+      });
+    });
+
+    describe('when experimentalFeaturesEnabled is true', () => {
+      it('has() returns true for experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: true,
+        });
+
+        expect(await registry.has('experimental-skill')).toBe(true);
+      });
+
+      it('get() returns experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: true,
+        });
+
+        expect(await registry.get('experimental-skill')).toEqual(experimentalSkill);
+      });
+
+      it('bulkGet() includes experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([normalSkill, experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: true,
+        });
+
+        const result = await registry.bulkGet(['normal-skill', 'experimental-skill']);
+        expect(result.size).toBe(2);
+        expect(result.has('normal-skill')).toBe(true);
+        expect(result.has('experimental-skill')).toBe(true);
+      });
+
+      it('list() includes experimental skills', async () => {
+        const registry = createSkillRegistry({
+          builtinProvider: createMockBuiltinProvider([normalSkill, experimentalSkill]),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(),
+          experimentalFeaturesEnabled: true,
+        });
+
+        const result = await registry.list();
+        expect(result).toHaveLength(2);
+      });
+    });
+
+    it('non-experimental skills are always returned regardless of the flag', async () => {
+      const registryOff = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([normalSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+      const registryOn = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([normalSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: true,
+      });
+
+      expect(await registryOff.has('normal-skill')).toBe(true);
+      expect(await registryOn.has('normal-skill')).toBe(true);
+      expect(await registryOff.get('normal-skill')).toEqual(normalSkill);
+      expect(await registryOn.get('normal-skill')).toEqual(normalSkill);
     });
   });
 });

@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
+import { useStableCallback } from '@kbn/react-hooks';
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetch$Arguments,
@@ -20,7 +21,6 @@ import type {
   UnifiedHistogramServices,
 } from '../../../types';
 import { UnifiedHistogramFetchStatus } from '../../../types';
-import { useStableCallback } from '../../../hooks/use_stable_callback';
 
 export const useTotalHits = ({
   services,

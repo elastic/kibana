@@ -1,0 +1,211 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ReactNode } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
+import type { AppHeaderPadding } from '../types';
+
+// Single-row bar height, applied to every header (title, tabbed, or back-button-only) so the bar
+// stays a consistent 48px. The symmetric size.s padding leaves a 32px content area, enough for the
+// trailing controls (buttons) to fit without pushing the row past 48px.
+const APPLICATION_TOP_BAR_MIN_HEIGHT_PX = 48;
+
+export interface AppHeaderShellProps {
+  title?: ReactNode;
+  badges?: ReactNode;
+  titleActions?: ReactNode;
+  trailing?: ReactNode;
+  metadata?: ReactNode;
+  tabs?: ReactNode;
+  sticky?: boolean;
+  padding?: AppHeaderPadding;
+}
+
+// Resolves the horizontal-only padding contract. Vertical padding is standardized internally
+// (see `useHeaderStyles`) so the header keeps a consistent height regardless of this prop.
+const resolveHorizontalPadding = (
+  sticky: boolean,
+  padding: AppHeaderPadding | undefined,
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
+) => {
+  const resolved = padding ?? (sticky ? 'm' : 'none');
+
+  if (resolved === 'none') {
+    return { paddingInline: undefined, bleedMargin: undefined };
+  }
+
+  if (resolved === 'm') {
+    return { paddingInline: euiTheme.size.m, bleedMargin: undefined };
+  }
+
+  // `{ bleed }`: pull the header out to its padded container's edges (negative margin) and
+  // re-inset the content by the same amount so it stays aligned with the page gutter.
+  const value = resolved.bleed === 'l' ? euiTheme.size.l : euiTheme.size.m;
+  return { paddingInline: value, bleedMargin: value };
+};
+
+const useHeaderStyles = (
+  sticky: boolean,
+  padding: AppHeaderPadding | undefined,
+  hasTabs: boolean,
+  hasMetadata: boolean
+) => {
+  const { euiTheme } = useEuiTheme();
+
+  return useMemo(() => {
+    const { paddingInline, bleedMargin } = resolveHorizontalPadding(sticky, padding, euiTheme);
+
+    // Vertical padding is internal (independent of the `padding` prop). The primary row floors at a
+    // consistent 48px regardless of title size; content is centered within it.
+    const paddingBlock = euiTheme.size.s;
+    // A row followed by another collapses its bottom gap so the next row sits close (and tabs stay
+    // flush with the header's bottom border); otherwise it uses the symmetric vertical padding.
+    const bottomPad = (followed: boolean) => (followed ? euiTheme.size.xs : paddingBlock);
+
+    const root = css`
+      ${sticky &&
+      css`
+        position: sticky;
+        top: 0;
+        z-index: ${euiTheme.levels.mask};
+      `}
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 0;
+      ${paddingInline &&
+      css`
+        padding-inline: ${paddingInline};
+      `}
+      ${bleedMargin &&
+      css`
+        margin-inline: -${bleedMargin};
+        margin-top: -${bleedMargin};
+      `}
+      background: ${euiTheme.colors.backgroundBasePlain};
+      border-bottom: ${euiTheme.border.thin};
+      margin-bottom: -${euiTheme.border.width.thin};
+
+      &:hover .titleActionsReveal,
+      &:focus-within .titleActionsReveal {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    `;
+
+    const primaryRow = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.m};
+      min-width: 0;
+      min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
+      padding-block-start: ${paddingBlock};
+      padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
+    `;
+
+    const titleCluster = css`
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    `;
+
+    const titleGroup = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      flex: 0 1 auto;
+      min-width: 0;
+      max-width: 100%;
+    `;
+
+    const titleClusterSpacer = css`
+      flex: 1 1 auto;
+      min-width: 0;
+    `;
+
+    const tabsRow = css`
+      display: flex;
+      align-items: stretch;
+    `;
+
+    const metadataRow = css`
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: ${euiTheme.size.m};
+      row-gap: ${euiTheme.size.xs};
+      min-width: 0;
+      padding-block-end: ${bottomPad(hasTabs)};
+    `;
+
+    const titleActionsReveal = css`
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity ${euiTheme.animation.fast} ease;
+    `;
+
+    return {
+      root,
+      primaryRow,
+      titleCluster,
+      titleGroup,
+      titleClusterSpacer,
+      titleActionsReveal,
+      metadataRow,
+      tabsRow,
+    };
+  }, [euiTheme, sticky, padding, hasTabs, hasMetadata]);
+};
+
+export const AppHeaderShell = React.memo<AppHeaderShellProps>(
+  ({ title, badges, titleActions, trailing, metadata, tabs, sticky = true, padding }) => {
+    const styles = useHeaderStyles(sticky, padding, !!tabs, !!metadata);
+
+    return (
+      <div css={styles.root} data-test-subj="appHeader">
+        <div css={styles.primaryRow}>
+          <div css={styles.titleCluster}>
+            <div css={styles.titleGroup}>
+              {title}
+              {badges}
+              {titleActions && (
+                <div className="titleActionsReveal" css={styles.titleActionsReveal}>
+                  {titleActions}
+                </div>
+              )}
+            </div>
+            <div css={styles.titleClusterSpacer} aria-hidden />
+          </div>
+          {trailing}
+        </div>
+        {metadata && (
+          <div css={styles.metadataRow} data-test-subj="appHeaderMetadata">
+            {metadata}
+          </div>
+        )}
+        {tabs && (
+          <div css={styles.tabsRow} data-test-subj="appHeaderTabs">
+            {tabs}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+AppHeaderShell.displayName = 'AppHeaderShell';

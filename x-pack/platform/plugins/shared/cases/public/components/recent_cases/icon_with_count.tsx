@@ -37,6 +37,7 @@ export const IconWithCount = React.memo<{
               color="default"
               size="s"
               type={icon}
+              aria-hidden={true}
             />
           </EuiFlexItem>
 

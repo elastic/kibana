@@ -12,7 +12,7 @@ import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
-import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { STACK_CONNECTORS_MANAGEMENT_ID } from '../../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavigateToApp } from '../../hooks/use_navigate_to_app';
@@ -49,11 +49,11 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
   const { data: dataConnectors, isLoading } = useLoadConnectors({
     http,
+    featureId: 'workplace_ai',
     settings: {
       client: uiSettings,
       globalClient: uiSettings,
     },
-    inferenceEnabled: true,
   });
 
   const connectors = useMemo(() => dataConnectors ?? [], [dataConnectors]);
@@ -97,7 +97,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
   const connectorSelectorButton = (
     <EuiButtonEmpty
-      iconType={isLoading ? undefined : 'arrowDown'}
+      iconType={isLoading ? undefined : 'chevronSingleDown'}
       iconSide="right"
       flush="both"
       onClick={togglePopover}

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getAttackDiscoveryPrompts } from '.';
 import { getPromptsByGroupId, promptDictionary } from '../../../../prompt';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
@@ -22,7 +20,6 @@ jest.mock('../../../../prompt', () => {
 const mockGetPromptsByGroupId = getPromptsByGroupId as jest.Mock;
 
 describe('getAttackDiscoveryPrompts', () => {
-  const actionsClient = {} as jest.Mocked<PublicMethodsOf<ActionsClient>>;
   const savedObjectsClient = {} as jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
@@ -54,7 +51,6 @@ describe('getAttackDiscoveryPrompts', () => {
 
   it('should return all prompts', async () => {
     const result = await getAttackDiscoveryPrompts({
-      actionsClient,
       connectorId: 'test-connector-id',
       savedObjectsClient,
       model: '2',
@@ -98,7 +94,6 @@ describe('getAttackDiscoveryPrompts', () => {
     mockGetPromptsByGroupId.mockResolvedValue([]);
 
     const result = await getAttackDiscoveryPrompts({
-      actionsClient,
       connectorId: 'test-connector-id',
       savedObjectsClient,
     });

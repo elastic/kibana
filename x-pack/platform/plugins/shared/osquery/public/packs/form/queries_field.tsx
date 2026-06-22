@@ -18,7 +18,7 @@ import { QUERY_TIMEOUT } from '../../../common/constants';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
-import { getSupportedPlatforms } from '../queries/platforms/helpers';
+import { getSupportedPlatforms } from '../queries/platforms';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
 interface QueriesFieldProps {
@@ -170,7 +170,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
                   data-test-subj="add-query-button"
                   fill
                   onClick={handleShowAddFlyout}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                 >
                   <FormattedMessage
                     id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"

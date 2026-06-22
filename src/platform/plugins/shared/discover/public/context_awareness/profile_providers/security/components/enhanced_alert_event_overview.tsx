@@ -10,6 +10,8 @@
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
+const noop = () => {};
+
 /**
  * This component is a placeholder for the new alert/event Overview tab content.
  * It will be rendered only when the discover.securitySolutionFlyout feature flag is enabled.
@@ -18,16 +20,20 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
  */
 export interface EnhancedAlertEventOverviewProps extends DocViewRenderProps {
   providerServices: ProfileProviderServices;
+  refreshData?: () => void;
 }
 
 export const EnhancedAlertEventOverview = ({
   hit,
   providerServices,
+  refreshData,
+  ...docViewProps
 }: EnhancedAlertEventOverviewProps) => {
   const alertFlyoutOverviewTabFeature = providerServices.discoverShared.features.registry.getById(
     'security-solution-alert-flyout-overview-tab'
   );
+  const handleAlertUpdated = refreshData ?? noop;
 
   const render = alertFlyoutOverviewTabFeature?.render;
-  return render ? render(hit) : null;
+  return render ? render({ hit, ...docViewProps, onAlertUpdated: handleAlertUpdated }) : null;
 };

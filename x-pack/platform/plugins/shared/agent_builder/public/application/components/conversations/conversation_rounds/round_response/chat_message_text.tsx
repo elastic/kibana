@@ -52,6 +52,7 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  isStreaming?: boolean;
 }
 
 /**
@@ -64,6 +65,7 @@ export function ChatMessageText({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
 
@@ -104,6 +106,36 @@ export function ChatMessageText({
       // Internal link in full page: target="_blank" handles navigation
     },
     [isSidebar, http?.externalUrl, application]
+  );
+
+  const visualizationRenderer = useMemo(
+    () =>
+      createVisualizationRenderer({
+        startDependencies,
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
+    [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
+  );
+
+  const renderAttachmentRenderer = useMemo(
+    () =>
+      createRenderAttachmentRenderer({
+        conversationAttachments,
+        attachmentRefs,
+        conversationId,
+        isSidebar,
+        attachmentsService,
+        isStreaming,
+      }),
+    [
+      conversationAttachments,
+      attachmentRefs,
+      conversationId,
+      isSidebar,
+      attachmentsService,
+      isStreaming,
+    ]
   );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -152,42 +184,41 @@ export function ChatMessageText({
       },
       table: (props) => (
         <>
-          <EuiTable
-            {...props}
-            className={css`
-              .euiTableCellContent__text {
-                white-space: normal;
-              }
-            `}
-          />
+          <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
           <EuiSpacer size="m" />
         </>
       ),
       th: (props) => {
         const { children, ...rest } = props;
-        return <EuiTableHeaderCell {...rest}>{children}</EuiTableHeaderCell>;
+        return (
+          <EuiTableHeaderCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
+            {children}
+          </EuiTableHeaderCell>
+        );
       },
       tr: (props) => <EuiTableRow {...props} />,
       td: (props) => {
         const { children, ...rest } = props;
         return (
-          <EuiTableRowCell truncateText={true} {...rest}>
+          <EuiTableRowCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
             {children}
           </EuiTableRowCell>
         );
       },
-      [visualizationElement.tagName]: createVisualizationRenderer({
-        startDependencies,
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
-      }),
-      [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
-        conversationAttachments,
-        attachmentRefs,
-        conversationId,
-        isSidebar,
-        attachmentsService,
-      }),
+      [visualizationElement.tagName]: visualizationRenderer,
+      [renderAttachmentElement.tagName]: renderAttachmentRenderer,
     };
 
     return {
@@ -200,17 +231,7 @@ export function ChatMessageText({
       ],
       processingPluginList: processingPlugins,
     };
-  }, [
-    startDependencies,
-    stepsFromCurrentRound,
-    stepsFromPrevRounds,
-    conversationAttachments,
-    attachmentRefs,
-    conversationId,
-    isSidebar,
-    attachmentsService,
-    handleLinkClick,
-  ]);
+  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick]);
 
   return (
     <>

@@ -376,7 +376,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                           Object.keys(headersObj).length > 0 ? headersObj : ''
                         );
                       }}
-                      iconType="minusInCircle"
+                      iconType="minusCircle"
                       aria-label={DELETE_LABEL}
                       data-test-subj={`${key}-delete-button-${index}`}
                     />
@@ -397,7 +397,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                   headersList.length === 1 &&
                   (headersList[0][0] === '' || headersList[0][1] === ''))
               }
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => {
                 const newHeaders = [...headersList, ['', '']];
                 setHeadersList(newHeaders);

@@ -8,7 +8,7 @@
 import { getDissectProcessorWithReview } from './get_dissect_processor_with_review';
 import { collapseRepeats } from './collapse_repeats';
 import { serializeAST } from '../serialize_ast';
-import type { DissectPattern, DissectAST } from '../types';
+import type { DissectPattern, DissectAST, DissectFieldNode } from '../types';
 import type { NormalizedReviewResult } from './get_review_fields';
 
 // Helper to parse a pattern string into AST
@@ -21,7 +21,7 @@ function parsePattern(patternString: string): DissectAST {
     if (match[1]) {
       // Field node
       const fieldContent = match[1];
-      const modifiers: any = {};
+      const modifiers: DissectFieldNode['modifiers'] = {};
       let fieldName = fieldContent;
 
       // Parse modifiers

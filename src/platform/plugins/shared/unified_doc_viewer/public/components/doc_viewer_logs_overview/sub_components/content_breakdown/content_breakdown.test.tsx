@@ -15,10 +15,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({ dangerouslySetInnerHTML }: { dangerouslySetInnerHTML?: { __html: string } }) => (
+  EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
     <pre>
-      {/* eslint-disable-next-line react/no-danger */}
-      <code data-test-subj="codeBlock" dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
+      <code data-test-subj="codeBlock">{children}</code>
     </pre>
   ),
 }));
@@ -27,15 +26,27 @@ jest.mock('../hover_popover_action', () => ({
   HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+const mockConvertToReact = jest.fn((value: unknown) => value);
+
+jest.mock('../../../../plugin', () => ({
+  getUnifiedDocViewerServices: () => ({
+    fieldFormats: {
+      getDefaultInstance: () => ({
+        convertToReact: mockConvertToReact,
+      }),
+    },
+  }),
+}));
+
 const mockDataView = {
   fields: {
     getAll: () => [],
     getByName: () => undefined,
   },
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  getFormatterForField: jest.fn(() => ({ convertToText: (value: unknown) => value })),
 } as unknown as DataView;
 
-const buildHit = (fields: Record<string, unknown> = {}) =>
+const buildHit = (fields: Record<string, unknown> = {}, highlight?: Record<string, string[]>) =>
   buildDataTableRecord({
     _index: 'logs-*',
     _id: 'test-id',
@@ -44,9 +55,14 @@ const buildHit = (fields: Record<string, unknown> = {}) =>
       '@timestamp': Date.now(),
       ...fields,
     },
+    highlight,
   });
 
 describe('ContentBreakdown', () => {
+  beforeEach(() => {
+    mockConvertToReact.mockClear();
+  });
+
   describe('Field ranking', () => {
     it('should display OTel body.text field when present (highest priority)', () => {
       const hit = buildHit({ 'body.text': 'OTel log message' });
@@ -98,6 +114,111 @@ describe('ContentBreakdown', () => {
 
       // Ensure the browser didn't interpret `<John Doe>` as a real element
       expect(container.querySelector('john')).toBeNull();
+    });
+
+    it('renders pretty-printed JSON when message is valid JSON and skips convertToReact', () => {
+      const json = { foo: { bar: true } };
+      const message = JSON.stringify(json);
+      const hit = buildHit({ message });
+      const formattedDoc = { message } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      const codeBlock = screen.getByTestId('codeBlock');
+      expect(codeBlock.textContent).toBe(JSON.stringify(json, null, 2));
+      // The JSON path uses formattedValue directly — convertToReact should not be called
+      expect(mockConvertToReact).not.toHaveBeenCalled();
+    });
+
+    it('applies highlights even when field is not in data view (e.g., OTel body.text)', () => {
+      const fieldName = 'body.text';
+      const message = 'OTel log message with search term';
+      const highlights = [
+        'OTel log message with @kibana-highlighted-field@search@/kibana-highlighted-field@ term',
+      ];
+      const hit = buildHit({ [fieldName]: message }, { [fieldName]: highlights });
+      const formattedDoc = { message } as any;
+
+      // Mock the formatter to return React nodes with highlighted content
+      mockConvertToReact.mockImplementationOnce(() => (
+        <>
+          OTel log message with <mark className="ffSearch__highlight">search</mark> term
+        </>
+      ));
+
+      const { container } = render(
+        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      // Verify the formatter was called with field name for highlight lookup
+      // even though the field is not in the data view (getByName returns undefined)
+      expect(mockConvertToReact).toHaveBeenCalledWith(
+        message,
+        expect.objectContaining({
+          field: { name: fieldName },
+          hit: expect.objectContaining({
+            highlight: { [fieldName]: highlights },
+          }),
+        })
+      );
+
+      // Verify the highlighted content is rendered
+      const markElement = container.querySelector('mark.ffSearch__highlight');
+      expect(markElement).toBeInTheDocument();
+      expect(markElement).toHaveTextContent('search');
+    });
+
+    it('uses DataViewField from data view when field exists and applies highlights', () => {
+      const fieldName = 'message';
+      const message = 'log message with search term';
+      const highlights = [
+        'log message with @kibana-highlighted-field@search@/kibana-highlighted-field@ term',
+      ];
+      const hit = buildHit({ [fieldName]: message }, { [fieldName]: highlights });
+      const formattedDoc = { message } as any;
+
+      const mockDataViewField = {
+        name: fieldName,
+        type: 'string',
+        esTypes: ['text'],
+        searchable: true,
+        aggregatable: false,
+      };
+
+      const dataViewWithField = {
+        ...mockDataView,
+        fields: {
+          getAll: () => [mockDataViewField],
+          getByName: (name: string) => (name === fieldName ? mockDataViewField : undefined),
+        },
+      } as unknown as DataView;
+
+      // Mock the formatter to return React nodes with highlighted content
+      mockConvertToReact.mockImplementationOnce(() => (
+        <>
+          log message with <mark className="ffSearch__highlight">search</mark> term
+        </>
+      ));
+
+      const { container } = render(
+        <ContentBreakdown dataView={dataViewWithField} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      // Verify the formatter was called with full DataViewField (not just { name })
+      expect(mockConvertToReact).toHaveBeenCalledWith(
+        message,
+        expect.objectContaining({
+          field: mockDataViewField,
+          hit: expect.objectContaining({
+            highlight: { [fieldName]: highlights },
+          }),
+        })
+      );
+
+      // Verify the highlighted content is rendered
+      const markElement = container.querySelector('mark.ffSearch__highlight');
+      expect(markElement).toBeInTheDocument();
+      expect(markElement).toHaveTextContent('search');
     });
   });
 });

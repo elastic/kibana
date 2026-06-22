@@ -18,7 +18,6 @@ import type {
 import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
 import type { AuthMode } from '@kbn/connector-specs';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
@@ -67,6 +66,7 @@ export interface HookServices {
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+  getSkippedPreconfiguredConnectorIds: () => Set<string>;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -126,7 +126,7 @@ export type ExecutorType<
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-type Validator<T> = Pick<z3.ZodType, 'parse'> | Pick<z4.ZodType, 'parse'>;
+type Validator<T> = Pick<z4.ZodType, 'parse'>;
 export interface ValidatorType<T> {
   schema: Validator<T>;
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;
@@ -196,7 +196,6 @@ export type ConnectorLifecyclePostCreateParams = Omit<
 > & {
   connectorType: string;
   connectorName: string;
-  workflowTemplates: string[];
 };
 export type ConnectorLifecyclePostDeleteParams = PostDeleteConnectorHookParams & {
   connectorType: string;
@@ -243,6 +242,14 @@ export interface ActionTypeCoreFields<
    * Only applies to system actions (isSystemActionType: true).
    */
   allowMultipleSystemActions?: boolean;
+  /**
+   * Description of this connector type.
+   */
+  description?: string;
+  /**
+   * When true, the connector type is shown as technical preview in the UI.
+   */
+  isExperimental?: boolean;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

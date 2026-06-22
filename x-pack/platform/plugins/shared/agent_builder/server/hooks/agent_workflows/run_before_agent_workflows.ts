@@ -14,17 +14,14 @@ import {
   createWorkflowAbortedError,
   createWorkflowExecutionError,
 } from '@kbn/agent-builder-common';
-import {
-  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import { executeWorkflow } from '../../services/workflow/execute_workflow';
 import type { BeforeAgentWorkflowOutput } from './types';
 import type { AgentsServiceStart } from '../../services/agents';
 import {
@@ -143,11 +140,7 @@ export async function runBeforeAgentWorkflows({
 }
 
 async function isPreExecutionWorkflowEnabled(uiSettingsClient: IUiSettingsClient) {
-  const experimentalFeaturesEnabled =
-    (await uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)) ?? false;
-  const workflowsUiEnabled =
-    (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? false;
-  return workflowsUiEnabled && experimentalFeaturesEnabled;
+  return (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? true;
 }
 
 async function getWorkflowIds(

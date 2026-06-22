@@ -114,9 +114,10 @@ describe('BackgroundSearchNotifier', () => {
           coreStartMock,
           locatorsMock
         );
-        // First call is for the initial poll, second call is for the next interval
+        // First two calls are for the initial poll (map + groupSessions re-read), third is for the next interval
         mockGetInProgressSessionIds
           .mockReturnValueOnce(['session-1', 'session-2'])
+          .mockReturnValueOnce([])
           .mockReturnValueOnce([]);
 
         // When
@@ -160,9 +161,10 @@ describe('BackgroundSearchNotifier', () => {
           coreStartMock,
           locatorsMock
         );
-        // First call is for the initial poll, second call is for the next interval
+        // First two calls are for the initial poll (map + groupSessions re-read), third is for the next interval
         mockGetInProgressSessionIds
           .mockReturnValueOnce(['session-1', 'session-2'])
+          .mockReturnValueOnce([])
           .mockReturnValueOnce([]);
 
         // When
@@ -208,10 +210,11 @@ describe('BackgroundSearchNotifier', () => {
           coreStartMock,
           locatorsMock
         );
-        // First call is for the initial poll, second call is for the next interval
+        // First two calls are for the initial poll (map + groupSessions re-read), third is for the next interval
         mockGetInProgressSessionIds
           .mockReturnValueOnce(['session-1', 'session-2', 'session-3', 'session-4'])
-          .mockReturnValueOnce(['session-1', 'session-4']);
+          .mockReturnValueOnce(['session-1', 'session-4'])
+          .mockReturnValueOnce([]);
 
         // When
         backgroundSearchNotifier.startPolling(1000);
@@ -226,7 +229,7 @@ describe('BackgroundSearchNotifier', () => {
     });
 
     describe('when sessions are not found in status response', () => {
-      it('should treat them as still in-progress', async () => {
+      it('should silently remove them from tracking', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
           status: jest.fn().mockResolvedValue({
@@ -250,11 +253,43 @@ describe('BackgroundSearchNotifier', () => {
         await jest.advanceTimersByTimeAsync(1000);
 
         // Then
-        expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([
-          'session-1',
-          'session-2',
-          'session-3',
-        ]);
+        expect(mockSetInProgressSessionIds).toHaveBeenCalledWith(['session-1']);
+        expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+        expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when a new session is added while polling is running', () => {
+      it('should preserve the new session', async () => {
+        // Given
+        const sessionsClientMock = getSessionsClientMock({
+          status: jest.fn().mockResolvedValue({
+            statuses: {
+              'session-1': { status: 'in_progress' },
+            },
+            sessions: {},
+          }),
+        });
+        const coreStartMock = coreMock.createStart();
+        const backgroundSearchNotifier = new BackgroundSearchNotifier(
+          sessionsClientMock,
+          coreStartMock,
+          locatorsMock
+        );
+        // session-2 is added to localStorage while the status call for session-1 is in flight
+        mockGetInProgressSessionIds
+          .mockReturnValueOnce(['session-1']) // t=0 map: initial snapshot
+          .mockReturnValueOnce(['session-1', 'session-2']) // t=0 groupSessions re-read: session-2 was added concurrently
+          .mockReturnValueOnce([]); // t=1000 map: filtered out
+
+        // When
+        backgroundSearchNotifier.startPolling(1000);
+        await jest.advanceTimersByTimeAsync(1000);
+        backgroundSearchNotifier.stopPolling();
+
+        // Then
+        expect(sessionsClientMock.status).toHaveBeenCalledWith(['session-1']);
+        expect(mockSetInProgressSessionIds).toHaveBeenCalledWith(['session-1', 'session-2']);
         expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
         expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
       });
@@ -287,6 +322,7 @@ describe('BackgroundSearchNotifier', () => {
           locatorsMock
         );
         mockGetInProgressSessionIds
+          .mockReturnValueOnce(['session-1'])
           .mockReturnValueOnce(['session-1'])
           .mockReturnValueOnce(['session-1'])
           .mockReturnValueOnce([]);

@@ -8,82 +8,127 @@
  */
 
 import {
-  DEFAULT_CONTROL_WIDTH,
-  ESQL_CONTROL,
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+  DEFAULT_RANGE_SLIDER_STATE,
+  DEFAULT_TIME_SLIDER_STATE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
+import type { DashboardState } from '../../types';
 import {
   transformPinnedPanelProperties,
   transformPinnedPanelsObjectToArray,
   transformPinnedPanelsOut,
+  type StoredPinnedPanels,
 } from './transform_pinned_panels_out';
-import type { DashboardState } from '../../types';
+import {
+  optionsListDSLControlSchema,
+  rangeSliderControlSchema,
+  timeSliderControlSchema,
+} from '@kbn/controls-schemas';
 
-jest.mock('../../../kibana_services', () => ({
-  ...jest.requireActual('../../../kibana_services'),
-  embeddableService: {
-    getTransforms: jest.fn(),
-  },
-}));
+const mockGetTransforms = jest.fn();
+
+beforeAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../../kibana_services').embeddableService = {
+    getTransforms: mockGetTransforms,
+  };
+
+  mockGetTransforms.mockImplementation((embeddableType) => {
+    function getSchema(type: string) {
+      if (type === OPTIONS_LIST_CONTROL) {
+        return optionsListDSLControlSchema;
+      }
+
+      if (type === RANGE_SLIDER_CONTROL) {
+        return rangeSliderControlSchema;
+      }
+
+      if (type === TIME_SLIDER_CONTROL) {
+        return timeSliderControlSchema;
+      }
+
+      if (type === 'invalidPanel') {
+        return {
+          validate: jest.fn().mockImplementation(() => {
+            throw new Error('Boo!');
+          }),
+        };
+      }
+    }
+    return {
+      transformOut: jest.fn().mockImplementation((val) => val),
+      schema: getSchema(embeddableType),
+    };
+  });
+});
 
 describe('pinned panels', () => {
   const mockPinnedPanels = {
     control1: {
       id: 'control1',
-      type: 'optionsListControl',
-      width: 'medium',
-      config: { foo: 'bar' },
+      type: OPTIONS_LIST_CONTROL,
+      grow: true,
+      config: { data_view_id: 'dataViewId', field_name: 'fieldName' },
       order: 0,
     },
     control2: {
       id: 'control2',
-      type: 'rangeSliderControl',
+      type: RANGE_SLIDER_CONTROL,
       width: 'small',
-      config: { bizz: 'buzz' },
+      config: { data_view_id: 'dataViewId', field_name: 'fieldName', step: 2 },
       order: 1,
     },
     control3: {
       id: 'control3',
-      type: 'esqlControl',
+      type: TIME_SLIDER_CONTROL,
       grow: true,
-      config: { boo: 'bear' },
-      unsupportedProperty: 'unsupported',
+      width: 'large',
+      config: {},
       order: 2,
     },
   } as Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
   const transformedPinnedPanels = [
     {
-      uid: 'control1',
+      id: 'control1',
       type: OPTIONS_LIST_CONTROL,
-      width: DEFAULT_CONTROL_WIDTH,
-      config: {
-        foo: 'bar',
-      },
-    },
-    {
-      uid: 'control2',
-      type: RANGE_SLIDER_CONTROL,
-      width: 'small',
-      config: {
-        bizz: 'buzz',
-      },
-    },
-    {
-      uid: 'control3',
-      type: ESQL_CONTROL,
+      ...DEFAULT_PINNED_CONTROL_STATE,
       grow: true,
       config: {
-        boo: 'bear',
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        data_view_id: 'dataViewId',
+        field_name: 'fieldName',
       },
+    },
+    {
+      id: 'control2',
+      type: RANGE_SLIDER_CONTROL,
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      width: 'small',
+      config: {
+        ...DEFAULT_RANGE_SLIDER_STATE,
+        data_view_id: 'dataViewId',
+        field_name: 'fieldName',
+        step: 2,
+      },
+    },
+    {
+      id: 'control3',
+      type: TIME_SLIDER_CONTROL,
+      grow: true,
+      width: 'large',
+      config: DEFAULT_TIME_SLIDER_STATE,
     },
   ] as unknown as DashboardState['pinned_panels'];
 
   it('should transform pinned panels object to array with all transformations applied', () => {
     const result = transformPinnedPanelsOut(undefined, { panels: mockPinnedPanels }, []);
-    expect(result).toEqual(transformedPinnedPanels);
+    expect(result.panels).toEqual(transformedPinnedPanels);
   });
 
   it('should transform pinned panels object to array', () => {
@@ -94,18 +139,55 @@ describe('pinned panels', () => {
     expect(result).toHaveProperty('2.id', 'control3');
   });
 
+  it('drops any invalid panels', () => {
+    const invalidPanel = {
+      type: 'invalidPanel',
+      grow: true,
+      config: {},
+      unsupportedProperty: 'unsupported',
+      order: 3,
+    };
+    const result = transformPinnedPanelsOut(
+      undefined,
+      {
+        panels: {
+          ...mockPinnedPanels,
+          invalidPanel,
+        },
+      } as DashboardSavedObjectAttributes['pinned_panels'],
+      []
+    );
+    expect(result.panels).toEqual(transformedPinnedPanels);
+    expect(result.warnings).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "message": "Unable to transform pinned panel config. Error: Boo!",
+          "panel_config": Object {},
+          "panel_type": "invalidPanel",
+          "type": "dropped_panel",
+        },
+      ]
+    `);
+  });
+
   describe('transform <9.4 legacy controls', () => {
     it('should transform controls explicit input', () => {
-      const controlsArray = transformPinnedPanelsObjectToArray(mockPinnedPanels);
+      const controlsArray = transformPinnedPanelsObjectToArray({
+        ...mockPinnedPanels,
+        control3: {
+          ...mockPinnedPanels.control3,
+          unsupportedProperty: 'unsupported',
+        },
+      } as StoredPinnedPanels);
       const result = transformPinnedPanelProperties(controlsArray);
 
-      expect(result).toHaveProperty('0.config.foo', 'bar');
+      expect(result).toHaveProperty('0.config.data_view_id', 'dataViewId');
       expect(result).not.toHaveProperty('0.explicitInput');
 
-      expect(result).toHaveProperty('1.config.bizz', 'buzz');
+      expect(result).toHaveProperty('1.config.step', 2);
       expect(result).not.toHaveProperty('1.explicitInput');
 
-      expect(result).toHaveProperty('2.config.boo', 'bear');
+      expect(result).toHaveProperty('2.config');
       expect(result).not.toHaveProperty('2.explicitInput');
       expect(result).not.toHaveProperty('2.unsupportedProperty');
       expect(result).not.toHaveProperty('2.config.unsupportedProperty');
@@ -114,7 +196,7 @@ describe('pinned panels', () => {
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = { panelsJSON: JSON.stringify(mockPinnedPanels) };
       const result = transformPinnedPanelsOut(serializedControlState, undefined, []);
-      expect(result).toEqual(transformedPinnedPanels);
+      expect(result.panels).toEqual(transformedPinnedPanels);
     });
   });
 });

@@ -1,0 +1,553 @@
+{
+  "sha1": "89c4d5591674b16fd750fdd351047bc86bf6c048",
+  "tests": [
+    {
+      "id": "7f09fed36a7e0d8-c1ae45431291e6d",
+      "title": "Observability alerts - status controls filters the alerts table by status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alert_controls.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "00b8c2a1956343b-26c6d6429a5a975",
+      "title": "Observability alerts - summary widget shows active and total alert counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alert_summary_widget.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "f1307c084b923ab-8b9751cac4a6464",
+      "title": "Observability alerts - row actions opens the rule details page from the \"View Rule Details\" row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_actions.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "2ed10533bea88f4-86d1303cfce367b",
+      "title": "Observability alerts - flyout opens and closes the alert flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_flyout.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "2ed10533bea88f4-197969c83ff4dba",
+      "title": "Observability alerts - flyout shows the alert overview and navigation links in the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_flyout.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "6781596a4746391-54c67f082a11c59",
+      "title": "Observability alerts - pagination exposes the page size selector and applies the selected size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_pagination.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "6781596a4746391-ab233b069d7b47e",
+      "title": "Observability alerts - pagination navigates between pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_pagination.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "a1996bdd115d685-ea9104479d9447b",
+      "title": "Observability alerts - URL state synchronization hydrates the query bar and time range from the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_state_sync.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "a1996bdd115d685-3a7da764b3f4e31",
+      "title": "Observability alerts - URL state synchronization applies defaults when the URL carries no state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_state_sync.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "68b5afb32e69cd7-32cd21611d58819",
+      "title": "Observability alerts - table configuration renders without error from a pre-existing persisted configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
+        "line": 97,
+        "column": 9
+      }
+    },
+    {
+      "id": "68b5afb32e69cd7-4e9713446cd1e60",
+      "title": "Observability alerts - table configuration renders the default columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
+        "line": 115,
+        "column": 9
+      }
+    },
+    {
+      "id": "68b5afb32e69cd7-db9a9d0ced664da",
+      "title": "Observability alerts - table configuration renders the group selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
+        "line": 122,
+        "column": 9
+      }
+    },
+    {
+      "id": "68b5afb32e69cd7-a5f6b4b7e377e81",
+      "title": "Observability alerts - table configuration renders the expected row actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
+        "line": 127,
+        "column": 9
+      }
+    },
+    {
+      "id": "68b5afb32e69cd7-ac1faba90278067",
+      "title": "Observability alerts - table configuration remembers hidden columns across navigations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
+        "line": 142,
+        "column": 9
+      }
+    },
+    {
+      "id": "68b5afb32e69cd7-33cdf9b8cf0ff3c",
+      "title": "Observability alerts - table configuration remembers sorting changes across navigations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
+        "line": 153,
+        "column": 9
+      }
+    },
+    {
+      "id": "22dd2fadc01b7c5-df7d25aba5f31bd",
+      "title": "Observability alerts - table & query bar renders the alerts table with every alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
+        "line": 36,
+        "column": 9
+      }
+    },
+    {
+      "id": "22dd2fadc01b7c5-ba343469689444b",
+      "title": "Observability alerts - table & query bar filters alerts by status through the query bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "22dd2fadc01b7c5-26366133836772f",
+      "title": "Observability alerts - table & query bar shows the no-data state when a filter matches nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "22dd2fadc01b7c5-0ec2cfb1b6010d4",
+      "title": "Observability alerts - table & query bar keeps the page usable when the query input is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "22dd2fadc01b7c5-650e8f5f6c195dc",
+      "title": "Observability alerts - table & query bar applies date picker selections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
+        "line": 60,
+        "column": 9
+      }
+    },
+    {
+      "id": "0bc216e8d6c9fd0-9b002a2ca5cc629",
+      "title": "Observability alerts - bulk mute / unmute bulk mutes and unmutes the rule alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/mute_unmute.spec.ts",
+        "line": 123,
+        "column": 9
+      }
+    },
+    {
+      "id": "ce6d2554bbcb1a3-35498c416011944",
+      "title": "Observability alerts - overview alert table navigates to onboarding from the no-data \"Add data\" CTA",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "ce6d2554bbcb1a3-28cf5e151e58caf",
+      "title": "Observability alerts - overview alert table renders the alerts section with alerts once a rule exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "377fb60beb43218-be4e77b5eb1dd03",
+      "title": "Observability alerts - rule stats shows the expected rule, disabled, muted and error counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/rule_stats.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "3d30f1f27e8f75f-13c366bfc2c5cd4",
+      "title": "Observability alerts - add to case (all privileges) renders the case options in the row actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "3d30f1f27e8f75f-92c49a4a4bc87de",
+      "title": "Observability alerts - add to case (all privileges) opens the create-case flyout from \"Add to new case\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "3d30f1f27e8f75f-329e97db5764fcf",
+      "title": "Observability alerts - add to case (all privileges) opens the existing-cases modal from \"Add to existing case\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "e122544bab28b0e-6e9f20c8db9bc24",
+      "title": "Observability alerts - add to case (read-only) does not render the case options in the row actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.read.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    },
+    {
+      "id": "62c9b54422814af-bfe2894343a3db8",
+      "title": "Observability cases - case detail rule link links to the observability rule page from the case detail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/case_details_rule_link.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "a9ef6f6d075d8bd-28df9aeb1236375",
+      "title": "Observability cases - all privileges shows the cases list with an enabled create button and no read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "a9ef6f6d075d8bd-cc8a2b1738d6bfb",
+      "title": "Observability cases - all privileges opens the create-case form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "a9ef6f6d075d8bd-9e20c9254c8438d",
+      "title": "Observability cases - all privileges allows an existing case to be edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3ffd39f648f151-77c285778f177cc",
+      "title": "Observability cases - no privileges returns the feature-privileges-required page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.none.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "21b2300ae4e0df7-97511258cc64ed9",
+      "title": "Observability cases - read-only privileges shows the cases list with a read-only badge and no create button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
+        "line": 43,
+        "column": 9
+      }
+    },
+    {
+      "id": "21b2300ae4e0df7-ec54837429bfb1d",
+      "title": "Observability cases - read-only privileges does not allow a case to be created",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "21b2300ae4e0df7-c7a70c89ab7ba24",
+      "title": "Observability cases - read-only privileges does not allow an existing case to be edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "08ad6c943106b9a-e97f149531b91cd",
+      "title": "Observability Landing Page (discover.isEsqlDefault enabled) redirects to Discover with an ES|QL query when logs data exists",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
+        "line": 58,
+        "column": 9
+      }
+    },
+    {
+      "id": "08ad6c943106b9a-a8f4d61d87c1d79",
+      "title": "Observability Landing Page (discover.isEsqlDefault enabled) redirects to onboarding when no logs data exists",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "b997ef31f0ad15f-e93e7fc15d6406a",
+      "title": "Nightshift navigation from Significant Events Discovery navigates to Nightshift page from Streams discovery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    }
+  ]
+}

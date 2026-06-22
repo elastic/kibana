@@ -15,7 +15,7 @@ import {
 } from '../../../common/workflows/steps/create_case';
 import type { CasesClient } from '../../client';
 
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 import {
   getInitialCaseValue,
   type GetInitialCaseValueArgs,
@@ -57,6 +57,9 @@ export const createCaseStepDefinition = (
       }
 
       const createdCase = await casesClient.cases.create(enrichedInput);
-      return createCaseStepCommonDefinition.outputSchema.shape.case.parse(createdCase);
+      return safeParseCaseForWorkflowOutput(
+        createCaseStepCommonDefinition.outputSchema.shape.case,
+        createdCase
+      );
     }),
   });

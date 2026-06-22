@@ -23,6 +23,8 @@ export const createMockedAgentRegistry = (): AgentRegistryMock => {
     update: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
+    getAcl: jest.fn(),
+    updateAcl: jest.fn(),
   };
 };
 
@@ -66,5 +68,9 @@ export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
     getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
     removeToolRefsFromAgents: jest.fn(),
     getAgentsUsingTools: jest.fn(),
+    removePluginRefsFromAgents: jest.fn(),
+    getAgentsUsingPlugins: jest.fn(),
+    removeSkillRefsFromAgents: jest.fn(),
+    getAgentsUsingSkills: jest.fn(),
   };
 };

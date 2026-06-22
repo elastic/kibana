@@ -25,8 +25,8 @@ dependsOn:
   - '@kbn/profiling-utils'
   - '@kbn/fleet-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/spaces-plugin'
   - '@kbn/observability-plugin'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
@@ -39,26 +39,6 @@ fileGroups:
     - server/**/*
     - jest.config.js
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

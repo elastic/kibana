@@ -8,16 +8,17 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import React, { Suspense } from 'react';
 import { isTriggerType } from '@kbn/workflows';
 import { PopoverItems } from './popover_items';
 import * as i18n from '../../../common/translations';
-import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
+import { withTooltip } from '../../shared/ui/with_tooltip';
 import { triggerSchemas } from '../../trigger_schemas';
 
 interface WorkflowsTriggersListProps {
-  triggers: WorkflowTrigger[];
+  triggers: Array<{ type: string }>;
 }
 
 const TRIGGERS_ICONS: Record<string, string> = {
@@ -27,6 +28,28 @@ const TRIGGERS_ICONS: Record<string, string> = {
 };
 
 const DEFAULT_TRIGGER_ICON = 'bolt';
+
+const CONTAINER_BREAKPOINT_HIDE = '700px';
+
+const triggersListStyles = {
+  container: css({
+    maxWidth: '100%',
+    minWidth: 0,
+  }),
+  textContainer: css({
+    minWidth: 0,
+    overflow: 'hidden',
+    flexShrink: 1,
+    [`@container (max-width: ${CONTAINER_BREAKPOINT_HIDE})`]: {
+      display: 'none',
+    },
+  }),
+  text: css({
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }),
+};
 
 function getTriggerIconType(triggerType: string): string | React.ComponentType {
   if (isTriggerType(triggerType) && TRIGGERS_ICONS[triggerType]) {
@@ -39,33 +62,46 @@ function getTriggerIconType(triggerType: string): string | React.ComponentType {
   return DEFAULT_TRIGGER_ICON;
 }
 
-function getTriggerLabel(triggerType: string): string {
+export function getTriggerLabel(triggerType: string): string {
   const definition = triggerSchemas.getTriggerDefinition(triggerType);
   return definition?.title ?? capitalize(triggerType);
 }
 
-function TriggerIcon({ triggerType }: { triggerType: string }) {
+const triggerIconAnchorStyle = css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  lineHeight: 0,
+});
+
+export function TriggerIcon({ triggerType }: { triggerType: string }) {
   const icon = getTriggerIconType(triggerType);
-  if (typeof icon === 'string') {
-    return <EuiIcon type={icon} size="s" aria-hidden={true} />;
-  }
-  const IconComponent = icon;
-  return (
-    <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-      <EuiIcon type={IconComponent} size="s" aria-hidden={true} />
-    </Suspense>
-  );
+  const label = getTriggerLabel(triggerType);
+  const iconNode =
+    typeof icon === 'string' ? (
+      <EuiIcon type={icon} size="m" title={label} />
+    ) : (
+      <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+        <EuiIcon type={icon} size="m" title={label} />
+      </Suspense>
+    );
+  return <span css={triggerIconAnchorStyle}>{withTooltip(iconNode, label)}</span>;
 }
 
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
   if (triggers.length === 0) {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        wrap={false}
+        css={triggersListStyles.container}
+      >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="crossInCircle" size="s" aria-hidden={true} />
+          <EuiIcon type="crossCircle" size="m" aria-hidden={true} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
+        <EuiFlexItem grow={false} css={triggersListStyles.textContainer}>
+          <EuiText size="s" color="subdued" css={triggersListStyles.text}>
             {'No triggers'}
           </EuiText>
         </EuiFlexItem>
@@ -76,12 +112,15 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
   const [firstTrigger, ...restOfTriggers] = triggers;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+      wrap={false}
+      css={triggersListStyles.container}
+    >
       <EuiFlexItem grow={false}>
         <TriggerIcon triggerType={firstTrigger.type} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">{getTriggerLabel(firstTrigger.type)}</EuiText>
       </EuiFlexItem>
       {restOfTriggers.length > 0 && (
         <EuiFlexItem grow={false}>

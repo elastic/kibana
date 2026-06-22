@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/task_manager
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
+  - '@kbn/uiam-api-keys-provisioning-status'
   - '@kbn/usage-collection-plugin'
   - '@kbn/config-schema'
   - '@kbn/config'
@@ -45,7 +47,7 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/response-ops-scheduling-types'
   - '@kbn/logging-mocks'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
   - '@kbn/security-plugin-types-server'
@@ -54,6 +56,8 @@ dependsOn:
   - '@kbn/core-execution-context-server-mocks'
   - '@kbn/core-execution-context-common'
   - '@kbn/core-http-server'
+  - '@kbn/core-security-server'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -65,27 +69,9 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - common/**/*
+    - test/scout/**/*
+    - test/scout_task_manager_uiam/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -28,7 +28,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
-  XYState,
+  XYVisualizationState,
   DateHistogramIndexPatternColumn,
   DatatableVisualizationState,
   HeatmapVisualizationState,
@@ -179,12 +179,12 @@ function getBaseAttributes(
 function getLensAttributesXY(
   defaultIndexPattern: DataView,
   fields: FieldsMap,
-  chartType: XYState['preferredSeriesType'],
+  chartType: XYVisualizationState['preferredSeriesType'],
   color: string
 ): LensAttributesByType<'lnsXY'> {
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields);
 
-  const xyConfig: XYState = {
+  const xyConfig: XYVisualizationState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
     fittingFunction: 'None',
     gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },

@@ -24,18 +24,20 @@ export class StreamsService {
 
   async getClient({
     attachmentClient,
-    queryClient,
-    featureClient,
+    getQueryClient,
+    getFeatureClient,
     esClient,
     esClientAsInternalUser,
     uiSettingsClient,
+    isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    queryClient: QueryClient;
-    featureClient: FeatureClient;
+    getQueryClient?: () => Promise<QueryClient>;
+    getFeatureClient?: () => Promise<FeatureClient>;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
+    isSecurityEnabled: boolean;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -48,14 +50,15 @@ export class StreamsService {
 
     return new StreamsClient({
       attachmentClient,
-      queryClient,
+      getQueryClient,
       logger,
-      featureClient,
+      getFeatureClient,
       esClient,
       esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
+      isSecurityEnabled,
       isWiredStreamViewsEnabled,
       isDev: this.isDev,
     });

@@ -94,7 +94,7 @@ describe('useOAuthRedirectResult', () => {
     expect(MockBroadcastChannel.instances).toHaveLength(1);
     expect(MockBroadcastChannel.instances[0].name).toBe(OAUTH_BROADCAST_CHANNEL_NAME);
     expect(MockBroadcastChannel.instances[0].messages).toEqual([
-      { connectorId: 'conn-1', status: 'success' },
+      { connectorId: 'conn-1', status: 'success', statusCode: 200 },
     ]);
     expect(MockBroadcastChannel.instances[0].close).toHaveBeenCalled();
   });
@@ -107,8 +107,47 @@ describe('useOAuthRedirectResult', () => {
 
     expect(onError).toHaveBeenCalledWith('conn-2', expect.any(Error));
     expect(MockBroadcastChannel.instances[0].messages).toEqual([
-      { connectorId: 'conn-2', status: 'error', error: expect.any(String) },
+      { connectorId: 'conn-2', status: 'error', statusCode: 500, error: expect.any(String) },
     ]);
+  });
+
+  it('includes status_code in the success broadcast when provided', () => {
+    setLocation('?oauth_authorization=success&connector_id=conn-1&status_code=200');
+
+    renderHook(() => useOAuthRedirectResult({}));
+
+    expect(MockBroadcastChannel.instances[0].messages).toEqual([
+      { connectorId: 'conn-1', status: 'success', statusCode: 200 },
+    ]);
+  });
+
+  it('includes status_code in the error broadcast when provided', () => {
+    setLocation('?oauth_authorization=error&connector_id=conn-2&status_code=403');
+
+    renderHook(() => useOAuthRedirectResult({}));
+
+    expect(MockBroadcastChannel.instances[0].messages).toEqual([
+      { connectorId: 'conn-2', status: 'error', statusCode: 403, error: expect.any(String) },
+    ]);
+  });
+
+  it('falls back to default status code when status_code is non-numeric', () => {
+    setLocation('?oauth_authorization=error&connector_id=conn-2&status_code=abc');
+
+    renderHook(() => useOAuthRedirectResult({}));
+
+    expect(MockBroadcastChannel.instances[0].messages).toEqual([
+      { connectorId: 'conn-2', status: 'error', statusCode: 500, error: expect.any(String) },
+    ]);
+  });
+
+  it('strips status_code from the URL', () => {
+    setLocation('?oauth_authorization=success&connector_id=conn-1&status_code=200&page=2');
+
+    renderHook(() => useOAuthRedirectResult({}));
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.not.stringContaining('status_code'));
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('page=2'));
   });
 
   it('replaces the URL with OAuth params stripped', () => {

@@ -15,6 +15,7 @@ import type {
   ESQLFieldWithMetadata,
   ESQLCallbacks,
   EsqlView,
+  EsqlDataset,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -22,6 +23,7 @@ import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
+import type { ReplacementRangeStrategy } from '../../language/autocomplete/utils/prefix_range';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -84,6 +86,7 @@ export interface ISuggestionItem {
   };
   /**
    * The range that should be replaced when the suggestion is applied
+   * Prefer `replacementRangeStrategy`; use this only as an escape hatch.
    *
    * IMPORTANT NOTE!!!
    *
@@ -95,11 +98,25 @@ export interface ISuggestionItem {
     end: number;
   };
   /**
+   * Centralized replacement-range strategy.
+   */
+  replacementRangeStrategy?: ReplacementRangeStrategy;
+  /**
    * If the suggestions list is incomplete and should be re-requested when the user types more characters.
    * If a completion item with incomplete true is shown, the editor will ask for new suggestions in every keystroke
    * until there are no more incomplete suggestions returned.
    */
   incomplete?: boolean;
+  /**
+   * Instructs the centralized replacement-range resolver to prepend the currently typed prefix
+   * to this suggestion's text before insertion.
+   */
+  preserveTypedPrefix?: boolean;
+  /**
+   * Instructs the centralized replacement-range resolver to keep this suggestion only when the
+   * currently typed prefix resolves to an existing column in the current command context.
+   */
+  requiresExistingColumnMatch?: boolean;
 }
 
 export type GetColumnsByTypeFn = (
@@ -141,7 +158,7 @@ export interface ESQLCommandSummary {
    */
   metadataColumns?: Set<string>;
   /**
-   * A set of renamed columns pairs [oldName, newName]
+   * A set of renamed columns pairs [newName, oldName]
    */
   renamedColumnsPairs?: Set<[string, string]>;
 
@@ -199,14 +216,17 @@ export interface ICommandContext {
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
   views?: EsqlView[];
+  datasets?: EsqlDataset[];
   editorExtensions?: EditorExtensions;
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  subquerySupport?: boolean;
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+  isTimeseriesSource?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -244,6 +264,16 @@ export enum Location {
    * In a grouping clause
    */
   STATS_BY = 'stats_by',
+
+  /**
+   * In a LIMIT grouping clause
+   */
+  LIMIT_BY = 'limit_by',
+
+  /**
+   * In a CHANGE_POINT grouping clause
+   */
+  CHANGE_POINT_BY = 'change_point_by',
 
   /**
    * In a per-agg filter
@@ -308,7 +338,7 @@ export enum Location {
 }
 
 export enum UnmappedFieldsStrategy {
-  FAIL = 'FAIL',
+  DEFAULT = 'DEFAULT',
   NULLIFY = 'NULLIFY',
   LOAD = 'LOAD',
 }

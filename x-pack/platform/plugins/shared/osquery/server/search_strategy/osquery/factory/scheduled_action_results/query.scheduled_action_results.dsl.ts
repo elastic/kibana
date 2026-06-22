@@ -8,6 +8,7 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
+import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 
 export const buildScheduledActionResultsQuery = ({
   scheduleId,
@@ -15,19 +16,39 @@ export const buildScheduledActionResultsQuery = ({
   spaceId,
   sort,
   pagination,
+  ccsEnabled,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
+  // Scheduled action_responses emitted by osquerybeat may not carry a
+  // `space_id` field. Mirror the history aggregation (buildScheduledResponsesQuery):
+  // in the default space match `space_id: default` OR a missing `space_id`;
+  // in a named space match the space exactly.
+  const spaceIdFilter: Record<string, unknown> | undefined = !spaceId
+    ? undefined
+    : spaceId === 'default'
+    ? {
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
+        },
+      }
+    : { term: { space_id: spaceId } };
+
   const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },
     { term: { schedule_execution_count: executionCount } },
+    ...(spaceIdFilter ? [spaceIdFilter] : []),
   ];
 
-  if (spaceId) {
-    filterQuery.push({ term: { space_id: spaceId } });
-  }
+  const index = prefixIndexPatternsWithCcs(
+    `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+    ccsEnabled ?? false
+  );
 
   return {
     allow_no_indices: true,
-    index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+    index,
     ignore_unavailable: true,
     aggs: {
       aggs: {
@@ -39,7 +60,7 @@ export const buildScheduledActionResultsQuery = ({
                 must: [
                   { term: { schedule_id: scheduleId } },
                   { term: { schedule_execution_count: executionCount } },
-                  ...(spaceId ? [{ term: { space_id: spaceId } }] : []),
+                  ...(spaceIdFilter ? [spaceIdFilter] : []),
                 ],
               },
             },

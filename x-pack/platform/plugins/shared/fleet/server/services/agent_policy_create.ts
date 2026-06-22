@@ -12,6 +12,10 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
+import pRetry from 'p-retry';
+
+import { LockAcquisitionError } from '@kbn/lock-manager';
+
 import { getDefaultFleetServerpolicyId } from '../../common/services/agent_policies_helpers';
 
 import {
@@ -21,6 +25,7 @@ import {
 } from '../../common';
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
+import { PackagePolicyNameExistsError } from '../errors';
 
 import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
@@ -88,27 +93,46 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
-  newPackagePolicy.name = await incrementPackageName(
-    soClient,
-    packageToInstall,
-    agentPolicy.space_ids ?? [options.spaceId]
-  );
   if (agentPolicy.supports_agentless) {
     newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
   }
 
-  await packagePolicyService.create(
-    soClient,
-    esClient,
-    newPackagePolicy,
+  const spaceIds = agentPolicy.space_ids ?? [options.spaceId];
+  const lockKey = `fleet-package-policy-name-${packageToInstall}-${[...spaceIds].sort().join(':')}`;
+
+  await pRetry(
+    () =>
+      appContextService.getLockManagerService()!.withLock(lockKey, async () => {
+        newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
+        await packagePolicyService.create(
+          soClient,
+          esClient,
+          newPackagePolicy,
+          {
+            spaceId: options.spaceId,
+            user: options.user,
+            bumpRevision: false,
+            force: options.force,
+          },
+          undefined,
+          options.request
+        );
+      }),
     {
-      spaceId: options.spaceId,
-      user: options.user,
-      bumpRevision: false,
-      force: options.force,
-    },
-    undefined,
-    options.request
+      onFailedAttempt: (error) => {
+        if (
+          !(error instanceof LockAcquisitionError) &&
+          !(error instanceof PackagePolicyNameExistsError)
+        ) {
+          throw error;
+        }
+      },
+      minTimeout: 100,
+      factor: 2,
+      maxTimeout: 2_000,
+      retries: 100,
+      maxRetryTime: 60_000,
+    }
   );
 }
 

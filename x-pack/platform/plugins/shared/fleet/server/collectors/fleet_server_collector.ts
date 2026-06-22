@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
@@ -78,7 +79,7 @@ export const getFleetServerUsage = async (
       soClient,
       undefined,
       Array.from(policyIds)
-        .map((policyId) => `(policy_id:"${policyId}")`)
+        .map((policyId) => `(policy_id:"${escapeQuotes(policyId)}")`)
         .join(' or ')
     );
 

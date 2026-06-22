@@ -362,9 +362,11 @@ export class SecurityPlugin
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
+      serverlessProjectId: cloud?.serverless?.projectId,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       docLinks: core.docLinks,
+      i18n: core.i18n,
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -413,7 +415,10 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({ clusterClient, session });
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+    });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
     const customLogoutURL =
@@ -422,6 +427,13 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
+
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+
+    const kibanaServerResourceURL =
+      config.mcp?.oauth2?.metadata?.resource ?? core.http.basePath.publicBaseUrl ?? serverBaseUrl;
+
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
@@ -432,7 +444,11 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       session,
       uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam, this.elasticsearchUrl)
+        ? new UiamService(this.logger.get('uiam'), config.uiam, {
+            kibanaServerResourceURL,
+            elasticsearchUrl: this.elasticsearchUrl,
+            kibanaVersion: this.initializerContext.env.packageInfo.version,
+          })
         : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
@@ -451,7 +467,6 @@ export class SecurityPlugin
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,
       clusterClient,
-      basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });
 

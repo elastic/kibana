@@ -74,6 +74,12 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       code: '',
       filename: 'x-pack/solutions/observability/plugins/my_plugin/test/scout/common/constants.ts',
     },
+    // Valid: Scout fixture file with 'test' in the name (not a test file)
+    {
+      code: '',
+      filename:
+        'x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/fixtures/test_bed_fixture.ts',
+    },
     // Valid: Scout config file
     {
       code: '',
@@ -103,6 +109,24 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       code: '',
       filename:
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/global.setup.ts',
+    },
+    // Valid: global.teardown.ts in tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/global.teardown.ts',
+    },
+    // Valid: global.teardown.ts in parallel_tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel_tests/global.teardown.ts',
+    },
+    // Valid: global.teardown.ts in API tests
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/global.teardown.ts',
     },
   ],
 

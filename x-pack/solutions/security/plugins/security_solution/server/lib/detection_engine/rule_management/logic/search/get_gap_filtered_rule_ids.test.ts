@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
+import { gapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import {
   getRuleMock,
   getFindResultWithMultiHits,
@@ -28,11 +29,13 @@ describe('getGapFilteredRuleIds', () => {
     totalUnfilledDurationMs: 0,
     totalInProgressDurationMs: 0,
     totalFilledDurationMs: 0,
+    totalErrorDurationMs: 0,
     totalDurationMs: 0,
     rulesByGapFillStatus: {
       unfilled: 0,
       inProgress: 0,
       filled: 0,
+      error: 0,
     },
   };
 
@@ -373,6 +376,29 @@ describe('getGapFilteredRuleIds', () => {
           highestPriorityGapFillStatuses: [gapFillStatus.UNFILLED, gapFillStatus.IN_PROGRESS],
           start: defaultGapRange.start,
           end: defaultGapRange.end,
+        })
+      );
+    });
+
+    it('should pass excludedReasons to getRuleIdsWithGaps', async () => {
+      const excludedReasons = [gapReasonType.RULE_DISABLED];
+      rulesClient.getRuleIdsWithGaps.mockResolvedValue({
+        total: 0,
+        ruleIds: [],
+        summary: defaultSummary,
+      });
+
+      await getGapFilteredRuleIds({
+        rulesClient,
+        gapRange: defaultGapRange,
+        gapFillStatuses: defaultGapFillStatuses,
+        maxRuleIds: 10,
+        excludedReasons,
+      });
+
+      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excludedReasons,
         })
       );
     });

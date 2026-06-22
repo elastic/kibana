@@ -9,12 +9,13 @@
 
 /** The base API path for dashboard endpoints (no leading slash for apiClient). */
 export const DASHBOARD_API_PATH = 'api/dashboards';
+export const DASHBOARD_API_VERSION = '2023-10-31';
 
 /** Common headers for Dashboard API requests (internal API version 1) */
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
+  'elastic-api-version': DASHBOARD_API_VERSION,
 } as const;
 
 /** Test data paths */
@@ -22,7 +23,7 @@ export const KBN_ARCHIVES = {
   BASIC: 'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
   TAGS: 'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/tags.json',
   MANY_DASHBOARDS:
-    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-dashboards.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many_dashboards.json',
 } as const;
 
 /** Test dashboard ID used in fixtures - is a saved object loaded by the kbn_archiver */

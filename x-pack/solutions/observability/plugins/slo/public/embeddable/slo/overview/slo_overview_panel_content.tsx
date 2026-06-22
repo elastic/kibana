@@ -8,6 +8,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Filter } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import React from 'react';
@@ -29,10 +30,15 @@ export function hasSloGroupBy(groupBy: string[] | string | undefined): boolean {
 
 export interface GroupOverviewPanelProps {
   groupFilters: GroupFilters;
+  dashboardFilters?: Filter[];
   reloadSubject: Subject<boolean>;
 }
 
-export function GroupOverviewPanel({ groupFilters, reloadSubject }: GroupOverviewPanelProps) {
+export function GroupOverviewPanel({
+  groupFilters,
+  dashboardFilters = [],
+  reloadSubject,
+}: GroupOverviewPanelProps) {
   return (
     <div
       css={({ euiTheme }: UseEuiTheme) => css`
@@ -56,7 +62,7 @@ export function GroupOverviewPanel({ groupFilters, reloadSubject }: GroupOvervie
             groupBy={groupFilters.group_by}
             groups={groupFilters.groups ?? []}
             kqlQuery={groupFilters.kql_query ?? ''}
-            filters={toStoredFilters(groupFilters.filters) ?? []}
+            filters={[...(toStoredFilters(groupFilters.filters) ?? []), ...dashboardFilters]}
             reloadSubject={reloadSubject}
           />
         </EuiFlexItem>
@@ -78,6 +84,7 @@ export interface SloOverviewPanelContentProps {
   sloInstanceId: string | undefined;
   overviewMode: OverviewEmbeddableState['overview_mode'] | undefined;
   groupFilters: GroupFilters | undefined;
+  dashboardFilters?: Filter[];
   remoteName: string | undefined;
   reloadSubject: Subject<boolean>;
 }
@@ -87,6 +94,7 @@ export function SloOverviewPanelContent({
   sloInstanceId,
   overviewMode,
   groupFilters,
+  dashboardFilters,
   remoteName,
   reloadSubject,
 }: SloOverviewPanelContentProps) {
@@ -99,7 +107,13 @@ export function SloOverviewPanelContent({
     overviewMode === 'single' && sloInstanceId === ALL_VALUE && hasGroupBy && Boolean(sloId);
 
   if (overviewMode === 'groups') {
-    return <GroupOverviewPanel groupFilters={groupFilters!} reloadSubject={reloadSubject} />;
+    return (
+      <GroupOverviewPanel
+        groupFilters={groupFilters!}
+        dashboardFilters={dashboardFilters}
+        reloadSubject={reloadSubject}
+      />
+    );
   }
   if (showCardList && sloId) {
     return <SingleOverviewCardList sloId={sloId} />;

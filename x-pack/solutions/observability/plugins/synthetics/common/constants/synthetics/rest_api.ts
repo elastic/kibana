@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export interface IndexSizeEntry {
+  index: string;
+  sizeInBytes: number;
+}
+
 export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
@@ -25,6 +30,8 @@ export enum SYNTHETICS_API_URLS {
   SERVICE_ALLOWED = '/internal/synthetics/service/allowed',
   SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
+  SYNTHETICS_MONITORS_HEALTH = '/internal/synthetics/monitors/_health',
+  SYNTHETICS_MONITOR_HEALTH = '/internal/synthetics/monitors/{monitorId}/_health',
   PRIVATE_LOCATIONS_CLEANUP = `/internal/synthetics/private_locations/_cleanup`,
   SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
   SYNC_GLOBAL_PARAMS_SETTINGS = `/internal/synthetics/sync_global_params/_settings`,
@@ -49,6 +56,10 @@ export enum SYNTHETICS_API_URLS {
   TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
 
   CERTS = '/internal/synthetics/certs',
+  CERTS_FACETS = '/internal/synthetics/certs/facets',
+
+  ERROR_GROUPS = '/internal/synthetics/error_groups',
+  ERROR_STATS = '/internal/synthetics/error_stats',
 
   SUGGESTIONS = `/internal/synthetics/suggestions`,
   MAINTENANCE_WINDOWS = `/internal/synthetics/monitors/maintenance_windows`,
@@ -59,7 +70,13 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
+  MULTI_SPACE_SETTINGS = `/internal/synthetics/settings_multi_space`,
 
   INSPECT_STATUS_RULE = '/internal/synthetics/inspect_status_rule',
   INSPECT_TLS_RULE = '/internal/synthetics/inspect_tls_rule',
+
+  MONITOR_SUMMARY_STATS = '/internal/synthetics/monitor/summary_stats',
+
+  /** Internal support bundle: monitors (redacted), indices, Fleet policies, locations, param keys. */
+  SYNTHETICS_DIAGNOSTICS = '/internal/synthetics/diagnostics',
 }

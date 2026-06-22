@@ -14,21 +14,19 @@ import { SESSION_VIEW_TEST_ID } from './test_ids';
 import {
   SESSION_VIEW_NO_DATA_TEST_ID,
   SESSION_VIEW_UPSELL_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+} from '../../../../flyout_v2/document/main/components/test_ids';
 import { SessionView } from './session_view';
 import {
   ANCESTOR_INDEX,
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_START,
-} from '../../../../flyout_v2/document/constants/field_names';
-import { useSessionViewConfig } from '../../../../flyout_v2/document/hooks/use_session_view_config';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+} from '../../../../flyout_v2/document/main/constants/field_names';
+import { useSessionViewConfig } from '../../../../flyout_v2/document/tools/session_view/hooks/use_session_view_config';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../flyout_v2/document/hooks/use_session_view_config');
+jest.mock('../../../../flyout_v2/document/tools/session_view/hooks/use_session_view_config');
 jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../../sourcerer/containers');
 
 const NO_DATA_MESSAGE =
   'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.';
@@ -78,14 +76,6 @@ describe('<SessionView />', () => {
   beforeEach(() => {
     (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-    jest.mocked(useSourcererDataView).mockReturnValue({
-      browserFields: {},
-      dataViewId: '',
-      loading: false,
-      indicesExist: true,
-      selectedPatterns: ['index'],
-      sourcererDataView: {},
-    });
   });
   it('renders session view correctly', () => {
     const contextValue = {

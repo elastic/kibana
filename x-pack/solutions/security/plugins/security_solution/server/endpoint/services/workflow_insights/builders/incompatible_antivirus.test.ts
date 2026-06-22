@@ -12,10 +12,10 @@ import moment from 'moment';
 import type { EndpointMetadataService } from '../../metadata';
 import type { BuildWorkflowInsightParams } from '.';
 import {
-  Category,
-  SourceType,
-  TargetType,
-  ActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightActionType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../../mocks';
 import { groupEndpointIdsByOS } from '../helpers';
@@ -71,20 +71,20 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     expect.objectContaining({
       '@timestamp': expect.any(moment),
       message: 'Incompatible antiviruses detected',
-      category: Category.Endpoint,
+      category: WorkflowInsightCategory.enum.endpoint,
       type: 'incompatible_antivirus',
       source: {
-        type: SourceType.LlmConnector,
+        type: WorkflowInsightSourceType.enum['llm-connector'],
         id: 'connector-id-1',
         data_range_start: expect.any(moment),
         data_range_end: expect.any(moment),
       },
       target: {
-        type: TargetType.Endpoint,
+        type: WorkflowInsightTargetType.enum.endpoint,
         ids: ['endpoint-1'],
       },
       action: {
-        type: ActionType.Refreshed,
+        type: WorkflowInsightActionType.enum.refreshed,
         timestamp: expect.any(moment),
       },
       value: `/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${

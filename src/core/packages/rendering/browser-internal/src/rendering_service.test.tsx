@@ -50,6 +50,8 @@ jest.mock('@kbn/core-chrome-browser-components', () => ({
   AppMenuBar: () => <div>App menu!</div>,
   Sidebar: () => <div>Sidebar!</div>,
   useHasAppMenu: () => false,
+  useHasInlineAppHeader: () => false,
+  useHasChromeAppHeaderContent: () => false,
 }));
 
 const mockChromeVisible$ = new BehaviorSubject(false);
@@ -59,6 +61,7 @@ jest.mock('@kbn/core-chrome-browser-hooks', () => {
     useChromeStyle: () => 'classic',
     useIsChromeVisible: () => useObservable(mockChromeVisible$, mockChromeVisible$.getValue()),
     useSidebarWidth: () => 0,
+    useSideNavWidth: () => 0,
   };
 });
 jest.mock('@kbn/core-chrome-browser-hooks/internal', () => ({

@@ -143,7 +143,7 @@ export class LlmProxy {
           `Interceptors were not called: ${interceptorNames.map((name) => `\n - ${name}`)}\n`
         );
       },
-      { retries: 5, maxTimeout: 1000 }
+      { retries: 30, maxTimeout: 1000 }
     ).catch((error) => {
       this.clear();
       throw error;

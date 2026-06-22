@@ -48,10 +48,12 @@ interface AcknowledgedTask<TParams extends {} = {}, TPayload extends {} = {}>
     payload: TPayload;
   };
 }
-interface FailedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
+interface FailedTask<TParams extends {} = {}, TPayload extends {} = {}>
+  extends PersistedTaskBase<TParams> {
   status: TaskStatus.Failed;
   task: PersistedTaskBase<TParams>['task'] & {
     error: string;
+    payload?: TPayload;
   };
 }
 
@@ -60,7 +62,7 @@ export type PersistedTask<TParams extends {} = {}, TPayload extends {} = {}> =
   | InProgressTask<TParams>
   | CompletedTask<TParams, TPayload>
   | AcknowledgedTask<TParams, TPayload>
-  | FailedTask<TParams>
+  | FailedTask<TParams, TPayload>
   | BeingCanceledTask<TParams>
   | CanceledTask<TParams>;
 

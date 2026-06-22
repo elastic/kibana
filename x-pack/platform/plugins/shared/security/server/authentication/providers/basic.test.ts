@@ -14,6 +14,7 @@ import { mockAuthenticationProviderOptions } from './base.mock';
 import { BasicAuthenticationProvider } from './basic';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
+import { sessionMock } from '../../session_management/session.mock';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -124,7 +125,10 @@ describe('BasicAuthenticationProvider', () => {
 
     it('does not handle authentication if state exists, but authorization property is missing.', async () => {
       await expect(
-        provider.authenticate(httpServerMock.createKibanaRequest(), {})
+        provider.authenticate(
+          httpServerMock.createKibanaRequest(),
+          sessionMock.createValue({ state: {} })
+        )
       ).resolves.toEqual(AuthenticationResult.notHandled());
     });
 
@@ -144,9 +148,9 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader('user', 'password');
       const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
 
-      await expect(provider.authenticate(request, { authorization })).resolves.toEqual(
-        AuthenticationResult.notHandled()
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: { authorization } }))
+      ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe(authorization);
@@ -161,9 +165,9 @@ describe('BasicAuthenticationProvider', () => {
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, { authorization })).resolves.toEqual(
-        AuthenticationResult.succeeded(user, { authHeaders: { authorization } })
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: { authorization } }))
+      ).resolves.toEqual(AuthenticationResult.succeeded(user, { authHeaders: { authorization } }));
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
     });
@@ -181,9 +185,9 @@ describe('BasicAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, { authorization })).resolves.toEqual(
-        AuthenticationResult.failed(authenticationError)
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: { authorization } }))
+      ).resolves.toEqual(AuthenticationResult.failed(authenticationError));
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
@@ -192,16 +196,19 @@ describe('BasicAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('does not handle logout if state is not present', async () => {
+    it('does not handle logout if session is not present', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest())).resolves.toEqual(
         DeauthenticationResult.notHandled()
       );
     });
 
     it('redirects to the logged out URL.', async () => {
-      await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/some-logged-out-page')
-      );
+      await expect(
+        provider.logout(
+          httpServerMock.createKibanaRequest(),
+          sessionMock.createValue({ state: {} })
+        )
+      ).resolves.toEqual(DeauthenticationResult.redirectTo('/some-logged-out-page'));
 
       await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
         DeauthenticationResult.redirectTo('/some-logged-out-page')

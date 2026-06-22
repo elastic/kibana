@@ -67,8 +67,8 @@ import {
 const result = await mockFindDashboards({
   searchQuery: 'revenue',
   filters: {
-    tags: { include: ['tag-production'] },
-    favoritesOnly: false,
+    tag: { include: ['tag-production'] },
+    starred: undefined,
   },
   sort: { field: 'updatedAt', direction: 'desc' },
   page: { index: 0, size: 10 },
@@ -91,7 +91,7 @@ import {
 } from '@kbn/content-list-mock-data';
 
 // Use directly in tests or custom implementations
-console.log(MOCK_DASHBOARDS.length); // 8 dashboard items
+console.log(MOCK_DASHBOARDS.length); // 10 dashboard items
 console.log(MOCK_TAGS.length);       // 8 tag items
 ```
 
@@ -125,19 +125,19 @@ Mock user profile services for stories that display creator/updater information:
 
 ```typescript
 import {
-  mockUserProfileServices,
+  mockContentListUserProfilesServices,
   MOCK_USER_PROFILES,
   MOCK_USER_PROFILES_MAP,
 } from '@kbn/content-list-mock-data';
 
-// Use the mock services in your story context
-const { getUserProfile, bulkGetUserProfiles } = mockUserProfileServices;
+// Pass directly as `services.userProfiles` to the provider.
+<ContentListClientProvider
+  services={{ userProfiles: mockContentListUserProfilesServices }}
+  // ...
+/>
 
-// Fetch a single profile
-const profile = await getUserProfile('u_jane_doe');
-
-// Bulk fetch profiles
-const profiles = await bulkGetUserProfiles(['u_jane_doe', 'u_john_smith']);
+// Or use individual profiles for test assertions.
+const profile = MOCK_USER_PROFILES_MAP['u_jane_doe'];
 ```
 
 ## API
@@ -146,10 +146,10 @@ const profiles = await bulkGetUserProfiles(['u_jane_doe', 'u_john_smith']);
 
 | Export | Type | Description |
 |--------|------|-------------|
-| `MOCK_DASHBOARDS` | `DashboardMockItem[]` | 8 dashboard items with titles, descriptions, tags, and metadata. |
-| `MOCK_VISUALIZATIONS` | `VisualizationMockItem[]` | 8 visualization items spanning multiple viz types (Lens, Pie, Table, etc.). |
-| `MOCK_MAPS` | `MapMockItem[]` | 5 map items representing geographic visualizations. |
-| `MOCK_FILES` | `FileMockItem[]` | 6 file items demonstrating custom content type attributes. |
+| `MOCK_DASHBOARDS` | `DashboardMockItem[]` | 10 dashboard items, tuned to span the name-cell permutation matrix (short/long title × empty/short/long description × no/few/many tags) so stories exercise both narrow and wide-viewport layouts. |
+| `MOCK_VISUALIZATIONS` | `VisualizationMockItem[]` | 8 visualization items covering the name-cell permutation matrix (title × description × tag count) and a variety of `visType`s (Lens, Pie, Table, Area, Metric, Tag Cloud, Vega, Line+error). |
+| `MOCK_MAPS` | `MapMockItem[]` | 5 map items spanning the name-cell permutation matrix (title × description × tag count) within the smaller fixture size — covers sparse-favorited, rich, description-wrap, long-title-only, and most-sparse rows. |
+| `MOCK_FILES` | `FileMockItem[]` | 6 file items spanning the name-cell `title × description` matrix (the Files Management story does not render tags inline), with realistic short/long filenames and short/long/missing descriptions. |
 | `MOCK_TAGS` | `MockTag[]` | 8 tags including both user-created and managed (Fleet) tags. |
 | `MOCK_USERS` | `readonly string[]` | Array of mock user IDs used across content items. |
 | `MOCK_USER_PROFILES` | `UserProfile[]` | User profile objects corresponding to `MOCK_USERS`. |
@@ -170,7 +170,7 @@ const profiles = await bulkGetUserProfiles(['u_jane_doe', 'u_john_smith']);
 
 | Export | Description |
 |--------|-------------|
-| `mockUserProfileServices` | Object containing `getUserProfile` and `bulkGetUserProfiles` mock implementations. |
+| `mockContentListUserProfilesServices` | `ContentListUserProfilesServices` with `bulkResolve` backed by static mock data. |
 
 ### Types
 

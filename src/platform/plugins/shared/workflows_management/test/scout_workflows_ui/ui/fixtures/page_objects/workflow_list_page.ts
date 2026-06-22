@@ -108,4 +108,88 @@ export class WorkflowListPage {
   getSearchField(): Locator {
     return this.page.testSubj.locator('workflowSearchField');
   }
+
+  // Import / Export actions
+
+  /** Clicks the import workflows button in the toolbar. */
+  async clickImportButton() {
+    await this.page.testSubj.click('importWorkflowsButton');
+  }
+
+  /** Returns the import flyout locator. */
+  getImportFlyout(): Locator {
+    return this.page.testSubj.locator('importWorkflowsFlyout');
+  }
+
+  /** Sets a file on the import file picker input using an in-memory buffer. */
+  async uploadFile(file: { name: string; mimeType: string; buffer: Buffer }) {
+    const input = this.page.testSubj.locator('import-workflows-file-picker');
+    await input.setInputFiles(file);
+  }
+
+  /** Returns the conflict callout locator. */
+  getConflictCallout(): Locator {
+    return this.page.testSubj.locator('import-workflows-conflicts');
+  }
+
+  /** Selects a conflict resolution option from the footer dropdown. */
+  async selectConflictResolution(option: 'overwrite' | 'generateNewIds') {
+    const select = this.page.testSubj.locator('import-workflows-conflict-resolution');
+    await select.selectOption(option);
+  }
+
+  /** Clicks the import confirmation button. */
+  async confirmImport() {
+    await this.page.testSubj.click('import-workflows-confirm');
+  }
+
+  /** Clicks the import cancel button. */
+  async cancelImport() {
+    await this.page.testSubj.click('import-workflows-cancel');
+  }
+
+  /** Clicks the Close button shown after import completes. */
+  async closeImport() {
+    await this.page.testSubj.click('import-workflows-close');
+  }
+
+  /** Returns the Close button locator shown after import completes. */
+  getImportCloseButton(): Locator {
+    return this.page.testSubj.locator('import-workflows-close');
+  }
+
+  /** Returns the import result icon locator for a given workflow ID. */
+  getImportResultIcon(workflowId: string, status: 'success' | 'failed'): Locator {
+    return this.page.testSubj.locator(`import-preview-${status}-${workflowId}`);
+  }
+
+  /** Performs bulk export on the selected workflows. */
+  async performBulkExport(workflowNames: string[]) {
+    await this.selectWorkflows(workflowNames);
+    await this.page.testSubj.waitForSelector('workflows-table-bulk-actions-button', {
+      state: 'visible',
+    });
+    await this.page.testSubj.click('workflows-table-bulk-actions-button');
+    await this.page.testSubj.click('workflows-bulk-action-export');
+  }
+
+  /** Returns the export references modal locator. */
+  getExportReferencesModal(): Locator {
+    return this.page.testSubj.locator('export-references-modal');
+  }
+
+  /** Clicks the Ignore button in the export references modal. */
+  async ignoreExportReferences() {
+    await this.page.testSubj.click('export-references-ignore');
+  }
+
+  /** Clicks the Add referenced button in the export references modal. */
+  async addDirectExportReferences() {
+    await this.page.testSubj.click('export-references-add-direct');
+  }
+
+  /** Clicks the Add all referenced button in the export references modal. */
+  async addAllExportReferences() {
+    await this.page.testSubj.click('export-references-add-all');
+  }
 }

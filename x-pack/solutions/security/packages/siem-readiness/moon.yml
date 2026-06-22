@@ -16,12 +16,9 @@ project:
   channel: ''
   owner: '@elastic/contextual-security-apps'
   sourceRoot: x-pack/solutions/security/packages/siem-readiness
-dependsOn:
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/core'
-  - '@kbn/react-query'
+dependsOn: []
 tags:
-  - shared-browser
+  - shared-common
   - package
   - prod
   - group-security
@@ -32,26 +29,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -46,9 +46,11 @@ export const EditorMenu: FC<Props> = ({
           trigger: { id: ADD_CANVAS_ELEMENT_TRIGGER },
         };
         const actionName = item.getDisplayName(context);
+        const icon =
+          (item.id === 'addVegaPanelAction' ? 'code' : item.getIconType(context)) ?? 'empty';
         return {
           name: actionName,
-          icon: item.getIconType(context),
+          icon: typeof icon === 'string' ? icon : 'empty',
           onClick: createNewEmbeddableFromAction(item, context, closePopover),
           'data-test-subj': `create-action-${actionName}`,
           toolTipContent: item?.getDisplayNameTooltip?.(context),

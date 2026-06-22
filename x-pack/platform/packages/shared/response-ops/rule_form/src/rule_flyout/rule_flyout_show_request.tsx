@@ -42,7 +42,7 @@ export const RuleFlyoutShowRequest = ({ onClose }: RuleFlyoutShowRequestProps) =
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={onClose}
               aria-label={RULE_FLYOUT_HEADER_BACK_TEXT}
               color="text"
@@ -67,7 +67,7 @@ export const RuleFlyoutShowRequest = ({ onClose }: RuleFlyoutShowRequestProps) =
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={onClose}
           data-test-subj="ruleFlyoutShowRequestBackButton"
         >

@@ -25,9 +25,9 @@ import {
   DEFEND_INSIGHTS_STORAGE_KEY,
   ConnectorSelectorInline,
   DEFAULT_ASSISTANT_NAMESPACE,
-  useLoadConnectors,
   AssistantSpaceIdProvider,
 } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
@@ -62,6 +62,7 @@ export const WorkflowInsightsScanSection = ({
   const { http, settings, docLinks } = useKibana().services;
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    featureId: 'defend_insights',
     settings,
   });
   const { canWriteWorkflowInsights } = useUserPrivileges().endpointPrivileges;

@@ -69,10 +69,100 @@ const sloInfoShownEventType: TelemetryEvent = {
   schema: {},
 };
 
+const serviceMapDagreLayoutFallbackEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SERVICE_MAP_DAGRE_LAYOUT_FALLBACK,
+  schema: {
+    error_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error constructor name when Dagre.layout throws',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Truncated Error.message from Dagre (no APM graph payload)',
+      },
+    },
+    stack_head: {
+      type: 'text',
+      _meta: {
+        description: 'First stack frames when available; helps map minified chunks to Dagre',
+      },
+    },
+  },
+};
+
+const serviceMapAddedToDashboardEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD,
+  schema: {
+    new_dashboard: {
+      type: 'boolean',
+      _meta: { description: 'True if a new dashboard was created vs adding to existing' },
+    },
+    has_service_name: {
+      type: 'boolean',
+      _meta: { description: 'True if a service.name filter was attached' },
+    },
+    has_kuery: {
+      type: 'boolean',
+      _meta: { description: 'True if any KQL filter (URL/Controls/pills) was attached' },
+    },
+    view_filter_count: {
+      type: 'integer',
+      _meta: { description: 'Number of view-filter chips (alerts/SLO/connection/anomaly)' },
+    },
+    sync_with_dashboard_filters: {
+      type: 'boolean',
+      _meta: { description: 'True if the panel follows the dashboard global filters' },
+    },
+  },
+};
+
+const metricsCalloutDateRangeSelectedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED,
+  schema: {
+    calloutType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Whether the mixed metrics callout is for overlapping or non-overlapping data',
+      },
+    },
+    selectedInstrumentationType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The instrumentation type selected by the user: classic_apm or otel_native',
+      },
+    },
+  },
+};
+
+const metricsCalloutLoadedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.METRICS_CALLOUT_LOADED,
+  schema: {
+    calloutType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Whether the mixed metrics callout is for overlapping or non-overlapping data',
+      },
+    },
+    shownInstrumentationType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The instrumentation type shown by the callout: classic_apm or otel_native',
+      },
+    },
+  },
+};
+
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   sloOverviewFlyoutViewedEventType,
   sloOverviewFlyoutSearchQueriedEventType,
   sloOverviewFlyoutStatusFilteredEventType,
   sloInfoShownEventType,
+  serviceMapDagreLayoutFallbackEventType,
+  serviceMapAddedToDashboardEventType,
+  metricsCalloutDateRangeSelectedEventType,
+  metricsCalloutLoadedEventType,
 ];

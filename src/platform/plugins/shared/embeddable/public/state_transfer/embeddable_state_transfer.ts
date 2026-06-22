@@ -10,6 +10,7 @@
 import { cloneDeep } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import { map, Subject } from 'rxjs';
 import type { EmbeddableEditorState, EmbeddablePackageState } from './types';
 import {
   isEmbeddableEditorState,
@@ -21,6 +22,15 @@ import {
 export const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = 'EMBEDDABLE_STATE_TRANSFER';
 
 /**
+ * The shape of state stored in session storage under {@link EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY}.
+ * Top-level keys are state category keys (e.g. 'embeddable_editor_state', 'embeddable_package_state').
+ * Each category maps appIds to arrays of state objects validated at read time by type guards.
+ */
+interface EmbeddableTransferStorageState {
+  [stateKey: string]: Record<string, unknown[] | undefined> | undefined;
+}
+
+/**
  * A wrapper around the session storage which provides strongly typed helper methods
  * for common incoming and outgoing states used by the embeddable infrastructure.
  *
@@ -30,6 +40,7 @@ export class EmbeddableStateTransfer {
   public isTransferInProgress: boolean;
   private storage: Storage;
   private appList: ReadonlyMap<string, PublicAppInfo> | undefined;
+  private incomingPackagesState$: Subject<EmbeddableTransferStorageState>;
 
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
@@ -43,6 +54,7 @@ export class EmbeddableStateTransfer {
     currentAppId$.subscribe(() => {
       this.isTransferInProgress = false;
     });
+    this.incomingPackagesState$ = new Subject<EmbeddableTransferStorageState>();
   }
 
   /**
@@ -50,6 +62,12 @@ export class EmbeddableStateTransfer {
    * @param appId - The id of the app to fetch the title for
    */
   public getAppNameFromId = (appId: string): string | undefined => this.appList?.get(appId)?.title;
+
+  private getStorageState(): EmbeddableTransferStorageState | undefined {
+    return this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY) as
+      | EmbeddableTransferStorageState
+      | undefined;
+  }
 
   /**
    * Fetches an {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id
@@ -84,7 +102,7 @@ export class EmbeddableStateTransfer {
    * @param removeAfterFetch - Whether to remove the package state after fetch to prevent duplicates.
    */
   public clearEditorState(appId?: string) {
-    const currentState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
+    const currentState = this.getStorageState();
     if (currentState) {
       if (appId) {
         delete currentState[EMBEDDABLE_EDITOR_STATE_KEY]?.[appId];
@@ -154,7 +172,7 @@ export class EmbeddableStateTransfer {
   }
 
   private removeKeysFromStorage(
-    state: Record<string, any>,
+    state: EmbeddableTransferStorageState,
     options?: {
       keysToRemoveAfterFetch?: string[];
     }
@@ -184,9 +202,10 @@ export class EmbeddableStateTransfer {
     key: string,
     options?: {
       keysToRemoveAfterFetch?: string[];
-    }
+    },
+    stateObject?: EmbeddableTransferStorageState
   ): IncomingStateType[] | undefined {
-    const embeddableState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
+    const embeddableState = stateObject ?? this.getStorageState();
     if (!embeddableState) {
       return undefined;
     }
@@ -209,7 +228,7 @@ export class EmbeddableStateTransfer {
     return undefined;
   }
 
-  private async navigateToWithState<OutgoingStateType = unknown>(
+  private async navigateToWithState<OutgoingStateType extends unknown[] = unknown[]>(
     appId: string,
     key: string,
     options?: {
@@ -219,9 +238,10 @@ export class EmbeddableStateTransfer {
       skipAppLeave?: boolean;
     }
   ): Promise<void> {
-    const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
-    const stateObject = {
-      ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
+    const stored = this.getStorageState();
+    const existingAppState = stored?.[key] || {};
+    const stateObject: EmbeddableTransferStorageState = {
+      ...stored,
       [key]: {
         ...existingAppState,
         [appId]: options?.state,
@@ -233,5 +253,31 @@ export class EmbeddableStateTransfer {
       openInNewTab: options?.openInNewTab,
       skipAppLeave: options?.skipAppLeave,
     });
+    /**
+     * If navigateToApp ends up attempting to transfer state to the exact same page that's currently open, it will end up
+     * being a no-op. For this case, emit the incoming packages to incomingPackagesState$.
+     * If navigateToApp successfully redirects, downstream subscribers will get unsubscribed before receiving the state transfer. It will only
+     * affect them in cases where navigateToApp doesn't end up doing anything.
+     * Skip emission when opening in a new tab — the state is meant for the new tab, not the current page.
+     */
+    if (!options?.openInNewTab) {
+      this.incomingPackagesState$.next(stateObject);
+    }
+  }
+
+  public onTransferEmbeddablePackage$(appId: string, removeAfterFetch?: boolean) {
+    return this.incomingPackagesState$.pipe(
+      map((stateObject) => {
+        return this.getIncomingPackagesState<EmbeddablePackageState>(
+          isEmbeddablePackageState,
+          appId,
+          EMBEDDABLE_PACKAGE_STATE_KEY,
+          {
+            keysToRemoveAfterFetch: removeAfterFetch ? [EMBEDDABLE_PACKAGE_STATE_KEY] : undefined,
+          },
+          stateObject
+        );
+      })
+    );
   }
 }

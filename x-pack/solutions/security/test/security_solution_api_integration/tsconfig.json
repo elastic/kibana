@@ -66,6 +66,8 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/detections-response-ftr-services",
     "@kbn/connector-schemas",
-    "@kbn/spaces-utils",
+    "@kbn/security-solution-features",
+    "@kbn/core-spaces-common",
+    "@kbn/entity-store",
   ]
 }

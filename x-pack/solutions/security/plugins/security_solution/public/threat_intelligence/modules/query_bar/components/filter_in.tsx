@@ -18,7 +18,7 @@ import { FilterIn } from '../utils/filter';
 import { type Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { FILTER_FOR_TITLE, FILTER_IN_ANNOUNCEMENT } from './translations';
 
-const ICON_TYPE = 'plusInCircle';
+const ICON_TYPE = 'plusCircle';
 
 export interface FilterInProps {
   /**
@@ -132,8 +132,7 @@ export const FilterInContextMenu: FC<FilterInContextMenuProps> = ({
   return (
     <EuiContextMenuItem
       key="filterIn"
-      icon="plusInCircle"
-      size="s"
+      icon="plusCircle"
       onClick={() => {
         filterFn();
         onAnnounce(FILTER_IN_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));

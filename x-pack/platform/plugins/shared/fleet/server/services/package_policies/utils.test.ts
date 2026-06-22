@@ -13,8 +13,11 @@ import { appContextService } from '../app_context';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants';
+
 import {
   canDeployCustomPackageAsAgentlessOrThrow,
+  canUseOutputForIntegration,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './utils';
@@ -149,7 +152,7 @@ describe('Package Policy Utils', () => {
           },
           {
             type: 'content',
-          }
+          } as any
         )
       ).rejects.toThrowError('Cannot create policy for content only packages');
     });
@@ -168,10 +171,241 @@ describe('Package Policy Utils', () => {
           },
           {
             type: 'integration',
-          }
+          } as any
         )
       ).resolves.not.toThrow();
     });
+
+    it('should throw if non-dynamic package has a stream with undefined data_stream.type', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const policyWithUndefinedType = {
+        ...testPolicy,
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [{ id: 'stream-1', enabled: true, data_stream: { dataset: 'test' } }],
+          },
+        ],
+      };
+      await expect(
+        preflightCheckPackagePolicy(
+          soClient,
+          policyWithUndefinedType as any,
+          {
+            name: 'non-dynamic-pkg',
+            type: 'integration',
+            policy_templates: [],
+          } as any
+        )
+      ).rejects.toThrowError(
+        '[data_stream.type]: required for stream in package "non-dynamic-pkg"'
+      );
+    });
+
+    it('should not throw if dynamic_signal_types package has a stream with undefined data_stream.type', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const policyWithUndefinedType = {
+        ...testPolicy,
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [{ id: 'stream-1', enabled: true, data_stream: { dataset: 'otel.dataset' } }],
+          },
+        ],
+      };
+      await expect(
+        preflightCheckPackagePolicy(
+          soClient,
+          policyWithUndefinedType as any,
+          {
+            name: 'sql-server-input-otel',
+            type: 'input',
+            policy_templates: [
+              {
+                name: 'otel',
+                input: 'otelcol',
+                dynamic_signal_types: true,
+                title: 'OTel',
+                description: 'OTel input',
+                template_path: 'some/path.hbs',
+              },
+            ],
+          } as any
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('should not throw for a composable integration with a dynamic OTel nested input and undefined data_stream.type', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const policyWithMixedInputs = {
+        ...testPolicy,
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            policy_template: 'composable-otel',
+            // undefined type is allowed for this input
+            streams: [{ id: 'stream-otel', enabled: true, data_stream: { dataset: 'otel.ds' } }],
+          },
+          {
+            type: 'logfile',
+            enabled: true,
+            policy_template: 'composable-otel',
+            streams: [
+              { id: 'stream-log', enabled: true, data_stream: { type: 'logs', dataset: 'my.ds' } },
+            ],
+          },
+        ],
+      };
+      await expect(
+        preflightCheckPackagePolicy(
+          soClient,
+          policyWithMixedInputs as any,
+          {
+            name: 'composable-integration',
+            type: 'integration',
+            policy_templates: [
+              {
+                name: 'composable-otel',
+                title: 'Composable OTel',
+                description: 'desc',
+                inputs: [
+                  {
+                    type: 'otelcol',
+                    title: 'OTel',
+                    description: 'OTel',
+                    dynamic_signal_types: true,
+                  },
+                  { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+                ],
+              },
+            ],
+          } as any
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw for a composable integration when a non-dynamic input has undefined data_stream.type', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const policyWithBadLogfileInput = {
+        ...testPolicy,
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            policy_template: 'composable-otel',
+            // type is missing — not allowed for logfile
+            streams: [{ id: 'stream-log', enabled: true, data_stream: { dataset: 'my.ds' } }],
+          },
+        ],
+      };
+      await expect(
+        preflightCheckPackagePolicy(
+          soClient,
+          policyWithBadLogfileInput as any,
+          {
+            name: 'composable-integration',
+            type: 'integration',
+            policy_templates: [
+              {
+                name: 'composable-otel',
+                title: 'Composable OTel',
+                description: 'desc',
+                inputs: [
+                  {
+                    type: 'otelcol',
+                    title: 'OTel',
+                    description: 'OTel',
+                    dynamic_signal_types: true,
+                  },
+                  { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+                ],
+              },
+            ],
+          } as any
+        )
+      ).rejects.toThrowError(
+        '[data_stream.type]: required for stream in package "composable-integration"'
+      );
+    });
+  });
+});
+
+describe('canUseOutputForIntegration', () => {
+  const soClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should reject a Logstash output_id on a package policy with an OTel input', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'logstash-output',
+      package: { name: 'host_metrics_otel', version: '1.0.0', title: 'Host Metrics OTel' },
+      supports_agentless: false,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(false);
+    expect(result.errorMessage).toMatch(/not usable with package/);
+  });
+
+  it('should reject a Kafka output_id on a package policy with an OTel input', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'kafka-output', type: 'kafka' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'kafka-output',
+      package: { name: 'host_metrics_otel', version: '1.0.0', title: 'Host Metrics OTel' },
+      supports_agentless: false,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(false);
+    expect(result.errorMessage).toMatch(/not usable with package/);
+  });
+
+  it('should accept an Elasticsearch output_id on a package policy with an OTel input', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'es-output', type: 'elasticsearch' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'es-output',
+      package: { name: 'host_metrics_otel', version: '1.0.0', title: 'Host Metrics OTel' },
+      supports_agentless: false,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(true);
+    expect(result.errorMessage).toBeNull();
+  });
+
+  it('should still permit Logstash output_id on a non-OTel package policy (regression guard)', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'logstash-output',
+      package: { name: 'nginx', version: '1.0.0', title: 'Nginx' },
+      supports_agentless: false,
+      inputs: [{ type: 'log', enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(true);
+    expect(result.errorMessage).toBeNull();
   });
 });
 

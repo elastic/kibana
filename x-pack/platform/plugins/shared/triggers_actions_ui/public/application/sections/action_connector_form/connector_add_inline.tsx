@@ -9,20 +9,21 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiAccordion,
+  EuiBetaBadge,
   EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiCallOut,
-  EuiText,
   EuiFormRow,
-  EuiButtonEmpty,
+  EuiIcon,
   EuiIconTip,
-  EuiBetaBadge,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
@@ -157,7 +158,7 @@ export const AddConnectorInline = ({
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+              <EuiIcon type={actionTypeRegistered.iconClass} size="m" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -199,18 +200,28 @@ export const AddConnectorInline = ({
           </EuiFlexGroup>
         }
         extraAction={
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            color="danger"
-            className="actAccordionActionForm__extraAction"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.triggersActionsUI.sections.connectorAddInline.accordion.deleteIconAriaLabel',
               {
                 defaultMessage: 'Delete',
               }
             )}
-            onClick={onDeleteConnector}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="minusCircle"
+              color="danger"
+              className="actAccordionActionForm__extraAction"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorAddInline.accordion.deleteIconAriaLabel',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
+              onClick={onDeleteConnector}
+            />
+          </EuiToolTip>
         }
         paddingSize="l"
       >

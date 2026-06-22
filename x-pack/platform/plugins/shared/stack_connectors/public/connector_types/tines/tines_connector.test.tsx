@@ -6,12 +6,19 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import { act, render } from '@testing-library/react';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/tines/constants';
 import TinesConnectorFields from './tines_connector';
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 const url = 'https://example.com';
 const email = 'some.email@test.com';
@@ -23,11 +30,12 @@ const actionConnector = {
   config: { url },
   secrets: { email, token },
   isDeprecated: false,
+  id: 'tines',
 };
 
 describe('TinesConnectorFields renders', () => {
   it('should render all fields', async () => {
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <TinesConnectorFields
           readOnly={false}
@@ -37,14 +45,12 @@ describe('TinesConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    await waitForComponentToUpdate();
-
-    expect(wrapper.find('input[data-test-subj="config.url-input"]').exists()).toBe(true);
-    expect(wrapper.find('input[data-test-subj="config.url-input"]').prop('value')).toBe(url);
-    expect(wrapper.find('input[data-test-subj="secrets.email-input"]').exists()).toBe(true);
-    expect(wrapper.find('input[data-test-subj="secrets.email-input"]').prop('value')).toBe(email);
-    expect(wrapper.find('input[data-test-subj="secrets.token-input"]').exists()).toBe(true);
-    expect(wrapper.find('input[data-test-subj="secrets.token-input"]').prop('value')).toBe(token);
+    expect(screen.getByTestId('config.url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('config.url-input')).toHaveValue(url);
+    expect(screen.getByTestId('secrets.email-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.email-input')).toHaveValue(email);
+    expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.token-input')).toHaveValue(token);
   });
 
   describe('Validation', () => {
@@ -55,7 +61,7 @@ describe('TinesConnectorFields renders', () => {
     });
 
     it('should succeed validation when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -65,13 +71,13 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: actionConnector,
-        isValid: true,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: actionConnector,
+          isValid: true,
+        });
       });
     });
 
@@ -81,7 +87,7 @@ describe('TinesConnectorFields renders', () => {
         secrets: {},
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -91,13 +97,13 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
@@ -107,7 +113,7 @@ describe('TinesConnectorFields renders', () => {
         config: { url: '' },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -117,13 +123,13 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
@@ -133,7 +139,7 @@ describe('TinesConnectorFields renders', () => {
         config: { url: 'not a url' },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -143,13 +149,13 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
   });

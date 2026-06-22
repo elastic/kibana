@@ -54,7 +54,9 @@ export namespace QueryStream {
   }
 
   export interface Definition extends BaseStream.Definition {
+    type: 'query';
     query: QueryWithEsql;
+    field_descriptions?: Record<string, string>;
   }
 
   export type Source = BaseStream.Source<QueryStream.Definition>;
@@ -71,18 +73,30 @@ export namespace QueryStream {
   }
 }
 
-const queryStreamDefinitionSchema = baseStreamDefinitionSchema.extend({
-  query: QueryWithEsql.right,
-});
+const queryStreamDefinitionSchema = baseStreamDefinitionSchema
+  .extend({
+    type: z.literal('query'),
+    query: QueryWithEsql.right,
+    field_descriptions: z.record(z.string(), z.string()).optional(),
+  })
+  .meta({ id: 'QueryStreamDefinition' });
 
-const queryStreamGetResponseSchema = baseStreamGetResponseSchema.extend({
-  stream: queryStreamDefinitionSchema,
-  inherited_fields: inheritedFieldDefinitionSchema,
-});
+const queryStreamGetResponseSchema = baseStreamGetResponseSchema
+  .extend({
+    stream: queryStreamDefinitionSchema,
+    inherited_fields: inheritedFieldDefinitionSchema,
+  })
+  .meta({ id: 'QueryStreamGetResponse' });
 
-const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema.extend({
-  stream: baseStreamUpsertDefinitionSchema.extend({ query: QueryWithEsql.right }),
-});
+const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema
+  .extend({
+    stream: baseStreamUpsertDefinitionSchema.extend({
+      type: z.literal('query'),
+      query: QueryWithEsql.right,
+      field_descriptions: z.record(z.string(), z.string()).optional(),
+    }),
+  })
+  .meta({ id: 'QueryStreamUpsertRequest' });
 
 export const QueryStream: {
   Definition: Validation<BaseStream.Model['Definition'], QueryStream.Definition>;
@@ -112,3 +126,9 @@ export const QueryStream: {
 QueryStream.Definition.is = (
   stream: BaseStream.Model['Definition']
 ): stream is QueryStream.Definition => 'query' in stream;
+
+// Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
+QueryStream.GetResponse.is = (
+  response: BaseStream.Model['GetResponse']
+): response is QueryStream.GetResponse =>
+  'type' in response.stream && response.stream.type === 'query';

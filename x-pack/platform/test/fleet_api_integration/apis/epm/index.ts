@@ -54,10 +54,14 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./routing_rules'));
     loadTestFile(require.resolve('./install_runtime_field'));
     loadTestFile(require.resolve('./get_templates_inputs'));
+    loadTestFile(require.resolve('./get_templates_inputs_otel'));
+    loadTestFile(require.resolve('./template_paths_compilation'));
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./custom_integrations'));
     loadTestFile(require.resolve('./rollback'));
+    loadTestFile(require.resolve('./rollback_composable'));
     loadTestFile(require.resolve('./knowledge_base'));
     loadTestFile(require.resolve('./review_upgrade'));
+    loadTestFile(require.resolve('./install_custom_dataset_templates'));
   });
 }

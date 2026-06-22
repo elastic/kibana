@@ -12,12 +12,13 @@ import type { BuiltInStepType, ConnectorTypeInfo, WorkflowOutput } from '@kbn/wo
 import {
   DataSetStepSchema,
   ForEachStepSchema,
-  getBuiltInStepStability,
   IfStepSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
+  SwitchStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WhileStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -79,9 +80,10 @@ export function getConnectorTypeSuggestions(
     // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
     const isDynamicConnector =
       !connectorType.startsWith('elasticsearch.') && !connectorType.startsWith('kibana.');
+    const shortName = connector?.summary || connector?.description;
     const displayName =
-      isDynamicConnector && connector?.description
-        ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
+      isDynamicConnector && shortName
+        ? shortName.replace(' connector', '').replace(' (no instances configured)', '')
         : connectorType;
 
     return {
@@ -95,7 +97,7 @@ export function getConnectorTypeSuggestions(
         ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
         : connectorType.startsWith('kibana.')
         ? `Kibana API - ${connectorType.replace('kibana.', '')}`
-        : connector?.description || `Workflow connector - ${connectorType}`,
+        : connector?.description || connector?.summary || `Workflow connector - ${connectorType}`,
       filterText: connectorType,
       sortText: `!${connectorType}`, // Priority prefix to sort before default suggestions
       preselect: false,
@@ -136,12 +138,6 @@ export function getConnectorTypeSuggestions(
         endColumn: Math.max(range.endColumn, 1000),
       };
 
-      const stability = getBuiltInStepStability(stepType.type);
-      const detail =
-        stability === 'tech_preview'
-          ? 'Built-in workflow step (Tech Preview)'
-          : 'Built-in workflow step';
-
       suggestions.push({
         label: stepType.type,
         kind: stepType.icon,
@@ -151,7 +147,7 @@ export function getConnectorTypeSuggestions(
         documentation: stepType.description,
         filterText: stepType.type,
         sortText: `!${stepType.type}`,
-        detail,
+        detail: 'Built-in workflow step',
         preselect: false,
       });
     });
@@ -244,6 +240,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Keyword,
     },
     {
+      schema: SwitchStepSchema,
+      description:
+        'Multi-way branching. Evaluates expression and runs the steps of the first matching case value',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+    },
+    {
       schema: LoopBreakStepSchema,
       description: 'Exit the enclosing loop immediately',
       icon: monaco.languages.CompletionItemKind.Keyword,
@@ -274,6 +276,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
+    },
+    {
+      schema: WaitForInputStepSchema,
+      description: 'Pause execution until external input is provided (human-in-the-loop)',
+      icon: monaco.languages.CompletionItemKind.Event,
     },
     {
       schema: WorkflowExecuteStepSchema,

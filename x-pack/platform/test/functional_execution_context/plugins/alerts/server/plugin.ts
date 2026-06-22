@@ -101,15 +101,16 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       {
         path: '/emit_log_with_trace_id',
         security: {
+          authc: {
+            enabled: false,
+            reason: 'This route is part of a test plugin and does not require authentication.',
+          },
           authz: {
             enabled: false,
             reason: 'This route is opted out from authorization',
           },
         },
         validate: false,
-        options: {
-          authRequired: false,
-        },
       },
       async (ctx, req, res) => {
         const coreCtx = await ctx.core;

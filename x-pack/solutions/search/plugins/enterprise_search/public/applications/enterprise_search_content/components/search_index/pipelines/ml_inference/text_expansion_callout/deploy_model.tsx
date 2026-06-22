@@ -91,7 +91,7 @@ export const DeployModel = ({
                     color="primary"
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-deployModel`}
                     disabled={isCreateButtonDisabled}
-                    iconType="launch"
+                    iconType="rocket"
                     onClick={() => createTextExpansionModel()}
                   >
                     {i18n.translate(

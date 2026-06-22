@@ -11,6 +11,7 @@ import { otelEquivalentLookupMap } from './logs_layer';
 
 describe('generateLayer', () => {
   const definition: Streams.WiredStream.Definition = {
+    type: 'wired',
     name: 'logs.abc',
     description: '',
     updated_at: new Date().toISOString(),
@@ -184,6 +185,7 @@ describe('generateLayer', () => {
     // which allows Elasticsearch to handle field patterns like "client" + "client.ip"
     // and automatically creates aliases.
     const definitionWithHierarchicalFields: Streams.WiredStream.Definition = {
+      type: 'wired',
       name: 'logs.test',
       description: '',
       updated_at: new Date().toISOString(),
@@ -231,6 +233,7 @@ describe('generateLayer', () => {
     const fullOtelField = `attributes.${otelField}`;
 
     const definitionWithOtelField: Streams.WiredStream.Definition = {
+      type: 'wired',
       name: 'logs.otel',
       description: '',
       updated_at: new Date().toISOString(),
@@ -261,6 +264,7 @@ describe('generateLayer', () => {
 
   it('should skip doc-only fields (no type) and not include them in mappings', () => {
     const definitionWithDocOnlyField: Streams.WiredStream.Definition = {
+      type: 'wired',
       name: 'logs.test',
       description: '',
       updated_at: new Date().toISOString(),
@@ -300,6 +304,7 @@ describe('generateLayer', () => {
 
   it('should not include description in ES mappings', () => {
     const definitionWithDescription: Streams.WiredStream.Definition = {
+      type: 'wired',
       name: 'logs.test',
       description: '',
       updated_at: new Date().toISOString(),
@@ -338,6 +343,7 @@ describe('generateLayer', () => {
       otelStreams.forEach((streamName) => {
         // Create definition without explicit message field to test alias behavior
         const rootDefinition: Streams.WiredStream.Definition = {
+          type: 'wired',
           name: streamName,
           description: '',
           updated_at: new Date().toISOString(),

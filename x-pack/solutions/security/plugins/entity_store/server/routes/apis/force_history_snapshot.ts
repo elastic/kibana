@@ -6,16 +6,18 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 
 export function registerForceHistorySnapshot(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.FORCE_HISTORY_SNAPSHOT,
+      path: ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
       access: 'internal',
+      summary: 'Force history snapshot',
+      description: 'Trigger an immediate history snapshot of all entity engines.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

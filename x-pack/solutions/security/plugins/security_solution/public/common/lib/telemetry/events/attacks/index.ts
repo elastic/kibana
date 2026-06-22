@@ -152,6 +152,36 @@ export const attacksScheduleFlyoutOpenedEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksScheduleDetailsFlyoutOpenedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.ScheduleDetailsFlyoutOpened,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: { description: 'The source of the schedule details flyout open', optional: false },
+    },
+  },
+};
+
+export const attacksSettingsFlyoutOpenedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.SettingsFlyoutOpened,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: { description: 'The source of the settings flyout open', optional: false },
+    },
+  },
+};
+
+export const attacksGenerateClickedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.GenerateClicked,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: { description: 'The source of the generate button click', optional: false },
+    },
+  },
+};
+
 export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = {
   eventType: AttacksEventTypes.FeaturePromotionCalloutAction,
   schema: {
@@ -161,6 +191,25 @@ export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = 
         description: 'The action taken on the promotion callout (view_attacks/hide)',
         optional: false,
       },
+    },
+  },
+};
+
+export const attacksWorkflowRunTriggeredEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.WorkflowRunTriggered,
+  schema: actionSourceSchema,
+};
+
+export const attacksTypeFilterChangedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.TypeFilterChanged,
+  schema: {
+    types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'A selected type', optional: false },
+      },
+      _meta: { description: 'The selected types in the type filter', optional: false },
     },
   },
 };
@@ -178,5 +227,10 @@ export const attacksTelemetryEvents = [
   attacksDetailsFlyoutOpenedEvent,
   attacksExpandedViewTabClickedEvent,
   attacksScheduleFlyoutOpenedEvent,
+  attacksSettingsFlyoutOpenedEvent,
+  attacksGenerateClickedEvent,
+  attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
+  attacksWorkflowRunTriggeredEvent,
+  attacksTypeFilterChangedEvent,
 ];

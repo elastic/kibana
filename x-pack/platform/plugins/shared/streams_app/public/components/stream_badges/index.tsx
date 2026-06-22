@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButton, EuiButtonIcon, EuiLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
+import {
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
 import {
-  isIlmLifecycle,
-  isErrorLifecycle,
-  isDslLifecycle,
+  Streams,
   getDiscoverEsqlQuery,
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
 } from '@kbn/streams-schema';
 import React from 'react';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { css } from '@emotion/react';
-import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -55,7 +62,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          "Classic streams are based on existing data streams and don't support all Streams features like partitioning.",
+          "Classic streams are based on existing data streams and don't support all Streams features like ingest-time partitioning.",
       })}
       anchorProps={{
         css: css`
@@ -65,7 +72,7 @@ export function ClassicStreamBadge() {
     >
       <EuiBadge
         color="hollow"
-        iconType="streamsClassic"
+        iconType="productStreamsClassic"
         iconSide="left"
         tabIndex={0}
         data-test-subj="classicStreamBadge"
@@ -82,7 +89,7 @@ export function WiredStreamBadge() {
   return (
     <EuiBadge
       color="hollow"
-      iconType="streamsWired"
+      iconType="productStreamsWired"
       iconSide="left"
       data-test-subj="wiredStreamBadge"
     >
@@ -93,12 +100,21 @@ export function WiredStreamBadge() {
   );
 }
 
-export function QueryStreamBadge() {
-  const { euiTheme } = useEuiTheme();
+export function DraftStreamBadge() {
   return (
-    <EuiBadge color={euiTheme.colors.backgroundLightAccent}>
+    <EuiBadge iconType="dashedCircle" color="default" data-test-subj="draftStreamBadge">
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
+        defaultMessage: 'Draft',
+      })}
+    </EuiBadge>
+  );
+}
+
+export function QueryStreamBadge() {
+  return (
+    <EuiBadge iconType="code" color="accent">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.queryBadgeLabel', {
-        defaultMessage: 'Query stream',
+        defaultMessage: 'Query',
       })}
     </EuiBadge>
   );
@@ -285,13 +301,15 @@ export function DiscoverBadgeButton({
       })}
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
-      href={discoverLink}
-      iconType="discoverApp"
-      size="xs"
-      aria-label={ariaLabel}
-    />
+    <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
+        href={discoverLink}
+        iconType="discoverApp"
+        size="xs"
+        aria-label={ariaLabel}
+      />
+    </EuiToolTip>
   );
 }
 
@@ -323,3 +341,17 @@ export function TimeSeriesBadge() {
     </EuiToolTip>
   );
 }
+
+export const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);

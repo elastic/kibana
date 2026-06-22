@@ -112,6 +112,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
       <EuiFlexItem>
         <EuiPopover
           anchorPosition="downLeft"
+          aria-label={MORE_ACTIONS}
           button={
             <EuiToolTip content={MORE_ACTIONS} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -129,11 +130,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel
-            size="s"
-            items={actionsMenuItems}
-            data-test-subj="alertsTableActionsMenu"
-          />
+          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
         </EuiPopover>
       </EuiFlexItem>
     </>

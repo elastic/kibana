@@ -49,8 +49,7 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         return null;
       }
 
-      // Create basic hover content
-      const content = [
+      const bodyLines = [
         `**Workflow Connector**: \`${connectorType}\``,
         '',
         this.createConnectorOverview(
@@ -66,9 +65,14 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         this.generateGenericParameterHelp(connectorType),
         '',
         '_💡 Tip: Check the connector documentation for specific parameter details_',
-      ].join('\n');
+      ];
 
-      return this.createMarkdownContent(content);
+      return this.createMarkdownContent(
+        this.prependStabilityBadgeToContent(
+          this.getConnectorStabilityFromCache(connectorType),
+          bodyLines
+        )
+      );
     } catch (error) {
       // console.warn('GenericMonacoConnectorHandler: Error generating hover content', error);
       return null;
@@ -132,6 +136,20 @@ ${Object.entries(connectorInfo.examples.params || {})
             to: ['user@example.com', 'other@example.com'],
             subject: 'Workflow Notification',
             message: 'Your workflow has completed successfully.',
+          },
+        },
+      };
+    }
+
+    // Human-in-the-loop wait
+    if (connectorType === 'waitForInput') {
+      return {
+        name: 'Wait For Input',
+        description: 'Pause execution until external input is provided (human-in-the-loop)',
+        documentation: 'Configure the message displayed to the user when waiting for input',
+        examples: {
+          params: {
+            message: 'Please approve before continuing',
           },
         },
       };

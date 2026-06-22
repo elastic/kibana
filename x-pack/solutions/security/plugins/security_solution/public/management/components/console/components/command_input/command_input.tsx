@@ -8,7 +8,13 @@
 import type { MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiResizeObserver,
+  EuiToolTip,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
@@ -207,7 +213,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             prevLeftOfCursor,
             prevRightOfCursor,
             prevParsedInput,
-            prevEnteredCommand
+            prevEnteredCommand,
+            key
           );
 
           inputText.addValue(processedValue ?? '', selection);
@@ -328,14 +335,16 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                   <InputPlaceholder />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj={getTestId('inputTextSubmitButton')}
-                    aria-label="submit-command"
-                    iconType="playFilled"
-                    color="primary"
-                    isDisabled={disableArrowButton}
-                    onClick={handleSubmitButton}
-                  />
+                  <EuiToolTip content="submit-command" disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      data-test-subj={getTestId('inputTextSubmitButton')}
+                      aria-label="submit-command"
+                      iconType="play"
+                      color="primary"
+                      isDisabled={disableArrowButton}
+                      onClick={handleSubmitButton}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </CommandInputContainer>

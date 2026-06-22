@@ -28,6 +28,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
@@ -40,6 +42,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
+import { SkillReferencedContentFieldArray } from './skill_referenced_content_field_array';
 import type { SkillFormData } from './skill_form_validation';
 
 export enum SkillFormMode {
@@ -61,7 +64,7 @@ const FormSection: React.FC<FormSectionProps> = ({ id, icon, title, description,
     <EuiFlexItem grow={1}>
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiIcon type={icon} />
+          <EuiIcon type={icon} aria-hidden={true} />
           <EuiTitle size="xs">
             <h2 id={id}>{title}</h2>
           </EuiTitle>
@@ -152,6 +155,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
         description: skill.description,
         content: skill.content,
         tool_ids: skill.tool_ids ?? [],
+        referenced_content: skill.referenced_content ?? [],
       });
     }
   }, [skill, reset]);
@@ -183,6 +187,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           description: data.description,
           content: data.content,
           tool_ids: data.tool_ids,
+          referenced_content: data.referenced_content,
         });
       } else if (mode === SkillFormMode.Edit) {
         await (onSave as (d: UpdateSkillPayload) => Promise<unknown>)({
@@ -190,6 +195,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           description: data.description,
           content: data.content,
           tool_ids: data.tool_ids,
+          referenced_content: data.referenced_content,
         });
       }
       reset(data, { keepDirty: false });
@@ -206,7 +212,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
 
   return (
     <FormProvider {...form}>
-      <KibanaPageTemplate panelled bottomBorder={false} data-test-subj="agentBuilderSkillFormPage">
+      <KibanaPageTemplate bottomBorder={false} data-test-subj="agentBuilderSkillFormPage">
         <KibanaPageTemplate.Header
           pageTitle={
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -236,6 +242,11 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     disabled={hasErrors || isSubmitting || (!isCreateMode && !isDirty)}
                     isLoading={isSubmitting}
                     data-test-subj="agentBuilderSkillFormSaveButton"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_EDIT,
+                      detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                    })}
                   >
                     {labels.skills.saveButtonLabel}
                   </EuiButton>,
@@ -397,6 +408,18 @@ export const SkillForm: React.FC<SkillFormProps> = ({
 
               <EuiHorizontalRule />
 
+              {/* Section: Additional referenced files */}
+              <FormSection
+                id="skill-referenced-content-section-title"
+                icon="documents"
+                title={labels.skills.referencedContentLabel}
+                description={labels.skills.referencedFileSection.description}
+              >
+                <SkillReferencedContentFieldArray control={control} readOnly={isViewMode} />
+              </FormSection>
+
+              <EuiHorizontalRule />
+
               {/* Section: Associated tools */}
               <FormSection
                 id="skill-tools-section-title"
@@ -420,6 +443,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                       fullWidth
                     >
                       <EuiComboBox
+                        isInvalid={!!error}
                         fullWidth
                         options={toolOptions}
                         selectedOptions={value.map((toolId) => ({

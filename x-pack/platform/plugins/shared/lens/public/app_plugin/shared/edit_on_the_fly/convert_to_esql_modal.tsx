@@ -25,6 +25,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -128,9 +129,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
 
           return (
-            <EuiButtonIcon
-              onClick={() => toggleDetails(layer)}
-              aria-label={
+            <EuiToolTip
+              content={
                 isExpanded
                   ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
                       defaultMessage: 'Collapse',
@@ -139,9 +139,23 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                       defaultMessage: 'Expand',
                     })
               }
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-              disabled={!layer.isConvertibleToEsql}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={() => toggleDetails(layer)}
+                aria-label={
+                  isExpanded
+                    ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
+                        defaultMessage: 'Collapse',
+                      })
+                    : i18n.translate('xpack.lens.config.expandAriaLabel', {
+                        defaultMessage: 'Expand',
+                      })
+                }
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                disabled={!layer.isConvertibleToEsql}
+              />
+            </EuiToolTip>
           );
         },
       },

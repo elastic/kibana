@@ -10,35 +10,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, complexity */
 
 import { Frequency } from '@kbn/rrule';
+import { parseIntervalString, type WorkflowTrigger } from '../../common/lib/trigger_types';
 
-// Define the trigger type based on the schema
-export interface WorkflowTrigger {
-  type: 'alert' | 'scheduled' | 'manual';
-  with?: Record<string, any>;
-}
-
-/**
- * Parses interval string in format like "5m", "2h", "1d", "30s"
- * @param intervalString - The interval string to parse (e.g., "5m", "2h", "1d")
- * @returns Object with value and unit, or null if invalid
- */
-export function parseIntervalString(
-  intervalString: string
-): { value: number; unit: string } | null {
-  const match = intervalString.match(/^(\d+)([smhd])$/);
-  if (!match) {
-    return null;
-  }
-
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
-
-  if (isNaN(value) || value < 1) {
-    return null;
-  }
-
-  return { value, unit };
-}
+export type { WorkflowTrigger } from '../../common/lib/trigger_types';
+export { parseIntervalString } from '../../common/lib/trigger_types';
 
 // RRule configuration interface for YAML
 export interface WorkflowRRuleConfig {
@@ -64,12 +39,12 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
 
   // Handle RRule-based scheduling (new)
   if (config.rrule) {
-    return convertRRuleToTaskSchedule(config.rrule);
+    return convertRRuleToTaskSchedule(config.rrule as WorkflowRRuleConfig);
   }
 
   // Handle legacy interval-based scheduling (e.g., every 5 minutes)
   if (config.every && config.unit) {
-    const every = parseInt(config.every, 10);
+    const every = parseInt(config.every as string, 10);
     const unit = String(config.unit).toLowerCase();
 
     if (isNaN(every) || every < 1) {

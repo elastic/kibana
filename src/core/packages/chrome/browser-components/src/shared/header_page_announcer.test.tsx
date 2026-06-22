@@ -139,4 +139,27 @@ describe('HeaderPageAnnouncer', () => {
 
     expect(skipLink.focus).not.toHaveBeenCalled();
   });
+
+  it('does not focus skip link when Tab is pressed and focus is within a flyout', () => {
+    const { getByTestId, getByText } = render(
+      <>
+        <TestChromeProviders>
+          <HeaderPageAnnouncer breadcrumbs={[{ text: 'Test' }]} />
+        </TestChromeProviders>
+        <div className="euiFlyout" role="dialog" aria-label="Flyout">
+          <button>Button in flyout</button>
+        </div>
+      </>
+    );
+
+    const skipLink = getByTestId('skipToMainButton');
+    const flyoutButton = getByText('Button in flyout');
+
+    flyoutButton.focus();
+
+    skipLink.focus = jest.fn();
+    fireEvent.keyDown(window, { key: 'Tab' });
+
+    expect(skipLink.focus).not.toHaveBeenCalled();
+  });
 });

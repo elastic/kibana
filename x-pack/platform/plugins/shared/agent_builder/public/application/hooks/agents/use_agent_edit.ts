@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
+  type AgentAclEntry,
   type AgentDefinition,
   AgentVisibility,
   type ToolSelection,
@@ -18,6 +19,7 @@ import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
 import { useSkillsService } from '../skills/use_skills';
+import { usePluginsService } from '../plugins/use_plugins';
 import { useExperimentalFeatures } from '../use_experimental_features';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
@@ -45,6 +47,7 @@ const emptyState = (): AgentEditState => ({
     tools: defaultToolSelection,
     enable_elastic_capabilities: false,
     workflow_ids: [],
+    plugin_ids: [],
   },
 });
 
@@ -65,6 +68,7 @@ export function useAgentEdit({
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
   const { skills, isLoading: skillsLoading, error: skillsError } = useSkillsService();
+  const { plugins, isLoading: pluginsLoading, error: pluginsError } = usePluginsService();
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
@@ -97,6 +101,20 @@ export function useAgentEdit({
     },
   });
 
+  const updateAclMutation = useMutation({
+    mutationFn: ({ id, entries }: { id: string; entries: AgentAclEntry[] }) =>
+      agentService.updateAcl(id, { entries }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+      if (editingAgentId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.acl(editingAgentId) });
+      }
+    },
+    onError: (err: Error) => {
+      onSaveError(err);
+    },
+  });
+
   useEffect(() => {
     if (!agentId) {
       setState(emptyState());
@@ -116,32 +134,53 @@ export function useAgentEdit({
 
   const submit = useCallback(
     async (data: AgentEditState) => {
-      const cleanedData = cleanInvalidToolReferences(data, tools);
-      const requestData = isExperimentalFeaturesEnabled
-        ? cleanedData
-        : { ...cleanedData, visibility: undefined };
+      const requestData = cleanInvalidToolReferences(data, tools);
 
       if (editingAgentId) {
-        const { id, ...updatedAgent } = requestData;
+        const { id, acl, ...updatedAgent } = requestData;
         await updateMutation.mutateAsync(updatedAgent);
+
+        const nextEntries = acl?.entries ?? [];
+        const prevEntries = agent?.acl?.entries ?? [];
+        if (aclEntriesChanged(prevEntries, nextEntries)) {
+          await updateAclMutation.mutateAsync({ id: editingAgentId, entries: nextEntries });
+        }
       } else {
         await createMutation.mutateAsync(requestData);
       }
     },
-    [editingAgentId, createMutation, updateMutation, tools, isExperimentalFeaturesEnabled]
+    [editingAgentId, createMutation, updateMutation, updateAclMutation, tools, agent]
   );
 
   const isLoading = agentId
-    ? agentLoading || toolsLoading || (isExperimentalFeaturesEnabled && skillsLoading)
+    ? agentLoading ||
+      toolsLoading ||
+      skillsLoading ||
+      (isExperimentalFeaturesEnabled && pluginsLoading)
     : false;
 
   return {
     state,
     isLoading,
-    isSubmitting: createMutation.isLoading || updateMutation.isLoading,
+    isSubmitting:
+      createMutation.isLoading || updateMutation.isLoading || updateAclMutation.isLoading,
     submit,
     tools,
     skills,
-    error: toolsError || (isExperimentalFeaturesEnabled ? skillsError : undefined) || agentError,
+    plugins,
+    error:
+      toolsError ||
+      skillsError ||
+      (isExperimentalFeaturesEnabled ? pluginsError : undefined) ||
+      agentError,
   };
+}
+function aclEntriesChanged(a: AgentAclEntry[], b: AgentAclEntry[]): boolean {
+  if (a.length !== b.length) return true;
+  const signature = (entries: AgentAclEntry[]) =>
+    [...entries]
+      .map((e) => `${e.type}:${e.name}:${e.role}`)
+      .sort()
+      .join('|');
+  return signature(a) !== signature(b);
 }

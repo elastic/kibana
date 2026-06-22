@@ -1,0 +1,85 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-idp-user-a",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:06:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": [
+          "iam"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "user"
+        ]
+      },
+      "host": {
+        "id": "i-0abc111111111111a",
+        "name": "test-ec2-a",
+        "hostname": "test-ec2-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-idp-user-b",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:07:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": [
+          "iam"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "user"
+        ]
+      },
+      "host": {
+        "id": "i-0abc222222222222b",
+        "name": "test-ec2-b",
+        "hostname": "test-ec2-b"
+      },
+      "user": {
+        "id": "test-user-b",
+        "name": "test-user-b"
+      }
+    }
+  }
+}

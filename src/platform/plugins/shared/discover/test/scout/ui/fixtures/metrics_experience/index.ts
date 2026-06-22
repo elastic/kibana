@@ -53,12 +53,10 @@ export const spaceTest = spaceBaseTest.extend<
     },
     use: (pageObjects: MetricsExperienceTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = {
+    await use({
       ...pageObjects,
       metricsExperience: createLazyPageObject(MetricsExperiencePage, page),
-    };
-
-    await use(extendedPageObjects);
+    });
   },
 });
 

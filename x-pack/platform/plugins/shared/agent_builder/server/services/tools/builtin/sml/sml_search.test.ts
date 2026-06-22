@@ -8,23 +8,22 @@
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
-import type { SmlSearchResult } from '../../../sml';
+import type { SmlSearchResult } from '@kbn/agent-context-layer-plugin/server';
 import { createSmlSearchTool } from './sml_search';
 
 const mockSearch = jest.fn();
-const getSmlService = jest.fn(() => ({
+const getAgentContextLayer = jest.fn(() => ({
   search: mockSearch,
-  checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
+  deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
-  listTypeDefinitions: jest.fn(),
-  getCrawler: jest.fn(),
+  resolveSmlAttachItems: jest.fn(),
 }));
 
 const mockContext = {
   spaceId: 'default',
-  esClient: { asCurrentUser: {} },
+  esClient: { asCurrentUser: {}, asInternalUser: {} },
   request: {},
   savedObjectsClient: {},
   attachments: { add: jest.fn() },
@@ -36,73 +35,109 @@ describe('createSmlSearchTool', () => {
   });
 
   it('has correct id and tags', () => {
-    const tool = createSmlSearchTool({ getSmlService });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     expect(tool.id).toBe(platformCoreTools.smlSearch);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['sml', 'search']);
   });
 
-  it('calls search with correct params', async () => {
-    mockSearch.mockResolvedValue({ results: [], total: 0 });
-    const tool = createSmlSearchTool({ getSmlService });
+  it('description mentions workflows, wildcard query, and the types/tags filters', () => {
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    expect(tool.description).toContain('workflows');
+    expect(tool.description).toContain('"*"');
+    expect(tool.description).toContain('types');
+    expect(tool.description).toContain('tags');
+    expect(tool.description).toContain('sml_attach');
+  });
+
+  it('calls search with correct params (no constraints, no filters by default)', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     await tool.handler(
-      { keywords: ['cpu', 'usage'], size: 20 },
+      { query: 'cpu usage', size: 20 },
       mockContext as unknown as ToolHandlerContext
     );
-    expect(getSmlService).toHaveBeenCalled();
+    expect(getAgentContextLayer).toHaveBeenCalled();
     expect(mockSearch).toHaveBeenCalledWith({
-      keywords: ['cpu', 'usage'],
+      query: 'cpu usage',
       size: 20,
       spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
+      esClient: mockContext.esClient,
       request: mockContext.request,
+      constraints: undefined,
+      filters: undefined,
     });
   });
 
-  it('maps document fields to LLM-friendly names', async () => {
+  it('forwards agent-supplied types and tags as `filters` to the service', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler(
+      { query: 'sales', types: ['dashboard'], tags: ['production'] },
+      mockContext as unknown as ToolHandlerContext
+    );
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { types: ['dashboard'], tags: ['production'] },
+      })
+    );
+  });
+
+  it('omits filters when types/tags are empty arrays (treated as no constraint)', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler(
+      { query: 'sales', types: [], tags: [] },
+      mockContext as unknown as ToolHandlerContext
+    );
+    expect(mockSearch).toHaveBeenCalledWith(expect.objectContaining({ filters: undefined }));
+  });
+
+  it('maps document fields to the LLM-friendly hit shape', async () => {
     const hits: SmlSearchResult[] = [
       {
         id: 'chunk-1',
-        origin_id: 'ref-1',
+        origin: { uri: 'visualization://ref-1' },
         type: 'visualization',
         title: 'CPU Chart',
-        content: 'Chart content',
-        score: 0.95,
-        created_at: '2024-01-01',
-        updated_at: '2024-01-02',
+        content: 'cpu usage data',
+        description: 'A CPU chart',
+        tags: ['perf'],
+        references: [{ uri: 'dashboard://abc' }],
         spaces: ['default'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
       },
     ];
-    mockSearch.mockResolvedValue({ results: hits, total: 1 });
-    const tool = createSmlSearchTool({ getSmlService });
+    mockSearch.mockResolvedValue({ results: hits });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     const result = (await tool.handler(
-      { keywords: ['cpu'] },
+      { query: 'cpu' },
       mockContext as unknown as ToolHandlerContext
     )) as {
       results: unknown[];
     };
     expect(result.results).toHaveLength(1);
-    const data = (result.results[0] as OtherResult<{ total: number; items: unknown[] }>).data;
-    expect(data.total).toBe(1);
+    const data = (result.results[0] as OtherResult<{ items: unknown[] }>).data;
     expect(data.items).toHaveLength(1);
     expect(data.items[0]).toEqual({
       chunk_id: 'chunk-1',
-      attachment_id: 'ref-1',
+      attachment_id: 'visualization://ref-1',
       attachment_type: 'visualization',
       type: 'visualization',
       title: 'CPU Chart',
-      content: 'Chart content',
-      score: 0.95,
+      content: 'cpu usage data',
+      description: 'A CPU chart',
+      tags: ['perf'],
+      references: ['dashboard://abc'],
     });
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
   });
 
   it('returns "No results found" when empty', async () => {
-    mockSearch.mockResolvedValue({ results: [], total: 0 });
-    const tool = createSmlSearchTool({ getSmlService });
+    mockSearch.mockResolvedValue({ results: [] });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     const result = (await tool.handler(
-      { keywords: ['nonexistent'] },
+      { query: 'nonexistent' },
       mockContext as unknown as ToolHandlerContext
     )) as {
       results: unknown[];
@@ -111,26 +146,116 @@ describe('createSmlSearchTool', () => {
     const data = (
       result.results[0] as OtherResult<{
         message: string;
-        keywords: string[];
-        total: number;
+        query: string;
         items: unknown[];
       }>
     ).data;
     expect(data.message).toBe('No results found in the Semantic Metadata Layer.');
-    expect(data.keywords).toEqual(['nonexistent']);
-    expect(data.total).toBe(0);
+    expect(data.query).toBe('nonexistent');
     expect(data.items).toEqual([]);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
   });
 
   it('uses default size when not provided', async () => {
-    mockSearch.mockResolvedValue({ results: [], total: 0 });
-    const tool = createSmlSearchTool({ getSmlService });
-    await tool.handler({ keywords: ['test'] }, mockContext as unknown as ToolHandlerContext);
+    mockSearch.mockResolvedValue({ results: [] });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
-        keywords: ['test'],
+        query: 'test',
         size: undefined,
+      })
+    );
+  });
+
+  it('passes connector_ids as `constraints` (runtime-imposed) from agentConfiguration', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+    const contextWithConnectors = {
+      ...mockContext,
+      agentConfiguration: { connector_ids: ['conn-1', 'conn-2'], tools: [] },
+    };
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler({ query: 'test' }, contextWithConnectors as unknown as ToolHandlerContext);
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        constraints: { connector: { ids: ['conn-1', 'conn-2'] } },
+        filters: undefined,
+      })
+    );
+  });
+
+  it('does not pass constraints when agentConfiguration has no connector_ids', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+    const contextWithoutConnectors = {
+      ...mockContext,
+      agentConfiguration: { tools: [] },
+    };
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler(
+      { query: 'test' },
+      contextWithoutConnectors as unknown as ToolHandlerContext
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        constraints: undefined,
+      })
+    );
+  });
+
+  it('passes empty connector ids constraints when connector_ids is []', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+    const contextWithEmptyConnectors = {
+      ...mockContext,
+      agentConfiguration: { connector_ids: [], tools: [] },
+    };
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler(
+      { query: 'test' },
+      contextWithEmptyConnectors as unknown as ToolHandlerContext
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        constraints: { connector: { ids: [] } },
+      })
+    );
+  });
+
+  it('does not pass constraints when agentConfiguration is undefined', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        constraints: undefined,
+      })
+    );
+  });
+
+  it('combines runtime constraints (connectors) with agent-supplied filters', async () => {
+    mockSearch.mockResolvedValue({ results: [] });
+    const contextWithConnectors = {
+      ...mockContext,
+      agentConfiguration: { connector_ids: ['conn-1'], tools: [] },
+    };
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler(
+      { query: 'test', types: ['connector'], tags: ['prod'] },
+      contextWithConnectors as unknown as ToolHandlerContext
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        constraints: { connector: { ids: ['conn-1'] } },
+        filters: { types: ['connector'], tags: ['prod'] },
       })
     );
   });

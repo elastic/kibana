@@ -19,6 +19,7 @@ const createWiredStreamDefinition = (
   name: string,
   fields: FieldDefinition
 ): Streams.WiredStream.Definition => ({
+  type: 'wired',
   name,
   description: '',
   updated_at: new Date().toISOString(),
@@ -706,6 +707,7 @@ describe('validateClassicFields', () => {
     fieldOverrides?: Record<string, { type: string }>
   ): Streams.ClassicStream.Definition =>
     ({
+      type: 'classic',
       name,
       description: '',
       updated_at: new Date().toISOString(),

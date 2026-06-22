@@ -20,6 +20,7 @@ const initialGroupColumn = [cascadeGroups[0]];
 
 const defaultProps: CascadeRowHeaderPrimitiveProps = {
   isGroupNode: true,
+  isMobile: false,
   onCascadeGroupNodeExpanded: jest.fn(),
   onCascadeGroupNodeCollapsed: jest.fn(),
   rowInstance: {

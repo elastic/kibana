@@ -15,7 +15,7 @@ import type { Case } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
   BulkGetAttachmentsResponse,
-  AttachmentRequest,
+  AttachmentRequestV2,
   BulkCreateAttachmentsRequest,
   BulkCreateAttachmentsRequestV2,
   AttachmentPatchRequest,
@@ -31,20 +31,20 @@ import { postCaseReq } from '../mock';
 
 export const bulkGetAttachments = async ({
   supertest,
-  attachmentIds,
+  savedObjectIds,
   caseId,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
-  attachmentIds: string[];
+  savedObjectIds: string[];
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<BulkGetAttachmentsResponse> => {
   const { body: comments } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_get`)
-    .send({ ids: attachmentIds })
+    .send({ ids: savedObjectIds })
     .set('kbn-xsrf', 'abc')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
@@ -62,7 +62,7 @@ export const createComment = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  params: AttachmentRequest;
+  params: AttachmentRequestV2;
   auth?: { user: User; space: string | null } | null;
   expectedHttpCode?: number;
   headers?: Record<string, string | string[]>;

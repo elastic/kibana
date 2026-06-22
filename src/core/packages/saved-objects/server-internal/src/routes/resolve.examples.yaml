@@ -1,0 +1,42 @@
+responses:
+  '200':
+    description: A resolve response.
+    content:
+      application/json:
+        examples:
+          resolveSavedObjectResponse:
+            summary: A resolved saved object (alias match)
+            value:
+              outcome: aliasMatch
+              alias_target_id: example-dashboard-2
+              saved_object:
+                id: example-dashboard-2
+                type: dashboard
+                attributes:
+                  title: Example dashboard 2
+                references: []
+                namespaces:
+                  - default
+                managed: false
+                updated_at: '2026-04-17T12:00:00.000Z'
+                version: WzEsMl0=
+  '400':
+    description: A bad request.
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Unsupported saved object type(s): unknownType'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/saved_objects/resolve/dashboard/legacy-id" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/saved_objects/resolve/dashboard/legacy-id

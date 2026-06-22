@@ -7,13 +7,14 @@
 
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import * as selectors from '../../store/selectors';
 import { type NodeEventOnClick, NodeEventsInCategory } from './node_events_of_type';
 import { NodeEvents } from './node_events';
 import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';
 import { EventDetail } from './event_detail';
-import type { PanelViewAndParameters, ResolverCellActionRenderer } from '../../types';
+import type { PanelViewAndParameters } from '../../types';
 import type { State } from '../../../common/store/types';
 
 /**
@@ -28,7 +29,7 @@ export const PanelRouter = memo(function ({
 }: {
   id: string;
   nodeEventOnClick?: NodeEventOnClick;
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }) {
   const params: PanelViewAndParameters = useSelector((state: State) =>
     selectors.panelViewAndParameters(state.analyzer[id])

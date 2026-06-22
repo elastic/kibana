@@ -6,16 +6,18 @@
  */
 
 import Path from 'path';
+import { spawnSync } from 'child_process';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import execa from 'execa';
 
 import {
   resolveRestoreStrategy,
   restoreTSBuildArtifacts,
-  writeArtifactsState,
 } from './cache/restore_ts_build_artifacts';
+import { writeArtifactsState } from './cache/artifacts_state';
 import { isCiEnvironment, resolveCurrentCommitSha } from './cache/utils';
 import { createTypeCheckConfigs } from './tsc/create_type_check_configs';
 import { runTsc, runTscFastPass } from './tsc/run_tsc';
@@ -51,6 +53,67 @@ run(
     const { TS_PROJECTS } = await import('@kbn/ts-projects');
     const { updateRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import('./tsc/root_refs_config');
 
+    // Pre-flight: validate the project reference graph before doing any
+    // network I/O. When switching branches without re-running bootstrap,
+    // a kibana.jsonc may reference a package whose tsconfig does not yet
+    // exist, causing a cryptic crash inside createTypeCheckConfigs after
+    // spending minutes on a GCS restore. Catching it here gives a clear,
+    // actionable error immediately.
+    //
+    // When --project is set we only need to validate the single project's
+    // reference chain; otherwise validate all projects.
+    const projectsToValidate = projectFilter
+      ? TS_PROJECTS.filter((p) => p.path === projectFilter)
+      : TS_PROJECTS;
+
+    const brokenRefs: string[] = [];
+    for (const p of projectsToValidate) {
+      try {
+        p.getKbnRefs(TS_PROJECTS);
+      } catch (err) {
+        brokenRefs.push(err instanceof Error ? err.message : String(err));
+      }
+    }
+    if (brokenRefs.length > 0) {
+      if (process.env.KBN_TS_TYPE_CHECK_BOOTSTRAP_RETRIED === '1') {
+        throw createFailError(
+          'Broken TypeScript project references remain after `yarn kbn bootstrap`. Fix manually: yarn kbn bootstrap'
+        );
+      }
+
+      log.warning('[Bootstrap] Broken TypeScript project references detected:');
+      for (const msg of brokenRefs.slice(0, 5)) {
+        log.warning(`  ${msg}`);
+      }
+      if (brokenRefs.length > 5) {
+        log.warning(`  … and ${brokenRefs.length - 5} more`);
+      }
+      log.warning('');
+      log.warning(
+        '[Bootstrap] This usually happens after switching branches. ' +
+          'Running yarn kbn bootstrap to repair...'
+      );
+
+      try {
+        await execa('yarn', ['kbn', 'bootstrap'], { cwd: REPO_ROOT, stdio: 'inherit' });
+      } catch {
+        log.error('[Bootstrap] Bootstrap failed. Fix it manually: yarn kbn bootstrap');
+        throw createFailError('Bootstrap failed');
+      }
+
+      // Bootstrap updates node_modules and regenerates config files. The
+      // already-imported @kbn/ts-projects module is stale in Node's module
+      // cache, so we must restart the process entirely to pick up the new
+      // project graph. Re-exec with identical arguments.
+      log.info('[Bootstrap] Bootstrap complete — restarting type check with fresh project data...');
+      const { status } = spawnSync(process.execPath, process.argv.slice(1), {
+        cwd: process.cwd(),
+        stdio: 'inherit',
+        env: { ...process.env, KBN_TS_TYPE_CHECK_BOOTSTRAP_RETRIED: '1' },
+      });
+      process.exit(status ?? 1);
+    }
+
     // Decide whether to restore artifacts from GCS before type checking.
     // CI always restores (and archives after). Locally, the smart strategy
     // checks whether local artifacts are fresh enough or a GCS restore would
@@ -72,6 +135,9 @@ run(
         if (strategy.shouldRestore && strategy.bestSha) {
           await restoreTSBuildArtifacts(log, strategy.bestSha, {
             staleProjects: strategy.staleProjects,
+            prNumber: strategy.prNumber,
+            prTipSha: strategy.prTipSha,
+            skipCacheServer: !strategy.cacheServerAvailable,
           });
           didRestore = true;
         }

@@ -41,6 +41,8 @@ export const ManagementLandingPage = ({
   } = useAppContext();
   setBreadcrumbs();
 
+  const hideAnnouncements = !coreStart.notifications.tours.isEnabled();
+
   // Check AutoOps status
   const useAutoOpsStatus = getAutoOpsStatusHook();
   const autoOpsStatus = useAutoOpsStatus();
@@ -53,7 +55,8 @@ export const ManagementLandingPage = ({
     !isCloudEnabled &&
     !isAirGapped &&
     !autoOpsStatus.isLoading &&
-    !autoOpsStatus.isCloudConnectAutoopsEnabled;
+    !autoOpsStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
   const cloudConnectUrl = coreStart.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
     e.preventDefault();

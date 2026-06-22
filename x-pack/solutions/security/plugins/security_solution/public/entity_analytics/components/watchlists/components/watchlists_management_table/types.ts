@@ -7,4 +7,7 @@
 
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 
-export type WatchlistTableItemType = WatchlistObject;
+export type WatchlistTableItemType = WatchlistObject & {
+  /** Derived display string for the entity source (e.g. "Entity Store" or "Index: my-index") */
+  source?: string;
+};

@@ -12,7 +12,7 @@
 var Fs = require('fs');
 var Path = require('path');
 
-var METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+var METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 function hasFlag(args, flag) {
   if (args.includes(flag)) {
@@ -274,20 +274,15 @@ var ENV_DOCS = [
     example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
   },
   {
-    name: 'EVALUATIONS_ES_URL',
-    description: 'Elasticsearch URL where evaluation results are exported.',
-    example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
-  },
-  {
-    name: 'EVALUATIONS_ES_API_KEY',
-    description: 'API key for authenticating with the evaluations Elasticsearch cluster.',
-    example: 'EVALUATIONS_ES_API_KEY=...',
-  },
-  {
-    name: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT',
+    name: 'EVALUATIONS_KBN_URL',
     description:
-      'Skip the Elasticsearch export preflight check (not recommended for CI). Preflight runs a small sentinel write against the configured evaluations cluster.',
-    example: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT=true',
+      'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
+    example: 'EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601',
+  },
+  {
+    name: 'EVALUATIONS_KBN_API_KEY',
+    description: 'API key for authenticating to EVALUATIONS_KBN_URL.',
+    example: 'EVALUATIONS_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',
@@ -341,13 +336,17 @@ function runFastHelp() {
   logInfo('For full command help/flags: node scripts/evals --full-help');
   logInfo('');
   logInfo('Commands:');
-  logInfo('  init                          Set up connectors for local evals');
+  logInfo('  init                          Set up config + connectors for local evals');
+  logInfo('  init config                   Only create/update vault config.json');
+  logInfo('    --profile <name>            Write config.<name>.json (e.g. --profile local)');
   logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');
   logInfo('  scout                         Start Scout server for evals');
+  logInfo('  clear-index                   Delete .evaluation-scores indices (reset export)');
   logInfo('  run [--suite <id>] [...]      Run an eval suite');
   logInfo('  list [--refresh] [--json]     List eval suites');
+  logInfo('  labels [suite-id ...]         Create/sync GitHub eval suite labels');
   logInfo('  compare <run-a> <run-b>       Compare two eval runs');
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');

@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('elasticsearch query rule', function () {
     it('create rule screenshot', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
       await testSubjects.click(`.es-query-SelectOption`);
@@ -97,13 +97,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('example elasticsearch query rule conditions and actions', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       // Edit the rule that was created as part of startup
       await testSubjects.setValue('ruleSearchField', esQueryRuleName);
       await browser.pressKeys(browser.keys.ENTER);
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${esQueryRuleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${esQueryRuleName}"]`
+      );
       await alertRule.click();
       const actionsButton = await testSubjects.find('ruleActionsButton');
       await actionsButton.click();

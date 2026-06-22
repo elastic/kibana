@@ -16,7 +16,7 @@ import type {
 import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -26,10 +26,10 @@ import type {
   IntegrationCallbacks,
   LensInternalApi,
 } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
-import { isTextBasedLanguage, stripInheritedContext, transformToApiConfig } from '../helper';
-
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import type { StateManagementConfig } from './initialize_state_management';
@@ -59,12 +59,12 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
     PublishesWritableDescription &
-    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
+    HasLibraryTransforms<LensWireAPIConfig, LensWireAPIConfig> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
-  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
+  reinitializeState: (lastSaved?: LensWireAPIConfig) => void;
 }
 
 /**
@@ -83,7 +83,7 @@ export function initializeDashboardServices(
   // ( based on existing FTR tests ).
   const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState.attributes.title);
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
-    initialState.savedObjectId
+    initialState.ref_id
       ? internalApi.attributes$.getValue().description || initialState.description
       : initialState.description
   );
@@ -108,45 +108,36 @@ export function initializeDashboardServices(
           attributes.references
         );
         // keep in sync the state
-        stateConfig.api.updateSavedObjectId(savedObjectId);
+        stateConfig.api.updateRefId(savedObjectId);
         return savedObjectId;
       },
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await attributeService.checkForDuplicateTitle({
-          newTitle,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-          newCopyOnSave: false,
-          newDescription: '',
-          displayName: '',
-          lastSavedTitle: '',
-          copyOnSave: false,
-        });
-      },
+      hasLibraryItemWithTitle: attributeService.hasLibraryItemWithTitle,
       canLinkToLibrary: async () =>
-        !getLatestState().savedObjectId && !isTextBasedLanguage(getLatestState()),
-      canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
+        !getLatestState().ref_id && !isTextBasedLanguage(getLatestState()),
+      canUnlinkFromLibrary: async () => Boolean(getLatestState().ref_id),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
         return {
           ...currentState,
-          savedObjectId: newId,
+          ref_id: newId,
         };
       },
       getSerializedStateByValue: () => {
-        const { savedObjectId, ...byValueRuntimeState } = stripInheritedContext(getLatestState());
+        const { ref_id: refId, ...byValueRuntimeState } = stripInheritedContext(getLatestState());
         return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(
       titleManager.anyStateChange$,
-      internalApi.overrides$,
-      internalApi.disableTriggers$
-    ).pipe(map(() => undefined)),
+      internalApi.overrides$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      internalApi.disableTriggers$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState: () => {
       const { style, className } = apiHasLensComponentProps(parentApi)
         ? parentApi
@@ -168,7 +159,7 @@ export function initializeDashboardServices(
         disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
+    reinitializeState: (lastSaved?: LensWireAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
     },
   };

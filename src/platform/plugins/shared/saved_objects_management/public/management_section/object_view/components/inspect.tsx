@@ -45,7 +45,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
                 aria-label={copyToClipboardLabel}
                 size="s"
                 flush="right"
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
               >
                 {copyToClipboardLabel}
@@ -58,6 +58,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           languageId={XJsonLang.ID}
           value={objectAsJsonString}
           aria-label={codeEditorAriaLabel(title)}
+          enableFindAction
           options={{
             automaticLayout: false,
             fontSize: 12,

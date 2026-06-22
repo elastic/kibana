@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ParsedMetricItem } from '../../types';
-import { OverviewTab } from './overview_tab';
-import { EsqlQueryTab } from './esql_query_tab';
+import type { FlyoutTabId } from '../../restorable_state';
+import { useMetricsExperienceState } from '../observability/metrics/context/metrics_experience_state_provider';
+import { OverviewTab, EsqlQueryTab } from './tabs';
 
 const tabIds = {
   OVERVIEW: 'overview',
   ESQL_QUERY: 'esql-query',
-} as const;
-
-type TabId = (typeof tabIds)[keyof typeof tabIds];
+} as const satisfies Record<string, FlyoutTabId>;
 
 const OverviewTabName = i18n.translate('metricsExperience.metricFlyout.overviewTab', {
   defaultMessage: 'Overview',
@@ -49,10 +48,11 @@ interface MetricFlyoutBodyProps {
 }
 
 export const MetricFlyoutBody = ({ metricItem, esqlQuery, description }: MetricFlyoutBodyProps) => {
-  const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
+  const { flyoutState, onFlyoutSelectedTabChange } = useMetricsExperienceState();
+  const selectedTabId: FlyoutTabId = flyoutState?.selectedTabId ?? tabIds.OVERVIEW;
 
-  const onSelectedTabChanged = (id: TabId) => {
-    setSelectedTabId(id);
+  const onSelectedTabChanged = (id: FlyoutTabId) => {
+    onFlyoutSelectedTabChange(id);
   };
 
   const renderTabs = () => {

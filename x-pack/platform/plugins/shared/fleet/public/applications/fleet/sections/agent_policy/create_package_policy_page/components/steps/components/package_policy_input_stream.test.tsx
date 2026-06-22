@@ -11,6 +11,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 import type { TestRenderer } from '../../../../../../../../mock';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { DATA_STREAM_TYPE_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type {
   PackageInfo,
@@ -203,10 +204,16 @@ describe('PackagePolicyInputStreamConfig', () => {
     jest.resetAllMocks();
   });
 
+  /**
+   * Renders `PackagePolicyInputStreamConfig`. Pass `inputPolicyTemplate` (parent input’s
+   * `policy_template`) for composable multi-template packages so `dynamic_signal_types` matches
+   * the correct template.
+   */
   const render = (
     packageInputStream: RegistryStreamWithDataStream = mockPackageInputStreamWithVarGroups,
     packagePolicyInputStream: NewPackagePolicyInputStream = mockPackagePolicyInputStream,
-    packageInfo: PackageInfo = mockPackageInfo
+    packageInfo: PackageInfo = mockPackageInfo,
+    inputPolicyTemplate?: string
   ) => {
     renderResult = testRenderer.render(
       <PackagePolicyInputStreamConfig
@@ -216,7 +223,8 @@ describe('PackagePolicyInputStreamConfig', () => {
         updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
         inputStreamValidationResults={{ vars: {} }}
         forceShowErrors={false}
-        totalStreams={2}
+        hasStreamToggle={true}
+        inputPolicyTemplate={inputPolicyTemplate}
       />
     );
   };
@@ -289,7 +297,7 @@ describe('PackagePolicyInputStreamConfig', () => {
           updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
           inputStreamValidationResults={{ vars: {} }}
           forceShowErrors={false}
-          totalStreams={2}
+          hasStreamToggle={true}
         />
       );
 
@@ -430,7 +438,98 @@ describe('PackagePolicyInputStreamConfig', () => {
     });
   });
 
+  describe('condition field', () => {
+    const minimalInputStream: RegistryStreamWithDataStream = {
+      input: 'httpjson',
+      title: 'Collect logs',
+      template_path: 'stream.yml.hbs',
+      vars: [],
+      description: 'Minimal stream for condition tests',
+      data_stream: {
+        title: 'Test Logs',
+        release: 'ga',
+        type: 'logs',
+        package: 'test_package',
+        dataset: 'test_package.test',
+        path: 'test',
+        elasticsearch: {},
+        ingest_pipeline: 'default',
+        streams: [],
+      },
+    };
+
+    const minimalPolicyInputStream: NewPackagePolicyInputStream = {
+      id: 'stream-cond',
+      enabled: true,
+      data_stream: { type: 'logs', dataset: 'test_package.test' },
+      vars: {},
+    };
+
+    const renderCondition = (
+      policyOverrides: Partial<NewPackagePolicyInputStream> = {},
+      showConditionField = true
+    ) => {
+      renderResult = testRenderer.render(
+        <PackagePolicyInputStreamConfig
+          packageInputStream={minimalInputStream}
+          packageInfo={mockPackageInfo}
+          packagePolicyInputStream={{ ...minimalPolicyInputStream, ...policyOverrides }}
+          updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
+          inputStreamValidationResults={{ vars: {} }}
+          forceShowErrors={false}
+          hasStreamToggle={true}
+          showConditionField={showConditionField}
+        />
+      );
+    };
+
+    it('shows condition field in advanced options when showConditionField is true', async () => {
+      renderCondition();
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field when showConditionField is false', async () => {
+      renderCondition({}, false);
+      expect(
+        renderResult.queryByTestId('packagePolicyStreamConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('calls updatePackagePolicyInputStream with condition value on change', async () => {
+      renderCondition();
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();
+      });
+      fireEvent.change(renderResult.getByTestId('packagePolicyStreamConditionInput'), {
+        target: { value: "${host.os.type} == 'linux'" },
+      });
+      expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({
+        condition: "${host.os.type} == 'linux'",
+      });
+    });
+
+    it('calls updatePackagePolicyInputStream with null when field is cleared', async () => {
+      renderCondition({ condition: "${host.os.type} == 'linux'" });
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();
+      });
+      fireEvent.change(renderResult.getByTestId('packagePolicyStreamConditionInput'), {
+        target: { value: '' },
+      });
+      expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({ condition: null });
+    });
+  });
+
   describe('dynamic_signal_types behavior', () => {
+    // Data Stream Type UI applies only to `packageInfo.type === 'input'` (see dev_docs/input_packages.md).
+    // Input packages are documented with a single policy template; composable multi-template behavior
+    // for `dynamic_signal_types` / `policy_template` is covered in policy_template.test.ts
+    // (`packagePolicyInputAllowsUndefinedDataStreamType`).
     const mockOtelInputStream: RegistryStreamWithDataStream = {
       input: 'otelcol',
       title: 'OTel Collector',
@@ -626,6 +725,63 @@ describe('PackagePolicyInputStreamConfig', () => {
         expect(
           Array.from(radioGroup.children).find((child) => child.textContent === 'Traces')
         ).toBeInTheDocument();
+      });
+    });
+
+    it('should show use_apm toggle when data_stream.type is traces for non-dynamic otelcol input', async () => {
+      const packageInfoNonDynamic: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OTel',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      const tracesInputStream: NewPackagePolicyInputStream = {
+        ...mockOtelPolicyInputStream,
+        vars: {
+          [DATA_STREAM_TYPE_VAR_NAME]: { type: 'string', value: 'traces' },
+        },
+      };
+
+      render(mockOtelInputStream, tracesInputStream, packageInfoNonDynamic);
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Enable Elastic APM Enrichment')).toBeInTheDocument();
+      });
+    });
+
+    it('should not show use_apm toggle when data_stream.type is not traces', async () => {
+      const packageInfoNonDynamic: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OTel',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      render(mockOtelInputStream, mockOtelPolicyInputStream, packageInfoNonDynamic);
+
+      await waitFor(() => {
+        expect(renderResult.queryByText('Enable Elastic APM Enrichment')).not.toBeInTheDocument();
       });
     });
   });

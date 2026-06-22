@@ -39,6 +39,8 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 export interface Props {
   item: Item;
   entityName: string;
+  flyoutTitle: string;
+  flyoutTitleId: string;
   isReadonly?: boolean;
   readonlyReason?: string;
   services: Pick<Services, 'TagSelector' | 'TagList' | 'notifyError'>;
@@ -52,11 +54,11 @@ export interface Props {
   appendRows?: React.ReactNode;
 }
 
-const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
-
 export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
+  flyoutTitle,
+  flyoutTitleId,
   isReadonly = true,
   readonlyReason,
   services: { TagSelector, TagList, notifyError },
@@ -70,20 +72,15 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const form = useMetadataForm({ item, customValidators });
 
   const hasNoChanges = () => {
-    const itemTags = item.tags.map((obj) => obj.id).sort();
+    const itemTags = item.tags.slice().sort();
     const formTags = form.tags.value.slice().sort();
-
-    const compareTags = (arr1: string[], arr2: string[]) => {
-      if (arr1.length !== arr2.length) return false;
-      return arr1.every((tag: string, index) => tag === arr2[index]);
-    };
-
     const description = item.description || '';
 
     return (
       item.title === form.title.value &&
       description === form.description.value &&
-      compareTags(itemTags, formTags)
+      itemTags.length === formTags.length &&
+      itemTags.every((tag, i) => tag === formTags[i])
     );
   };
 
@@ -118,22 +115,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
     setIsSubmitted(true);
   }, [onSave, item.id, form, notifyError, entityName]);
 
-  const title = capitalize(
-    i18n.translate('contentManagement.contentEditor.flyoutTitle', {
-      defaultMessage: '{entityName} details',
-      values: {
-        entityName,
-      },
-    })
-  );
-
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
-          <h2>
-            <span>{title}</span>
-          </h2>
+          <h2 id={flyoutTitleId}>{flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -146,7 +132,6 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
               defaultMessage: 'To edit these details, contact your administrator for access.',
             })
           }
-          tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}
         >

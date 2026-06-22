@@ -1,0 +1,47 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        mgetWorkflowsRequestExample:
+          description: 'Example request to retrieve multiple workflows by their IDs'
+          value:
+            ids:
+              - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+            source:
+              - name
+              - enabled
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          mgetWorkflowsResponseExample:
+            description: 'Example response returning the requested workflows with projected fields'
+            value:
+              - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                name: Example definition
+                enabled: true
+              - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                name: Second workflow
+                enabled: false
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/mget" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"],
+          "source": ["name", "enabled"]
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/mget
+      {
+        "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"],
+        "source": ["name", "enabled"]
+      }

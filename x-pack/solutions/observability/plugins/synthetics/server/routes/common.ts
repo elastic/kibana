@@ -9,7 +9,7 @@ import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useLogicalAndFields } from '../../common/constants';
 import type { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
@@ -35,6 +35,7 @@ const CommonQuerySchema = {
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   monitorQueryIds: StringOrArraySchema,
+  configIds: StringOrArraySchema,
   showFromAllSpaces: schema.maybe(schema.boolean()),
   useLogicalAndFor: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
@@ -60,6 +61,7 @@ export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 export const OverviewStatusSchema = schema.object({
   ...CommonQuerySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
+  groupByMonitor: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
@@ -96,6 +98,7 @@ export const getMonitorFilters = async (
     projects,
     schedules,
     monitorQueryIds,
+    configIds,
     locations: queryLocations,
     useLogicalAndFor,
   } = context.request.query;
@@ -109,6 +112,7 @@ export const getMonitorFilters = async (
       projects,
       schedules,
       monitorQueryIds,
+      configIds,
       locations,
     },
     useLogicalAndFor,
@@ -243,6 +247,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     projects,
     schedules,
     monitorQueryIds,
+    configIds,
   } = monitorQuery;
 
   return (
@@ -254,7 +259,8 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!status?.length ||
     !!projects?.length ||
     !!schedules?.length ||
-    !!monitorQueryIds?.length
+    !!monitorQueryIds?.length ||
+    !!configIds?.length
   );
 };
 

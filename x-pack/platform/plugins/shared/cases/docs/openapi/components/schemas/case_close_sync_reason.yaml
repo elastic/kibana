@@ -1,0 +1,14 @@
+description: >
+  The close reason to sync to attached alerts when closing the case. Can be one of following predefined reasons:
+  [false_positive, duplicate, true_positive, benign_positive, automated_closure,
+  other] or a custom reason provided by the user.
+oneOf:
+  - type: string
+    enum:
+      - false_positive
+      - duplicate
+      - true_positive
+      - benign_positive
+      - automated_closure
+      - other
+  - type: string

@@ -14,9 +14,19 @@ import { abortableTimeout, TimeoutAbortedError } from '../utils';
 
 export const FLUSH_INTERVAL_MS = 500;
 
-export async function flushState(params: WorkflowExecutionLoopParams) {
+export interface FlushStateOptions {
+  workflowLogFlushSignal?: AbortSignal;
+}
+
+export async function flushState(
+  params: WorkflowExecutionLoopParams,
+  options: FlushStateOptions = {}
+) {
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
-  await Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
+  await Promise.all([
+    params.stepIoService.flush(),
+    params.workflowLogger.flushEvents({ signal: options.workflowLogFlushSignal }),
+  ]);
   flushSpan?.end();
 }
 
@@ -44,32 +54,34 @@ export async function persistenceLoop(
   params: WorkflowExecutionLoopParams,
   persistenceAbortSignal?: AbortSignal
 ) {
-  // Create the abort promise once outside the loop to avoid accumulating
-  // event listeners on each iteration.
-  const persistenceAbortPromise: Promise<void> = persistenceAbortSignal
-    ? new Promise<void>((_, reject) => {
-        if (persistenceAbortSignal.aborted) {
-          reject(new TimeoutAbortedError());
-          return;
-        }
-        persistenceAbortSignal.addEventListener('abort', () => reject(new TimeoutAbortedError()), {
-          once: true,
-        });
-      })
-    : new Promise<void>(() => {});
-
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     if (persistenceAbortSignal?.aborted) {
       return;
     }
 
-    await flushState(params);
+    await flushState(params, {
+      workflowLogFlushSignal: params.taskAbortController.signal,
+    });
 
     try {
       const waitSpan = apm.startSpan('persistence wait', 'workflow', 'wait');
       await Promise.race([
         abortableTimeout(FLUSH_INTERVAL_MS, params.taskAbortController.signal),
-        persistenceAbortPromise,
+        persistenceAbortSignal
+          ? new Promise<void>((_, reject) => {
+              if (persistenceAbortSignal.aborted) {
+                reject(new TimeoutAbortedError());
+                return;
+              }
+              persistenceAbortSignal.addEventListener(
+                'abort',
+                () => reject(new TimeoutAbortedError()),
+                {
+                  once: true,
+                }
+              );
+            })
+          : new Promise<void>(() => {}),
       ]);
       waitSpan?.end();
     } catch (error) {

@@ -104,7 +104,7 @@ export const ColorStops = ({
       <div>
         {deleteButton}
         <EuiButtonIcon
-          iconType="plusInCircle"
+          iconType="plusCircle"
           color="primary"
           aria-label="Add"
           title="Add"

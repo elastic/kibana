@@ -23,7 +23,6 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
-  httpServiceMock,
   executionContextServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
@@ -135,7 +134,6 @@ describe('Task Runner Cancel', () => {
     actionsPlugin: actionsMock.createStart(),
     alertsService,
     backfillClient,
-    basePathService: httpServiceMock.createBasePath(),
     cancelAlertsOnRuleTimeout: true,
     connectorAdapterRegistry,
     data: dataPlugin,
@@ -279,8 +277,8 @@ describe('Task Runner Cancel', () => {
                   metrics: {
                     duration: 0,
                     gap_duration_s: null,
-                    // TODO: uncomment after intermidiate release
-                    // gap_range: null,
+                    gap_range: null,
+                    gap_reason: null,
                     total_alerts_created: null,
                     total_alerts_detected: null,
                     total_indexing_duration_ms: null,

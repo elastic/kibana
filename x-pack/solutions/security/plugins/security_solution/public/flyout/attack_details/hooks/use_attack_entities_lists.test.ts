@@ -10,6 +10,15 @@ import { useAttackEntitiesLists } from './use_attack_entities_lists';
 import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
+
 jest.mock('./use_original_alert_ids', () => ({
   useOriginalAlertIds: jest.fn(),
 }));
@@ -45,12 +54,12 @@ describe('useAttackEntitiesLists', () => {
         skip: true,
       })
     );
-    expect(result.current.userNames).toEqual([]);
-    expect(result.current.hostNames).toEqual([]);
+    expect(result.current.userEntityEntries).toEqual([]);
+    expect(result.current.hostEntityEntries).toEqual([]);
     expect(result.current.loading).toBe(false);
   });
 
-  it('passes query with ids filter and terms aggs when alertIds exist', () => {
+  it('passes query with ids filter, EUID runtime_mappings and terms aggs when alertIds exist', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1', 'id2']);
 
     renderHook(() => useAttackEntitiesLists());
@@ -61,20 +70,40 @@ describe('useAttackEntitiesLists', () => {
         query: expect.objectContaining({
           query: { ids: { values: ['id1', 'id2'] } },
           size: 0,
-          aggs: {
-            unique_user_names: {
-              terms: { field: 'user.name', size: 200 },
-            },
-            unique_host_names: {
-              terms: { field: 'host.name', size: 200 },
-            },
-          },
+          runtime_mappings: expect.objectContaining({
+            attack_entities_euid_user: expect.any(Object),
+            attack_entities_euid_host: expect.any(Object),
+          }),
+          aggs: expect.objectContaining({
+            unique_users_by_euid: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'attack_entities_euid_user',
+                size: 200,
+              }),
+              aggs: expect.objectContaining({
+                sample: expect.objectContaining({
+                  top_hits: expect.objectContaining({ size: 1 }),
+                }),
+              }),
+            }),
+            unique_hosts_by_euid: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'attack_entities_euid_host',
+                size: 200,
+              }),
+              aggs: expect.objectContaining({
+                sample: expect.objectContaining({
+                  top_hits: expect.objectContaining({ size: 1 }),
+                }),
+              }),
+            }),
+          }),
         }),
       })
     );
   });
 
-  it('parses userNames and hostNames from aggregation buckets', () => {
+  it('parses userEntityEntries and hostEntityEntries (with sample _source) from EUID aggregation buckets', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
@@ -84,16 +113,62 @@ describe('useAttackEntitiesLists', () => {
         took: 0,
         timeout: false,
         aggregations: {
-          unique_user_names: {
+          unique_users_by_euid: {
             buckets: [
-              { key: 'user1', doc_count: 2 },
-              { key: 'user2', doc_count: 1 },
+              {
+                key: 'user:user1',
+                doc_count: 2,
+                sample: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          user: { name: 'user1' },
+                          host: { id: 'host-for-user1' },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                key: 'user:user2',
+                doc_count: 1,
+                sample: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          user: { name: 'user2' },
+                          host: { id: 'host-for-user2' },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             ],
           },
-          unique_host_names: {
+          unique_hosts_by_euid: {
             buckets: [
-              { key: 'host1', doc_count: 3 },
-              { key: 'host2', doc_count: 1 },
+              {
+                key: 'host:host1',
+                doc_count: 3,
+                sample: {
+                  hits: {
+                    hits: [{ _source: { host: { name: 'host1' } } }],
+                  },
+                },
+              },
+              {
+                key: 'host:host2',
+                doc_count: 1,
+                sample: {
+                  hits: {
+                    hits: [{ _source: { host: { name: 'host2' } } }],
+                  },
+                },
+              },
             ],
           },
         },
@@ -106,8 +181,40 @@ describe('useAttackEntitiesLists', () => {
 
     const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.userNames).toEqual(['user1', 'user2']);
-    expect(result.current.hostNames).toEqual(['host1', 'host2']);
+    expect(result.current.userEntityEntries).toEqual([
+      {
+        identityFields: {
+          'user.name': 'user1',
+          'host.id': 'host-for-user1',
+          'entity.namespace': 'local',
+        },
+        sampleSource: {
+          user: { name: 'user1' },
+          host: { id: 'host-for-user1' },
+        },
+      },
+      {
+        identityFields: {
+          'user.name': 'user2',
+          'host.id': 'host-for-user2',
+          'entity.namespace': 'local',
+        },
+        sampleSource: {
+          user: { name: 'user2' },
+          host: { id: 'host-for-user2' },
+        },
+      },
+    ]);
+    expect(result.current.hostEntityEntries).toEqual([
+      {
+        identityFields: { 'host.name': 'host1' },
+        sampleSource: { host: { name: 'host1' } },
+      },
+      {
+        identityFields: { 'host.name': 'host2' },
+        sampleSource: { host: { name: 'host2' } },
+      },
+    ]);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(false);
   });
@@ -131,11 +238,11 @@ describe('useAttackEntitiesLists', () => {
 
     const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.userNames).toEqual([]);
-    expect(result.current.hostNames).toEqual([]);
+    expect(result.current.userEntityEntries).toEqual([]);
+    expect(result.current.hostEntityEntries).toEqual([]);
   });
 
-  it('filters out empty string keys from buckets', () => {
+  it('skips buckets with missing or invalid sample _source', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
@@ -145,14 +252,39 @@ describe('useAttackEntitiesLists', () => {
         took: 0,
         timeout: false,
         aggregations: {
-          unique_user_names: {
+          unique_users_by_euid: {
             buckets: [
-              { key: 'user1', doc_count: 1 },
-              { key: '', doc_count: 1 },
+              {
+                key: 'user:user1',
+                doc_count: 1,
+                sample: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          user: { name: 'user1' },
+                          host: { id: 'h1' },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                key: 'user:empty',
+                doc_count: 1,
+                sample: { hits: { hits: [] } },
+              },
             ],
           },
-          unique_host_names: {
-            buckets: [{ key: 'host1', doc_count: 1 }],
+          unique_hosts_by_euid: {
+            buckets: [
+              {
+                key: 'host:host1',
+                doc_count: 1,
+                sample: { hits: { hits: [{ _source: { host: { name: 'host1' } } }] } },
+              },
+            ],
           },
         },
       },
@@ -164,7 +296,20 @@ describe('useAttackEntitiesLists', () => {
 
     const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.userNames).toEqual(['user1']);
-    expect(result.current.hostNames).toEqual(['host1']);
+    expect(result.current.userEntityEntries).toEqual([
+      {
+        identityFields: { 'user.name': 'user1', 'host.id': 'h1', 'entity.namespace': 'local' },
+        sampleSource: {
+          user: { name: 'user1' },
+          host: { id: 'h1' },
+        },
+      },
+    ]);
+    expect(result.current.hostEntityEntries).toEqual([
+      {
+        identityFields: { 'host.name': 'host1' },
+        sampleSource: { host: { name: 'host1' } },
+      },
+    ]);
   });
 });

@@ -9,7 +9,7 @@ import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, take } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   CoreSetup,
   CoreStart,
@@ -161,7 +161,16 @@ import {
   registerAgentlessDeploymentSyncTask,
   scheduleAgentlessDeploymentSyncTask,
 } from './tasks/agentless/deployment_sync_task';
+import {
+  registerVerifierPolicyCleanupTask,
+  scheduleVerifierPolicyCleanupTask,
+} from './tasks/agentless/verifier_policy_cleanup_task';
+import {
+  registerVerifyPermissionsTask,
+  scheduleVerifyPermissionsTask,
+} from './tasks/agentless/verify_permissions_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
+import { registerSyncNamespaceTemplatesTask } from './tasks/sync_namespace_templates_task';
 import {
   type AgentlessPoliciesService,
   AgentlessPoliciesServiceImpl,
@@ -698,7 +707,10 @@ export class FleetPlugin
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
+    registerVerifyPermissionsTask(deps.taskManager);
+    registerVerifierPolicyCleanupTask(deps.taskManager);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
+    registerSyncNamespaceTemplatesTask(deps.taskManager);
     registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
@@ -713,6 +725,7 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.unenrollInactiveAgents?.taskInterval,
+        gracePeriodMs: config.unenrollInactiveAgents?.gracePeriodMs,
       },
     });
     this.deleteUnenrolledAgentsTask = new DeleteUnenrolledAgentsTask({
@@ -864,6 +877,8 @@ export class FleetPlugin
       plugins.taskManager,
       this.configInitialValue as FleetConfigType
     ).catch(() => {});
+    scheduleVerifyPermissionsTask(plugins.taskManager).catch(() => {});
+    scheduleVerifierPolicyCleanupTask(plugins.taskManager).catch((error) => {});
     this.fleetPolicyRevisionsCleanupTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});

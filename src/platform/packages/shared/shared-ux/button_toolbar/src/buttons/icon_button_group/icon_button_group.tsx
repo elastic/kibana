@@ -24,12 +24,20 @@ export interface IconButton {
   iconType: IconType;
   /** Handler for button click. */
   onClick: () => void;
-  /** HTML `title` attribute for tooltips if different from `label` */
+  /**
+   * HTML `title` attribute for the native browser tooltip. Defaults to `label`.
+   * Ignored when `toolTipContent` is provided — the native tooltip is suppressed
+   * so only the `EuiToolTip` is shown.
+   */
   title?: string;
   /** Test subject for button */
   'data-test-subj'?: string;
   /** To disable the action **/
   isDisabled?: boolean;
+  /** Tooltip content */
+  toolTipContent?: EuiButtonGroupOptionProps['toolTipContent'];
+  /** Tooltip props */
+  toolTipProps?: EuiButtonGroupOptionProps['toolTipProps'];
   /** A11y for button */
   'aria-expanded'?: boolean;
   /** A11y for button */
@@ -71,13 +79,17 @@ export const IconButtonGroup = ({
   const iconButtonGroupStyles = getIconButtonGroupStyles(euiTheme);
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
-    const { label, title = label, css: buttonCss, ...rest } = button;
+    const { label, title, toolTipContent, css: buttonCss, ...rest } = button;
+    // EuiButtonGroupButton defaults the native `title` to the button text. When a
+    // consumer provides `toolTipContent`, suppress that native tooltip (via
+    // `title: ''`) so the EuiToolTip is the only tooltip shown.
     return {
       ...rest,
       'aria-label': title ?? label,
       id: `${htmlIdGenerator()()}${index}`,
       label,
-      title,
+      title: toolTipContent !== undefined ? '' : title ?? label,
+      toolTipContent,
       css: css`
         ${iconButtonStyles};
         ${buttonCss ? buttonCss : ''}

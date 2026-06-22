@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyFieldsToJsonSchema } from './field_conversion';
 import { type ConnectorContractUnion } from '../..';
+import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
@@ -19,11 +19,12 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
-  getTriggerSchema,
+  getSwitchStepSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
@@ -33,7 +34,7 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import type { JsonModelSchema } from '../schema/common/json_model_schema';
+import { getTriggerSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -69,45 +70,50 @@ export function generateYamlSchemaFromConnectors(
     triggers: z.array(triggerSchema).min(1),
   });
 
-  return workflowBaseWithTriggers
-    .extend({
-      settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-      steps: z.array(recursiveStepSchema),
-    })
-    .transform((data) => {
-      let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-      if (data.inputs) {
-        if (
-          'properties' in data.inputs &&
-          typeof data.inputs === 'object' &&
-          !Array.isArray(data.inputs)
-        ) {
-          normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-        } else if (Array.isArray(data.inputs)) {
-          normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
-        }
-      }
-      const { inputs: _, ...rest } = data;
-      return {
-        ...rest,
-        version: '1' as const,
-        ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
-      };
-    });
+  return workflowBaseWithTriggers.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    steps: z.array(recursiveStepSchema),
+  });
+}
+
+/**
+ * Generates a schema for trusted workflow definitions that need the shared workflow envelope
+ * validation without materializing the connector-expanded step union.
+ */
+export function generateLightweightYamlSchema(triggers: string[] = []): z.ZodType {
+  // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
+  // not materialize connector or step-definition schemas.
+  const triggerSchema = getTriggerSchema(triggers);
+  const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
+    triggers: z.array(triggerSchema).min(1),
+  });
+
+  return workflowBaseWithTriggers.extend({
+    // WorkflowSchemaBase validates settings with step-aware fallback schemas. Keep the
+    // trusted startup path step-agnostic so it does not duplicate the step schema SOT.
+    settings: z.unknown().optional(),
+    steps: z.array(z.unknown()).min(1),
+  });
 }
 
 function createRecursiveStepSchema(
   connectors: ConnectorContractUnion[],
   loose: boolean = false
 ): z.ZodType {
-  // Use a simpler approach to avoid infinite recursion during validation
-  // Create the step schema with limited recursion depth
+  // Build the discriminated union exactly once: Zod calls the lazy getter on
+  // every traversal (z.toJSONSchema, .safeParse, monaco-yaml's AJV walk), and
+  // each connector references stepSchema again via `on-failure.fallback`, so
+  // without the cache the 200+ entry union would be rebuilt on every visit.
+  let cachedUnion: z.ZodType | undefined;
   const stepSchema: z.ZodType = z.lazy(() => {
-    // Create step schemas with the recursive reference
-    // Use the same stepSchema reference to maintain consistency
+    if (cachedUnion) {
+      return cachedUnion;
+    }
+
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
+    const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
 
@@ -115,19 +121,19 @@ function createRecursiveStepSchema(
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
-    // Generate alias schemas for backward compatibility
-    // These allow old type names to still validate, but they won't appear in autocomplete
+    // Alias schemas keep old type names parseable, but they're not surfaced in
+    // autocomplete.
     const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
 
-    // Return discriminated union with all step types
-    // This creates proper JSON schema validation that Monaco YAML can handle
-    return z.discriminatedUnion('type', [
+    cachedUnion = z.discriminatedUnion('type', [
       forEachSchema,
       whileSchema,
       ifSchema,
+      switchSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
+      WaitForInputStepSchema,
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
@@ -138,9 +144,21 @@ function createRecursiveStepSchema(
       ...connectorSchemas,
       ...aliasSchemas,
     ]);
+    return cachedUnion;
   });
 
   return stepSchema;
+}
+
+/**
+ * Returns true when a step's params schema has no required fields, meaning `with` can be omitted.
+ * This covers steps like `data.parseJson` whose inputs are all optional or entirely absent.
+ */
+function hasNoRequiredFields(schema: z.ZodType): boolean {
+  if (!(schema instanceof z.ZodObject)) return false;
+  return Object.values(schema.shape).every(
+    (field) => field instanceof z.ZodOptional || field instanceof z.ZodDefault
+  );
 }
 
 function generateStepSchemaForConnector(
@@ -155,11 +173,17 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
   }
 
+  // If all params are optional (or there are none), `with` itself should be optional so users
+  // don't have to write an empty `with: {}` block for steps that need no inputs.
+  const withSchema = hasNoRequiredFields(connector.paramsSchema)
+    ? connector.paramsSchema.optional()
+    : connector.paramsSchema;
+
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
-    with: connector.paramsSchema,
+    with: withSchema,
     ...connectorIdSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),
@@ -184,10 +208,14 @@ function generateAliasSchemas(
     if (connector) {
       // Create a schema with the old type name but same params/output
       const newSchema = generateStepSchemaForConnector(connector, stepSchema, loose);
+      const deprecation = getStepDeprecationInfo(oldType);
+      const description = deprecation
+        ? getDeprecatedStepMessage(oldType, deprecation)
+        : `Deprecated: Use ${newType} instead`;
       aliasSchemas.push(
         newSchema.extend({
           // Mark as deprecated in description so it's clear this is a legacy alias
-          type: z.literal(oldType).describe(`Deprecated: Use ${newType} instead`),
+          type: z.literal(oldType).describe(description),
         })
       );
     }

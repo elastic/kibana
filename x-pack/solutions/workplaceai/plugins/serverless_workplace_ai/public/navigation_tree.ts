@@ -7,7 +7,6 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { DATA_SOURCES_SHORT_TITLE } from '@kbn/data-sources-plugin/common';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
   return {
@@ -21,12 +20,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       {
         icon: 'productAgent',
         link: 'agent_builder',
-      },
-      {
-        link: 'data_sources',
-        title: DATA_SOURCES_SHORT_TITLE,
-        icon: 'plugs',
-        badgeType: 'techPreview',
       },
       {
         link: 'workflows',
@@ -50,7 +43,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
           defaultMessage: 'Developer tools',
         }),
         link: 'dev_tools',
-        icon: 'editorCodeBlock',
+        icon: 'code',
       },
       {
         id: 'management',

@@ -8,15 +8,16 @@
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { ChartType } from '@kbn/visualization-utils';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type {
   VisualizeEditorContext,
+  VisualizationMap,
   Suggestion,
   IndexPatternRef,
-  VisualizationMap,
   TypedLensByValueInput,
   TypedLensSerializedState,
   TextBasedPrivateState,
@@ -169,56 +170,62 @@ export function mergeSuggestionWithVisContext({
   }
 }
 
+const findCompatibleSuggestion = (suggestionCandidates: Suggestion[], targetChartType: ChartType) =>
+  suggestionCandidates.find(
+    (s) => s.title.includes(targetChartType) || s.visualizationId.includes(targetChartType)
+  );
+
+export const createSuggestionWithAttributes = (
+  suggestion: Suggestion,
+  preferredVisAttributes: TypedLensByValueInput['attributes'] | undefined,
+  context: VisualizeFieldContext | VisualizeEditorContext
+) =>
+  preferredVisAttributes
+    ? mergeSuggestionWithVisContext({
+        suggestion,
+        visAttributes: preferredVisAttributes,
+        context,
+      })
+    : suggestion;
+
 /**
- * Switches the visualization type of a suggestion to the specified visualization type
- * @param visualizationMap the visualization map
- * @param targetTypeId the target visualization type to switch to
- * @param familyType the family type of the current suggestion
- * @param shouldSwitch whether the visualization type should be switched
- * @returns updated suggestion or undefined if no switch was made
+ * Selects the best suggestion for a target chart type, applying sub-type switching if needed
+ * (e.g., bar → line within XY, pie → donut).
  */
-export function switchVisualizationType({
+export const selectAndApplyChartSuggestion = ({
+  suggestionsList,
+  targetChartType,
+  chartType,
   visualizationMap,
-  suggestions,
-  targetTypeId,
-  familyType,
-  forceSwitch,
+  preferredVisAttributes,
+  context,
 }: {
+  suggestionsList: Suggestion[];
+  targetChartType: ChartType;
+  chartType: string | undefined;
   visualizationMap: VisualizationMap;
-  suggestions: Suggestion[];
-  targetTypeId?: string;
-  familyType: string;
-  forceSwitch: boolean;
-}): Suggestion[] | undefined {
-  const suggestion = suggestions.find((s) => s.visualizationId === familyType);
+  preferredVisAttributes: TypedLensByValueInput['attributes'] | undefined;
+  context: VisualizeFieldContext | VisualizeEditorContext;
+}): Suggestion => {
+  const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
+  const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
 
-  const visualizationInstance = visualizationMap[familyType];
-
-  const currentTypeId =
-    suggestion &&
-    targetTypeId &&
-    visualizationInstance?.getVisualizationTypeId(suggestion.visualizationState);
-
-  // Determine if a switch is required either
-  // via force flag
-  // or by checking if the target type is supported by the family chart type
-  const shouldSwitch =
-    forceSwitch ||
-    (targetTypeId &&
-      visualizationInstance?.isSubtypeSupported?.(targetTypeId) &&
-      currentTypeId !== targetTypeId);
-
-  if (shouldSwitch && suggestion && familyType && targetTypeId) {
-    const visualizationState = visualizationInstance?.switchVisualizationType?.(
-      targetTypeId,
-      suggestion?.visualizationState
-    );
-
-    return [
-      {
-        ...suggestion,
-        visualizationState,
-      },
-    ];
+  let finalSuggestion = selectedSuggestion;
+  if (chartType) {
+    const vis = visualizationMap[selectedSuggestion.visualizationId];
+    if (vis?.isSubtypeSupported?.(chartType) && vis?.switchVisualizationType) {
+      const currentSubType = vis.getVisualizationTypeId?.(selectedSuggestion.visualizationState);
+      if (currentSubType !== chartType) {
+        finalSuggestion = {
+          ...selectedSuggestion,
+          visualizationState: vis.switchVisualizationType(
+            chartType,
+            selectedSuggestion.visualizationState
+          ),
+        };
+      }
+    }
   }
-}
+
+  return createSuggestionWithAttributes(finalSuggestion, preferredVisAttributes, context);
+};

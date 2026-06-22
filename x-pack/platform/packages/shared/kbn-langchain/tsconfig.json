@@ -17,6 +17,7 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/actions-plugin",
+    "@kbn/inference-common",
     "@kbn/logging-mocks",
     "@kbn/utility-types",
     "@kbn/tooling-log"

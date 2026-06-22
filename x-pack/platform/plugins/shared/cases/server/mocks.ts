@@ -37,7 +37,6 @@ const lensPersistableState = {
     title: '',
     description: '',
     visualizationType: 'lnsXY',
-    type: 'lens',
     references: [
       {
         type: 'index-pattern',
@@ -799,6 +798,11 @@ export const mockCasesContract = (): CasesServerStart => ({
     },
     templates: {
       enabled: true,
+    },
+    casesRedesign: {
+      list: false,
+      details: false,
+      settings: false,
     },
     attachments: {
       enabled: true,

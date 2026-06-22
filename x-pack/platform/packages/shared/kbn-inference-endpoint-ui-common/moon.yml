@@ -29,10 +29,8 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/projects-solutions-groups'
   - '@kbn/react-query'
-  - '@kbn/search-api-panels'
   - '@kbn/kibana-react-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/deeplinks-management'
   - '@kbn/connector-schemas'
 tags:
   - shared-browser
@@ -46,26 +44,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

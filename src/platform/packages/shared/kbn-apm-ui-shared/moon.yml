@@ -18,9 +18,12 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-apm-ui-shared
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
   - '@kbn/charts-theme'
   - '@kbn/apm-types-shared'
   - '@kbn/custom-icons'
+  - '@kbn/ebt-click'
+  - '@kbn/apm-types'
 tags:
   - shared-browser
   - package
@@ -33,26 +36,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

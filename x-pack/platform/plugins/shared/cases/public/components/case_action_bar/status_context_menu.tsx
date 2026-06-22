@@ -6,29 +6,49 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
-import type { CaseStatuses } from '../../../common/types/domain';
-import { caseStatuses } from '../../../common/types/domain';
+import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
+import { useCloseCaseModal } from '../all_cases/use_close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from '../all_cases/use_can_sync_close_reason_to_alerts';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
 interface Props {
   currentStatus: CaseStatuses;
+  totalAlerts: number;
+  syncAlertsEnabled: boolean;
   disabled?: boolean;
   isLoading?: boolean;
-  onStatusChanged: (status: CaseStatuses) => void;
+  onStatusChanged: (status: CaseStatuses, closeReason?: string) => void;
 }
 
 const StatusContextMenuComponent: React.FC<Props> = ({
   currentStatus,
+  totalAlerts,
+  syncAlertsEnabled,
   disabled = false,
   isLoading = false,
   onStatusChanged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const shouldDisableStatus = useShouldDisableStatus();
+  const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
+    totalAlerts,
+    syncAlertsEnabled,
+  });
+
+  const onCloseCase = useCallback(
+    (closeReason?: string) => {
+      onStatusChanged(CaseStatuses.closed, closeReason);
+    },
+    [onStatusChanged]
+  );
+  const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
+    canSyncCloseReasonToAlerts,
+    onCloseCase,
+  });
   const togglePopover = useCallback(
     () => setIsPopoverOpen((prevPopoverStatus) => !prevPopoverStatus),
     []
@@ -51,10 +71,14 @@ const StatusContextMenuComponent: React.FC<Props> = ({
     (status: CaseStatuses) => {
       closePopover();
       if (currentStatus !== status) {
-        onStatusChanged(status);
+        if (status === CaseStatuses.closed) {
+          openCloseCaseModal();
+        } else {
+          onStatusChanged(status);
+        }
       }
     },
-    [closePopover, currentStatus, onStatusChanged]
+    [closePopover, currentStatus, onStatusChanged, openCloseCaseModal]
   );
 
   const panelItems = useMemo(
@@ -79,17 +103,20 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   }
 
   return (
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={popOverButton}
-      closePopover={closePopover}
-      data-test-subj="case-view-status-dropdown"
-      id="caseStatusPopover"
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel title={CHANGE_STATUS} items={panelItems} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        anchorPosition="downLeft"
+        button={popOverButton}
+        closePopover={closePopover}
+        data-test-subj="case-view-status-dropdown"
+        id="caseStatusPopover"
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel title={CHANGE_STATUS} items={panelItems} />
+      </EuiPopover>
+      {closeCaseModal}
+    </>
   );
 };
 

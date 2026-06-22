@@ -89,6 +89,7 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -341,6 +342,7 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   skipUnassignFromAgentPolicies?: boolean;
   force?: boolean;
   asyncDeploy?: boolean;
+  ignoreMissing?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {

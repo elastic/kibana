@@ -229,7 +229,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  const { force, id, package: pkg, ...newPolicy } = request.body;
+  const { force, id, package: pkg, create_dataset_templates, ...newPolicy } = request.body;
   if ('spaceIds' in newPolicy) {
     delete newPolicy.spaceIds;
   }
@@ -287,6 +287,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         id,
         force,
         spaceId,
+        createDatasetTemplates: create_dataset_templates,
       },
       context,
       request
@@ -449,6 +450,23 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       if (agentPolicy?.supports_agentless) {
         throw new PackagePolicyRequestError(
           'Cannot change agent policies of an agentless integration'
+        );
+      }
+    }
+
+    if (
+      newData.output_id !== undefined &&
+      newData.output_id !== packagePolicy.output_id &&
+      !isEmpty(packagePolicy.policy_ids)
+    ) {
+      const parentAgentPolicies = await agentPolicyService.getByIds(
+        soClient,
+        packagePolicy.policy_ids!,
+        { ignoreMissing: true }
+      );
+      if (parentAgentPolicies.some((ap) => ap.is_managed)) {
+        throw new PackagePolicyRequestError(
+          'Cannot change the output of a package policy belonging to a managed agent policy'
         );
       }
     }

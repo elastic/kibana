@@ -26,7 +26,6 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
-  httpServiceMock,
   executionContextServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
@@ -208,7 +207,6 @@ describe('Task Runner', () => {
       actionsPlugin: actionsMock.createStart(),
       alertsService: mockAlertsService,
       backfillClient,
-      basePathService: httpServiceMock.createBasePath(),
       cancelAlertsOnRuleTimeout: true,
       connectorAdapterRegistry,
       data: dataPlugin,
@@ -399,7 +397,11 @@ describe('Task Runner', () => {
         );
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -534,7 +536,11 @@ describe('Task Runner', () => {
           { tags: ['1', 'test'] }
         );
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(
@@ -736,7 +742,11 @@ describe('Task Runner', () => {
         });
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -827,7 +837,11 @@ describe('Task Runner', () => {
         });
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);

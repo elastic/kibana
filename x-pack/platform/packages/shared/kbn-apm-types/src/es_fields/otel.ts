@@ -17,3 +17,4 @@ export const LINKS_TRACE_ID = 'links.trace_id';
 export const LINKS_SPAN_ID = 'links.span_id';
 export const ATTRIBUTE_HTTP_SCHEME = 'attributes.http.scheme';
 export const ATTRIBUTE_HTTP_STATUS_CODE = 'attributes.http.status_code';
+export const PROCESS_RUNTIME_VERSION = 'process.runtime.version';

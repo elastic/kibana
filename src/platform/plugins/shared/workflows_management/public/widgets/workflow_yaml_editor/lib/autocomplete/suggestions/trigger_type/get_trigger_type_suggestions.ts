@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import {
   AlertRuleTriggerSchema,
+  isTriggerType,
   ManualTriggerSchema,
   ScheduledTriggerSchema,
 } from '@kbn/workflows';
@@ -63,6 +65,16 @@ export function getTriggerTypeSuggestions(
       endColumn: Math.max(range.endColumn, 1000),
     };
 
+    const isEventDriven = !isTriggerType(triggerType.type);
+    const detail = isEventDriven
+      ? i18n.translate('workflows.triggerSuggestions.eventDrivenTriggerDetail', {
+          defaultMessage: 'Event-driven trigger',
+        })
+      : i18n.translate('workflows.triggerSuggestions.workflowTriggerDetail', {
+          defaultMessage: 'Workflow trigger',
+        });
+
+    const sortPrefix = isEventDriven ? '1_' : '0_';
     suggestions.push({
       label: triggerType.type,
       kind: triggerType.icon,
@@ -71,8 +83,8 @@ export function getTriggerTypeSuggestions(
       range: extendedRange,
       documentation: triggerType.description,
       filterText: triggerType.type,
-      sortText: `!${triggerType.type}`, // Priority prefix to sort before other suggestions
-      detail: 'Workflow trigger',
+      sortText: `!${sortPrefix}${triggerType.type}`,
+      detail,
       preselect: false,
     });
   });

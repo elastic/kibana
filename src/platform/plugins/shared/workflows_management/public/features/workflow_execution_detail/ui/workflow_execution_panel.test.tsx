@@ -12,10 +12,10 @@ import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -112,9 +112,7 @@ describe('WorkflowExecutionPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStore = undefined;
-    jest
-      .mocked(useWorkflowsCapabilities)
-      .mockReturnValue({ ...mockWorkflowsManagementCapabilities });
+    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
   const renderComponent = (props = {}, store?: any) => {
@@ -185,7 +183,7 @@ describe('WorkflowExecutionPanel', () => {
       expect(screen.getByTestId('cancel-execution-button')).toBeInTheDocument();
     });
 
-    it('should show cancel button for cancelable status (WAITING_FOR_INPUT)', () => {
+    it('should show cancel button for WAITING_FOR_INPUT (it is a cancelable status)', () => {
       renderComponent({
         execution: { ...mockExecution, status: ExecutionStatus.WAITING_FOR_INPUT },
       });
@@ -209,6 +207,17 @@ describe('WorkflowExecutionPanel', () => {
     it('should not show cancel button for terminal status (FAILED)', () => {
       renderComponent({
         execution: { ...mockExecution, status: ExecutionStatus.FAILED },
+      });
+      expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
+    });
+
+    it('should not show cancel button when finishedAt is set even if status were stale', () => {
+      renderComponent({
+        execution: {
+          ...mockExecution,
+          status: ExecutionStatus.RUNNING,
+          finishedAt: '2025-08-05T20:01:00.000Z',
+        },
       });
       expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
     });
@@ -337,13 +346,48 @@ describe('WorkflowExecutionPanel', () => {
       fireEvent.click(screen.getByTestId('replayExecutionButton'));
 
       const state = store.getState();
-      expect(state.detail.replayExecutionId).toBe('exec-123');
+      expect(state.detail.replay?.executionId).toBe('exec-123');
       expect(state.detail.isTestModalOpen).toBe(true);
+    });
+
+    it('should dispatch setTestStepModalOpenStepId and setReplayStepExecutionId when step run replay', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString(mockExecution.yaml));
+
+      const stepRunExecution = {
+        ...mockExecution,
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'my-step',
+        stepExecutions: [
+          {
+            id: 'step-exec-1',
+            stepId: 'my-step',
+            workflowRunId: 'exec-123',
+            status: 'completed',
+            startedAt: '',
+          },
+        ],
+      };
+
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: stepRunExecution,
+        },
+        store
+      );
+
+      fireEvent.click(screen.getByTestId('replayExecutionButton'));
+
+      const state = store.getState();
+      expect(state.detail.testStepModalOpenStepId).toBe('my-step');
+      expect(state.detail.replay?.stepExecutionId).toBe('step-exec-1');
+      expect(state.detail.isTestModalOpen).toBe(false);
     });
 
     it('should disable replay button when user lacks execute capability', () => {
       jest.mocked(useWorkflowsCapabilities).mockReturnValue({
-        ...mockWorkflowsManagementCapabilities,
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
 

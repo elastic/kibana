@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
   type EuiSuperSelectOption,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,7 +41,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   onSelect,
 }) => {
   const usageTracker = useUsageTracker();
-  const managementLink = useManagementLink(selectedModel?.connectorId || '');
+  const managementLink = useManagementLink();
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
 
@@ -56,7 +57,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         inputDisplay: (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={model.icon} />
+              <EuiIcon type={model.icon} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexGroup
               justifyContent="spaceBetween"
@@ -71,7 +72,9 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
                   color="subdued"
                   css={{ overflow: 'hidden', textOverflow: 'ellipsis', textWrap: 'nowrap' }}
                 >
-                  <span title={model.connectorName}>{model.connectorName}</span>
+                  <EuiToolTip content={model.connectorName} disableScreenReaderOutput>
+                    <span>{model.connectorName}</span>
+                  </EuiToolTip>
                 </EuiText>
               )}
             </EuiFlexGroup>
@@ -80,7 +83,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         dropdownDisplay: (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={model.icon} />
+              <EuiIcon type={model.icon} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexGroup
               gutterSize="xs"

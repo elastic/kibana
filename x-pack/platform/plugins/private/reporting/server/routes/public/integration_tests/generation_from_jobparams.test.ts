@@ -185,10 +185,10 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
           "invalid params: [
             {
               \\"code\\": \\"custom\\",
-              \\"message\\": \\"Invalid timezone\\",
               \\"path\\": [
                 \\"browserTimezone\\"
-              ]
+              ],
+              \\"message\\": \\"Invalid timezone\\"
             }
           ]"
         `)

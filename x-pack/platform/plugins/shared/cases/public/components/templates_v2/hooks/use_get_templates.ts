@@ -7,8 +7,8 @@
 
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import { useToasts } from '../../../common/lib/kibana';
-import * as i18n from '../../templates/translations';
+import { KibanaServices, useToasts } from '../../../common/lib/kibana';
+import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import type {
   TemplatesFindRequest,
@@ -24,7 +24,7 @@ export const useGetTemplates = (
   } = {}
 ): UseQueryResult<TemplatesFindResponse> => {
   const toasts = useToasts();
-
+  const isEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
   return useQuery(
     casesQueriesKeys.templatesAll(params),
     ({ signal }) => {
@@ -38,6 +38,7 @@ export const useGetTemplates = (
     },
     {
       keepPreviousData: true,
+      enabled: isEnabled,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

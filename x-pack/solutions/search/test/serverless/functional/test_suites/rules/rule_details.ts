@@ -22,7 +22,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
-  const svlRuleDetailsUI = getPageObject('svlRuleDetailsUI');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -33,7 +32,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
-    await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${ruleName}"]`);
+    await find.clickDisplayedByCssSelector(
+      `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${ruleName}"]`
+    );
   };
 
   const openRulesSection = async () => {
@@ -75,7 +76,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    describe('Header', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/256840
+    describe.skip('Header', () => {
       const testRunUuid = uuidv4();
       const ruleName = `test-rule-${testRunUuid}`;
       const RULE_TYPE_ID = '.es-query';
@@ -347,7 +349,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Edit rule with deleted connector', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/259893
+    describe.skip('Edit rule with deleted connector', () => {
       const RULE_TYPE_ID = '.es-query';
 
       afterEach(async () => {
@@ -535,7 +538,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await find.clickByButtonText('Settings');
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).toEqual('On custom action intervals');
         const throttleInput = await testSubjects.find('throttleInput');
@@ -572,7 +574,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
       });
 
-      it('renders a disabled rule details view in app button', async () => {
+      it('does not render a view in discover button', async () => {
         const rule = await alertingApi.helpers.createEsQueryRule({
           roleAuthc,
           consumer: 'alerts',
@@ -597,7 +599,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
 
-        expect(await svlRuleDetailsUI.isViewInAppDisabled()).toEqual(true);
+        await testSubjects.missingOrFail('ruleDetails-viewInDiscover');
       });
     });
   });

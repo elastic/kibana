@@ -46,9 +46,11 @@ import { initializeTransforms } from './create_transforms/create_transforms';
 import { createDataViews } from './create_data_views';
 
 import { registerFeatures } from './utils/register_features';
-import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
+import { osqueryUnifiedAttachment } from './cases/attachments';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
+import { checkResponseActionAuthz } from './lib/check_response_action_authz';
+import { SchemaService } from './lib/schema_service';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
 
@@ -61,18 +63,22 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private coreStart: CoreStart | null = null;
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
+  private readonly schemaService: SchemaService;
+  private rruleSchedulingEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
     this.logger = initializerContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
+    this.schemaService = new SchemaService(this.logger);
   }
 
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
     const experimentalFeatures = config.experimentalFeatures;
+    this.rruleSchedulingEnabled = experimentalFeatures.rruleScheduling;
 
     registerFeatures(plugins.features);
 
@@ -103,7 +109,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         );
 
         plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
-        defineRoutes(router, osqueryContext);
+        defineRoutes(router, osqueryContext, this.schemaService);
       })
       .catch(() => {
         // it shouldn't reject, but just in case
@@ -133,6 +139,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               osqueryContext: this.osqueryAppContextService,
               logger: this.logger,
               abortController,
+              isRruleFeatureEnabled: this.rruleSchedulingEnabled,
             });
 
             return { state: { completed: !hadFailures } };
@@ -141,11 +148,15 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+    if (plugins.cases) {
+      plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+    }
 
     return {
       createActionService: this.createActionService,
-    };
+      checkResponseActionAuthz: (request, actionParams) =>
+        checkResponseActionAuthz(core, request, actionParams),
+    } satisfies OsqueryPluginSetup;
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
@@ -238,7 +249,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     spaceScopedClient,
                     allPacks.saved_objects,
                     this.osqueryAppContextService,
-                    soClient.getCurrentNamespace()
+                    soClient.getCurrentNamespace(),
+                    this.rruleSchedulingEnabled
                   );
                 }
               }

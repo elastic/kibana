@@ -7,23 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { timeSliderControlSchema } from '@kbn/controls-schemas';
+
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
+import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformDashboardOut } from './transform_dashboard_out';
+import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
+import { setStubKibanaServices } from '../../../mocks';
 
-jest.mock('../../../kibana_services', () => ({
-  ...jest.requireActual('../../../kibana_services'),
-  embeddableService: {
-    getTransforms: jest.fn(),
+const embeddable = createEmbeddableSetupMock();
+embeddable.registerEmbeddableServerDefinition(TIME_SLIDER_CONTROL, {
+  title: 'Time slider control',
+  getSchema: () => {
+    return timeSliderControlSchema;
   },
-}));
+  getTransforms: () => {
+    return {
+      transformOut: jest.fn().mockImplementation((val) => val),
+      schema: timeSliderControlSchema,
+    };
+  },
+});
 
 describe('transformDashboardOut', () => {
+  beforeAll(() => {
+    setStubKibanaServices();
+  });
+
   const pinnedPanelSo = {
-    config: { anyKey: 'some value' },
-    type: 'type1',
+    config: {},
+    type: 'time_slider_control',
     order: 0,
   };
 
@@ -39,20 +57,27 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should not supply defaults for optional top level properties', () => {
-    const input: DashboardSavedObjectAttributes = {
-      description: '',
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{}',
-      },
-      optionsJSON: '{}',
-      panelsJSON: '',
-      timeRestore: false,
+  test('should supply defaults', () => {
+    const input: Partial<DashboardSavedObjectAttributes> = {
       title: 'my title',
     };
-    expect(transformDashboardOut(input)).toEqual({
-      title: 'my title',
-    });
+    expect(transformDashboardOut(input, undefined, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
+      Object {
+        "dashboardState": Object {
+          "options": Object {
+${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
+  .slice(2, -2)
+  .replaceAll('.', ' '.repeat(12))},
+          },
+          "panels": Array [],
+          "pinned_panels": Array [],
+          "tags": Array [],
+          "title": "my title",
+        },
+        "warnings": Array [],
+      }
+    `);
   });
 
   test('should transform full attributes correctly', () => {
@@ -102,55 +127,71 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual({
-      pinned_panels: [
-        {
-          uid: 'foo',
-          grow: false,
-          width: 'small',
-          config: {
-            anyKey: 'some value',
+    expect(transformDashboardOut(input, references, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
+      Object {
+        "dashboardState": Object {
+          "description": "description",
+          "filters": Array [],
+          "options": Object {
+            "auto_apply_filters": false,
+            "hide_panel_borders": false,
+            "hide_panel_titles": true,
+            "sync_colors": false,
+            "sync_cursor": false,
+            "sync_tooltips": false,
+            "use_margins": false,
           },
-          type: 'type1',
+          "panels": Array [
+            Object {
+              "config": Object {
+                "enhancements": Object {},
+                "title": "title1",
+              },
+              "grid": Object {
+                "h": 10,
+                "w": 10,
+                "x": 0,
+                "y": 0,
+              },
+              "id": "1",
+              "type": "type1",
+            },
+          ],
+          "pinned_panels": Array [
+            Object {
+              "config": Object {
+                "end_percentage_of_time_range": 1,
+                "is_anchored": false,
+                "start_percentage_of_time_range": 0,
+              },
+              "grow": false,
+              "id": "foo",
+              "type": "time_slider_control",
+              "width": "small",
+            },
+          ],
+          "query": Object {
+            "expression": "test",
+            "language": "kql",
+          },
+          "refresh_interval": Object {
+            "pause": true,
+            "value": 1000,
+          },
+          "tags": Array [
+            "tag1",
+            "tag2",
+          ],
+          "time_range": Object {
+            "from": "now-15m",
+            "to": "now",
+          },
+          "title": "title",
         },
-      ],
-      description: 'description',
-      query: { query: 'test', language: 'KQL' },
-      options: {
-        hide_panel_titles: true,
-        use_margins: false,
-        sync_colors: false,
-        sync_tooltips: false,
-        sync_cursor: false,
-        auto_apply_filters: false,
-      },
-      panels: [
-        {
-          config: {
-            enhancements: {},
-            title: 'title1',
-          },
-          grid: {
-            x: 0,
-            y: 0,
-            w: 10,
-            h: 10,
-          },
-          uid: '1',
-          type: 'type1',
-        },
-      ],
-      refresh_interval: {
-        pause: true,
-        value: 1000,
-      },
-      tags: ['tag1', 'tag2'],
-      time_range: {
-        from: 'now-15m',
-        to: 'now',
-      },
-      title: 'title',
-    });
+        "warnings": Array [],
+      }
+    `);
   });
 
   test('should transform <9.4 legacy attributes correctly', () => {
@@ -188,46 +229,60 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual({
-      pinned_panels: [
-        {
-          uid: 'foo',
-          grow: false,
-          width: 'small',
-          config: {
-            anyKey: 'some value',
+    expect(transformDashboardOut(input, references, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
+      Object {
+        "dashboardState": Object {
+          "description": "description",
+          "filters": Array [],
+          "options": Object {
+            "auto_apply_filters": false,
+            "hide_panel_borders": false,
+            "hide_panel_titles": true,
+            "sync_colors": false,
+            "sync_cursor": false,
+            "sync_tooltips": false,
+            "use_margins": false,
           },
-          type: 'type1',
+          "panels": Array [
+            Object {
+              "config": Object {
+                "enhancements": Object {},
+                "title": "title1",
+              },
+              "grid": Object {
+                "h": 10,
+                "w": 10,
+                "x": 0,
+                "y": 0,
+              },
+              "id": "1",
+              "type": "type1",
+            },
+          ],
+          "pinned_panels": Array [
+            Object {
+              "config": Object {
+                "end_percentage_of_time_range": 1,
+                "is_anchored": false,
+                "start_percentage_of_time_range": 0,
+              },
+              "grow": false,
+              "id": "foo",
+              "type": "time_slider_control",
+              "width": "small",
+            },
+          ],
+          "query": Object {
+            "expression": "test",
+            "language": "kql",
+          },
+          "tags": Array [],
+          "title": "title",
         },
-      ],
-      description: 'description',
-      query: { query: 'test', language: 'KQL' },
-      options: {
-        hide_panel_titles: true,
-        use_margins: false,
-        sync_colors: false,
-        sync_tooltips: false,
-        sync_cursor: false,
-        auto_apply_filters: false,
-      },
-      panels: [
-        {
-          config: {
-            enhancements: {},
-            title: 'title1',
-          },
-          grid: {
-            x: 0,
-            y: 0,
-            w: 10,
-            h: 10,
-          },
-          uid: '1',
-          type: 'type1',
-        },
-      ],
-      title: 'title',
-    });
+        "warnings": Array [],
+      }
+    `);
   });
 
   describe('project_routing', () => {
@@ -240,8 +295,13 @@ describe('transformDashboardOut', () => {
         description: 'my description',
         projectRouting: '_alias:_origin',
       };
-      const result = transformDashboardOut(input);
-      expect(result.project_routing).toBe('_alias:_origin');
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
+      expect(dashboardState.project_routing).toBe('_alias:_origin');
     });
 
     test('should not include project_routing when it is undefined', () => {
@@ -253,9 +313,14 @@ describe('transformDashboardOut', () => {
         description: 'my description',
         // projectRouting is undefined
       };
-      const result = transformDashboardOut(input);
-      expect(result.project_routing).toBeUndefined();
-      expect(result).not.toHaveProperty('project_routing');
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
+      expect(dashboardState.project_routing).toBeUndefined();
+      expect(dashboardState).not.toHaveProperty('project_routing');
     });
   });
 });

@@ -10,7 +10,7 @@ import React from 'react';
 
 interface BenefitRowProps {
   iconType: string;
-  text: string;
+  text: React.ReactNode;
 }
 
 export const BenefitRow = ({ iconType, text }: BenefitRowProps) => {

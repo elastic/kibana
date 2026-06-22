@@ -21,8 +21,17 @@ export const normalizePathSlashes = (path: string): string => {
 
 export interface ApiClientOptions {
   headers?: Record<string, string>;
-  responseType?: 'json' | 'text';
+  responseType?: 'json' | 'text' | 'buffer';
   body?: any;
+  /**
+   * Pass an AbortSignal to cancel the request mid-flight.
+   * @example
+   * const controller = new AbortController();
+   * const promise = apiClient.post(url, { signal: controller.signal, headers, body });
+   * setTimeout(() => controller.abort(), 2000);
+   * await expect(promise).rejects.toThrow();
+   */
+  signal?: AbortSignal;
 }
 
 export interface ApiClientResponse {
@@ -45,7 +54,7 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
   apiClient: [
     async ({ config, log }, use) => {
       const kibanaServerUrl = formatUrl(config.hosts.kibana);
-      const testAgent = supertest(kibanaServerUrl);
+      const testAgent = supertest(kibanaServerUrl, config.http2 ? { http2: true } : {});
 
       // Map method names to agent functions
       const methodMap: Record<keyof ApiClientFixture, (url: string) => supertest.Test> = {
@@ -77,6 +86,19 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             req = req.set('Accept', 'application/json');
           }
 
+          // Enable binary buffering for buffer responseType
+          if (options.responseType === 'buffer') {
+            req = req.buffer(true).parse((res, callback) => {
+              const chunks: Buffer[] = [];
+              res.on('data', (chunk: Buffer) => {
+                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+              });
+              res.on('end', () => {
+                callback(null, Buffer.concat(chunks));
+              });
+            });
+          }
+
           // Handle body and auto-set Content-Type if needed
           if (options.body !== undefined) {
             const isPlainObject =
@@ -95,6 +117,24 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             }
 
             req = req.send(options.body);
+          }
+
+          if (options.signal) {
+            if (options.signal.aborted) {
+              req.abort();
+            } else {
+              options.signal.addEventListener(
+                'abort',
+                () => {
+                  try {
+                    req.abort();
+                  } catch {
+                    // Swallow — the abort rejection propagates via the awaited request
+                  }
+                },
+                { once: true }
+              );
+            }
           }
 
           const res = await req;

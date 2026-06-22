@@ -20,6 +20,11 @@ describe('config validation', () => {
           "attachments": Object {
             "enabled": false,
           },
+          "casesRedesign": Object {
+            "details": false,
+            "list": false,
+            "settings": false,
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
@@ -104,6 +109,7 @@ describe('config validation', () => {
               "text/json",
               "application/json",
               "application/zip",
+              "application/x-zip-compressed",
               "application/gzip",
               "application/x-bzip",
               "application/x-bzip2",

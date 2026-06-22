@@ -22,18 +22,25 @@ import type {
   RegistryVarGroup,
 } from '../types';
 
-import { DATASET_VAR_NAME } from '../constants';
+import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
 
 import {
   isValidNamespace,
   doesPackageHaveIntegrations,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getInputEffectiveName,
+  buildInputKey,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
-import { isValidDataset } from './is_valid_namespace';
+import { isValidDataset, isValidDataStreamType } from './is_valid_namespace';
 
 type Errors = string[] | null;
+
+export interface ValidatePackagePolicyDeps {
+  safeLoadYaml: (yaml: string) => any;
+  conditionValidator?: (expr?: string) => Array<{ line: number; column: number; message: string }>;
+}
 
 interface DurationParseResult {
   isValid: boolean;
@@ -131,6 +138,7 @@ type ValidationRequiredVars = Record<string, ValidationRequiredVarsEntry[]>;
 export interface PackagePolicyConfigValidationResults {
   required_vars?: ValidationRequiredVars | null;
   vars?: ValidationEntry;
+  condition?: Errors;
 }
 
 export type PackagePolicyInputValidationResults = PackagePolicyConfigValidationResults & {
@@ -142,8 +150,24 @@ export type PackagePolicyValidationResults = {
   description: Errors;
   namespace: Errors;
   additional_datastreams_permissions: Errors;
+  condition: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
+
+const validateCondition = (
+  expr: string | null | undefined,
+  conditionValidator: ValidatePackagePolicyDeps['conditionValidator']
+): Errors => {
+  if (!conditionValidator) return null;
+  const errors = conditionValidator(expr ?? undefined);
+  if (!errors.length) return null;
+  return errors.map(({ line, column, message }) =>
+    i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
+      defaultMessage: 'Line {line}, column {col}: {message}',
+      values: { line, col: column + 1, message },
+    })
+  );
+};
 
 const validatePackageRequiredVars = (
   streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,
@@ -276,15 +300,17 @@ const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
 export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  safeLoadYaml: (yaml: string) => any,
+  deps: ValidatePackagePolicyDeps,
   spaceSettings?: { allowedNamespacePrefixes?: string[] }
 ): PackagePolicyValidationResults => {
+  const { safeLoadYaml, conditionValidator } = deps;
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
     namespace: null,
     additional_datastreams_permissions: null,
+    condition: null,
     inputs: {},
     vars: {},
   };
@@ -324,6 +350,8 @@ export const validatePackagePolicy = (
         null
       );
   }
+
+  validationResults.condition = validateCondition(packagePolicy.condition, conditionValidator);
 
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
@@ -369,7 +397,11 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+      const varDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
@@ -382,9 +414,11 @@ export const validatePackagePolicy = (
   >((reqVarDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const requiredVarDefKey = hasIntegrations
-        ? `${policyTemplate.name}-${input.type}`
-        : input.type;
+      const requiredVarDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         reqVarDefs[requiredVarDefKey] = input.required_vars;
@@ -430,7 +464,11 @@ export const validatePackagePolicy = (
     if (!input.vars && !input.streams) {
       return;
     }
-    const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
+    const inputKey = buildInputKey(
+      getInputEffectiveName(input),
+      input.policy_template,
+      hasIntegrations
+    );
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       required_vars: undefined,
@@ -465,11 +503,16 @@ export const validatePackagePolicy = (
       delete inputValidationResults.required_vars;
     }
 
+    const inputConditionErrors = validateCondition(input.condition, conditionValidator);
+    if (inputConditionErrors !== null) {
+      inputValidationResults.condition = inputConditionErrors;
+    }
+
     // Validate each input stream with var definitions
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
-        const streamKey = `${stream.data_stream.dataset}-${input.type}`;
+        const streamKey = `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`;
 
         const streamVarDefs = streamVarDefsByDatasetAndInput[streamKey];
         const streamVarGroups = streamVarGroupsByDatasetAndInput[streamKey];
@@ -518,13 +561,22 @@ export const validatePackagePolicy = (
           }
         }
 
+        const streamConditionErrors = validateCondition(stream.condition, conditionValidator);
+        if (streamConditionErrors !== null) {
+          streamValidationResults.condition = streamConditionErrors;
+        }
+
         inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
       });
     } else {
       delete inputValidationResults.streams;
     }
 
-    if (inputValidationResults.vars || inputValidationResults.streams) {
+    if (
+      inputValidationResults.vars ||
+      inputValidationResults.streams ||
+      inputValidationResults.condition
+    ) {
       validationResults.inputs![inputKey] = inputValidationResults;
     }
   });
@@ -620,7 +672,9 @@ export const validatePackagePolicyConfig = (
 
   if (varDef.type === 'yaml') {
     try {
-      parsedValue = safeLoadYaml(value);
+      // Coerce to string before parsing to match the behavior of js-yaml.load,
+      // which internally calls String(input). The yaml package requires a string.
+      parsedValue = safeLoadYaml(String(value));
     } catch (e) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {
@@ -814,6 +868,17 @@ export const validatePackagePolicyConfig = (
       parsedValue.dataset ? parsedValue.dataset : parsedValue,
       false
     );
+    if (!valid && error) {
+      errors.push(error);
+    }
+  }
+
+  if (
+    varName === DATA_STREAM_TYPE_VAR_NAME &&
+    packageType === 'input' &&
+    parsedValue !== undefined
+  ) {
+    const { valid, error } = isValidDataStreamType(parsedValue, false);
     if (!valid && error) {
       errors.push(error);
     }

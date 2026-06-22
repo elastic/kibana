@@ -13,6 +13,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -23,6 +24,7 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import { builtInComparatorsWithInclusive } from '../../../constants/comparators';
 import { convertToBuiltInComparators } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../types';
@@ -134,18 +136,28 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="o11yExpressionRowButton"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
                 {
                   defaultMessage: 'Remove condition',
                 }
               )}
-              color={'text'}
-              iconType={'trash'}
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="o11yExpressionRowButton"
+                aria-label={i18n.translate(
+                  'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
+                  {
+                    defaultMessage: 'Remove condition',
+                  }
+                )}
+                color={'text'}
+                iconType={'trash'}
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -210,6 +222,7 @@ const ThresholdElement: React.FC<{
   return (
     <>
       <ThresholdExpression
+        customComparators={builtInComparatorsWithInclusive}
         thresholdComparator={thresholdComparator()}
         threshold={displayedThreshold}
         onChangeSelectedThresholdComparator={updateComparator}

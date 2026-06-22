@@ -236,12 +236,17 @@ const getResponseActionListTableColumns = ({
       render: (actionListDataItem: ActionListApiResponse['data'][number]) => {
         const actionId = actionListDataItem.id;
         return (
-          <EuiButtonIcon
-            data-test-subj={getTestId('expand-button')}
-            onClick={onClickCallback(actionListDataItem)}
-            aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
-            iconType={expandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
-          />
+          <EuiToolTip
+            content={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={getTestId('expand-button')}
+              onClick={onClickCallback(actionListDataItem)}
+              aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+              iconType={expandedRowMap[actionId] ? 'chevronSingleUp' : 'chevronSingleDown'}
+            />
+          </EuiToolTip>
         );
       },
     },

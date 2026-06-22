@@ -59,6 +59,8 @@ jest.mock('../spaces/get_current_namespace', () => ({
 
 jest.mock('../spaces/agent_namespaces', () => ({
   agentsKueryNamespaceFilter: jest.fn(),
+  buildFilterWithNamespace: jest.requireActual('../spaces/agent_namespaces')
+    .buildFilterWithNamespace,
 }));
 
 jest.mock('../license', () => ({
@@ -697,7 +699,7 @@ describe('rollback', () => {
 
         expect(result.actionIds).toEqual([mockActionId1]);
         expect(mockGetAgentsByKuery).toHaveBeenCalledWith(esClient, soClient, {
-          kuery,
+          kuery: `(${kuery})`,
           showAgentless: undefined,
           showInactive: false,
           page: 1,
@@ -733,7 +735,7 @@ describe('rollback', () => {
 
         expect(result.actionIds).toEqual([mockActionId1, mockActionId2]);
         expect(mockGetAgentsByKuery).toHaveBeenCalledWith(esClient, soClient, {
-          kuery,
+          kuery: `(${kuery})`,
           showAgentless: undefined,
           showInactive: false,
           page: 1,
@@ -777,7 +779,7 @@ describe('rollback', () => {
           esClient,
           soClient,
           expect.objectContaining({
-            kuery: `${namespaceFilter} AND ${kuery}`,
+            kuery: `(${namespaceFilter}) AND (${kuery})`,
           })
         );
       });

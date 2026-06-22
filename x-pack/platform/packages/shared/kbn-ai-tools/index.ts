@@ -9,14 +9,20 @@ export { describeDataset } from './src/tools/describe_dataset';
 
 export { formatDocumentAnalysis } from './src/tools/describe_dataset/format_document_analysis';
 
-export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
-export { getSampleDocuments } from './src/tools/describe_dataset/get_sample_documents';
+export { mergeSampleDocumentsWithSchema } from './src/tools/describe_dataset/merge_sample_documents_with_schema';
+export {
+  getSampleDocuments,
+  getSampleDocumentsEsql,
+} from './src/tools/describe_dataset/get_sample_documents';
+export { getDiverseSampleDocuments } from './src/tools/describe_dataset/get_diverse_sample_documents';
 export type {
   DocumentAnalysis,
   FormattedDocumentAnalysis,
 } from './src/tools/describe_dataset/document_analysis';
 export {
   getLogPatterns,
+  getSigEventsLogPatternsEsql,
+  type LogPatternEsqlEntry,
   type FieldPatternResultWithChanges,
 } from './src/tools/log_patterns/get_log_patterns';
 export {
@@ -24,5 +30,10 @@ export {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
 } from './src/utils/p_value_to_label';
+export {
+  getEsqlColumnSchema,
+  type EsqlColumnSchema,
+  type GetEsqlColumnSchemaParams,
+} from './src/utils/get_esql_column_schema';
 
 export { executeAsEsqlAgent } from './src/tools/esql';

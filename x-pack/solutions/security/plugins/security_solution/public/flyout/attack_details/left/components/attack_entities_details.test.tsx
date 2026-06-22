@@ -11,6 +11,22 @@ import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../../context';
 import { AttackEntitiesDetails } from './attack_entities_details';
 
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useUiSetting: () => false,
+  };
+});
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: () => ({
+    entityRecord: null,
+    isLoading: false,
+    refetch: jest.fn(),
+  }),
+}));
+
 jest.mock('@kbn/i18n-react', () => ({
   FormattedMessage: ({
     defaultMessage,
@@ -124,8 +140,8 @@ describe('AttackEntitiesDetails', () => {
     jest.clearAllMocks();
     useHeaderData.mockReturnValue({ timestamp: '2024-01-01T00:00:00Z' });
     useAttackEntitiesLists.mockReturnValue({
-      userNames: [],
-      hostNames: [],
+      userEntityEntries: [],
+      hostEntityEntries: [],
       loading: false,
       error: false,
     });
@@ -133,8 +149,8 @@ describe('AttackEntitiesDetails', () => {
 
   it('renders loading skeleton when loading is true', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userNames: [],
-      hostNames: [],
+      userEntityEntries: [],
+      hostEntityEntries: [],
       loading: true,
       error: false,
     });
@@ -147,8 +163,8 @@ describe('AttackEntitiesDetails', () => {
 
   it('renders error message when error is true', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userNames: [],
-      hostNames: [],
+      userEntityEntries: [],
+      hostEntityEntries: [],
       loading: false,
       error: true,
     });
@@ -161,10 +177,10 @@ describe('AttackEntitiesDetails', () => {
     expect(screen.queryByTestId('attack-entities-details')).not.toBeInTheDocument();
   });
 
-  it('renders no data message when userNames and hostNames are empty', () => {
+  it('renders no data message when user and host entity entries are empty', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userNames: [],
-      hostNames: [],
+      userEntityEntries: [],
+      hostEntityEntries: [],
       loading: false,
       error: false,
     });
@@ -179,8 +195,13 @@ describe('AttackEntitiesDetails', () => {
 
   it('renders User and Host sections with UserDetails and HostDetails when data is present', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userNames: ['user1', 'user2'],
-      hostNames: ['host1'],
+      userEntityEntries: [
+        { identityFields: { 'user.name': 'user1' }, sampleSource: { user: { name: 'user1' } } },
+        { identityFields: { 'user.name': 'user2' }, sampleSource: { user: { name: 'user2' } } },
+      ],
+      hostEntityEntries: [
+        { identityFields: { 'host.name': 'host1' }, sampleSource: { host: { name: 'host1' } } },
+      ],
       loading: false,
       error: false,
     });
@@ -198,8 +219,12 @@ describe('AttackEntitiesDetails', () => {
 
   it('renders singular User and Host titles when each list has at most one item', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userNames: ['user1'],
-      hostNames: ['host1'],
+      userEntityEntries: [
+        { identityFields: { 'user.name': 'user1' }, sampleSource: { user: { name: 'user1' } } },
+      ],
+      hostEntityEntries: [
+        { identityFields: { 'host.name': 'host1' }, sampleSource: { host: { name: 'host1' } } },
+      ],
       loading: false,
       error: false,
     });
@@ -212,8 +237,14 @@ describe('AttackEntitiesDetails', () => {
 
   it('renders plural Users and Hosts titles when each list has more than one item', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userNames: ['user1', 'user2'],
-      hostNames: ['host1', 'host2'],
+      userEntityEntries: [
+        { identityFields: { 'user.name': 'user1' }, sampleSource: { user: { name: 'user1' } } },
+        { identityFields: { 'user.name': 'user2' }, sampleSource: { user: { name: 'user2' } } },
+      ],
+      hostEntityEntries: [
+        { identityFields: { 'host.name': 'host1' }, sampleSource: { host: { name: 'host1' } } },
+        { identityFields: { 'host.name': 'host2' }, sampleSource: { host: { name: 'host2' } } },
+      ],
       loading: false,
       error: false,
     });
@@ -227,8 +258,15 @@ describe('AttackEntitiesDetails', () => {
   it('passes scopeId and timestamp to UserDetails and HostDetails', () => {
     useHeaderData.mockReturnValue({ timestamp: '2025-06-15T12:00:00Z' });
     useAttackEntitiesLists.mockReturnValue({
-      userNames: ['alice'],
-      hostNames: ['host-a'],
+      userEntityEntries: [
+        { identityFields: { 'user.name': 'alice' }, sampleSource: { user: { name: 'alice' } } },
+      ],
+      hostEntityEntries: [
+        {
+          identityFields: { 'host.name': 'host-a' },
+          sampleSource: { host: { name: 'host-a' } },
+        },
+      ],
       loading: false,
       error: false,
     });
@@ -250,8 +288,10 @@ describe('AttackEntitiesDetails', () => {
   it('uses empty string for timestamp when timestamp is null', () => {
     useHeaderData.mockReturnValue({ timestamp: null });
     useAttackEntitiesLists.mockReturnValue({
-      userNames: ['user1'],
-      hostNames: [],
+      userEntityEntries: [
+        { identityFields: { 'user.name': 'user1' }, sampleSource: { user: { name: 'user1' } } },
+      ],
+      hostEntityEntries: [],
       loading: false,
       error: false,
     });

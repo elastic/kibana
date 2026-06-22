@@ -53,10 +53,11 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/esql-types'
   - '@kbn/background-search'
-  - '@kbn/split-button'
   - '@kbn/cps'
   - '@kbn/css-utils'
   - '@kbn/kql'
+  - '@kbn/date-range-picker'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -67,27 +68,8 @@ fileGroups:
   src:
     - public/**/*
     - public/**/*.json
+    - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

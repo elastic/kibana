@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import type { Subscription } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
@@ -45,7 +45,7 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security } = setupDeps;
+    const { serverless, management, security, workflowsManagement } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -57,12 +57,21 @@ export class ServerlessObservabilityPlugin
         return createNavigationTree({
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
+          genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
         });
       })
     );
     serverless.initNavigation('oblt', navigationTree$);
+
+    if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
+      workflowsManagement.setUnavailableInServerlessTier({
+        // Hardcoded for now since it's the only product that can require an upgrade. Could be improved by retrieving the required products from the pricing config.
+        requiredProducts: ['Observability: Complete'],
+      });
+    }
 
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
     const roleManagementEnabled = security.authz.isRoleManagementEnabled();
@@ -74,8 +83,8 @@ export class ServerlessObservabilityPlugin
             Boolean(aiAssistantIsEnabled) && chatExperience !== AIChatExperience.Agent
         ),
         distinctUntilChanged(),
-        map((showAiAssistant) =>
-          serverless.getNavigationCards(
+        switchMap((showAiAssistant) =>
+          serverless.getNavigationCards$(
             roleManagementEnabled,
             showAiAssistant
               ? {

@@ -15,6 +15,7 @@ import type {
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  MANAGE_TEMPLATES_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -73,6 +74,9 @@ export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
+  attachments?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -88,6 +92,11 @@ export interface CasesUiConfigType {
   };
   templates: {
     enabled: boolean;
+  };
+  casesRedesign: {
+    list: boolean;
+    details: boolean;
+    settings: boolean;
   };
 }
 
@@ -122,12 +131,12 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
 export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
-  latestAttachments: AttachmentUI[];
+  latestAttachments: AttachmentUIV2[];
 }
 
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
-  comments: AttachmentUI[];
+  comments: AttachmentUIV2[];
 };
 export type ObservableUI = CaseUI['observables'][0];
 
@@ -193,6 +202,11 @@ export interface SystemFilterOptions {
   category: string[];
 }
 
+export interface ExtendedFieldFilter {
+  label: string;
+  value: string;
+}
+
 export interface FilterOptions extends SystemFilterOptions {
   customFields: {
     [key: string]: {
@@ -200,6 +214,7 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  extendedFieldFilters: ExtendedFieldFilter[];
   from: string;
   to: string;
 }
@@ -338,8 +353,6 @@ export interface Ecs {
 
 export type CaseActionConnector = ActionConnector;
 
-export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
-
 export interface CasesPermissions {
   all: boolean;
   create: boolean;
@@ -352,6 +365,7 @@ export interface CasesPermissions {
   reopenCase: boolean;
   createComment: boolean;
   assign: boolean;
+  manageTemplates: boolean;
 }
 
 export interface CasesCapabilities {
@@ -365,8 +379,5 @@ export interface CasesCapabilities {
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
-}
-
-export interface CaseViewEventsTableProps {
-  events: { eventId: string | string[]; index: string | string[] }[];
+  [MANAGE_TEMPLATES_CAPABILITY]: boolean;
 }

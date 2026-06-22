@@ -37,7 +37,6 @@ dependsOn:
   - '@kbn/io-ts-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/alerting-plugin'
-  - '@kbn/spaces-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-ui-settings-server'
@@ -59,18 +58,20 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/ml-trained-models-utils'
   - '@kbn/lock-manager'
-  - '@kbn/i18n-react'
   - '@kbn/inference-tracing'
   - '@kbn/licensing-types'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/product-doc-base-plugin'
-  - '@kbn/inference-endpoint-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/usage-collection-plugin'
-  - '@kbn/ai-agent-confirmation-modal'
-  - '@kbn/ai-assistant-management-plugin'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/zod'
+  - '@kbn/search-inference-endpoints'
+  - '@kbn/inference-connectors'
+  - '@kbn/react-query'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/evals-plugin'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
@@ -85,26 +86,6 @@ fileGroups:
     - public/**/*.json
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

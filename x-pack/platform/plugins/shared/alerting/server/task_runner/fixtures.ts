@@ -74,6 +74,7 @@ export const generateRuleUpdateParams = ({
   successRatio = 1,
   history = defaultHistory,
   alertsCount,
+  metrics,
 }: {
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
@@ -83,6 +84,7 @@ export const generateRuleUpdateParams = ({
   successRatio?: number;
   history?: RuleMonitoring['run']['history'];
   alertsCount?: Record<string, number>;
+  metrics?: Record<string, unknown>;
 }) => [
   {
     id: `alert:1`,
@@ -100,12 +102,13 @@ export const generateRuleUpdateParams = ({
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
-                // TODO: uncomment after intermidiate release
-                // gap_range: null,
+                gap_range: null,
+                gap_reason: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
                 total_search_duration_ms: null,
+                ...metrics,
               },
             },
           },

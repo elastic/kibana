@@ -7,7 +7,9 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { CRUDClient } from '../../domain/crud';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { EntityUpdateClient } from '../../domain/crud';
+import type { MaintainerTelemetryClient } from './maintainer_telemetry_client';
 
 export const EntityMaintainerTaskStatus = {
   NEVER_STARTED: 'never_started',
@@ -35,10 +37,26 @@ export type EntityMaintainerTelemetryEventType =
 export interface EntityMaintainerRegistryData {
   interval: string;
   description?: string;
+  minLicense: LicenseType;
 }
 
 export interface EntityMaintainerTaskEntry extends EntityMaintainerRegistryData {
   id: string;
+}
+
+export interface EntityMaintainerLifecycle {
+  run: EntityMaintainerTaskMethod;
+  setup?: EntityMaintainerTaskMethod;
+  initialState: EntityMaintainerState;
+}
+
+export interface EntityMaintainerRegistration
+  extends EntityMaintainerTaskEntry,
+    EntityMaintainerLifecycle {}
+
+export interface EntityMaintainerRegistryValue {
+  task: EntityMaintainerTaskEntry;
+  lifecycle: EntityMaintainerLifecycle;
 }
 
 export interface EntityMaintainerStatusMetadata {
@@ -60,13 +78,15 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
   taskStatus: EntityMaintainerTaskStatus;
 }
 
-interface EntityMaintainerTaskMethodContext {
+export interface EntityMaintainerTaskMethodContext {
   status: EntityMaintainerStatus;
   abortController: AbortController;
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
-  crudClient: CRUDClient;
+  cpsEsClient: ElasticsearchClient;
+  crudClient: EntityUpdateClient;
+  telemetry: MaintainerTelemetryClient;
 }
 
 export type EntityMaintainerTaskMethod = (
@@ -77,7 +97,9 @@ export interface RegisterEntityMaintainerConfig {
   id: string;
   description?: string;
   interval: string;
+  timeout?: string;
   initialState: EntityMaintainerState;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;
+  minLicense?: LicenseType;
 }

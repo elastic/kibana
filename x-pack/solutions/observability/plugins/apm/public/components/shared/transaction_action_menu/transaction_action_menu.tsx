@@ -52,7 +52,7 @@ function ActionMenuButton({ onClick, isLoading }: { onClick: () => void; isLoadi
     <EuiButton
       data-test-subj="apmActionMenuButtonInvestigateButton"
       isLoading={isLoading}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onClick}
     >
@@ -148,7 +148,6 @@ function ActionMenuSections({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
 

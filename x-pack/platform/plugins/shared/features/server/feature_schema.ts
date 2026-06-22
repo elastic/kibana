@@ -77,6 +77,7 @@ const alertingRuleSchemaSpec = {
   enable: schema.maybe(alertingSchema),
   manual_run: schema.maybe(alertingSchema),
   manage_rule_settings: schema.maybe(alertingSchema),
+  mute_alerts: schema.maybe(alertingSchema),
   read: schema.maybe(alertingSchema),
 };
 
@@ -102,6 +103,7 @@ const casesSchemaObject = schema.maybe(
     createComment: schema.maybe(casesSchema),
     reopenCase: schema.maybe(casesSchema),
     assign: schema.maybe(casesSchema),
+    manageTemplates: schema.maybe(casesSchema),
   })
 );
 
@@ -156,6 +158,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     },
   }),
   name: schema.string(),
+  excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   includeIn: schema.oneOf([schema.literal('all'), schema.literal('read'), schema.literal('none')]),
   minimumLicense: schema.maybe(validSubFeaturePrivilegeLicensesSchema),
   management: schema.maybe(managementSchema),

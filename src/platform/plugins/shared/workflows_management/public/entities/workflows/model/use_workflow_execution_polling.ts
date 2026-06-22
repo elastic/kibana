@@ -8,60 +8,57 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Subject, switchMap, takeUntil, timer } from 'rxjs';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
+import { WORKFLOW_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { loadExecutionThunk } from '../store/workflow_detail/thunks/load_execution_thunk';
 
-export const PollingIntervalMs = 1000 as const;
-
-interface PollingState {
+export interface PollingState {
   workflowExecution: WorkflowExecutionDto | undefined;
   isLoading: boolean;
   error: Error | null;
 }
 
 /**
- * This hook uses RxJS operators for a more declarative approach.
- * It uses RxJS's built-in operators for polling and cleanup.
+ * Polls a single workflow execution serially: each request starts only after the previous
+ * finishes, then waits WORKFLOW_EXECUTION_POLL_INTERVAL_MS before the next poll.
  */
 export const useWorkflowExecutionPolling = (workflowExecutionId: string): PollingState => {
   const [loadExecution, { result: workflowExecution, error }] =
     useAsyncThunkState(loadExecutionThunk);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const stopSubjectRef = useRef<Subject<void>>(new Subject<void>());
+  const workflowExecutionIdRef = useRef(workflowExecutionId);
+  workflowExecutionIdRef.current = workflowExecutionId;
+
+  const workflowExecutionRef = useRef(workflowExecution);
+  workflowExecutionRef.current = workflowExecution;
 
   useEffect(() => {
-    // Create a new stop subject for this polling cycle
-    const stop$ = new Subject<void>();
-    stopSubjectRef.current = stop$;
     setIsLoading(true);
+  }, [workflowExecutionId]);
 
-    // Create an observable that polls at intervals, starting immediately
-    // timer(0, PollingIntervalMs) emits immediately (0ms) then every PollingIntervalMs
-    const polling$ = timer(0, PollingIntervalMs).pipe(
-      switchMap(() => loadExecution({ id: workflowExecutionId })),
-      takeUntil(stop$)
-    );
-
-    const subscription = polling$.subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-      stop$.next();
-      setIsLoading(false);
-    };
-  }, [workflowExecutionId, loadExecution]);
-
-  // Stop polling when execution reaches terminal state
   useEffect(() => {
-    if (workflowExecution && isTerminalStatus(workflowExecution.status)) {
-      stopSubjectRef.current.next();
+    if (workflowExecution?.id === workflowExecutionId) {
       setIsLoading(false);
     }
-  }, [workflowExecution]);
+  }, [workflowExecution, workflowExecutionId]);
+
+  useSerialPolling({
+    poll: () => loadExecution({ id: workflowExecutionId }),
+    pollKey: workflowExecutionId,
+    intervalMs: WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+    shouldStop: () => {
+      const execution = workflowExecutionRef.current;
+      return (
+        execution !== undefined &&
+        execution.id === workflowExecutionIdRef.current &&
+        isTerminalStatus(execution.status)
+      );
+    },
+  });
 
   return { workflowExecution, isLoading, error };
 };

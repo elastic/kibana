@@ -55,7 +55,6 @@ export {
   userIsReArrangingProviders,
   fieldWasDroppedOnTimelineColumns,
   DRAG_TYPE_FIELD,
-  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
 interface AddProviderToTimelineParams {
   activeTimelineDataProviders: DataProvider[];

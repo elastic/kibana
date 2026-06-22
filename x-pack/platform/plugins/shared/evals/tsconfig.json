@@ -10,11 +10,15 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/features-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/storage-adapter",
     "@kbn/es-errors",
     "@kbn/evals-common",
+    "@kbn/zod-helpers",
+    "@kbn/data-streams",
+    "@kbn/core-data-streams-server",
     "@kbn/i18n",
     "@kbn/react-query",
     "@kbn/shared-ux-router",
@@ -22,6 +26,12 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/llm-trace-waterfall",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/es-mappings"
   ]
 }

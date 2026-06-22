@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
@@ -21,18 +20,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import {
-  appendWhereClauseToESQLQuery,
-  hasTransformationalCommand,
-  appendFilteringWhereClauseForCascadeLayout,
-} from '@kbn/esql-utils';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { generateFilters } from '@kbn/data-plugin/public';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { type DataView, type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  ErrorCallout,
+  SHOW_FIELD_STATISTICS,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -54,10 +51,8 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
-import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
@@ -72,7 +67,6 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { isCascadedDocumentsVisible } from './cascaded_documents';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -86,6 +80,8 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
 
 export function DiscoverLayout() {
   const {
+    core,
+    docLinks,
     trackUiMetric,
     capabilities,
     dataViews,
@@ -125,13 +121,6 @@ export function DiscoverLayout() {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
-  const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
-  const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
-    isCascadedDocumentsVisible(
-      tab.cascadedDocumentsState.availableCascadeGroups,
-      tab.appState.query
-    )
-  );
 
   const fetchCounter = useRef<number>(0);
 
@@ -202,92 +191,13 @@ export function DiscoverLayout() {
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
+  const addFilter = useCurrentTabAction(internalStateActions.addFilter);
   const onAddFilter = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
-      if (!field) {
-        return;
-      }
-      const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(dataView, fieldName, dataViews, capabilities);
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
-      }
-      void scopedEBTManager.trackFilterAddition({
-        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-        fieldsMetadata,
-      });
-      return filterManager.addFilters(newFilters);
+      dispatch(addFilter({ field, value: values, mode: operation }));
     },
-    [
-      dataView,
-      dataViews,
-      capabilities,
-      filterManager,
-      trackUiMetric,
-      scopedEBTManager,
-      fieldsMetadata,
-    ]
+    [addFilter, dispatch]
   );
-
-  const onPopulateWhereClause = useCallback<DocViewFilterFn>(
-    (field, values, operation) => {
-      if (!field || !isOfAggregateQueryType(query)) {
-        return;
-      }
-      const fieldName = typeof field === 'string' ? field : field.name;
-      // send the field type for casting
-      const fieldType = typeof field !== 'string' ? field.type : undefined;
-      // weird existence logic from Discover components
-      // in the field it comes the operator _exists_ and in the value the field
-      // I need to take care of it here but I think it should be handled on the fieldlist instead
-      const updatedQuery = isCascadeLayoutSelected
-        ? appendFilteringWhereClauseForCascadeLayout(
-            query.esql,
-            esqlVariables,
-            dataView,
-            fieldName === '_exists_' ? String(values) : fieldName,
-            fieldName === '_exists_' || values == null ? undefined : values,
-            getOperator(fieldName, values, operation),
-            fieldType
-          )
-        : appendWhereClauseToESQLQuery(
-            query.esql,
-            fieldName === '_exists_' ? String(values) : fieldName,
-            fieldName === '_exists_' || values == null ? undefined : values,
-            getOperator(fieldName, values, operation),
-            fieldType
-          );
-
-      if (!updatedQuery) {
-        return;
-      }
-      data.query.queryString.setQuery({
-        esql: updatedQuery,
-      });
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
-      }
-      void scopedEBTManager.trackFilterAddition({
-        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-        fieldsMetadata,
-      });
-    },
-    [
-      query,
-      isCascadeLayoutSelected,
-      esqlVariables,
-      dataView,
-      data.query.queryString,
-      trackUiMetric,
-      scopedEBTManager,
-      fieldsMetadata,
-    ]
-  );
-
-  const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
 
   const canSetBreakdownField = useMemo(
     () =>
@@ -375,16 +285,6 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
-  const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
-    return (
-      <PanelsToggle
-        sidebarToggleState$={sidebarToggleState$}
-        renderedFor="root"
-        isChartAvailable={undefined}
-      />
-    );
-  }, [sidebarToggleState$]);
-
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -397,10 +297,10 @@ export function DiscoverLayout() {
           dataView={dataView}
           columns={currentColumns}
           viewMode={viewMode}
-          onAddFilter={onFilter}
+          onAddFilter={onAddFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
-          panelsToggle={panelsToggle}
+          sidebarToggleState$={sidebarToggleState$}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -410,10 +310,10 @@ export function DiscoverLayout() {
     dataView,
     currentColumns,
     viewMode,
-    onFilter,
+    onAddFilter,
     onFieldEdited,
     onDropFieldToTable,
-    panelsToggle,
+    sidebarToggleState$,
     dataStateContainer,
   ]);
 
@@ -497,7 +397,7 @@ export function DiscoverLayout() {
                 documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
-                onAddFilter={onFilter}
+                onAddFilter={onAddFilter}
                 onChangeDataView={onChangeDataView}
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
@@ -511,14 +411,14 @@ export function DiscoverLayout() {
               <div css={styles.dscPageContentWrapper}>
                 {resultState === 'none' ? (
                   <>
-                    {React.isValidElement(panelsToggle) ? (
-                      <div css={styles.mainPanel}>
-                        {React.cloneElement(panelsToggle, {
-                          renderedFor: 'prompt',
-                          isChartAvailable: false,
-                        })}
-                      </div>
-                    ) : null}
+                    <div css={styles.mainPanel}>
+                      <PanelsToggle
+                        sidebarToggleState$={sidebarToggleState$}
+                        omitChartButton
+                        omitTableButton
+                        dataTestSubjSuffix="InPage"
+                      />
+                    </div>
                     {dataState.error ? (
                       <ErrorCallout
                         title={i18n.translate(
@@ -529,6 +429,10 @@ export function DiscoverLayout() {
                         )}
                         error={dataState.error}
                         isEsqlMode={isEsqlMode}
+                        showErrorDialog={({ title, error }) =>
+                          core.notifications.showErrorDialog({ title, error })
+                        }
+                        esqlReferenceHref={docLinks.links.query.queryESQL}
                       />
                     ) : (
                       <DiscoverNoResults
@@ -563,21 +467,6 @@ export function DiscoverLayout() {
     </EuiPage>
   );
 }
-
-const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
-  if (fieldName === '_exists_') {
-    return 'is_not_null';
-  }
-  if (values == null && operation === '-') {
-    return 'is_not_null';
-  }
-
-  if (values == null && operation === '+') {
-    return 'is_null';
-  }
-
-  return operation;
-};
 
 const componentStyles = {
   dscPage: ({ euiTheme }: UseEuiTheme) =>

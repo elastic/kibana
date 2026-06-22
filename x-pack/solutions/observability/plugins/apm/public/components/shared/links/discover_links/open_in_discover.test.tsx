@@ -27,6 +27,14 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 const MOCK_ERROR_INDEX = 'logs-apm.error-*';
+const MOCK_DATA_TEST_SUBJ = 'testButton';
+const MOCK_LABEL = 'Open in Discover';
+const MOCK_LABEL_FULL_TRACE = 'Open full trace in Discover';
+const MOCK_DISCOVER_URL = 'http://test-discover-url';
+const MOCK_SERVICE_NAME = 'my-service';
+const MOCK_EBT = { element: 'test' } as const;
+const MOCK_RANGE_FROM = 'now-15m';
+const MOCK_RANGE_TO = 'now';
 
 jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
@@ -42,6 +50,25 @@ const mockGetRedirectUrl = jest.fn();
 const mockLocatorGet = jest.fn().mockReturnValue({
   getRedirectUrl: mockGetRedirectUrl,
 });
+
+type OpenInDiscoverProps = Parameters<typeof OpenInDiscover>[0];
+
+function renderOpenInDiscover(
+  overrides: Partial<OpenInDiscoverProps> & { queryParams: OpenInDiscoverProps['queryParams'] }
+) {
+  return render(
+    <OpenInDiscover
+      variant="emptyButton"
+      dataTestSubj={MOCK_DATA_TEST_SUBJ}
+      label={MOCK_LABEL}
+      indexType="traces"
+      rangeFrom={MOCK_RANGE_FROM}
+      rangeTo={MOCK_RANGE_TO}
+      ebt={MOCK_EBT}
+      {...overrides}
+    />
+  );
+}
 
 describe('OpenInDiscover', () => {
   beforeEach(() => {
@@ -75,69 +102,48 @@ describe('OpenInDiscover', () => {
       },
     } as any);
 
-    mockGetRedirectUrl.mockReturnValue('http://test-discover-url');
+    mockGetRedirectUrl.mockReturnValue(MOCK_DISCOVER_URL);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('button variant', () => {
+  describe('emptyButton variant', () => {
     it('should render a button with correct props', () => {
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service' }}
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({
+        queryParams: { serviceName: MOCK_SERVICE_NAME },
+      });
 
-      const button = getByTestId('testButton');
+      const button = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent('Open in Discover');
+      expect(button).toHaveTextContent(MOCK_LABEL);
     });
 
     it('should render a button with custom label when provided', () => {
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service' }}
-          label="Open full trace in Discover"
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({
+        queryParams: { serviceName: MOCK_SERVICE_NAME },
+        label: MOCK_LABEL_FULL_TRACE,
+      });
 
-      const button = getByTestId('testButton');
+      const button = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent('Open full trace in Discover');
+      expect(button).toHaveTextContent(MOCK_LABEL_FULL_TRACE);
     });
 
     it('should generate correct ESQL query and pass it to the locator', () => {
-      render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service', transactionType: 'request' }}
-        />
-      );
+      renderOpenInDiscover({
+        queryParams: { serviceName: MOCK_SERVICE_NAME, transactionType: 'request' },
+      });
 
       expect(mockLocatorGet).toHaveBeenCalledWith(DISCOVER_APP_LOCATOR);
       expect(mockGetRedirectUrl).toHaveBeenCalledWith({
         timeRange: {
-          from: 'now-15m',
-          to: 'now',
+          from: MOCK_RANGE_FROM,
+          to: MOCK_RANGE_TO,
         },
         query: {
-          esql: expect.stringContaining(`\`${SERVICE_NAME}\` == "my-service"`),
+          esql: expect.stringContaining(`\`${SERVICE_NAME}\` == "${MOCK_SERVICE_NAME}"`),
         },
       });
     });
@@ -148,18 +154,9 @@ describe('OpenInDiscover', () => {
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
 
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{}}
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({ queryParams: {} });
 
-      const button = getByTestId('testButton');
+      const button = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(button).toBeDisabled();
     });
 
@@ -174,40 +171,26 @@ describe('OpenInDiscover', () => {
         indexSettingsStatus: FETCH_STATUS.LOADING,
       } as any);
 
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{}}
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({ queryParams: {} });
 
-      const button = getByTestId('testButton');
+      const button = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(button).toBeDisabled();
     });
   });
 
-  describe('outlinedButton variant', () => {
+  describe('button variant', () => {
     it('should render an outlined button with custom label', () => {
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="outlinedButton"
-          dataTestSubj="testOutlinedButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service' }}
-          label="Explore traces"
-        />
-      );
+      const label = 'Explore traces';
+      const { getByTestId } = renderOpenInDiscover({
+        variant: 'button',
+        queryParams: { serviceName: MOCK_SERVICE_NAME },
+        label,
+      });
 
-      const button = getByTestId('testOutlinedButton');
+      const button = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent('Explore traces');
-      expect(button).toHaveAttribute('href', 'http://test-discover-url');
+      expect(button).toHaveTextContent(label);
+      expect(button).toHaveAttribute('href', MOCK_DISCOVER_URL);
     });
 
     it('should render disabled outlined button when indexSettingsStatus is not SUCCESS', () => {
@@ -221,39 +204,27 @@ describe('OpenInDiscover', () => {
         indexSettingsStatus: FETCH_STATUS.LOADING,
       } as any);
 
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="outlinedButton"
-          dataTestSubj="testOutlinedButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{}}
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({
+        variant: 'button',
+        queryParams: {},
+      });
 
-      const button = getByTestId('testOutlinedButton');
+      const button = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(button).toBeDisabled();
     });
   });
 
   describe('link variant', () => {
     it('should render a link with correct props', () => {
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="link"
-          dataTestSubj="testLink"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service' }}
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({
+        variant: 'link',
+        queryParams: { serviceName: MOCK_SERVICE_NAME },
+      });
 
-      const link = getByTestId('testLink');
+      const link = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', 'http://test-discover-url');
-      expect(link).toHaveTextContent('Open in Discover');
+      expect(link).toHaveAttribute('href', MOCK_DISCOVER_URL);
+      expect(link).toHaveTextContent(MOCK_LABEL);
     });
 
     it('should render disabled link when indexSettings is empty', () => {
@@ -262,18 +233,12 @@ describe('OpenInDiscover', () => {
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
 
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="link"
-          dataTestSubj="testLink"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{}}
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({
+        variant: 'link',
+        queryParams: {},
+      });
 
-      const link = getByTestId('testLink');
+      const link = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(link).toBeInTheDocument();
       expect(link).toBeDisabled();
     });
@@ -289,18 +254,12 @@ describe('OpenInDiscover', () => {
         indexSettingsStatus: FETCH_STATUS.LOADING,
       } as any);
 
-      const { getByTestId } = render(
-        <OpenInDiscover
-          variant="link"
-          dataTestSubj="testLink"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{}}
-        />
-      );
+      const { getByTestId } = renderOpenInDiscover({
+        variant: 'link',
+        queryParams: {},
+      });
 
-      const link = getByTestId('testLink');
+      const link = getByTestId(MOCK_DATA_TEST_SUBJ);
       expect(link).toBeInTheDocument();
       expect(link).toBeDisabled();
     });
@@ -308,16 +267,9 @@ describe('OpenInDiscover', () => {
 
   describe('ESQL query generation', () => {
     it('should generate traces ESQL query with service name and transaction type', () => {
-      render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service', transactionType: 'request' }}
-        />
-      );
+      renderOpenInDiscover({
+        queryParams: { serviceName: MOCK_SERVICE_NAME, transactionType: 'request' },
+      });
 
       const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
       expect(esqlArg).toContain(`FROM ${MOCK_TRACES_INDEX}`);
@@ -326,32 +278,19 @@ describe('OpenInDiscover', () => {
     });
 
     it('should generate traces ESQL query with transaction name filter', () => {
-      render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service', transactionName: 'GET /api/users' }}
-        />
-      );
+      renderOpenInDiscover({
+        queryParams: { serviceName: MOCK_SERVICE_NAME, transactionName: 'GET /api/users' },
+      });
 
       const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
       expect(esqlArg).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
     });
 
     it('should generate error ESQL query with error index', () => {
-      render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="error"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ serviceName: 'my-service', errorGroupId: 'error-123' }}
-        />
-      );
+      renderOpenInDiscover({
+        indexType: 'error',
+        queryParams: { serviceName: MOCK_SERVICE_NAME, errorGroupId: 'error-123' },
+      });
 
       const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
       expect(esqlArg).toContain(`FROM ${MOCK_ERROR_INDEX}`);
@@ -359,16 +298,9 @@ describe('OpenInDiscover', () => {
     });
 
     it('should generate ESQL query with span ID for span view', () => {
-      render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{ spanId: 'span-456' }}
-        />
-      );
+      renderOpenInDiscover({
+        queryParams: { spanId: 'span-456' },
+      });
 
       const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
       expect(esqlArg).toContain(`\`${SPAN_ID}\` == "span-456"`);
@@ -378,25 +310,13 @@ describe('OpenInDiscover', () => {
   describe('consumer scenarios', () => {
     describe('waterfall (transaction details) context', () => {
       it('should generate correct query with only traceId and sort by @timestamp ASC', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="apmWaterfallOpenInDiscoverButton"
-            indexType="traces"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            label="Open full trace in Discover"
-            queryParams={{
-              traceId: 'trace-abc-123',
-              sortDirection: 'ASC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          queryParams: { traceId: 'trace-abc-123', sortDirection: 'ASC' },
+          label: MOCK_LABEL_FULL_TRACE,
+        });
 
-        const button = document.querySelector(
-          '[data-test-subj="apmWaterfallOpenInDiscoverButton"]'
-        );
-        expect(button).toHaveTextContent('Open full trace in Discover');
+        const button = document.querySelector(`[data-test-subj="${MOCK_DATA_TEST_SUBJ}"]`);
+        expect(button).toHaveTextContent(MOCK_LABEL_FULL_TRACE);
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`FROM ${MOCK_TRACES_INDEX}`);
@@ -409,17 +329,10 @@ describe('OpenInDiscover', () => {
       });
 
       it('should generate query without traceId filter when traceId is not provided', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="apmWaterfallOpenInDiscoverButton"
-            indexType="traces"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            label="Open full trace in Discover"
-            queryParams={{}}
-          />
-        );
+        renderOpenInDiscover({
+          queryParams: {},
+          label: MOCK_LABEL_FULL_TRACE,
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).not.toContain('trace.id');
@@ -429,25 +342,19 @@ describe('OpenInDiscover', () => {
 
     describe('dependency operation context', () => {
       it('should generate correct query with dependency-specific params', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="apmWaterfallOpenInDiscoverButton"
-            indexType="traces"
-            rangeFrom="now-24h"
-            rangeTo="now"
-            queryParams={{
-              kuery: '',
-              serviceName: 'upstream-service',
-              environment: 'staging',
-              spanName: 'SELECT * FROM users',
-              dependencyName: 'postgresql',
-              sampleRangeFrom: 500,
-              sampleRangeTo: 2000,
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          rangeFrom: 'now-24h',
+          queryParams: {
+            kuery: '',
+            serviceName: 'upstream-service',
+            environment: 'staging',
+            spanName: 'SELECT * FROM users',
+            dependencyName: 'postgresql',
+            sampleRangeFrom: 500,
+            sampleRangeTo: 2000,
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "upstream-service"`);
@@ -457,7 +364,6 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).toContain(`\`${SPAN_DURATION}\` >= 500`);
         expect(esqlArg).toContain(`\`${SPAN_DURATION}\` <= 2000`);
         expect(esqlArg).toContain('SORT @timestamp DESC');
-        // transactionName is not set, so SPAN_DURATION is used instead of TRANSACTION_DURATION
         expect(esqlArg).not.toContain(TRANSACTION_DURATION);
         expect(esqlArg).not.toContain(TRANSACTION_NAME);
       });
@@ -465,21 +371,15 @@ describe('OpenInDiscover', () => {
 
     describe('trace explorer context', () => {
       it('should generate minimal query with only kuery and environment', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="apmWaterfallOpenInDiscoverButton"
-            indexType="traces"
-            rangeFrom="now-1h"
-            rangeTo="now"
-            queryParams={{
-              kuery: 'trace.id: "abc123"',
-              serviceName: 'discovered-service',
-              environment: 'production',
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          rangeFrom: 'now-1h',
+          queryParams: {
+            kuery: 'trace.id: "abc123"',
+            serviceName: 'discovered-service',
+            environment: 'production',
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "discovered-service"`);
@@ -494,23 +394,17 @@ describe('OpenInDiscover', () => {
 
     describe('chart link context', () => {
       it('should generate correct query for latency/throughput/error rate charts', () => {
-        render(
-          <OpenInDiscover
-            variant="link"
-            dataTestSubj="apmLatencyChartOpenInDiscover"
-            indexType="traces"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            queryParams={{
-              kuery: '',
-              serviceName: 'my-service',
-              environment: 'production',
-              transactionName: 'GET /api/users',
-              transactionType: 'request',
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          variant: 'link',
+          queryParams: {
+            kuery: '',
+            serviceName: MOCK_SERVICE_NAME,
+            environment: 'production',
+            transactionName: 'GET /api/users',
+            transactionType: 'request',
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
@@ -518,28 +412,21 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
         expect(esqlArg).toContain(`\`${TRANSACTION_TYPE}\` == "request"`);
         expect(esqlArg).toContain('SORT @timestamp DESC');
-        // charts don't pass sample range
         expect(esqlArg).not.toContain(TRANSACTION_DURATION);
         expect(esqlArg).not.toContain(SPAN_DURATION);
       });
 
       it('should generate correct query for overview charts without transactionName', () => {
-        render(
-          <OpenInDiscover
-            variant="link"
-            dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
-            indexType="traces"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            queryParams={{
-              kuery: '',
-              serviceName: 'my-service',
-              environment: 'production',
-              transactionType: 'request',
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          variant: 'link',
+          queryParams: {
+            kuery: '',
+            serviceName: MOCK_SERVICE_NAME,
+            environment: 'production',
+            transactionType: 'request',
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
@@ -551,25 +438,18 @@ describe('OpenInDiscover', () => {
 
     describe('correlations context', () => {
       it('should generate correct query with sample range for correlations', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
-            indexType="traces"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            queryParams={{
-              kuery: '',
-              serviceName: 'my-service',
-              environment: 'production',
-              transactionName: 'GET /api/users',
-              transactionType: 'request',
-              sampleRangeFrom: 2000,
-              sampleRangeTo: 8000,
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          queryParams: {
+            kuery: '',
+            serviceName: MOCK_SERVICE_NAME,
+            environment: 'production',
+            transactionName: 'GET /api/users',
+            transactionType: 'request',
+            sampleRangeFrom: 2000,
+            sampleRangeTo: 8000,
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
@@ -581,23 +461,16 @@ describe('OpenInDiscover', () => {
       });
 
       it('should generate correct query without sample range when chart is not brushed', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
-            indexType="traces"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            queryParams={{
-              kuery: '',
-              serviceName: 'my-service',
-              environment: 'production',
-              transactionName: 'GET /api/users',
-              transactionType: 'request',
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          queryParams: {
+            kuery: '',
+            serviceName: MOCK_SERVICE_NAME,
+            environment: 'production',
+            transactionName: 'GET /api/users',
+            transactionType: 'request',
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
@@ -609,21 +482,15 @@ describe('OpenInDiscover', () => {
 
     describe('error sample context', () => {
       it('should generate correct query with error index and error group ID', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
-            indexType="error"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            queryParams={{
-              kuery: '',
-              serviceName: 'my-service',
-              errorGroupId: 'abc123def456',
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          indexType: 'error',
+          queryParams: {
+            kuery: '',
+            serviceName: MOCK_SERVICE_NAME,
+            errorGroupId: 'abc123def456',
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`FROM ${MOCK_ERROR_INDEX}`);
@@ -636,27 +503,19 @@ describe('OpenInDiscover', () => {
 
     describe('span flyout context', () => {
       it('should generate correct query with span ID', () => {
-        render(
-          <OpenInDiscover
-            variant="button"
-            dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
-            indexType="traces"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            queryParams={{
-              kuery: 'service.name: "my-service"',
-              spanId: 'span-abc-123',
-              sortDirection: 'DESC',
-            }}
-          />
-        );
+        renderOpenInDiscover({
+          queryParams: {
+            kuery: 'service.name: "my-service"',
+            spanId: 'span-abc-123',
+            sortDirection: 'DESC',
+          },
+        });
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`FROM ${MOCK_TRACES_INDEX}`);
         expect(esqlArg).toContain(`\`${SPAN_ID}\` == "span-abc-123"`);
         expect(esqlArg).toContain('KQL("service.name: \\"my-service\\"")');
         expect(esqlArg).toContain('SORT @timestamp DESC');
-        // span flyout only passes spanId and kuery — no explicit service/transaction filters
         expect(esqlArg).not.toContain(`\`${SERVICE_NAME}\` ==`);
         expect(esqlArg).not.toContain(TRANSACTION_NAME);
       });

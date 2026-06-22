@@ -8,16 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import {
-  EQL_RULE_TYPE_ID,
-  ESQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/securitysolution-rules';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import {
   APP_ID,
   SECURITY_FEATURE_ID_V4,
@@ -25,7 +16,6 @@ import {
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
   SECURITY_FEATURE_ID_V5,
-  RULES_FEATURE_ID_V2,
   LISTS_API_READ,
   RULES_API_READ,
   ALERTS_API_READ,
@@ -40,27 +30,26 @@ import {
   SECURITY_UI_CRUD,
   SECURITY_UI_SHOW,
   CLOUD_DEFEND_APP_ID,
-  EXCEPTIONS_SUBFEATURE_ALL,
+  EXCEPTIONS_SUBFEATURE_ALL_ID,
+  ALERTS_FEATURE_ID,
+  RULES_FEATURE_ID_V4,
+  CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+  ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+  INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+  MANUAL_RUN_RULES_SUBFEATURE_ID,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
+  RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
 
-const SECURITY_RULE_TYPES = [
-  LEGACY_NOTIFICATIONS_ID,
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-];
-
-const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [SERVER_APP_ID],
-}));
+const alertingFeatures = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS].map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [SERVER_APP_ID],
+  })
+);
 
 export const getSecurityV4BaseKibanaFeature = ({
   savedObjects,
@@ -104,14 +93,24 @@ export const getSecurityV4BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['all'] },
+          { feature: RULES_FEATURE_ID_V4, privileges: ['all'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           {
-            feature: RULES_FEATURE_ID_V2,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
+            feature: RULES_FEATURE_ID_V4,
+            privileges: [
+              'minimal_all',
+              EXCEPTIONS_SUBFEATURE_ALL_ID,
+              INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+              CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+              ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+              MANUAL_RUN_RULES_SUBFEATURE_ID,
+              RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
+            ],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -153,14 +152,16 @@ export const getSecurityV4BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['read'] },
+          { feature: RULES_FEATURE_ID_V4, privileges: ['read'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
           {
-            feature: RULES_FEATURE_ID_V2,
+            feature: RULES_FEATURE_ID_V4,
             privileges: ['minimal_read'],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -171,6 +172,7 @@ export const getSecurityV4BaseKibanaFeature = ({
         LISTS_API_READ,
         RULES_API_READ,
         ALERTS_API_READ,
+        ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
         EXCEPTIONS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
@@ -190,7 +192,7 @@ export const getSecurityV4BaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: [SECURITY_UI_SHOW],
+      ui: [SECURITY_UI_SHOW, ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE],
     },
   },
 });

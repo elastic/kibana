@@ -12,12 +12,14 @@ import type { BulkGapFillError } from './utils';
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
 import { processGapsBatch } from './process_gaps_batch';
+import type { GapReasonType } from '../../../../../common/constants';
 import { backfillInitiator } from '../../../../../common/constants';
 
 interface BatchBackfillRuleGapsParams {
   rule: { id: string; name: string };
   range: BulkFillGapsByRuleIdsParams['range'];
   maxGapCountPerRule: number;
+  excludedReasons?: GapReasonType[];
 }
 
 type BatchBackfillScheduleRuleGapsResult =
@@ -27,7 +29,7 @@ type BatchBackfillScheduleRuleGapsResult =
 
 export const batchBackfillRuleGaps = async (
   context: RulesClientContext,
-  { rule, range, maxGapCountPerRule }: BatchBackfillRuleGapsParams
+  { rule, range, maxGapCountPerRule, excludedReasons }: BatchBackfillRuleGapsParams
 ): Promise<BatchBackfillScheduleRuleGapsResult> => {
   const logger = context.logger.get('gaps');
   const { start, end } = range;
@@ -41,6 +43,7 @@ export const batchBackfillRuleGaps = async (
       ruleIds: [rule.id],
       start,
       end,
+      excludedReasons,
       eventLogClient,
       logger,
       processGapsBatch: async (

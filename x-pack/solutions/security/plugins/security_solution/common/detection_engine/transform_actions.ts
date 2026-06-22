@@ -109,6 +109,12 @@ export const transformRuleToAlertResponseAction = ({
   params,
 }: ResponseAction): RuleResponseAction => {
   if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
+    if (params == null) {
+      return {
+        params: {},
+        actionTypeId,
+      };
+    }
     const {
       saved_query_id: savedQueryId,
       ecs_mapping: ecsMapping,
@@ -137,6 +143,12 @@ export const transformAlertToRuleResponseAction = ({
   params,
 }: RuleResponseAction): ResponseAction => {
   if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
+    if (params == null) {
+      return {
+        params: {},
+        action_type_id: actionTypeId,
+      };
+    }
     const { savedQueryId, ecsMapping, packId, ...rest } = params;
     return {
       params: {

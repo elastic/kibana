@@ -72,3 +72,49 @@ export const EpmPackagesSchemaV7 = EpmPackagesSchemaV6.extends({
     )
   ),
 });
+
+export const EpmPackagesSchemaV8 = EpmPackagesSchemaV7.extends({
+  is_dependency_of: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+  installed_as_dependency: schema.maybe(schema.boolean()),
+});
+
+export const EpmPackagesSchemaV9 = EpmPackagesSchemaV8.extends({
+  namespace_customization_enabled_for: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: 100 })
+  ),
+  previous_dependency_versions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          previousVersion: schema.nullable(schema.string()),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
+});
+
+export const EpmPackagesSchemaV10 = EpmPackagesSchemaV9.extends({
+  installed_es: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        type: schema.string(),
+        version: schema.maybe(schema.string()),
+        deferred: schema.maybe(schema.boolean()),
+        customDataStreamOriginDataset: schema.maybe(schema.string()),
+        customDataStreamOriginType: schema.maybe(schema.string()),
+      }),
+      { maxSize: 10000 }
+    )
+  ),
+});

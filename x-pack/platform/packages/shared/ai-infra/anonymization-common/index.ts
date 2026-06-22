@@ -57,3 +57,11 @@ export {
   ECS_ENTITY_CLASS_MAP,
 } from './src/ecs_entity_class_suggestions';
 export * from './impl/schemas';
+
+/**
+ * The anonymization feature (Phase 1 — profile-based policy service, persistent replacements,
+ * per-space salt) is intentionally disabled pending full removal of the implementation.
+ * This constant is the single place to change; all runtime checks across both server and browser
+ * code derive their state from it.
+ */
+export const ANONYMIZATION_FEATURE_ACTIVE = false;

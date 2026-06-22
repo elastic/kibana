@@ -828,7 +828,7 @@ describe('Color util transforms', () => {
             color: { type: 'color_code', value: '#ff0000' },
           },
         ],
-        unassignedColor: { type: 'color_code', value: '#00ff00' },
+        unassigned: { type: 'color_code', value: '#00ff00' },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
@@ -867,6 +867,83 @@ describe('Color util transforms', () => {
       expect(backToAPI).toEqual(originalColorMapping);
     });
 
+    describe('match rules', () => {
+      it('should rebuild match rules as raw rules on round-trip (render-equivalent, lossy discriminator)', () => {
+        const lensState: ColorMapping.Config = {
+          paletteId: SEMANTIC_PALETTE,
+          specialAssignments: [],
+          assignments: [
+            {
+              rules: [
+                { type: 'raw', value: 1000 },
+                { type: 'match', pattern: 'CaseSensitive', matchEntireWord: true, matchCase: true },
+                { type: 'match', pattern: 'LOWERCASE_ME', matchEntireWord: true, matchCase: false },
+              ],
+              color: { type: 'colorCode', colorCode: '#ff0000' },
+              touched: false,
+            },
+            {
+              rules: [
+                { type: 'raw', value: 1500 },
+                { type: 'match', pattern: '2000', matchEntireWord: true, matchCase: true },
+                { type: 'match', pattern: '2500', matchEntireWord: true, matchCase: false },
+              ],
+              color: { type: 'colorCode', colorCode: '#00ff00' },
+              touched: false,
+            },
+          ],
+          colorMode: { type: 'categorical' },
+        };
+
+        const apiFormat = fromColorMappingLensStateToAPI(lensState);
+        expect(apiFormat).toEqual({
+          palette: SEMANTIC_PALETTE,
+          mode: 'categorical',
+          mapping: [
+            {
+              color: { type: 'color_code', value: '#ff0000' },
+              values: [1000, 'CaseSensitive', 'lowercase_me'],
+            },
+            {
+              color: { type: 'color_code', value: '#00ff00' },
+              values: [1500, '2000', '2500'],
+            },
+          ],
+        });
+
+        const backToLensState = fromColorMappingAPIToLensState(apiFormat);
+        expect(backToLensState).toEqual({
+          colorMapping: {
+            paletteId: SEMANTIC_PALETTE,
+            assignments: [
+              {
+                rules: [
+                  { type: 'raw', value: 1000 },
+                  { type: 'raw', value: 'CaseSensitive' },
+                  { type: 'raw', value: 'lowercase_me' },
+                ],
+                color: { type: 'colorCode', colorCode: '#ff0000' },
+                touched: false,
+              },
+              {
+                rules: [
+                  { type: 'raw', value: 1500 },
+                  { type: 'raw', value: '2000' },
+                  { type: 'raw', value: '2500' },
+                ],
+                color: { type: 'colorCode', colorCode: '#00ff00' },
+                touched: false,
+              },
+            ],
+            specialAssignments: [
+              { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
+            ],
+            colorMode: { type: 'categorical' },
+          },
+        });
+      });
+    });
+
     it('should maintain data integrity for gradient color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMappingType = {
         palette: SEMANTIC_PALETTE,
@@ -884,7 +961,7 @@ describe('Color util transforms', () => {
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
         sort: 'asc',
-        unassignedColor: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
+        unassigned: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);

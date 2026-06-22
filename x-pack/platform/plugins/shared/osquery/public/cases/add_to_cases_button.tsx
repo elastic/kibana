@@ -6,8 +6,14 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { AttachmentType, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { JsonValue } from '@kbn/utility-types';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -30,6 +36,9 @@ export interface AddToCaseButtonProps {
   iconProps?: Record<string, string>;
   scheduleId?: string;
   executionCount?: number;
+  displayAsMenuItem?: boolean;
+  onMenuItemClick?: () => void;
+  size?: 'xs' | 's' | 'm';
 }
 
 export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
@@ -41,6 +50,9 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   iconProps,
   scheduleId,
   executionCount,
+  displayAsMenuItem = false,
+  onMenuItemClick,
+  size = 'xs',
 }) => {
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
@@ -80,13 +92,9 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
     const attachments: CaseAttachmentsWithoutOwner = [
       ...alertAttachments,
       {
-        type: AttachmentType.externalReference,
-        externalReferenceId: actionId,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.elasticSearchDoc,
-        },
-        externalReferenceAttachmentTypeId: 'osquery',
-        externalReferenceMetadata: metadata,
+        type: OSQUERY_ATTACHMENT_TYPE,
+        attachmentId: actionId,
+        metadata,
       },
     ];
     if (hasCasesPermissions) {
@@ -102,6 +110,23 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
     scheduleId,
     selectCaseModal,
   ]);
+
+  const handleMenuItemClick = useCallback(() => {
+    onMenuItemClick?.();
+    handleClick();
+  }, [onMenuItemClick, handleClick]);
+
+  if (displayAsMenuItem) {
+    return (
+      <EuiContextMenuItem
+        icon="casesApp"
+        disabled={isDisabled || !hasCasesPermissions}
+        onClick={handleMenuItemClick}
+      >
+        {ADD_TO_CASE}
+      </EuiContextMenuItem>
+    );
+  }
 
   if (isIcon) {
     return (
@@ -119,7 +144,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
 
   return (
     <EuiButtonEmpty
-      size="xs"
+      size={size}
       iconType="casesApp"
       onClick={handleClick}
       isDisabled={isDisabled || !hasCasesPermissions}

@@ -11,8 +11,15 @@ import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
-import { isServiceRunning, readState } from '../services';
+import {
+  isServiceRunning,
+  readState,
+  startService,
+  tailLog,
+  EDOT_CONTAINER_NAME,
+} from '../services';
 import { safeExec } from '../utils';
+import { defaultExportProfile, readVaultConfigFromFile, resolveVaultConfigPath } from '../profiles';
 
 const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
 
@@ -105,11 +112,12 @@ export const doctorCmd: Command<void> = {
     const dockerPs = safeExec('docker', [
       'ps',
       '--filter',
-      'name=kibana-edot-collector',
+      `name=${EDOT_CONTAINER_NAME}`,
       '--format',
       '{{.Names}}',
     ]);
-    const edotDockerAlive = dockerPs !== null && dockerPs.length > 0;
+    const edotDockerAlive =
+      dockerPs !== null && dockerPs.split('\n').some((name) => name.trim() === EDOT_CONTAINER_NAME);
 
     if (edotManagedAlive || edotDockerAlive) {
       const source = edotManagedAlive ? 'managed' : 'docker';
@@ -122,8 +130,30 @@ export const doctorCmd: Command<void> = {
         status: 'fail',
         detail: 'not running',
         fix: async () => {
-          log.info('EDOT will start automatically with: node scripts/evals start');
-          log.info('Or start it manually: node scripts/edot_collector.js');
+          log.info('Starting EDOT collector (backgrounded)...');
+          startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log);
+
+          const stopTail = tailLog(repoRoot, 'edot', log, { fromStart: true });
+          await new Promise((r) => setTimeout(r, 5000));
+          stopTail();
+
+          const edotUpAfterFix = safeExec('docker', [
+            'ps',
+            '--filter',
+            `name=${EDOT_CONTAINER_NAME}`,
+            '--format',
+            '{{.Names}}',
+          ]);
+          if (
+            edotUpAfterFix &&
+            edotUpAfterFix.split('\n').some((n) => n.trim() === EDOT_CONTAINER_NAME)
+          ) {
+            log.info('EDOT collector started successfully');
+          } else {
+            log.warning(
+              'EDOT collector may not have started. Check logs: node scripts/evals logs --service edot'
+            );
+          }
         },
       });
     }
@@ -140,7 +170,9 @@ export const doctorCmd: Command<void> = {
       let detail = 'running';
       if (scoutManagedAlive) {
         const state = readState(repoRoot);
-        detail = `running (managed, PID ${state.scout?.pid})`;
+        const configSet = state.scout?.serverConfigSet;
+        const configSetInfo = configSet ? `, serverConfigSet=${configSet}` : '';
+        detail = `running (managed, PID ${state.scout?.pid}${configSetInfo})`;
       } else if (scoutProcessLine) {
         const configMatch = scoutProcessLine.match(/--serverConfigSet(?:=|\s+)(\S+)/);
         const archMatch = /--arch(?:=|\s+)(stateful|serverless)/.exec(scoutProcessLine);
@@ -239,5 +271,23 @@ export const doctorCmd: Command<void> = {
     log.info('');
     log.info('Quick start:');
     log.info('  node scripts/evals start --suite <suite-id>');
+
+    // --- Profile hint: golden datasets + local export ---
+    const goldenConfigExists = readVaultConfigFromFile(repoRoot) !== undefined;
+    const localProfile = defaultExportProfile(repoRoot);
+    const localConfigExists = localProfile != null;
+    if (goldenConfigExists) {
+      log.info('');
+      log.info('Tip: golden datasets + local export');
+      log.info(
+        `  (datasets from ${resolveVaultConfigPath(repoRoot)}; export via ${
+          localConfigExists ? resolveVaultConfigPath(repoRoot, localProfile) : 'local defaults'
+        })`
+      );
+      if (!localConfigExists) {
+        log.info('  Create local export profile: node scripts/evals init config --profile local');
+      }
+      log.info('  node scripts/evals start --suite attack-discovery --export-profile local');
+    }
   },
 };

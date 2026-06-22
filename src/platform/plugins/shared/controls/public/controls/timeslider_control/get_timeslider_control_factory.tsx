@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, first, map, merge, pairwise } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map, merge, pairwise, skip } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,11 +18,11 @@ import {
   getViewModeSubject,
   useBatchedPublishingSubjects,
   apiPublishesSettings,
-  initializeUnsavedChanges,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
@@ -47,7 +47,7 @@ const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
 });
 
-export const getTimesliderControlFactory = (): EmbeddableFactory<
+export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
   TimeSliderControlState,
   TimeSliderControlApi
 > => {
@@ -55,10 +55,13 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
     type: TIME_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
+
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.is_anchored);
+      const isAnchored$ = new BehaviorSubject<TimeSliderControlState['is_anchored']>(
+        state.is_anchored
+      );
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
@@ -68,8 +71,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       );
 
       function getTimesliceSyncedWithTimeRangePercentage(
-        startPercentage: number,
-        endPercentage: number
+        startPercentage: TimeSliderControlState['start_percentage_of_time_range'],
+        endPercentage: TimeSliderControlState['end_percentage_of_time_range']
       ): [number, number] {
         const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
@@ -81,16 +84,9 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       }
 
       function syncTimesliceWithTimeRangePercentage(
-        startPercentage: number | undefined,
-        endPercentage: number | undefined
+        startPercentage: TimeSliderControlState['start_percentage_of_time_range'],
+        endPercentage: TimeSliderControlState['end_percentage_of_time_range']
       ) {
-        if (startPercentage === undefined || endPercentage === undefined) {
-          if (timeslice$.value !== undefined) {
-            timeslice$.next(undefined);
-          }
-          return;
-        }
-
         const { timeRange, timeRangeBounds } = timeRangeMeta$.value;
 
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
@@ -104,22 +100,15 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         const { start_percentage_of_time_range, end_percentage_of_time_range } =
           timeRangePercentage.getLatestState();
 
-        if (
-          start_percentage_of_time_range !== undefined &&
-          end_percentage_of_time_range !== undefined
-        ) {
-          timeslice$.next(
-            getTimesliceSyncedWithTimeRangePercentage(
-              start_percentage_of_time_range,
-              end_percentage_of_time_range
-            )
-          );
-        } else {
-          timeslice$.next(undefined);
-        }
+        timeslice$.next(
+          getTimesliceSyncedWithTimeRangePercentage(
+            start_percentage_of_time_range,
+            end_percentage_of_time_range
+          )
+        );
       }
 
-      function setIsAnchored(isAnchored: boolean | undefined) {
+      function setIsAnchored(isAnchored: TimeSliderControlState['is_anchored']) {
         isAnchored$.next(isAnchored);
       }
 
@@ -234,40 +223,38 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         })
       );
 
-      function serializeState() {
-        return {
-          ...timeRangePercentage.getLatestState(),
-          isAnchored: isAnchored$.value,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<TimeSliderControlState>({
+      const stateApi = initializeStateApi<TimeSliderControlState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => ({
+          ...timeRangePercentage.getLatestState(),
+          is_anchored: isAnchored$.value,
+        }),
         anyStateChange$: merge(
           timeRangePercentage.anyStateChange$,
-          isAnchored$.pipe(map(() => undefined))
+          isAnchored$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {
             ...timeRangePercentageComparators,
             width: 'skip',
-            is_anchored: 'skip',
+            is_anchored: 'referenceEquality',
           };
         },
-        onReset: (lastSaved) => {
-          timeRangePercentage.reinitializeState(lastSaved);
-          setIsAnchored(lastSaved?.is_anchored);
+        applySerializedState: (nextState) => {
+          timeRangePercentage.reinitializeState(nextState);
+          setIsAnchored(nextState.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,
-        serializeState,
         clearSelections: () => {
           setTimeslice(undefined);
           hasTimeSliceSelection$.next(false);

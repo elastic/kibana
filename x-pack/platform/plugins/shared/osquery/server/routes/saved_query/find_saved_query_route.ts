@@ -7,9 +7,8 @@
 
 import type { IRouter } from '@kbn/core/server';
 
-import { omit } from 'lodash';
-import { escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { escapeQuotes, escapeKuery } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -22,6 +21,7 @@ import { convertECSMappingToObject } from '../utils';
 import { getInstalledSavedQueriesMap } from './utils';
 import type { FindSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
 import { findSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
+import { findSavedQueryResponseSchema } from './response_schemas';
 
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,6 +43,11 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
               typeof findSavedQueryRequestQuerySchema,
               FindSavedQueryRequestQuerySchema
             >(findSavedQueryRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findSavedQueryResponseSchema,
+            },
           },
         },
       },
@@ -66,16 +71,27 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             filters.push(`(${userFilters.join(' OR ')})`);
           }
 
+          if (request.query.id) {
+            const idTerm = request.query.id.trim();
+            filters.push(`${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(idTerm)}"`);
+          } else if (request.query.search) {
+            const searchTerm = escapeKuery(request.query.search.trim());
+            if (searchTerm) {
+              const searchFilter = [
+                `${savedQuerySavedObjectType}.attributes.id: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.description: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.query: *${searchTerm}*`,
+              ].join(' OR ');
+              filters.push(`(${searchFilter})`);
+            }
+          }
+
           const savedQueries = await spaceScopedClient.find<SavedQuerySavedObject>({
             type: savedQuerySavedObjectType,
             page: request.query.page || 1,
             perPage: request.query.pageSize,
             sortField: request.query.sort || 'id',
             sortOrder: request.query.sortOrder || 'desc',
-            ...(request.query.search && {
-              search: request.query.search,
-              searchFields: ['id', 'description'],
-            }),
             ...(filters.length && { filter: filters.join(' AND ') }),
           });
 
@@ -147,7 +163,9 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
 
           return response.ok({
             body: {
-              ...omit(savedQueries, 'saved_objects'),
+              page: savedQueries.page,
+              per_page: savedQueries.per_page,
+              total: savedQueries.total,
               data: savedObjects,
             },
           });

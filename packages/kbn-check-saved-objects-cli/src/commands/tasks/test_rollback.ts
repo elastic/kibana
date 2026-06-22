@@ -12,17 +12,22 @@ import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import { encryptionOverrides, type Task, type TaskContext } from '../types';
 import { getPreviousVersionType } from '../../migrations';
 import { checkDocuments } from './check_documents';
+import { getRollbackMigrationContext } from './rollback_context';
 
 export const testRollback: Task = async (ctx, task) => {
-  const { updatedTypes, baselineMappings } = ctx;
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
+    getRollbackMigrationContext(ctx);
+  const { baselineMappings } = ctx;
 
-  const previousVersionTypes = updatedTypes.map((type) =>
+  const previousVersionTypes = migrationTypes.map((type) =>
     getPreviousVersionType({ type, previousMappings: baselineMappings! })
   );
 
   const { runMigrations: performRollback, savedObjectsRepository } = await getKibanaMigratorTestKit(
     {
       types: previousVersionTypes,
+      kibanaIndex: migrationKibanaIndex,
+      settings: { migrations: { algorithm: migrationAlgorithm } },
       encryptionExtensionFactory: ctx.encryptedSavedObjects
         ? (typeRegistry) =>
             ctx.encryptedSavedObjects!.__testCreateDangerousExtension(
@@ -35,7 +40,7 @@ export const testRollback: Task = async (ctx, task) => {
 
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Run rollback migration on updated types: '${updatedTypes
+      title: `Run rollback migration on updated types: '${migrationTypes
         .map(({ name }) => name)
         .join(', ')}'`,
       task: async () => await performRollback(),

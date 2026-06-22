@@ -68,7 +68,7 @@ export const ConnectorsOverview = () => {
                       disabled={!canManageConnectors}
                       isLoading={isLoading}
                       fill
-                      iconType="plusInCircleFilled"
+                      iconType="plusCircle"
                       onClick={() => createConnector()}
                     >
                       {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {

@@ -16,19 +16,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  useSiemReadinessApi,
-  useMitreAttackIndicesDocCounts,
-  useIntegrationDisplayNames,
-  useDetectionRulesByIntegration,
-} from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../../hooks/use_siem_readiness_api';
+import { useMitreAttackIndicesDocCounts } from '../../../../hooks/use_mitre_attack_indices_doc_counts';
+import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_display_names';
+import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
-import {
-  INTEGRATIONS_INSTALLED_TOOLTIP,
-  INTEGRATIONS_UNINSTALLED_TOOLTIP,
-  INTEGRATIONS_DISABLED,
-  INTEGRATIONS_UNINSTALLED,
-} from '../../../../../detection_engine/common/components/related_integrations/translations';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 interface DetectionRule {
   rule_id?: string;
@@ -378,24 +371,13 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                     if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
                     return a.label.localeCompare(b.label);
                   })}
-                statusMap={
-                  new Map(
-                    tactic.missingPackages.map((pkg) => {
-                      const isDisabled = disabledPackagesSet.has(pkg);
-                      return [
-                        pkg,
-                        {
-                          status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
-                          badgeColor: isDisabled ? 'primary' : 'default',
-                          tooltip: isDisabled
-                            ? INTEGRATIONS_INSTALLED_TOOLTIP
-                            : INTEGRATIONS_UNINSTALLED_TOOLTIP,
-                        },
-                      ];
-                    })
-                  )
-                }
+                statusMap={createIntegrationStatusMapFromSets(
+                  tactic.missingPackages,
+                  enabledPackagesSet,
+                  disabledPackagesSet
+                )}
                 showOnlySelectable
+                telemetrySource="mitre_attack"
               />
             </EuiPopover>
           ))}

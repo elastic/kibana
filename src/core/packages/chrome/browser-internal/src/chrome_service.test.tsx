@@ -581,7 +581,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.getHelpExtension$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHelpExtension({ appName: 'App name', content: () => null });
+      chrome.setHelpExtension({ appName: 'App name' });
       chrome.setHelpExtension(undefined);
       service.stop();
 
@@ -590,7 +590,6 @@ describe('start', () => {
                 undefined,
                 Object {
                   "appName": "App name",
-                  "content": [Function],
                 },
                 undefined,
               ]
@@ -697,6 +696,31 @@ describe('start', () => {
         const updatedIsCollapsed = await firstValueFrom(isCollapsed$);
         service.stop();
         expect(updatedIsCollapsed).toBe(!isCollapsed);
+      });
+    });
+
+    describe('width', () => {
+      it('should return 0 by default', async () => {
+        const { chrome, service } = await start();
+
+        expect(chrome.sideNav.getWidth()).toBe(0);
+        expect(await firstValueFrom(chrome.sideNav.getWidth$())).toBe(0);
+
+        service.stop();
+      });
+
+      it('should update the width observable', async () => {
+        const { chrome, service } = await start();
+        const widths: number[] = [];
+        const subscription = chrome.sideNav.getWidth$().subscribe((width) => widths.push(width));
+
+        chrome.sideNav.setWidth(120);
+
+        expect(chrome.sideNav.getWidth()).toBe(120);
+        expect(widths).toEqual([0, 120]);
+
+        subscription.unsubscribe();
+        service.stop();
       });
     });
   });

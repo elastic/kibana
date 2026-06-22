@@ -46,7 +46,7 @@ export const ML_JOB_COMPATIBILITY_LINK_TEXT = i18n.translate(
 );
 
 export const COVERAGE_OVERVIEW_LINK_PATH =
-  'solutions/security/detect-and-alert/mitre-attandckr-coverage';
+  'solutions/security/detect-and-alert/mitre-attack-coverage';
 export const COVERAGE_OVERVIEW_LINK_TEXT = i18n.translate(
   'xpack.securitySolution.documentationLinks.coverageOverview.text',
   {

@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/es-errors'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/hapi-mocks'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/logging'
@@ -31,6 +32,7 @@ dependsOn:
   - '@kbn/config-mocks'
   - '@kbn/config'
   - '@kbn/core-security-server'
+  - '@kbn/tracing-utils'
 tags:
   - shared-server
   - package
@@ -42,26 +44,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

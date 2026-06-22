@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-utils-plugin'
+  - '@kbn/uiam-api-keys-provisioning-status'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
   - '@kbn/data-plugin'
@@ -46,6 +47,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/safer-lodash-set'
   - '@kbn/alerting-types'
+  - '@kbn/change-history'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/rrule'
@@ -66,6 +68,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/zod'
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-security-server-mocks'
@@ -86,6 +89,9 @@ dependsOn:
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/scout'
   - '@kbn/encrypted-saved-objects-shared'
+  - '@kbn/core-analytics-server-mocks'
+  - '@kbn/cps-server-utils'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
@@ -100,26 +106,6 @@ fileGroups:
     - common/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -8,7 +8,9 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { CaseUI } from '@kbn/cases-plugin/common';
+import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { UNTITLED_TIMELINE } from '../../timeline/properties/translations';
 import { selectTimelineById } from '../../../store/selectors';
 import type { State } from '../../../../common/store';
@@ -29,7 +31,12 @@ interface AttachToCaseButtonProps {
 }
 
 /**
- * Button that opens a popover with options to attach the timeline to new or existing case
+ * Button that opens a popover with options to attach the timeline to new or existing case.
+ *
+ * When the cases attachments framework flag is enabled, the timeline is created as a
+ * proper `security.timeline` case attachment. Otherwise it falls back to the legacy flow,
+ * which navigates the user to the case and inserts a markdown `[title](url)` link into
+ * the comment editor via redux.
  */
 export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelineId }) => {
   const dispatch = useDispatch();
@@ -45,14 +52,17 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
     application: { navigateToApp },
   } = useKibana().services;
   const userCasesPermissions = useMemo(() => cases.helpers.canUseCases([APP_ID]), [cases]);
+  const attachmentsEnabled = cases.config.attachmentsEnabled;
+  const addToNewCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({});
+  const addToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const [isPopoverOpen, setPopover] = useState(false);
   const [isCaseModalOpen, openCaseModal] = useState(false);
 
   const togglePopover = useCallback(() => setPopover((currentIsOpen) => !currentIsOpen), []);
-  const closeCaseModal = useCallback(() => openCaseModal(false), [openCaseModal]);
+  const closeCaseModal = useCallback(() => openCaseModal(false), []);
 
-  const onRowClick = useCallback(
+  const onLegacyRowClick = useCallback(
     async (theCase?: CaseUI) => {
       closeCaseModal();
       await navigateToApp(APP_UI_ID, {
@@ -70,8 +80,27 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
     [closeCaseModal, dispatch, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
+  const timelineAttachments: CaseAttachmentsWithoutOwner = useMemo(
+    () =>
+      savedObjectId
+        ? [
+            {
+              type: SECURITY_TIMELINE_ATTACHMENT_TYPE,
+              attachmentId: savedObjectId,
+              metadata: { title: timelineTitle.length > 0 ? timelineTitle : UNTITLED_TIMELINE },
+            },
+          ]
+        : [],
+    [savedObjectId, timelineTitle]
+  );
+
   const attachToNewCase = useCallback(() => {
     togglePopover();
+
+    if (attachmentsEnabled) {
+      addToNewCaseFlyout.open({ attachments: timelineAttachments });
+      return;
+    }
 
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.case,
@@ -86,17 +115,32 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
       );
       dispatch(showTimeline({ id: TimelineId.active, show: false }));
     });
-  }, [dispatch, navigateToApp, savedObjectId, timelineId, timelineTitle, togglePopover]);
+  }, [
+    addToNewCaseFlyout,
+    attachmentsEnabled,
+    dispatch,
+    navigateToApp,
+    savedObjectId,
+    timelineAttachments,
+    timelineId,
+    timelineTitle,
+    togglePopover,
+  ]);
 
   const attachToExistingCase = useCallback(() => {
     togglePopover();
+
+    if (attachmentsEnabled) {
+      addToExistingCaseModal.open({ getAttachments: () => timelineAttachments });
+      return;
+    }
     openCaseModal(true);
-  }, [togglePopover, openCaseModal]);
+  }, [addToExistingCaseModal, attachmentsEnabled, timelineAttachments, togglePopover]);
 
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         disabled={
           timelineStatus === TimelineStatusEnum.draft || timelineType !== TimelineTypeEnum.default
@@ -137,12 +181,14 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
         isOpen={isPopoverOpen}
         closePopover={togglePopover}
         panelPaddingSize="none"
+        aria-label={i18n.ATTACH_TO_CASE}
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      {isCaseModalOpen &&
+      {!attachmentsEnabled &&
+        isCaseModalOpen &&
         cases.ui.getAllCasesSelectorModal({
-          onRowClick,
+          onRowClick: onLegacyRowClick,
           onClose: closeCaseModal,
           owner: [APP_ID],
           permissions: userCasesPermissions,

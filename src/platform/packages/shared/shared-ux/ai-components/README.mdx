@@ -11,8 +11,6 @@ date: 2026-02-11
 
 Shared AI-related visual components for Kibana.
 
-For now, this package contains the `AiButton` components (see `ai_button/`).
-
 `AiButton` is the recommended public API. It is a wrapper around the internal `AiButtonBase` primitive and renders the correct underlying EUI button type based on the props you pass (e.g. `variant`, `iconOnly`).
 
 We also expose thin wrapper components for convenience: `AiButtonDefault`, `AiButtonEmpty`, and `AiButtonIcon`.
@@ -25,6 +23,7 @@ import {
   AiButtonDefault,
   AiButtonEmpty,
   AiButtonIcon,
+  AiIcon,
 } from '@kbn/shared-ux-ai-components';
 
 <AiButton onClick={() => undefined}>AI Button</AiButton>;
@@ -46,4 +45,6 @@ import {
 <AiButtonIcon iconType="aiAssistantLogo" aria-label="AI Assistant" onClick={() => undefined} />;
 
 <AiButtonEmpty onClick={() => undefined}>AI Button</AiButtonEmpty>;
+
+<AiIcon type="sparkles" size="m" aria-label="AI Assistant" />;
 ```

@@ -608,21 +608,38 @@ describe('Perform bulk action route', () => {
       );
     });
 
-    it('rejects payload if there is more than 100 ids in payload', async () => {
+    it('rejects payload if there are more than 1000 ids in payload for any action', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
           ...getBulkDisableRuleActionSchemaMock(),
           query: undefined,
-          ids: Array.from({ length: 101 }).map(() => 'fake-id'),
+          ids: Array.from({ length: 1001 }).map(() => 'fake-id'),
         },
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
+      expect(response.body.message).toEqual('More than 1000 ids sent for bulk action.');
+    });
+
+    it('rejects payload if there are more than 1000 ids in payload for edit actions', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          query: undefined,
+          ids: Array.from({ length: 1001 }).map(() => 'fake-id'),
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual('More than 1000 ids sent for bulk action.');
     });
 
     it('rejects payload if both query and ids defined', async () => {
@@ -663,7 +680,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionEditSchemaMock(), edit: [] },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(expect.stringContaining('Invalid input'));
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining('edit: Too small: expected array to have >=1 items')
+      );
     });
 
     it('rejects payloads if search query dry_run is invalid', async () => {
@@ -790,6 +809,7 @@ describe('Perform bulk action route', () => {
       await server.inject(request, requestContextMock.convertContext(context));
 
       expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
+        checkOsqueryResponseActionAuthz: expect.any(Function),
         endpointAuthz: expect.any(Object),
         endpointService: expect.any(Object),
         spaceId: 'default',

@@ -9,13 +9,14 @@ import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import {
-  EuiText,
-  EuiIcon,
-  EuiSpacer,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,13 +62,15 @@ export const SidePanelContentManager = memo(() => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label="closeSidePanelIcon"
-                iconType="cross"
-                color="text"
-                onClick={closeHelpPanel}
-                data-test-subj={getTestId('headerCloseButton')}
-              />
+              <EuiToolTip content="closeSidePanelIcon" disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label="closeSidePanelIcon"
+                  iconType="cross"
+                  color="text"
+                  onClick={closeHelpPanel}
+                  data-test-subj={getTestId('headerCloseButton')}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </StyledEuiFlexGroup>
           <EuiSpacer size="m" />
@@ -76,7 +79,7 @@ export const SidePanelContentManager = memo(() => {
               id="xpack.securitySolution.console.sidePanel.helpDescription"
               defaultMessage="Use the add ({icon}) button to populate a response action to the text bar. Add additional parameters or comments as necessary."
               values={{
-                icon: <EuiIcon type="plusInCircle" />,
+                icon: <EuiIcon type="plusCircle" aria-hidden={true} />,
               }}
             />
           </EuiText>

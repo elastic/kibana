@@ -41,12 +41,27 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "Test run: {{ execution.isTestRun }}"
+`;
 
+/**
+ * Workflow with an event-driven trigger so the Run/Test modal shows the Event tab.
+ */
+export const getTestRunEventTabWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: false
+description: Workflow with workflows.failed trigger for Event tab scout test
+triggers:
+  - type: workflows.failed
 steps:
   - name: hello_world_step
     type: console
@@ -64,14 +79,12 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 consts:
   loop_items: [{"@timestamp": "now"}, {"@timestamp": "yesterday"}, {"@timestamp": "tomorrow"}, {"@timestamp": "next week"}]
-
-  inputs:
-  - name: message
-    type: string
-    default: "hello world"
 
 steps:
   - name: first_step
@@ -83,7 +96,7 @@ steps:
     type: foreach
     foreach: '{{consts.loop_items}}'
     steps:
-      - name: hello_world_step
+      - name: test_console_step
         type: console
         with:
           message: "Test run: {{ execution.isTestRun }}, timestamp: {{foreach.item['@timestamp']}}"
@@ -99,11 +112,10 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 
 steps:
   - name: first_step
@@ -155,12 +167,13 @@ export const getDummyWorkflowYaml = (name: string) => `
 name: ${name}
 description: Dummy workflow description
 enabled: true
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+
 triggers:
   - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 steps:
   - name: hello_world_step
     type: console
@@ -193,6 +206,23 @@ triggers:
 steps:
   - name: hello_world_step
     type:`;
+
+/**
+ * Workflow with a trailing empty line at the root level.
+ * Used to verify that root-level property suggestions (consts, inputs, etc.)
+ * appear on empty lines outside liquid blocks.
+ */
+export const getRootLevelAutocompleteYaml = (name: string) => `
+name: ${name}
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "hello"
+`;
 
 /**
  * Manual-only workflow with an event variable reference.
@@ -237,17 +267,16 @@ enabled: false
 description: Multi-step workflow for scroll testing
 triggers:
   - type: manual
-
-inputs:
-  - name: param_a
-    type: string
-    default: "value_a"
-  - name: param_b
-    type: string
-    default: "value_b"
-  - name: param_c
-    type: string
-    default: "value_c"
+    inputs:
+      - name: param_a
+        type: string
+        default: "value_a"
+      - name: param_b
+        type: string
+        default: "value_b"
+      - name: param_c
+        type: string
+        default: "value_c"
 
 steps:
   - name: step_alpha
@@ -303,13 +332,68 @@ enabled: true
 # This comment references {{ steps.foo.output }}
 triggers:
   - type: manual
-inputs:
-  - name: message
-    type: string
-    default: "hello"
+    inputs:
+      - name: message
+        type: string
+        default: "hello"
 steps:
   # {{ some_old_variable | json }}
   - name: hello_world_step
     type: console  # previously used {{ steps.old.output }}
     with:
       message: "{{ inputs.message }}"`;
+
+export const getWorkflowWithEventInputYaml = (name: string) => `
+name: ${name}
+description: Workflow with event and inputs logging
+enabled: true
+triggers:
+  - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello"
+steps:
+  - name: log_event
+    type: console
+    with:
+      message: "{{event | json}}"
+
+  - name: log_inputs
+    type: console
+    with:
+      message: "{{inputs | json}}"
+      `;
+
+/**
+ * Long-running workflow (console + two wait steps) for cancellation Scout tests.
+ * Kept enabled so it can be run from the UI or API without an extra toggle step.
+ */
+export const getLongRunningCancellationWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: true
+description: Long-running workflow for cancellation tests
+triggers:
+  - type: manual
+
+steps:
+  - name: first_step
+    type: console
+    with:
+      message: Hello World
+
+  - name: wait_1
+    type: wait
+    with:
+      duration: 4s
+
+  - name: wait_2
+    type: wait
+    with:
+      duration: 4s
+
+  - name: last_step
+    type: console
+    with:
+      message: Hello World
+  `;

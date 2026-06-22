@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { MaintenanceWindowStatus } from '../../common';
@@ -169,7 +170,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
           <EuiContextMenuItem
             data-test-subj="table-actions-copy-id"
             key="copy-id"
-            icon="copyClipboard"
+            icon="copy"
             onClick={() => {
               closePopover();
               navigator.clipboard.writeText(id).then(() => {
@@ -223,7 +224,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
           <EuiContextMenuItem
             data-test-subj="table-actions-unarchive"
             key="unarchive"
-            icon="exit"
+            icon="logOut"
             onClick={() => {
               closePopover();
               showModal('unarchive');
@@ -258,14 +259,16 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
 
     const button = useMemo(
       () => (
-        <EuiButtonIcon
-          isDisabled={isLoading}
-          data-test-subj="table-actions-icon-button"
-          iconType="boxesHorizontal"
-          size="s"
-          aria-label="Upcoming events"
-          onClick={onButtonClick}
-        />
+        <EuiToolTip content="Upcoming events" disableScreenReaderOutput>
+          <EuiButtonIcon
+            isDisabled={isLoading}
+            data-test-subj="table-actions-icon-button"
+            iconType="boxesVertical"
+            size="s"
+            aria-label="Upcoming events"
+            onClick={onButtonClick}
+          />
+        </EuiToolTip>
       ),
       [isLoading, onButtonClick]
     );
@@ -275,6 +278,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiPopover
+              aria-label={i18n.TABLE_ACTIONS_POPOVER_ARIA_LABEL}
               button={button}
               isOpen={isPopoverOpen}
               closePopover={closePopover}

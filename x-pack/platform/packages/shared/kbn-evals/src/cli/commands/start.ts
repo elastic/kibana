@@ -8,9 +8,11 @@
 import Fs from 'fs';
 import Path from 'path';
 import { spawn } from 'child_process';
+import inquirer from 'inquirer';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { resolveCcmApiKey } from '@kbn/es';
 import { resolveEvalSuites } from '../suites';
 import {
   promptForSuite,
@@ -18,8 +20,7 @@ import {
   promptForProject,
   isTTY,
   getAllAvailableConnectors,
-  readLocalEsUrl,
-  SCOUT_EVALS_ARGS,
+  scoutEvalsArgs,
 } from '../prompts';
 import {
   isServiceRunning,
@@ -27,65 +28,26 @@ import {
   startService,
   stopService,
   connectorsHash,
+  scoutEnvHash,
   tailLog,
+  isEdotDockerRunning,
 } from '../services';
-import { safeExec, VAULT_SECRET_PATH } from '../utils';
+import { readCachedEisConnectors } from '../eis_connectors_cache';
+import {
+  defaultExportProfile,
+  envFromDatasetsProfile,
+  envFromExportProfile,
+  stripTrailingSlash,
+  probeHttp,
+  isExportProfileImplicitLocal,
+  isDevVaultProfile,
+  resolveVaultConfigPath,
+} from '../profiles';
+import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } from './init';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
-
-const fetchCcmApiKey = (log: ToolingLog): string => {
-  const envKey = process.env.KIBANA_EIS_CCM_API_KEY;
-  if (envKey) {
-    return envKey;
-  }
-
-  log.info('KIBANA_EIS_CCM_API_KEY not set -- fetching from Vault...');
-  const vaultOk = safeExec('vault', ['token', 'lookup', '-format=json']);
-  if (!vaultOk) {
-    throw new Error(
-      [
-        'Vault authentication required for EIS CCM.',
-        'Log in first:  vault login --method oidc',
-        'Or set KIBANA_EIS_CCM_API_KEY manually.',
-      ].join('\n')
-    );
-  }
-
-  const key = safeExec('vault', ['read', '-field=key', VAULT_SECRET_PATH]);
-  if (!key) {
-    throw new Error(
-      [
-        'Failed to read EIS CCM API key from Vault.',
-        'Ensure VPN is connected and try:  vault login --method oidc',
-      ].join('\n')
-    );
-  }
-  return key;
-};
-
-const isEdotRunningViaDocker = (): boolean => {
-  const result = safeExec('docker', [
-    'ps',
-    '--filter',
-    'name=kibana-edot-collector',
-    '--format',
-    '{{.Names}}',
-  ]);
-  return result !== null && result.length > 0;
-};
-
-// Any HTTP response (including 401/503) means the service is listening.
-// We only care that the port is up, not that auth is configured yet.
-const probeHttp = async (url: string): Promise<boolean> => {
-  try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -119,6 +81,45 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
   }
 
   throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
+};
+
+/**
+ * Verify the Scout-managed ES and Kibana are actually reachable, not just that
+ * the parent PID is alive. Covers the common case where ES crashes while the
+ * Scout orchestrator (and Kibana) keep running.
+ */
+const probeScoutHealth = async (repoRoot: string): Promise<{ ok: boolean; reason?: string }> => {
+  const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
+  if (!Fs.existsSync(configPath)) {
+    return { ok: false, reason: 'local config missing (.scout/servers/local.json)' };
+  }
+
+  try {
+    const raw = Fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(raw) as { hosts?: { kibana?: string; elasticsearch?: string } };
+    const esUrl = parsed.hosts?.elasticsearch;
+    const kbnUrl = parsed.hosts?.kibana;
+
+    if (!esUrl || !kbnUrl) {
+      return { ok: false, reason: 'hosts missing from local config' };
+    }
+
+    const [esOk, kbnOk] = await Promise.all([probeHttp(esUrl), probeHttp(`${kbnUrl}/api/status`)]);
+
+    if (!esOk && !kbnOk) {
+      return { ok: false, reason: `ES (${esUrl}) and Kibana (${kbnUrl}) are unreachable` };
+    }
+    if (!esOk) {
+      return { ok: false, reason: `ES is unreachable (${esUrl})` };
+    }
+    if (!kbnOk) {
+      return { ok: false, reason: `Kibana is unreachable (${kbnUrl})` };
+    }
+
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'failed to read local config' };
+  }
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
@@ -176,15 +177,90 @@ export const startCmd: Command<void> = {
       'project',
       'repetitions',
       'grep',
+      'profile',
+      'datasets-profile',
+      'export-profile',
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
     ],
-    boolean: ['skip-server', 'dry-run'],
+    boolean: ['skip-server', 'dry-run', 'skip-init'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
-    default: { 'skip-server': false, 'dry-run': false },
+    default: { 'skip-server': false, 'dry-run': false, 'skip-init': false },
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
+    let profile = flagsReader.string('profile') ?? undefined;
+
+    if (!flagsReader.boolean('skip-init')) {
+      if (!profile) {
+        if (!isTTY()) {
+          throw createFlagError(
+            '--profile is required in non-interactive mode (e.g. --profile dev-vault, --profile local).'
+          );
+        }
+
+        type InfraChoice = 'local' | 'golden-cluster' | 'custom';
+        const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
+          type: 'list',
+          name: 'choice',
+          message: 'How do you want to run evals and export results and traces?',
+          choices: [
+            { name: 'Local (localhost ES/Kibana)', value: 'local' },
+            {
+              name: 'Golden cluster (uses Vault -- no config file needed)',
+              value: 'golden-cluster',
+            },
+            { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
+          ],
+        });
+
+        if (choice === 'local') {
+          await ensureLocalConfig(repoRoot, log);
+          profile = 'local';
+        } else if (choice === 'golden-cluster') {
+          await ensureVaultAuth(log);
+          profile = 'dev-vault';
+        } else {
+          const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
+            type: 'input',
+            name: 'customProfile',
+            message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
+            default: '',
+          });
+          const resolvedProfile = customProfile.trim() || 'default';
+          await runConfigInit(repoRoot, log, { profile: resolvedProfile });
+          profile = resolvedProfile;
+        }
+      } else if (isDevVaultProfile(profile)) {
+        await ensureVaultAuth(log);
+      } else if (profile === 'local') {
+        await ensureLocalConfig(repoRoot, log);
+      } else {
+        const configPath = resolveVaultConfigPath(repoRoot, profile);
+        if (!Fs.existsSync(configPath)) {
+          if (!isTTY()) {
+            throw createFlagError(
+              `Config not found: ${configPath}. Run \`node scripts/evals init config --profile ${profile}\` to create it.`
+            );
+          }
+          log.info(`Config file for profile "${profile}" not found. Running setup wizard...`);
+          log.info('');
+          await runConfigInit(repoRoot, log, { profile });
+        }
+      }
+
+      if (getAllAvailableConnectors(repoRoot).length === 0) {
+        if (!isTTY()) {
+          throw createFlagError(
+            'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
+          );
+        }
+      }
+
+      if (isTTY()) {
+        await runConnectorSetup(repoRoot, log);
+      }
+    }
 
     // --- Resolve suite ---
     let suiteId = flagsReader.string('suite');
@@ -242,6 +318,50 @@ export const startCmd: Command<void> = {
         ? projects.some(isEisConnectorId)
         : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
+    if (requiresEisCcm && !process.env.KIBANA_TESTING_AI_CONNECTORS) {
+      const cached = readCachedEisConnectors();
+      if (cached) {
+        process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(JSON.stringify(cached)).toString(
+          'base64'
+        );
+        log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
+      }
+    }
+
+    const baseProfile = profile;
+    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
+    const exportProfile =
+      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
+
+    const profileEnvOverrides: Record<string, string> = {
+      ...envFromDatasetsProfile(repoRoot, datasetsProfile),
+      ...envFromExportProfile(repoRoot, exportProfile, {
+        defaultTracingExporters: exportProfile === 'local',
+      }),
+    };
+
+    // Best-effort default: if we implicitly resolved an export profile, don't fail the run when the
+    // export ES isn't reachable. Instead, warn and continue without export (preflight won't run).
+    // When the user actively chose a profile (via CLI flag or wizard), trust their config.
+    const exportProfileIsImplicit =
+      !profile && isExportProfileImplicitLocal(flagsReader, exportProfile);
+    if (exportProfileIsImplicit) {
+      const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
+
+      const tracingReachable = tracingEsUrl
+        ? await probeHttp(stripTrailingSlash(tracingEsUrl))
+        : true;
+
+      if (!tracingReachable) {
+        log.warning(
+          `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+            'Continuing without external trace queries. To require export, pass --export-profile local.'
+        );
+        delete profileEnvOverrides.TRACING_ES_URL;
+        delete profileEnvOverrides.TRACING_ES_API_KEY;
+      }
+    }
+
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
     log.info(`Judge:     ${evaluationConnectorId}`);
@@ -251,6 +371,12 @@ export const startCmd: Command<void> = {
       log.info(`Models:    all (from KIBANA_TESTING_AI_CONNECTORS)`);
     }
     log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
+    if (suite?.serverConfigSet) {
+      log.info(`Config:    ${suite.serverConfigSet}`);
+    }
+    log.info(
+      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
+    );
     log.info('');
 
     const rerunArgs: string[] = [];
@@ -264,6 +390,18 @@ export const startCmd: Command<void> = {
 
     if (projects.length > 0) {
       rerunArgs.push('--model', projects.join(','));
+    }
+
+    if (profile) {
+      rerunArgs.push('--profile', profile);
+    }
+    const passedDatasetsProfile = flagsReader.string('datasets-profile');
+    const passedExportProfile = flagsReader.string('export-profile');
+    if (passedDatasetsProfile) {
+      rerunArgs.push('--datasets-profile', passedDatasetsProfile);
+    }
+    if (passedExportProfile) {
+      rerunArgs.push('--export-profile', passedExportProfile);
     }
 
     const grep = flagsReader.string('grep');
@@ -289,19 +427,25 @@ export const startCmd: Command<void> = {
     }
 
     if (!skipServer) {
-      // --- Step 1: EDOT collector (uses kibana.dev.yml ES defaults, no dependencies) ---
-      if (isServiceRunning(repoRoot, 'edot') || isEdotRunningViaDocker()) {
+      // --- Step 1: EDOT collector (exports traces to configured ES) ---
+      if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
         log.info('[1/4] EDOT collector already running -- reusing');
       } else {
-        log.info('[1/4] Starting EDOT collector (backgrounded, exporting to kibana.dev.yml ES)...');
+        log.info('[1/4] Starting EDOT collector (backgrounded)...');
 
-        startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log);
+        const elasticsearchHost = profileEnvOverrides.TRACING_ES_URL;
+        if (elasticsearchHost) {
+          log.info(`[1/4] EDOT collector will export to: ${elasticsearchHost}`);
+        }
+        startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log, {
+          env: elasticsearchHost ? { ELASTICSEARCH_HOST: elasticsearchHost } : undefined,
+        });
 
         const stopTail = tailLog(repoRoot, 'edot', log, { fromStart: true });
         await new Promise((r) => setTimeout(r, 5000));
         stopTail();
 
-        if (!isEdotRunningViaDocker()) {
+        if (!isEdotDockerRunning()) {
           log.warning(
             'EDOT collector may not have started. Check logs: node scripts/evals logs --service edot'
           );
@@ -311,17 +455,37 @@ export const startCmd: Command<void> = {
       }
 
       // --- Step 2: Scout server ---
-      const scoutAlive = isServiceRunning(repoRoot, 'scout');
-      const scoutStale = scoutAlive && isScoutStale(repoRoot);
+      const serverConfigSet = suite?.serverConfigSet ?? 'evals_tracing';
+      const scoutEnv: Record<string, string> = {};
+      if (profileEnvOverrides.GCS_CREDENTIALS) {
+        scoutEnv.GCS_CREDENTIALS = profileEnvOverrides.GCS_CREDENTIALS;
+      }
+      if (profileEnvOverrides.TRACING_EXPORTERS) {
+        scoutEnv.TRACING_EXPORTERS = profileEnvOverrides.TRACING_EXPORTERS;
+      }
 
-      if (scoutStale) {
-        log.warning(
-          '[2/4] Scout connectors are stale (KIBANA_TESTING_AI_CONNECTORS changed). Restarting...'
-        );
+      const scoutAlive = isServiceRunning(repoRoot, 'scout');
+      const staleCheck = scoutAlive
+        ? isScoutStale(repoRoot, serverConfigSet, scoutEnv)
+        : { stale: false };
+
+      if (staleCheck.stale) {
+        log.warning(`[2/4] Scout server is stale (${staleCheck.reason}). Restarting...`);
         await stopService(repoRoot, 'scout', log);
       }
 
-      if (scoutAlive && !scoutStale) {
+      let scoutReusable = scoutAlive && !staleCheck.stale;
+
+      if (scoutReusable) {
+        const health = await probeScoutHealth(repoRoot);
+        if (!health.ok) {
+          log.warning(`[2/4] Scout PID alive but ${health.reason}. Restarting...`);
+          await stopService(repoRoot, 'scout', log);
+          scoutReusable = false;
+        }
+      }
+
+      if (scoutReusable) {
         log.info('[2/4] Scout server already running -- reusing');
       } else {
         const scoutConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -329,10 +493,22 @@ export const startCmd: Command<void> = {
           Fs.unlinkSync(scoutConfigPath);
         }
 
-        log.info('[2/4] Starting Scout server (backgrounded, stateful/classic, evals_tracing)...');
-        startService(repoRoot, 'scout', 'node', ['scripts/scout.js', ...SCOUT_EVALS_ARGS], log, {
-          connectorsHash: connectorsHash(),
-        });
+        log.info(
+          `[2/4] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`
+        );
+        startService(
+          repoRoot,
+          'scout',
+          'node',
+          ['scripts/scout.js', ...scoutEvalsArgs(serverConfigSet)],
+          log,
+          {
+            connectorsHash: connectorsHash(),
+            serverConfigSet,
+            envHash: scoutEnvHash(scoutEnv),
+            env: Object.keys(scoutEnv).length > 0 ? scoutEnv : undefined,
+          }
+        );
 
         const stopTail = tailLog(repoRoot, 'scout', log, { fromStart: true });
         log.info('[2/4] Waiting for ES + Kibana to be ready...');
@@ -344,7 +520,7 @@ export const startCmd: Command<void> = {
       // --- Step 3: EIS CCM ---
       if (requiresEisCcm) {
         log.info('[3/4] Enabling EIS (Cloud Connected Mode)...');
-        const ccmApiKey = fetchCcmApiKey(log);
+        const ccmApiKey = await resolveCcmApiKey(log);
 
         const ccmResult = spawn(
           'node',
@@ -381,22 +557,19 @@ export const startCmd: Command<void> = {
       EVALUATION_CONNECTOR_ID: evaluationConnectorId,
     };
 
+    if (requiresEisCcm && !skipServer) {
+      envOverrides.KBN_EVALS_AWAIT_CCM_CONNECTORS = '1';
+    }
+
     if (suite) {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
 
-    const localEsUrl = readLocalEsUrl(repoRoot);
+    Object.assign(envOverrides, profileEnvOverrides);
 
-    if (!process.env.TRACING_ES_URL && localEsUrl) {
-      envOverrides.TRACING_ES_URL = localEsUrl;
-      log.info(`Trace evaluators will query: ${localEsUrl}`);
+    if (envOverrides.TRACING_ES_URL) {
+      log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
     }
-
-    if (!process.env.EVALUATIONS_ES_URL && localEsUrl) {
-      envOverrides.EVALUATIONS_ES_URL = localEsUrl;
-      log.info(`Evaluation results will export to: ${localEsUrl}`);
-    }
-
     if (repetitions) {
       envOverrides.EVALUATION_REPETITIONS = repetitions;
     }
@@ -421,10 +594,15 @@ export const startCmd: Command<void> = {
     }
 
     await new Promise<void>((resolve, reject) => {
+      const childEnv: Record<string, string> = { ...process.env, ...envOverrides } as Record<
+        string,
+        string
+      >;
+      delete childEnv.NO_COLOR;
       const child = spawn('node', args, {
         cwd: repoRoot,
         stdio: 'inherit',
-        env: { ...process.env, ...envOverrides },
+        env: childEnv,
       });
 
       child.on('exit', (code) => {

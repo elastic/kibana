@@ -111,7 +111,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     this.useDefaultStrategyForPath =
       this.isPublic || useVersionResolutionStrategyForInternalPaths.has(path);
     this.enableQueryVersion = options.enableQueryVersion === true;
-    this.defaultSecurityConfig = validRouteSecurity(options.security, options.options);
+    this.defaultSecurityConfig = validRouteSecurity(options.security);
     this.options = options;
     this.router.registerRoute({
       path: this.path,

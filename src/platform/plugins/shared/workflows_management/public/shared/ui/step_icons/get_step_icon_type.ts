@@ -18,6 +18,7 @@ export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
     case 'trigger_alert':
       return 'warning';
     case 'trigger_document':
+    case 'trigger_event':
       return 'document';
     case 'trigger_scheduled':
       return 'clock';
@@ -37,7 +38,7 @@ export const getStepIconType = (nodeType: string): IconType => {
       iconType = 'globe';
       break;
     case 'console':
-      iconType = 'console';
+      iconType = 'commandLine';
       break;
     case 'data.set':
       iconType = 'database';
@@ -54,10 +55,14 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'workflow.fail':
       iconType = HardcodedIcons['workflow.fail'];
       break;
+    // `workflow` (bare base type) is handled in StepIcon's BASE_TYPE_AGGREGATE_ICONS.
 
     // flow control nodes
     case 'wait':
       iconType = 'clock';
+      break;
+    case 'waitForInput':
+      iconType = 'user';
       break;
     case 'enter-if':
     case 'exit-if':
@@ -85,10 +90,19 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'loop-continue':
       iconType = 'controls';
       break;
+    case 'switch':
+    case 'enter-switch':
+    case 'exit-switch':
+    case 'enter-case-branch':
+    case 'exit-case-branch':
+    case 'enter-default-branch':
+    case 'exit-default-branch':
+      iconType = 'productStreamsWired';
+      break;
 
     // connectors which use EUI icons
     case 'email':
-      iconType = 'email';
+      iconType = 'mail';
       break;
     case 'slack':
     case 'slack_api':

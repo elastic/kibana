@@ -7,7 +7,14 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCode,
+  EuiCodeBlock,
+  EuiInMemoryTable,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 /**
@@ -166,12 +173,17 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
               render: (fieldKey: string) => {
                 const isPinned = pinnedFields?.includes(fieldKey);
                 return (
-                  <EuiButtonIcon
-                    iconType={isPinned ? 'pinFilled' : 'pin'}
-                    aria-label={isPinned ? 'Unpin field' : 'Pin field'}
-                    color={isPinned ? 'primary' : 'text'}
-                    onClick={() => togglePin(fieldKey)}
-                  />
+                  <EuiToolTip
+                    content={isPinned ? 'Unpin field' : 'Pin field'}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType={isPinned ? 'pinFill' : 'pin'}
+                      aria-label={isPinned ? 'Unpin field' : 'Pin field'}
+                      color={isPinned ? 'primary' : 'text'}
+                      onClick={() => togglePin(fieldKey)}
+                    />
+                  </EuiToolTip>
                 );
               },
             },

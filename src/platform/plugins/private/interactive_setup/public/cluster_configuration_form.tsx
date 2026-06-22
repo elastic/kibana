@@ -285,7 +285,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       )}
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="chevronSingleLeft" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.clusterConfigurationForm.cancelButton"
               defaultMessage="Back"
@@ -330,7 +330,7 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
     <EuiPanel color={compressed ? 'subdued' : undefined} hasBorder={!compressed}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="document" size="l" />
+          <EuiIcon type="document" size="l" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup responsive={false} gutterSize="none" justifyContent="spaceBetween">
@@ -453,7 +453,7 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
                       <EuiSpacer size="s" />
                       <EuiFlexGroup responsive={false} justifyContent="center">
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="sortDown" color="subdued" />
+                          <EuiIcon type="sortDown" color="subdued" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="s" />
@@ -510,6 +510,9 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
       anchorPosition="rightCenter"
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.translate('interactiveSetup.forgotPasswordPopover.ariaLabel', {
+        defaultMessage: 'Forgot password',
+      })}
     >
       <EuiText size="s" grow={false}>
         <p>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -36,6 +38,8 @@ export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean)
         },
       },
       summary: `Get remote synced integrations status`,
+      description:
+        'Get the synchronization status of all remote integrations across connected remote clusters.',
       options: {
         tags: ['oas-tag:Fleet remote synced integrations'],
         availability: {
@@ -47,6 +51,10 @@ export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean)
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_remote_synced_integrations_status.yaml'),
+        },
         validate: {
           request: {},
           response: {
@@ -76,6 +84,8 @@ export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean)
         },
       },
       summary: `Get remote synced integrations status by outputId`,
+      description:
+        'Get the synchronization status of remote integrations for a specific output by its ID.',
       options: {
         tags: ['oas-tag:Fleet remote synced integrations'],
         availability: {
@@ -87,6 +97,10 @@ export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean)
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_remote_synced_integrations_info.yaml'),
+        },
         validate: {
           request: GetRemoteSyncedIntegrationsInfoRequestSchema,
           response: {

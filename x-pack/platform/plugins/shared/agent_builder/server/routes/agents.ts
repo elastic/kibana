@@ -7,8 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { AgentVisibility } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -18,7 +17,9 @@ import type {
   CreateAgentResponse,
   UpdateAgentResponse,
   DeleteAgentResponse,
+  GetAgentAclResponse,
   ListAgentResponse,
+  UpdateAgentAclResponse,
 } from '../../common/http_api/agents';
 import { asError } from '../utils/as_error';
 
@@ -50,16 +51,25 @@ const SKILLS_SCHEMA = schema.arrayOf(
   }
 );
 
-const VISIBILITY_DISABLED_MESSAGE =
-  'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.';
+const PLUGINS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Plugin ID to assign to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of plugin IDs to assign to the agent.' },
+  }
+);
 
-const isVisibilityBlockedByExperimentalGate = ({
-  experimentalFeaturesEnabled,
-  visibility,
-}: {
-  experimentalFeaturesEnabled: boolean;
-  visibility: AgentVisibility | undefined;
-}): boolean => !experimentalFeaturesEnabled && visibility !== undefined;
+const CONNECTORS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Connector ID to associate with the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of connector IDs to associate with the agent.' },
+  }
+);
 
 export function registerAgentRoutes({
   router,
@@ -77,7 +87,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'List agents',
       description:
-        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -109,7 +119,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Get an agent by ID',
       description:
-        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -150,7 +160,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Create an agent',
       description:
-        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
+        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -240,6 +250,8 @@ export function registerAgentRoutes({
                       { maxSize: 100 }
                     )
                   ),
+                  plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                  connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -255,23 +267,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.create(request.body);
@@ -303,7 +298,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Update an agent',
       description:
-        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
+        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -399,6 +394,8 @@ export function registerAgentRoutes({
                         { maxSize: 100 }
                       )
                     ),
+                    plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                    connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -415,23 +412,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.update(request.params.id, request.body);
@@ -462,7 +442,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Delete an agent',
       description:
-        'Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Delete an agent by ID. This action cannot be undone. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
@@ -507,6 +487,134 @@ export function registerAgentRoutes({
           });
         } catch (error) {
           auditLogService.logAgentDeleted(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
+      })
+    );
+
+  // Get agent ACL
+  router.versioned
+    .get({
+      path: `${publicApiPath}/agents/{id}/acl`,
+      security: AGENT_BUILDER_READ_SECURITY,
+      access: 'public',
+      summary: "Get an agent's access control list",
+      description:
+        'Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+      options: {
+        tags: ['agent', 'oas-tag:agent builder'],
+        availability: { since: '9.5.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent whose ACL to retrieve.' },
+              }),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_get.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents } = getInternalServices();
+        const service = await agents.getRegistry({ request });
+        const result = await service.getAcl(request.params.id);
+
+        const body: GetAgentAclResponse = {
+          can_manage: result.can_manage,
+          acl: result.can_manage ? result.acl : { entries: [] },
+        };
+        return response.ok<GetAgentAclResponse>({ body });
+      })
+    );
+
+  // Update agent ACL
+  router.versioned
+    .put({
+      path: `${publicApiPath}/agents/{id}/acl`,
+      security: AGENTS_WRITE_SECURITY,
+      access: 'public',
+      summary: "Update an agent's access control list",
+      description:
+        'Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+      options: {
+        tags: ['agent', 'oas-tag:agent builder'],
+        availability: { since: '9.5.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent whose ACL to update.' },
+              }),
+            }),
+            body: schema.object({
+              entries: schema.arrayOf(
+                schema.object({
+                  type: schema.literal('user'),
+                  name: schema.string({
+                    minLength: 1,
+                    maxLength: 1024,
+                    meta: {
+                      description:
+                        'Case-sensitive Kibana username of the principal to grant access to.',
+                    },
+                  }),
+                  role: schema.oneOf(
+                    [
+                      schema.literal(AgentAclRole.User),
+                      schema.literal(AgentAclRole.Editor),
+                      schema.literal(AgentAclRole.Manager),
+                    ],
+                    {
+                      meta: {
+                        description:
+                          'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.',
+                      },
+                    }
+                  ),
+                }),
+                {
+                  maxSize: 100,
+                  meta: {
+                    description:
+                      'Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.',
+                  },
+                }
+              ),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_update.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents, auditLogService } = getInternalServices();
+        const service = await agents.getRegistry({ request });
+
+        try {
+          const updatedAcl = await service.updateAcl(request.params.id, request.body);
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+          });
+          return response.ok<UpdateAgentAclResponse>({ body: updatedAcl });
+        } catch (error) {
+          auditLogService.logAgentUpdated(request, {
             agentId: request.params.id,
             error: asError(error),
           });

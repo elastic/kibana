@@ -33,6 +33,7 @@ export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
   endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
     minSize: 1,
+    maxSize: 250,
     validate: (endpointIds) => {
       if (endpointIds.map((v) => v.trim()).some((v) => !v.length)) {
         return 'endpoint_ids cannot contain empty strings';
@@ -43,6 +44,7 @@ export const BaseActionRequestSchema = {
   alert_ids: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), {
       minSize: 1,
+      maxSize: 50,
       validate: (alertIds) => {
         if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
           return 'alert_ids cannot contain empty strings';
@@ -54,6 +56,7 @@ export const BaseActionRequestSchema = {
   case_ids: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), {
       minSize: 1,
+      maxSize: 50,
       validate: (caseIds) => {
         if (caseIds.map((v) => v.trim()).some((v) => !v.length)) {
           return 'case_ids cannot contain empty strings';

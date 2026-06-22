@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { read } from './api';
+import type { DashboardReadResponseBody } from './api';
 
 /**
  * Client interface for dashboard CRUD operations
  */
 export interface DashboardServerClient {
-  read(requestCtx: RequestHandlerContext, id: string): ReturnType<typeof read>;
+  read(
+    savedObjectsClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<DashboardReadResponseBody>;
 }
 
 /** The setup contract for the Dashboard plugin on the server. */
@@ -39,7 +42,7 @@ export interface DashboardPluginStart {
    * @returns A promise that resolves to the {@link ScanDashboardsResult}.
    */
   scanDashboards: (
-    ctx: RequestHandlerContext,
+    savedObjectsClient: SavedObjectsClientContract,
     page: number,
     perPage: number
   ) => Promise<ScanDashboardsResult>;

@@ -161,6 +161,49 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema
   ) satisfies z.Schema<DissectProcessor>;
 
 /**
+ * URI parts processor
+ */
+
+export interface UriPartsProcessor extends ProcessorBaseWithWhere {
+  action: 'uri_parts';
+  from: string;
+  to?: string;
+  keep_original?: boolean;
+  remove_if_successful?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const uriPartsProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('uri_parts'),
+    from: StreamlangSourceField.describe('Source field holding the URI string to parse'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe(
+        'Target field / column prefix for the extracted URI components (defaults to "url"). ' +
+          'May equal `from` — the canonical ECS shape parses the `url` field in place. ' +
+          'Note: combining `to === from` with `remove_if_successful: true` nulls the parsed ' +
+          'object after writing it.'
+      ),
+    keep_original: z
+      .optional(z.boolean())
+      .describe(
+        'If true (default), preserve the original URI string alongside the extracted parts'
+      ),
+    remove_if_successful: z
+      .optional(z.boolean())
+      .describe(
+        'If true, remove the source field after a successful parse. Source field is kept on failure.'
+      ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'URI parts processor - Parse a URI into components (scheme, domain, port, path, query, fragment, ...)'
+  ) satisfies z.Schema<UriPartsProcessor>;
+
+/**
  * Date processor
  */
 
@@ -232,7 +275,7 @@ export interface SetProcessor extends ProcessorBaseWithWhere {
   copy_from?: string;
 }
 
-const setProcessorSchema = processorBaseWithWhereSchema
+export const setProcessorSchema = processorBaseWithWhereSchema
   .extend({
     action: z.literal('set'),
     to: StreamlangTargetField.describe('Target field to set or create'),
@@ -242,10 +285,17 @@ const setProcessorSchema = processorBaseWithWhereSchema
       .optional(StreamlangSourceField)
       .describe('Copy value from another field instead of providing a literal'),
   })
-  .refine((obj) => (obj.value && !obj.copy_from) || (!obj.value && obj.copy_from), {
-    message: 'Set processor must have either value or copy_from, but not both.',
-    path: ['value', 'copy_from'],
-  })
+  .refine(
+    (obj) => {
+      const hasValue = obj.value !== undefined;
+      const hasCopyFrom = obj.copy_from !== undefined;
+      return (hasValue && !hasCopyFrom) || (!hasValue && hasCopyFrom);
+    },
+    {
+      message: 'Set processor must have either value or copy_from, but not both.',
+      path: ['value', 'copy_from'],
+    }
+  )
   .describe(
     'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
   ) satisfies z.Schema<SetProcessor>;
@@ -544,17 +594,6 @@ export const splitProcessorSchema = processorBaseWithWhereSchema
       .optional(z.boolean())
       .describe('Preserve empty trailing fields in the split result'),
   })
-  .refine(
-    (obj) =>
-      !obj.where ||
-      (obj.where && isAlwaysCondition(obj.where)) ||
-      (obj.where && obj.to && obj.from !== obj.to),
-    {
-      message:
-        'Split processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
-      path: ['to', 'where'],
-    }
-  )
   .describe(
     'Split processor - Split a field value into an array using a separator'
   ) satisfies z.Schema<SplitProcessor>;
@@ -584,6 +623,58 @@ export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
     .describe('Sort order - "asc" (ascending) or "desc" (descending). Defaults to "asc"'),
   ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
 }) satisfies z.Schema<SortProcessor>;
+
+/**
+ * JsonExtract processor
+ *
+ * Extracts values from JSON strings using JSONPath-like selectors.
+ */
+
+export const jsonExtractTypes = ['keyword', 'integer', 'long', 'double', 'boolean'] as const;
+export type JsonExtractType = (typeof jsonExtractTypes)[number];
+
+export interface JsonExtraction {
+  selector: string;
+  target_field: string;
+  type?: JsonExtractType;
+}
+
+const jsonExtractionSchema = z
+  .object({
+    selector: NonEmptyString.describe(
+      'JSONPath-like selector to extract value (e.g., "user.id", "$.metadata.client.ip", "items[0].name")'
+    ),
+    target_field: StreamlangTargetField.describe('Target field to store the extracted value'),
+    type: z
+      .optional(z.enum(jsonExtractTypes))
+      .describe(
+        'Data type for the extracted value. Defaults to "keyword". Ensures consistent types across transpilers.'
+      ),
+  })
+  .describe('A single extraction specification') satisfies z.Schema<JsonExtraction>;
+
+export interface JsonExtractProcessor extends ProcessorBaseWithWhere {
+  action: 'json_extract';
+  field: string;
+  extractions: JsonExtraction[];
+  ignore_missing?: boolean;
+}
+
+export const jsonExtractProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('json_extract'),
+    field: StreamlangSourceField.describe('Source field containing the JSON string to parse'),
+    extractions: z
+      .array(jsonExtractionSchema)
+      .nonempty()
+      .describe('List of extraction specifications'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'JsonExtract processor - Extract values from JSON strings using JSONPath-like selectors'
+  ) satisfies z.Schema<JsonExtractProcessor>;
 
 /**
  * Concat processor
@@ -677,11 +768,119 @@ export const networkDirectionProcessorSchema = z.intersection(
   ])
 ) satisfies z.Schema<NetworkDirectionProcessor>;
 
+/**
+ * Enrich processor
+ */
+
+export interface EnrichProcessor extends ProcessorBaseWithWhere {
+  action: 'enrich';
+  policy_name: string;
+  to: string;
+  ignore_missing?: boolean;
+  override?: boolean;
+}
+
+export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('enrich'),
+  policy_name: NonEmptyString,
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+  override: z.optional(z.boolean()),
+}) satisfies z.Schema<EnrichProcessor>;
+
+/**
+ * User agent processor
+ */
+
+export const userAgentProperties = ['name', 'os', 'device', 'original', 'version'] as const;
+
+export type UserAgentProperty = (typeof userAgentProperties)[number];
+
+export interface UserAgentProcessor extends ProcessorBaseWithWhere {
+  action: 'user_agent';
+  from: string;
+  to?: string;
+  regex_file?: string;
+  properties?: UserAgentProperty[];
+  extract_device_type?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const userAgentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('user_agent'),
+    from: StreamlangSourceField.describe('The field containing the user agent string'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('The field that will be filled with the user agent details'),
+    regex_file: z
+      .optional(NonEmptyString)
+      .describe(
+        'Custom regex file name containing the regular expressions for parsing the user agent string'
+      ),
+    properties: z
+      .optional(z.array(z.enum(userAgentProperties)))
+      .describe('Specific properties to extract (defaults to all)'),
+    extract_device_type: z
+      .optional(z.boolean())
+      .describe('Extracts device type from the user agent string'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .refine(
+    (obj) => {
+      const target = obj.to ?? 'user_agent';
+      return (
+        !obj.where ||
+        (obj.where && isAlwaysCondition(obj.where)) ||
+        (obj.where && Boolean(target) && obj.from !== target)
+      );
+    },
+    {
+      message:
+        'User agent processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  )
+  .describe(
+    'User agent processor - Extract browser, OS, and device details from a user agent string'
+  ) satisfies z.Schema<UserAgentProcessor>;
+
+/**
+ * Registered domain processor
+ */
+
+export interface RegisteredDomainProcessor extends ProcessorBaseWithWhere {
+  action: 'registered_domain';
+  expression: string;
+  prefix: string;
+  ignore_missing?: boolean;
+}
+
+export const registeredDomainSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('registered_domain'),
+    expression: StreamlangSourceField.describe(
+      'The string expression containing the FQDN to parse'
+    ),
+    prefix: NonEmptyString.describe(
+      'The prefix for the output columns. The extracted parts are available as prefix.part_name'
+    ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when expression field is missing'),
+  })
+  .describe(
+    'Registered domain processor - extracts domain, registered_domain, top_level_domain, subdomain from a FQDN'
+  ) satisfies z.Schema<RegisteredDomainProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
   | DropDocumentProcessor
   | GrokProcessor
+  | UriPartsProcessor
   | MathProcessor
   | RenameProcessor
   | SetProcessor
@@ -699,11 +898,16 @@ export type StreamlangProcessorDefinition =
   | SortProcessor
   | ConcatProcessor
   | NetworkDirectionProcessor
+  | JsonExtractProcessor
+  | EnrichProcessor
+  | UserAgentProcessor
+  | RegisteredDomainProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
+  uriPartsProcessorSchema,
   dateProcessorSchema,
   dropDocumentProcessorSchema,
   mathProcessorSchema,
@@ -723,12 +927,16 @@ export const streamlangProcessorSchema = z.union([
   convertProcessorSchema,
   concatProcessorSchema,
   networkDirectionProcessorSchema,
+  jsonExtractProcessorSchema,
+  enrichProcessorSchema,
+  userAgentProcessorSchema,
+  registeredDomainSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
 export const isProcessWithOverrideOption = createIsNarrowSchema(
   processorBaseSchema,
-  z.union([renameProcessorSchema, setProcessorSchema])
+  z.union([renameProcessorSchema, setProcessorSchema, enrichProcessorSchema])
 );
 
 export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
@@ -737,11 +945,16 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     renameProcessorSchema,
     grokProcessorSchema,
     dissectProcessorSchema,
+    uriPartsProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
     redactProcessorSchema,
     mathProcessorSchema,
     splitProcessorSchema,
+    jsonExtractProcessorSchema,
+    enrichProcessorSchema,
+    userAgentProcessorSchema,
+    registeredDomainSchema,
   ])
 );
 
@@ -770,28 +983,42 @@ export const isRedactProcessorDefinition = createIsNarrowSchema(
  */
 export type ProcessorType = StreamlangProcessorDefinition['action'];
 
+/** Internal Zod schema structure for extracting processor action from union options */
+interface ZodProcessorSchemaLike {
+  _def?: {
+    schema?: ZodProcessorSchemaLike;
+    left?: ZodProcessorSchemaLike;
+    options?: ZodProcessorSchemaLike[];
+  };
+  shape?: { action?: { value?: ProcessorType } };
+}
+
 /**
  * Get all processor types as a string array (derived from the Zod schema)
  */
 export const processorTypes: ProcessorType[] = (
-  streamlangProcessorSchema._def.options as ReadonlyArray<any>
-).map((schema: any) => {
+  streamlangProcessorSchema._def.options as ReadonlyArray<ZodProcessorSchemaLike>
+).map((schema: ZodProcessorSchemaLike) => {
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
-  let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+  let baseSchema: ZodProcessorSchemaLike =
+    '_def' in schema && schema._def && 'schema' in schema._def ? schema._def.schema! : schema;
 
   // Handle ZodIntersection (from z.intersection()) by getting the left side which contains the action
-  if ('_def' in baseSchema && 'left' in baseSchema._def) {
-    baseSchema = baseSchema._def.left;
+  if ('_def' in baseSchema && baseSchema._def && 'left' in baseSchema._def) {
+    baseSchema = baseSchema._def.left!;
   }
 
   // Handle ZodUnion (from z.union()) by getting the first option's action
   // All options in the union should have the same action value
-  if ('_def' in baseSchema && 'options' in baseSchema._def) {
-    baseSchema = baseSchema._def.options[0];
+  if ('_def' in baseSchema && baseSchema._def && 'options' in baseSchema._def) {
+    baseSchema = baseSchema._def.options![0]!;
   }
 
-  return baseSchema.shape.action.value;
-}) as ProcessorType[];
+  if (!baseSchema.shape?.action?.value) {
+    throw new Error('Unable to extract action from processor schema');
+  }
+  return baseSchema.shape.action.value as ProcessorType;
+});
 
 /**
  * Get the processor type (action) from a processor definition

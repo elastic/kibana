@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/securitysolution-es-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/shared-ux-router'
   - '@kbn/core-saved-objects-server'
@@ -78,6 +79,8 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-query'
   - '@kbn/kql'
+  - '@kbn/entity-store'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
@@ -94,26 +97,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

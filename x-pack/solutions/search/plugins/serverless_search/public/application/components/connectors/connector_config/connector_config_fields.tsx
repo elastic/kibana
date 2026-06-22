@@ -57,7 +57,7 @@ export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({
       <EuiFlexItem>
         <ConnectorConfigurationComponent
           connector={connector}
-          hasPlatinumLicense={false}
+          hasPlatinumLicense={true}
           isDisabled={isDisabled}
           isLoading={isLoading}
           saveConfig={mutate}

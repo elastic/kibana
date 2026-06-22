@@ -15,11 +15,12 @@ import {
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
   useEuiPaddingCSS,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -181,6 +182,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   return (
     <EuiPopover
       id="dataViewPopover"
+      aria-label={i18n.translate(
+        'xpack.stackAlerts.components.ui.dataViewSelectPopover.ariaLabel',
+        { defaultMessage: 'Data view' }
+      )}
       button={
         <EuiExpression
           display="columns"
@@ -221,16 +226,24 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="closeDataViewPopover"
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
                   { defaultMessage: 'Close' }
                 )}
-                onClick={closeDataViewPopover}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="closeDataViewPopover"
+                  iconType="cross"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
+                    { defaultMessage: 'Close' }
+                  )}
+                  onClick={closeDataViewPopover}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
@@ -245,7 +258,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           <EuiPopoverFooter paddingSize="none">
             <EuiButtonEmpty
               css={createDataViewButtonPadding.s}
-              iconType="plusInCircleFilled"
+              iconType="plusCircle"
               data-test-subj="chooseDataViewPopover.createDataViewButton"
               onClick={() => {
                 closeDataViewPopover();

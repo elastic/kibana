@@ -62,6 +62,7 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId3: string;
     let packagePolicySecretsId: string;
     let packagePolicySecrets: any;
+    let endpointVersion: string;
     let endpointPackagePolicyId: string;
     let inputOnlyPackagePolicyId: string;
 
@@ -76,7 +77,20 @@ export default function (providerContext: FtrProviderContext) {
 
       await enableSecrets(providerContext);
 
-      await supertest.delete(`/api/fleet/epm/packages/endpoint/8.6.1`).set('kbn-xsrf', 'xxxx');
+      // Install latest endpoint to resolve the current version, then uninstall before the test re-installs it
+      await supertest
+        .post(`/api/fleet/epm/packages/endpoint`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+      const { body: endpointInfo } = await supertest
+        .get(`/api/fleet/epm/packages/endpoint`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      endpointVersion = endpointInfo.item.version;
+      await supertest
+        .delete(`/api/fleet/epm/packages/endpoint/${endpointVersion}`)
+        .set('kbn-xsrf', 'xxxx');
       const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
         await Promise.all([
           supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
@@ -213,7 +227,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Elastic Defend',
-            version: '8.6.1',
+            version: endpointVersion,
           },
         });
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
@@ -261,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
       // uninstall endpoint package
       await supertest
-        .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
+        .delete(`/api/fleet/epm/packages/endpoint/${endpointVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       await supertest
@@ -414,7 +428,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Elastic Defend',
-            version: '8.6.1',
+            version: endpointVersion,
           },
         })
         .expect(200);
@@ -798,20 +812,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.message).eql('Input not found: with_required_variables-i-do-not-exists');
       });
 
-      it('should return a 400 if namespace is edited on input only package policy', async function () {
-        const { body } = await supertest
-          .put(`/api/fleet/package_policies/${inputOnlyPackagePolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            ...inputOnlyBasePackagePolicy,
-            namespace: 'updated_namespace',
-          })
-          .expect(400);
-        expect(body.message).eql(
-          'Package policy namespace cannot be modified for input only packages, please create a new package policy.'
-        );
-      });
-
       it('should return a 400 if dataset is edited on input only package policy', async function () {
         const updatedPolicy = JSON.parse(JSON.stringify(inputOnlyBasePackagePolicy));
 
@@ -823,7 +823,7 @@ export default function (providerContext: FtrProviderContext) {
           .send(updatedPolicy)
           .expect(400);
         expect(body.message).eql(
-          'Package policy dataset cannot be modified for input only packages, please create a new package policy.'
+          'Package policy dataset cannot be modified, please create a new package policy.'
         );
       });
 

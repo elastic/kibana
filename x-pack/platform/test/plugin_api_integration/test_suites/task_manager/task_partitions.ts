@@ -7,40 +7,14 @@
 
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import { asyncForEach } from '@kbn/std';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RawDoc, SerializedConcreteTaskInstance } from './test_utils';
+import { scheduleTask, currentTasks, historyDocs } from './test_utils';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
-
-export interface RawDoc {
-  _id: string;
-  _source: any;
-  _type?: string;
-}
-export interface SearchResults {
-  hits: {
-    hits: RawDoc[];
-  };
-}
-
-type DeprecatedConcreteTaskInstance = Omit<ConcreteTaskInstance, 'schedule'> & {
-  interval: string;
-};
-
-type SerializedConcreteTaskInstance<State = string, Params = string> = Omit<
-  ConcreteTaskInstance,
-  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
-> & {
-  state: State;
-  params: Params;
-  scheduledAt: string;
-  startedAt: string | null;
-  retryAt: string | null;
-  runAt: string;
-};
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -50,26 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
   const testHistoryIndex = '.kibana_task_manager_test_result';
   const testNode1 = 'y-test-node';
   const testNode2 = 'z-test-node';
-
-  function scheduleTask(
-    task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
-  ): Promise<SerializedConcreteTaskInstance> {
-    return supertest
-      .post('/api/sample_tasks/schedule')
-      .set('kbn-xsrf', 'xxx')
-      .send({ task })
-      .expect(200)
-      .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
-  }
-
-  function currentTasks<State = unknown, Params = unknown>(): Promise<{
-    docs: Array<SerializedConcreteTaskInstance<State, Params>>;
-  }> {
-    return supertest
-      .get('/api/sample_tasks')
-      .expect(200)
-      .then((response) => response.body);
-  }
 
   function updateKibanaNodes() {
     const lastSeen = new Date().toISOString();
@@ -85,32 +39,6 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ id: testNode2, lastSeen })
         .expect(200),
     ]);
-  }
-
-  async function historyDocs({
-    taskId,
-    taskType,
-  }: {
-    taskId?: string;
-    taskType?: string;
-  }): Promise<RawDoc[]> {
-    const filter: any[] = [{ term: { type: 'task' } }];
-    if (taskId) {
-      filter.push({ term: { taskId } });
-    }
-    if (taskType) {
-      filter.push({ term: { taskType } });
-    }
-    return es
-      .search({
-        index: testHistoryIndex,
-        query: {
-          bool: {
-            filter,
-          },
-        },
-      })
-      .then((result) => (result as unknown as SearchResults).hits.hits);
   }
 
   describe('task partitions', () => {
@@ -165,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       const tasksToSchedule: Array<Promise<SerializedConcreteTaskInstance>> = [];
       for (let i = 0; i < 3; i++) {
         tasksToSchedule.push(
-          scheduleTask({
+          scheduleTask(supertest, {
             id: `${i}`,
             taskType: 'sampleTask',
             schedule: { interval: `1d` },
@@ -177,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       let tasks: any[] = [];
       await retry.try(async () => {
-        tasks = (await currentTasks()).docs;
+        tasks = (await currentTasks(supertest)).docs;
         expect(tasks.length).to.eql(3);
       });
 
@@ -191,7 +119,11 @@ export default function ({ getService }: FtrProviderContext) {
         await retry.try(async () => {
           await updateKibanaNodes();
 
-          const doc: RawDoc[] = await historyDocs({ taskId: scheduledTask.id });
+          const doc: RawDoc[] = await historyDocs({
+            es,
+            index: testHistoryIndex,
+            taskId: scheduledTask.id,
+          });
           if (doc.length === 1) {
             taskRanOnThisNode = true;
             return;

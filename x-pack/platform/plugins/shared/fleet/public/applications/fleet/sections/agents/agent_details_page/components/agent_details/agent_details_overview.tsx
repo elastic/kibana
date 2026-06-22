@@ -32,18 +32,12 @@ import { hasVersionSuffix } from '../../../../../../../../common/services/versio
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
-import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
 import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 import { AgentPolicyOutputsSummary } from '../../../agent_list_page/components/agent_policy_outputs_summary';
 import { formattedTime } from '../../../agent_list_page/components/agent_activity_flyout/helpers';
 import { AgentEffectiveConfigFlyout } from '../agent_effective_config_flyout';
-
-// Allows child text to be truncated
-const FlexItemWithMinWidth = styled(EuiFlexItem)`
-  min-width: 0px;
-`;
 
 const EuiButtonCompressed = styled(EuiButton)`
   height: 32px;
@@ -66,7 +60,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
           data-test-subj="agentDetailsOverviewSection"
         >
           <EuiFlexGroup>
-            <FlexItemWithMinWidth grow={5}>
+            <EuiFlexItem grow={5}>
               <EuiFlexGroup direction="column" gutterSize="m">
                 {[
                   {
@@ -118,23 +112,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     typeof description === 'string' && description.length > 20 ? description : '';
                   return (
                     <EuiFlexGroup>
-                      <FlexItemWithMinWidth grow={8}>
+                      <EuiFlexItem grow={8}>
                         <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                      </FlexItemWithMinWidth>
-                      <FlexItemWithMinWidth grow={4}>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={4}>
                         <EuiToolTip position="top" content={tooltip}>
                           <EuiDescriptionListDescription className="eui-textTruncate">
                             {description}
                           </EuiDescriptionListDescription>
                         </EuiToolTip>
-                      </FlexItemWithMinWidth>
+                      </EuiFlexItem>
                     </EuiFlexGroup>
                   );
                 })}
               </EuiFlexGroup>
-            </FlexItemWithMinWidth>
-            <FlexItemWithMinWidth grow={5}>
-              <EuiFlexGroup justifyContent="flexEnd" direction="column" alignItems="flexEnd">
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiFlexGroup justifyContent="flexStart" direction="column" alignItems="flexEnd">
                 <EuiFlexItem grow={false}>
                   <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
                 </EuiFlexItem>
@@ -150,7 +144,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </FlexItemWithMinWidth>
+            </EuiFlexItem>
           </EuiFlexGroup>
           {[
             {
@@ -273,7 +267,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Privilege mode',
               }),
               description:
-                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                agent?.local_metadata.elastic?.agent.unprivileged === true ? (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
                     defaultMessage="Running as non-root"
@@ -353,14 +347,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {
                 defaultMessage: 'Tags',
               }),
-              description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
+              description: (agent.tags ?? []).length > 0 ? agent.tags!.join(', ') : '-',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
                 defaultMessage: 'FIPS mode',
               }),
               description:
-                agent.local_metadata.elastic.agent.fips === true ? (
+                agent.local_metadata.elastic?.agent.fips === true ? (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.fipsModeCompliantText"
                     defaultMessage="Enabled"
@@ -380,7 +374,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: (
                 <EuiFlexGroup direction="column" alignItems="flexStart" justifyContent="flexStart">
                   {agent.capabilities?.sort().map((capability) => (
-                    <FlexItemWithMinWidth grow={false} key={capability}>
+                    <EuiFlexItem grow={false} key={capability}>
                       <EuiDescriptionListDescription
                         css={`
                           ${euiTextBreakWord()};
@@ -388,7 +382,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                       >
                         {capability}
                       </EuiDescriptionListDescription>
-                    </FlexItemWithMinWidth>
+                    </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>
               ),
@@ -397,20 +391,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
           ]
             .filter(({ hidden }) => !hidden)
             .map(({ title, description }) => {
-              const tooltip =
-                typeof description === 'string' && description.length > 20 ? description : '';
               return (
                 <EuiFlexGroup>
-                  <FlexItemWithMinWidth grow={3}>
+                  <EuiFlexItem grow={3}>
                     <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                  </FlexItemWithMinWidth>
-                  <FlexItemWithMinWidth grow={7}>
-                    <EuiToolTip position="top" content={tooltip}>
-                      <EuiDescriptionListDescription className="eui-textTruncate">
-                        {description}
-                      </EuiDescriptionListDescription>
-                    </EuiToolTip>
-                  </FlexItemWithMinWidth>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={7}>
+                    <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               );
             })}

@@ -12,16 +12,30 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
-const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+const EventTriggersConfigSchema = schema.object({
   /**
    * When false, event-driven workflow execution is disabled: event-triggered runs
    * (triggeredBy not in manual/scheduled/alert) are skipped at execution time.
    */
-  eventDriven: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    logEvents: schema.boolean({ defaultValue: true }),
-  }),
+  enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * When false, trigger events are not logged to the trigger-events data stream.
+   */
+  logEvents: schema.boolean({ defaultValue: true }),
+  /**
+   * Maximum depth for event-triggered chains (any workflow in the chain).
+   * Scheduling is skipped when depth exceeds this value.
+   */
+  maxChainDepth: schema.number({ defaultValue: 10, min: 1 }),
+});
+
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  eventDriven: EventTriggersConfigSchema,
+  /**
+   * Maximum depth of nested workflow execution (workflow calling workflow via workflow.execute step).
+   */
+  maxWorkflowDepth: schema.number({ defaultValue: 10, min: 1 }),
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
@@ -34,6 +48,15 @@ const configSchema = schema.object({
     ),
   }),
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
+  eviction: schema.object({
+    /**
+     * Minimum output payload size for a completed step to be eligible for eviction
+     * from in-memory state after it has been flushed to Elasticsearch.
+     * Payloads smaller than this threshold stay in memory to avoid ES round-trip latency.
+     * Set to "0b" to evict all completed step outputs, or a very large value to disable eviction.
+     */
+    minPayloadSize: schema.byteSize({ defaultValue: '10kb' }),
+  }),
   collectQueueMetrics: schema.boolean({
     defaultValue: false,
     meta: {
@@ -44,6 +67,7 @@ const configSchema = schema.object({
   }),
 });
 
+export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {

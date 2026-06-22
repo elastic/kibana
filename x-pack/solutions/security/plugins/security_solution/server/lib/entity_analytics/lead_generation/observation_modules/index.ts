@@ -5,5 +5,20 @@
  * 2.0.
  */
 
-export type { ObservationModule, ObservationModuleConfig, ObservationEntity } from './types';
+export type {
+  ObservationModule,
+  ObservationModuleConfig,
+  ObservationEntity,
+  AlertBucket,
+} from './types';
+export { parseAlertBuckets } from './types';
 export { ObservationModuleRegistry } from './observation_module_registry';
+export { createRiskScoreModule } from './risk_score_module';
+export { createTemporalStateModule } from './temporal_state_module';
+export { createBehavioralAnalysisModule } from './behavioral_analysis_module';
+export {
+  extractIsPrivileged,
+  groupEntitiesByType,
+  makeObservation,
+  matchesPrivilegedWatchlist,
+} from './utils';

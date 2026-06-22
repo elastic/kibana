@@ -43,6 +43,9 @@ interface Props {
   children: React.ReactChild;
   selectedTabKey: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  customSearchBar?: React.ReactNode;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 export function MobileServiceTemplate(props: Props) {
@@ -55,7 +58,15 @@ export function MobileServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions }: Props) {
+function TemplateWithContext({
+  title,
+  children,
+  selectedTabKey,
+  searchBarOptions,
+  customSearchBar,
+  bottomHeaderContent: BottomHeaderContent,
+  contentWrapper: ContentWrapper = React.Fragment,
+}: Props) {
   const {
     path: { serviceName },
     query,
@@ -104,39 +115,48 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
   );
 
   return (
-    <ApmMainTemplate
-      pageHeader={{
-        tabs,
-        pageTitle: (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="l">
-                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceIcons
-                    serviceName={serviceName}
-                    environment={environment}
-                    start={start}
-                    end={end}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+    <ContentWrapper>
+      <ApmMainTemplate
+        searchBar={
+          <>
+            {BottomHeaderContent && <BottomHeaderContent />}
+            {customSearchBar ?? <MobileSearchBar {...searchBarOptions} />}
+          </>
+        }
+        pageHeader={{
+          tabs,
+          pageTitle: (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ServiceIcons
+                      serviceName={serviceName}
+                      environment={environment}
+                      start={start}
+                      end={end}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <AnalyzeDataButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      }}
-    >
-      <MobileSearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>{children}</ServiceAnomalyTimeseriesContextProvider>
-    </ApmMainTemplate>
+              <EuiFlexItem grow={false}>
+                <AnalyzeDataButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }}
+      >
+        <ServiceAnomalyTimeseriesContextProvider>
+          {children}
+        </ServiceAnomalyTimeseriesContextProvider>
+      </ApmMainTemplate>
+    </ContentWrapper>
   );
 }
 
@@ -214,7 +234,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
     },
     {
       key: 'alerts',
@@ -233,7 +253,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
       label: i18n.translate('xpack.apm.mobileServiceDetails.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),

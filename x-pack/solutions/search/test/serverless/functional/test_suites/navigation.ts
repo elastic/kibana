@@ -77,7 +77,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         {
           link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
-          pageTestSubject: 'gettingStartedHeader',
+          pageTestSubject: 'search-getting-started',
         },
         {
           link: { deepLinkId: 'dev_tools:console' },
@@ -128,7 +128,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'management:index_management',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts(
+        ['Data management', 'Indices and data streams', 'Index Management', 'Indices'],
+        { removeProjectName: true }
+      );
+
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchQueryRules',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts(
+        ['Data management', 'Relevance', 'Query rules'],
+        { removeProjectName: true }
+      );
     });
 
     it('navigate using search', async () => {
@@ -160,6 +171,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           // footer:
           'search_getting_started',
           'dev_tools',
+          'workflows',
           'data_management',
           'admin_and_settings',
         ],

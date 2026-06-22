@@ -10,11 +10,96 @@
 import type { SortingConfig } from './sorting';
 import type { PaginationConfig } from './pagination';
 import type { SearchConfig } from './search';
+import type { SelectionConfig } from './selection';
+import type { ActiveFilters } from '../datasource';
+import type { ContentListItem } from '../item';
+import type { FieldDefinition, FlagDefinition } from '../query_model/types';
+
+/**
+ * A single display-ready facet for a filter popover option.
+ *
+ * The `T` parameter carries provider-specific data through the facet pipeline,
+ * e.g. `FilterFacet<Tag>` for tag facets or `FilterFacet<UserProfileEntry>`
+ * for user profile facets. Renderers receive the typed `data` without casting.
+ */
+export interface FilterFacet<T = unknown> {
+  /** Unique key identifying this facet (e.g. user UID, tag ID). */
+  key: string;
+  /** Human-readable display label. */
+  label: string;
+  /** Optional item count for this facet value. */
+  count?: number;
+  /** Optional provider-specific data (e.g. `UserProfileEntry` for profiles, `Tag` for tags). */
+  data?: T;
+}
+
+/**
+ * Parameters passed to {@link FilterFacetConfig.getFacets}.
+ */
+export interface FilterFacetParams {
+  /** Current active filters (excluding the filter being fetched, for faceted-search semantics). */
+  filters: ActiveFilters;
+  /** Abort signal for request cancellation. */
+  signal?: AbortSignal;
+}
+
+/**
+ * Provider that supplies display-ready facets for a filter popover.
+ *
+ * The `T` parameter flows through to each {@link FilterFacet} returned by
+ * `getFacets`, keeping the `data` payload typed end-to-end.
+ *
+ * How the implementation accesses the item set is provider-specific:
+ * - Client provider: captures `getItems()` from the strategy via closure.
+ * - Server provider: calls a server aggregation endpoint, ignoring items.
+ */
+export interface FilterFacetConfig<T = unknown> {
+  /**
+   * Fetch display-ready facets for the filter popover.
+   * Called lazily when the popover opens, with its own React Query lifecycle.
+   */
+  getFacets: (params: FilterFacetParams) => Promise<FilterFacet<T>[]>;
+}
+
+/**
+ * Type guard to check if a filter feature config is a {@link FilterFacetConfig} object (not boolean).
+ */
+export const isFilterFacetConfig = (
+  value?: boolean | FilterFacetConfig
+): value is FilterFacetConfig =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as FilterFacetConfig).getFacets === 'function';
+
+/**
+ * Content editor feature configuration on the base provider.
+ *
+ * The editor is list-level: at most one per list, opened against any row.
+ * Wiring `open` is what makes `<Action.ContentEditor />` render — the action
+ * reads it from `features.contentEditor.open` and self-skips when undefined.
+ *
+ * Base-provider consumers supply their own `open`; the client provider
+ * synthesises one from its `isReadonly` / `onSave` / `customValidators` /
+ * `appendRows` bag and `useOpenContentEditor()`.
+ */
+export interface ContentEditorFeatureConfig {
+  /** Per-item callback that opens the content editor. Leave undefined to omit the row icon. */
+  open?: (item: ContentListItem) => void;
+}
 
 /**
  * Feature configuration for enabling/customizing content list capabilities.
  */
 export interface ContentListFeatures {
+  /**
+   * Synchronize query text and sort state with the current route's URL.
+   *
+   * Enabled by default when the provider is rendered inside a router. Set to
+   * `false` for embedded lists, modals, sidebars, or secondary lists that share
+   * a route with another URL-synced list.
+   */
+  urlSync?: boolean;
+
   /** Sorting configuration. */
   sorting?: SortingConfig | boolean;
   /** Pagination configuration. Set to `false` to disable pagination entirely. */
@@ -23,18 +108,24 @@ export interface ContentListFeatures {
   search?: SearchConfig | boolean;
   /**
    * Selection configuration.
-   * When `true` (default), row selection checkboxes are shown and bulk
-   * actions are enabled. Set to `false` to disable selection entirely.
-   * Selection is automatically disabled when `isReadOnly` is `true`.
+   *
+   * - `true` (default): row checkboxes and bulk actions are enabled.
+   * - `false`: selection is disabled entirely.
+   * - {@link SelectionConfig}: selection is enabled with per-row gating (e.g.
+   *   `selectable`, `selectableMessage`).
+   *
+   * Selection is automatically disabled when `isReadOnly` is `true`,
+   * regardless of the value passed here.
    */
-  selection?: boolean;
+  selection?: boolean | SelectionConfig;
   /**
    * Tags feature configuration.
    *
    * - `true` or `undefined`: Auto-enabled when `services.tags` is provided.
    * - `false`: Explicitly disables tags even if `services.tags` is present.
+   * - `FilterFacetConfig`: Enables tags with popover facets from `getFacets`.
    */
-  tags?: boolean;
+  tags?: boolean | FilterFacetConfig;
 
   /**
    * Starred feature configuration.
@@ -43,6 +134,48 @@ export interface ContentListFeatures {
    * - `false`: Explicitly disables starring even if `services.favorites` is present.
    */
   starred?: boolean;
+
+  /**
+   * User profiles feature configuration (createdBy filter, etc.).
+   *
+   * - `true` or `undefined`: Auto-enabled when `services.userProfiles` is provided.
+   * - `false`: Explicitly disables user profile features even if the service is present.
+   * - `FilterFacetConfig`: Enables user profiles with popover facets from `getFacets`.
+   */
+  userProfiles?: boolean | FilterFacetConfig;
+
+  /**
+   * Additional field definitions for consumer-specific filter dimensions
+   * (e.g. `updatedBy`, `type`, `status`).
+   *
+   * Merged with built-in field definitions (tag, createdBy) in `useFieldDefinitions`.
+   * Each entry registers a field name in the search bar schema and provides
+   * ID ↔ display resolution for query parsing.
+   */
+  fields?: FieldDefinition[];
+
+  /**
+   * Additional flag definitions for consumer-specific boolean toggles
+   * (e.g. `is:managed`, `is:deprecated`).
+   *
+   * Merged with built-in flag definitions (starred) in `useFieldDefinitions`.
+   */
+  flags?: FlagDefinition[];
+
+  /**
+   * Toolbar filter configs compiled by a provider variant.
+   *
+   * Internal pass-through from a provider to {@link `@kbn/content-list-toolbar`};
+   * the toolbar narrows each value to `SearchFilterConfig` at the consumption
+   * site, keeping the EUI dependency out of this base package's public types.
+   */
+  toolbarFilters?: Record<string, unknown>;
+
+  /**
+   * Content editor configuration. See {@link ContentEditorFeatureConfig}.
+   * Populated automatically by the client provider.
+   */
+  contentEditor?: ContentEditorFeatureConfig;
 }
 
 /**
@@ -105,4 +238,6 @@ export interface ContentListSupports {
   tags: boolean;
   /** Whether starring items is supported. */
   starred: boolean;
+  /** Whether user profile filtering (createdBy) is supported. */
+  userProfiles: boolean;
 }

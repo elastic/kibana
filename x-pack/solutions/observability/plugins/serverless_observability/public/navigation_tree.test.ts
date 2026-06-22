@@ -8,6 +8,19 @@
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 
+const getAdminSettingsNode = (
+  options: Parameters<typeof createNavigationTree>[0] = {}
+): NodeDefinition => {
+  const { footer } = createNavigationTree(options);
+  const adminSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+
+  if (!adminSettingsNode) {
+    throw new Error('Admin and Settings footer node not found');
+  }
+
+  return adminSettingsNode;
+};
+
 describe('Navigation Tree', () => {
   it('should generate tree with overview', () => {
     const navigation = createNavigationTree({});
@@ -18,6 +31,21 @@ describe('Navigation Tree', () => {
       title: 'Observability',
       link: 'observability-overview',
     });
+  });
+
+  it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {
+    const { body } = createNavigationTree({});
+    const mlNode = body.find((item) => item.id === 'machine_learning-landing');
+    const anomalySection = mlNode?.children?.find(
+      (item) => item.id === 'category-anomaly_detection'
+    );
+
+    expect(anomalySection?.children?.[0]).toEqual(
+      expect.objectContaining({
+        link: 'management:anomaly_detection',
+        title: 'Manage jobs',
+      })
+    );
   });
 
   it('should not generate tree with overview', () => {
@@ -50,6 +78,46 @@ describe('Navigation Tree', () => {
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
+  });
+
+  it('hides GenAI Settings in admin settings when unavailable', () => {
+    const adminSettingsNode = getAdminSettingsNode({ genAiSettingsAvailable: false });
+    const aiSection = adminSettingsNode?.children?.find(
+      (item) => item.title === 'AI' && 'children' in item
+    );
+
+    expect(aiSection).toBeUndefined();
+  });
+
+  it('hides ML and AI related admin settings when unavailable', () => {
+    const adminSettingsNode = getAdminSettingsNode({
+      overviewAvailable: false,
+      genAiSettingsAvailable: false,
+    });
+
+    expect(adminSettingsNode.children).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'machine_learning' }),
+        expect.objectContaining({ id: 'model_management' }),
+        expect.objectContaining({ title: 'AI' }),
+      ])
+    );
+  });
+
+  it('uses a single Alerts link to classic Observability alerts', () => {
+    const { body } = createNavigationTree({ showAlertingV2: true });
+    const alertsPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+    const flatAlerts = body.find((item) => item.link === 'observability-overview:alerts');
+
+    expect(alertsPanel).toBeUndefined();
+    expect(flatAlerts).toEqual(
+      expect.objectContaining({
+        link: 'observability-overview:alerts',
+        icon: 'warning',
+      })
+    );
   });
 
   describe('filterForFeatureAvailability', () => {

@@ -14,6 +14,7 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_ICONS } from '../../../common/constants';
@@ -57,11 +58,16 @@ export const ProcessTreeAlert = ({
     }
   }, [isInvestigated, uuid, selectAlert]);
 
-  const handleExpandClick = useCallback(() => {
-    if (uuid && index) {
-      onShowAlertDetails(uuid, index);
-    }
-  }, [index, onShowAlertDetails, uuid]);
+  const handleExpandClick = useCallback(
+    (evt: React.MouseEvent<HTMLButtonElement>) => {
+      evt.stopPropagation();
+      evt.preventDefault();
+      if (uuid && index) {
+        onShowAlertDetails(uuid, index);
+      }
+    },
+    [index, onShowAlertDetails, uuid]
+  );
 
   const handleClick = useCallback(() => {
     if (alert.kibana?.alert) {
@@ -88,12 +94,14 @@ export const ProcessTreeAlert = ({
         data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
       >
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="expand"
-            aria-label="expand"
-            data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
-            onClick={handleExpandClick}
-          />
+          <EuiToolTip content="expand" disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="maximize"
+              aria-label="expand"
+              data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
+              onClick={handleExpandClick}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip

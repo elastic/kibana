@@ -427,7 +427,6 @@ export const ControlGeneralViewSelector = ({
               anchorPosition="downLeft"
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   <EuiContextMenuItem
                     key="duplicate"
@@ -524,7 +523,6 @@ export const ControlGeneralViewSelector = ({
         anchorPosition="downLeft"
       >
         <EuiContextMenuPanel
-          size="s"
           items={remainingConditions.map((prop) => {
             const label = camelToSentenceCase(prop);
             const disabled = conditionCombinationInvalid(conditionsAdded, prop);

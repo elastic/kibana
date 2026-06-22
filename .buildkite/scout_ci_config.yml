@@ -2,59 +2,101 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - alerting
+    - alerting_v2
     - apm
+    - automatic_import
     - banners
+    - canvas
+    - cloud_integrations/cloud_links
     - cloud_security_posture
     - console
+    - contentManagementExamples
+    - cross_cluster_replication
     - custom_branding
     - dashboard
+    - dashboard_markdown
+    - data
+    - data_view_editor
+    - data_view_management
     - data_views
+    - dev_tools
     - discover
     - discover_enhanced
     - entity_store
+    - error_boundary_example
+    - event_annotation_listing
     - exploratory_view
     - fleet
+    - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - graph
+    - grokdebugger
+    - home
+    - index_lifecycle_management
     - index_management
     - infra
+    - ingest_hub
+    - ingest_pipelines
     - intercepts
+    - kibana_overview
+    - kql
     - lens
+    - logstash
+    - management
     - maps
+    - ml
+    - monitoring
     - navigation
     - observability
     - observability_onboarding
+    - osquery
     - painless_lab
     - profiling
+    - saved_objects_management
+    - saved_objects_tagging
     - search_getting_started
     - search_homepage
+    - search_inference_endpoints
+    - searchprofiler
     - security
     - security_solution
+    - serverless_observability
     - share
     - slo
     - spaces
+    - stack_connectors
     - streams
     - streams_app
     - synthetics
+    - task_manager
     - transform
     - triggers_actions_ui
+    - unified_search
+    - upgrade_assistant
     - uptime
     - ux
+    - watcher
     - workflows_extensions
     - workflows_management
   disabled:
 
 packages:
   enabled:
-    - kbn-streamlang-tests
-  disabled:
-    # Scout's own tests are executed first to validate the Scout framework
-    # (see .buildkite/scripts/steps/test/scout/test_run_builder.sh). Excluded here
-    # so they don't rerun alongside plugin/package Scout tests discovered later.
+    - core
     - kbn-scout
+    - kbn-security-hardening
+    - kbn-streamlang-tests
+    - user-storage
+  disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+  - x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts
+  - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
+  - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
+  - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts

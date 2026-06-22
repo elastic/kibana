@@ -31,7 +31,7 @@ export function getTranslateRuleGraph({
     logger,
   });
   const translationResultNode = getTranslationResultNode();
-  const inlineQueryNode = getInlineQueryNode({ model, logger });
+  const inlineQueryNode = getInlineQueryNode({ model, logger, telemetryClient });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
@@ -74,7 +74,9 @@ export function getTranslateRuleGraph({
 
 const translatableRouter = (state: TranslateRuleState) => {
   if (
-    (state.original_rule.vendor === 'splunk' && !state.inline_query) ||
+    ((state.original_rule.vendor === 'splunk' ||
+      state.original_rule.vendor === 'microsoft-sentinel') &&
+      !state.inline_query) ||
     (state.original_rule.vendor === 'qradar' && !state.nl_query)
   ) {
     return 'translationResult';

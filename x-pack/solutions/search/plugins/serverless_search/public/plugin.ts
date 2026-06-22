@@ -10,6 +10,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { QueryClient, MutationCache, QueryCache } from '@kbn/react-query';
+import type { Subscription } from 'rxjs';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -33,6 +34,8 @@ export class ServerlessSearchPlugin
       ServerlessSearchPluginStartDependencies
     >
 {
+  private managementCardsSubscription?: Subscription;
+
   public setup(
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies
@@ -136,41 +139,49 @@ export class ServerlessSearchPlugin
     const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
       map(([application, chatExperience]) => {
         const showAiAssistant = chatExperience !== AIChatExperience.Agent;
-        return createNavigationTree({ ...application, showAiAssistant });
+        return createNavigationTree({
+          ...application,
+          showAiAssistant,
+          showAlertingV2: Boolean(application.capabilities.alertingVTwo),
+        });
       })
     );
     serverless.initNavigation('es', navigationTree$);
 
-    const extendCardNavDefinitions = serverless.getNavigationCards(
-      security.authz.isRoleManagementEnabled(),
-      aiAssistantIsEnabled
-        ? {
-            observabilityAiAssistantManagement: {
-              category: appCategories.OTHER,
-              title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
-                defaultMessage: 'AI Assistant',
-              }),
-              description: i18n.translate(
-                'xpack.serverlessSearch.aiAssistantManagementDescription',
-                {
-                  defaultMessage:
-                    'Manage knowledge base and control assistant behavior, including response language.',
-                }
-              ),
-              icon: 'sparkles',
-            },
-          }
-        : undefined
-    );
-
-    management.setupCardsNavigation({
-      enabled: true,
-      hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
-      extendCardNavDefinitions,
-    });
+    this.managementCardsSubscription = serverless
+      .getNavigationCards$(
+        security.authz.isRoleManagementEnabled(),
+        aiAssistantIsEnabled
+          ? {
+              observabilityAiAssistantManagement: {
+                category: appCategories.OTHER,
+                title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
+                  defaultMessage: 'AI Assistant',
+                }),
+                description: i18n.translate(
+                  'xpack.serverlessSearch.aiAssistantManagementDescription',
+                  {
+                    defaultMessage:
+                      'Manage knowledge base and control assistant behavior, including response language.',
+                  }
+                ),
+                icon: 'sparkles',
+              },
+            }
+          : undefined
+      )
+      .subscribe((extendCardNavDefinitions) => {
+        management.setupCardsNavigation({
+          enabled: true,
+          hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+          extendCardNavDefinitions,
+        });
+      });
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.managementCardsSubscription?.unsubscribe();
+  }
 }

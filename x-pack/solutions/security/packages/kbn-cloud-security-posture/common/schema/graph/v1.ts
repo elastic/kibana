@@ -12,6 +12,16 @@ export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 const PINNED_IDS_MAX_SIZE = 1024;
 
 /**
+ * CPS project routing expressions accepted by the Graph API.
+ * Values mirror `@kbn/cps-server-utils` (server-only package); declared here so the
+ * shared-common schema can validate without depending on a server-side module.
+ */
+export const PROJECT_ROUTING_ORIGIN = '_alias:_origin' as const;
+export const PROJECT_ROUTING_ALL = '_alias:*' as const;
+
+export type ProjectRouting = typeof PROJECT_ROUTING_ORIGIN | typeof PROJECT_ROUTING_ALL;
+
+/**
  * Entity ID for relationship queries.
  * isOrigin indicates whether this entity is the center/origin of the graph
  * (relevant when opening graph from entity flyout).
@@ -58,6 +68,11 @@ export const graphRequestSchema = schema.object({
     ),
     // Entity IDs for fetching relationships from entity store (optional, may be empty when opening from events flyout)
     entityIds: schema.maybe(schema.arrayOf(entityIdSchema)),
+    // CPS project routing applied only to logs/events queries.
+    // Alerts and entity-store enrichment are always pinned to the origin project.
+    projectRouting: schema.maybe(
+      schema.oneOf([schema.literal(PROJECT_ROUTING_ALL), schema.literal(PROJECT_ROUTING_ORIGIN)])
+    ),
   }),
 });
 
@@ -69,13 +84,21 @@ export const entitySchema = schema.object({
   name: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   sub_type: schema.maybe(schema.string()),
+  engine_type: schema.maybe(
+    schema.oneOf([
+      schema.literal('host'),
+      schema.literal('user'),
+      schema.literal('service'),
+      schema.literal('generic'),
+    ])
+  ),
   host: schema.maybe(
     schema.object({
-      ip: schema.maybe(schema.string()),
+      ip: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
-  ecsParentField: schema.maybe(schema.string()),
+  sourceFields: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export const nodeDocumentDataSchema = schema.object({

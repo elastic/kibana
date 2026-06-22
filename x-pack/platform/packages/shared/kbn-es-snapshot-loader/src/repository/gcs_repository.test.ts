@@ -44,17 +44,40 @@ describe('createGcsRepository', () => {
 
     await repository.register({ esClient, log, repoName: 'test-repo' });
 
-    expect(createRepository).toHaveBeenCalledWith({
-      name: 'test-repo',
-      body: {
-        type: 'gcs',
-        settings: {
-          bucket: 'snapshot-bucket',
-          base_path: 'base/path',
-          client: 'default',
+    expect(createRepository).toHaveBeenCalledWith(
+      {
+        name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
+        verify: false,
+        body: {
+          type: 'gcs',
+          settings: {
+            bucket: 'snapshot-bucket',
+            base_path: 'base/path',
+            client: 'default',
+          },
         },
       },
-    });
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
+  });
+
+  it('registers with verify: true when explicitly requested', async () => {
+    const createRepository = jest.fn().mockResolvedValue(undefined);
+    const esClient = {
+      snapshot: {
+        createRepository,
+      },
+    } as unknown as Client;
+    const repository = createGcsRepository({ bucket: 'snapshot-bucket' });
+
+    await repository.register({ esClient, log, repoName: 'test-repo', verify: true });
+
+    expect(createRepository).toHaveBeenCalledWith(
+      expect.objectContaining({ verify: true }),
+      expect.anything()
+    );
   });
 
   it('omits optional settings when undefined', async () => {
@@ -68,14 +91,20 @@ describe('createGcsRepository', () => {
 
     await repository.register({ esClient, log, repoName: 'test-repo' });
 
-    expect(createRepository).toHaveBeenCalledWith({
-      name: 'test-repo',
-      body: {
-        type: 'gcs',
-        settings: {
-          bucket: 'snapshot-bucket',
+    expect(createRepository).toHaveBeenCalledWith(
+      {
+        name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
+        verify: false,
+        body: {
+          type: 'gcs',
+          settings: {
+            bucket: 'snapshot-bucket',
+          },
         },
       },
-    });
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
   });
 });

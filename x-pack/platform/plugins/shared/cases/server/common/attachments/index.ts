@@ -5,71 +5,73 @@
  * 2.0.
  */
 
-import { AttachmentType } from '../../../common/types/domain';
 import {
   COMMENT_ATTACHMENT_TYPE,
-  VALID_ATTACHMENT_TYPES,
-  LEGACY_TO_UNIFIED_MAP,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  PERSISTABLE_ATTACHMENT_TYPES,
+  EXTERNAL_REFERENCE_TYPE_MAP,
+  LEGACY_ACTIONS_TYPE,
 } from '../../../common/constants/attachments';
+import {
+  isAlertAttachmentType,
+  toUnifiedAttachmentType,
+  toUnifiedPersistableStateAttachmentType,
+} from '../../../common/utils/attachments';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../types/attachments_v2';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
+import { externalReferenceAttachmentTransformer } from './external_reference';
+import { persistableStateAttachmentTransformer } from './persistable_state';
+import { eventAttachmentTransformer } from './event';
+import { actionsAttachmentTransformer } from './actions';
+import { alertAttachmentTransformer } from './alert';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
+export { actionsAttachmentTransformer } from './actions';
 export {
   getAttachmentSavedObjectType,
   resolveAttachmentSavedObjectType,
 } from './saved_object_type';
+// Re-exported so existing server call sites keep their `from '.'` import path.
+export { getAttachmentTypeFromAttributes } from '../../../common/utils/attachments';
+
+/** Set of all unified type names that map to external references */
+const UNIFIED_EXTERNAL_REFERENCE_TYPES = new Set(Object.values(EXTERNAL_REFERENCE_TYPE_MAP));
 
 /**
- * Converts a legacy attachment type to its unified type.
- */
-export function toUnifiedAttachmentType(type: string): string {
-  if (!VALID_ATTACHMENT_TYPES.has(type)) {
-    throw new Error(`Invalid attachment type: ${type}`);
-  }
-  const unified = LEGACY_TO_UNIFIED_MAP[type];
-  if (unified) {
-    return unified;
-  }
-  return type;
-}
-
-/**
- * Returns the attachment type string from attributes (unified or legacy shape).
- * Used to select the correct transformer.
- * @throws Error if attributes is null or not an object
- */
-export function getAttachmentTypeFromAttributes(attributes: unknown): string {
-  if (attributes === null || typeof attributes !== 'object') {
-    throw new Error('Invalid attributes: expected non-null object');
-  }
-  const attrs = attributes as Record<string, unknown>;
-  if (typeof attrs.type === 'string') {
-    return attrs.type;
-  }
-  if ('comment' in attrs) {
-    return AttachmentType.user;
-  }
-  return COMMENT_ATTACHMENT_TYPE;
-}
-
-/**
- * Returns the persisted transformer for the given attachment type.
- * Use getAttachmentTypeFromAttributes(attributes) to derive type from decoded attributes.
- * For comment/user types returns the comment transformer; for all other types returns a
- * pass-through transformer (identity for old <-> new schema).
+ * Returns the persisted transformer for the routing key from {@link getAttachmentTypeFromAttributes}.
+ * For comment/user types returns the comment transformer; for migrated persistable
+ * types (e.g. Lens) returns the persistable-state transformer; for migrated external
+ * reference subtypes (e.g. endpoint) returns the external reference transformer;
+ * otherwise pass-through.
  */
 export function getAttachmentTypeTransformers(
-  type: string
+  type: string,
+  owner: string
 ): AttachmentTypeTransformer<AttachmentPersistedAttributes, UnifiedAttachmentAttributes> {
-  const normalizedType = toUnifiedAttachmentType(type);
+  const normalizedType = toUnifiedAttachmentType(type, owner);
+  const normalizedPersistableType = toUnifiedPersistableStateAttachmentType(type);
 
-  if (normalizedType === 'comment') {
+  if (normalizedType === COMMENT_ATTACHMENT_TYPE || normalizedType === 'comment') {
     return commentAttachmentTransformer;
+  }
+  if (PERSISTABLE_ATTACHMENT_TYPES.has(normalizedPersistableType)) {
+    return persistableStateAttachmentTransformer;
+  }
+  if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
+    return eventAttachmentTransformer;
+  }
+  if (type === LEGACY_ACTIONS_TYPE) {
+    return actionsAttachmentTransformer;
+  }
+  if (isAlertAttachmentType(normalizedType)) {
+    return alertAttachmentTransformer;
+  }
+  if (UNIFIED_EXTERNAL_REFERENCE_TYPES.has(normalizedType)) {
+    return externalReferenceAttachmentTransformer;
   }
   return passThroughTransformer;
 }

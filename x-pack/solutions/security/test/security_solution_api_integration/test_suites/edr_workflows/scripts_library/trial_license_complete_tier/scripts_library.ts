@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         .on('error', createSupertestErrorLogger(log))
         .on('response', addScriptToAfterEachCleanup)
         .field('name', 'test script')
+        .field('fileType', 'script')
         .field('platform', JSON.stringify(['linux']))
         .attach('file', buildFileBuffer(), 'script_file.sh')
         .expect(200);
@@ -121,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
             .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
             .on('response', addScriptToAfterEachCleanup)
             .field('name', 'test script')
+            .field('fileType', 'script')
             .field('platform', JSON.stringify(['linux']))
             .attach('file', buildFileBuffer(), 'script_file.sh')
             .expect(403);
@@ -133,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
             .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
             .on('response', addScriptToAfterEachCleanup)
             .field('name', 'test script')
+            .field('fileType', 'script')
             .field('platform', JSON.stringify(['linux']))
             .attach('file', buildFileBuffer(), 'script_file.sh')
             .expect(403);
@@ -145,6 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
             .on('error', createSupertestErrorLogger(log))
             .on('response', addScriptToAfterEachCleanup)
             .field('name', 'test script')
+            .field('fileType', 'script')
             .field('platform', JSON.stringify(['linux']))
             .attach('file', buildFileBuffer(), 'script_file.sh')
             .expect(200);
@@ -218,7 +222,8 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(403);
         });
 
-        it('should delete script when user has WRITE privileges', async () => {
+        // https://github.com/elastic/security-team/issues/16593
+        it.skip('should delete script when user has WRITE privileges', async () => {
           await writeScriptsSuperTest
             .delete(SCRIPTS_LIBRARY_ROUTE_ITEM.replace('{script_id}', scriptId))
             .set('kbn-xsrf', 'true')

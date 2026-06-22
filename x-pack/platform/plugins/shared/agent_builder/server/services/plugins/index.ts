@@ -12,3 +12,4 @@ export {
   type PluginsServiceStart,
 } from './plugin_service';
 export { type PluginClient, type PersistedPluginDefinition, toPluginDefinition } from './client';
+export { type PluginRegistry } from './plugin_registry';

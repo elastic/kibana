@@ -53,6 +53,14 @@ export interface CanvasRenderCallbacks {
 }
 
 /**
+ * Callbacks available to inline content renderers.
+ */
+export interface InlineRenderCallbacks {
+  /** Register action buttons to display in the inline attachment header */
+  registerActionButtons: (buttons: ActionButton[]) => void;
+}
+
+/**
  * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
 export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -62,6 +70,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   isSidebar: boolean;
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
+  /** Id of the agent the current conversation is using, when known. */
+  agentId?: string;
   /** Function to update the attachment's origin reference */
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
@@ -85,8 +95,70 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
-  /** Handler function called when the button is clicked */
+  /** Whether the action is currently unavailable */
+  disabled?: boolean;
+  /** Optional explanation shown when a disabled action remains visible */
+  disabledReason?: string;
+  /**
+   * Optional URL. When provided, the button renders as an anchor (`<a href>`)
+   * so it honors native browser behaviors like middle-click and cmd-click /
+   * "Open in new tab" from the context menu.
+   */
+  href?: string;
+  /**
+   * When true, the link opens in a new browser tab. Only applies when `href`
+   * is set; `rel="noopener noreferrer"` is added automatically.
+   */
+  openInNewTab?: boolean;
+  /**
+   * Handler function called when the button is clicked.
+   */
   handler: () => void | Promise<void>;
+}
+
+/**
+ * Parameters passed to attachment lifecycle hooks.
+ */
+export interface AttachmentLifecycleParams<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** Returns the current attachment state */
+  getAttachment: () => TAttachment;
+  /** Update the attachment's origin reference (e.g., after saving to library) */
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
+}
+
+/**
+ * Parameters passed to the `getHeader` resolver.
+ */
+export interface GetHeaderParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
+  /** The attachment being rendered in the header. */
+  attachment: TAttachment;
+}
+
+/**
+ * Return value of the `getHeader` resolver.
+ */
+export interface HeaderData {
+  /** Optional icon to display in the attachment header next to the title. */
+  icon?: IconType;
+  /** Optional secondary line rendered under the attachment title. */
+  subtitle?: string;
+  /** Optional badges rendered in the attachment header next to the title. */
+  badges?: HeaderBadge[];
+}
+
+/**
+ * Badge definition for rendering in the attachment header next to the title.
+ * Maps directly onto `EuiBadge`'s props.
+ */
+export interface HeaderBadge {
+  /** Badge content. */
+  label: string;
+  /** Optional EUI badge color (e.g. 'hollow', 'success', 'warning', 'accent'). */
+  color?: string;
+  /** Optional icon to display alongside the label. */
+  iconType?: IconType;
 }
 
 /**
@@ -98,9 +170,15 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getLabel: (attachment: TAttachment) => string;
   /**
-   * Returns the icon type to display for the attachment.
+   * Returns the icon type to display for the attachment pill (pre-send chip).
    */
   getIcon?: () => IconType;
+  /**
+   * Returns header metadata (icon, subtitle, badges) for the attachment header
+   * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
+   * subtitle, no badges).
+   */
+  getHeader?: (params: GetHeaderParams<TAttachment>) => HeaderData;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.
@@ -110,8 +188,21 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Optional custom content renderer for inline attachment display.
    * When provided, attachments can be rendered inline in the conversation
    * using the <render_attachment> tag.
+   *
+   * The `callbacks` object provides:
+   * - `registerActionButtons`: dynamically register action buttons in the inline header
    */
-  renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderInlineContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
+  /**
+   * Optional preferred width for the canvas flyout when opened in full-screen context.
+   * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
+   * Defaults to `'50vw'` when not specified.
+   * Has no effect in sidebar context.
+   */
+  canvasWidth?: string;
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
@@ -131,6 +222,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /**
+   * Optional max-width (in px) for the inline attachment panel.
+   * When provided, the outer panel will not exceed this width.
+   */
+  getMaxWidth?: (attachment: TAttachment) => number | undefined;
 }
 
 /**

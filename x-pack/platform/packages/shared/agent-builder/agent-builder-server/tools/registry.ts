@@ -12,11 +12,15 @@ import type { InternalToolDefinition } from './internal';
 /**
  * Parameters for listing tools.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ToolListParams {
-  // blank for now
-  // type?: ToolType[];
-  // tags?: string[];
+  /**
+   * Filter tools by type. Only tools matching one of the specified types will be returned.
+   */
+  types?: ToolType[];
+  /**
+   * Filter tools by tags. Only tools that have at least one of the specified tags will be returned.
+   */
+  tags?: string[];
 }
 
 /**

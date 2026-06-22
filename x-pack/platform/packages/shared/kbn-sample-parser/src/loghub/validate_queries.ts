@@ -50,7 +50,7 @@ export const querySchema: z.ZodType<LoghubQuery> = z.object({
       z.string().transform((arg) => JSON.parse(arg) as object),
     ])
     .refine(
-      (arg): arg is Record<string, any> => {
+      (arg): arg is Record<string, unknown> => {
         return !isEmpty(arg);
       },
       { message: `Object cannot be empty` }

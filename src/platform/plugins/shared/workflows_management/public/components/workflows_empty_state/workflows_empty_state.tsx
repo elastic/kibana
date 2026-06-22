@@ -19,16 +19,14 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
+import { PrivilegesFooter } from '../workflows_required_priveleges_footer';
 interface WorkflowsEmptyStateProps {
   onCreateWorkflow?: () => void;
-  canCreateWorkflow?: boolean;
 }
 
-export function WorkflowsEmptyState({
-  onCreateWorkflow,
-  canCreateWorkflow = false,
-}: WorkflowsEmptyStateProps) {
+export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStateProps) {
   const { http } = useKibana().services;
   return (
     <EuiEmptyPrompt
@@ -60,13 +58,13 @@ export function WorkflowsEmptyState({
         </>
       }
       actions={
-        canCreateWorkflow && onCreateWorkflow ? (
+        onCreateWorkflow ? (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusInCircle">
+              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusCircle">
                 <FormattedMessage
                   id="workflows.emptyState.createButton"
-                  defaultMessage="Create a new workflow"
+                  defaultMessage="Create workflow"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -74,7 +72,7 @@ export function WorkflowsEmptyState({
               <EuiButtonEmpty
                 href="https://github.com/elastic/workflows"
                 target="_blank"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 aria-label="Example workflows"
               >
@@ -97,13 +95,58 @@ export function WorkflowsEmptyState({
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href="https://ela.st/workflows-docs" target="_blank">
+          <EuiLink href={WORKFLOWS_DOCUMENTATION_URL} target="_blank">
             <FormattedMessage
               id="workflows.emptyState.footer.link"
               defaultMessage="Read documentation"
             />
           </EuiLink>
         </>
+      }
+    />
+  );
+}
+
+export function WorkflowsEmptyStateReadOnly() {
+  const { http } = useKibana().services;
+  return (
+    <EuiEmptyPrompt
+      icon={
+        <EuiImage
+          size="fullWidth"
+          src={http?.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+          alt=""
+        />
+      }
+      title={
+        <h2 style={{ whiteSpace: 'nowrap' }}>
+          <FormattedMessage
+            id="workflows.emptyStateReadOnly.title"
+            defaultMessage="Workflows list will be here"
+          />
+        </h2>
+      }
+      layout="horizontal"
+      color="plain"
+      body={
+        <>
+          <p>
+            <FormattedMessage
+              id="workflows.emptyStateReadOnly.body.firstParagraph"
+              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment."
+            />
+          </p>
+        </>
+      }
+      footer={
+        <PrivilegesFooter
+          permissions={[
+            {
+              id: 'platform.plugins.shared.workflows_management.writeWorkflowPermissionText',
+              default: 'Workflows: Write',
+            },
+          ]}
+        />
       }
     />
   );

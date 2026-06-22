@@ -96,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Dashboards', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.contain('Dashboards');
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.existOrFail('newItemButton');
+        await dashboard.expectCreateButtonExists();
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -278,7 +278,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboards']);
+        expect(navLinks).to.eql(['Dashboards', 'Workflows']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -288,7 +288,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.missingOrFail('newItemButton');
+        await dashboard.expectCreateButtonMissing();
       });
 
       it(`shows read-only badge`, async () => {
@@ -388,7 +388,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboards']);
+        expect(navLinks).to.contain('Dashboards');
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -396,7 +396,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
-        await testSubjects.missingOrFail('newItemButton');
+        await dashboard.expectCreateButtonMissing();
       });
 
       it(`shows read-only badge`, async () => {

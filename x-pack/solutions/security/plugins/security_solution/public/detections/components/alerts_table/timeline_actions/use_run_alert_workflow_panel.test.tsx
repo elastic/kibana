@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
+  AlertWorkflowsPanel,
   useRunAlertWorkflowPanel,
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
@@ -106,13 +107,14 @@ const renderContextMenu = (
   const panelsToRender = [{ id: 0, items }, ...panels];
   return render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
     </EuiPopover>
   );
 };
@@ -298,6 +300,29 @@ describe('AlertWorkflowsPanel', () => {
       })
     );
     expect(closePopoverFn).toHaveBeenCalled();
+  });
+
+  it('calls onExecute callback when workflow execution is triggered', async () => {
+    const user = userEvent.setup();
+    const onExecuteFn = jest.fn();
+    mockMutate.mockImplementation((_vars: unknown, { onSettled }: { onSettled?: () => void }) => {
+      onSettled?.();
+    });
+
+    render(
+      <TestProviders>
+        <AlertWorkflowsPanel
+          alertIds={[{ _id: 'alert-123', _index: 'alerts-index' }]}
+          onClose={jest.fn()}
+          onExecute={onExecuteFn}
+        />
+      </TestProviders>
+    );
+
+    await user.click(screen.getByTestId('select-workflow-option'));
+    await user.click(screen.getByTestId('execute-alert-workflow-button'));
+
+    expect(onExecuteFn).toHaveBeenCalledTimes(1);
   });
 
   it('calls addSuccess (workflow success toast) when mutate onSuccess is invoked', async () => {

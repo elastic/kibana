@@ -28,9 +28,11 @@
       "cloud",
       "usageCollection",
       "streams",
+      "ingestHub",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "ingestHub"
     ],
     "extraPublicDirs": [
       "common"

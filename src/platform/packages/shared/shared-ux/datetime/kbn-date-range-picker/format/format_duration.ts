@@ -9,11 +9,11 @@
 
 const UNIT_ABBREV = {
   years: 'y',
-  months: 'mos',
+  months: 'mo',
   weeks: 'w',
   days: 'd',
   hours: 'h',
-  minutes: 'min',
+  minutes: 'm',
   seconds: 's',
   milliseconds: 'ms',
 } as const;

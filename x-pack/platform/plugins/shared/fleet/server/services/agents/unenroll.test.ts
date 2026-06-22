@@ -15,11 +15,18 @@ import { appContextService } from '../app_context';
 
 import { createAppContextStartContractMock } from '../../mocks';
 
+import { outputService } from '../output';
+
 import type { Agent } from '../../types';
+
+import { SO_SEARCH_LIMIT } from '../../constants';
+
+import * as agentNamespaces from '../spaces/agent_namespaces';
 
 import { unenrollAgent, unenrollAgents } from './unenroll';
 import { invalidateAPIKeysForAgents, isAgentUnenrolled } from './unenroll_action_runner';
 import { createClientMock } from './action.mock';
+import * as crud from './crud';
 
 jest.mock('../api_keys');
 
@@ -331,9 +338,19 @@ describe('unenroll', () => {
   });
 
   describe('invalidateAPIKeysForAgents', () => {
+    let mockOutputServiceGet: jest.SpyInstance;
+
     beforeEach(() => {
       mockedInvalidateAPIKeys.mockReset();
+      mockOutputServiceGet = jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValue({ type: 'elasticsearch' } as any);
     });
+
+    afterEach(() => {
+      mockOutputServiceGet.mockRestore();
+    });
+
     it('revoke all the agents API keys', async () => {
       await invalidateAPIKeysForAgents([
         {
@@ -380,6 +397,46 @@ describe('unenroll', () => {
         'outputApiKey3',
       ]);
     });
+
+    it('excludes remote output keys from invalidateAPIKeys', async () => {
+      mockOutputServiceGet.mockImplementation(async (id: string) => {
+        if (id === 'remoteOutput1') return { type: 'remote_elasticsearch' } as any;
+        return { type: 'elasticsearch' } as any;
+      });
+
+      await invalidateAPIKeysForAgents([
+        {
+          id: 'agent1',
+          access_api_key_id: 'accessApiKey1',
+          outputs: {
+            localOutput1: {
+              api_key_id: 'localOutputApiKey1',
+            },
+            remoteOutput1: {
+              api_key_id: 'remoteApiKey1',
+              to_retire_api_key_ids: [{ id: 'remoteRetireKey1' }],
+            },
+          },
+        } as any,
+      ]);
+
+      expect(mockedInvalidateAPIKeys).toBeCalledWith(['accessApiKey1', 'localOutputApiKey1']);
+    });
+
+    it('treats output as local when outputService.get throws', async () => {
+      mockOutputServiceGet.mockRejectedValue(new Error('output not found'));
+
+      await invalidateAPIKeysForAgents([
+        {
+          id: 'agent1',
+          outputs: {
+            output1: { api_key_id: 'outputApiKey1' },
+          },
+        } as any,
+      ]);
+
+      expect(mockedInvalidateAPIKeys).toBeCalledWith(['outputApiKey1']);
+    });
   });
 
   describe('isAgentUnenrolled', () => {
@@ -411,5 +468,49 @@ describe('unenroll', () => {
         false
       );
     });
+  });
+});
+
+describe('unenrollAgents kuery construction', () => {
+  let mockGetAgentsByKuery: jest.SpyInstance;
+  let mockAgentsKueryNamespaceFilter: jest.SpyInstance;
+
+  beforeEach(async () => {
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
+    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
+      agents: [],
+      total: 0,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    mockAgentsKueryNamespaceFilter = jest
+      .spyOn(agentNamespaces, 'agentsKueryNamespaceFilter')
+      .mockResolvedValue('namespaces:custom_space');
+  });
+
+  afterEach(() => {
+    mockGetAgentsByKuery.mockRestore();
+    mockAgentsKueryNamespaceFilter.mockRestore();
+    appContextService.stop();
+  });
+
+  it('wraps namespace filter and kuery containing OR in parentheses', async () => {
+    const { soClient, esClient } = createClientMock();
+    const kuery = 'status:online or status:error or status:offline';
+
+    await unenrollAgents(soClient, esClient, { kuery });
+
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({
+        kuery: `(namespaces:custom_space) AND (${kuery})`,
+      })
+    );
   });
 });

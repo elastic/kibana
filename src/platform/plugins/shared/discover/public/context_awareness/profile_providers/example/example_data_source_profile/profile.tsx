@@ -16,7 +16,7 @@ import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { ChartWithCustomButtons, CustomDocViewerHeader } from './components';
+import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
@@ -62,9 +62,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       },
     }),
     getDocViewer:
-      (prev, { context }) =>
+      (prev, { context, toolkit }) =>
       (params) => {
-        const { openInNewTab, updateESQLQuery } = params.actions;
+        const { openInNewTab, updateESQLQuery } = toolkit.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
 
@@ -94,6 +94,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             return prevValue.docViewsRegistry(registry);
           },
           renderHeader: (props) => <CustomDocViewerHeader {...props} />,
+          renderFooter: (props) => <CustomDocViewerFooter {...props} />,
         };
       },
     /**
@@ -154,7 +155,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             id: 'example-custom-action4',
             order: 101,
             label: 'Create SLO (Custom action)',
-            iconType: 'visGauge',
+            iconType: 'chartGauge',
             testId: 'example-custom-action-under-alerts',
             run: ({ context: { onFinishAction } }) => {
               // This is an example of a custom action that opens a flyout or any other custom modal.
@@ -188,7 +189,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
       return [
         ...additionalControls,
-        ...['visBarVerticalStacked', 'heart', 'inspect'].map(
+        ...['chartBarVerticalStack', 'heart', 'inspect'].map(
           (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
             render: (Control, rowProps) => {
@@ -225,9 +226,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ],
       rowHeight: 5,
     }),
-    getAdditionalCellActions: (prev) => (params) =>
+    getAdditionalCellActions: (prev) => () =>
       [
-        ...prev(params),
+        ...prev(),
         {
           id: 'example-data-source-action',
           getDisplayName: () => 'Example data source action',
@@ -270,16 +271,18 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         recommendedFields: exampleRecommendedFieldNames,
       };
     },
-    getChartSectionConfiguration: (prev) => (params) => {
-      return {
-        ...prev(params),
-        renderChartSection: (props) => (
-          <ChartWithCustomButtons {...props} actions={params.actions} />
-        ),
-        localStorageKeyPrefix: 'discover:exampleDataSource',
-        replaceDefaultChart: true,
-      };
-    },
+    getChartSectionConfiguration:
+      (prev, { toolkit }) =>
+      () => {
+        return {
+          ...prev(),
+          renderChartSection: (props) => (
+            <ChartWithCustomButtons {...props} actions={toolkit.actions} />
+          ),
+          localStorageKeyPrefix: 'discover:exampleDataSource',
+          replaceDefaultChart: true,
+        };
+      },
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

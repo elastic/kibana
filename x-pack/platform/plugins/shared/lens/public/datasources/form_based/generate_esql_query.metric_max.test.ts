@@ -73,7 +73,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes) | EVAL static_value = 100'
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend) | EVAL static_value = 100'
       );
       expect(result.esAggsIdMap).toHaveProperty('static_value');
       expect(result.esAggsIdMap.static_value[0].id).toBe('3');
@@ -149,6 +149,52 @@ describe('generateEsqlQuery metric max (static_value)', () => {
       );
       expect(result.esAggsIdMap).toHaveProperty('static_value_0');
       expect(result.esAggsIdMap).toHaveProperty('static_value_1');
+    }
+  });
+
+  it('should use columnRoles for max metric with filter to produce semantic output name and preserve label', () => {
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'sum',
+            sourceField: 'bytes',
+            label: 'Sum of bytes',
+            dataType: 'number' as const,
+            isBucketed: false,
+          },
+        ],
+        [
+          '2',
+          {
+            operationType: 'max' as const,
+            sourceField: 'bytes',
+            label: 'Maximum of bytes',
+            dataType: 'number' as const,
+            isBucketed: false,
+            filter: {
+              query: 'bytes > 100',
+              language: 'kuery' as const,
+            },
+          },
+        ],
+      ],
+      mockLayer,
+      mockIndexPatternWithoutTimeField,
+      uiSettings,
+      mockDateRange,
+      new Date(),
+      { '2': 'max_value' }
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toContain('max_value = MAX(bytes) WHERE KQL');
+      expect(result.esAggsIdMap).toHaveProperty('max_value');
+      const maxEntry = result.esAggsIdMap.max_value[0];
+      expect(maxEntry.id).toBe('2');
+      expect(maxEntry.label).toBe('Maximum of bytes');
     }
   });
 });

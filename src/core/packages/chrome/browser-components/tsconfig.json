@@ -32,10 +32,9 @@
     "@kbn/core-base-browser-mocks",
     "@kbn/react-env",
     "@kbn/react-kibana-context-env",
-    "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/core-chrome-navigation",
     "@kbn/core-chrome-sidebar-components",
+    "@kbn/ui-side-navigation",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-common",
     "@kbn/core-doc-links-browser",
@@ -47,5 +46,8 @@
     "@kbn/shared-ux-label-formatter",
     "@kbn/test-jest-helpers",
     "@kbn/use-observable",
+    "@kbn/shared-ux-utility",
+    "@kbn/ui-chrome-layout",
+    "@kbn/app-header",
   ]
 }
