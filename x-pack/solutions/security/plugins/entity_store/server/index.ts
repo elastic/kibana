@@ -12,6 +12,11 @@ export type {
   EntityStoreStartContract,
   EntityStoreCRUDClient,
 } from './types';
+export type {
+  GraphRoleAliasContext,
+  GraphAliasMap,
+  GraphRoleDestination,
+} from './domain/streams_features';
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
 export type { ResolutionClient } from './domain/resolution';

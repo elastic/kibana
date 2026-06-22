@@ -11,7 +11,12 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { EntityStoreGlobalState, HistorySnapshotState, LogExtractionConfig } from './constants';
+import {
+  EntityStoreGlobalState,
+  HistorySnapshotState,
+  KnowledgeIndicatorsConfig,
+  LogExtractionConfig,
+} from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
 
 export class EntityStoreGlobalStateClient {
@@ -55,9 +60,13 @@ export class EntityStoreGlobalStateClient {
 
     const historySnapshot = HistorySnapshotState.parse(initialState?.historySnapshot ?? {});
     const logsExtraction = LogExtractionConfig.parse(initialState?.logsExtraction ?? {});
+    const knowledgeIndicators = KnowledgeIndicatorsConfig.parse(
+      initialState?.knowledgeIndicators ?? {}
+    );
     const defaultState: EntityStoreGlobalState = {
       historySnapshot,
       logsExtraction,
+      knowledgeIndicators,
     };
     const parsed = EntityStoreGlobalState.parse(defaultState);
 

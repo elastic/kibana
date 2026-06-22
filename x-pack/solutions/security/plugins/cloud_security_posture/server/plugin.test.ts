@@ -65,6 +65,11 @@ describe('Cloud Security Posture Plugin', () => {
         security: securityMock.createStart(),
         licensing: licensingMock.createStart(),
         dataViews: createIndexPatternsStartMock(),
+        entityStore: {
+          createCRUDClient: jest.fn(),
+          createResolutionClient: jest.fn(),
+          getGraphRoleAliases: jest.fn().mockResolvedValue([]),
+        } as unknown as CspServerPluginStartDeps['entityStore'],
       };
 
       contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);

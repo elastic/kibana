@@ -25,6 +25,7 @@ import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
+import { hasKnowledgeIndicatorProvenance } from './inferred_knowledge_indicator_badge';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_HOVER_SHAPE_ID,
@@ -52,6 +53,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
     nodeClick,
     ipClickHandler,
     countryClickHandler,
+    documentsData,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
@@ -137,6 +139,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
         label={label}
         ips={ips}
         countryCodes={countryCodes}
+        isInferred={hasKnowledgeIndicatorProvenance(documentsData)}
         onIpClick={ipClickHandler}
         onCountryClick={countryClickHandler}
       />

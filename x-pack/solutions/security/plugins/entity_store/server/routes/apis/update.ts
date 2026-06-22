@@ -15,9 +15,18 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
+import { EntityStoreGlobalStateClient } from '../../domain/saved_objects';
 
 const bodySchema = z.object({
-  logExtraction: LogExtractionUpdadeSchema,
+  logExtraction: LogExtractionUpdadeSchema.optional(),
+  // Cloud-security graph KI alias knob. `null` disables the alias prelude
+  // (graph stays byte-identical to today); a number (0–100) is the minimum
+  // schema-feature confidence whose `ecs_identity_aliases` the graph applies.
+  knowledgeIndicators: z
+    .object({
+      graphAliasMinConfidence: z.number().int().min(0).max(100).nullable(),
+    })
+    .optional(),
 });
 
 export function registerUpdate(router: EntityStorePluginRouter) {
@@ -48,11 +57,21 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const { logsExtractionClient, logger } = await ctx.entityStore;
+        const { logsExtractionClient, logger, core, namespace } = await ctx.entityStore;
         logger.debug('Update api called');
 
         try {
-          await logsExtractionClient.updateConfig(req.body.logExtraction);
+          if (req.body.logExtraction) {
+            await logsExtractionClient.updateConfig(req.body.logExtraction);
+          }
+          if (req.body.knowledgeIndicators) {
+            const globalStateClient = new EntityStoreGlobalStateClient(
+              core.savedObjects.client,
+              namespace,
+              logger
+            );
+            await globalStateClient.update({ knowledgeIndicators: req.body.knowledgeIndicators });
+          }
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });

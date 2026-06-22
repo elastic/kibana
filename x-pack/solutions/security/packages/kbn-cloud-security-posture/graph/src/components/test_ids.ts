@@ -108,6 +108,9 @@ export const GRAPH_TAG_WRAPPER_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagWrapper` a
 export const GRAPH_TAG_COUNT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagCount` as const;
 export const GRAPH_TAG_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagText` as const;
 
+export const GRAPH_INFERRED_KI_BADGE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}InferredKnowledgeIndicatorBadge` as const;
+
 export const GRAPH_POPOVER_PREVIEW_PANEL =
   `${GRAPH_INVESTIGATION_TEST_ID}PopoverPreviewPanel` as const;
 

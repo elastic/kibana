@@ -38,6 +38,7 @@ import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/serv
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { EntityStoreStartContract, GraphRoleAliasContext } from '@kbn/entity-store/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
@@ -64,6 +65,7 @@ export interface CspServerPluginStartDeps {
   security: SecurityPluginStart;
   licensing: LicensingPluginStart;
   dataViews: DataViewsPluginStart;
+  entityStore: EntityStoreStartContract;
   spaces?: SpacesPluginStart;
 }
 
@@ -82,6 +84,15 @@ export interface CspApiRequestHandlerContext {
   packagePolicyService: PackagePolicyClient;
   packageService: PackageService;
   spacesService?: SpacesPluginStart['spacesService'];
+
+  /**
+   * Resolves the Streams-KI graph-role alias contexts for this request via the
+   * entity_store start contract. Returns `[]` when the `graphAliasMinConfidence`
+   * knob is disabled (default) or streams is not enabled, so the graph query is
+   * byte-identical to today unless a tenant opts in. Used by the graph events
+   * route to splice the alias prelude into the ES|QL query.
+   */
+  getGraphRoleAliases: () => Promise<GraphRoleAliasContext[]>;
 
   isPluginInitialized(): boolean;
 }

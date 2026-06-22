@@ -7,6 +7,7 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import type { GraphRoleAliasContext } from '@kbn/entity-store/server';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
 import {
@@ -42,6 +43,7 @@ export interface FetchGraphParams {
   entityIds?: EntityId[];
   pinnedIds?: string[];
   projectRouting?: ProjectRouting;
+  graphRoleAliases?: GraphRoleAliasContext[];
 }
 
 export interface FetchGraphResult {
@@ -73,6 +75,7 @@ export const fetchGraph = async ({
   entityIds,
   pinnedIds,
   projectRouting,
+  graphRoleAliases,
 }: FetchGraphParams): Promise<FetchGraphResult> => {
   // Only fetch events when originEventIds or esQuery are provided
   const hasOriginEventIds = originEventIds.length > 0;
@@ -101,6 +104,7 @@ export const fetchGraph = async ({
           esQuery,
           pinnedIds,
           projectRouting,
+          graphRoleAliases,
         }).catch((error) => {
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;

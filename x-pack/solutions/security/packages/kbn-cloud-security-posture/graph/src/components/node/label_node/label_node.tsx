@@ -34,6 +34,7 @@ import { analyzeDocuments } from './analyze_documents';
 import { LabelNodeBadges } from './label_node_badges';
 import { LabelNodeDetails } from './label_node_details';
 import { showStackedShape } from '../../utils';
+import { hasKnowledgeIndicatorProvenance } from '../inferred_knowledge_indicator_badge';
 
 export const TEST_SUBJ_SHAPE = 'label-node-shape';
 export const TEST_SUBJ_STACKED_SHAPE = 'label-node-stacked-shape';
@@ -60,6 +61,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     ipClickHandler,
     countryClickHandler,
     eventClickHandler,
+    documentsData,
   } = props.data as LabelNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
@@ -76,6 +78,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const numAlerts = uniqueAlertsCount ?? 0;
 
   const analysis = analyzeDocuments({ uniqueEventsCount: numEvents, uniqueAlertsCount: numAlerts });
+  const isInferred = hasKnowledgeIndicatorProvenance(documentsData);
 
   return (
     <>
@@ -125,7 +128,11 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                 />
               )}
             </EuiText>
-            <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
+            <LabelNodeBadges
+              analysis={analysis}
+              isInferred={isInferred}
+              onEventClick={eventClickHandler}
+            />
           </div>
         </LabelShape>
         {showStackedShape(numEvents + numAlerts) && (

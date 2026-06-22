@@ -13,6 +13,7 @@ import { Tag } from './tag/tag';
 import { Ips } from './ips/ips';
 import { CountryFlags } from './country_flags/country_flags';
 import { Label } from './label/label';
+import { InferredKnowledgeIndicatorBadge } from './inferred_knowledge_indicator_badge';
 
 interface NodeDetailsProps {
   count?: number;
@@ -20,6 +21,7 @@ interface NodeDetailsProps {
   label?: string;
   ips?: string[];
   countryCodes?: string[];
+  isInferred?: boolean;
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onCountryClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -30,6 +32,7 @@ export const NodeDetails = ({
   label,
   ips,
   countryCodes,
+  isInferred,
   onIpClick,
   onCountryClick,
 }: NodeDetailsProps) => {
@@ -40,7 +43,7 @@ export const NodeDetails = ({
   const shouldRenderIps = ips && ips.length > 0;
   const shouldRenderFlags = countryCodes && countryCodes.length > 0;
 
-  const shouldRenderTop = shouldRenderTag;
+  const shouldRenderTop = shouldRenderTag || isInferred;
   const shouldRenderBottom = shouldRenderLabel || shouldRenderIps || shouldRenderFlags;
 
   return (
@@ -53,8 +56,18 @@ export const NodeDetails = ({
       `}
     >
       {shouldRenderTop ? (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: ${euiTheme.size.xxs};
+          `}
+        >
           {shouldRenderTag ? <Tag count={count} text={tag} /> : null}
+          {isInferred ? <InferredKnowledgeIndicatorBadge /> : null}
         </EuiFlexItem>
       ) : null}
       {shouldRenderBottom ? (

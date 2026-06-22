@@ -65,6 +65,10 @@ export const defineGraphRoute = (router: CspRouter) =>
         }
 
         try {
+          // Off by default: resolves to `[]` unless the entity-store
+          // `graphAliasMinConfidence` knob is set, so the query is unchanged.
+          const graphRoleAliases = await cspContext.getGraphRoleAliases();
+
           const resp = await getGraphV1({
             services: {
               logger: cspContext.logger,
@@ -83,6 +87,7 @@ export const defineGraphRoute = (router: CspRouter) =>
             },
             showUnknownTarget,
             nodesLimit,
+            graphRoleAliases,
           });
 
           return response.ok({ body: resp });

@@ -50,6 +50,10 @@ import {
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
+import {
+  createKnowledgeIndicatorsReader,
+  type StreamsKnowledgeIndicatorsReader,
+} from './lib/streams/cross_plugin/knowledge_indicators_reader';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
 import type {
   StreamsPluginSetupDependencies,
@@ -88,8 +92,21 @@ const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginStart {}
+
+export interface StreamsPluginStart {
+  /**
+   * Builds a request-scoped, read-only Knowledge Indicators reader for
+   * cross-plugin consumers (e.g. entity_store's KI integration, which also
+   * powers the cloud-security graph alias prelude). The returned surface is
+   * narrowed so consumers can read schema / entity / dependency features and
+   * resolve stream index patterns without depending on the internal
+   * KnowledgeIndicatorClient or StreamsClient. The reader inherits the
+   * request's auth / space scoping.
+   */
+  getKnowledgeIndicatorsReader(args: {
+    request: KibanaRequest;
+  }): Promise<StreamsKnowledgeIndicatorsReader>;
+}
 
 export class StreamsPlugin
   implements
@@ -662,7 +679,20 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
-    return {};
+    const getScopedClients = this.streamsGetScopedClients;
+
+    return {
+      getKnowledgeIndicatorsReader: async ({ request }: { request: KibanaRequest }) => {
+        if (!getScopedClients) {
+          throw new Error(
+            'Streams scoped clients are not available; getKnowledgeIndicatorsReader was called before setup completed'
+          );
+        }
+        const { streamsClient, getKnowledgeIndicatorClient } = await getScopedClients({ request });
+        const knowledgeIndicatorClient = await getKnowledgeIndicatorClient();
+        return createKnowledgeIndicatorsReader({ knowledgeIndicatorClient, streamsClient });
+      },
+    };
   }
 
   private async installMemoryWorkflowsIfEnabled(

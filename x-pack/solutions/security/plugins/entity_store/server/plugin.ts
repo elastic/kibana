@@ -22,8 +22,13 @@ import { registerUiSettings } from './infra/feature_flags/register';
 import {
   CcsLogExtractionStateType,
   EngineDescriptorType,
+  EntityStoreGlobalStateClient,
   EntityStoreGlobalStateType,
 } from './domain/saved_objects';
+import {
+  createKnowledgeIndicatorsReaderFromStreamsStart,
+  loadGraphRoleAliases,
+} from './domain/streams_features';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud';
@@ -121,6 +126,35 @@ export class EntityStorePlugin
       createCRUDClient: (esClient, namespace) => new CRUDClient({ logger, esClient, namespace }),
       createResolutionClient: (esClient, namespace) =>
         new ResolutionClient({ logger, esClient, namespace }),
+      getGraphRoleAliases: async (request, _esClient, namespace) => {
+        try {
+          // The `graphAliasMinConfidence` knob is read internally (CSP cannot
+          // reach entity_store's global-state SO). `null` => disabled => `[]`,
+          // which keeps the cloud-security graph byte-identical to today.
+          const soClient = core.savedObjects.getScopedClient(request);
+          const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
+          const state = await globalStateClient.find();
+          const minConfidence = state?.knowledgeIndicators.graphAliasMinConfidence ?? null;
+          if (minConfidence === null) {
+            return [];
+          }
+          // Request-scoped reader: schema features are read with the caller's
+          // auth / space scope. Returns a no-op reader when streams is disabled.
+          const reader = await createKnowledgeIndicatorsReaderFromStreamsStart({
+            streams: plugins.streams,
+            request,
+            logger,
+          });
+          return await loadGraphRoleAliases(reader, { minConfidence }, logger);
+        } catch (error) {
+          logger.warn(
+            `[entity_store] getGraphRoleAliases failed; returning no graph aliases: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return [];
+        }
+      },
     };
   }
 
