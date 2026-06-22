@@ -22,7 +22,6 @@ export interface AppMenuProps {
   menu?: AppMenuConfig & { isCollapsed?: boolean };
   docLink?: string;
   showAddIntegrations?: boolean;
-  isCollapsed?: boolean;
 }
 
 export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegrations }) => {
