@@ -15,9 +15,9 @@ import { docCountApproximateTooltip, docCountClosedIndexTooltip } from '../trans
 interface DocCountCellProps {
   indexName: string;
   docCountApi: ReturnType<typeof docCountApi>;
-  /** Metadata-based doc count already fetched as part of the index list (available even without read access). */
+  // Metadata based doc count already fetched as part of the index list (available even without read access).
   metadataCount?: number;
-  /** Index status — closed indices prevent ES|QL from running at all. */
+  // Closed indices prevent ES|QL from running at all.
   status?: string;
 }
 
@@ -36,7 +36,7 @@ export const DocCountCell = ({
   const result = docCountResponse ? docCountResponse[indexName] : undefined;
 
   useEffect(() => {
-    // Don't request an ES|QL count for closed indices — ES|QL can't read them and would
+    // Don't request an ES|QL count for closed indices, ES|QL cant read them and would
     // poison the whole batch they share.
     if (!isClosed && !isWaitingForIndexStats) {
       docCountApi.getByName(indexName);
@@ -75,7 +75,7 @@ export const DocCountCell = ({
       );
     }
 
-    // No metadata count available — last resort is the original error display.
+    // No metadata count available, last resort is the original error display.
     return (
       <EuiToolTip
         content={i18n.translate('xpack.idxMgmt.indexTable.docCountErrorTooltip', {

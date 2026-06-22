@@ -21,7 +21,7 @@ export interface DocCountState {
   count?: number;
   isLoading: boolean;
   isError: boolean;
-  /** Present when the count comes from index metadata rather than a live ES|QL query. */
+  // Present when the count comes from index metadata rather than a live ES|QL query.
   approximateReason?: 'closed_index' | 'requires_read';
 }
 interface Props {
@@ -51,7 +51,7 @@ export const QuickStats = ({ indexDetails }: Props) => {
   const [docCount, setDocCount] = useState<DocCountState>({ isLoading: true, isError: false });
 
   const fetchDocCount = useCallback(async () => {
-    // ES|QL can't read closed indices. Skip the request entirely and fall back to metadata.
+    // ES|QL cant read closed indices. Skip the request entirely and fall back to metadata.
     if (isClosed) {
       setDocCount({
         count: metadataDocCount,
