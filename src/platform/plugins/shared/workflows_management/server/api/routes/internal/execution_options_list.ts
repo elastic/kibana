@@ -15,7 +15,6 @@ import type {
 } from '@kbn/controls-plugin/common/options_list/types';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
-import { normalizeWorkflowExecutionsDurationQuery } from '../../../../common/lib/normalize_workflow_executions_duration_query';
 import { buildWorkflowExecutionsSpaceFilter } from '../../lib/build_workflow_executions_search_query';
 import {
   getElasticsearchErrorMessage,
@@ -121,9 +120,7 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
           const optionsListRequest = request.body as OptionsListRequestBody;
 
           const searchFilter = getSearchFilter(optionsListRequest);
-          const optionsListFilters = (optionsListRequest.filters ?? []).map(
-            normalizeWorkflowExecutionsDurationQuery
-          );
+          const optionsListFilters = optionsListRequest.filters ?? [];
           const selectedOptions = optionsListRequest.selectedOptions ?? [];
           const shouldValidateSelections =
             !optionsListRequest.ignoreValidations && selectedOptions.length > 0;

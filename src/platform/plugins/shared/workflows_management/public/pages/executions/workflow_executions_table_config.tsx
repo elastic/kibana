@@ -91,5 +91,4 @@ export const buildWorkflowExecutionsGridColumns = (
 export interface WorkflowExecutionsGridCellContext {
   executions: WorkflowExecutionListItemDto[];
   onOpenExecution: (execution: WorkflowExecutionListItemDto) => void;
-  selectedExecutionId?: string;
 }

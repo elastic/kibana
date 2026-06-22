@@ -22,7 +22,6 @@ import {
   buildWorkflowExecutionsSearchFilters,
   getWorkflowExecutionsFetchErrorMessage,
 } from './workflow_executions_search_query';
-import { normalizeWorkflowExecutionsDurationQuery } from '../../../common/lib/normalize_workflow_executions_duration_query';
 import { useKibana } from '../../hooks/use_kibana';
 
 const WORKFLOWS_EXECUTIONS_API_VERSION = '2023-10-31';
@@ -70,16 +69,16 @@ export const useWorkflowExecutionsSearch = ({
     [filters, spaceId, timeField, timeRange]
   );
 
-  const esQuery = useMemo(() => {
-    const builtQuery = buildEsQuery(
-      dataView,
-      query?.query ? [query] : [],
-      searchFilters,
-      getEsQueryConfig(uiSettings)
-    );
-
-    return normalizeWorkflowExecutionsDurationQuery(builtQuery);
-  }, [dataView, query, searchFilters, uiSettings]);
+  const esQuery = useMemo(
+    () =>
+      buildEsQuery(
+        dataView,
+        query?.query ? [query] : [],
+        searchFilters,
+        getEsQueryConfig(uiSettings)
+      ),
+    [dataView, query, searchFilters, uiSettings]
+  );
 
   const sortParam = useMemo(() => mapSortToEsSort(sort), [sort]);
 

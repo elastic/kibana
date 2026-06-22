@@ -219,9 +219,8 @@ export const WorkflowExecutionsDataGrid = ({
     () => ({
       executions,
       onOpenExecution,
-      selectedExecutionId,
     }),
-    [executions, onOpenExecution, selectedExecutionId]
+    [executions, onOpenExecution]
   );
 
   const renderCellValue = useCallback<EuiDataGridProps['renderCellValue']>(
