@@ -98,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.tryForTime(6000, async () => {
         const gridData = await dataGrid.getDataGridTableData();
         expect(gridData.columns).to.eql([
+          '', // Unsaved-row color indicator control column
           'Select column',
           'Actions columnActions', // Add row control column
           'Keywordcustomer_first_name',
@@ -109,6 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '', // Add column control column
         ]);
         expect(gridData.rows[0]).to.eql([
+          '', // Unsaved-row color indicator control column
           '', // toggles column
           '', // Add row control column
           'Elyssa',
