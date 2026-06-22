@@ -147,40 +147,15 @@ export const getESQLControlFactory = <
             labelManager.reinitializeState(updatedState);
           };
 
-          /** For static ??field controls, we need to know which query to pull suggestions from */
-          let relatedQuery;
-          if (
-            isStaticESQLControl(nextState) &&
-            nextState.variable_type === ESQLVariableType.FIELDS
-          ) {
-            const variableKey = selections.api.esqlVariable$.getValue().key; // key of variable to search for
-            const getRelatedQuery = (_api: unknown) => {
-              const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
-              return query && getESQLQueryVariables(query).includes(variableKey)
-                ? query
-                : undefined;
-            };
-
-            relatedQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
-            if (!relatedQuery && apiPublishesChildren(parentApi)) {
-              // the parent API does not publish a related query, so check all related children
-              for (const panel of relatedPanelsApi.relatedPanels$.getValue()) {
-                const child = parentApi.children$.getValue()[panel];
-                const childQuery = getRelatedQuery(child);
-                if (childQuery) {
-                  // found a child with a query that references this variable, so break out of loop;
-                  // only one query can be used to build suggestions
-                  relatedQuery = childQuery;
-                  break;
-                }
-              }
-            }
-          }
-
           try {
             await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
               queryString: isStaticESQLControl(nextState)
-                ? relatedQuery ?? ''
+                ? getRelatedStaticQuery(
+                    nextState.variable_type as ESQLVariableType,
+                    parentApi,
+                    selections.api.esqlVariable$.getValue().key,
+                    relatedPanelsApi.relatedPanels$
+                  )
                 : nextState.esql_query,
               variableType: nextState.variable_type,
               controlType: nextState.control_type,
@@ -297,3 +272,41 @@ export const getESQLControlFactory = <
     },
   };
 };
+
+function getRelatedStaticQuery(
+  variableType: ESQLVariableType,
+  parentApi: unknown,
+  variableKey: string,
+  relatedPanels$: BehaviorSubject<string[]>
+): string | undefined {
+  /**
+   * For non-field type static controls, we do not populate suggestions based on another query
+   */
+  if (variableType !== ESQLVariableType.FIELDS) return '';
+
+  /**
+   * For static ??field controls, we need to know which query to pull suggestions from
+   */
+  let relatedQuery;
+  if (variableType === ESQLVariableType.FIELDS) {
+    const getRelatedQuery = (_api: unknown) => {
+      const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
+      return query && getESQLQueryVariables(query).includes(variableKey) ? query : undefined;
+    };
+
+    relatedQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
+    if (!relatedQuery && apiPublishesChildren(parentApi)) {
+      // the parent API does not publish a related query, so check all related children
+      for (const panel of relatedPanels$.getValue()) {
+        const child = parentApi.children$.getValue()[panel];
+        const childQuery = getRelatedQuery(child);
+        if (childQuery) {
+          // found a child with a query that references this variable, so break out of loop;
+          // only one query can be used to build suggestions
+          relatedQuery = childQuery;
+          break;
+        }
+      }
+    }
+  }
+}
