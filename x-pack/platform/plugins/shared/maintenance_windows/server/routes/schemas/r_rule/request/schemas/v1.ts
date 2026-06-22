@@ -15,7 +15,7 @@ import {
 
 export const rRuleRequestSchema = schema.object(
   {
-    dtstart: schema.string({ validate: validateStartDateV1, maxLength: 64 }),
+    dtstart: schema.string({ validate: validateStartDateV1, maxLength: 100 }),
     tzid: schema.string({ validate: validateTimezone, maxLength: 64 }),
     freq: schema.maybe(
       schema.oneOf([
@@ -34,10 +34,9 @@ export const rRuleRequestSchema = schema.object(
           }
         },
         min: 1,
-        max: 1000,
       })
     ),
-    until: schema.maybe(schema.string({ validate: validateEndDateV1, maxLength: 64 })),
+    until: schema.maybe(schema.string({ validate: validateEndDateV1, maxLength: 100 })),
     count: schema.maybe(
       schema.number({
         validate: (count: number) => {
@@ -46,13 +45,12 @@ export const rRuleRequestSchema = schema.object(
           }
         },
         min: 1,
-        max: 1000,
       })
     ),
     byweekday: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: 4 }), {
+      schema.arrayOf(schema.string({ maxLength: 10 }), {
         minSize: 1,
-        maxSize: 35,
+        maxSize: 50,
         validate: validateRecurrenceByWeekdayV1,
       })
     ),

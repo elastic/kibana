@@ -20,9 +20,8 @@ export const maintenanceWindowStatus = {
   DISABLED: 'disabled',
 } as const;
 
-export const ID_MAX_LENGTH = 36;
+export const ID_MAX_LENGTH = 100;
 export const TITLE_MAX_LENGTH = 256;
-export const DURATION_MAX_MS = 365 * 24 * 60 * 60 * 1000;
 export const SEARCH_MAX_LENGTH = 1024;
 export const BULK_GET_IDS_MAX_SIZE = 100;
 export const STATUS_FILTER_MAX_SIZE = Object.keys(maintenanceWindowStatus).length;

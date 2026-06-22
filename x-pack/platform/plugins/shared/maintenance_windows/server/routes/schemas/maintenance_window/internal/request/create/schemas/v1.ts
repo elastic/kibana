@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../../shared';
-import { DURATION_MAX_MS, TITLE_MAX_LENGTH } from '../../../../shared/constants/latest';
+import { TITLE_MAX_LENGTH } from '../../../../shared/constants/latest';
 import { rRuleRequestSchemaV1 } from '../../../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../../../alerts_filter_query';
 
 export const createBodySchema = schema.object({
   title: schema.string({ maxLength: TITLE_MAX_LENGTH }),
-  duration: schema.number({ max: DURATION_MAX_MS }),
+  duration: schema.number(),
   r_rule: rRuleRequestSchemaV1,
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),

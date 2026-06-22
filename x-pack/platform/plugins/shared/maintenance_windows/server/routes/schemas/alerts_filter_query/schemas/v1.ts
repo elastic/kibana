@@ -62,7 +62,7 @@ export const alertsFilterQuerySchema = schema.object(
     ),
     dsl: schema.maybe(
       schema.string({
-        maxLength: 8192,
+        maxLength: 10000,
         meta: {
           description: 'A filter written in Elasticsearch Query Domain Specific Language (DSL).',
         },
