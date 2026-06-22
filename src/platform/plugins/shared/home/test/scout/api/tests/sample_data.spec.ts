@@ -49,8 +49,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
     await kbnClient.spaces.delete(TEST_SPACE_ID);
   });
 
-
-
   // ---------------------------------------------------------------------------
   // Negative path
   // ---------------------------------------------------------------------------
