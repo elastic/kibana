@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security app - PKI interactions', function () {
-    loadTestFile(require.resolve('./url_capture'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
