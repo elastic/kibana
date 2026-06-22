@@ -18,7 +18,12 @@ import {
   type SidePanelNestedPanelItemClickParams,
   type SidePanelNestedPanelRenderProps,
 } from '@kbn/core-chrome-browser';
-import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-side-navigation/types';
+import type {
+  MenuItem,
+  NavigationStructure,
+  SecondaryMenuItem,
+  SideNavLogo,
+} from '@kbn/ui-side-navigation/types';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
@@ -63,7 +68,11 @@ export const Navigation = (props: ChromeNavigationProps) => {
 
       const panels = [...navItems.primaryItems, ...navItems.footerItems];
       for (const panel of panels) {
-        if (!panel.sections?.some((section) => section.items.some((navItem) => navItem.id === item.id))) {
+        if (
+          !panel.sections?.some((section) =>
+            section.items.some((navItem) => navItem.id === item.id)
+          )
+        ) {
           continue;
         }
 
@@ -118,11 +127,13 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (): (NavigationItems & {
-  solutionId: SolutionId;
-  panelStateManager: PanelStateManager;
-  navItemsRef: React.MutableRefObject<NavigationStructure | null>;
-}) | null => {
+const useNavigationItems = ():
+  | (NavigationItems & {
+      solutionId: SolutionId;
+      panelStateManager: PanelStateManager;
+      navItemsRef: React.MutableRefObject<NavigationStructure | null>;
+    })
+  | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
   const isNextChrome = useIsNextChrome();
@@ -149,7 +160,7 @@ const useNavigationItems = (): (NavigationItems & {
         };
       })
     );
-  }, [chrome, basePath, isNextChrome, panelStateManager]);
+  }, [chrome, isNextChrome, panelStateManager]);
 
   return useObservable(items$, null);
 };
