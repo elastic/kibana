@@ -22,6 +22,7 @@ plugins:
     - data_view_editor
     - data_view_management
     - data_views
+    - data_views_as_code
     - dev_tools
     - discover
     - discover_enhanced
