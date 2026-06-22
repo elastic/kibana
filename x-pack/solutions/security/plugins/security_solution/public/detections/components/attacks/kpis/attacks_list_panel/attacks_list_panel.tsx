@@ -22,7 +22,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { SeverityBar } from '../../../../../entity_analytics/components/severity/severity_bar';
