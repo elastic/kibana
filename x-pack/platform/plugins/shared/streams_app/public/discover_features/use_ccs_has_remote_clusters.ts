@@ -26,7 +26,7 @@ export function useCcsHasRemoteClusters({
         const clusters = await http.get<Array<{ isConnected: boolean }>>(REMOTE_CLUSTERS_API, {
           signal,
         });
-        return clusters.length > 0;
+        return clusters.some(({ isConnected }) => isConnected);
       } catch {
         return false;
       }
