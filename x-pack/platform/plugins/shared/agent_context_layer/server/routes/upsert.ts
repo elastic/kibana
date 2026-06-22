@@ -38,6 +38,7 @@ export const registerUpsertRoute = ({
           title: schema.string({ minLength: 1 }),
           origin_id: schema.string({ minLength: 1 }),
           content: schema.string(),
+          tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 200 }), { maxSize: 100 })),
           permissions: schema.maybe(
             schema.object({
               kibana: schema.maybe(
