@@ -43,4 +43,11 @@ export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
 
 export { clientTypes } from './src/lib/clients';
-export type { ClientTypeSpec, BuildContext, ClientRegistry, ClientTypeId } from './src/lib/clients';
+export type {
+  ClientTypeSpec,
+  BuildContext,
+  ConnectorNetwork,
+  ClientRegistry,
+  ClientTypeId,
+  MysqlPool,
+} from './src/lib/clients';

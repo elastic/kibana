@@ -12,7 +12,7 @@ import {
   getHeaderValue,
   clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
-import type { ActionContext, ClientTypeSpec } from '@kbn/connector-specs';
+import type { ActionContext, ClientTypeSpec, ConnectorNetwork } from '@kbn/connector-specs';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -70,11 +70,13 @@ export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
   getClientLeasePool,
+  network,
   clientTypes = defaultClientTypes,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getClientLeasePool: () => LeasePool<unknown>;
+  network: ConnectorNetwork;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
 }) =>
   async function (
@@ -123,7 +125,7 @@ export const generateExecutorFunction = ({
       }
       return pool.lease(
         buildClientLeaseKey(connectorId, id),
-        () => clientType.build({ logger, axiosInstance, config }),
+        () => clientType.build({ logger, axiosInstance, config, network }),
         clientType.terminate
       );
     };

@@ -10,10 +10,16 @@
 import type { AxiosInstance } from 'axios';
 import type { Logger } from '@kbn/logging';
 
+export interface ConnectorNetwork {
+  ensureUriAllowed(url: string): void;
+  ensureHostnameAllowed(host: string): void;
+}
+
 export interface BuildContext {
   logger: Logger;
   axiosInstance: AxiosInstance;
   config?: Record<string, unknown>;
+  network: ConnectorNetwork;
 }
 
 export interface ClientTypeSpec<TClient> {

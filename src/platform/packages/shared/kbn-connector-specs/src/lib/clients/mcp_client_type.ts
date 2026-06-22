@@ -7,29 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { McpClient } from '@kbn/mcp-client';
-import { createMcpClientFromAxios } from '../mcp/create_mcp_client_from_axios';
+import type { AxiosInstance } from 'axios';
+import { McpClient } from '@kbn/mcp-client';
+import type { FetchLike } from '@kbn/mcp-client';
 import type { ClientTypeSpec } from './client_type_spec';
 
 const MCP_CLIENT_VERSION = '1.0.0';
 
+const extractStaticHeaders = (axiosInstance: AxiosInstance): Record<string, string> => {
+  const common = axiosInstance.defaults?.headers?.common;
+  if (!common || typeof common !== 'object') {
+    return {};
+  }
+  const headers: Record<string, string> = {};
+  for (const [key, value] of Object.entries(common)) {
+    if (typeof value === 'string') {
+      headers[key] = value;
+    }
+  }
+  return headers;
+};
+
 export const mcpClientType: ClientTypeSpec<McpClient> = {
   id: 'mcp',
 
-  // Runs at lease time (first getClient('mcp') for this connector), not at spec load.
-  // Same per-action axios + config as before; connect moved out of withMcpClient's finally.
   async build(ctx) {
     const serverUrl = typeof ctx.config?.serverUrl === 'string' ? ctx.config.serverUrl : undefined;
     if (!serverUrl) {
       throw new Error('config.serverUrl is required');
     }
-    const client = createMcpClientFromAxios({
-      logger: ctx.logger,
-      axiosInstance: ctx.axiosInstance,
-      url: serverUrl,
-      name: `kibana-mcp-${serverUrl}`,
-      version: MCP_CLIENT_VERSION,
-    });
+
+    ctx.network.ensureUriAllowed(serverUrl);
+
+    const headers = extractStaticHeaders(ctx.axiosInstance);
+
+    const guardedFetch: FetchLike = async (url, init) => {
+      ctx.network.ensureUriAllowed(typeof url === 'string' ? url : url.toString());
+      return fetch(url, init);
+    };
+
+    const client = new McpClient(
+      ctx.logger,
+      { name: `kibana-mcp-${serverUrl}`, version: MCP_CLIENT_VERSION, url: serverUrl },
+      { headers, fetch: guardedFetch }
+    );
     await client.connect();
     return client;
   },

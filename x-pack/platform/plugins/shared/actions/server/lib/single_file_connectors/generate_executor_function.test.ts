@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta } from '@kbn/connector-specs';
-import type { ActionContext, ConnectorSpec } from '@kbn/connector-specs';
+import type { ActionContext, ConnectorNetwork, ConnectorSpec } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 import { LeasePool } from '../lease_pool';
 
@@ -21,6 +21,7 @@ describe('generateExecutorFunction', () => {
   let mockAxiosInstance: object;
   let mockHandler: jest.Mock;
   let fakeLeasePool: LeasePool<unknown>;
+  let mockNetwork: ConnectorNetwork;
 
   const makeExecOptions = (params: Record<string, unknown>) =>
     ({
@@ -47,6 +48,7 @@ describe('generateExecutorFunction', () => {
     mockGetAxiosInstanceWithAuth = jest.fn().mockResolvedValue(mockAxiosInstance);
     mockHandler = jest.fn().mockResolvedValue({ result: 'ok' });
     fakeLeasePool = new LeasePool<unknown>();
+    mockNetwork = { ensureUriAllowed: jest.fn(), ensureHostnameAllowed: jest.fn() };
   });
 
   const makeActions = (handler: jest.Mock = mockHandler): ConnectorSpec['actions'] => ({
@@ -62,6 +64,7 @@ describe('generateExecutorFunction', () => {
       actions: makeActions(handler),
       getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
       getClientLeasePool: () => fakeLeasePool,
+      network: mockNetwork,
     });
 
   describe('successful execution', () => {
@@ -177,6 +180,39 @@ describe('generateExecutorFunction', () => {
     });
   });
 
+  describe('ctx.getClient - build receives network from generateExecutorFunction', () => {
+    it('passes network to clientType.build', async () => {
+      const fakeClient = { id: 'x' };
+      const buildSpy = jest.fn().mockResolvedValue(fakeClient);
+      const fakeClientType = {
+        id: 'typed',
+        build: buildSpy,
+        terminate: jest.fn(),
+      };
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
+              return {};
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getClientLeasePool: () => fakeLeasePool,
+        network: mockNetwork,
+        clientTypes: { typed: fakeClientType },
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(buildSpy).toHaveBeenCalledWith(expect.objectContaining({ network: mockNetwork }));
+    });
+  });
+
   describe('ctx.getClient — lease receives clientType.terminate as 3rd arg', () => {
     it('passes clientType.terminate to pool.lease', async () => {
       const terminateSpy = jest.fn().mockResolvedValue(undefined);
@@ -202,6 +238,7 @@ describe('generateExecutorFunction', () => {
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => fakeLeasePool,
+        network: mockNetwork,
         clientTypes: { typed: fakeClientType },
       });
 
@@ -237,6 +274,7 @@ describe('generateExecutorFunction', () => {
         actions: { testAction: { isTool: true, input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => pool,
+        network: mockNetwork,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -267,6 +305,7 @@ describe('generateExecutorFunction', () => {
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => pool,
+        network: mockNetwork,
         clientTypes: { unused: fakeClientType },
       });
 
@@ -295,6 +334,7 @@ describe('generateExecutorFunction', () => {
         actions: { testAction: { isTool: true, input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => pool,
+        network: mockNetwork,
         clientTypes: { failing: fakeClientType },
       });
 
@@ -316,6 +356,7 @@ describe('generateExecutorFunction', () => {
         actions: { testAction: { isTool: true, input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => pool,
+        network: mockNetwork,
         clientTypes: {},
       });
 
@@ -351,6 +392,7 @@ describe('generateExecutorFunction', () => {
         actions: { testAction: { isTool: true, input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => pool,
+        network: mockNetwork,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -450,6 +492,7 @@ describe('generateExecutorFunction', () => {
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => fakeLeasePool,
+        network: mockNetwork,
       });
 
       const result = await executor(
@@ -543,6 +586,7 @@ describe('generateExecutorFunction', () => {
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getClientLeasePool: () => fakeLeasePool,
+        network: mockNetwork,
       });
 
       const result1 = await executor(
