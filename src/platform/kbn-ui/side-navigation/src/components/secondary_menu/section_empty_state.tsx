@@ -25,7 +25,7 @@ export const SecondaryMenuSectionEmptyStateComponent = ({
     display: flex;
     flex-direction: column;
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.l};
+    padding: ${euiTheme.size.base} ${euiTheme.size.l};
     border-radius: 4px;
     background-color: ${euiTheme.colors.backgroundBaseHighlighted};
     text-align: center;

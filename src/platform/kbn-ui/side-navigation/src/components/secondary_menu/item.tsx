@@ -30,6 +30,8 @@ import {
 } from '../../constants';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 
+const HOVER_ITEM_ACTION_CLASS = 'sideNavHoverItemAction';
+
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
   hasSubmenu?: boolean;
@@ -68,6 +70,12 @@ export const SecondaryMenuItemComponent = ({
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
   const resolvedItemActions = useNestedPanelActions(itemActions);
   const hasItemActions = Boolean(resolvedItemActions?.length);
+  const alwaysVisibleItemActions =
+    resolvedItemActions?.filter((action) => !action.opensItemActionMenu) ?? [];
+  const hasAlwaysVisibleItemActions = alwaysVisibleItemActions.length > 0;
+  const hasHoverItemActions = resolvedItemActions?.some(
+    (action) => Boolean(action.opensItemActionMenu)
+  );
 
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
@@ -83,7 +91,7 @@ export const SecondaryMenuItemComponent = ({
     // 6px comes from Figma, no token
     padding-block: 6px;
     padding-inline: ${buttonPaddingInline};
-    ${hasItemActions
+    ${hasAlwaysVisibleItemActions
       ? `padding-inline-end: calc(${buttonPaddingInline} + ${ITEM_ACTION_SPACING_OFFSET}px);`
       : ''}
     width: 100%;
@@ -105,6 +113,23 @@ export const SecondaryMenuItemComponent = ({
   const itemWrapperStyles = css`
     position: relative;
     width: 100%;
+
+    ${hasHoverItemActions
+      ? `
+      .${HOVER_ITEM_ACTION_CLASS} {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity ${euiTheme.animation.fast} ease-in;
+      }
+
+      &:hover .${HOVER_ITEM_ACTION_CLASS},
+      &:focus-within .${HOVER_ITEM_ACTION_CLASS},
+      &:has(.${HOVER_ITEM_ACTION_CLASS} [aria-expanded="true"]) .${HOVER_ITEM_ACTION_CLASS} {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    `
+      : ''}
   `;
 
   const itemActionsInsideStyles = css`
@@ -138,9 +163,9 @@ export const SecondaryMenuItemComponent = ({
     if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
     // Secondary item label + right arrow (More menu)
     if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
-    // Secondary item label + trailing item actions
-    if (hasItemActions) {
-      maxWidth -= ITEM_ACTION_SPACING_OFFSET * (resolvedItemActions?.length ?? 0);
+    // Secondary item label + always-visible trailing item actions
+    if (hasAlwaysVisibleItemActions) {
+      maxWidth -= ITEM_ACTION_SPACING_OFFSET * alwaysVisibleItemActions.length;
     }
     return maxWidth;
   };
@@ -212,16 +237,17 @@ export const SecondaryMenuItemComponent = ({
           <div css={itemActionsInsideStyles}>
             {resolvedItemActions?.map((action) =>
               action.opensItemActionMenu ? (
-                <SecondaryMenuItemActionMenuButton
-                  key={action.id}
-                  aria-label={action['aria-label']}
-                  data-test-subj={action['data-test-subj']}
-                  iconType={action.iconType}
-                  id={action.id}
-                  isHighlighted={isHighlighted}
-                  itemActionMenuContext={action.itemActionMenuContext}
-                  opensItemActionMenu={action.opensItemActionMenu}
-                />
+                <span key={action.id} className={HOVER_ITEM_ACTION_CLASS}>
+                  <SecondaryMenuItemActionMenuButton
+                    aria-label={action['aria-label']}
+                    data-test-subj={action['data-test-subj']}
+                    iconType={action.iconType}
+                    id={action.id}
+                    isHighlighted={isHighlighted}
+                    itemActionMenuContext={action.itemActionMenuContext}
+                    opensItemActionMenu={action.opensItemActionMenu}
+                  />
+                </span>
               ) : (
                 <EuiButtonIcon
                   key={action.id}
