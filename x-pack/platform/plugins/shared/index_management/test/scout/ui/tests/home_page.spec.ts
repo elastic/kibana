@@ -156,8 +156,15 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
       name: new RegExp(byteUnitsDataStreamName),
     });
     await expect(dataStreamRow).toBeVisible();
-    await expect(dataStreamRow).toContainText(/\d+(?:\.\d+)?\s?(?:B|KB|MB|GB|TB|PB)\b/);
-    await expect(dataStreamRow).not.toContainText(/\d+(?:\.\d+)?\s?(?:b|kb|mb|gb|tb|pb)\b/);
+
+    const uppercaseByteSizePattern = /\d+(?:\.\d+)?\s?(?:B|KB|MB|GB|TB|PB)\b/;
+    const lowercaseByteSizePattern = /\d+(?:\.\d+)?\s?(?:b|kb|mb|gb|tb|pb)\b/;
+    const storageSizeCell = dataStreamRow.getByRole('cell').filter({
+      hasText: uppercaseByteSizePattern,
+    });
+
+    await expect(storageSizeCell).toBeVisible();
+    await expect(storageSizeCell).not.toContainText(lowercaseByteSizePattern);
   });
 
   test('Index templates - renders the index templates tab', async ({ pageObjects, page }) => {
