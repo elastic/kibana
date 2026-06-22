@@ -77,7 +77,7 @@ interface UseSyncUrlDetailsParams {
  */
 export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetailsParams) => {
   const { config, telemetry } = useOnboardingContext();
-  const { storedUrlDetail, setStoredUrlDetail, navigateToDetail } = useUrlDetail();
+  const { storedUrlDetail, setStoredUrlDetail, navigateToDetail, setTopic } = useUrlDetail();
 
   const onComplete = useCallback((cloudTopicId: OnboardingTopicId | null) => {
     if (cloudTopicId && config.has(cloudTopicId)) {
