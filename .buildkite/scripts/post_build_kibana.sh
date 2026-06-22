@@ -30,12 +30,8 @@ echo "--- Upload Build Artifacts"
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 version="$(jq -r '.version' package.json)"
 cd "$KIBANA_DIR/target"
-cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.zst" kibana-default.tar.zst
-
-upload_tmp_artifact "$KIBANA_DIR/target/kibana-default.tar.zst" kibana-default.tar.zst "$BUILDKITE_BUILD_ID" &
-GCS_UPLOAD_PID=$!
-
-buildkite-agent artifact upload "./*.tar.zst;./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.gz" kibana-default.tar.gz
+buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 cd -
 
 # [rspack-transition] Upload build type marker for cache validation.

@@ -275,10 +275,6 @@ export class Config {
     );
   }
 
-  getTarZstd() {
-    return Boolean(this.buildOptions.tarZstd);
-  }
-
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
