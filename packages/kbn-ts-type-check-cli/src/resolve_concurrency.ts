@@ -12,18 +12,22 @@ import Os from 'os';
 /**
  * `tsgo -b` is an orchestrator: `--builders` projects build concurrently and
  * each runs up to `--checkers` type-checkers. The two multiply, so peak
- * parallelism (and memory) is roughly `builders * checkers`.
+ * parallelism is roughly `builders * checkers`.
  *
- * Defaults are derived from the host core count; both are env-overridable so a
- * CI step can tune them per machine profile without code changes.
+ * Kibana's package graph is wide and shallow (~1,400 mostly small packages),
+ * so builders (cross-project parallelism) is the dominant lever. Checkers
+ * (intra-project parallelism) only matter for the handful of large packages.
+ * The default formula keeps total workers equal to core count to avoid
+ * oversubscription: builders = floor(cores / checkers).
+ *
+ * Both are env-overridable so a CI step can tune them per machine profile
+ * without code changes.
  */
 export const ENV_BUILDERS = 'KBN_TYPE_CHECK_BUILDERS';
 export const ENV_CHECKERS = 'KBN_TYPE_CHECK_CHECKERS';
 export const ENV_STOP_ON_ERRORS = 'KBN_TYPE_CHECK_STOP_ON_ERRORS';
 export const ENV_MAX_OLD_SPACE = 'KBN_TYPE_CHECK_MAX_OLD_SPACE_MB';
 
-/** Upper bound so a many-core machine doesn't spawn an unreasonable builder count. */
-const MAX_DEFAULT_BUILDERS = 16;
 const DEFAULT_CHECKERS = 2;
 const DEFAULT_MAX_OLD_SPACE_MB = 12288;
 
@@ -39,9 +43,10 @@ export const resolveTypeCheckConcurrency = (
   cpuCount: number = Os.cpus().length
 ): TypeCheckConcurrency => {
   const cores = Math.max(1, cpuCount);
+  const checkers = readPositiveInt(env[ENV_CHECKERS], DEFAULT_CHECKERS);
   return {
-    builders: readPositiveInt(env[ENV_BUILDERS], Math.min(cores, MAX_DEFAULT_BUILDERS)),
-    checkers: readPositiveInt(env[ENV_CHECKERS], DEFAULT_CHECKERS),
+    builders: readPositiveInt(env[ENV_BUILDERS], Math.max(1, Math.floor(cores / checkers))),
+    checkers,
     stopOnErrors: readBoolean(env[ENV_STOP_ON_ERRORS]),
   };
 };

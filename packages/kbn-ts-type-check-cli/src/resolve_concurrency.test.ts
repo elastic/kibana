@@ -14,16 +14,16 @@ import {
 } from './resolve_concurrency';
 
 describe('resolveTypeCheckConcurrency', () => {
-  it('defaults builders from core count and checkers to 2', () => {
+  it('defaults builders to floor(cores/checkers) so total workers equal core count', () => {
     expect(resolveTypeCheckConcurrency({}, 8)).toEqual({
-      builders: 8,
+      builders: 4, // floor(8 / 2)
       checkers: 2,
       stopOnErrors: false,
     });
   });
 
-  it('caps default builders at 16 on many-core machines', () => {
-    expect(resolveTypeCheckConcurrency({}, 64).builders).toBe(16);
+  it('scales builders with core count on many-core machines', () => {
+    expect(resolveTypeCheckConcurrency({}, 64).builders).toBe(32); // floor(64 / 2)
   });
 
   it('honors env overrides', () => {
@@ -44,7 +44,7 @@ describe('resolveTypeCheckConcurrency', () => {
       { KBN_TYPE_CHECK_BUILDERS: '0', KBN_TYPE_CHECK_CHECKERS: 'nope' },
       8
     );
-    expect(resolved.builders).toBe(8);
+    expect(resolved.builders).toBe(4); // floor(8 / 2)
     expect(resolved.checkers).toBe(2);
   });
 });
