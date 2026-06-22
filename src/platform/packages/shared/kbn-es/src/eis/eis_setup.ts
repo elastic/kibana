@@ -288,6 +288,69 @@ export const waitForEisEsReady = async (
 };
 
 /**
+ * Extracts a human-readable detail from an Elasticsearch error response body.
+ * ES typically returns `{ "error": { "reason": "..." } }` or `{ "error": "..." }`.
+ * Falls back to the trimmed raw body when it isn't the expected shape.
+ */
+const extractEsErrorReason = (body: string | undefined): string | undefined => {
+  const trimmed = body?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as { error?: unknown };
+    const { error } = parsed;
+    if (typeof error === 'string') {
+      return error;
+    }
+    if (error && typeof error === 'object' && 'reason' in error) {
+      const { reason } = error as { reason?: unknown };
+      if (typeof reason === 'string') {
+        return reason;
+      }
+    }
+  } catch {
+    // Not JSON — fall through to returning the raw body.
+  }
+
+  return trimmed;
+};
+
+/**
+ * Builds the error thrown when ES rejects the CCM request with 401/403. The
+ * rejection is (almost always) the EIS gateway refusing the CCM API key during
+ * the validation step ES performs before storing it, so the message points at
+ * refreshing the key rather than at local ES credentials.
+ */
+const formatCcmKeyRejectedError = (statusCode: number, body: string | undefined): string => {
+  const reason = extractEsErrorReason(body);
+  return [
+    `HTTP ${statusCode} — Elasticsearch rejected the CCM API key.`,
+    ...(reason ? [`Elasticsearch said: ${reason}`] : []),
+    '',
+    'This usually means the EIS gateway rejected the CCM API key (rotated, expired,',
+    'or revoked) when Elasticsearch validated it. The local elastic/changeme',
+    'credentials are not the problem here.',
+    '',
+    'To refresh the key:',
+    '',
+    `  ${chalk.cyan('rm ~/.elastic/eis-ccm-key.json')}    # drop the stale cached key`,
+    `  ${chalk.cyan('vault login --method oidc')}          # re-authenticate to Vault`,
+    '',
+    'Then re-run with --eis. Or set a known-good key directly:',
+    '',
+    `  ${chalk.cyan('export KIBANA_EIS_CCM_API_KEY="<key>"')}`,
+  ].join('\n');
+};
+
+/** Builds the error thrown for any other non-2xx CCM response. */
+const formatCcmHttpError = (statusCode: number, body: string | undefined): string => {
+  const reason = extractEsErrorReason(body);
+  return reason ? `HTTP ${statusCode} — ${reason}` : `HTTP ${statusCode}`;
+};
+
+/**
  * Sets the CCM API key in Elasticsearch via PUT _inference/_ccm.
  */
 export const setCcmApiKey = async (
@@ -303,7 +366,7 @@ export const setCcmApiKey = async (
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const { statusCode } = await eisHttpRequest(
+      const { statusCode, data } = await eisHttpRequest(
         esUrl,
         {
           method: 'PUT',
@@ -322,11 +385,16 @@ export const setCcmApiKey = async (
         return;
       }
 
+      // As of elastic/elasticsearch#139088, PUT _inference/_ccm validates the
+      // key against the EIS gateway before storing it. A 401/403 here almost
+      // always means EIS rejected the CCM API key (rotated/expired), NOT that
+      // local ES basic auth failed — so surface the ES body and a refresh hint
+      // rather than implying a local credentials problem.
       if (statusCode === 401 || statusCode === 403) {
-        throw new Error(`HTTP ${statusCode} — Elasticsearch rejected the CCM request.`);
+        throw new Error(formatCcmKeyRejectedError(statusCode, data));
       }
 
-      throw new Error(`HTTP ${statusCode}`);
+      throw new Error(formatCcmHttpError(statusCode, data));
     } catch (error) {
       if (
         attempt < maxRetries &&
