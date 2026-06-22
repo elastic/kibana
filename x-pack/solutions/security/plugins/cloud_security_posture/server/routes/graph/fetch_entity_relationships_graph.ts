@@ -186,14 +186,12 @@ export const fetchEntityRelationships = async ({
   entityIds,
   spaceId,
   entityStoreIndexExists,
-  pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
   spaceId: string;
   entityStoreIndexExists: boolean;
-  pinnedIds?: string[];
 }): Promise<EsqlToRecords<RelationshipEsqlRow>> => {
   if (!entityStoreIndexExists) {
     return { columns: [], records: [] };
@@ -216,7 +214,6 @@ export const fetchEntityRelationships = async ({
       columnar: false,
       filter,
       query,
-      params: (pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
     })
     .toRecords<RelationshipEsqlRow>();
 

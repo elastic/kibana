@@ -117,7 +117,6 @@ export const fetchGraph = async ({
         entityIds,
         spaceId,
         entityStoreIndexExists,
-        pinnedIds,
       }).catch((error) => {
         logger.error(`Failed to fetch entity relationships: ${error.message}`);
         throw error;
