@@ -416,10 +416,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             fullWidth
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            placeholder={i18n.translate(
-              'xpack.idxMgmt.dataStreamList.table.searchPlaceholder',
-              { defaultMessage: 'Search data streams' }
-            )}
+            placeholder={i18n.translate('xpack.idxMgmt.dataStreamList.table.searchPlaceholder', {
+              defaultMessage: 'Search data streams',
+            })}
             data-test-subj="dataStreamSearch"
           />
         </EuiFlexItem>
