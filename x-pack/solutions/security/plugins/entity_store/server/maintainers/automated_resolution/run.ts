@@ -25,7 +25,7 @@ import type { AutomatedResolutionState, MatchBucket, EntityHit } from './types';
 
 const MATCH_FIELD = 'user.email';
 const ENTITY_TYPE = 'user';
-const NAMESPACE_PRIORITY = ['active_directory', 'okta', 'entra_id'];
+export const NAMESPACE_PRIORITY = ['active_directory', 'okta', 'entra_id'];
 const PAGE_SIZE = 10_000;
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';

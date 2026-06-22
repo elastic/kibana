@@ -12,6 +12,10 @@ import {
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  USE_KI_ENTITY_RESOLUTION_DEFAULT,
+  KI_ENTITY_RESOLUTION_MIN_CONFIDENCE_DEFAULT,
+  KI_ENTITY_RESOLUTION_RESOLVE_IDP_TO_IDP_DEFAULT,
+  KI_ENTITY_RESOLUTION_USE_RULES_DEFAULT,
 } from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
@@ -120,11 +124,69 @@ const version3: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionSchemaV4 = logExtractionSchemaV3.extends({
+  useKiEntityResolution: schema.maybe(schema.boolean()),
+  kiEntityResolutionMinConfidence: schema.maybe(schema.number()),
+  kiEntityResolutionResolveIdpToIdp: schema.maybe(schema.boolean()),
+});
+
+const globalStateSchemaV4 = globalStateSchemaV3.extends({
+  logsExtraction: logExtractionSchemaV4,
+});
+
+const version4: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          logsExtraction: {
+            useKiEntityResolution: USE_KI_ENTITY_RESOLUTION_DEFAULT,
+            kiEntityResolutionMinConfidence: KI_ENTITY_RESOLUTION_MIN_CONFIDENCE_DEFAULT,
+            kiEntityResolutionResolveIdpToIdp: KI_ENTITY_RESOLUTION_RESOLVE_IDP_TO_IDP_DEFAULT,
+          },
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV4,
+    forwardCompatibility: globalStateSchemaV4.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const logExtractionSchemaV5 = logExtractionSchemaV4.extends({
+  kiEntityResolutionUseRules: schema.maybe(schema.boolean()),
+});
+
+const globalStateSchemaV5 = globalStateSchemaV4.extends({
+  logsExtraction: logExtractionSchemaV5,
+});
+
+const version5: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          logsExtraction: {
+            kiEntityResolutionUseRules: KI_ENTITY_RESOLUTION_USE_RULES_DEFAULT,
+          },
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV5,
+    forwardCompatibility: globalStateSchemaV5.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5 },
   hiddenFromHttpApis: true,
 };

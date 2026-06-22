@@ -32,6 +32,10 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   maxTimeWindowSize: true,
   maxLogsPerWindow: true,
   maxLogsPerWindowCapBehavior: true,
+  useKiEntityResolution: true,
+  kiEntityResolutionMinConfidence: true,
+  kiEntityResolutionResolveIdpToIdp: true,
+  kiEntityResolutionUseRules: true,
 }).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
@@ -60,6 +64,10 @@ export const LogExtractionUpdateParams = z.object({
     .optional(),
   maxLogsPerWindow: z.number().int().min(0).optional(),
   maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional(),
+  useKiEntityResolution: z.boolean().optional(),
+  kiEntityResolutionMinConfidence: z.number().int().min(0).max(100).optional(),
+  kiEntityResolutionResolveIdpToIdp: z.boolean().optional(),
+  kiEntityResolutionUseRules: z.boolean().optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
