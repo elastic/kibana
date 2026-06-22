@@ -13,21 +13,29 @@ import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
 apiTest.describe('Collector integration is not installed', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
+
+  apiTest.beforeAll(async ({ requestAuth, profilingSetup, profilingHelper }) => {
+    // Start from a clean data state so `has_data` is false for these assertions.
     await profilingSetup.cleanup();
+    // Ensure the collector + symbolizer policies exist so the tests below can delete them.
+    // setupResources is fast here because the bundled packages were already installed in global setup.
+    await profilingHelper.installPolicies();
+    await profilingSetup.setupResources();
+
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
   });
+
   apiTest.afterAll(async ({ profilingHelper }) => {
-    profilingHelper.cleanupPolicies();
+    await profilingHelper.cleanupPolicies();
   });
 
   apiTest('collector integration missing', async ({ profilingHelper, apiServices, apiClient }) => {
-    const ids = await profilingHelper.getPoliciyIds();
+    const ids = await profilingHelper.getPolicyIds();
     const collectorId = ids.collectorId;
 
-    await apiServices.fleet.package_policies.delete(collectorId!);
-
     expect(collectorId).toBeDefined();
+
+    await apiServices.fleet.package_policies.delete(collectorId!);
 
     const adminRes = await apiClient.get(esResourcesEndpoint);
     const adminStatus = adminRes.body;
@@ -52,29 +60,18 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
   apiTest(
     'Symbolizer integration is not installed',
     async ({ profilingHelper, apiClient, apiServices }) => {
-      const ids = await profilingHelper.getPoliciyIds();
-
+      const ids = await profilingHelper.getPolicyIds();
       const symbolizerId = ids.symbolizerId;
-
-      await apiServices.fleet.package_policies.delete(symbolizerId!);
 
       expect(symbolizerId).toBeDefined();
 
-      const adminRes = await apiClient.get(esResourcesEndpoint, {
-        headers: {
-          ...viewerApiCreditials.apiKeyHeader,
-          'content-type': 'application/json',
-          'kbn-xsrf': 'reporting',
-        },
-      });
-      const adminStatus = adminRes.body;
-      expect(adminStatus.has_setup).toBe(false);
-      expect(adminStatus.has_data).toBe(false);
-      expect(adminStatus.pre_8_9_1_data).toBe(false);
+      await apiServices.fleet.package_policies.delete(symbolizerId!);
 
       const readRes = await apiClient.get(esResourcesEndpoint, {
         headers: {
           ...viewerApiCreditials.apiKeyHeader,
+          'content-type': 'application/json',
+          'kbn-xsrf': 'reporting',
         },
       });
       const readStatus = readRes.body;
