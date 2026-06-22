@@ -58,4 +58,8 @@ export const mcpClientType: ClientTypeSpec<McpClient> = {
   async terminate(client) {
     await client.terminate();
   },
+
+  isUserError(err: unknown): boolean {
+    return err instanceof Error && err.message === 'config.serverUrl is required';
+  },
 };

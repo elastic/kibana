@@ -12,6 +12,8 @@ import { setConnectorActionErrorMeta } from '@kbn/connector-specs';
 import type { ActionContext, ConnectorNetwork, ConnectorSpec } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 import { LeasePool } from '../lease_pool';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 describe('generateExecutorFunction', () => {
   const connectorId = 'test-connector-id';
@@ -315,7 +317,7 @@ describe('generateExecutorFunction', () => {
       expect(buildCount).toBe(0);
     });
 
-    it('surfaces a build rejection as an executor error result', async () => {
+    it('surfaces a build rejection from getClient as a thrown FRAMEWORK-tagged error', async () => {
       const fakeClientType = {
         id: 'failing',
         build: jest.fn(async () => {
@@ -338,11 +340,57 @@ describe('generateExecutorFunction', () => {
         clientTypes: { failing: fakeClientType },
       });
 
-      const result = await executor(
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('tags a build failure as USER when clientType.isUserError returns true', async () => {
+      const buildError = new Error('config.serverUrl is required');
+      const fakeClientType = {
+        id: 'typed',
+        build: jest.fn().mockRejectedValue(buildError),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        isUserError: jest.fn().mockReturnValue(true),
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('typed');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getClientLeasePool: () => pool,
+        network: mockNetwork,
+        clientTypes: { typed: fakeClientType },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
+    });
+
+    it('returns {status:error} for an untagged handler error — no getClient involved (regression)', async () => {
+      mockHandler.mockRejectedValue(new Error('direct handler failure'));
+
+      const result = await makeExecutor()(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
       );
 
-      expect(result).toMatchObject({ status: 'error', message: 'build exploded' });
+      expect(result).toEqual({
+        status: 'error',
+        message: 'direct handler failure',
+        actionId: connectorId,
+      });
     });
 
     it('surfaces a request for an unknown client type id as an error result', async () => {

@@ -13,6 +13,8 @@ import {
   clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
 import type { ActionContext, ClientTypeSpec, ConnectorNetwork } from '@kbn/connector-specs';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -118,16 +120,21 @@ export const generateExecutorFunction = ({
     }
 
     const pool = getClientLeasePool();
-    const getClient = (id: string): Promise<unknown> => {
+    const getClient = async (id: string): Promise<unknown> => {
       const clientType = clientTypes[id];
       if (!clientType) {
         throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
       }
-      return pool.lease(
-        buildClientLeaseKey(connectorId, id),
-        () => clientType.build({ logger, axiosInstance, config, network }),
-        clientType.terminate
-      );
+      try {
+        return await pool.lease(
+          buildClientLeaseKey(connectorId, id),
+          () => clientType.build({ logger, axiosInstance, config, network }),
+          clientType.terminate
+        );
+      } catch (err) {
+        const isUser = isUserError(err) || (clientType.isUserError?.(err) ?? false);
+        throw createTaskRunError(err, isUser ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK);
+      }
     };
 
     const actionContext = {
@@ -148,6 +155,7 @@ export const generateExecutorFunction = ({
 
       return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
+      if (error instanceof Error && getErrorSource(error)) throw error;
       const errorMessage = error instanceof Error ? error.message : String(error);
       const contentLengthBytes = getResponseSizeHeaderBytes({
         error,

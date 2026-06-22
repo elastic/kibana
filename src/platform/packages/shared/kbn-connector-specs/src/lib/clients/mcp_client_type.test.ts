@@ -213,4 +213,21 @@ describe('mcpClientType', () => {
       expect(mockTerminate).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('isUserError', () => {
+    it('returns true for the missing serverUrl pre-connect error', () => {
+      expect(mcpClientType.isUserError!(new Error('config.serverUrl is required'))).toBe(true);
+    });
+
+    it('returns false for other Error instances', () => {
+      expect(mcpClientType.isUserError!(new Error('something else went wrong'))).toBe(false);
+      expect(mcpClientType.isUserError!(new Error('Error connecting to MCP server: timeout'))).toBe(false);
+    });
+
+    it('returns false for non-Error values', () => {
+      expect(mcpClientType.isUserError!('config.serverUrl is required')).toBe(false);
+      expect(mcpClientType.isUserError!(null)).toBe(false);
+      expect(mcpClientType.isUserError!(undefined)).toBe(false);
+    });
+  });
 });

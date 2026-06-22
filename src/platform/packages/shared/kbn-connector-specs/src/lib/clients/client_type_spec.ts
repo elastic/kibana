@@ -27,4 +27,11 @@ export interface ClientTypeSpec<TClient> {
   build(ctx: BuildContext): Promise<TClient>;
   /** Called when evicting a pooled instance (connector delete, TTL, etc.); not wired in PoC. */
   terminate(client: TClient): Promise<void>;
+  /**
+   * Optional: return true to classify a connect failure as a USER error (bad config, auth).
+   * Boolean rather than TaskErrorSource because this package cannot import TaskErrorSource
+   * (shared-common cannot depend on a plugin).
+   * Only ever promotes to USER; FRAMEWORK is the default for unclassified failures.
+   */
+  isUserError?(err: unknown): boolean;
 }
