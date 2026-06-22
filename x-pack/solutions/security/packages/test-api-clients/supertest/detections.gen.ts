@@ -45,6 +45,7 @@ import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
+import type { RestoreRuleRequestParamsInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/restore_rule/restore_rule_route.gen';
 import type { ReviewRuleInstallationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type { ReviewRuleUpgradeRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
 import type {
@@ -458,6 +459,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Restore a detection rule to a specific historical snapshot.
+
+      */
+  restoreRule(props: RestoreRuleProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
    * Lists prebuilt detection rules that can be installed
    */
   reviewRuleInstallation(props: ReviewRuleInstallationProps, kibanaSpace: string = 'default') {
@@ -744,6 +764,9 @@ export interface ReadRuleProps {
 export interface ReadRuleExecutionResultsProps {
   params: ReadRuleExecutionResultsRequestParamsInput;
   body: ReadRuleExecutionResultsRequestBodyInput;
+}
+export interface RestoreRuleProps {
+  params: RestoreRuleRequestParamsInput;
 }
 export interface ReviewRuleInstallationProps {
   body: ReviewRuleInstallationRequestBodyInput;

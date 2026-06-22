@@ -41,6 +41,10 @@ export interface RuleChangeTrackingMetadata {
    * Rule duplication action original rule's Saved Object id
    */
   originalRuleSoId?: string;
+  /**
+   * Rule restore action — the change-history event id of the snapshot being restored from.
+   */
+  restoredFromChangeId?: string;
 }
 
 /**

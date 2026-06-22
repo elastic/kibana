@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { ChangeHistoryDocument, GetHistoryResult } from '@kbn/change-history';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
@@ -39,6 +42,8 @@ export interface GetRuleHistoryParams {
   size?: number;
   /** ES sort. When omitted, the underlying change-history client's default applies. */
   sort?: SortCombinations[];
+  /** Extra ES query clauses ANDed into the history search (e.g. a term filter on event.id). */
+  filters?: QueryDslQueryContainer[];
 }
 
 /**
@@ -63,7 +68,14 @@ const DEFAULT_SIZE = 20;
 
 export async function getRuleHistory(
   context: RulesClientContext,
-  { module, ruleId, from = DEFAULT_FROM, size = DEFAULT_SIZE, sort }: GetRuleHistoryParams
+  {
+    module,
+    ruleId,
+    from = DEFAULT_FROM,
+    size = DEFAULT_SIZE,
+    sort,
+    filters: additionalFilters,
+  }: GetRuleHistoryParams
 ): Promise<GetRuleHistoryResult> {
   if (!context.changeTrackingService) {
     throw new RuleChangeTrackingDisabledError();
@@ -107,6 +119,7 @@ export async function getRuleHistory(
     from,
     size,
     sort,
+    additionalFilters,
   });
 
   const itemsRule: RuleChangeHistoryDocument[] = [];
@@ -121,6 +134,7 @@ export async function getRuleHistory(
 
   return {
     ...result,
+    total: itemsRule.length,
     items: itemsRule,
   };
 }

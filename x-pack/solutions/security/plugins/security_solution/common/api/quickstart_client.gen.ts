@@ -85,6 +85,10 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
+  RestoreRuleRequestParamsInput,
+  RestoreRuleResponse,
+} from './detection_engine/rule_management/restore_rule/restore_rule_route.gen';
+import type {
   RuleChangesHistoryRequestQueryInput,
   RuleChangesHistoryRequestParamsInput,
   RuleChangesHistoryResponse,
@@ -3140,6 +3144,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Restore a detection rule to a specific historical snapshot.
+
+    */
+  async restoreRule(props: RestoreRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RestoreRule`);
+    return this.kbnClient
+      .request<RestoreRuleResponse>({
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Lists prebuilt detection rules that can be installed
    */
   async reviewRuleInstallation(props: ReviewRuleInstallationProps) {
@@ -4289,6 +4312,9 @@ export interface ReadRuleExecutionResultsProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RestoreRuleProps {
+  params: RestoreRuleRequestParamsInput;
 }
 export interface ReviewRuleInstallationProps {
   body: ReviewRuleInstallationRequestBodyInput;
