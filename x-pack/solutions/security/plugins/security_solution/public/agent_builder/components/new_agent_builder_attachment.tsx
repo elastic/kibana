@@ -71,11 +71,10 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   }, [onClick, reportAddToChatClick, telemetryData]);
 
   const isDisabled = disabled || !hasValidAgentBuilderLicense;
-  const tooltipContent = !hasValidAgentBuilderLicense
+  const licenseTooltip = !hasValidAgentBuilderLicense
     ? i18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT
-    : disabled && disabledTooltip
-    ? disabledTooltip
     : undefined;
+  const tooltipContent = licenseTooltip ?? (disabled ? disabledTooltip : undefined);
 
   if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
     return null;
