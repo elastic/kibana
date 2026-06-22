@@ -167,7 +167,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('show selected breakdown in toolbar selector', async () => {
-          expect(await discover.getBreakdownChartToolbarValue()).toBe(BREAKDOWN.FIELD);
+          await expect
+            .poll(async () => discover.getBreakdownChartToolbarValue())
+            .toBe(BREAKDOWN.FIELD);
         });
 
         await spaceTest.step(
