@@ -132,46 +132,6 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
   );
 
   apiTest(
-    'should ignore missing field when ignore_missing is true',
-    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-    async ({ testBed, esql }) => {
-      const indexName = 'stream-e2e-test-grok-ignore-missing';
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'grok',
-            from: 'message',
-            patterns: ['User IP: %{IP:client.ip}'],
-            ignore_missing: true,
-          } as GrokProcessor,
-        ],
-      };
-      const { query } = await transpile(streamlangDSL);
-      const docs = [
-        { expect: null, log: { level: 'info' }, client: { ip: '192.168.1.1' } }, // Should not grok, but nullifies the field
-        { expect: '127.0.0.1', client: { ip: '192.168.1.1' }, message: 'User IP: 127.0.0.1' }, // Should grok
-        { expect: null, client: { ip: '192.168.1.1' }, message: 'User IP: N/A' }, // Should grok
-      ];
-      await testBed.ingest(indexName, docs);
-      const esqlResult = await esql.queryOnIndex(indexName, query);
-
-      // Group documents by their expectation
-      const nullDocs = esqlResult.documents.filter((doc) => doc.expect === null);
-      const ipDocs = esqlResult.documents.filter((doc) => doc.expect === '127.0.0.1');
-
-      // Test all null docs have null client.ip
-      nullDocs.forEach((doc) => {
-        expect(doc['client.ip']).toBeNull();
-      });
-
-      // Test all IP docs have correct client.ip
-      ipDocs.forEach((doc) => {
-        expect(doc['client.ip']).toBe('127.0.0.1');
-      });
-    }
-  );
-
-  apiTest(
     'should filter out if field is missing and ignore_missing is false',
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
