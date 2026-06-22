@@ -51,6 +51,8 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
   const input = (step.input ?? {}) as {
     message?: unknown;
     schema?: unknown;
+    approveLabel?: unknown;
+    rejectLabel?: unknown;
   };
   const message =
     typeof input.message === 'string' && input.message.length > 0 ? input.message : undefined;
@@ -64,8 +66,11 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
     source_app: 'workflows',
     source_id: buildWorkflowSourceId(step),
     status: 'pending',
-    // Short summary: prefer the rendered message, fall back to step id.
-    title: message ?? `Step "${step.stepId}" is waiting for input`,
+    title:
+      message ??
+      (step.stepType === 'waitForApproval'
+        ? `Step "${step.stepId}" is waiting for approval`
+        : `Step "${step.stepId}" is waiting for input`),
     description: `Workflow ${step.workflowId} — step "${step.stepId}"`,
     input_message: message,
     input_schema: schema,

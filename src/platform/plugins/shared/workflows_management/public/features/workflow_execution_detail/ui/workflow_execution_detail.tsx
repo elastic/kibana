@@ -22,6 +22,7 @@ import {
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { ApprovalLabels } from './resume_execution_button';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -128,14 +129,28 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       ExecutionStatus.WAITING_FOR_INPUT
     );
 
-    const { resumeMessage, resumeSchema } = useMemo<{
+    const { resumeMessage, resumeSchema, approvalLabels } = useMemo<{
       resumeMessage: string | undefined;
       resumeSchema: JsonModelSchemaType | undefined;
+      approvalLabels: ApprovalLabels | undefined;
     }>(() => {
       const stepInput = pausedStepFullData?.input as
-        | { message?: string; schema?: JsonModelSchemaType }
+        | {
+            message?: string;
+            schema?: JsonModelSchemaType;
+            approveLabel?: string;
+            rejectLabel?: string;
+          }
         | undefined;
-      return { resumeMessage: stepInput?.message, resumeSchema: stepInput?.schema };
+      const labels =
+        typeof stepInput?.approveLabel === 'string' && typeof stepInput?.rejectLabel === 'string'
+          ? { approveLabel: stepInput.approveLabel, rejectLabel: stepInput.rejectLabel }
+          : undefined;
+      return {
+        resumeMessage: stepInput?.message,
+        resumeSchema: stepInput?.schema,
+        approvalLabels: labels,
+      };
     }, [pausedStepFullData]);
 
     // For pseudo-steps (overview, trigger), build from execution context directly
@@ -287,6 +302,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               workflowExecutionStatus={workflowExecution?.status}
               resumeMessage={resumeMessage}
               resumeSchema={resumeSchema}
+              approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
               waitingStepExecutionId={waitingStepExecutionId}
               childWorkflowExecution={selectedStepChildExecution}
