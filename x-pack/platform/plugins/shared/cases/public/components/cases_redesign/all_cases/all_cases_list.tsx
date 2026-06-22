@@ -158,9 +158,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onSortOrderChange = useCallback(
       (sortOrder: 'asc' | 'desc') => {
-        setQueryParams({ ...queryParams, sortField: SortFieldCase.createdAt, sortOrder });
+        setQueryParams({ sortField: SortFieldCase.createdAt, sortOrder });
       },
-      [queryParams, setQueryParams]
+      [setQueryParams]
     );
 
     const { columns, isLoadingColumns, rowHeader } = useCasesColumns({
