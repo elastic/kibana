@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { createActionHandler } from './create_action_handler';
 import { createDynamicQueries } from './create_queries';
