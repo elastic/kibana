@@ -108,6 +108,8 @@
     "@kbn/shared-ux-column-presets",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-spaces-common",
+    "@kbn/app-header",
+    "@kbn/core-chrome-app-menu-components",
   ],
   "exclude": ["target/**/*"]
 }
