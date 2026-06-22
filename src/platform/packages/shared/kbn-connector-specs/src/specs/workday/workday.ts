@@ -14,7 +14,8 @@
  * expense, project, procurement, budget, and revenue data to AI agents.
  * Scoped to low-sensitivity operations only — no compensation, payroll, or personal contact data.
  *
- * Requires OAuth 2.0 Authorization Code authentication with scopes:
+ * Supports OAuth 2.0 Authorization Code (per-user) and Client Credentials (machine-to-machine) authentication.
+ * Required scopes for Authorization Code:
  *   Worker Profile and Skills, Organizations and Roles, Time Off and Leave, Staffing,
  *   Tenant Non-Configurable, Recruiting, Learning Core, Expenses, Benefits, Journeys,
  *   Time Tracking, Projects, Procurement, Budgets, Project Billing, Project Tracking
@@ -125,6 +126,26 @@ export const Workday: ConnectorSpec = {
               helpText:
                 "Replace '<tenant>' with your Workday tenant name, for example https://wd2-impl-services1.workday.com/ccx/oauth2/mycompany/authorize ",
             },
+            tokenUrl: {
+              placeholder: 'https://wd2-impl-services1.workday.com/ccx/oauth2/<tenant>/token',
+              helpText:
+                "Replace '<tenant>' with your Workday tenant name, for example https://wd2-impl-services1.workday.com/ccx/oauth2/mycompany/token",
+            },
+            scope: {
+              hidden: true,
+              helpText:
+                'Leave this field empty — the OAuth server grants all scopes registered with the client.',
+            },
+          },
+        },
+      },
+      {
+        type: 'oauth_client_credentials',
+        defaults: {
+          scope: '',
+        },
+        overrides: {
+          meta: {
             tokenUrl: {
               placeholder: 'https://wd2-impl-services1.workday.com/ccx/oauth2/<tenant>/token',
               helpText:
@@ -1034,18 +1055,30 @@ export const Workday: ConnectorSpec = {
     'If results appear truncated, increment `offset` by the `limit` value to fetch the next page.',
     '',
     '### Authentication & tenant setup',
-    'This connector uses OAuth 2.0 Authorization Code flow. In Workday, search for "Register API Client for Integrations" and create a client with:',
+    'This connector supports two OAuth 2.0 grant types. Choose based on your use case:',
+    '',
+    '**Authorization Code (per-user)** — each user authenticates interactively; actions run as that user.',
+    'In Workday, search for "Register API Client for Integrations" and create a client with:',
     '  - Grant type: Authorization Code Grant',
     '  - Non-Expiring Refresh Tokens: enabled',
     '  - Functional Areas (scopes): select the areas needed for your use case —',
     '    Worker Profile and Skills, Organizations and Roles, Time Off and Leave, Staffing,',
     '    Tenant Non-Configurable, Recruiting, Learning Core, Expenses, Benefits, Journeys,',
     '    Time Tracking, Projects, Procurement, Budgets, Project Billing, Project Tracking',
-    'The OAuth scope field in the connector should be left blank — Workday grants all Functional Areas',
-    'registered with the API client automatically. Do not set the scope field manually.',
     'The authorization and token URLs follow the pattern:',
     '  https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/authorize',
     '  https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/token',
+    '',
+    '**Client Credentials (machine-to-machine)** — a single service account token; no user interaction required.',
+    'In Workday, search for "Register API Client for Integrations" and create a client with:',
+    '  - Grant type: Client Credentials Grant',
+    '  - Functional Areas (scopes): same set as above',
+    'Enter the Client ID and Client Secret from the registered API client into the connector secrets.',
+    'The token URL follows the same pattern:',
+    '  https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/token',
+    '',
+    'For both grant types, the OAuth scope field in the connector should be left blank — Workday grants',
+    'all Functional Areas registered with the API client automatically. Do not set the scope field manually.',
     'Replace <tenantName> with the same value entered in the "Tenant Name" connector field.',
     '',
     '### Data safety',

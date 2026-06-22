@@ -65,16 +65,12 @@ To use the Workday connector, you need to register an API client in Workday and 
 2. Search for and open **Register API Client for Integrations**.
 3. Enter a name for the client (for example, `Kibana Integration`).
 4. From the **Client Grant Type** menu, select **Authorization Code Grant**.
-5. Enable **Non-Expiring Refresh Tokens**.
+5. Enable **PKCE**.
 6. Add the **Functional Areas** corresponding to the action groups you want to enable (see the Available actions table above).
 7. Click **OK** and copy the **Client ID** and **Client Secret** that are displayed. Store the secret securely — Workday displays it only once.
 8. Search for and open **View API Clients**. Find your client and copy the **Authorization Endpoint** and **Token Endpoint** URLs.
-9. Create an Integration System User (ISU):
-   a. Search for **Create Integration System User** and create a new ISU.
-   b. Search for **Manage: Security for Integration System User** and assign the ISU to an **Integration System Security Group (ISSG)**.
-   c. Grant the ISSG domain security policies that cover the data you need.
-10. To configure the Kibana connector, enter:
-    - **Tenant URL**: your Workday base URL (for example, `https://mycompany.workday.com`)
-    - **Tenant Name**: your tenant identifier (for example, `mycompany`)
-    - **Client ID** and **Client Secret** from step 7
-    - **Authorization URL** and **Token URL** from step 8
+9. To configure the Kibana connector, enter:
+   - **Tenant URL**: your Workday base URL (for example, `https://mycompany.workday.com`)
+   - **Tenant Name**: your tenant identifier (for example, `mycompany`)
+   - **Client ID** and **Client Secret** from step 7
+   - **Authorization URL** and **Token URL** from step 8
