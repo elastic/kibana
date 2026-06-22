@@ -238,7 +238,7 @@ const buildV2ActorResolution = (): string => {
     evalParts.push(userFieldEvaluationsEsql);
   }
   typedEntityTypes.forEach((type) => {
-    evalParts.push(`_actor_${type}_euid = ${getEuidEsqlEvaluation(type)}`);
+    evalParts.push(getEuidEsqlEvaluation(type, `_actor_${type}_euid`));
   });
 
   // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
@@ -276,10 +276,9 @@ const buildV2TargetResolution = (): string => {
     .map((field) => `| MV_EXPAND \`${field}\``)
     .join('\n');
 
-  const targetEvalParts = ALL_ENTITY_TYPES.map((type) => {
-    const targetEuidEval = getTargetEuidEsqlEvaluation(type);
-    return `_target_${type}_euid = ${targetEuidEval}`;
-  });
+  const targetEvalParts = ALL_ENTITY_TYPES.map((type) =>
+    getTargetEuidEsqlEvaluation(type, `_target_${type}_euid`)
+  );
 
   const appendStatements = [
     '| EVAL targetEntityId = TO_STRING(null)',

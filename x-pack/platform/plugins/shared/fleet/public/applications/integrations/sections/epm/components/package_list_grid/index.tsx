@@ -11,18 +11,20 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiButton,
   EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useLocalSearch, searchIdField } from '../../../../hooks';
 
@@ -43,11 +45,13 @@ import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky;
-  top: calc(
-    var(--kbn-application--sticky-headers-offset, 96px) +
-      ${(props) => props.theme.eui.euiSizeL /* 24px */}
-  );
+  @media (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    position: sticky;
+    top: calc(
+      var(--kbn-application--sticky-headers-offset, 96px) +
+        ${(props) => props.theme.eui.euiSizeL /* 24px */}
+    );
+  }
 `;
 
 export interface PackageListGridProps {
@@ -279,16 +283,21 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {hiddenSubCategoriesItems?.length ? (
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate('xpack.fleet.epmList.subcategoriesPopoverAriaLabel', {
+                    defaultMessage: 'More subcategories',
+                  })}
                   data-test-subj="epmList.showMoreSubCategoriesButton"
                   id="moreSubCategories"
                   button={
-                    <EuiButtonIcon
-                      display="base"
-                      onClick={onButtonClick}
-                      iconType="boxesVertical"
-                      aria-label="Show more subcategories"
-                      size="s"
-                    />
+                    <EuiToolTip content="Show more subcategories" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={onButtonClick}
+                        iconType="boxesVertical"
+                        aria-label="Show more subcategories"
+                        size="s"
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
