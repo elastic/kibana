@@ -507,6 +507,7 @@ describe('runRelationshipMaintainer', () => {
         integrations: [baseConfig],
       });
       expect(result.totalBuckets).toBe(0); // error integration excluded from totals
+      expect(result.totalRecords).toBe(0);
       expect(result.totalWritten).toBe(0);
       expect(bulkUpdate).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
-
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import { writeEntityIds } from './update_entities';
+import { writeEntityIds, hashEntityId } from './update_entities';
 import type { EntityRelationshipRecord } from './types';
-
-const hashEntityId = (id: string) => createHash('sha256').update(id).digest('hex');
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
   ({

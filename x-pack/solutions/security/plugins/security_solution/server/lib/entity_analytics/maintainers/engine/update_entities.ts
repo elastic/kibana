@@ -15,7 +15,7 @@ import type { EntityRelationshipRecord } from './types';
 
 // Must stay in sync with hashEuid in entity_store/common/domain/euid/hash_euid.ts.
 // Avoids a cross-plugin import of a private module.
-const hashEntityId = (id: string): string => createHash('sha256').update(id).digest('hex');
+export const hashEntityId = (id: string): string => createHash('sha256').update(id).digest('hex');
 
 type ValidRecord = EntityRelationshipRecord & { entityId: string };
 
