@@ -22,8 +22,7 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { CaseUI } from '../../../../../../common/ui/types';
 import type { CasesColumnSelection } from '../../types';
 import { ListItemOptionalFields } from './list_item_optional_fields';
-import { UserToolTip } from '../../../../user_profiles/user_tooltip';
-import { SmallUserAvatar } from '../../../../user_profiles/small_user_avatar';
+import { CaseUserAvatar } from '../../../../user_profiles/user_avatar';
 import { useAssignees } from '../../../../../containers/user_profiles/use_assignees';
 import { FormattedRelativePreferenceDate } from '../../../../formatted_date';
 import { CaseDetailsLink } from '../../../../links';
@@ -154,9 +153,7 @@ export const CaseListItem: React.FC<{
                 >
                   {allAssignees.slice(0, MAX_VISIBLE_ASSIGNEES).map((assignee) => (
                     <EuiFlexItem grow={false} key={assignee.uid}>
-                      <UserToolTip userInfo={assignee.profile}>
-                        <SmallUserAvatar userInfo={assignee.profile} />
-                      </UserToolTip>
+                      <CaseUserAvatar size="s" userInfo={assignee.profile} />
                     </EuiFlexItem>
                   ))}
                   {allAssignees.length > MAX_VISIBLE_ASSIGNEES && (

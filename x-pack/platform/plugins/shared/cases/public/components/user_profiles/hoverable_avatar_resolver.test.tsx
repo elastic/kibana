@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { CaseUser } from '../../containers/types';
@@ -63,8 +63,10 @@ describe('HoverableAvatarResolver', () => {
 
     await userEvent.hover(screen.getByText('DR'));
 
-    await screen.findByTestId('user-profile-tooltip');
-
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'Damaged Raccoon (damaged_raccoon@elastic.co)'
+      );
+    });
   });
 });

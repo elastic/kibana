@@ -11,7 +11,7 @@ import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiAvatar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UserAvatarTip } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 import {
   useCreatedByFilterToggle,
   useProfile,
@@ -136,7 +136,7 @@ export const CreatedByCell = memo(({ createdBy, managed }: CreatedByCellProps) =
       )}
       data-test-subj="content-list-createdBy-avatar"
     >
-      <UserAvatarTip {...{ user: user.user, avatar: user.avatar, size: 's' }} />
+      <UserAvatar {...{ user: user.user, avatar: user.avatar, size: 's' }} />
     </span>
   );
 });
