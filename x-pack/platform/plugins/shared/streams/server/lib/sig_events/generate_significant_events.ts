@@ -16,8 +16,7 @@ import {
 } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { FeatureClient } from '../streams/feature/feature_client';
-import type { QueryClient } from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../streams/ki';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
 
 interface Params {
@@ -29,8 +28,7 @@ interface Params {
 
 interface Dependencies {
   inferenceClient: InferenceClient;
-  featureClient: FeatureClient;
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   logger: Logger;
   signal: AbortSignal;
   esClient: ElasticsearchClient;
@@ -46,10 +44,9 @@ export async function generateSignificantEventDefinitions(
   toolUsage: SignificantEventsToolUsage;
 }> {
   const { definition, connectorId, systemPrompt, maxExistingQueriesForContext } = params;
-  const { inferenceClient, featureClient, queryClient, logger, signal, esClient, memoryTools } =
-    dependencies;
+  const { inferenceClient, kiClient, logger, signal, esClient, memoryTools } = dependencies;
 
-  const { [definition.name]: existingLinks } = await queryClient.getStreamToQueryLinksMap([
+  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
     definition.name,
   ]);
 
@@ -80,7 +77,7 @@ export async function generateSignificantEventDefinitions(
     signal,
     systemPrompt: memoryTools ? `${systemPrompt}\n${memoryTools.promptSnippet}` : systemPrompt,
     getFeatures: async (filters) => {
-      const response = await featureClient.getFeatures(definition.name, filters);
+      const response = await kiClient.getFeatures(definition.name, filters);
       return response.hits;
     },
     additionalTools: memoryTools?.tools,
