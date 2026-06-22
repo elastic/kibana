@@ -26,12 +26,7 @@ import { getNoDataConfig } from '../no_data_config';
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 
-// The header tabs and search bar are rendered inside EuiPageHeader's left-side flex item,
-// whose default `min-width: auto` makes it grow to its content's width. When the tabs are
-// wider than the available space (e.g. narrowed by the solution nav), that item expands
-// past the viewport instead of letting EuiTabs scroll, hiding content under the right edge.
-// Size containment makes this wrapper's inline size independent of its content, so the
-// flex item stays within the available width and EuiTabs scrolls. See issue #273717.
+// Garantee's responsiveness of the header content
 const headerContentStyles = css`
   contain: inline-size;
 `;
