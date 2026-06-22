@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { minimatch } from 'minimatch';
 import type { FileEntry, FsEntry, DirEntry } from '@kbn/agent-builder-server/runner/filestore';
-import type { Volume, VolumeGlobOptions } from '@kbn/agent-builder-server/runner';
 import { normalizePath, getPathSegments } from './path_utils';
 
 /**
@@ -21,21 +19,13 @@ interface DirNode {
 }
 
 /**
- * A volume that stores file entries in memory.
- * Suitable for eager data like tool results and attachments.
+ * In-memory index of `FileEntry` records.
  */
-export class MemoryVolume implements Volume {
-  readonly id: string;
-
+export class MemoryVolume {
   /** Map of normalized path to FileEntry for O(1) file lookup */
   private readonly fileIndex: Map<string, FileEntry> = new Map();
-
   /** Root of the directory tree */
   private readonly root: DirNode = this.createDirNode();
-
-  constructor(id: string) {
-    this.id = id;
-  }
 
   /**
    * Add a file entry to this volume.
@@ -122,48 +112,14 @@ export class MemoryVolume implements Volume {
     return entries;
   }
 
-  async glob(patterns: string | string[], options: VolumeGlobOptions = {}): Promise<FsEntry[]> {
-    const patternArray = Array.isArray(patterns) ? patterns : [patterns];
-    const { onlyFiles = false, onlyDirectories = false } = options;
-
-    const entries: FsEntry[] = [];
-    const seenPaths = new Set<string>();
-
-    // Helper to check if a path matches any of the patterns
-    const matchesPatterns = (path: string): boolean => {
-      return patternArray.some((pattern) => minimatch(path, pattern, { dot: true }));
-    };
-
-    // Collect all file paths
-    const allFilePaths = Array.from(this.fileIndex.keys());
-
-    // Collect all implicit directory paths
-    const allDirPaths = this.getAllDirectoryPaths();
-
-    // Match files (unless onlyDirectories)
-    if (!onlyDirectories) {
-      for (const filePath of allFilePaths) {
-        if (matchesPatterns(filePath) && !seenPaths.has(filePath)) {
-          seenPaths.add(filePath);
-          const entry = this.fileIndex.get(filePath);
-          if (entry) {
-            entries.push(entry);
-          }
-        }
-      }
-    }
-
-    // Match directories (unless onlyFiles)
-    if (!onlyFiles) {
-      for (const dirPath of allDirPaths) {
-        if (matchesPatterns(dirPath) && !seenPaths.has(dirPath)) {
-          seenPaths.add(dirPath);
-          entries.push({ path: dirPath, type: 'dir' } satisfies DirEntry);
-        }
-      }
-    }
-
-    return entries;
+  async getEntry(path: string): Promise<FileEntry | undefined> {
+    return this.get(path);
+  }
+  async listEntries(dirPath: string): Promise<FsEntry[]> {
+    return this.list(dirPath);
+  }
+  async entryExists(path: string): Promise<boolean> {
+    return this.exists(path);
   }
 
   async exists(path: string): Promise<boolean> {
@@ -177,10 +133,6 @@ export class MemoryVolume implements Volume {
     // Check if it's an implicit directory
     const node = this.getNode(normalizedPath);
     return node !== undefined;
-  }
-
-  async dispose(): Promise<void> {
-    this.clear();
   }
 
   // ============================================================================
@@ -271,28 +223,5 @@ export class MemoryVolume implements Volume {
     }
 
     return node;
-  }
-
-  /**
-   * Get all implicit directory paths.
-   */
-  private getAllDirectoryPaths(): string[] {
-    const paths: string[] = [];
-
-    const walk = (node: DirNode, currentPath: string) => {
-      for (const [name, child] of node.children) {
-        const childPath = currentPath === '/' ? `/${name}` : `${currentPath}/${name}`;
-        paths.push(childPath);
-        walk(child, childPath);
-      }
-    };
-
-    // Include root only if it has content
-    if (this.root.children.size > 0 || this.root.files.size > 0) {
-      paths.push('/');
-    }
-
-    walk(this.root, '/');
-    return paths;
   }
 }
