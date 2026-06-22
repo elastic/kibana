@@ -47,10 +47,11 @@ export const fetchMonitorRecentPings = async ({
     {
       monitorId,
       // Callers normally pass an explicit UI date range; this fallback is only
-      // used when none is provided. Default to the last 24h (instead of 30
-      // days) so the query doesn't fan out across long-retention frozen-tier
-      // indices when no range is supplied.
-      from: from ?? moment().subtract(24, 'hours').toISOString(),
+      // used when none is provided. Default to the last 7 days (instead of 30)
+      // so the query stays within typical hot+warm retention and doesn't fan
+      // out to long-retention frozen-tier indices, while still being wide
+      // enough not to hide infrequently-run monitors.
+      from: from ?? moment().subtract(7, 'days').toISOString(),
       to: to ?? moment().toISOString(),
       locations,
       sort,

@@ -95,16 +95,13 @@ export const getTimespanFilter = ({ from, to }: { from: string; to: string }) =>
  */
 export const CHECK_GROUP_TIME_RANGE_BUFFER_MS = 60 * 60 * 1000; // 1 hour
 
-export const getCheckGroupTimeRangeFilter = (
-  timestamp: string,
-  bufferMs: number = CHECK_GROUP_TIME_RANGE_BUFFER_MS
-) => {
+export const getCheckGroupTimeRangeFilter = (timestamp: string) => {
   const runTime = new Date(timestamp).getTime();
   return {
     range: {
       '@timestamp': {
-        gte: new Date(runTime - bufferMs).toISOString(),
-        lte: new Date(runTime + bufferMs).toISOString(),
+        gte: new Date(runTime - CHECK_GROUP_TIME_RANGE_BUFFER_MS).toISOString(),
+        lte: new Date(runTime + CHECK_GROUP_TIME_RANGE_BUFFER_MS).toISOString(),
       },
     },
   };

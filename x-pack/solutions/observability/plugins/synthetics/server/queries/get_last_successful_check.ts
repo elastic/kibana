@@ -16,11 +16,25 @@ export interface GetStepScreenshotParams {
   location?: string;
 }
 
+/**
+ * How far back to look for a monitor's most recent successful check. Without a
+ * lower bound the `@timestamp desc` search walks backwards across every backing
+ * index — including frozen-tier searchable snapshots — for monitors that have
+ * been down for a long time. Capping the look-back at 30 days lets `can_match`
+ * prune older shards; a monitor with no success in the last 30 days simply has
+ * no "last successful check" to show, which is acceptable.
+ */
+export const LAST_SUCCESSFUL_CHECK_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000;
+
 export const getLastSuccessfulStepParams = ({
   monitorId,
   timestamp,
   location,
 }: GetStepScreenshotParams): estypes.SearchRequest => {
+  const lookbackStart = new Date(
+    new Date(timestamp).getTime() - LAST_SUCCESSFUL_CHECK_LOOKBACK_MS
+  ).toISOString();
+
   return {
     size: 1,
     sort: [
@@ -36,6 +50,7 @@ export const getLastSuccessfulStepParams = ({
           {
             range: {
               '@timestamp': {
+                gte: lookbackStart,
                 lte: timestamp,
               },
             },
