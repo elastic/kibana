@@ -9,7 +9,6 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
-import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type { ESQLBucketMetadata } from '@kbn/es-types/src/search';
 import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
@@ -104,10 +103,6 @@ export interface DatatableColumnMeta {
    * any extra parameters for the source that produced this column
    */
   sourceParams?: SerializableRecord;
-  /**
-   * bucket metadata for the column
-   */
-  bucket?: ESQLBucketMetadata;
 }
 
 interface SourceParamsESQL extends Record<string, unknown> {
@@ -115,6 +110,7 @@ interface SourceParamsESQL extends Record<string, unknown> {
   sourceField: string;
   operationType: string;
   interval?: number;
+  bucket?: ESQLBucketMetadata;
 }
 
 export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {
@@ -122,7 +118,12 @@ export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceP
     obj &&
     typeof obj.indexPattern === 'string' &&
     typeof obj.sourceField === 'string' &&
-    (typeof obj.interval === 'number' || !obj.interval)
+    (typeof obj.interval === 'number' || !obj.interval) &&
+    ((typeof obj.bucket === 'object' &&
+      obj.bucket !== null &&
+      'interval' in obj.bucket &&
+      'unit' in obj.bucket) ||
+      !obj.bucket)
   );
 }
 

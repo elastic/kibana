@@ -7,40 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { search } from '@kbn/data-plugin/public';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
+import { ESQL_TABLE_TYPE, type DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { search } from '@kbn/data-plugin/public';
+import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import moment from 'moment';
 import type { XYChartProps } from '../../common';
 import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
-import { isDataLayer, getDataLayers } from './visualization';
+import { getDataLayers, isDataLayer } from './visualization';
 
-const DURATION_UNITS = {
-  second: 's',
-  seconds: 's',
-  minute: 'm',
-  minutes: 'm',
-  hour: 'h',
-  hours: 'h',
-  day: 'd',
-  week: 'w',
-  weeks: 'w',
-  month: 'M',
-  months: 'M',
-  year: 'y',
-  years: 'y',
-};
+const ESQL_UNITS = [
+  'millisecond',
+  'second',
+  'minute',
+  'hour',
+  'day',
+  'week',
+  'month',
+  'quarter',
+  'year',
+] as const satisfies readonly moment.unitOfTime.DurationConstructor[];
 
-const isDurationUnit = (unit: string): unit is keyof typeof DURATION_UNITS => {
-  return unit in DURATION_UNITS;
-};
+type Unit = (typeof ESQL_UNITS)[number];
 
-const normaliseUnit = (unit: string) => {
-  if (isDurationUnit(unit)) {
-    return DURATION_UNITS[unit];
-  }
-  return unit;
-};
+const isUnit = (s: string): s is Unit => (ESQL_UNITS as readonly string[]).includes(s);
+
+const esqlTimeBucketToMs = (interval: number, unit: string): number | undefined =>
+  isUnit(unit) ? moment.duration(interval, unit).asMilliseconds() : undefined;
 
 export function calculateMinInterval(
   datatableUtilities: DatatableUtilitiesService,
@@ -49,6 +43,8 @@ export function calculateMinInterval(
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
   const isTimeViz = isTimeChart(getDataLayers(filteredLayers));
+  const isEsqlMode = filteredLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
+
   const xColumn =
     isDataLayer(filteredLayers[0]) &&
     filteredLayers[0].xAccessor &&
@@ -56,16 +52,11 @@ export function calculateMinInterval(
 
   if (!xColumn) return;
 
-  const bucket = xColumn.meta.bucket;
-
-  if (bucket) {
-    if (bucket.unit) {
-      const durationString = `${bucket.interval}${normaliseUnit(bucket.unit)}`;
-      const duration = search.aggs.parseInterval(durationString)?.as('milliseconds');
-      return duration;
-    }
-
-    return bucket.interval;
+  if (isEsqlMode && xColumn.meta.sourceParams && isSourceParamsESQL(xColumn.meta.sourceParams)) {
+    const bucket = xColumn.meta.sourceParams.bucket;
+    if (!bucket) return undefined;
+    const { interval, unit } = bucket;
+    return unit ? esqlTimeBucketToMs(interval, unit) : interval;
   }
 
   if (minTimeBarInterval) {

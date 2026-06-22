@@ -29,7 +29,7 @@ import {
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { buildEsQuery, type Filter, getTimeZoneFromSettings } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse, ESQLColumn } from '@kbn/es-types';
 import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -91,16 +91,9 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
   // all_columns in the response means that there is a separation between
   // columns with data and empty columns
   // columns contain only columns with data while all_columns everything
+
   const hasEmptyColumns = body.all_columns && body.all_columns?.length > body.columns.length;
   const lookup = new Set(hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []);
-  const indexPattern = getIndexPatternFromESQLQuery(query);
-
-  const appliedTimeRange = input?.timeRange
-    ? {
-        from: DateMath.parse(input.timeRange.from)?.toISOString(),
-        to: DateMath.parse(input.timeRange.to, { roundUp: true })?.toISOString(),
-      }
-    : undefined;
 
   // Normalize body.values: if all arrays are empty, convert to single empty array
   const normalizedValues = body.values.every((row) => Array.isArray(row) && row.length === 0)
@@ -114,15 +107,44 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
     ? buildRenameSourceFieldMap(query)
     : null;
 
+  const getSourceParams = (column: ESQLColumn) => {
+    const { name, type, _meta } = column;
+
+    const sourceParams: DatatableColumn['meta']['sourceParams'] = {};
+
+    const indexPattern = getIndexPatternFromESQLQuery(query);
+    const sourceField = renameSourceFieldMap?.get(name) ?? name;
+
+    sourceParams.indexPattern = indexPattern;
+    sourceParams.sourceField = sourceField;
+
+    if (type === 'date' && input?.timeRange) {
+      sourceParams.appliedTimeRange = {
+        from: DateMath.parse(input.timeRange.from)?.toISOString(),
+        to: DateMath.parse(input.timeRange.to, { roundUp: true })?.toISOString(),
+      };
+      sourceParams.params = {};
+    }
+
+    if (_meta?.bucket) {
+      sourceParams.bucket = {
+        interval: _meta.bucket.interval,
+        unit: _meta.bucket.unit,
+      };
+    }
+
+    return sourceParams;
+  };
+
   const allColumns =
-    (body.all_columns ?? body.columns)?.map(({ name, type, original_types, _meta }) => {
+    (body.all_columns ?? body.columns)?.map((column) => {
+      const { name, type, original_types } = column;
+
       const originalTypes = original_types ?? [];
       const hasConflict = type === 'unsupported' && originalTypes.length > 1;
       const kibanaFieldType = hasConflict
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
-
-      const sourceField = renameSourceFieldMap?.get(name) ?? name;
 
       return {
         id: name,
@@ -130,12 +152,7 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
         meta: {
           type: kibanaFieldType,
           esType: type,
-          sourceParams: {
-            indexPattern,
-            sourceField,
-            ...(type === 'date' && { appliedTimeRange, params: {} }),
-          },
-          bucket: _meta?.bucket,
+          sourceParams: getSourceParams(column),
         },
         isNull: hasEmptyColumns ? !lookup.has(name) : false,
         isComputedColumn: isComputedColumn(name, querySummary),
