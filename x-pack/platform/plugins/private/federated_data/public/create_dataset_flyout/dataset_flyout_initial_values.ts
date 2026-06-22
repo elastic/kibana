@@ -11,13 +11,10 @@ import type {
   DatasetSettingsFile,
 } from '../../common/dataset_types';
 import {
-  DATASET_FORMAT_AUTOMATIC,
   emptyCreateDatasetSettingsFormValues,
-  isParquetDatasetFormat,
   type CreateDatasetFormValues,
   type CreateDatasetSettingsFormValues,
   type DatasetErrorModeFormValue,
-  type DatasetFormatFormValue,
   type DatasetPartitionDetectionFormValue,
 } from './create_dataset_flyout_form_state';
 
@@ -43,27 +40,13 @@ const settingsToFlyoutFormValues = (
     return defaults;
   }
 
-  if (isParquetDatasetFormat(settings.format as DatasetFormatFormValue)) {
-    return {
-      ...defaults,
-      format: 'parquet',
-    };
-  }
-
   const fileSettings = settings as DatasetSettingsFile;
-  const format: DatasetFormatFormValue = fileSettings.format ?? DATASET_FORMAT_AUTOMATIC;
 
   return {
     ...defaults,
-    format,
     error_mode: (fileSettings.error_mode ?? '') as DatasetErrorModeFormValue,
-    max_errors: fileSettings.max_errors !== undefined ? String(fileSettings.max_errors) : '',
-    max_error_ratio:
-      fileSettings.max_error_ratio !== undefined ? String(fileSettings.max_error_ratio) : '',
     partition_detection: (fileSettings.partition_detection ??
       '') as DatasetPartitionDetectionFormValue,
-    partition_path: fileSettings.partition_path ?? '',
-    hive_partitioning: fileSettings.hive_partitioning ?? false,
   };
 };
 

@@ -170,8 +170,8 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
       const settings = buildDatasetSettingsFromFormValues(values.settings);
       const payload: DataSetWithName = {
         name: values.name.trim(),
-        data_source: values.data_source?.trim(),
-        resource: values.resource?.trim(),
+        data_source: values.data_source.trim(),
+        resource: values.resource.trim(),
         ...(desc ? { description: desc } : {}),
         ...(settings ? { settings } : {}),
       };
