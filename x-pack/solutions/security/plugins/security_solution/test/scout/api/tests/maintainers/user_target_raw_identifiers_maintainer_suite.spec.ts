@@ -228,13 +228,15 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
           const wrongSourceActor = userId(aEmail);
 
           await seedUserEntity(esClient, { entityId: target, namespace, email: tEmail });
-          // Actor has the correct raw_identifiers but entity.source from a different
-          // integration — the maintainer's entity.source filter must exclude it.
+          // Actor has the correct raw_identifiers but an entity.source that no
+          // supervises config matches — the maintainer's exact entity.source filter
+          // must exclude it. (Use an unrelated endpoint source, not another IDP EA
+          // dataset, since those are valid supervises sources.)
           await seedUserEntity(esClient, {
             entityId: wrongSourceActor,
             namespace,
             email: aEmail,
-            entitySource: 'entityanalytics_entra_id',
+            entitySource: 'elastic_defend',
             relationship: { key: relationshipKey, userEmails: [tEmail] },
           });
 
@@ -251,14 +253,19 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
 // suite seeds user entities, runs the maintainer, and asserts the
 // entity.lifecycle.last_seen watermark gate end-to-end.
 //
-// supervises is user → user (Okta), so it reconstructs the target EUID with the
-// @okta namespace suffix. entity.source is the full data_stream.dataset
-// (`entityanalytics_okta.user`) — the Okta EA integration ships no event.module,
-// so entity.source falls through to data_stream.dataset, not the bare name.
+// supervises is user → user, reconstructing the target EUID with the IDP
+// namespace suffix. The maintainer supports both Okta and Entra ID (identical
+// mechanism, differing only in entity.source + namespace suffix). This e2e suite
+// exercises the Okta source; the Entra ID source is covered by the unit/snapshot
+// tests in configs.test.ts (a second e2e registration would need its own spec
+// file — the scout_max_one_describe lint rule allows one root describe per file).
+//
+// The maintainer matches entity.source against both the bare integration name
+// and the <integration>.user dataset; we seed the bare form here.
 registerUserTargetRawIdentifiersMaintainerSuite({
   maintainerId: 'supervises',
   relationshipKey: 'supervises',
   entityPrefix: 'sup',
   namespace: 'okta',
-  requiredEntitySource: 'entityanalytics_okta.user',
+  requiredEntitySource: 'entityanalytics_okta',
 });

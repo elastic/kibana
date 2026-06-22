@@ -15,9 +15,22 @@ const overrideConfigs = SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
   (c): c is OverrideRelationshipIntegrationConfig => c.kind === 'override'
 );
 
+// id → (entity.source values, namespace suffix) the config is expected to emit.
+const EXPECTED_SOURCE_BY_ID: Record<string, { entitySources: string[]; namespace: string }> = {
+  entityanalytics_okta: {
+    entitySources: ['entityanalytics_okta', 'entityanalytics_okta.user'],
+    namespace: 'okta',
+  },
+  entityanalytics_entra_id: {
+    entitySources: ['entityanalytics_entra_id', 'entityanalytics_entra_id.user'],
+    namespace: 'entra_id',
+  },
+};
+
 describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the one expected integration', () => {
+  it('ships exactly the expected IDP integrations (okta + entra_id)', () => {
     expect(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
+      'entityanalytics_entra_id',
       'entityanalytics_okta',
     ]);
   });
@@ -89,9 +102,10 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: override query MV_EXPANDs the chosen key BEFORE CONCAT (CONCAT is null on multi-valued input)',
     (config) => {
+      const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
       const query = buildTargetsPerActorQuery(config, 'default');
       const expandIdx = query.indexOf('MV_EXPAND rawTargetKey');
-      const concatIdx = query.indexOf('CONCAT("user:", rawTargetKey, "@okta")');
+      const concatIdx = query.indexOf(`CONCAT("user:", rawTargetKey, "@${namespace}")`);
       expect(expandIdx).toBeGreaterThanOrEqual(0);
       expect(concatIdx).toBeGreaterThanOrEqual(0);
       // The expand must come first, or CONCAT collapses the multi-valued field to null.
@@ -100,20 +114,22 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   );
 
   it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query builds the user EUID with the @okta namespace suffix',
+    '$id: override query builds the user EUID with the IDP namespace suffix',
     (config) => {
+      const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
       const query = buildTargetsPerActorQuery(config, 'default');
-      expect(query).toContain('CONCAT("user:", rawTargetKey, "@okta")');
+      expect(query).toContain(`CONCAT("user:", rawTargetKey, "@${namespace}")`);
     }
   );
 
   it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: override query guards against non-EUID and namespace-only target values',
     (config) => {
+      const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
       const query = buildTargetsPerActorQuery(config, 'default');
-      // Rejects empty/prefix-only values like "user:@okta" from a blank raw field,
-      // and requires a namespace-suffixed user EUID shape.
-      expect(query).toContain('targetEntityId != "user:@okta"');
+      // Rejects empty/prefix-only values like "user:@<namespace>" from a blank raw
+      // field, and requires a namespace-suffixed user EUID shape.
+      expect(query).toContain(`targetEntityId != "user:@${namespace}"`);
       expect(query).toContain('targetEntityId RLIKE ".+:.+@.+"');
     }
   );
@@ -171,22 +187,30 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   });
 
   describe('entity.source filter', () => {
-    // entity.source is the full data_stream.dataset (`entityanalytics_okta.user`)
-    // when the integration ships no event.module — NOT the bare integration name.
-    const OKTA_SOURCE = 'entityanalytics_okta.user';
+    // entity.source may be the bare integration name OR the full <integration>.user
+    // dataset (depending on whether the integration emits event.module), so both
+    // are matched.
+    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+      '$id: Step 1 composite agg filters match any of the entity.source values',
+      (config) => {
+        const { entitySources } = EXPECTED_SOURCE_BY_ID[config.id];
+        const filters = config.compositeAggAdditionalFilters ?? [];
+        const sourceFilter = filters.find((f) => JSON.stringify(f).includes('entity.source'));
+        expect(sourceFilter).toEqual({ terms: { 'entity.source': entitySources } });
+      }
+    );
 
-    it(`Step 1 composite agg filters include an entity.source term for ${OKTA_SOURCE}`, () => {
-      const config = buildSupervisesConfigs()[0];
-      const filters = config.compositeAggAdditionalFilters ?? [];
-      const sourceFilter = filters.find((f) => JSON.stringify(f).includes('entity.source'));
-      expect(sourceFilter).toEqual({ term: { 'entity.source': OKTA_SOURCE } });
-    });
-
-    it(`Step 2 ES|QL override filters on entity.source == "${OKTA_SOURCE}"`, () => {
-      const config = buildSupervisesConfigs()[0] as OverrideRelationshipIntegrationConfig;
-      const query = config.esqlQueryOverride('default');
-      expect(query).toContain(`entity.source == "${OKTA_SOURCE}"`);
-    });
+    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+      '$id: Step 2 ES|QL override filters entity.source IN the configured values',
+      (config) => {
+        const { entitySources } = EXPECTED_SOURCE_BY_ID[config.id];
+        const query = (config as OverrideRelationshipIntegrationConfig).esqlQueryOverride(
+          'default'
+        );
+        const list = entitySources.map((s) => `"${s}"`).join(', ');
+        expect(query).toContain(`entity.source IN (${list})`);
+      }
+    );
   });
 
   describe('watermark behaviour', () => {
@@ -235,11 +259,14 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       }
     );
 
-    it('entityanalytics_okta: targets-per-actor ES|QL with watermark is locked', () => {
-      const config = buildSupervisesConfigs(
-        '2026-06-01T00:00:00.000Z'
-      )[0] as OverrideRelationshipIntegrationConfig;
-      expect(config.esqlQueryOverride('__namespace__')).toMatchSnapshot();
-    });
+    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id))(
+      '%s: targets-per-actor ES|QL with watermark is locked',
+      (id) => {
+        const config = buildSupervisesConfigs('2026-06-01T00:00:00.000Z').find(
+          (c) => c.id === id
+        ) as OverrideRelationshipIntegrationConfig;
+        expect(config.esqlQueryOverride('__namespace__')).toMatchSnapshot();
+      }
+    );
   });
 });

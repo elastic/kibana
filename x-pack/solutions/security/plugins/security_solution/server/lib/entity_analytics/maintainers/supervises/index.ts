@@ -13,8 +13,7 @@ import { buildSupervisesConfigs } from './configs';
 export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
   id: 'supervises',
   description:
-    'Resolves supervises relationships from raw_identifiers on entity documents ' +
-    '(Okta: user → user via the manager/direct-reports hierarchy)',
+    'Resolves supervises (user → user) relationships from raw_identifiers on entity documents',
   interval: '1d',
   initialState: {},
   run: async ({ esClient, logger, status, crudClient, abortController }) => {
