@@ -210,6 +210,7 @@ export function getActionsConfigurationUtilities(
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   const validatedEmailCurried = curry(validateEmails)(config);
+  let earsSSLSettingsCache: SSLSettings | null = null;
   return {
     isHostnameAllowed,
     isUriAllowed,
@@ -218,6 +219,9 @@ export function getActionsConfigurationUtilities(
     getResponseSettings: () => getResponseSettingsFromConfig(config),
     getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
     getEARSSSLSettings: () => {
+      if (earsSSLSettingsCache !== null) {
+        return earsSSLSettingsCache;
+      }
       const readSSLFile = (filePath: string, configKey: string): Buffer => {
         try {
           return readFileSync(filePath);
@@ -227,13 +231,14 @@ export function getActionsConfigurationUtilities(
           );
         }
       };
-      return {
+      earsSSLSettingsCache = {
         ...getSSLSettingsFromConfig(config.auth.ears?.ssl?.verificationMode),
         cert: config.auth.ears?.ssl?.certificate
           ? readSSLFile(config.auth.ears.ssl.certificate, 'certificate')
           : undefined,
         key: config.auth.ears?.ssl?.key ? readSSLFile(config.auth.ears.ssl.key, 'key') : undefined,
       };
+      return earsSSLSettingsCache;
     },
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {

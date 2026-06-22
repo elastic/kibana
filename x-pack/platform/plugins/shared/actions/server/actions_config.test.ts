@@ -548,6 +548,26 @@ describe('getEARSSSLSettings', () => {
     expect(mockReadFileSync).not.toHaveBeenCalled();
   });
 
+  test('caches the SSL settings and reads files only once across multiple calls', () => {
+    mockReadFileSync
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockReturnValueOnce(Buffer.from('key-pem'));
+
+    const configUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    const first = configUtils.getEARSSSLSettings();
+    const second = configUtils.getEARSSSLSettings();
+
+    expect(first).toBe(second);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(2);
+  });
+
   test('throws a descriptive config error when the EARS ssl.certificate file cannot be read', () => {
     mockReadFileSync.mockImplementationOnce(() => {
       throw new Error("ENOENT: no such file or directory, open '/path/to/missing-cert.pem'");
