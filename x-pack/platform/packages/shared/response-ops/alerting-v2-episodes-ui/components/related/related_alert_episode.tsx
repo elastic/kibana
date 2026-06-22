@@ -13,6 +13,10 @@ import type { AlertEpisode } from '../../queries/episodes_query';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
+import {
+  AlertEpisodeSeverityBadge,
+  isSupportedEpisodeSeverity,
+} from '../severity/episode_severity_badge';
 import { getNonEmptyGroupingFields, parseEpisodeDataJson } from '../../utils/episode_grouping_data';
 
 export interface RelatedAlertEpisodeProps {
@@ -66,6 +70,11 @@ export function RelatedAlertEpisode({
                 episodeAction={episodeAction}
                 groupAction={groupAction}
               />
+            </EuiFlexItem>
+          ) : null}
+          {isSupportedEpisodeSeverity(episode.severity) ? (
+            <EuiFlexItem grow={false}>
+              <AlertEpisodeSeverityBadge severity={episode.severity} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
