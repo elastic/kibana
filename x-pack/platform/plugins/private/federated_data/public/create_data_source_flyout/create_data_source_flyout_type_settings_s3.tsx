@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -204,16 +204,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   const { field: jwtAudienceField, fieldState: jwtAudienceState } = useController({
     name: 'settings.jwt_audience',
     control,
-    rules: areFieldsRequired
-      ? {
-          validate: (value?: string) =>
-            value?.trim()
-              ? true
-              : i18n.translate('dataSets.createFlyout.s3.fields.jwtAudienceRequired', {
-                  defaultMessage: 'JWT audience is required.',
-                }),
-        }
-      : undefined,
   });
 
   const { field: roleSessionNameField } = useController({
@@ -228,14 +218,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
     name: 'settings.sts_region',
     control,
   });
-
-  const hasAdvancedError = useMemo(() => Boolean(jwtAudienceState.error), [jwtAudienceState.error]);
-
-  useEffect(() => {
-    if (hasAdvancedError) {
-      setIsAdvancedOpen(true);
-    }
-  }, [hasAdvancedError]);
 
   useEffect(() => {
     return () => {
