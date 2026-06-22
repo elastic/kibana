@@ -89,6 +89,12 @@ const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiToolTip: {
     repositionOnScroll: true,
   },
+  // Enable horizontal scrolling and disable responsive card layout on all tables by default
+  EuiTable: {
+    scrollableInline: true,
+    tableLayout: 'auto',
+    responsiveBreakpoint: false,
+  },
 };
 
 /**
