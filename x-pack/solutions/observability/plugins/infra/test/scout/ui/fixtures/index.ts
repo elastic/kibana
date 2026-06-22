@@ -85,7 +85,9 @@ export const test = baseWithSynthtrace.extend<
   },
 });
 
-const createInfraSynthtraceEsClientOverride = () => ({
+const globalSetupWithSynthtrace = mergeTests(baseGlobalSetupHook, synthtraceFixture);
+
+export const globalSetupHook = globalSetupWithSynthtrace.extend({
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
     const { infraEsClient } = await getSynthtraceClient(
       'infraEsClient',
@@ -111,14 +113,30 @@ const createInfraSynthtraceEsClientOverride = () => ({
   },
 });
 
-const globalSetupWithSynthtrace = mergeTests(baseGlobalSetupHook, synthtraceFixture);
-
-export const globalSetupHook = globalSetupWithSynthtrace.extend(
-  createInfraSynthtraceEsClientOverride()
-);
-
 const globalTeardownWithSynthtrace = mergeTests(baseGlobalTeardownHook, synthtraceFixture);
 
-export const globalTeardownHook = globalTeardownWithSynthtrace.extend(
-  createInfraSynthtraceEsClientOverride()
-);
+export const globalTeardownHook = globalTeardownWithSynthtrace.extend({
+  infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
+    const { infraEsClient } = await getSynthtraceClient(
+      'infraEsClient',
+      {
+        esClient,
+        kbnUrl: kbnUrl.get(),
+        log,
+        config,
+      },
+      // Metrics system indexes are TSDS and thus, time bound.
+      // In order to have fixed dates in the tests, we need to skip the system package installation so that the TSDS configuration doesn't get applied.
+      // Otherwise, time-bound indexes will reject documents outside their time range, which depends on the time the test is being ran, making them less deterministic.
+      { skipInstallation: true }
+    );
+
+    const index = async (events: SynthtraceGenerator<InfraDocument>) => {
+      await infraEsClient.index(Readable.from(Array.from(events)));
+    };
+
+    const clean = async () => await infraEsClient.clean();
+
+    await use({ index, clean });
+  },
+});
