@@ -36,7 +36,7 @@ export function registerSingleMetricViewerCasesAttachment(
         event: (
           <FormattedMessage
             id="xpack.ml.cases.singleMetricViewer.embeddableAddedEvent"
-            defaultMessage="added single metric viewer"
+            defaultMessage="added a single metric viewer"
           />
         ),
         timelineAvatar: PLUGIN_ICON,

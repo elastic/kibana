@@ -45,7 +45,7 @@ export function registerCases(
         event: (
           <FormattedMessage
             id="xpack.aiops.changePointDetection.cases.attachmentEvent"
-            defaultMessage="added change point chart"
+            defaultMessage="added change point charts"
           />
         ),
         timelineAvatar: 'machineLearningApp',

@@ -29,7 +29,7 @@ export function registerAnomalySwimLaneCasesAttachment(
         event: (
           <FormattedMessage
             id="xpack.ml.cases.anomalySwimLane.embeddableAddedEvent"
-            defaultMessage="added anomaly swim lane"
+            defaultMessage="added an anomaly swim lane"
           />
         ),
         timelineAvatar: PLUGIN_ICON,
