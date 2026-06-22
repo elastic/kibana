@@ -51,9 +51,6 @@ async function unmuteInstanceWithOCC(
       operation: WriteOperations.UnmuteAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

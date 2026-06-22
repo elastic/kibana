@@ -17,6 +17,7 @@ import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
 import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
 import { AlertConditionStep } from './alert_condition_step';
+import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
 
 jest.mock('@kbn/code-editor', () => ({
   ...jest.requireActual('@kbn/code-editor'),
@@ -25,10 +26,6 @@ jest.mock('@kbn/code-editor', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
-}));
-
-jest.mock('../../../form/hooks/use_data_fields', () => ({
-  useDataFields: jest.fn(() => ({ data: {} })),
 }));
 
 let getFormValues: (() => ComposeFormValues) | undefined;
@@ -54,7 +51,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   query: {
     format: 'composed',
     base: BASE_QUERY,
-    blocks: { breach: ALERT_BLOCK },
+    breach: { segment: ALERT_BLOCK },
   },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -77,7 +74,14 @@ const createComposeFormWrapper = (
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
             <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              {children}
+              <ComposeDiscoverTimeFieldContextProvider
+                value={{
+                  timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+                  isTimeFieldResolved: true,
+                }}
+              >
+                {children}
+              </ComposeDiscoverTimeFieldContextProvider>
             </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
@@ -126,19 +130,19 @@ const renderStep = (
 
 const STANDALONE_QUERY: RuleQuery = {
   format: 'standalone',
-  breach: 'FROM logs-* | LIMIT 10',
+  breach: { query: 'FROM logs-* | LIMIT 10' },
 };
 
 const COMPOSED_QUERY: RuleQuery = {
   format: 'composed',
   base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
-  blocks: { breach: '| WHERE count > 100' },
+  breach: { segment: '| WHERE count > 100' },
 };
 
 const COMPOSED_QUERY_EMPTY_BASE: RuleQuery = {
   format: 'composed',
   base: '',
-  blocks: { breach: '| WHERE count > 100' },
+  breach: { segment: '| WHERE count > 100' },
 };
 
 describe('AlertConditionStep', () => {
@@ -179,6 +183,75 @@ describe('AlertConditionStep', () => {
       expect(
         screen.getByText(/Couldn't automatically separate base query from alert condition/)
       ).toBeInTheDocument();
+    });
+
+    it('shows alert-condition-missing callout when base query is present but alert condition is empty', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('composeDiscoverAlertQueryMissing')).toBeInTheDocument();
+      expect(screen.getByText('Alert condition required')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Define an alert condition in the query editor before continuing to the next step.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('does not show alert-condition-missing callout when splitFailed callout is already shown', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: '', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(
+        screen.getByText(/Couldn't automatically separate base query from alert condition/)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout when both queries are defined', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout for signal kind', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout when query is not committed', () => {
+      renderStep(
+        { queryCommitted: false },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
     });
   });
 
@@ -312,7 +385,7 @@ describe('AlertConditionStep', () => {
         {
           formValueOverrides: {
             kind: 'signal',
-            query: { format: 'standalone', breach: `${BASE_QUERY}\n${ALERT_BLOCK}` },
+            query: { format: 'standalone', breach: { query: `${BASE_QUERY}\n${ALERT_BLOCK}` } },
           },
         }
       );
@@ -430,7 +503,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
-              blocks: { breach: '| WHERE count > 100' },
+              breach: { segment: '| WHERE count > 100' },
             },
           },
         }
@@ -449,7 +522,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM kibana_sample_data_ecommerce\n| STATS total = SUM(taxful_total_price) BY customer_gender, day_of_week',
-              blocks: { breach: '| WHERE total > 1000' },
+              breach: { segment: '| WHERE total > 1000' },
             },
           },
         }
@@ -469,7 +542,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*)',
-              blocks: { breach: '| WHERE count > 100' },
+              breach: { segment: '| WHERE count > 100' },
             },
           },
         }

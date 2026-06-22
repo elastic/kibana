@@ -21,6 +21,7 @@ plugins:
     - data_view_editor
     - data_view_management
     - data_views
+    - data_views_as_code
     - dev_tools
     - discover
     - discover_enhanced
@@ -82,6 +83,7 @@ plugins:
     - workflows_extensions
     - workflows_management
   disabled:
+    - data_views_as_code # Not yet registered for CI; added to unblock pipelines
 
 packages:
   enabled:

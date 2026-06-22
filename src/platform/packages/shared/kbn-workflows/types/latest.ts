@@ -37,6 +37,7 @@ export type {
   WorkflowExecutionListItemDto,
   WorkflowExecutionLogModel,
   WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
@@ -53,6 +54,7 @@ export type {
   ExecutionTypeUnion,
   TerminalExecutionStatus,
   // api types
+  WorkflowSortField,
   WorkflowsSearchParams,
   // connector types
   ConnectorSubAction,
