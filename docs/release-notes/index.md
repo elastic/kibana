@@ -26,10 +26,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.4.3 [kibana-9.4.3-release-notes]
 
-### Features and enhancements [kibana-9.4.3-features-enhancements]
-
-**Elastic Observability solution**:
-For the Elastic Observability 9.4.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
 ### Fixes [kibana-9.4.3-fixes]
 
