@@ -73,8 +73,7 @@ async function runTask({
     });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
-    remote = extractionResult.success && extractionResult.isRemote;
-
+    remote = extractionResult.isRemote;
     if (!extractionResult.success) {
       logger.error(
         `Logs extraction failed for ${entityType}: ${extractionResult.error.message}, took ${extractionDuration}ms`
@@ -83,9 +82,8 @@ async function runTask({
       logger.info(
         `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
       );
+      entityStoreMetrics.extractionTaskSuccess.add(1, { entity_type: entityType, namespace, remote });
     }
-
-    entityStoreMetrics.extractionTaskSuccess.add(1, { entity_type: entityType, namespace, remote });
 
     const updatedState = {
       namespace,
@@ -102,16 +100,12 @@ async function runTask({
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);
 
-    if (abortController?.signal.aborted) {
-      entityStoreMetrics.extractionTaskAborted.add(1, { entity_type: entityType, namespace, remote });
-    } else {
-      entityStoreMetrics.extractionTaskError.add(1, {
-        entity_type: entityType,
-        namespace,
-        error_type: e.name ?? 'UnknownError',
-        remote,
-      });
-    }
+    entityStoreMetrics.extractionTaskError.add(1, {
+      entity_type: entityType,
+      namespace,
+      error_type: e.name ?? 'UnknownError',
+      remote,
+    });
 
     return {
       state: {

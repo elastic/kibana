@@ -313,6 +313,11 @@ export class CcsLogsExtractionClient {
       this.logger.info(
         `Aborting CCS logs extraction, CCS entities extracted until abort: ${totalCount}, in ${totalPages} pages`
       );
+      entityStoreMetrics.extractionTaskAborted.add(1, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: true,
+      });
     };
     abortController?.signal.addEventListener('abort', onAbort);
 

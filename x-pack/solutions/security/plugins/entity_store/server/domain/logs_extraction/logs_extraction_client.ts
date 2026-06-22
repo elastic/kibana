@@ -91,6 +91,7 @@ interface ExtractedLogsSummarySuccess {
 
 interface ExtractedLogsSummaryError {
   success: false;
+  isRemote: boolean;
   error: Error;
 }
 
@@ -150,11 +151,13 @@ export class LogsExtractionClient {
   ): Promise<ExtractedLogsSummary> {
     this.logger.debug('starting entity extraction');
 
+    let isRemote = false;
+
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
       const entityDefinition = getEntityDefinition(type, this.namespace);
       const {
-        isRemote,
+        isRemote: resolvedIsRemote,
         count,
         pages,
         indexPatterns,
@@ -170,6 +173,8 @@ export class LogsExtractionClient {
         opts,
         entityDefinition,
       });
+
+      isRemote = resolvedIsRemote;
 
       const operationResult = {
         success: true as const,
@@ -205,7 +210,7 @@ export class LogsExtractionClient {
 
       return operationResult;
     } catch (error) {
-      return await this.handleError(error, type);
+      return await this.handleError(error, type, isRemote);
     }
   }
 
@@ -563,7 +568,14 @@ export class LogsExtractionClient {
     let logsCapTimestamp: string | undefined;
     let state: EngineLogExtractionState = { ...initialEngineState };
 
-    const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
+    const onAbort = () => {
+      this.logger.debug('Aborting execution mid logs extraction');
+      entityStoreMetrics.extractionTaskAborted.add(1, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
+      });
+    };
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
     /** One-shot `paginationId` from a prior run: consumed by the first bounded extraction batch for entity-level pagination. */
@@ -914,18 +926,26 @@ export class LogsExtractionClient {
     });
   }
 
-  private async handleError(error: any, type: EntityType): Promise<ExtractedLogsSummary> {
+  private async handleError(
+    error: any,
+    type: EntityType,
+    isRemote: boolean
+  ): Promise<ExtractedLogsSummary> {
     if (
       SavedObjectsErrorHelpers.isNotFoundError(error) ||
       error instanceof EntityStoreNotRunningError
     ) {
-      return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
+      return {
+        success: false,
+        isRemote,
+        error: new Error(`Entity store is not started for type ${type}`),
+      };
     }
 
     await this.engineDescriptorClient.update(type, {
       error: { message: error.message, action: 'extractLogs' },
     });
-    return { success: false, error };
+    return { success: false, isRemote, error };
   }
 
   /**
