@@ -75,9 +75,15 @@ apiTest.describe(
           event: { outcome: 'success' },
         });
 
-        const extraction = await forceLogExtraction(apiClient, internalHeaders, 'user', WINDOW_FROM, WINDOW_TO);
+        const extraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'user',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
         expect(extraction.statusCode).toBe(200);
-        expect(extraction.body.success).toBe(true);
+        expect((extraction.body as { success: boolean }).success).toBe(true);
         await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const hits = await esClient.search({
@@ -102,15 +108,27 @@ apiTest.describe(
         });
 
         // First call: CPS path writes the entity-update doc into updates.
-        const firstExtraction = await forceLogExtraction(apiClient, internalHeaders, 'user', WINDOW_FROM, WINDOW_TO);
+        const firstExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'user',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
         expect(firstExtraction.statusCode).toBe(200);
-        expect(firstExtraction.body.success).toBe(true);
+        expect((firstExtraction.body as { success: boolean }).success).toBe(true);
         // Ensure the updates doc is visible before the main path reads it.
         await esClient.indices.refresh({ index: UPDATES_INDEX });
         // Second call: main path scans updates and merges into latest.
-        const secondExtraction = await forceLogExtraction(apiClient, internalHeaders, 'user', WINDOW_FROM, WINDOW_TO);
+        const secondExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'user',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
         expect(secondExtraction.statusCode).toBe(200);
-        expect(secondExtraction.body.success).toBe(true);
+        expect((secondExtraction.body as { success: boolean }).success).toBe(true);
 
         await esClient.indices.refresh({ index: LATEST_ALIAS });
 
