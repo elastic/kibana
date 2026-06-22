@@ -16,7 +16,9 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  euiFullHeight,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebounceFn } from '@kbn/react-hooks';
@@ -131,6 +133,22 @@ export interface ComposeDiscoverFlyoutProps {
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
 const YAML_PARSE_DEBOUNCE_OPTIONS = { wait: 300 } as const;
+
+const composeDiscoverYamlFlyoutBodyCss = css`
+  ${euiFullHeight()}
+  .euiFlyoutBody__overflow {
+    ${euiFullHeight()}
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+`;
 
 const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
   if (stepIndex < currentStep) return 'complete';
@@ -823,31 +841,56 @@ export function ComposeDiscoverFlyout({
               </EuiFlexGroup>
             </EuiFlyoutHeader>
 
-            <EuiFlyoutBody>
-              {validationCallout}
+            <EuiFlyoutBody css={uiState.yamlMode ? composeDiscoverYamlFlyoutBodyCss : undefined}>
               {uiState.yamlMode ? (
-                <React.Suspense fallback={null}>
-                  <LazyYamlRuleForm
-                    services={baseServices}
-                    yamlText={yamlText}
-                    setYamlText={handleSetYamlText}
-                    onBlurSync={handleBlurSync}
-                    isSubmitting={isSaving}
-                  />
-                </React.Suspense>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: 1,
+                    minHeight: 0,
+                  }}
+                >
+                  {validationCallout}
+                  <div
+                    style={{
+                      flex: 1,
+                      minHeight: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <React.Suspense fallback={null}>
+                      <LazyYamlRuleForm
+                        services={baseServices}
+                        yamlText={yamlText}
+                        setYamlText={handleSetYamlText}
+                        onBlurSync={handleBlurSync}
+                        isSubmitting={isSaving}
+                        fullHeight
+                      />
+                    </React.Suspense>
+                  </div>
+                </div>
               ) : (
-                <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
-                  <ComposeDiscoverForm
-                    state={uiState}
-                    dispatch={dispatch}
-                    services={baseServices}
-                    onRecoveryTypeChange={handleRecoveryTypeChange}
-                    onKindChange={handleKindChange}
-                    isEditing={isEditing}
-                    ruleId={ruleId}
-                    builderType={builderType}
-                  />
-                </BuilderStateProvider>
+                <>
+                  {validationCallout}
+                  <BuilderStateProvider
+                    builderState={builderState}
+                    setBuilderState={setBuilderState}
+                  >
+                    <ComposeDiscoverForm
+                      state={uiState}
+                      dispatch={dispatch}
+                      services={baseServices}
+                      onRecoveryTypeChange={handleRecoveryTypeChange}
+                      onKindChange={handleKindChange}
+                      isEditing={isEditing}
+                      ruleId={ruleId}
+                      builderType={builderType}
+                    />
+                  </BuilderStateProvider>
+                </>
               )}
             </EuiFlyoutBody>
 
