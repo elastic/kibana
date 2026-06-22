@@ -201,6 +201,9 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
   // conversion code — it behaves identically for all TSVB panel types.
   spaceTest(
     'should navigate back to TSVB when the Back button is clicked',
+    // Stateful only — editPanel on by-reference panels requires visualize_v2.save,
+    // which is not available in serverless roles. Original FTR test was stateful-only too.
+    { tag: tags.stateful.all },
     async ({ page, pageObjects }) => {
       const { dashboard } = pageObjects;
 

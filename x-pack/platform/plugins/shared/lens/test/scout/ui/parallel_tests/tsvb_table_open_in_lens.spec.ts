@@ -125,7 +125,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
       const dimensions = page.testSubj
-        .locator('[data-test-subj="lnsDatatable_metrics"]')
+        .locator('lnsDatatable_metrics')
         .locator('[data-test-subj="lns-dimensionTrigger"]');
       await expect(dimensions.filter({ hasText: 'Count of records last 1m' })).toBeVisible();
     }
@@ -139,7 +139,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
       const dimensions = page.testSubj
-        .locator('[data-test-subj="lnsDatatable_metrics"]')
+        .locator('lnsDatatable_metrics')
         .locator('[data-test-subj="lns-dimensionTrigger"]');
       await expect(dimensions).toHaveText(['Count of records', '10']);
     }
@@ -151,7 +151,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
     const splitRows = page.testSubj
-      .locator('[data-test-subj="lnsDatatable_rows"]')
+      .locator('lnsDatatable_rows')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(splitRows).toHaveText([
       'Top 10 values of machine.os.raw',
@@ -165,7 +165,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
     const splitRows = page.testSubj
-      .locator('[data-test-subj="lnsDatatable_rows"]')
+      .locator('lnsDatatable_rows')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(splitRows.filter({ hasText: 'test' })).toBeVisible();
   });
@@ -176,7 +176,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
     const dimensions = page.testSubj
-      .locator('[data-test-subj="lnsDatatable_metrics"]')
+      .locator('lnsDatatable_metrics')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(dimensions).toHaveCount(1);
   });

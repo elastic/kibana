@@ -107,7 +107,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(chartSwitcher).toHaveText('Bar');
 
     const yDimension = page.testSubj
-      .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+      .locator('lnsXY_yDimensionPanel')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(yDimension).toHaveText('Maximum of memory');
   });
@@ -118,10 +118,10 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     const xDimension = page.testSubj
-      .locator('[data-test-subj="lnsXY_xDimensionPanel"]')
+      .locator('lnsXY_xDimensionPanel')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     const yDimension = page.testSubj
-      .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+      .locator('lnsXY_yDimensionPanel')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(xDimension).toHaveText('Top 10 values of extension.raw');
     await expect(yDimension).toHaveText('Count of records');
@@ -135,7 +135,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       const yDimension = page.testSubj
-        .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+        .locator('lnsXY_yDimensionPanel')
         .locator('[data-test-subj="lns-dimensionTrigger"]');
       await yDimension.click();
       await page.testSubj.locator('indexPattern-advanced-accordion').click();
@@ -157,12 +157,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       // Verify 2 layers
-      const layerTabs = page.testSubj.locator('[data-test-subj="lns-layerPanel"]');
+      const layerTabs = page.testSubj.locator('lns-layerPanel');
       await expect(layerTabs).toHaveCount(2);
 
       // Layer 0: Count of records
       const layer0YDimension = page.testSubj
-        .locator('[data-test-subj="lns-layerPanel"]')
+        .locator('lns-layerPanel')
         .filter({ hasText: 'Count of records' })
         .locator(
           '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-dimensionTrigger"]'
@@ -171,7 +171,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
 
       // Layer 1: Static value 10
       const layer1YDimension = page.testSubj
-        .locator('[data-test-subj="lns-layerPanel"]')
+        .locator('lns-layerPanel')
         .filter({ hasText: '10' })
         .locator(
           '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-dimensionTrigger"]'
@@ -186,7 +186,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     const yDimension = page.testSubj
-      .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+      .locator('lnsXY_yDimensionPanel')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(yDimension).toHaveText('Count of records');
   });
