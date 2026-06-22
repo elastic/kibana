@@ -29,6 +29,7 @@ import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowListTable } from './workflow_list_table';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
+import { WorkflowsEmptyStateReadOnly } from '../../../components/workflows_empty_state/workflows_empty_state';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -307,10 +308,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
         <EuiFlexItem grow={false}>
-          <WorkflowsEmptyState
-            onCreateWorkflow={onCreateWorkflow}
-            canCreateWorkflow={canCreateWorkflow}
-          />
+          {canCreateWorkflow ? (
+            <WorkflowsEmptyState onCreateWorkflow={onCreateWorkflow} />
+          ) : (
+            <WorkflowsEmptyStateReadOnly />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -361,6 +363,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onPageChange={(pageIndex, pageSize) =>
           setSearch({ ...search, page: pageIndex + 1, size: pageSize })
         }
+        onSortChange={(field, order) =>
+          setSearch({ ...search, sortField: field, sortOrder: order, page: 1 })
+        }
+        sortField={search.sortField}
+        sortOrder={search.sortOrder}
         onToggleWorkflow={handleToggleWorkflow}
         onDeleteWorkflow={handleDeleteWorkflow}
         onCloneWorkflow={handleCloneWorkflow}

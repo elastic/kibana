@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,6 +19,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
@@ -44,6 +46,9 @@ export interface RuleSummaryFlyoutProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
+  hasAnimation?: EuiFlyoutProps['hasAnimation'];
 }
 
 export const RuleSummaryFlyout = ({
@@ -54,6 +59,9 @@ export const RuleSummaryFlyout = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  session,
+  ownFocus = true,
+  hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
   const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
@@ -62,9 +70,10 @@ export const RuleSummaryFlyout = ({
     <RuleProvider rule={rule}>
       <EuiFlyout
         type="push"
-        hasAnimation
+        hasAnimation={hasAnimation}
         size="s"
-        ownFocus
+        ownFocus={ownFocus}
+        session={session}
         hideCloseButton
         paddingSize="none"
         onClose={onClose}
@@ -86,15 +95,22 @@ export const RuleSummaryFlyout = ({
           >
             {onQuickEdit && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  color="text"
-                  onClick={() => onQuickEdit(rule)}
-                  aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
                     defaultMessage: 'Quick edit rule',
                   })}
-                  data-test-subj="ruleSummaryFlyoutQuickEditButton"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    color="text"
+                    onClick={() => onQuickEdit(rule)}
+                    aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
+                      defaultMessage: 'Quick edit rule',
+                    })}
+                    data-test-subj="ruleSummaryFlyoutQuickEditButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
@@ -107,15 +123,22 @@ export const RuleSummaryFlyout = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-                aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.close', {
+              <EuiToolTip
+                content={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.close', {
                   defaultMessage: 'Close',
                 })}
-                data-test-subj="ruleSummaryFlyoutCloseButton"
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="cross"
+                  color="text"
+                  onClick={onClose}
+                  aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.close', {
+                    defaultMessage: 'Close',
+                  })}
+                  data-test-subj="ruleSummaryFlyoutCloseButton"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

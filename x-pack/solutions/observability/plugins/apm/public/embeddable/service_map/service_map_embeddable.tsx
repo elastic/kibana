@@ -9,6 +9,12 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
+import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
+import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getDateRange } from '../../context/url_params_context/helpers';
 import { isActivePlatinumLicense } from '../../../common/license_check';
@@ -41,23 +47,22 @@ export interface ServiceMapEmbeddableProps {
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
-  /** Separate range for the badges query. Defaults to `[rangeFrom, rangeTo]`. */
   badgesRangeFrom?: string;
   badgesRangeTo?: string;
-  /** KQL for the badges query only. Defaults to `kuery`. Pass `""` to aggregate across all nodes. */
   badgesKuery?: string;
-  /** Show the popover's "Focus map" button in embedded contexts. Defaults to `!isEmbedded`. */
   showFocusMapInPopover?: boolean;
-  /** Strip `kuery` from popover-built URLs ("Service Details" / "Focus map"); env still flows through. */
   clearKueryOnPopoverNavigation?: boolean;
-  /** Focus button always navigates to standalone APM, even for the currently focused service. */
   alwaysNavigateOnPopoverFocus?: boolean;
-  /** Drop cross-env spans before rendering when env is set. */
   strictEnvironmentScope?: boolean;
-  /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
   onEmptyStateChange?: (isEmpty: boolean) => void;
-  /** Field-value pairs to pass as filter bar pills in the "View full map" link instead of kuery. */
   filterPills?: Array<{ field: string; value: string }>;
+  mapOrientation?: ServiceMapOrientation;
+  onMapOrientationChange?: (next: ServiceMapOrientation) => void;
+  /** Parent dashboard filters/query forwarded when sync_with_dashboard_filters is on. */
+  parentFilters?: Filter[];
+  parentQuery?: Query | AggregateQuery;
+  viewFilters?: ServiceMapViewFilters;
+  onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
 }
 
 function LoadingSpinner() {
@@ -87,6 +92,12 @@ export function ServiceMapEmbeddable({
   strictEnvironmentScope,
   onEmptyStateChange,
   filterPills,
+  mapOrientation,
+  onMapOrientationChange,
+  parentFilters,
+  parentQuery,
+  viewFilters,
+  onViewFiltersChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -129,6 +140,32 @@ export function ServiceMapEmbeddable({
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
+  const { dataView } = useAdHocApmDataView();
+  const kibanaQuerySettings = useKibanaQuerySettings();
+  const esQuery = useMemo(() => {
+    // Environment is applied via the dedicated server param, so skip it here.
+    const filtersWithoutEnv = (parentFilters ?? []).filter(
+      (f) => f.meta?.key !== 'service.environment'
+    );
+    const hasParentFilters = filtersWithoutEnv.length > 0;
+    const parentQueryText =
+      parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
+        ? parentQuery.query.trim()
+        : '';
+    const hasParentQuery = parentQueryText.length > 0;
+    if (!dataView || (!hasParentFilters && !hasParentQuery)) {
+      return undefined;
+    }
+    const parentQueryLanguage =
+      parentQuery && 'language' in parentQuery && typeof parentQuery.language === 'string'
+        ? parentQuery.language
+        : 'kuery';
+    const queries: Query[] = hasParentQuery
+      ? [{ query: parentQueryText, language: parentQueryLanguage }]
+      : [];
+    return buildEsQuery(dataView, queries, filtersWithoutEnv, kibanaQuerySettings);
+  }, [dataView, parentFilters, parentQuery, kibanaQuerySettings]);
+
   const { data, status, error } = useServiceMap({
     environment,
     kuery,
@@ -137,9 +174,9 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
     serviceName,
     strictEnvironmentScope,
+    esQuery,
   });
 
-  // Only fire on SUCCESS — loading/error states carry no emptiness signal.
   useEffect(() => {
     if (!onEmptyStateChange) return;
     if (status !== FETCH_STATUS.SUCCESS) return;
@@ -154,6 +191,26 @@ export function ServiceMapEmbeddable({
     nodes: data.nodes,
     nodesStatus: status,
   });
+
+  // Strip badge-dependent filters (alert/SLO/anomaly) until badge data resolves. On failure,
+  // keep showing all services but warn that those filters couldn't be applied.
+  const viewFiltersForGraph = useMemo<ServiceMapViewFilters | undefined>(() => {
+    if (!viewFilters) return viewFilters;
+    if (badgesStatus === FETCH_STATUS.SUCCESS) return viewFilters;
+    return {
+      ...viewFilters,
+      alertStatusFilter: [],
+      sloStatusFilter: [],
+      anomalySeverityFilter: [],
+    };
+  }, [viewFilters, badgesStatus]);
+
+  const badgeDependentFiltersActive =
+    (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
+    (viewFilters?.sloStatusFilter?.length ?? 0) > 0 ||
+    (viewFilters?.anomalySeverityFilter?.length ?? 0) > 0;
+  const showBadgesFailedWarning =
+    badgeDependentFiltersActive && badgesStatus === FETCH_STATUS.FAILURE;
 
   if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
     return (
@@ -254,6 +311,20 @@ export function ServiceMapEmbeddable({
         }}
       >
         {isLoading && <LoadingSpinner />}
+        {showBadgesFailedWarning && (
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.apm.serviceMapEmbeddable.badgesFailedWarning', {
+              defaultMessage:
+                "Alert, SLO and anomaly filters couldn't be applied because their data failed to load. Showing all services.",
+            })}
+            data-test-subj="apmServiceMapEmbeddableBadgesFailedWarning"
+            css={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1 }}
+          />
+        )}
         <ServiceMapGraph
           height="100%"
           nodes={isLoading ? [] : nodesForGraph}
@@ -270,6 +341,10 @@ export function ServiceMapEmbeddable({
           showFocusMap={showFocusMapInPopover}
           alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
           clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+          mapOrientation={mapOrientation}
+          onMapOrientationChange={onMapOrientationChange}
+          viewFilters={viewFiltersForGraph}
+          onViewFiltersChange={onViewFiltersChange}
         />
       </div>
       {sloOverviewFlyout && (
