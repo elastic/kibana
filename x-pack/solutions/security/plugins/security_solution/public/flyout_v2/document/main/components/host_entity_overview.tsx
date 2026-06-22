@@ -153,8 +153,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
   }, [hostName, identityFields]);
 
-  const storeHostEntityId = hostIdentityFields['entity.id'];
-
   const riskFromEntityRecord = useMemo(
     () => (entityRecord != null ? getRiskFromEntityRecord(entityRecord) : null),
     [entityRecord]

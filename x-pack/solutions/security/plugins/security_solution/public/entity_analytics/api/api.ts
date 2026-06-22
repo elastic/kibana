@@ -134,7 +134,7 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
   route.replace('{id}', encodeURIComponent(id));
 
 export const useEntityAnalyticsRoutes = () => {
-  const { http, uiSettings } = useKibana().services;
+  const { http } = useKibana().services;
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
