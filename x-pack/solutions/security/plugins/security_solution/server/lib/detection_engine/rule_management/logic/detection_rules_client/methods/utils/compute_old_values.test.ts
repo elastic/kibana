@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
 import { computeOldValues } from './compute_old_values';
 
 describe('computeOldValues', () => {
@@ -33,6 +33,17 @@ describe('computeOldValues', () => {
       asRule({ note: { blob: 'old', author: 'alice' } })
     );
     expect(patch).toEqual({ note: { blob: 'old' } });
+  });
+
+  it('omits arrays of objects when their contents are deep-equal', () => {
+    const threat = [{ framework: 'MITRE', tactic: { id: 'TA0003', name: 'Persistence' } }];
+    const patch = computeOldValues(
+      asRule({ threat: [{ framework: 'MITRE', tactic: { id: 'TA0003', name: 'Persistence' } }] }),
+      asRule({ threat: [{ framework: 'MITRE', tactic: { id: 'TA0003', name: 'Persistence' } }] })
+    );
+    expect(patch).toEqual({});
+    // Verify array reference inequality did not cause a false positive
+    expect(threat).not.toBe(patch);
   });
 
   it('emits the entire previous array when arrays differ', () => {
@@ -79,6 +90,34 @@ describe('computeOldValues', () => {
       asRule({ schedule: { interval: '5m', other: 1 } })
     );
     expect(patch).toEqual({});
+  });
+
+  it('emits null when a field transitions from undefined to a value (e.g. note added)', () => {
+    const patch = computeOldValues(
+      asRule({ name: 'a', note: 'investigation guide' }),
+      asRule({ name: 'a', note: undefined })
+    );
+    expect(patch).toEqual({ note: null });
+  });
+
+  it('emits the previous value when a field transitions from a value to undefined (e.g. note cleared)', () => {
+    const patch = computeOldValues(
+      asRule({ name: 'a', note: undefined }),
+      asRule({ name: 'a', note: 'old guide' })
+    );
+    expect(patch).toEqual({ note: 'old guide' });
+  });
+
+  it('treats keys with undefined values identically to absent keys', () => {
+    const patchFromUndefined = computeOldValues(
+      asRule({ name: 'a', note: 'new' }),
+      asRule({ name: 'a', note: undefined })
+    );
+    const patchFromAbsent = computeOldValues(
+      asRule({ name: 'a', note: 'new' }),
+      asRule({ name: 'a' })
+    );
+    expect(patchFromUndefined).toEqual(patchFromAbsent);
   });
 });
 
