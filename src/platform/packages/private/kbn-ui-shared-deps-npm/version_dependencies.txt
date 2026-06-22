@@ -44,7 +44,7 @@
 @mapbox/hast-util-table-cell-style@0.2.0
 @popperjs/core@2.11.8
 @reduxjs/toolkit@1.9.7
-@reduxjs/toolkit@2.7.0
+@reduxjs/toolkit@2.12.0
 @remix-run/router@1.23.3
 @standard-schema/spec@1.1.0
 @standard-schema/utils@0.3.0
@@ -259,8 +259,7 @@ html-void-elements@1.0.5
 https-browserify@1.0.0
 icss-utils@5.1.0
 ieee754@1.2.1
-immer@10.0.3
-immer@10.2.0
+immer@11.1.8
 immer@9.0.21
 import-fresh@3.3.0
 inflight@1.0.6
