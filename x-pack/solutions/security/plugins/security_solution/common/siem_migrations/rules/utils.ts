@@ -6,13 +6,8 @@
  */
 
 import type { Severity } from '../../api/detection_engine';
-import {
-  DEFAULT_TRANSLATION_FIELDS,
-  SENTINEL_DEFAULT_QUERY_FREQUENCY,
-  SENTINEL_RULE_KIND_ANNOTATION_KEY,
-} from '../constants';
+import { DEFAULT_TRANSLATION_FIELDS } from '../constants';
 import type { ElasticRule, ElasticRulePartial, OriginalRule } from '../model/rule_migration.gen';
-import { SENTINEL_NRT_RULE_KIND } from '../parsers/sentinel/types';
 
 export interface MigrationTranslationFields {
   from: string;
@@ -47,18 +42,15 @@ export const getTranslationFieldsFromAnnotations = (
   originalRule: OriginalRule
 ): MigrationTranslationFields => {
   const { annotations } = originalRule;
-  const isSentinelNrtRule =
-    originalRule.vendor === 'microsoft-sentinel' &&
-    annotations?.[SENTINEL_RULE_KIND_ANNOTATION_KEY] === SENTINEL_NRT_RULE_KIND;
-  const defaultInterval = isSentinelNrtRule
-    ? SENTINEL_DEFAULT_QUERY_FREQUENCY
-    : DEFAULT_TRANSLATION_FIELDS.interval;
 
   return {
     from:
       typeof annotations?.from === 'string' ? annotations.from : DEFAULT_TRANSLATION_FIELDS.from,
     to: typeof annotations?.to === 'string' ? annotations.to : DEFAULT_TRANSLATION_FIELDS.to,
-    interval: typeof annotations?.interval === 'string' ? annotations.interval : defaultInterval,
+    interval:
+      typeof annotations?.interval === 'string'
+        ? annotations.interval
+        : DEFAULT_TRANSLATION_FIELDS.interval,
   };
 };
 

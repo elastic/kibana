@@ -6,8 +6,6 @@
  */
 
 import type { OriginalRule } from '../model/rule_migration.gen';
-import { SENTINEL_NRT_RULE_KIND, SENTINEL_SCHEDULED_RULE_KIND } from '../parsers/sentinel/types';
-import { SENTINEL_RULE_KIND_ANNOTATION_KEY } from '../constants';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
   getTranslationFieldsFromAnnotations,
@@ -76,41 +74,10 @@ describe('getTranslationFieldsFromAnnotations', () => {
     });
   });
 
-  it('uses Sentinel NRT query frequency default when no interval annotation is present', () => {
+  it('uses shared defaults when timing annotations are missing', () => {
     expect(
       getTranslationFieldsFromAnnotations({
         ...originalRule,
-        annotations: {
-          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_NRT_RULE_KIND,
-        },
-      })
-    ).toEqual({
-      from: 'now-360s',
-      to: 'now',
-      interval: '1m',
-    });
-  });
-
-  it('uses shared defaults for Scheduled Sentinel rules without timing annotations', () => {
-    expect(
-      getTranslationFieldsFromAnnotations({
-        ...originalRule,
-        annotations: {
-          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
-        },
-      })
-    ).toEqual({
-      from: 'now-360s',
-      to: 'now',
-      interval: '5m',
-    });
-  });
-
-  it('uses shared interval default for non-Sentinel rules without interval annotation', () => {
-    expect(
-      getTranslationFieldsFromAnnotations({
-        ...originalRule,
-        vendor: 'qradar',
         annotations: undefined,
       })
     ).toEqual({

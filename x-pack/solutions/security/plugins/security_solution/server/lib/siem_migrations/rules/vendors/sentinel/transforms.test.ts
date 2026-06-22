@@ -6,7 +6,12 @@
  */
 
 import type { SentinelRule } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
-import { SENTINEL_RULE_KIND_ANNOTATION_KEY, SENTINEL_SCHEDULED_RULE_KIND } from './constants';
+import {
+  SENTINEL_DEFAULT_QUERY_FREQUENCY,
+  SENTINEL_NRT_RULE_KIND,
+  SENTINEL_RULE_KIND_ANNOTATION_KEY,
+  SENTINEL_SCHEDULED_RULE_KIND,
+} from './constants';
 import { transformSentinelMitreMapping, transformSentinelRuleToOriginalRule } from './transforms';
 
 const baseSentinelRule: SentinelRule = {
@@ -209,6 +214,47 @@ describe('transformSentinelRuleToOriginalRule', () => {
       [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
       from: 'now-1m',
       to: 'now',
+    });
+  });
+
+  it('adds the Sentinel NRT default interval when queryFrequency is missing', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      kind: SENTINEL_NRT_RULE_KIND,
+    });
+
+    expect(result.annotations).toEqual({
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_NRT_RULE_KIND,
+      interval: SENTINEL_DEFAULT_QUERY_FREQUENCY,
+    });
+  });
+
+  it('adds the Sentinel NRT default interval when queryFrequency is empty', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      kind: SENTINEL_NRT_RULE_KIND,
+      queryFrequency: '',
+      queryPeriod: 'PT1M',
+    });
+
+    expect(result.annotations).toEqual({
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_NRT_RULE_KIND,
+      from: 'now-1m',
+      to: 'now',
+      interval: SENTINEL_DEFAULT_QUERY_FREQUENCY,
+    });
+  });
+
+  it('uses custom queryFrequency instead of the Sentinel NRT default interval', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      kind: SENTINEL_NRT_RULE_KIND,
+      queryFrequency: 'PT10M',
+    });
+
+    expect(result.annotations).toEqual({
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_NRT_RULE_KIND,
+      interval: '10m',
     });
   });
 });

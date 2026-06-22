@@ -16,6 +16,8 @@ import {
   SENTINEL_TACTIC_NAME_TO_DISPLAY,
   ISO_8601_DURATION_PATTERN,
   SENTINEL_RULE_KIND_ANNOTATION_KEY,
+  SENTINEL_NRT_RULE_KIND,
+  SENTINEL_DEFAULT_QUERY_FREQUENCY,
 } from './constants';
 
 /**
@@ -133,6 +135,18 @@ const transformQueryFrequencyToInterval = (
   return interval ? { interval } : undefined;
 };
 
+const getSentinelIntervalAnnotation = (
+  rule: SentinelRule
+): Pick<MigrationTranslationFields, 'interval'> | undefined => {
+  if (isNonEmptyString(rule.queryFrequency)) {
+    return transformQueryFrequencyToInterval(rule.queryFrequency);
+  }
+
+  return rule.kind === SENTINEL_NRT_RULE_KIND
+    ? { interval: SENTINEL_DEFAULT_QUERY_FREQUENCY }
+    : undefined;
+};
+
 /**
  * Transforms a parsed Sentinel rule into the OriginalRule format
  * used by the SIEM migrations pipeline.
@@ -153,9 +167,7 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
       ...(isNonEmptyString(rule.queryPeriod)
         ? transformQueryPeriodToTimeRange(rule.queryPeriod)
         : {}),
-      ...(isNonEmptyString(rule.queryFrequency)
-        ? transformQueryFrequencyToInterval(rule.queryFrequency)
-        : {}),
+      ...getSentinelIntervalAnnotation(rule),
     },
   };
 
