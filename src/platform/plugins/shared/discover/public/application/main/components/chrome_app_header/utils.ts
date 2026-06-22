@@ -36,7 +36,7 @@ export const getChromeHeaderBack = (
   return {
     href: originatingPath,
     onClick: () => embeddableEditor.transferBackToEditor(TransferAction.Cancel),
-    label: i18n.translate('discover.titleDashboardEditionBackLabel', {
+    label: i18n.translate('discover.titleDashboardEditBackLabel', {
       defaultMessage: 'Dashboard',
     }),
   };
@@ -57,10 +57,10 @@ export const getChromeHeaderTitle = ({
     const title =
       // Session persisted by value inside a dashboard.
       embeddableEditor.getByValueTab()?.label ||
-      // Session eddited by reference: it exists outise a particular dashboard.
+      // Session edited by reference: it exists outside a particular dashboard.
       sessionTitle ||
-      // Default, I.E: editting a by-value session that has no name.
-      i18n.translate('discover.DiscoverSessionTitle', {
+      // Default, I.E: editing a by-value session that has no name.
+      i18n.translate('discover.discoverSessionTitle', {
         defaultMessage: 'Discover session',
       });
 
