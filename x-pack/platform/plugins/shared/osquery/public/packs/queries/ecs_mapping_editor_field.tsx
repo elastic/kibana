@@ -669,17 +669,27 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
               <EuiFlexItem grow={false}>
                 <div css={buttonWrapperCss}>
                   {!isLastItem && (
-                    <EuiButtonIcon
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
                         {
                           defaultMessage: 'Delete ECS mapping row',
                         }
                       )}
-                      iconType="trash"
-                      color="danger"
-                      onClick={handleDeleteClick}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
+                          {
+                            defaultMessage: 'Delete ECS mapping row',
+                          }
+                        )}
+                        iconType="trash"
+                        color="danger"
+                        onClick={handleDeleteClick}
+                      />
+                    </EuiToolTip>
                   )}
                 </div>
               </EuiFlexItem>
