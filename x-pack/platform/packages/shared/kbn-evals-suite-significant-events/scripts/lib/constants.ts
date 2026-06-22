@@ -21,7 +21,7 @@ export const DEFAULT_ENV_SNAPSHOT_LOGS_INDEX = 'logs.otel';
 export const BASELINE_WAIT_MS = 3 * 60 * 1000;
 export const FAILURE_WAIT_MS = 5 * 60 * 1000;
 export const KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
-export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
+export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 15 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 

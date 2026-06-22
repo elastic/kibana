@@ -58,31 +58,12 @@ async function repromoteQueries({
   log: ToolingLog;
   config: ConnectionConfig;
 }): Promise<void> {
-  // The snapshot captures the KI query docs (rule_backed: true) but NOT the
-  // alerting rule saved objects, so the restored rules don't actually exist.
-  // Reset rule_backed to false so _promote re-creates them with the same
-  // deterministic rule_id; otherwise _promote skips them (it only promotes
-  // queries where query.rule_backed == false) and the queries never fire.
   log.debug('Resetting query promotion state...');
   await resetQueriesPromotion({ esClient });
   log.debug('Repromoting queries...');
   await promoteQueries(config);
 }
 
-/**
- * Restores the KI store as a genuine data stream.
- *
- * It is captured as a plain `snapshot-significant_events-knowledge_indicators` index
- * (reindex path), but `.significant_events-knowledge_indicators` is a data stream owned
- * by the streams plugin (its index template is installed at startup). Restoring the
- * snapshot directly under that name would create a concrete index that squats the data
- * stream's name, which ES cannot then materialize as a data stream. Instead we restore
- * to a temp index and reindex into the data-stream name, letting ES auto-create the
- * data stream from the always-present template.
- *
- * Must run after streams is enabled so the KI data-stream template exists. No-op on old
- * snapshots that predate KI capture — logs a notice and returns a skipped status.
- */
 async function restoreKiDataStream({
   esClient,
   log,
@@ -236,8 +217,6 @@ export const restoreEnvSnapshot = async ({
   const repository = createGcsRepository({ bucket: gcsBucket, basePath: gcsBasePath });
 
   await withTempSuperuser(esClient, log, config, async (sysClient) => {
-    // Clean the plain system indices, alerts, logs AND the KI data stream (the latter is
-    // not in `systemIndices` — it's restored separately as a data stream below).
     await ensureCleanEnvironment({
       esClient: sysClient,
       log,
