@@ -13,9 +13,9 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
-import { getSelectedServicePermissions } from '../service_permissions';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { AwsPermissionsViewer } from './aws_permissions_viewer';
+import { useIamPermissions } from '../use_iam_permissions';
 
 interface ConnectStepProps {
   onNext: () => void;
@@ -34,15 +34,32 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
     );
   }, [selectedServiceIds]);
 
-  const staticKeysPermissions = useMemo(
-    () => getSelectedServicePermissions(selectedServiceIds),
+  // Fetch IAM permissions from the server endpoint.
+  const { data: iamPermissions } = useIamPermissions(selectedServiceIds);
+
+  // Display names for the per-service toggle in the permissions viewer dropdown.
+  const viewerServices = useMemo(
+    () =>
+      selectedServiceIds
+        .map((id) => {
+          const entry = AWS_SERVICES_MAP.get(id);
+          return entry ? { id, name: entry.name } : null;
+        })
+        .filter((s): s is { id: string; name: string } => s !== null),
     [selectedServiceIds]
   );
 
-  const staticKeysContent = useMemo(
-    () => <AwsPermissionsViewer services={staticKeysPermissions} />,
-    [staticKeysPermissions]
-  );
+  // Render the viewer only once the endpoint has responded; until then show nothing.
+  const staticKeysContent = useMemo(() => {
+    if (!iamPermissions) return null;
+    return (
+      <AwsPermissionsViewer
+        merged={iamPermissions.merged}
+        byService={iamPermissions.byService}
+        services={viewerServices}
+      />
+    );
+  }, [iamPermissions, viewerServices]);
 
   return (
     <div data-test-subj="onboardingStep-connect">
