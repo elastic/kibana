@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useLocalSearch, searchIdField } from '../../../../hooks';
 
@@ -277,6 +278,9 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {hiddenSubCategoriesItems?.length ? (
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate('xpack.fleet.epmList.subcategoriesPopoverAriaLabel', {
+                    defaultMessage: 'More subcategories',
+                  })}
                   data-test-subj="epmList.showMoreSubCategoriesButton"
                   id="moreSubCategories"
                   button={
