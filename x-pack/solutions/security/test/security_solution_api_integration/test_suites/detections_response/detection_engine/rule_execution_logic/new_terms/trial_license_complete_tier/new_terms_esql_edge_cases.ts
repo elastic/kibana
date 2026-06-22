@@ -17,6 +17,19 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 const NESTED_INDEX = 'new-terms-nested-test';
 const FLATTENED_INDEX = 'new-terms-flattened-test';
 
+// Index pairs that map the same `value` field to different types, to reproduce the
+// cross-index mapping conflict blocker for ES|QL.
+const CONFLICT_IP_KEYWORD_INDEX = 'new-terms-conflict-ip-keyword';
+const CONFLICT_IP_TYPED_INDEX = 'new-terms-conflict-ip-typed';
+const CONFLICT_LONG_KEYWORD_INDEX = 'new-terms-conflict-long-keyword';
+const CONFLICT_LONG_TYPED_INDEX = 'new-terms-conflict-long-typed';
+const CONFLICT_INDICES = [
+  CONFLICT_IP_KEYWORD_INDEX,
+  CONFLICT_IP_TYPED_INDEX,
+  CONFLICT_LONG_KEYWORD_INDEX,
+  CONFLICT_LONG_TYPED_INDEX,
+];
+
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';
 const ruleExecutionStart = '2022-10-19T05:00:04.000Z';
 const recentDocTimestamp = '2022-10-19T05:00:05.000Z';
@@ -50,6 +63,20 @@ export default ({ getService }: FtrProviderContext) => {
     es,
     index: FLATTENED_INDEX,
     log,
+  });
+
+  const indexDocs = async (index: string, docs: Array<Record<string, unknown>>) => {
+    await es.bulk({
+      refresh: true,
+      operations: docs.flatMap((doc) => [{ index: { _index: index } }, doc]),
+    });
+  };
+
+  const valueMappings = (type: 'keyword' | 'ip' | 'long'): MappingTypeMapping => ({
+    properties: {
+      '@timestamp': { type: 'date' },
+      value: { type },
+    },
   });
 
   describe('@ess @serverless @serverlessQA New terms ES|QL approach - field type limitations', () => {
@@ -332,6 +359,109 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts.length).toEqual(1);
         expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['attackers']);
+      });
+    });
+
+    // KNOWN LIMITATION (tracked): when the rule index pattern spans indices that map the same
+    // `new_terms_fields` field to different types (e.g. `value` is keyword in one index and ip
+    // or long in another), neither detection path can read it:
+    //   - ES|QL: the query references the raw field in WHERE / MV_EXPAND / STATS BY, and a
+    //     multi-typed (union) field fails verification ("incompatible types"). The executor
+    //     records a rule error and produces 0 alerts.
+    //   - Aggregation: the terms `include` round-trip re-parses bucket values against the field
+    //     type and throws (e.g. "not an IP string literal"), also producing 0 alerts.
+    //
+    // The tests below assert the CURRENT behavior (0 alerts) so the suite stays green, and each
+    // documents the EXPECTED behavior once the conflict is handled (1 alert for the new value).
+    // A fix needs field_caps-driven casting/coercion before detection (e.g. ES|QL TO_STRING for
+    // ip/long conflicts) so the multi-typed field can be referenced. When that lands, flip these
+    // assertions to expect 1 alert with the documented value.
+    describe('mapping conflicts - same field name with different types across indices', () => {
+      before(async () => {
+        await es.indices.delete({
+          index: CONFLICT_INDICES.join(','),
+          ignore_unavailable: true,
+        });
+
+        await es.indices.create({
+          index: CONFLICT_IP_KEYWORD_INDEX,
+          mappings: valueMappings('keyword'),
+        });
+        await es.indices.create({
+          index: CONFLICT_IP_TYPED_INDEX,
+          mappings: valueMappings('ip'),
+        });
+        await es.indices.create({
+          index: CONFLICT_LONG_KEYWORD_INDEX,
+          mappings: valueMappings('keyword'),
+        });
+        await es.indices.create({
+          index: CONFLICT_LONG_TYPED_INDEX,
+          mappings: valueMappings('long'),
+        });
+
+        // ip + keyword: "10.0.0.1" is known on the keyword side, "10.0.0.99" is new on the ip side.
+        await indexDocs(CONFLICT_IP_KEYWORD_INDEX, [
+          { '@timestamp': '2022-10-14T05:00:04.000Z', value: '10.0.0.1' },
+          { '@timestamp': recentDocTimestamp, value: '10.0.0.1' },
+        ]);
+        await indexDocs(CONFLICT_IP_TYPED_INDEX, [
+          { '@timestamp': '2022-10-14T05:00:04.000Z', value: '10.0.0.2' },
+          { '@timestamp': recentDocTimestamp, value: '10.0.0.99' },
+        ]);
+
+        // long + keyword: "100" is known on the keyword side, 999 is new on the long side.
+        await indexDocs(CONFLICT_LONG_KEYWORD_INDEX, [
+          { '@timestamp': '2022-10-14T05:00:04.000Z', value: '100' },
+          { '@timestamp': recentDocTimestamp, value: '100' },
+        ]);
+        await indexDocs(CONFLICT_LONG_TYPED_INDEX, [
+          { '@timestamp': '2022-10-14T05:00:04.000Z', value: 200 },
+          { '@timestamp': recentDocTimestamp, value: 999 },
+        ]);
+      });
+
+      after(async () => {
+        await es.indices.delete({
+          index: CONFLICT_INDICES.join(','),
+          ignore_unavailable: true,
+        });
+      });
+
+      it('ip + keyword conflict: currently produces 0 alerts (expected: 1 alert for "10.0.0.99")', async () => {
+        // EXPECTED once conflicts are handled: 1 alert with kibana.alert.new_terms === ['10.0.0.99'].
+        // CURRENT: the ES|QL query fails verification on the union-typed `value` field, so the
+        // rule records an error and produces 0 alerts.
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: [CONFLICT_IP_KEYWORD_INDEX, CONFLICT_IP_TYPED_INDEX],
+          new_terms_fields: ['value'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).toEqual(0);
+      });
+
+      it('long + keyword conflict: currently produces 0 alerts (expected: 1 alert for 999)', async () => {
+        // EXPECTED once conflicts are handled: 1 alert for the new value 999.
+        // CURRENT: the ES|QL query fails verification on the union-typed `value` field, so the
+        // rule records an error and produces 0 alerts.
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: [CONFLICT_LONG_KEYWORD_INDEX, CONFLICT_LONG_TYPED_INDEX],
+          new_terms_fields: ['value'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).toEqual(0);
       });
     });
   });

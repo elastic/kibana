@@ -38,16 +38,28 @@ const createExecOptions = ({
   inputIndex,
   experimentalFeatures,
   licensing,
+  newTermsFields = ['user.name'],
 }: {
   inputIndex: string[];
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
+  newTermsFields?: string[];
 }) =>
   ({
     sharedParams: {
       inputIndex,
       experimentalFeatures,
       licensing,
+    },
+    params: {
+      newTermsFields,
+    },
+    services: {
+      scopedClusterClient: {
+        asCurrentUser: {
+          fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+        },
+      },
     },
   } as unknown as Parameters<ReturnType<typeof createNewTermsAlertType>['executor']>[0]);
 

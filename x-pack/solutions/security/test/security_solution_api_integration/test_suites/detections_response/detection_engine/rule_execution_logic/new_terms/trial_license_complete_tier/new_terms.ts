@@ -1447,19 +1447,13 @@ export default ({ getService }: FtrProviderContext) => {
           enableLoggedRequests: true,
         });
 
-        expect(logs[0].requests?.length).toEqual(4);
+        expect(logs[0].requests?.length).toEqual(2);
         const requests = logs[0].requests ?? [];
 
-        expect(requests[0].description).toBe('Find all values');
-        expect(requests[0].request_type).toBe('findAllTerms');
+        expect(requests[0].description).toBe('ES|QL request to find all matches');
+        expect(requests[0].request_type).toBe('findMatches');
 
-        expect(requests[1].description).toBe('Find new values');
-        expect(requests[1].request_type).toBe('findNewTerms');
-
-        expect(requests[2].description).toBe('Find documents associated with new values');
-        expect(requests[2].request_type).toBe('findDocuments');
-
-        expect(requests[3].description).toBe('Find all values after host.name: host-2');
+        expect(requests[1].description).toBe('Find documents for 1 new term combinations');
       });
 
       it('should return requests property when enable_logged_requests set to true for multiple fields', async () => {
@@ -1494,17 +1488,13 @@ export default ({ getService }: FtrProviderContext) => {
           enableLoggedRequests: true,
         });
 
-        expect(logs[0].requests?.length).toEqual(4);
+        expect(logs[0].requests?.length).toEqual(2);
         const requests = logs[0].requests ?? [];
 
-        expect(requests[0].description).toBe('Find all values');
-        expect(requests[0].request_type).toBe('findAllTerms');
+        expect(requests[0].description).toBe('ES|QL request to find all matches');
+        expect(requests[0].request_type).toBe('findMatches');
 
-        expect(requests[1].description).toBe('Find new values');
-        expect(requests[1].request_type).toBe('findNewTerms');
-
-        expect(requests[2].description).toBe('Find documents associated with new values');
-        expect(requests[2].request_type).toBe('findDocuments');
+        expect(requests[1].description).toBe('Find documents for 2 new term combinations');
       });
     });
 
