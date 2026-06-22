@@ -45,7 +45,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fixes Discover session panels in dashboards failing to load after **Copy to Spaces** or import when the target space already contains remapped sessions [#272610]({{kib-pull}}272610).
 
 **Connectivity**:
-* Fixes the **Content Connectors** entry in **Stack Management** appearing in the sidebar for users without the required role privileges [#271709]({{kib-pull}}271709).
+* Removes the **Content Connectors** page from the menu for users who didn't have the appropriate role privileges [#271709]({{kib-pull}}271709).
 
 **Data ingestion and Fleet**:
 * Improves `POST /api/fleet/setup` performance for deployments with many configured outputs by fetching only the required outputs instead of decrypting all saved outputs on each call [#273848]({{kib-pull}}273848).
