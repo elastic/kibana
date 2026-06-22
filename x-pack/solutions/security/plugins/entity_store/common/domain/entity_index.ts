@@ -51,6 +51,14 @@ export const getLatestEntityIndexPattern = (namespace: string) =>
     namespace,
   })}-*` as const;
 
+// Returns the index pattern matching all versioned metadata entity indices.
+export const getMetadataEntityIndexPattern = (namespace: string) =>
+  `${getEntityIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_METADATA,
+    namespace,
+  })}-*` as const;
+
 const padVersion = (version: number): string => String(version).padStart(5, '0');
 
 // Returns the concrete index name for the latest entities index (with version suffix)
@@ -58,5 +66,17 @@ export const getLatestEntitiesIndexName = (namespace: string) =>
   `${getEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_LATEST,
+    namespace,
+  })}-${padVersion(MAPPING_VERSION)}`;
+
+// Returns the alias name for the entity metadata dataset.
+export const getEntityMetadataAlias = (namespace: string) =>
+  `${ENTITY_BASE_PREFIX}-${ENTITY_METADATA}-${namespace}` as const;
+
+// Returns the concrete index name for the entity metadata index (with version suffix).
+export const getEntityMetadataIndexName = (namespace: string) =>
+  `${getEntityIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_METADATA,
     namespace,
   })}-${padVersion(MAPPING_VERSION)}`;

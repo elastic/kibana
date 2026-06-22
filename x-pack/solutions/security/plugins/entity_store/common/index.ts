@@ -112,6 +112,7 @@ export {
   ENTITY_LATEST,
   ENTITY_UPDATES,
   ENTITY_HISTORY,
+  ENTITY_METADATA,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
   MAPPING_VERSION,
@@ -119,6 +120,9 @@ export {
   getEntitiesAlias,
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getEntityMetadataIndexName,
+  getMetadataEntityIndexPattern,
 } from './domain/entity_index';
 
 export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_metadata';
@@ -127,3 +131,6 @@ export type {
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
+
+export { buildEntityEsqlQuery } from './esql/entity_query_builder';
+export type { EntityQueryOptions } from './esql/entity_query_builder';

@@ -11,7 +11,10 @@ import {
   ENTITY_STORE_ROUTES,
   getEntitiesAlias,
   getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getMetadataEntityIndexPattern,
   ENTITY_LATEST,
+  ENTITY_METADATA,
 } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
@@ -49,9 +52,16 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
         const spaceId = entityStoreCtx.namespace;
         const entitiesAliasPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const latestEntityIndexPattern = getLatestEntityIndexPattern(spaceId);
+        const metadataAliasPattern = getEntityMetadataAlias(spaceId);
+        const metadataEntityIndexPattern = getMetadataEntityIndexPattern(spaceId);
 
         const response = await checkAndFormatPrivileges({
-          indexPatterns: [entitiesAliasPattern, latestEntityIndexPattern],
+          indexPatterns: [
+            entitiesAliasPattern,
+            latestEntityIndexPattern,
+            metadataAliasPattern,
+            metadataEntityIndexPattern,
+          ],
           request: req,
           security,
           privilegesToCheck: {
@@ -60,6 +70,8 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
               index: {
                 [entitiesAliasPattern]: ['read', 'write'],
                 [latestEntityIndexPattern]: ['read', 'write'],
+                [metadataAliasPattern]: ['read', 'write'],
+                [metadataEntityIndexPattern]: ['read', 'write'],
               },
             },
           },
