@@ -245,6 +245,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid}
         defaultViewport={defaultViewport}
         onViewportChange={onViewportChange}
+        showZoomControls
       />
       {flyoutTarget && (
         <EuiFocusTrap returnFocus>
