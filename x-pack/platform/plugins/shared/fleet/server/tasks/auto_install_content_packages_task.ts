@@ -186,7 +186,9 @@ export class AutoInstallContentPackagesTask {
       );
       if (rolledBackPackages.size > 0) {
         this.logger.info(
-          `[AutoInstallContentPackagesTask] Skipping rolled-back packages: ${[...rolledBackPackages].join(', ')}`
+          `[AutoInstallContentPackagesTask] Skipping rolled-back packages: ${[
+            ...rolledBackPackages,
+          ].join(', ')}`
         );
       }
 
