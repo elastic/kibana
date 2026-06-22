@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alertId: 'alert-telemetry-1',
             index: alertIndex,
             rule: { id: 'rule-1', name: 'Rule 1' },
-            owner: 'securitySolutionFixture',
+            owner: 'securitySolution',
           },
         ],
         auth: { user: superUser, space: 'space1' },
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
         alertId: `alert-telemetry-2-${i}`,
         index: alertIndex,
         rule: { id: 'rule-2', name: 'Rule 2' },
-        owner: 'securitySolutionFixture',
+        owner: 'securitySolution',
       }));
       await bulkCreateAttachments({
         supertest,
