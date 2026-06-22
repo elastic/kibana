@@ -18,11 +18,12 @@ import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
-import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
 
 const wiredStreamManagementSubTabs = [
   'overview',
@@ -30,7 +31,6 @@ const wiredStreamManagementSubTabs = [
   'processing',
   'schema',
   'lifecycle',
-  'advanced',
   'significantEvents',
   'dataQuality',
   'attachments',
@@ -39,6 +39,7 @@ const wiredStreamManagementSubTabs = [
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
 
 const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
+  advanced: { newTab: 'overview' },
   schemaEditor: { newTab: 'schema' },
   retention: { newTab: 'lifecycle' },
   route: { newTab: 'partitioning' },
@@ -55,6 +56,12 @@ export function WiredStreamDetailManagement({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -174,19 +181,13 @@ export function WiredStreamDetailManagement({
               />
             ),
             label: (
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-                  defaultMessage:
-                    'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-                })}
-              >
-                <span data-test-subj="retentionTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-                    defaultMessage: 'Data lifecycle',
-                  })}
-                </span>
-              </EuiToolTip>
+              <LifecycleTabLabel
+                definition={definition}
+                showActions={tab === 'lifecycle'}
+                indexTemplateName={`${definition.stream.name}@stream`}
+                notifications={notifications}
+                share={share}
+              />
             ),
           },
         }
@@ -240,22 +241,6 @@ export function WiredStreamDetailManagement({
       }),
     },
     ...otherTabs,
-    ...(definition.privileges.manage
-      ? {
-          advanced: {
-            content: (
-              <WiredAdvancedView
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-                isDraft={isDraft}
-              />
-            ),
-            label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-              defaultMessage: 'Advanced',
-            }),
-          },
-        }
-      : {}),
   };
 
   const redirectConfig = tabRedirects[tab];

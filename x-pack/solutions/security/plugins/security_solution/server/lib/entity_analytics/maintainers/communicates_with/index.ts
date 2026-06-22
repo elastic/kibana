@@ -16,7 +16,15 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
   description: 'Computes communicates_with relationships from cloud API and MDM activity events',
   interval: '1d',
   initialState: {},
-  run: async ({ esClient, logger, status, crudClient, abortController, telemetry }) => {
+  run: async ({
+    esClient,
+    cpsEsClient,
+    logger,
+    status,
+    crudClient,
+    abortController,
+    telemetry,
+  }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting communicates_with maintainer run');
 
@@ -27,6 +35,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
 
     const result = await runRelationshipMaintainer({
       esClient,
+      cpsEsClient,
       logger,
       namespace,
       crudClient,

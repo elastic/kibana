@@ -293,6 +293,7 @@ async function runIntegration(
  */
 export const runRelationshipMaintainer = async ({
   esClient,
+  cpsEsClient,
   logger,
   namespace,
   crudClient,
@@ -301,6 +302,7 @@ export const runRelationshipMaintainer = async ({
   telemetryCollector,
 }: {
   esClient: ElasticsearchClient;
+  cpsEsClient?: ElasticsearchClient;
   logger: Logger;
   namespace: string;
   crudClient: EntityUpdateClient;
@@ -337,6 +339,8 @@ export const runRelationshipMaintainer = async ({
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
 
+  const readClient = cpsEsClient ?? esClient;
+
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;
@@ -358,7 +362,7 @@ export const runRelationshipMaintainer = async ({
       outcome,
       iterations,
       truncated: integrationTruncated,
-    } = await runIntegration(config, esClient, logger, namespace, crudClient, abortController);
+    } = await runIntegration(config, readClient, logger, namespace, crudClient, abortController);
 
     totalIterations += iterations;
     if (integrationTruncated) truncated = true;
