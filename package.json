@@ -1456,7 +1456,7 @@
     "kea": "2.6.0",
     "langsmith": "0.7.1",
     "launchdarkly-js-client-sdk": "3.9.1",
-    "liquidjs": "10.26.0",
+    "liquidjs": "10.27.0",
     "lodash": "4.18.1",
     "lru-cache": "11.3.6",
     "lz-string": "1.5.0",
