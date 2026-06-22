@@ -248,6 +248,9 @@ export const Tab: React.FC<TabProps> = (props) => {
                   color="primary"
                   position="absolute"
                   css={css`
+                    // Pull the bar up by the tab's top border width so it sits on top of the
+                    // border edge instead of below it.
+                    top: -${euiTheme.border.width.thick};
                     // we can't simply use overflow: hidden; because then curved notches are not visible
                     border-top-left-radius: ${euiTheme.border.radius.small};
                     border-top-right-radius: ${euiTheme.border.radius.small};
