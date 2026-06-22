@@ -20,6 +20,7 @@ import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 import { useNestedPanelActions } from '../../hooks/use_panel_header_actions';
+import { SecondaryMenuItemActionMenuButton } from './item_action_menu_button';
 import {
   BADGE_SPACING_OFFSET,
   ITEM_ACTION_SPACING_OFFSET,
@@ -209,19 +210,32 @@ export const SecondaryMenuItemComponent = ({
         <div css={itemWrapperStyles}>
           {linkButton}
           <div css={itemActionsInsideStyles}>
-            {resolvedItemActions?.map((action) => (
-              <EuiButtonIcon
-                key={action.id}
-                id={action.id}
-                aria-label={action['aria-label']}
-                color={isHighlighted ? 'primary' : 'text'}
-                data-test-subj={action['data-test-subj']}
-                display={isHighlighted ? 'base' : 'empty'}
-                iconType={action.iconType}
-                onClick={action.onClick}
-                size="xs"
-              />
-            ))}
+            {resolvedItemActions?.map((action) =>
+              action.opensItemActionMenu ? (
+                <SecondaryMenuItemActionMenuButton
+                  key={action.id}
+                  aria-label={action['aria-label']}
+                  data-test-subj={action['data-test-subj']}
+                  iconType={action.iconType}
+                  id={action.id}
+                  isHighlighted={isHighlighted}
+                  itemActionMenuContext={action.itemActionMenuContext}
+                  opensItemActionMenu={action.opensItemActionMenu}
+                />
+              ) : (
+                <EuiButtonIcon
+                  key={action.id}
+                  id={action.id}
+                  aria-label={action['aria-label']}
+                  color={isHighlighted ? 'primary' : 'text'}
+                  data-test-subj={action['data-test-subj']}
+                  display={isHighlighted ? 'base' : 'empty'}
+                  iconType={action.iconType}
+                  onClick={action.onClick}
+                  size="xs"
+                />
+              )
+            )}
           </div>
         </div>
       ) : (

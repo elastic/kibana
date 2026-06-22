@@ -53,6 +53,14 @@ export interface PanelHeaderAction {
    * (optional) When set, clicking the header action opens the nested side panel with this id.
    */
   opensNestedPanel?: string;
+  /**
+   * (optional) When set, clicking the action opens a registered item action menu popover.
+   */
+  opensItemActionMenu?: string;
+  /**
+   * (optional) Context passed to the registered item action menu renderer.
+   */
+  itemActionMenuContext?: Record<string, string>;
 }
 
 /**

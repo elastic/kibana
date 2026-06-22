@@ -22,12 +22,12 @@ export const SecondaryMenuSectionEmptyStateComponent = ({
 
   const wrapperStyles = css`
     align-items: center;
-    background-color: ${euiTheme.colors.backgroundBaseHighlighted};
-    border-radius: 4px;
     display: flex;
     flex-direction: column;
     gap: ${euiTheme.size.s};
     padding: ${euiTheme.size.l};
+    border-radius: 4px;
+    background-color: ${euiTheme.colors.backgroundBaseHighlighted};
     text-align: center;
     width: 100%;
   `;

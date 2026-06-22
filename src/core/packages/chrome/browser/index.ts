@@ -70,6 +70,9 @@ export type {
   SidePanelNestedPanelItemClickParams,
   SidePanelNestedPanelRenderProps,
   SidePanelNestedPanelRenderer,
+  SideNavItemActionMenuContext,
+  SideNavItemActionMenuRenderProps,
+  SideNavItemActionMenuRenderer,
   SidebarApp,
   SidebarAppConfig,
   SidebarAppDefinition,
@@ -83,4 +86,8 @@ export {
   registerSidePanelNestedPanelRenderer,
   renderSidePanelNestedPanel,
   subscribeSidePanelNestedPanelRenderers,
+  getSideNavItemActionMenuRenderer,
+  registerSideNavItemActionMenuRenderer,
+  renderSideNavItemActionMenu,
+  subscribeSideNavItemActionMenuRenderers,
 } from './src';

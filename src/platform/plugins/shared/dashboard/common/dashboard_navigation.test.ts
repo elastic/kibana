@@ -76,7 +76,7 @@ describe('createDashboardsNavigationNode', () => {
           title: 'Starred',
           emptyState: {
             iconType: 'starEmpty',
-            message: 'Star a dashboard to see it here',
+            message: 'Dashboards you starred',
           },
           children: [],
         },
@@ -86,7 +86,7 @@ describe('createDashboardsNavigationNode', () => {
           animateItemReorder: true,
           emptyState: {
             iconType: 'clockCounter',
-            message: 'Recently visited dashboards will be shown here',
+            message: 'Dashboards you recently visited',
           },
           children: [],
         },
@@ -119,8 +119,17 @@ describe('createDashboardsNavigationNode', () => {
       title: 'Starred',
       emptyState: {
         iconType: 'starEmpty',
-        message: 'Star a dashboard to see it here',
+        message: 'Dashboards you starred',
       },
+    });
+    expect(node.children?.[1].children?.[0]).toMatchObject({
+      id: 'starred_2',
+      itemActions: [
+        expect.objectContaining({
+          iconType: 'ellipsis',
+          opensItemActionMenu: 'dashboards_item_actions',
+        }),
+      ],
     });
     expect(node.children?.[2]).toMatchObject({
       id: 'dashboards_recent',
@@ -128,7 +137,7 @@ describe('createDashboardsNavigationNode', () => {
       animateItemReorder: true,
       emptyState: {
         iconType: 'clockCounter',
-        message: 'Recently visited dashboards will be shown here',
+        message: 'Dashboards you recently visited',
       },
     });
   });
@@ -167,7 +176,7 @@ describe('createDashboardsNavigationNode', () => {
           items: [],
           emptyState: {
             iconType: 'starEmpty',
-            message: 'Star a dashboard to see it here',
+            message: 'Dashboards you starred',
           },
         }),
         expect.objectContaining({
@@ -177,7 +186,7 @@ describe('createDashboardsNavigationNode', () => {
           items: [],
           emptyState: {
             iconType: 'clockCounter',
-            message: 'Recently visited dashboards will be shown here',
+            message: 'Dashboards you recently visited',
           },
         }),
       ])
@@ -273,6 +282,12 @@ describe('createDashboardsNavigationNode', () => {
             id: 'starred_2',
             label: 'Starred dashboard',
             href: 'http://mocked/kibana/foo/app/dashboards#/view/2',
+            itemActions: [
+              expect.objectContaining({
+                iconType: 'ellipsis',
+                opensItemActionMenu: 'dashboards_item_actions',
+              }),
+            ],
           }),
         ],
       },
@@ -285,6 +300,12 @@ describe('createDashboardsNavigationNode', () => {
             id: 'recent_1',
             label: 'Recent dashboard',
             href: 'http://mocked/kibana/foo/app/dashboards#/view/1',
+            itemActions: [
+              expect.objectContaining({
+                iconType: 'ellipsis',
+                opensItemActionMenu: 'dashboards_item_actions',
+              }),
+            ],
           }),
         ],
       },

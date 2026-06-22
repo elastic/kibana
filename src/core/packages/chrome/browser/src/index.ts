@@ -77,12 +77,25 @@ export type {
   SidePanelNestedPanelRenderer,
 } from './side_panel_nested_panels';
 
+export type {
+  SideNavItemActionMenuContext,
+  SideNavItemActionMenuRenderProps,
+  SideNavItemActionMenuRenderer,
+} from './side_nav_item_action_menus';
+
 export {
   getSidePanelNestedPanelRenderer,
   registerSidePanelNestedPanelRenderer,
   renderSidePanelNestedPanel,
   subscribeSidePanelNestedPanelRenderers,
 } from './side_panel_nested_panels';
+
+export {
+  getSideNavItemActionMenuRenderer,
+  registerSideNavItemActionMenuRenderer,
+  renderSideNavItemActionMenu,
+  subscribeSideNavItemActionMenuRenderers,
+} from './side_nav_item_action_menus';
 
 export type {
   SidebarApp,

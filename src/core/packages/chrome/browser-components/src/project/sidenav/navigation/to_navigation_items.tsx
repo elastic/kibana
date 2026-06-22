@@ -212,6 +212,10 @@ export const toNavigationItems = (
         'aria-label': action.ariaLabel,
         'data-test-subj': getTestSubj(child, [`item-action-${action.id}`]),
         ...(action.opensNestedPanel ? { opensNestedPanel: action.opensNestedPanel } : {}),
+        ...(action.opensItemActionMenu ? { opensItemActionMenu: action.opensItemActionMenu } : {}),
+        ...(action.itemActionMenuContext
+          ? { itemActionMenuContext: action.itemActionMenuContext }
+          : {}),
       }));
 
       return {

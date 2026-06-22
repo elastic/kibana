@@ -55,12 +55,39 @@ const createDashboardHrefGetIsActive = (href: string): NodeDefinition['getIsActi
   return ({ pathNameSerialized }) => pathNameSerialized.startsWith(pathWithHash);
 };
 
-const createDashboardPanelItem = (item: DashboardNavigationPanelItem): NodeDefinition => ({
-  id: item.id,
-  title: item.title,
-  href: item.href,
-  getIsActive: createDashboardHrefGetIsActive(item.href),
-});
+const DASHBOARDS_ITEM_ACTION_MENU_ID = 'dashboards_item_actions';
+
+const getDashboardIdFromNavItemId = (navItemId: string): string =>
+  navItemId.replace(/^(recent|starred)_/, '');
+
+const createDashboardPanelItem = (
+  item: DashboardNavigationPanelItem,
+  section: 'recent' | 'starred'
+): NodeDefinition => {
+  const dashboardId = getDashboardIdFromNavItemId(item.id);
+
+  return {
+    id: item.id,
+    title: item.title,
+    href: item.href,
+    getIsActive: createDashboardHrefGetIsActive(item.href),
+    itemActions: [
+      {
+        id: `dashboards_item_actions_${item.id}`,
+        iconType: 'ellipsis',
+        ariaLabel: i18n.translate('dashboard.nav.dashboardItemActions', {
+          defaultMessage: 'Dashboard actions',
+        }),
+        opensItemActionMenu: DASHBOARDS_ITEM_ACTION_MENU_ID,
+        itemActionMenuContext: {
+          dashboardId,
+          section,
+          title: item.title,
+        },
+      },
+    ],
+  };
+};
 
 export const createDashboardsNavigationNode = (
   options: DashboardsNavigationNodeOptions = {}
@@ -103,7 +130,7 @@ export const createDashboardsNavigationNode = (
         defaultMessage: 'Dashboards you starred',
       }),
     },
-    children: options.starredDashboards?.map(createDashboardPanelItem) ?? [],
+    children: options.starredDashboards?.map((item) => createDashboardPanelItem(item, 'starred')) ?? [],
   });
 
   children.push({
@@ -118,7 +145,7 @@ export const createDashboardsNavigationNode = (
         defaultMessage: 'Dashboards you recently visited',
       }),
     },
-    children: options.recentDashboards?.map(createDashboardPanelItem) ?? [],
+    children: options.recentDashboards?.map((item) => createDashboardPanelItem(item, 'recent')) ?? [],
   });
 
   return {

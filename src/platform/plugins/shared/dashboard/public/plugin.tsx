@@ -70,10 +70,14 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
-import { registerSidePanelNestedPanelRenderer } from '@kbn/core-chrome-browser';
+import { registerSidePanelNestedPanelRenderer, registerSideNavItemActionMenuRenderer } from '@kbn/core-chrome-browser';
 import React from 'react';
 import { getDashboardsNavigationNode$ } from './dashboard_navigation/get_dashboards_navigation_node';
 import { DashboardSearchPanel } from './dashboard_navigation/dashboard_search_panel';
+import {
+  DASHBOARDS_ITEM_ACTION_MENU_ID,
+  DashboardItemActionMenu,
+} from './dashboard_navigation/dashboard_item_action_menu';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
@@ -419,6 +423,10 @@ export class DashboardPlugin
 
     registerSidePanelNestedPanelRenderer('dashboards_search', (props) => (
       <DashboardSearchPanel {...props} />
+    ));
+
+    registerSideNavItemActionMenuRenderer(DASHBOARDS_ITEM_ACTION_MENU_ID, (props) => (
+      <DashboardItemActionMenu {...props} />
     ));
 
     return {
