@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ComposeDiscoverAction, ComposeDiscoverState, RecoveryType } from '../types';
 import type { RuleBuilderRecoveryProps } from '../rule_builder/types';
-import type { ComposeFormValues } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
 import { QuerySummary } from '../query_summary';
 import { RecoveryDelayField } from '../../../form/fields/recovery_delay_field';
 
@@ -116,7 +116,7 @@ export function RecoveryConditionStep({
   onRecoveryTypeChange,
   renderBuilderRecovery,
 }: RecoveryConditionStepProps) {
-  const query = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
+  const query = useWatch<FormValues, 'query'>({ name: 'query' });
   const baseQuery = query?.format === 'composed' ? query.base : '';
   const recoveryBlock = query?.format === 'composed' ? query.recovery?.segment ?? '' : '';
 

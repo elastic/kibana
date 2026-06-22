@@ -12,13 +12,12 @@ import {
   splitArtifactsByType,
 } from '../../form/utils/artifact_mappers';
 import type { FormValues } from '../../form/types';
-import type { ComposeFormValues } from './compose_form_types';
 
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
 const DELAY_DURATION = 'duration';
 
-const mapStateTransition = (formValues: ComposeFormValues) => {
+const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
   if (kind !== 'alert') return undefined;
 
@@ -56,7 +55,7 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
  * inferred from presence of the recovery block and set as a top-level field
  * in `composeFormToCreateRequest`.
  */
-const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
+const composeQueryToApiQuery = (q: FormValues['query']): Query => {
   if (q.format === 'composed') {
     return {
       format: 'composed',
@@ -73,7 +72,7 @@ const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
 };
 
 export const composeFormToCreateRequest = (
-  formValues: ComposeFormValues,
+  formValues: FormValues,
   builderType?: string
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
@@ -101,7 +100,7 @@ export const composeFormToCreateRequest = (
 };
 
 export const composeFormToUpdateRequest = (
-  formValues: ComposeFormValues,
+  formValues: FormValues,
   builderType?: string
 ): UpdateRuleData => {
   const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
@@ -119,7 +118,7 @@ export const composeFormToUpdateRequest = (
 };
 
 // ---------------------------------------------------------------------------
-// API response → ComposeFormValues
+// API response → FormValues
 // ---------------------------------------------------------------------------
 
 /**
@@ -130,7 +129,7 @@ export const composeFormToUpdateRequest = (
 const apiQueryToRuleQuery = (
   q: RuleResponse['query'],
   recoveryStrategy?: RuleResponse['recovery_strategy']
-): ComposeFormValues['query'] => {
+): FormValues['query'] => {
   if (q.format === 'composed') {
     return {
       format: 'composed',
@@ -151,29 +150,29 @@ const apiQueryToRuleQuery = (
 };
 
 const deriveAlertDelayMode = (
-  st?: ComposeFormValues['stateTransition']
-): ComposeFormValues['stateTransitionAlertDelayMode'] => {
+  st?: FormValues['stateTransition']
+): FormValues['stateTransitionAlertDelayMode'] => {
   if (st?.pendingTimeframe != null) return DELAY_DURATION;
   if (st?.pendingCount != null && st.pendingCount > 0) return DELAY_BREACHES;
   return DELAY_IMMEDIATE;
 };
 
 const deriveRecoveryDelayMode = (
-  st?: ComposeFormValues['stateTransition']
-): ComposeFormValues['stateTransitionRecoveryDelayMode'] => {
+  st?: FormValues['stateTransition']
+): FormValues['stateTransitionRecoveryDelayMode'] => {
   if (st?.recoveringTimeframe != null) return DELAY_DURATION;
   if (st?.recoveringCount != null && st.recoveringCount > 0) return 'recoveries';
   return DELAY_IMMEDIATE;
 };
 
 /** Bridge YAML parse output into compose form values for the Discover flyout. */
-export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): ComposeFormValues => ({
+export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): FormValues => ({
   ...parsed,
   ...splitArtifactsByType(parsed.artifacts),
 });
 
-export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValues => {
-  const stateTransition: ComposeFormValues['stateTransition'] = rule.state_transition
+export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
+  const stateTransition: FormValues['stateTransition'] = rule.state_transition
     ? {
         pendingCount: rule.state_transition.pending_count ?? null,
         pendingTimeframe: rule.state_transition.pending_timeframe ?? null,

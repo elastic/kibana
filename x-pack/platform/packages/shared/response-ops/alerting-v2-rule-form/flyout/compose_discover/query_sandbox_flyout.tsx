@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
-import type { RuleQuery } from './compose_form_types';
-import { getBreachQuery } from './compose_form_types';
+import type { RuleQuery } from '../../form/types';
+import { getBreachQuery } from '../../form/types';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';

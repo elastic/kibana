@@ -11,7 +11,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createInitialState } from './use_compose_discover_state';
 import type { ComposeDiscoverState, StepDefinition } from './types';
-import type { ComposeFormValues } from './compose_form_types';
+import type { FormValues } from '../../form/types';
 import { ComposeDiscoverFooter, type ComposeDiscoverFooterProps } from './compose_discover_footer';
 
 const ALERT_CONDITION_STEP: StepDefinition = {
@@ -35,10 +35,10 @@ const Wrapper = ({
   formValues,
   children,
 }: {
-  formValues: Partial<ComposeFormValues>;
+  formValues: Partial<FormValues>;
   children: React.ReactNode;
 }) => {
-  const defaults: ComposeFormValues = {
+  const defaults: FormValues = {
     kind: 'alert',
     metadata: { name: '', enabled: true },
     timeField: '@timestamp',
@@ -48,7 +48,7 @@ const Wrapper = ({
     stateTransitionRecoveryDelayMode: 'immediate',
     ...formValues,
   };
-  const form = useForm<ComposeFormValues>({ defaultValues: defaults });
+  const form = useForm<FormValues>({ defaultValues: defaults });
   return (
     <IntlProvider locale="en">
       <FormProvider {...form}>{children}</FormProvider>
@@ -62,7 +62,7 @@ const renderFooter = ({
   propsOverrides = {},
 }: {
   stateOverrides?: Partial<ComposeDiscoverState>;
-  formValues?: Partial<ComposeFormValues>;
+  formValues?: Partial<FormValues>;
   propsOverrides?: Partial<ComposeDiscoverFooterProps>;
 } = {}) => {
   const onNext = jest.fn();

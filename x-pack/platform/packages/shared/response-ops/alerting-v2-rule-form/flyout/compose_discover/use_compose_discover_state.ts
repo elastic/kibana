@@ -6,7 +6,7 @@
  */
 
 import { useReducer } from 'react';
-import type { RuleKind } from './compose_form_types';
+import type { RuleKind } from '../../form/types';
 import type {
   StepId,
   ComposeDiscoverState,

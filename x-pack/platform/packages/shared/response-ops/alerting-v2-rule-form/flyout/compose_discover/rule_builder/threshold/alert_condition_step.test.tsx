@@ -20,7 +20,7 @@ import {
   DEFAULT_THRESHOLD_FORM_VALUES,
   type ThresholdFormValues,
 } from './form_types';
-import type { ComposeFormValues } from '../../compose_form_types';
+import type { FormValues } from '../../../../form/types';
 import type { ComposeDiscoverState } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';
 
@@ -48,7 +48,7 @@ const makeBuilderState = (overrides: Partial<ThresholdFormValues> = {}): Thresho
   ...overrides,
 });
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
+const BASE_COMPOSE_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
@@ -72,7 +72,7 @@ const Wrapper: React.FC<{
   onBuilderStateChange: (s: ThresholdFormValues) => void;
   children: React.ReactNode;
 }> = ({ builderState, onBuilderStateChange, children }) => {
-  const form = useForm<ComposeFormValues>({ defaultValues: BASE_COMPOSE_VALUES });
+  const form = useForm<FormValues>({ defaultValues: BASE_COMPOSE_VALUES });
   const queryClient = createTestQueryClient();
   const services = createMockServices();
 
@@ -101,17 +101,17 @@ const renderStep = ({
 }: {
   builderState?: ThresholdFormValues;
   stateOverrides?: Partial<ComposeDiscoverState>;
-  formValueOverrides?: Partial<ComposeFormValues>;
+  formValueOverrides?: Partial<FormValues>;
 } = {}) => {
   const state = createState(stateOverrides);
   const dispatch = jest.fn();
   const services = createMockServices();
   const setBuilderState = jest.fn();
   const queryClient = createTestQueryClient();
-  const defaultValues: ComposeFormValues = { ...BASE_COMPOSE_VALUES, ...formValueOverrides };
+  const defaultValues: FormValues = { ...BASE_COMPOSE_VALUES, ...formValueOverrides };
 
   const StepWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const form = useForm<ComposeFormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues });
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>

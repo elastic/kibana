@@ -17,8 +17,8 @@ import type {
   StepRenderProps,
 } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
-import type { ComposeFormValues } from '../compose_form_types';
-import { getBreachQuery } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
+import { getBreachQuery } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { isActionValid } from '../../../actions_form';
@@ -166,7 +166,7 @@ export const ComposeDiscoverForm = ({
   ruleId,
   builderType,
 }: Props) => {
-  const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const { steps, renderBuilderRecovery } = getSteps(isAlert, builderType);
 
   return steps[state.step].render({

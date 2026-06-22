@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
-import type { ComposeFormValues } from './compose_form_types';
+import type { FormValues } from '../../form/types';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
@@ -88,8 +88,8 @@ export const ComposeDiscoverFooter = ({
   onRequestClose,
   closeSourceRef,
 }: ComposeDiscoverFooterProps): React.ReactElement => {
-  const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const watchedQuery = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
+  const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const watchedQuery = useWatch<FormValues, 'query'>({ name: 'query' });
 
   const isConditionStep =
     currentStep?.id === 'alertCondition' || currentStep?.id === 'builderCondition';
