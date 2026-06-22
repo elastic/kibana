@@ -1911,5 +1911,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           title,
         },
       }),
+    'euiFlyoutMenu.pagination.previous': i18n.translate('core.euiFlyoutMenu.pagination.previous', {
+      defaultMessage: 'Previous',
+    }),
+    'euiFlyoutMenu.pagination.next': i18n.translate('core.euiFlyoutMenu.pagination.next', {
+      defaultMessage: 'Next',
+    }),
+    'euiFlyoutMenu.pagination.counter': ({ position, total }: EuiValues) =>
+      i18n.translate('core.euiFlyoutMenu.pagination.counter', {
+        defaultMessage: '{position} of {total}',
+        values: { position, total },
+      }),
   };
 };
