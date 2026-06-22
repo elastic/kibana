@@ -10,7 +10,6 @@ import {
   STREAMS_STATE_ERROR_EVENT,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
-  STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
   STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
   STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
@@ -18,13 +17,13 @@ import {
   STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  STREAMS_ONBOARDING_SCHEDULED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
-  streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
@@ -32,6 +31,7 @@ import {
   streamsAgentToolEventCreateSchema,
   streamsAgentToolEventStatusUpdateSchema,
   streamsSignificantEventsDiscoveryTriggeredSchema,
+  streamsOnboardingScheduledSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -52,11 +52,6 @@ const streamsSignificantEventsGeneratedEventType = {
   eventType: STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
   schema: streamsSignificantEventsQueriesGeneratedSchema,
 };
-const streamsInsightsGeneratedEventType = {
-  eventType: STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
-  schema: streamsInsightsGeneratedSchema,
-};
-
 const streamsProcessingPipelineSuggestedEventType = {
   eventType: STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
   schema: streamsProcessingPipelineSuggestedSchema,
@@ -92,12 +87,16 @@ const streamsSignificantEventsDiscoveryTriggeredEventType = {
   schema: streamsSignificantEventsDiscoveryTriggeredSchema,
 };
 
+const streamsOnboardingScheduledEventType = {
+  eventType: STREAMS_ONBOARDING_SCHEDULED_EVENT_TYPE,
+  schema: streamsOnboardingScheduledSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
   streamsDescriptionGeneratedEventType,
   streamsSignificantEventsGeneratedEventType,
-  streamsInsightsGeneratedEventType,
   streamsProcessingPipelineSuggestedEventType,
   streamsFeaturesIdentifiedEventType,
   streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
@@ -105,4 +104,5 @@ export {
   streamsAgentToolEventCreateEventType,
   streamsAgentToolEventStatusUpdateEventType,
   streamsSignificantEventsDiscoveryTriggeredEventType,
+  streamsOnboardingScheduledEventType,
 };
