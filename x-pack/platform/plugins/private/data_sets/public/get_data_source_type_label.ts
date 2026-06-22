@@ -19,7 +19,4 @@ const messages: Record<DataSourceType, string> = {
   s3: 'Amazon S3',
   gcs: 'Google Cloud Storage',
   azure: 'Azure',
-  iceberg: 'Apache Iceberg',
-  jdbc: 'JDBC',
-  flight: 'Apache Arrow Flight',
 };

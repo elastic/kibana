@@ -20,10 +20,6 @@ import { useController } from 'react-hook-form';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
-import {
-  DATASET_FORMAT_AUTOMATIC,
-  showsDatasetFileSettings,
-} from './create_dataset_flyout_form_state';
 
 export function CreateDatasetFlyoutSettings({
   control,
@@ -33,39 +29,6 @@ export function CreateDatasetFlyoutSettings({
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const contentId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutOptionalSettings' });
-  const { field: formatField } = useController({
-    name: 'settings.format',
-    control,
-  });
-
-  const format = formatField.value;
-  const showFileSettings = showsDatasetFileSettings(format);
-
-  const formatOptions = useMemo(
-    () => [
-      {
-        value: DATASET_FORMAT_AUTOMATIC,
-        text: createDatasetFlyoutStrings.settingsFormatAutomatic(),
-      },
-      {
-        value: 'parquet',
-        text: createDatasetFlyoutStrings.settingsFormatParquet(),
-      },
-      {
-        value: 'csv',
-        text: createDatasetFlyoutStrings.settingsFormatCsv(),
-      },
-      {
-        value: 'ndjson',
-        text: createDatasetFlyoutStrings.settingsFormatNdjson(),
-      },
-      {
-        value: 'orc',
-        text: createDatasetFlyoutStrings.settingsFormatOrc(),
-      },
-    ],
-    []
-  );
 
   return (
     <>

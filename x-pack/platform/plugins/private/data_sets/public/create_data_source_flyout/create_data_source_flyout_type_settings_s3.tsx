@@ -97,7 +97,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
     control,
     rules: areCredentialsRequired
       ? {
-          validate: (value: string) =>
+          validate: (value?: string) =>
             value?.trim()
               ? true
               : i18n.translate('dataSets.createFlyout.s3.fields.accessKeyRequired', {
@@ -111,7 +111,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
     control,
     rules: areCredentialsRequired
       ? {
-          validate: (value: string) =>
+          validate: (value?: string) =>
             value?.trim()
               ? true
               : i18n.translate('dataSets.createFlyout.s3.fields.secretKeyRequired', {
