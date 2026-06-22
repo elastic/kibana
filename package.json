@@ -104,7 +104,7 @@
     "**/socket.io-parser": "4.2.6",
     "**/typescript": "5.9.3",
     "**/util": "0.12.5",
-    "**/yauzl": "3.2.1",
+    "**/yauzl": "3.4.0",
     "**/zod": "4.4.3",
     "@aws-sdk/client-bedrock-agent-runtime": "3.994.0",
     "@aws-sdk/client-bedrock-runtime": "3.994.0",
@@ -1584,7 +1584,7 @@
     "xstate": "5.26.0",
     "xterm": "5.3.0",
     "yaml": "2.8.3",
-    "yauzl": "3.2.1",
+    "yauzl": "3.4.0",
     "yazl": "3.3.1",
     "zod": "4.4.3",
     "zod-to-json-schema": "3.25.0"
