@@ -53,6 +53,7 @@ describe('managed workflows', () => {
       autoCloseConfidenceScoreMinThreshold: 0.8,
       autoCloseConfidenceScoreMaxThreshold: 0.95,
       connectorId: '',
+      createConversation: true,
     };
 
     await installSecurityAlertValidationWorkflow({
