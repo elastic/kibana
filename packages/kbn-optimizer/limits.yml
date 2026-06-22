@@ -1,11 +1,11 @@
 pageLoadAssetSize:
   actions: 20500
   advancedSettings: 6196
-  agentBuilder: 58540
+  agentBuilder: 65830
   agentBuilderDashboards: 7786
   agentBuilderPlatform: 15544
   agentBuilderWorkflows: 24405
-  agentContextLayer: 1883
+  agentContextLayer: 7773
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -17,7 +17,7 @@ pageLoadAssetSize:
   canvas: 14881
   cases: 213452
   charts: 40269
-  cloud: 10648
+  cloud: 11743
   cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 29547
+  esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6117
@@ -64,7 +64,7 @@ pageLoadAssetSize:
   eventAnnotationListing: 13164
   exploratoryView: 45042
   expressionGauge: 15748
-  expressionHeatmap: 17563
+  expressionHeatmap: 20303
   expressionLegacyMetricVis: 11834
   expressionMetricVis: 18100
   expressionPartitionVis: 29826
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   logstash: 15882
   maintenanceWindows: 8775
   management: 14304
-  maps: 45917
+  maps: 36281
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 99842
@@ -125,6 +125,7 @@ pageLoadAssetSize:
   navigation: 11814
   newsfeed: 11110
   noDataPage: 1749
+  notificationCenter: 1791
   observability: 107797
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
@@ -166,8 +167,8 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79627
   securitySolution: 171101
-  securitySolutionEss: 38689
-  securitySolutionServerless: 52082
+  securitySolutionEss: 42592
+  securitySolutionServerless: 57290
   serverless: 7412
   serverlessObservability: 21437
   serverlessSearch: 26287
@@ -181,7 +182,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 32595
-  streamsApp: 29825
+  streamsApp: 340704
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -205,8 +206,8 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 20000
-  visTypeVega: 38538
+  visTypeTimeseries: 21819
+  visTypeVega: 11562
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizationListing: 5148
