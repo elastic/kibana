@@ -81,11 +81,11 @@ export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetails
 
   const onComplete = useCallback((cloudTopicId: OnboardingTopicId | null) => {
     if (cloudTopicId && config.has(cloudTopicId)) {
-  if (cloudTopicId === OnboardingTopicId.siemMigrations) {
-     navigateToDetail(cloudTopicId);
-     } else {
-     setTopic(cloudTopicId);
-   }
+      if (cloudTopicId === OnboardingTopicId.siemMigrations) {
+        navigateToDetail(cloudTopicId);
+      } else {
+        setTopic(cloudTopicId);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
