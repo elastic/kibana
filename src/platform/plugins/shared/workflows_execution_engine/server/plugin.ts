@@ -1344,15 +1344,10 @@ export class WorkflowsExecutionEnginePlugin
       },
     };
 
-    domainEventBus.subscribe(WORKFLOW_TERMINATED_EVENT_TYPE, (event) => {
-      if (event.payload.status === 'failed') {
-        triggerEventHandler.handleEvent({
-          triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
-          payload: omit(event.payload, 'status'),
-          request: event.request,
-        });
-      }
-    });
+    /**
+     * Subscribe to all domain events and handle them with the trigger event handler.
+     */
+    domainEventBus.subscribeAll((event) => triggerEventHandler.handleDomainEvent(event));
 
     return {
       workflowEventLoggerService,

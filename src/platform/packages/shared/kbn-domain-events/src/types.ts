@@ -24,4 +24,9 @@ export interface DomainEventBus {
     type: T,
     handler: (event: DomainEvent<T>) => void | Promise<void>
   ): () => void;
+  /**
+   * Subscribe to every event published on the bus.
+   * Handlers use the same async dispatch and error isolation as {@link subscribe}.
+   */
+  subscribeAll(handler: (event: DomainEvent) => void | Promise<void>): () => void;
 }

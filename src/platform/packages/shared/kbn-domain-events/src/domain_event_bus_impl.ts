@@ -12,6 +12,7 @@ import type { DomainEvent, DomainEventBus } from './types';
 import type { DomainEventType } from '../events';
 
 const ASYNC_RESOURCE_NAME = 'DomainEventBus';
+const ALL_EVENTS_CHANNEL = '__domain_event_bus_all__';
 
 type DomainEventHandler = (event: DomainEvent) => void | Promise<void>;
 
@@ -31,26 +32,22 @@ export class DomainEventBusImpl implements DomainEventBus {
       return;
     }
 
-    this.#emitter.emit(event.type, event);
+    this.#emitter.emit(ALL_EVENTS_CHANNEL, event);
   }
 
-  public subscribe<T extends DomainEventType>(
-    type: T,
-    handler: (event: DomainEvent<T>) => void | Promise<void>
-  ): () => void {
+  public subscribeAll(handler: DomainEventHandler): () => void {
     const wrapped: DomainEventHandler = (event) => {
       setImmediate(async () => {
         try {
-          await handler(event as DomainEvent<T>);
+          await handler(event);
         } catch {
           // Handler failures are isolated; siblings continue running.
         }
       });
     };
 
-    this.#emitter.on(type, wrapped);
+    this.#emitter.on(ALL_EVENTS_CHANNEL, wrapped);
 
-    // Unsubscribe is idempotent: calling it more than once removes the listener once.
     let active = true;
 
     return () => {
@@ -59,8 +56,21 @@ export class DomainEventBusImpl implements DomainEventBus {
       }
 
       active = false;
-      this.#emitter.off(type, wrapped);
+      this.#emitter.off(ALL_EVENTS_CHANNEL, wrapped);
     };
+  }
+
+  public subscribe<T extends DomainEventType>(
+    type: T,
+    handler: (event: DomainEvent<T>) => void | Promise<void>
+  ): () => void {
+    return this.subscribeAll((event) => {
+      if (event.type !== type) {
+        return;
+      }
+
+      return handler(event as DomainEvent<T>);
+    });
   }
 }
 

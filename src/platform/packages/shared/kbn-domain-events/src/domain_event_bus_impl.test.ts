@@ -185,6 +185,82 @@ describe('DomainEventBusImpl', () => {
     });
   });
 
+  describe('subscribeAll', () => {
+    it('invokes the handler for every published event type', async () => {
+      const handler = jest.fn();
+      bus.subscribeAll(handler);
+
+      const foo = fooEvent();
+      const bar = barEvent('run-all');
+      bus.publish(foo);
+      bus.publish(bar);
+
+      await flushAsync();
+
+      expect(handler).toHaveBeenCalledTimes(2);
+      expect(handler).toHaveBeenNthCalledWith(1, foo);
+      expect(handler).toHaveBeenNthCalledWith(2, bar);
+    });
+
+    it('dispatches handlers asynchronously so publish() returns before handlers run', async () => {
+      let handlerRan = false;
+      bus.subscribeAll(() => {
+        handlerRan = true;
+      });
+
+      bus.publish(fooEvent());
+
+      expect(handlerRan).toBe(false);
+
+      await flushAsync();
+
+      expect(handlerRan).toBe(true);
+    });
+
+    it('does not invoke handlers after unsubscribe()', async () => {
+      const handler = jest.fn();
+      const unsubscribe = bus.subscribeAll(handler);
+
+      bus.publish(fooEvent());
+      await flushAsync();
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      unsubscribe();
+      bus.publish(fooEvent());
+      await flushAsync();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not receive invalid published events', async () => {
+      const handler = jest.fn();
+      bus.subscribeAll(handler);
+
+      bus.publish(null as unknown as FooEvent);
+      bus.publish({ type: 123 } as unknown as FooEvent);
+
+      await flushAsync();
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('continues invoking siblings when a handler throws', async () => {
+      const failing = jest.fn(() => {
+        throw new Error('boom');
+      });
+      const succeeding = jest.fn();
+      bus.subscribeAll(failing);
+      bus.subscribeAll(succeeding);
+
+      bus.publish(fooEvent());
+
+      await flushAsync();
+
+      expect(failing).toHaveBeenCalledTimes(1);
+      expect(succeeding).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('unsubscribe', () => {
     it('stops invoking the handler after unsubscribe()', async () => {
       const handler = jest.fn();
