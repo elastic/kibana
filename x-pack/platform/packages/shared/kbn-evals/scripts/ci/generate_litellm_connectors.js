@@ -18,6 +18,8 @@
  * Auth: LiteLLM *virtual key* (sk-...) via Authorization Bearer.
  */
 
+const { slugifyId } = require('./slugify_id');
+
 function parseArgs(argv, { defaults = {} } = {}) {
   const out = { ...defaults };
   const rest = [];
@@ -64,14 +66,6 @@ function die(message) {
 
 function getArg(argv, name, envName) {
   return argv[name] || (envName ? process.env[envName] : undefined);
-}
-
-function sanitizeId(value) {
-  return String(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
 }
 
 /** Model name returned by /team/info when a team has unrestricted access to all proxy models. */
@@ -348,7 +342,7 @@ async function main() {
       continue;
     }
 
-    const connectorId = `litellm-${sanitizeId(fullModel)}`;
+    const connectorId = `litellm-${slugifyId(fullModel)}`;
     // Temporary normalization: LiteLLM can expose a *public model name* (aka a "model group")
     // like `llm-gateway/gpt-5.2-chat`, while internally routing that group to a provider-specific
     // model name (e.g. `gpt-5.2-chat-latest` as shown in the LiteLLM UI).

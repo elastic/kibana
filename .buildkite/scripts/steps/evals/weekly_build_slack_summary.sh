@@ -60,8 +60,6 @@ mapfile -t suite_ids < <(printf '%s\n' "${suite_ids[@]}" | sort -u)
 KIBANA_DIR="${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
 suites_config="${KIBANA_DIR}/.buildkite/pipelines/evals/evals.suites.json"
 
-# Build a JSON context for the condensed Slack summary builder. jq keeps multi-line
-# triage bodies and arbitrary characters safe; bash string building would not.
 suites_json='[]'
 annotation_file="$(mktemp -t kbn-evals-weekly-annotation.XXXXXX.md)"
 {
@@ -153,8 +151,9 @@ jq -n \
 slack_body_file="$(mktemp -t kbn-evals-weekly-slack.XXXXXX.md)"
 
 echo "--- Building condensed weekly Slack summary (executive model summary + by-suite)"
-if node "${KIBANA_DIR}/x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_weekly_slack_summary.js" \
-  "$context_file" "$slack_body_file"; then
+if EVAL_WEEKLY_CONTEXT_PATH="$context_file" \
+  EVAL_WEEKLY_SUMMARY_PATH="$slack_body_file" \
+  node "${KIBANA_DIR}/x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_weekly_slack_summary.js"; then
   slack_body="$(cat "$slack_body_file")"
 else
   echo "--- Condensed weekly summary builder failed; falling back to full annotation body"
@@ -172,8 +171,6 @@ fi
 
 buildkite-agent annotate --context 'kbn-evals-weekly-failures' --style 'error' "$annotation_body" || true
 
-# Slack messages are truncated past 40,000 chars (split past ~4,000); the builder
-# already targets a small condensed body, this is a final safety cap.
 if [[ "${#slack_body}" -gt 38000 ]]; then
   slack_body="${slack_body:0:38000}
 

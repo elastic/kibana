@@ -9,11 +9,13 @@
 const { readFileSync } = require('fs');
 const { stringify } = require('yaml');
 
-const summaryPath = process.argv[2] || process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
-const slackChannel = process.argv[3] || process.env.EVAL_SUITE_SLACK_CHANNEL || '';
+const summaryPath = process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
+const slackChannel = process.env.EVAL_SUITE_SLACK_CHANNEL || '';
 
 if (!summaryPath || !slackChannel) {
-  console.error('Usage: generate_suite_notify_pipeline.js <summary.md> <slackChannel>');
+  console.error(
+    'Usage: set EVAL_TRIAGE_SUMMARY_PATH (summary.md) and EVAL_SUITE_SLACK_CHANNEL (slack channel).'
+  );
   process.exit(1);
 }
 

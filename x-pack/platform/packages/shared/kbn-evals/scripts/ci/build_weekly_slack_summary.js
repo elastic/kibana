@@ -10,23 +10,18 @@ const { readFileSync, writeFileSync } = require('fs');
 const { extractSuiteRootCauseLine } = require('./failure_context_helpers');
 const { summarizeWeeklyFailures } = require('./summarize_weekly_failures_with_model');
 
-const contextPath = process.argv[2] || process.env.EVAL_WEEKLY_CONTEXT_PATH || '';
-const outputPath = process.argv[3] || process.env.EVAL_WEEKLY_SUMMARY_PATH || '';
+const contextPath = process.env.EVAL_WEEKLY_CONTEXT_PATH || '';
+const outputPath = process.env.EVAL_WEEKLY_SUMMARY_PATH || '';
 
 if (!contextPath || !outputPath) {
-  console.error('Usage: build_weekly_slack_summary.js <context.json> <output.md>');
+  console.error(
+    'Usage: set EVAL_WEEKLY_CONTEXT_PATH (context.json) and EVAL_WEEKLY_SUMMARY_PATH (output.md).'
+  );
   process.exit(1);
 }
 
 const MAX_SLACK_BODY_CHARS = Number(process.env.EVAL_WEEKLY_BODY_MAX_CHARS || '3500');
 
-/**
- * Render a clickable Slack channel link when a channel id is known, otherwise
- * fall back to the plain `#channel` mention (still informative, not a link).
- *
- * @param {{ slackChannel?: string; slackChannelId?: string }} suite
- * @returns {string}
- */
 function renderChannelLink(suite) {
   const channel = String(suite.slackChannel || '').trim();
   const channelId = String(suite.slackChannelId || '').trim();
@@ -39,30 +34,11 @@ function renderChannelLink(suite) {
   return channel;
 }
 
-/**
- * @param {string[]} failingProjects
- * @returns {string}
- */
-function renderFailingModels(failingProjects) {
-  if (!Array.isArray(failingProjects) || failingProjects.length === 0) {
-    return 'unknown models';
-  }
-  // Strip connector-id prefixes for readability (eis/, eis-, litellm-).
-  return failingProjects
-    .map((project) =>
-      String(project)
-        .replace(/^eis[/-]/, '')
-        .replace(/^litellm-/, '')
-    )
-    .join(', ');
-}
-
-/**
- * @param {{ suiteId: string; suiteName?: string; failingProjects?: string[]; jobUrl?: string; slackChannel?: string; slackChannelId?: string; triageBody?: string }} suite
- * @returns {string}
- */
 function renderSuiteLine(suite) {
-  const parts = [`\`${suite.suiteId}\``, renderFailingModels(suite.failingProjects || [])];
+  const parts = [
+    `\`${suite.suiteId}\``,
+    (suite.failingProjects || []).map((project) => String(project)).join(', '),
+  ];
 
   const rootCause = extractSuiteRootCauseLine(suite.triageBody);
   if (rootCause) {

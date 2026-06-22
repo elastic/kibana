@@ -10,11 +10,6 @@ const { buildWeeklyRollupUserPrompt, runTriageModel } = require('./failure_conte
 
 const maxOutputChars = Number(process.env.EVAL_WEEKLY_SUMMARY_MAX_CHARS || '900');
 
-/**
- * @param {Array<{ suiteId: string; suiteName?: string; failingProjects?: string[]; triageBody?: string }>} suites
- * @param {{ buildUrl?: string }} [meta]
- * @returns {Promise<{ summary: string; modelId: string }>}
- */
 async function summarizeWeeklyFailures(suites, meta = {}) {
   return runTriageModel(buildWeeklyRollupUserPrompt(suites, meta), { maxChars: maxOutputChars });
 }

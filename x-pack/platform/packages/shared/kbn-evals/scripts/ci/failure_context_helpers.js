@@ -6,7 +6,7 @@
  * 2.0.
  */
 
-const { suiteKeySafe } = require('./suite_key_safe');
+const { slugifyId } = require('./slugify_id');
 
 const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
@@ -17,20 +17,10 @@ const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-haiku-4-5';
 const TRIAGE_SYSTEM_PROMPT =
   'You are an SRE assistant triaging failed LLM evaluation CI runs. Be concise and factual, and base every statement on the provided context.';
 
-/**
- * @param {string} suiteId
- * @param {string} project
- * @returns {string}
- */
 function failureLogMetadataKey(suiteId, project) {
-  return `kbn-evals:suite-failure-log:${suiteKeySafe(suiteId)}:${suiteKeySafe(project)}`;
+  return `kbn-evals:suite-failure-log:${slugifyId(suiteId)}:${slugifyId(project)}`;
 }
 
-/**
- * @param {string | undefined | null} text
- * @param {number} maxChars
- * @returns {string}
- */
 function truncateText(text, maxChars) {
   const value = String(text ?? '');
   if (value.length <= maxChars) {
@@ -39,11 +29,6 @@ function truncateText(text, maxChars) {
   return value.slice(value.length - maxChars);
 }
 
-/**
- * @param {unknown} context
- * @param {number} [maxBytes]
- * @returns {string}
- */
 function truncateContextJson(context, maxBytes = MAX_CONTEXT_JSON_BYTES) {
   let serialized = JSON.stringify(context);
   if (Buffer.byteLength(serialized, 'utf8') <= maxBytes) {
@@ -67,11 +52,6 @@ function truncateContextJson(context, maxBytes = MAX_CONTEXT_JSON_BYTES) {
   return serialized.slice(0, maxBytes);
 }
 
-/**
- * @param {Record<string, unknown>} context
- * @param {{ suiteName: string; suiteId: string; buildUrl?: string; buildId?: string; failingProjects: string[] }} header
- * @returns {string}
- */
 function buildTriageUserPrompt(context, header) {
   const lines = [
     'Triage why this LLM evaluation suite failed in CI using only the run-log excerpts below.',
@@ -109,12 +89,6 @@ function buildTriageUserPrompt(context, header) {
 
 /**
  * Extract a short, single-line root-cause summary from a per-suite triage body.
- * The per-suite triage already leads with a one-line verdict, so we pull the
- * first meaningful bullet/sentence and strip Slack markdown noise.
- *
- * @param {string | undefined | null} triageBody
- * @param {number} [maxChars]
- * @returns {string}
  */
 function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
   const body = String(triageBody ?? '');
@@ -122,8 +96,6 @@ function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
     return '';
   }
 
-  // Prefer the first line after a "Triage summary" header, otherwise the first
-  // non-empty content line that is not the alert header or a metadata line.
   const rawLines = body.split('\n').map((line) => line.trim());
   const triageHeaderIndex = rawLines.findIndex((line) => /triage summary/i.test(line));
   const candidateLines = triageHeaderIndex >= 0 ? rawLines.slice(triageHeaderIndex + 1) : rawLines;
@@ -158,14 +130,7 @@ function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
 }
 
 /**
- * Build the user prompt for the weekly cross-suite executive summary. Input is
- * the set of failing suites with their per-suite triage bodies; output asks the
- * model for a short roll-up grouped by shared cause, flagging which suites can
- * be retried and which need a team to investigate.
- *
- * @param {Array<{ suiteId: string; suiteName?: string; failingProjects?: string[]; triageBody?: string }>} suites
- * @param {{ buildUrl?: string }} [meta]
- * @returns {string}
+ * Build the user prompt for the weekly cross-suite executive summary.
  */
 function buildWeeklyRollupUserPrompt(suites, meta = {}) {
   const lines = [
@@ -206,11 +171,6 @@ function buildWeeklyRollupUserPrompt(suites, meta = {}) {
   return lines.join('\n');
 }
 
-/**
- * @param {Record<string, unknown>} connector
- * @param {Array<{ role: string; content: string }>} messages
- * @returns {{ url: string; headers: Record<string, string>; body: Record<string, unknown> }}
- */
 function buildLitellmChatRequest(connector, messages) {
   const config = connector.config && typeof connector.config === 'object' ? connector.config : {};
   const secrets =
@@ -239,9 +199,6 @@ function buildLitellmChatRequest(connector, messages) {
   };
 }
 
-/**
- * @returns {Record<string, unknown> | null}
- */
 function parseVaultConfig() {
   const configB64 = process.env.KBN_EVALS_CONFIG_B64 || '';
   if (!configB64) {
@@ -258,9 +215,6 @@ function parseVaultConfig() {
 
 /**
  * Maps a LiteLLM connector id (e.g. litellm-llm-gateway-gpt-4o) to a LiteLLM model group name.
- *
- * @param {string} connectorId
- * @returns {string}
  */
 function connectorIdToLitellmModel(connectorId) {
   const stripped = String(connectorId).replace(/^litellm-/, '');
@@ -273,9 +227,6 @@ function connectorIdToLitellmModel(connectorId) {
 
 /**
  * Build a minimal LiteLLM connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
- *
- * @param {string} modelConnectorId
- * @returns {{ config: { apiUrl: string; defaultModel: string }; secrets: { apiKey: string } }}
  */
 function buildLitellmConnectorFromVault(modelConnectorId) {
   const config = parseVaultConfig();
@@ -307,8 +258,6 @@ function buildLitellmConnectorFromVault(modelConnectorId) {
 
 /**
  * Decode KIBANA_TESTING_AI_CONNECTORS (base64-encoded JSON in CI, raw JSON locally).
- *
- * @returns {Record<string, { config?: Record<string, unknown>; secrets?: Record<string, unknown> }>}
  */
 function decodeAiConnectors() {
   const raw = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
@@ -341,8 +290,6 @@ function decodeAiConnectors() {
 /**
  * Resolve the LiteLLM model used to generate Slack/GitHub triage text.
  * override with `EVAL_TRIAGE_MODEL_ID`.
- *
- * @returns {string}
  */
 function resolveTriageModelId() {
   return process.env.EVAL_TRIAGE_MODEL_ID || DEFAULT_TRIAGE_MODEL_ID;
@@ -367,9 +314,6 @@ function parseLitellmChatContent(responseJson) {
 
 /**
  * POST a built LiteLLM chat request and return the message content.
- *
- * @param {{ url: string; headers: Record<string, string>; body: Record<string, unknown> }} request
- * @returns {Promise<string>}
  */
 async function postLitellmChatRequest({ url, headers, body }) {
   const response = await fetch(url, {
@@ -406,8 +350,6 @@ async function postLitellmChatRequest({ url, headers, body }) {
  * Resolve the LiteLLM triage connector and its model id (shared by the text and
  * structured triage paths). Enforces the `litellm-` guard and falls back to the
  * vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
- *
- * @returns {{ connector: Record<string, unknown>; modelId: string }}
  */
 function resolveTriageConnector() {
   const modelId = resolveTriageModelId();
@@ -426,12 +368,7 @@ function resolveTriageConnector() {
 }
 
 /**
- * Parse the structured triage groups returned by the model. Tolerates an
- * optional ```json fenced wrapper, normalizes each group to a known shape, and
- * drops empty groups. Throws when the payload is not valid JSON.
- *
- * @param {string | undefined | null} rawText
- * @returns {Array<{ error: string; location: string; models: string[]; rootCause: string }>}
+ * Parse the structured triage groups returned by the model.
  */
 function parseTriageGroups(rawText) {
   const text = String(rawText ?? '').trim();
@@ -464,10 +401,6 @@ function parseTriageGroups(rawText) {
  * Resolve the LiteLLM connector, send the shared system prompt + the given user
  * prompt, and return the trimmed summary and the model id used. This is the
  * shared core behind the weekly text summary.
- *
- * @param {string} userPrompt
- * @param {{ maxChars?: number }} [options]
- * @returns {Promise<{ summary: string; modelId: string }>}
  */
 async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
   const { connector, modelId } = resolveTriageConnector();
@@ -489,9 +422,6 @@ async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
  * Resolve the LiteLLM connector, send the shared system prompt + the given user
  * prompt, and return the parsed structured triage groups and the model id used.
  * Used by the per-suite triage, which renders the message deterministically.
- *
- * @param {string} userPrompt
- * @returns {Promise<{ groups: Array<{ error: string; location: string; models: string[]; rootCause: string }>; modelId: string }>}
  */
 async function runTriageModelStructured(userPrompt) {
   const { connector, modelId } = resolveTriageConnector();

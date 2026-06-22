@@ -7,34 +7,23 @@
  */
 
 const { readFileSync, writeFileSync } = require('fs');
-const { fromRoot } = require('./repo_root');
+const { fromRoot } = require('@kbn/repo-info');
 const { resolveTriageModelId } = require('./failure_context_helpers');
 const { summarizeFailuresWithModel } = require('./summarize_failures_with_model');
 const { collectFailureContext } = require('./collect_failure_context');
 
-const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
-const failingProjectsArg = process.argv[3] || process.env.EVAL_FAILING_PROJECTS || '';
+const suiteId = process.env.EVAL_SUITE_ID || '';
+const failingProjectsArg = process.env.EVAL_FAILING_PROJECTS || '';
 
-// Output paths: write Slack-markdown and/or GitHub-markdown renderings of the
-// same triage. At least one must be provided.
+// Output paths: write Slack-markdown and/or GitHub-markdown
 const slackOutputPath = process.env.EVAL_TRIAGE_SLACK_OUT || '';
 const githubOutputPath = process.env.EVAL_TRIAGE_GITHUB_OUT || '';
-
-// Notification mode controls the header/intro so on-demand and weekly per-suite
-// messages read differently even though they share this builder.
-// - 'on-demand': ad-hoc verification triggered by a person.
-// - 'weekly': scheduled run alert for the owning team.
-function resolveNotifyMode() {
-  const explicit = (process.argv[4] || process.env.EVAL_NOTIFY_MODE || '').toLowerCase();
-  return explicit === 'on-demand' ? 'on-demand' : 'weekly';
-}
-
-const notifyMode = resolveNotifyMode();
+const notifyMode = process.env.EVAL_NOTIFY_MODE || '';
 
 if (!suiteId || !failingProjectsArg || (!slackOutputPath && !githubOutputPath)) {
   console.error(
-    'Usage: build_suite_owner_slack_message.js <suiteId> <comma-separated failing projects> [on-demand|weekly]\n' +
-      '  Set EVAL_TRIAGE_SLACK_OUT and/or EVAL_TRIAGE_GITHUB_OUT to choose output renderings.'
+    'Usage: set EVAL_SUITE_ID, EVAL_FAILING_PROJECTS (comma-separated), and at least one of\n' +
+      '  EVAL_TRIAGE_SLACK_OUT / EVAL_TRIAGE_GITHUB_OUT. Optional: EVAL_NOTIFY_MODE=on-demand|weekly.'
   );
   process.exit(1);
 }
@@ -59,21 +48,6 @@ const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
 const headerLabel = notifyMode === 'on-demand' ? 'On-demand LLM eval' : 'Weekly LLM evals';
 const headerEmoji = notifyMode === 'on-demand' ? ':test_tube:' : ':rotating_light:';
 
-/**
- * @typedef {{ error: string; location: string; models: string[]; rootCause: string }} TriageGroup
- * @typedef {{ modelId: string; groups?: TriageGroup[]; error?: string }} Triage
- */
-
-/**
- * Deterministically render the structured triage groups. The error log goes in a
- * fenced code block (plain ``` for Slack, ```sh for GitHub) and the location and
- * model ids render as inline `code`. Only the grouping and root cause come from
- * the model; all formatting is owned here.
- *
- * @param {Triage} triage
- * @param {string} openFence
- * @returns {string}
- */
 function renderTriageBody(triage, openFence) {
   if (triage.error) {
     return `_Triage summary could not be generated: ${triage.error}. See the suite owner notify Buildkite step for details._`;
@@ -148,21 +122,14 @@ function renderGithub(triage) {
   return `${lines.join('\n')}\n`;
 }
 
-/**
- * @param {unknown} error
- * @returns {string}
- */
 function formatTriageError(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
 async function main() {
-  const fallbackModelId = resolveTriageModelId() || 'unknown';
+  const triageModelId = resolveTriageModelId() || 'unknown';
 
-  // Single LLM call returns structured groups; both renderings format them
-  // deterministically for Slack and GitHub.
-  /** @type {Triage} */
-  let triage = { modelId: fallbackModelId, groups: [] };
+  let triage = { modelId: triageModelId, groups: [] };
   try {
     console.error('--- Collecting failure context for triage summary');
     const context = collectFailureContext({
@@ -173,13 +140,13 @@ async function main() {
       buildUrl,
     });
 
-    console.error(`--- Generating triage summary (model: ${fallbackModelId})`);
+    console.error(`--- Generating triage summary (model: ${triageModelId})`);
     const { groups, modelId } = await summarizeFailuresWithModel(context);
     triage = { modelId, groups };
   } catch (error) {
     const message = formatTriageError(error);
     console.error(`--- Triage summary failed: ${message}`);
-    triage = { modelId: fallbackModelId, error: message };
+    triage = { modelId: triageModelId, error: message };
   }
 
   if (slackOutputPath) {

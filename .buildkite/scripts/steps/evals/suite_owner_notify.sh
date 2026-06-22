@@ -33,8 +33,6 @@ fi
 
 suite_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
 
-# Notification mode controls the triage header. Weekly is the scheduled run; any
-# other context (on-demand, PR CI) reads as an on-demand-style verification.
 if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]]; then
   EVAL_NOTIFY_MODE="weekly"
 else
@@ -52,7 +50,7 @@ else
 fi
 
 # PR: comment when a PR number was resolved (run_suite.sh derives it from
-# GITHUB_PR_NUMBER / BUILDKITE_PULL_REQUEST / refs/pull/<N>/head).
+# GITHUB_PR_NUMBER, BUILDKITE_PULL_REQUEST, or refs/pull/<N>/head).
 pr_number="${EVAL_PR_NUMBER:-}"
 
 if [[ -z "${slack_channel}" && -z "${pr_number}" ]]; then
@@ -89,7 +87,6 @@ fi
 
 FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
-# Build the renderings we actually need (one LLM call inside the builder).
 if [[ -n "${slack_channel}" ]]; then
   SLACK_FILE="$(mktemp -t kbn-evals-triage-slack.XXXXXX.md)"
 fi
@@ -98,9 +95,12 @@ if [[ -n "${pr_number}" ]]; then
 fi
 
 echo "--- Building suite triage message(s)"
-if ! EVAL_TRIAGE_SLACK_OUT="${SLACK_FILE}" EVAL_TRIAGE_GITHUB_OUT="${GITHUB_FILE}" \
-  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner_slack_message.js \
-  "$EVAL_SUITE_ID" "$FAILING_PROJECTS_CSV" "$EVAL_NOTIFY_MODE"; then
+if ! EVAL_SUITE_ID="$EVAL_SUITE_ID" \
+  EVAL_FAILING_PROJECTS="$FAILING_PROJECTS_CSV" \
+  EVAL_NOTIFY_MODE="$EVAL_NOTIFY_MODE" \
+  EVAL_TRIAGE_SLACK_OUT="${SLACK_FILE}" \
+  EVAL_TRIAGE_GITHUB_OUT="${GITHUB_FILE}" \
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner_slack_message.js; then
   echo "--- build_suite_owner_slack_message crashed; writing static fallback summary"
   if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
     header_label="Weekly LLM evals"
@@ -113,7 +113,7 @@ if ! EVAL_TRIAGE_SLACK_OUT="${SLACK_FILE}" EVAL_TRIAGE_GITHUB_OUT="${GITHUB_FILE
       printf '*Failing models:*\n'
       for project in "${failing_projects[@]}"; do printf -- '- `%s`\n' "${project}"; done
       [[ -n "${BUILDKITE_BUILD_URL:-}" ]] && printf '\n<%s|View build>\n' "${BUILDKITE_BUILD_URL}"
-      printf '\n*Triage summary (model unavailable):*\n'
+      printf '\n*Triage summary:*\n'
       printf '_Suite owner message builder failed. See the suite owner notify Buildkite step for details._\n'
     } >"$SLACK_FILE"
   fi
@@ -123,17 +123,17 @@ if ! EVAL_TRIAGE_SLACK_OUT="${SLACK_FILE}" EVAL_TRIAGE_GITHUB_OUT="${GITHUB_FILE
       printf '**Failing models:**\n'
       for project in "${failing_projects[@]}"; do printf -- '- `%s`\n' "${project}"; done
       [[ -n "${BUILDKITE_BUILD_URL:-}" ]] && printf '\n[View build](%s)\n' "${BUILDKITE_BUILD_URL}"
-      printf '\n**Triage summary (model unavailable):**\n\n'
+      printf '\n**Triage summary:**\n\n'
       printf '_Suite owner message builder failed. See the suite owner notify Buildkite step for details._\n'
     } >"$GITHUB_FILE"
   fi
 fi
 
-# Record the Slack body for the weekly aggregate + annotate the build for the record.
-ANNOTATION_FILE="${SLACK_FILE:-${GITHUB_FILE}}"
 if [[ -n "${SLACK_FILE}" && -f "${SLACK_FILE}" ]]; then
   buildkite-agent meta-data set "kbn-evals:triage:${suite_key_safe}" "$(cat "$SLACK_FILE")" >/dev/null 2>&1 || true
 fi
+
+ANNOTATION_FILE="${SLACK_FILE:-${GITHUB_FILE}}"
 if [[ -n "${ANNOTATION_FILE}" && -f "${ANNOTATION_FILE}" ]]; then
   echo "--- Suite failure summary"
   cat "$ANNOTATION_FILE"
@@ -150,8 +150,10 @@ fi
 # --- Post to Slack --------------------------------------------------------
 if [[ -n "${slack_channel}" && -n "${SLACK_FILE}" && -f "${SLACK_FILE}" ]]; then
   NOTIFY_PIPELINE_FILE="$(mktemp -t kbn-evals-notify-pipeline.XXXXXX.yml)"
-  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_suite_notify_pipeline.js \
-    "$SLACK_FILE" "$slack_channel" >"$NOTIFY_PIPELINE_FILE"
+  EVAL_TRIAGE_SUMMARY_PATH="$SLACK_FILE" \
+    EVAL_SUITE_SLACK_CHANNEL="$slack_channel" \
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_suite_notify_pipeline.js \
+    >"$NOTIFY_PIPELINE_FILE"
 
   echo "--- Uploading suite owner Slack notify pipeline (channel: ${slack_channel})"
   cat "$NOTIFY_PIPELINE_FILE"

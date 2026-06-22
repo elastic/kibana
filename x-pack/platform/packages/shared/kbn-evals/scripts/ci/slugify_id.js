@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +5,8 @@
  * 2.0.
  */
 
-/**
- * @param {string} value
- * @returns {string}
- */
-function suiteKeySafe(value) {
+// Slugify an id into a safe token (lowercase; non-[a-z0-9_-] -> '-'; collapse runs of '-'; trim).
+function slugifyId(value) {
   return String(value)
     .toLowerCase()
     .replace(/[^a-z0-9_-]+/g, '-')
@@ -18,4 +14,4 @@ function suiteKeySafe(value) {
     .replace(/^-|-$/g, '');
 }
 
-module.exports = { suiteKeySafe };
+module.exports = { slugifyId };

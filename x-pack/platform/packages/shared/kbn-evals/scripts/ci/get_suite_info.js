@@ -7,7 +7,7 @@
  */
 
 const { readFileSync } = require('fs');
-const { fromRoot } = require('./repo_root');
+const { fromRoot } = require('@kbn/repo-info');
 
 const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
 if (!suiteId) {

@@ -13,10 +13,6 @@ const {
   truncateText,
 } = require('./failure_context_helpers');
 
-/**
- * @param {string} key
- * @returns {string}
- */
 function getMetadata(key) {
   try {
     const stdout = execFileSync('buildkite-agent', ['meta-data', 'get', key], {
@@ -36,7 +32,6 @@ function getMetadata(key) {
  * @returns {{ suiteId: string; suiteName: string; buildId?: string; buildUrl?: string; failingProjects: string[]; models: Record<string, { logExcerpt?: string }> }}
  */
 function collectFailureContext({ suiteId, suiteName, failingProjects, buildId, buildUrl }) {
-  /** @type {Record<string, { logExcerpt?: string }>} */
   const models = {};
 
   for (const project of failingProjects) {
