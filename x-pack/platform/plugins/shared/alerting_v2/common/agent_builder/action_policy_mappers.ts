@@ -17,9 +17,7 @@ export const attachmentDataToActionPolicyPayload = (
 ): CreateActionPolicyData => ({
   name: data.name ?? '',
   description: data.description ?? '',
-  type: data.type ?? 'global',
   destinations: data.destinations ?? [],
-  ...(data.ruleId !== undefined ? { ruleId: data.ruleId ?? undefined } : {}),
   ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
   ...(data.groupBy !== undefined ? { groupBy: data.groupBy ?? undefined } : {}),
   ...(data.tags !== undefined ? { tags: data.tags ?? undefined } : {}),

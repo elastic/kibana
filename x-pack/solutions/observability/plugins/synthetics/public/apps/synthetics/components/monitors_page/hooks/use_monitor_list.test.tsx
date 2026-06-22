@@ -49,6 +49,7 @@ describe('useMonitorList', () => {
       locations: [],
       monitorTypes: [],
       projects: [],
+      remoteNames: [],
       schedules: [],
       tags: [],
       useLogicalAndFor: [],
