@@ -41,26 +41,6 @@ export const buildTaskFakeRequest = ({
 
   if (userProfileId && enrichFakeRequest) {
     enrichFakeRequest(fakeRequest, userProfileId);
-    // eslint-disable-next-line no-console
-    console.log(
-      `[profile-id-debug] buildTaskFakeRequest: enriched fake request ${JSON.stringify({
-        userProfileId,
-        isFakeRequest: fakeRequest.isFakeRequest,
-        spaceId: fakeRequest.spaceId,
-      })}`
-    );
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(
-      `[profile-id-debug] buildTaskFakeRequest: built fake request WITHOUT enrichment ${JSON.stringify(
-        {
-          userProfileId,
-          enrichFakeRequestWired: !!enrichFakeRequest,
-          isFakeRequest: fakeRequest.isFakeRequest,
-          spaceId: fakeRequest.spaceId,
-        }
-      )}`
-    );
   }
 
   return fakeRequest;
