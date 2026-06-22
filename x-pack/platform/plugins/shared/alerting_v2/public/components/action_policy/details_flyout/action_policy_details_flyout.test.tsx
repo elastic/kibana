@@ -10,7 +10,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
+
+const ELASTIC_UID = 'elastic_uid';
+
+const mockBulkGet = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -22,6 +27,14 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'settings') {
       return {
         client: { get: () => 'YYYY-MM-DD HH:mm' },
+      };
+    }
+    if (token === 'userProfile') {
+      return { bulkGet: mockBulkGet };
+    }
+    if (token === 'http') {
+      return {
+        basePath: { prepend: (path: string) => `/base${path}` },
       };
     }
     return {};
@@ -63,14 +76,19 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
   auth: { owner: 'elastic', createdByUser: true },
-  createdBy: 'elastic_uid',
-  createdByUsername: 'elastic',
+  createdBy: ELASTIC_UID,
   createdAt: '2026-03-01T10:00:00.000Z',
-  updatedBy: 'elastic_uid',
-  updatedByUsername: 'elastic',
+  updatedBy: ELASTIC_UID,
   updatedAt: '2026-03-02T11:00:00.000Z',
   ...overrides,
 });
+
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
 
 interface RenderProps {
   policy?: ActionPolicyResponse;
@@ -100,15 +118,24 @@ const renderFlyout = (props: RenderProps = {}) => {
   };
 
   render(
-    <I18nProvider>
-      <ActionPolicyDetailsFlyout policy={policy} {...handlers} />
-    </I18nProvider>
+    <QueryClientProvider client={createQueryClient()}>
+      <I18nProvider>
+        <ActionPolicyDetailsFlyout policy={policy} {...handlers} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
   return { policy, handlers };
 };
 
 describe('ActionPolicyDetailsFlyout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockBulkGet.mockResolvedValue([
+      { uid: ELASTIC_UID, user: { username: 'elastic', full_name: 'Elastic User' } },
+    ]);
+  });
+
   describe('header', () => {
     it('renders the policy name and enabled state badge', () => {
       renderFlyout();
@@ -171,7 +198,7 @@ describe('ActionPolicyDetailsFlyout', () => {
         policy: createPolicy({
           groupingMode: 'per_episode',
           groupBy: null,
-          throttle: { strategy: 'on_status_change' },
+          throttle: { strategy: 'on_status_change', interval: null },
         }),
       });
 
@@ -185,10 +212,30 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('Workflow wf-2')).toBeInTheDocument();
     });
 
-    it('renders creator and updater usernames in the metadata section', () => {
+    it('resolves createdBy / updatedBy UIDs to user full names in the metadata section', async () => {
       renderFlyout();
 
-      expect(screen.getAllByText('elastic').length).toBeGreaterThan(0);
+      const elements = await screen.findAllByText('Elastic User');
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
+    });
+
+    it('falls back to the username when a profile has no full name', async () => {
+      mockBulkGet.mockResolvedValueOnce([{ uid: ELASTIC_UID, user: { username: 'elastic' } }]);
+      renderFlyout();
+
+      const elements = await screen.findAllByText('elastic');
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
+    });
+
+    it('falls back to the UID when no matching profile is returned', async () => {
+      mockBulkGet.mockResolvedValueOnce([]);
+      renderFlyout();
+
+      const elements = await screen.findAllByText(ELASTIC_UID);
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
     });
   });
 

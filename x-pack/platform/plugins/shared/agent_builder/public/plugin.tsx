@@ -59,6 +59,11 @@ import type {
   ConversationSidebarRef,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
+import type {
+  PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
+} from './types';
 import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -92,6 +97,7 @@ export class AgentBuilderPlugin
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
+  private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -108,6 +114,7 @@ export class AgentBuilderPlugin
 
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
     this.isEarsEnabled = deps.actions.isEarsEnabled;
+    this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
     registerApp({
       core,
@@ -233,6 +240,7 @@ export class AgentBuilderPlugin
       accessChecker,
       eventsService,
       isEarsEnabled: this.isEarsEnabled,
+      isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },
@@ -241,6 +249,55 @@ export class AgentBuilderPlugin
     this.internalServices = internalServices;
 
     setSidebarServices(core, internalServices);
+
+    const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
+      const { createEmbeddableConversation } = await import(
+        './embeddable/create_embeddable_conversation'
+      );
+
+      return {
+        default: createEmbeddableConversation({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
+    });
+
+    const PublicEmbeddableConversation: React.FC<PublicEmbeddableConversationProps> = ({
+      onClose,
+      ariaLabelledBy,
+      ...rest
+    }) => (
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversation
+          {...rest}
+          onClose={onClose}
+          ariaLabelledBy={ariaLabelledBy ?? 'agent-builder-embeddable-conversation'}
+        />
+      </React.Suspense>
+    );
+
+    const LazyConfiguredEmbeddableConversationInput = React.lazy(async () => {
+      const { createEmbeddableConversationInput } = await import(
+        './embeddable/create_embeddable_conversation_input'
+      );
+
+      return {
+        default: createEmbeddableConversationInput({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
+    });
+
+    const PublicEmbeddableConversationInput = React.forwardRef<
+      EmbeddableConversationInputRef,
+      PublicEmbeddableConversationInputProps
+    >((props, ref) => (
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversationInput {...props} ref={ref} />
+      </React.Suspense>
+    ));
 
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
@@ -296,6 +353,8 @@ export class AgentBuilderPlugin
       updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
+      EmbeddableConversation: PublicEmbeddableConversation,
+      EmbeddableConversationInput: PublicEmbeddableConversationInput,
     };
 
     if (hasAgentBuilder) {
@@ -335,6 +394,21 @@ export class AgentBuilderPlugin
         },
         // right before the user profile
         order: 1001,
+      });
+
+      // Chrome Next transition: also expose this control as an AI button so it renders in the
+      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+      // Remove the `registerRight` registration once Chrome Next is the only chrome.
+      // See https://github.com/elastic/kibana/issues/260010
+      core.chrome.next.aiButton.register({
+        content: (
+          <AgentBuilderNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            agentBuilderService={agentBuilderService}
+          />
+        ),
       });
     }
 

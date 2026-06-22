@@ -10,6 +10,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { buildWorkflowFilters } from '@kbn/workflows/server';
 
 import type { WorkflowSearchDeps } from './types';
 import { WorkflowSearchService } from './workflow_search_service';
@@ -102,7 +103,11 @@ describe('WorkflowSearchService', () => {
 
       const searchArgs = esClient.search.mock.calls[0][0] as any;
       const must = searchArgs.query.bool.must;
-      expect(must).toContainEqual({ term: { spaceId: 'my-space' } });
+      const expectedSpaceFilter = buildWorkflowFilters({
+        space: { id: 'my-space', includeGlobal: true },
+        deleted: 'not_deleted',
+      });
+      expect(must).toContainEqual(expectedSpaceFilter.must[0]);
       expect(must).toContainEqual({ term: { enabled: true } });
       expect(must).toContainEqual({ term: { triggerTypes: 'alert.trigger' } });
       expect(searchArgs.query.bool.must_not).toContainEqual({ exists: { field: 'deleted_at' } });
@@ -326,12 +331,62 @@ describe('WorkflowSearchService', () => {
         { label: 'First', key: 'First', doc_count: 2 },
         { label: 'Second', key: 'Second', doc_count: 1 },
       ]);
-      expect(result.enabled).toEqual([{ label: 'true', key: 1, doc_count: 3 }]);
+      expect(result.enabled).toEqual([{ label: 'true', key: 'true', doc_count: 3 }]);
 
       const requestedAggs = storageClient.search.mock.calls[0][0].aggs;
       // name → name.keyword, other fields pass through verbatim
       expect(requestedAggs.name.terms.field).toBe('name.keyword');
       expect(requestedAggs.enabled.terms.field).toBe('enabled');
+
+      const expectedDefaultFilter = buildWorkflowFilters({
+        space: { id: 'default', includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: 'unmanaged',
+      });
+      expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedDefaultFilter);
+    });
+
+    it('passes managed filter into the aggregation query', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ aggregations: {} });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflowAggs(['tags'], 'default', { managedFilter: 'all' });
+
+      const expectedFilter = buildWorkflowFilters({
+        space: { id: 'default', includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: 'all',
+      });
+      expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedFilter);
+    });
+
+    it('returns an empty response when the workflow index is missing', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception', reason: 'missing index' } },
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        })
+      );
+
+      const service = new WorkflowSearchService(deps);
+      const result = await service.getWorkflowAggs(['tags'], 'default');
+
+      expect(result).toEqual({});
+    });
+
+    it('returns an empty response when Elasticsearch omits aggregations', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({});
+
+      const service = new WorkflowSearchService(deps);
+      const result = await service.getWorkflowAggs(['enabled'], 'default');
+
+      expect(result).toEqual({});
     });
   });
 });

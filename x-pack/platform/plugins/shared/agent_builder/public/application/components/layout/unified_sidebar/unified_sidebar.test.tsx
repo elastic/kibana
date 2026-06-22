@@ -41,7 +41,7 @@ jest.mock('../../../hooks/use_conversation_list', () => ({
 
 jest.mock('../../../hooks/use_route_access_config', () => ({
   useRouteAccessConfig: () => ({
-    featureFlags: { experimental: false },
+    featureFlags: { experimental: false, uiamOAuthClientManagement: false },
     capabilities: { isUIAMEnabled: false },
   }),
 }));
@@ -55,8 +55,13 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
   default: () => [undefined, jest.fn()],
 }));
 
-jest.mock('../../../context/send_message/send_message_context', () => ({
-  useSendMessageContext: () => ({ removeAllErrors: jest.fn() }),
+jest.mock('../../../context/streaming/streaming_context', () => ({
+  useStreamingContext: () => ({
+    removeAllErrors: jest.fn(),
+    removeError: jest.fn(),
+    activeStreams: new Set(),
+    byConversationId: {},
+  }),
 }));
 
 import { UnifiedSidebar } from './unified_sidebar';

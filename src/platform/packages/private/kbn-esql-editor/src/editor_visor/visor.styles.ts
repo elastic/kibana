@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSizeFromScale } from '@elastic/eui';
+import { euiFontSizeFromScale, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { VisorMode } from './mode_selector';
 
@@ -26,7 +26,7 @@ export const visorStyles = (
   comboBoxWidth: number,
   isSpaceReduced: boolean,
   mode: VisorMode,
-  editorIsInline: boolean
+  isInline: boolean
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
@@ -45,7 +45,8 @@ export const visorStyles = (
     visorBox: css`
       border: 1px solid ${euiTheme.colors.borderBaseSubdued};
       border-radius: ${borderRadius};
-      ${editorIsInline ? 'flex-wrap: wrap;' : ''}
+      ${euiShadow(euiThemeContext, 'xs')}
+      ${isInline ? 'flex-wrap: wrap;' : ''}
     `,
     comboBoxWrapper: css`
       justify-content: center;
@@ -74,14 +75,14 @@ export const visorStyles = (
     searchWrapper: css`
       justify-content: center;
       padding-right: ${euiTheme.size.xs};
-      ${editorIsInline ? 'flex: 1 0 100%;' : ''}
+      ${isInline ? 'flex: 1 0 100%;' : ''}
       min-width: 0;
-      ${editorIsInline
+      ${isInline
         ? `border-top: 1px solid ${euiTheme.colors.borderBaseSubdued}; padding-right: 0;`
         : ''}
 
       .euiFormControlLayout--group {
-        border-radius: ${editorIsInline ? '0' : borderRadius};
+        border-radius: ${isInline ? '0' : borderRadius};
       }
       .euiFormControlLayout--group::after {
         border: none;
@@ -94,7 +95,7 @@ export const visorStyles = (
       }
 
       .kbnQueryBar__textarea {
-        border-radius: ${editorIsInline ? '0' : borderRadius} !important;
+        border-radius: ${isInline ? '0' : borderRadius} !important;
         font-size: ${fontSize} !important;
         padding-left: ${euiTheme.size.s} !important;
         padding-top: ${euiTheme.size.s} !important;

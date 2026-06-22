@@ -7,6 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import pMap from 'p-map';
+import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import apm from 'elastic-apm-node';
 import type {
   ElasticsearchClient,
   Logger,
@@ -28,8 +30,14 @@ import { toRichRollingTimeWindow, type TimeWindow } from '../../../domain/models
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
+import { buildCompositeSloSummaryDocId } from '../../composites/composite_slo_summary_index';
+import { buildCompositeSummaryDoc } from '../../composites/composite_summary_writer';
 import { DefaultSummaryClient } from '../../summary_client';
-import { computeCompositeSummary, type MemberSummaryData } from '../../compute_composite_summary';
+import {
+  computeCompositeSummary,
+  type MemberSummaryData,
+} from '../../composites/compute_composite_summary';
+import { COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES } from './constants';
 
 type SpaceItems = Array<{ compositeSlo: CompositeSLODefinition }>;
 type MemberDefinitionMap = Map<string, SLODefinition>;
@@ -68,6 +76,9 @@ export async function computeAndPersistCompositeSummaries({
   let totalProcessed = 0;
   const stats: RunStats = { decodeErrors: 0, spaceErrors: 0, computeErrors: 0, bulkErrors: 0 };
   const startTime = Date.now();
+  let runOutcome: 'success' | 'aborted' | 'error' = 'success';
+  let pagesFetched = 0;
+  let hitMaxLimit = false;
 
   const finder = soClient.createPointInTimeFinder<StoredCompositeSLODefinition>({
     type: SO_SLO_COMPOSITE_TYPE,
@@ -75,10 +86,15 @@ export async function computeAndPersistCompositeSummaries({
     perPage: COMPOSITE_SLOS_PER_PAGE,
   });
 
+  const spanOpts = { type: 'task' as const, labels: { plugin: 'slo' } };
+
   try {
     for await (const response of finder.find()) {
+      pagesFetched++;
+
       if (abortController.signal.aborted) {
         logger.debug('Task aborted, stopping');
+        runOutcome = 'aborted';
         break;
       }
 
@@ -90,49 +106,92 @@ export async function computeAndPersistCompositeSummaries({
         `Processing ${response.saved_objects.length} composite SLOs (${totalProcessed} processed so far)`
       );
 
-      const bySpace = groupBySpace(response.saved_objects, logger, stats);
-      const memberMapBySpace = await fetchMemberDefinitions(bySpace, soClient, logger, stats);
-      const summaryResultBySpace = await fetchMemberSummaries(
-        bySpace,
-        memberMapBySpace,
-        summaryClient,
-        logger,
-        stats
+      const bySpace = await withSpan(
+        {
+          name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.DECODE_AND_GROUP_COMPOSITES,
+          ...spanOpts,
+        },
+        async () => groupBySpace(response.saved_objects, logger, stats)
       );
-      const bulkOps = buildBulkOps(bySpace, memberMapBySpace, summaryResultBySpace, logger, stats);
 
-      if (bulkOps.length > 0) {
-        // refresh: false — rely on the index refresh_interval (default 1s) for visibility.
-        // Acceptable for an hourly background task. If the index refresh_interval is set to
-        // -1 or a very long value, docs will not be visible until the next manual refresh.
-        // The inline persist path on create/update should use refresh: true for read-your-writes
-        // when that path is added.
-        const bulkResponse = await esClient.bulk(
-          { operations: bulkOps, refresh: false },
-          { signal: abortController.signal }
-        );
-        if (bulkResponse.errors) {
-          const failed = bulkResponse.items.filter((item) => item.index?.error);
-          stats.bulkErrors += failed.length;
-          logger.error(`Bulk upsert had ${failed.length} errors`);
+      const memberMapBySpace = await withSpan(
+        {
+          name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.FETCH_MEMBER_DEFINITIONS,
+          ...spanOpts,
+        },
+        async () => fetchMemberDefinitions(bySpace, soClient, logger, stats)
+      );
+
+      const summaryResultBySpace = await withSpan(
+        {
+          name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.COMPUTE_MEMBER_SUMMARIES,
+          ...spanOpts,
+        },
+        async () => fetchMemberSummaries(bySpace, memberMapBySpace, summaryClient, logger, stats)
+      );
+
+      await withSpan(
+        { name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.BULK_WRITE, ...spanOpts },
+        async () => {
+          const bulkOps = buildBulkOps(
+            bySpace,
+            memberMapBySpace,
+            summaryResultBySpace,
+            logger,
+            stats
+          );
+
+          if (bulkOps.length > 0) {
+            // refresh: false — rely on the index refresh_interval (default 1s) for visibility.
+            // Acceptable for an hourly background task. If the index refresh_interval is set to
+            // -1 or a very long value, docs will not be visible until the next manual refresh.
+            // The inline persist path on create/update should use refresh: true for read-your-writes
+            // when that path is added.
+            const bulkResponse = await esClient.bulk(
+              { operations: bulkOps, refresh: false },
+              { signal: abortController.signal }
+            );
+            if (bulkResponse.errors) {
+              const failed = bulkResponse.items.filter((item) => item.index?.error);
+              stats.bulkErrors += failed.length;
+              logger.error(`Bulk upsert had ${failed.length} errors`);
+            }
+          }
         }
-      }
+      );
 
       totalProcessed += response.saved_objects.length;
 
       if (totalProcessed >= MAX_COMPOSITE_SLOS) {
         logger.debug(`Reached maximum composite SLOs processed (${MAX_COMPOSITE_SLOS}), stopping`);
+        hitMaxLimit = true;
         break;
       }
     }
   } catch (error) {
     if (error instanceof errors.RequestAbortedError) {
       logger.debug('Task aborted during execution');
+      runOutcome = 'aborted';
       return;
     }
+    runOutcome = 'error';
     throw error;
   } finally {
     await finder.close();
+    addTransactionLabels({
+      plugin: 'slo',
+      composite_slo_summary_run_outcome: runOutcome,
+      composite_slo_summary_hit_max_limit: hitMaxLimit,
+    });
+    apm.setCustomContext({
+      composite_slo_summary_processed_composites: totalProcessed,
+      composite_slo_summary_pages_fetched: pagesFetched,
+      composite_slo_summary_decode_errors: stats.decodeErrors,
+      composite_slo_summary_space_errors: stats.spaceErrors,
+      composite_slo_summary_compute_errors: stats.computeErrors,
+      composite_slo_summary_bulk_errors: stats.bulkErrors,
+      composite_slo_summary_duration_ms: Date.now() - startTime,
+    });
   }
 
   logger.info(
@@ -298,11 +357,25 @@ function buildBulkOps(
           );
         }
 
-        const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
+        const { compositeSummary, members } = computeCompositeSummary(
+          compositeSlo,
+          memberSummaries
+        );
         bulkOps.push({
-          index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `${spaceId}:${compositeSlo.id}` },
+          index: {
+            _index: COMPOSITE_SUMMARY_INDEX_NAME,
+            _id: buildCompositeSloSummaryDocId(spaceId, compositeSlo.id),
+          },
         });
-        bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId, unresolvedMemberIds));
+        bulkOps.push(
+          buildCompositeSummaryDoc(
+            compositeSlo,
+            compositeSummary,
+            members,
+            spaceId,
+            unresolvedMemberIds
+          )
+        );
       } catch (err) {
         stats.computeErrors++;
         logger.warn(
@@ -388,66 +461,4 @@ function decodeStoredSLO(
   }
 
   return result.right;
-}
-
-interface CompositeSummaryDoc {
-  spaceId: string;
-  summaryUpdatedAt: string;
-  compositeSlo: {
-    id: string;
-    name: string;
-    description: string;
-    tags: string[];
-    objective: { target: number };
-    timeWindow: { duration: string; type: string };
-    budgetingMethod: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  sliValue: number;
-  status: string;
-  errorBudgetInitial: number;
-  errorBudgetConsumed: number;
-  errorBudgetRemaining: number;
-  errorBudgetIsEstimated: boolean;
-  fiveMinuteBurnRate: number;
-  oneHourBurnRate: number;
-  oneDayBurnRate: number;
-  unresolvedMemberIds: string[];
-}
-
-function buildSummaryDoc(
-  compositeSlo: CompositeSLODefinition,
-  summary: ReturnType<typeof computeCompositeSummary>['compositeSummary'],
-  spaceId: string,
-  unresolvedMemberIds: string[]
-): CompositeSummaryDoc {
-  return {
-    spaceId,
-    summaryUpdatedAt: new Date().toISOString(),
-    compositeSlo: {
-      id: compositeSlo.id,
-      name: compositeSlo.name,
-      description: compositeSlo.description,
-      tags: compositeSlo.tags,
-      objective: { target: compositeSlo.objective.target },
-      timeWindow: {
-        duration: compositeSlo.timeWindow.duration,
-        type: compositeSlo.timeWindow.type,
-      },
-      budgetingMethod: compositeSlo.budgetingMethod,
-      createdAt: compositeSlo.createdAt,
-      updatedAt: compositeSlo.updatedAt,
-    },
-    sliValue: summary.sliValue,
-    status: summary.status,
-    errorBudgetInitial: summary.errorBudget.initial,
-    errorBudgetConsumed: summary.errorBudget.consumed,
-    errorBudgetRemaining: summary.errorBudget.remaining,
-    errorBudgetIsEstimated: summary.errorBudget.isEstimated,
-    fiveMinuteBurnRate: summary.fiveMinuteBurnRate,
-    oneHourBurnRate: summary.oneHourBurnRate,
-    oneDayBurnRate: summary.oneDayBurnRate,
-    unresolvedMemberIds,
-  };
 }

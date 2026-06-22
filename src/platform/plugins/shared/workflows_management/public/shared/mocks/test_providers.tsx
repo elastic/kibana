@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import React, { type PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { WorkflowsContextProvider } from '../../common/context';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
+import { createTestQueryClient } from '../test_utils';
 
 interface TestProviderProps {
   store?: ReturnType<typeof createMockStore>;
@@ -30,20 +33,22 @@ export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
   services,
 }) => {
   const testStore = store ?? createMockStore();
-  const testQueryClient = queryClient ?? new QueryClient();
+  const testQueryClient = queryClient ?? createTestQueryClient();
   const mockServices = services ?? createStartServicesMock();
   return (
-    <KibanaContextProvider services={mockServices}>
-      <QueryClientProvider client={testQueryClient}>
-        <WorkflowsContextProvider>
-          <MemoryRouter>
-            <I18nProviderMock>
-              <Provider store={testStore}>{children}</Provider>
-            </I18nProviderMock>
-          </MemoryRouter>
-        </WorkflowsContextProvider>
-      </QueryClientProvider>
-    </KibanaContextProvider>
+    <EuiProvider colorMode="light">
+      <KibanaContextProvider services={mockServices}>
+        <QueryClientProvider client={testQueryClient}>
+          <WorkflowsContextProvider>
+            <MemoryRouter>
+              <I18nProviderMock>
+                <Provider store={testStore}>{children}</Provider>
+              </I18nProviderMock>
+            </MemoryRouter>
+          </WorkflowsContextProvider>
+        </QueryClientProvider>
+      </KibanaContextProvider>
+    </EuiProvider>
   );
 };
 

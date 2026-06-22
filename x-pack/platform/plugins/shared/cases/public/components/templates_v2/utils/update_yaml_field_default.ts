@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Document } from 'yaml';
-import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
-import { load as parseYaml } from 'js-yaml';
+import type { Document, YAMLMap } from 'yaml';
+import { parse as parseYaml, parseDocument, isMap, isSeq, isScalar } from 'yaml';
 
 import type { z } from '@kbn/zod/v4';
 import type { UserPickerDefaultSchema } from '../../../../common/types/domain/template/fields';
@@ -19,7 +18,8 @@ export type FieldDefaultValue =
   | z.infer<typeof UserPickerDefaultSchema>;
 
 interface FieldDefinition {
-  name: string;
+  name?: string;
+  $ref?: string;
   metadata?: {
     default?: FieldDefaultValue;
   };
@@ -28,6 +28,25 @@ interface FieldDefinition {
 interface ParsedDefinition {
   fields?: FieldDefinition[];
 }
+
+/**
+ * Effective name for matching a field entry. For ref entries it is `name ?? $ref`
+ * (the alias wins when present); for inline entries it is `name`.
+ */
+const effectiveFieldName = (field: FieldDefinition): string | undefined =>
+  field.$ref !== undefined ? field.name ?? field.$ref : field.name;
+
+/**
+ * Same matching rule as `effectiveFieldName`, but operating on a yaml-library AST node
+ * so callers can locate the entry while preserving comments and formatting.
+ */
+const yamlEntryEffectiveName = (item: YAMLMap<unknown, unknown>): string | undefined => {
+  const nameNode = item.get('name', true);
+  const refNode = item.get('$ref', true);
+  const name = isScalar(nameNode) ? String(nameNode.value) : undefined;
+  const ref = isScalar(refNode) ? String(refNode.value) : undefined;
+  return ref !== undefined ? name ?? ref : name;
+};
 
 /**
  * Tries to parse a JSON-encoded array string. Returns the parsed array if successful,
@@ -74,12 +93,12 @@ export const updateYamlFieldDefault = (
   }
 
   try {
-    // First validate with js-yaml that the field exists
+    // First validate that the field exists
     const parsed = parseYaml(yaml) as ParsedDefinition;
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.fields)) {
       return yaml;
     }
-    const fieldExists = parsed.fields.some((field) => field.name === fieldName);
+    const fieldExists = parsed.fields.some((field) => effectiveFieldName(field) === fieldName);
     if (!fieldExists) {
       return yaml;
     }
@@ -99,23 +118,18 @@ export const updateYamlFieldDefault = (
 
     // Find the field in the sequence
     for (const item of fieldsNode.items) {
-      if (isMap(item)) {
-        const nameNode = item.get('name', true);
-        const name = isScalar(nameNode) ? String(nameNode.value) : null;
+      if (isMap(item) && yamlEntryEffectiveName(item) === fieldName) {
+        const metadataNode = item.get('metadata', true);
+        const defaultNode = toYamlDefaultNode(doc, newValue);
 
-        if (name === fieldName) {
-          const metadataNode = item.get('metadata', true);
-          const defaultNode = toYamlDefaultNode(doc, newValue);
-
-          if (!isMap(metadataNode)) {
-            // Create metadata if it doesn't exist
-            item.set('metadata', doc.createNode({ default: defaultNode }));
-          } else {
-            // Update or add default in existing metadata
-            metadataNode.set('default', defaultNode);
-          }
-          break;
+        if (!isMap(metadataNode)) {
+          // Create metadata if it doesn't exist
+          item.set('metadata', doc.createNode({ default: defaultNode }));
+        } else {
+          // Update or add default in existing metadata
+          metadataNode.set('default', defaultNode);
         }
+        break;
       }
     }
 
@@ -140,7 +154,7 @@ export const removeYamlFieldDefault = (yaml: string, fieldName: string): string 
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.fields)) {
       return yaml;
     }
-    const fieldExists = parsed.fields.some((field) => field.name === fieldName);
+    const fieldExists = parsed.fields.some((field) => effectiveFieldName(field) === fieldName);
     if (!fieldExists) {
       return yaml;
     }
@@ -157,11 +171,9 @@ export const removeYamlFieldDefault = (yaml: string, fieldName: string): string 
       return yaml;
     }
 
-    const fieldItem = fieldsNode.items.find((item) => {
-      if (!isMap(item)) return false;
-      const nameNode = item.get('name', true);
-      return isScalar(nameNode) && String(nameNode.value) === fieldName;
-    });
+    const fieldItem = fieldsNode.items.find(
+      (item) => isMap(item) && yamlEntryEffectiveName(item) === fieldName
+    );
 
     if (isMap(fieldItem)) {
       const metadataNode = fieldItem.get('metadata', true);
@@ -170,6 +182,59 @@ export const removeYamlFieldDefault = (yaml: string, fieldName: string): string 
         if (metadataNode.items.length === 0) {
           fieldItem.delete('metadata');
         }
+      }
+    }
+
+    return doc.toString();
+  } catch {
+    return yaml;
+  }
+};
+
+/**
+ * Updates or adds `metadata.default` directly in a single field definition YAML.
+ * Unlike updateYamlFieldDefault, operates on the root level (no `fields` array wrapper).
+ */
+export const updateFieldDefinitionDefault = (yaml: string, newValue: FieldDefaultValue): string => {
+  if (!yaml || yaml.trim() === '') return yaml;
+  try {
+    const doc = parseDocument(yaml);
+    const root = doc.contents;
+    if (!isMap(root)) return yaml;
+
+    const defaultNode = toYamlDefaultNode(doc, newValue);
+    const rootMap = root as YAMLMap<unknown, unknown>;
+    const metadataNode = rootMap.get('metadata', true);
+
+    if (!isMap(metadataNode)) {
+      rootMap.set('metadata', doc.createNode({ default: defaultNode }));
+    } else {
+      metadataNode.set('default', defaultNode);
+    }
+
+    return doc.toString();
+  } catch {
+    return yaml;
+  }
+};
+
+/**
+ * Removes `metadata.default` from a single field definition YAML.
+ * Unlike removeYamlFieldDefault, operates on the root level (no `fields` array wrapper).
+ */
+export const removeFieldDefinitionDefault = (yaml: string): string => {
+  if (!yaml || yaml.trim() === '') return yaml;
+  try {
+    const doc = parseDocument(yaml);
+    const root = doc.contents;
+    if (!isMap(root)) return yaml;
+
+    const rootMap = root as YAMLMap<unknown, unknown>;
+    const metadataNode = rootMap.get('metadata', true);
+    if (isMap(metadataNode)) {
+      metadataNode.delete('default');
+      if (metadataNode.items.length === 0) {
+        rootMap.delete('metadata');
       }
     }
 
@@ -194,7 +259,7 @@ export const hasFieldDefault = (yaml: string, fieldName: string): boolean => {
       return false;
     }
 
-    const field = parsed.fields.find((f) => f.name === fieldName);
+    const field = parsed.fields.find((f) => effectiveFieldName(f) === fieldName);
 
     if (!field) {
       return false;

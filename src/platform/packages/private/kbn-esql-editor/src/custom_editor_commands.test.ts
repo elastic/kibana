@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -32,6 +32,8 @@ const mockEditor = {
   getModel: jest.fn(() => mockModel),
   executeEdits: jest.fn(),
   setPosition: jest.fn(),
+  focus: jest.fn(),
+  trigger: jest.fn(),
 } as unknown as monaco.editor.IStandaloneCodeEditor;
 
 const mockUiActions = {
@@ -204,7 +206,7 @@ describe('Custom Editor Commands', () => {
 
       addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockOnPrettifyQuery);
 
-      expect(mockEditor.addCommand).toHaveBeenCalledTimes(2);
+      expect(mockEditor.addCommand).toHaveBeenCalledTimes(3);
 
       const cmdEnterCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
         // eslint-disable-next-line no-bitwise
@@ -236,6 +238,20 @@ describe('Custom Editor Commands', () => {
       cmdIHandler();
 
       expect(mockOnPrettifyQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('inserts a newline when Shift+Enter is pressed', () => {
+      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
+
+      const shiftEnterCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
+        // eslint-disable-next-line no-bitwise
+        ([keyMod]) => keyMod === (monaco.KeyMod.Shift | monaco.KeyCode.Enter)
+      );
+      expect(shiftEnterCall).toBeDefined();
+
+      shiftEnterCall[1]();
+
+      expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'type', { text: '\n' });
     });
   });
 });

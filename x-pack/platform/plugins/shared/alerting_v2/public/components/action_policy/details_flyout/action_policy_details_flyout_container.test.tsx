@@ -264,6 +264,23 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
+  it('clones a rule-scoped policy carrying over the matcher', async () => {
+    mockUseFetchActionPolicy.mockReturnValue({
+      data: buildPolicy({ matcher: 'rule.id: "rule-1"' }),
+    });
+    renderContainer();
+
+    await userEvent.click(screen.getByTestId('flyout-clone'));
+
+    expect(mockCreateActionPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'My Policy [clone]',
+        matcher: 'rule.id: "rule-1"',
+      })
+    );
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
   describe('delete flow', () => {
     it('hides the flyout and opens the delete modal when delete is clicked', async () => {
       mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });

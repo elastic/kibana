@@ -44,6 +44,7 @@ const getDefaultRules = (response: any) => ({
   scheduled_task_id: response.body.rules[0].scheduled_task_id,
   execution_status: response.body.rules[0].execution_status,
   monitoring: response.body.rules[0].monitoring,
+  is_snoozed_until: response.body.rules[0].is_snoozed_until,
   revision: 0,
   ...(response.body.rules[0].next_run ? { next_run: response.body.rules[0].next_run } : {}),
   ...(response.body.rules[0].last_run ? { last_run: response.body.rules[0].last_run } : {}),

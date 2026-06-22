@@ -17,6 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../../utils/i18n';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import type { EditDetailsFormData } from './types';
@@ -65,6 +67,11 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
                   checked={value}
                   onChange={(e) => onChange(e.target.checked)}
                   data-test-subj="editDetailsAutoIncludeSwitch"
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.flyout,
+                    action: AGENT_BUILDER_UI_EBT.action.agentOverview.ELASTIC_CAPABILITIES_TOGGLE,
+                    detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                  })}
                 />
               )}
             />

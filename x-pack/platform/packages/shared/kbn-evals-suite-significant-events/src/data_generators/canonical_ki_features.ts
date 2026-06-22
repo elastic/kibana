@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
-import { createHash } from 'crypto';
-
-export const CANONICAL_LAST_SEEN = '2026-01-01T00:00:00.000Z';
+import type { Feature, FeatureUpsert } from '@kbn/streams-schema';
+import { computeFeatureUuid } from '@kbn/streams-schema';
 
 const normalizeIdPart = (value: string): string =>
   value
@@ -40,16 +38,6 @@ const parseGroundTruthBlocks = (expectedGroundTruth: string): Record<string, str
   return blocks;
 };
 
-const makeDeterministicKIFeatureUuid = (scenarioId: string, id: string): string => {
-  const digest = createHash('sha256')
-    .update(`canonical:${normalizeIdPart(scenarioId)}:${normalizeIdPart(id)}`)
-    .digest('hex');
-  return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(
-    17,
-    20
-  )}-${digest.slice(20, 32)}`;
-};
-
 const makeKIFeature = ({
   streamName,
   scenarioId,
@@ -66,11 +54,8 @@ const makeKIFeature = ({
   title?: string;
   description: string;
   properties: Record<string, unknown>;
-}): Feature => ({
+}): FeatureUpsert => ({
   id,
-  uuid: makeDeterministicKIFeatureUuid(scenarioId, id),
-  status: 'active',
-  last_seen: CANONICAL_LAST_SEEN,
   stream_name: streamName,
   type,
   title,
@@ -100,7 +85,7 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
 
   const { entities = [], deps = [], infra = [] } = blocks;
 
-  const features: Feature[] = [];
+  const features: FeatureUpsert[] = [];
 
   for (const entity of entities) {
     const name = entity.trim();
@@ -159,5 +144,5 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
     );
   }
 
-  return features;
+  return features.map((feature) => ({ ...feature, uuid: computeFeatureUuid(feature) }));
 };

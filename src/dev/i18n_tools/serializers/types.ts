@@ -11,11 +11,13 @@ import type { MessageDescriptor } from '@formatjs/intl';
 import type { TranslationInput } from '@kbn/i18n';
 
 export interface FileOutput {
+  locale?: string;
   messages: Record<string, string | { text: string; comment: string }>;
   formats: TranslationInput['formats'];
 }
 
 export type Serializer = (
   messages: MessageDescriptor[],
-  formats?: TranslationInput['formats']
+  formats?: TranslationInput['formats'],
+  locale?: string
 ) => string;

@@ -27,6 +27,8 @@
     "@kbn/evals-common",
     "@kbn/safer-lodash-set",
     "@kbn/test",
-    "@kbn/es-errors"
+    "@kbn/es-errors",
+    "@kbn/es",
+    "@kbn/dot-text"
   ]
 }

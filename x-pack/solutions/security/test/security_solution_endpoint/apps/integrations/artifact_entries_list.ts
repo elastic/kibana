@@ -190,7 +190,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
         await testSubjects.click(
-          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}`
         );
       }
 
@@ -211,7 +211,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
         await testSubjects.click(
-          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}`
         );
       }
 

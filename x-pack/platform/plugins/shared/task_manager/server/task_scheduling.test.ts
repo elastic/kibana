@@ -529,24 +529,21 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload.length).toBe(2);
-      expect(bulkUpdatePayload[0]).toEqual({
-        ...task,
-        enabled: true,
-        runAt: new Date('1970-01-01T00:00:00.000Z'),
-        scheduledAt: new Date('1970-01-01T00:00:00.000Z'),
-      });
 
-      expect(omit(bulkUpdatePayload[1], 'runAt', 'scheduledAt')).toEqual({
-        ...omit(task2, 'runAt', 'scheduledAt'),
-        enabled: true,
-      });
-
-      const { runAt, scheduledAt } = bulkUpdatePayload[1];
-      expect(runAt.getTime()).toEqual(scheduledAt.getTime());
-      expect(runAt.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(
-        5 * 60 * 1000
-      );
+      // When more than one task is enabled, every task is jittered (no task runs immediately).
+      for (const payload of bulkUpdatePayload) {
+        const sourceTask = payload.id === task.id ? task : task2;
+        expect(omit(payload, 'runAt', 'scheduledAt')).toEqual({
+          ...omit(sourceTask, 'runAt', 'scheduledAt'),
+          enabled: true,
+        });
+        const { runAt, scheduledAt } = payload;
+        expect(runAt.getTime()).toEqual(scheduledAt.getTime());
+        expect(runAt.getTime()).toBeGreaterThanOrEqual(1);
+        expect(runAt.getTime()).toBeLessThanOrEqual(5 * 60 * 1000);
+      }
     });
+
     test('should call store bulk update with request when provided', async () => {
       const task = taskManagerMock.createTask({
         id,
@@ -1194,7 +1191,7 @@ describe('TaskScheduling', () => {
       );
     });
 
-    test('ignores 409 conflict errors', async () => {
+    test('reports 409 conflict errors via the conflict flag without throwing', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
@@ -1204,7 +1201,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
       const result = await taskScheduling.runSoon(id);
-      expect(result).toEqual({ id, forced: false });
+      expect(result).toEqual({ id, forced: false, conflict: true });
       expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
         'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
       );
@@ -1337,6 +1334,8 @@ describe('TaskScheduling', () => {
             schedule: undefined,
             traceparent: 'parent',
             enabled: true,
+            runAt: new Date(),
+            scheduledAt: new Date(),
           },
         ],
         undefined
@@ -1366,6 +1365,8 @@ describe('TaskScheduling', () => {
             schedule: undefined,
             traceparent: 'parent',
             enabled: true,
+            runAt: new Date(),
+            scheduledAt: new Date(),
           },
           {
             ...task2,
@@ -1377,6 +1378,139 @@ describe('TaskScheduling', () => {
         ],
         undefined
       );
+    });
+
+    test('runs a single recurring task immediately', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      await taskScheduling.bulkSchedule([task]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload).toEqual([
+        {
+          ...task,
+          id: undefined,
+          traceparent: 'parent',
+          enabled: true,
+          runAt: new Date(),
+          scheduledAt: new Date(),
+        },
+      ]);
+    });
+
+    test('jitters every recurring task within min(interval, 5m) when more than one task is scheduled', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task0 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const task1 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const task2 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1h' },
+      };
+      await taskScheduling.bulkSchedule([task0, task1, task2]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload.length).toBe(3);
+
+      const inputs = [task0, task1, task2];
+      const expectedUpperBounds = [60 * 1000, 60 * 1000, 5 * 60 * 1000];
+
+      bulkSchedulePayload.forEach((payload, idx) => {
+        expect(omit(payload, 'runAt', 'scheduledAt')).toEqual({
+          ...inputs[idx],
+          id: undefined,
+          traceparent: 'parent',
+          enabled: true,
+        });
+        const runAt = payload.runAt!.getTime();
+        expect(payload.scheduledAt!.getTime()).toBe(runAt);
+        expect(runAt).toBeGreaterThanOrEqual(1);
+        expect(runAt).toBeLessThanOrEqual(expectedUpperBounds[idx]);
+      });
+    });
+
+    test('runs ad-hoc tasks immediately without jitter even when scheduled alongside other tasks', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const recurringTask = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const adHocTask = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+      };
+      await taskScheduling.bulkSchedule([recurringTask, adHocTask]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload.length).toBe(2);
+
+      // Recurring task is now jittered since there is more than one task.
+      expect(omit(bulkSchedulePayload[0], 'runAt', 'scheduledAt')).toEqual({
+        ...recurringTask,
+        id: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      });
+      const recurringRunAt = bulkSchedulePayload[0].runAt!.getTime();
+      expect(bulkSchedulePayload[0].scheduledAt!.getTime()).toBe(recurringRunAt);
+      expect(recurringRunAt).toBeGreaterThanOrEqual(1);
+      expect(recurringRunAt).toBeLessThanOrEqual(60 * 1000);
+
+      // Ad-hoc task still runs immediately because addJitter returns "now" when there is no interval.
+      expect(bulkSchedulePayload[1]).toEqual({
+        ...adHocTask,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+        runAt: new Date(),
+        scheduledAt: new Date(),
+      });
+    });
+
+    test('does not jitter disabled tasks even if they have an interval schedule', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1h' },
+        enabled: false,
+      };
+      await taskScheduling.bulkSchedule([task]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload).toEqual([
+        {
+          ...task,
+          id: undefined,
+          traceparent: 'parent',
+          enabled: false,
+        },
+      ]);
     });
 
     test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {

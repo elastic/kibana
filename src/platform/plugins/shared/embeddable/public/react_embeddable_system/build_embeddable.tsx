@@ -12,7 +12,11 @@ import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmbeddableApi, EmbeddableApiRegistration, EmbeddableFactory } from './types';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableApiRegistration,
+  EmbeddablePublicDefinition,
+} from './types';
 import type { PhaseTracker } from './phase_tracker';
 import { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 
@@ -26,7 +30,7 @@ export async function buildEmbeddable<
   phaseTracker,
   type,
 }: {
-  factory?: EmbeddableFactory<SerializedState, Api>;
+  factory?: EmbeddablePublicDefinition<SerializedState, Api>;
   maybeId?: string;
   parentApi: HasSerializedChildState<SerializedState>;
   phaseTracker: PhaseTracker;
@@ -42,6 +46,7 @@ export async function buildEmbeddable<
       isCustomizable: true,
       isPinnable: false,
     };
+
     return {
       // Spread default panel capabilities first, allow apiRegistration to override them
       ...panelCapabilitiesDefaults,

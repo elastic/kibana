@@ -78,8 +78,10 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     // Save changes
     await saveRetentionChanges(page);
 
-    // Verify ILM policy is displayed in subtitle
-    await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
+    // Subtitle is phase/downsampling counts only (policy name is shown in the header badge).
+    await expect
+      .poll(async () => page.getByTestId('retention-metric-subtitle').textContent())
+      .toMatch(/data phases?/);
   });
 
   test('should display selected ILM policy name', async ({ page }) => {
@@ -113,8 +115,10 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     // Reload page
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
-    // Verify ILM policy persists
-    await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
+    // Verify ILM policy persists (policy name in header badge; subtitle is phase/downsampling counts only)
+    await expect
+      .poll(async () => page.getByTestId('retention-metric-subtitle').textContent())
+      .toMatch(/data phases?/);
     await expect(page.getByTestId('lifecycleBadge-logs.otel.nginx')).toContainText(
       '.alerts-ilm-policy'
     );
@@ -270,7 +274,10 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await page.getByTestId('editPolicyModal-overwriteButton').click();
 
         await expect(page.getByTestId('lifecyclePhase-warm-button')).toBeVisible();
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
       } finally {
         await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
       }
@@ -347,7 +354,10 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await expect(page.getByTestId(`lifecycleBadge-${TSDB_STREAM}`)).toContainText(
           newPolicyName
         );
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
       } finally {
         await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
         await esClient.ilm.deleteLifecycle({ name: newPolicyName }).catch(() => {});
@@ -404,8 +414,11 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await page.getByTestId(`ilmPolicy-${policyName}`).click();
         await saveRetentionChanges(page);
 
-        // Verify there is no downsampling step before editing
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        // Verify there is no downsampling step before editing (empty state is always rendered for TSDB)
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
 
         // Edit warm phase and enable downsampling
         await page.getByTestId('lifecyclePhase-warm-button').click();
@@ -417,7 +430,11 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await page.getByTestId('streamsEditIlmPhasesFlyoutFromSummaryTab-warm').click();
 
         // Scope to the visible "Downsampling" section (hot/warm/cold all exist in the DOM)
-        await flyout.getByRole('switch', { name: 'Downsampling' }).click();
+        const downsamplingToggle = page.locator(
+          '[data-test-subj="streamsEditIlmPhasesFlyoutFromSummaryDownsamplingSwitch"]:visible'
+        );
+        await expect(downsamplingToggle).toBeVisible();
+        await downsamplingToggle.click();
 
         // Set an explicit interval to keep the rendered step deterministic
         const intervalValue = page.locator(

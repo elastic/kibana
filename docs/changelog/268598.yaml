@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/268598
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Search and data
+title: Add trial usage badge with period progress

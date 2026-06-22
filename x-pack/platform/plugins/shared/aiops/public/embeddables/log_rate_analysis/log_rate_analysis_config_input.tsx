@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import type { AiopsPluginStartDeps } from '../../types';
 import { LogRateAnalysisEmbeddableInitializer } from './log_rate_analysis_embeddable_initializer';
 import type { LogRateAnalysisComponentApi } from './types';
-import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
 
 export function EmbeddableLogRateAnalysisUserInput({
   pluginStart,
@@ -23,7 +23,7 @@ export function EmbeddableLogRateAnalysisUserInput({
   logRateAnalysisControlsApi: LogRateAnalysisComponentApi;
   onCancel: () => void;
   onConfirm: (newUpdate: LogRateAnalysisEmbeddableState) => void;
-  initialState?: LogRateAnalysisEmbeddableState;
+  initialState?: Pick<LogRateAnalysisEmbeddableState, 'data_view_id'>;
   isNewPanel?: boolean;
 }) {
   const handlePreview = async (nextUpdate: LogRateAnalysisEmbeddableState) => {

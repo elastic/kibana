@@ -65,6 +65,12 @@ export class ActionPoliciesApi {
     });
   }
 
+  public async upsertActionPolicy(id: string, data: CreateActionPolicyData) {
+    return this.http.put<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
+      body: JSON.stringify(data),
+    });
+  }
+
   public async updateActionPolicy(id: string, data: UpdateActionPolicyBody) {
     return this.http.patch<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
       body: JSON.stringify(data),
@@ -111,8 +117,12 @@ export class ActionPoliciesApi {
     );
   }
 
-  public async fetchDataFields() {
-    return this.http.get<string[]>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`);
+  public async fetchDataFields(matcher?: string) {
+    const trimmed = matcher?.trim();
+    return this.http.get<string[]>(
+      `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+      trimmed ? { query: { matcher: trimmed } } : {}
+    );
   }
 
   public async fetchTags(params?: { search?: string }) {

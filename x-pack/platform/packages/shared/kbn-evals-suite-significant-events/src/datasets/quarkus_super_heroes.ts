@@ -805,8 +805,8 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
       output: {
         criteria: [
           {
-            id: 'healthy-baseline-queries',
-            text: 'Should generate queries for operational monitoring (e.g., fight throughput, service health, request volume) rather than error-focused detection since this is healthy traffic',
+            id: 'operational-monitoring',
+            text: 'Should generate queries for operational monitoring (e.g., fight throughput, service health, request volume) across the multi-service environment',
             score: 2,
           },
           {
@@ -814,10 +814,16 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Generated queries should cover multiple services present in the logs (e.g., rest-fights, rest-heroes, rest-villains, event-statistics) rather than a single service only',
             score: 2,
           },
+          {
+            id: 'stats-aggregate-monitoring',
+            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., fight simulation throughput at ~12 fights/min baseline, request volume per microservice) with calibrated thresholds documented in descriptions.',
+            score: 1,
+          },
         ],
         expected_categories: ['operational'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[operational monitoring for fight throughput/service health across rest-heroes/rest-villains/rest-fights/event-statistics]',
+          'queries=[operational monitoring for fight throughput/service health across rest-heroes/rest-villains/rest-fights/event-statistics; STATS queries for aggregate fight simulation throughput (~12 fights/min baseline) and request volume per microservice with calibrated thresholds]',
       },
       metadata: {
         difficulty: 'easy',
@@ -835,18 +841,54 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         criteria: [
           {
             id: 'kafka-error-query',
-            text: 'Must generate an ES|QL query that catches SmallRye Kafka write/nack errors (SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata)',
+            text: 'Must generate an ES|QL query that catches SmallRye Kafka write/nack errors (SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata). Note: this criterion covers only rest-fights producer errors — event-statistics consumer errors are out of scope for this criterion',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
+                  should: [
+                    { match_phrase: { 'body.text': 'SRMSG18206' } },
+                    { match_phrase: { 'body.text': 'SRMSG18212' } },
+                    {
+                      match_phrase: {
+                        'body.text': 'TimeoutException: Topic fights not present in metadata',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'affected-services-query',
-            text: 'Should generate queries detecting Kafka failures in rest-fights and event-statistics — separate queries per service are acceptable',
+            text: 'Should generate queries detecting Kafka failures in rest-fights (SRMSG18206 unable to write, SRMSG18212 message nacked)',
+            score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
+                  should: [
+                    { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
+                    { match_phrase: { 'body.text': 'SRMSG18206' } },
+                    { match_phrase: { 'body.text': 'SRMSG18212' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+          {
+            id: 'stats-error-rate-detection',
+            text: 'Should generate a STATS query detecting the sustained Kafka error rate in rest-fights. The STATS query should complement the match-type error detection queries.',
             score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for SmallRye Kafka write failures (SRMSG18206/SRMSG18212/TimeoutException) from rest-fights and event-statistics]',
+          'queries=[error detection for SmallRye Kafka write failures (SRMSG18206/SRMSG18212/TimeoutException) from rest-fights; STATS queries for sustained Kafka error rate and event-statistics throughput drop]',
       },
       metadata: {
         difficulty: 'medium',
@@ -867,16 +909,45 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'mongo-error-query',
             text: 'Must generate an ES|QL query that catches MongoDB connection errors (MongoTimeoutException: Timed out while waiting for a server, MongoSocketOpenException: Exception opening socket)',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
+                  should: [
+                    { match_phrase: { 'body.text': 'MongoTimeoutException' } },
+                    { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
+                    { match_phrase: { 'body.text': 'Timed out while waiting for a server' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'fights-failure-query',
             text: 'Should generate a query detecting fight simulation failures in rest-fights (HTTP Request to /api/fights failed)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                    { match_phrase: { 'body.text': 'HTTP Request to /api/fights failed' } },
+                  ],
+                },
+              },
+            ],
+          },
+          {
+            id: 'stats-error-rate-detection',
+            text: 'Should generate a STATS query detecting the sustained MongoDB error rate in rest-fights. The STATS query should complement the match-type error detection queries.',
+            score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for MongoTimeoutException/MongoSocketOpenException from rest-fights, fight HTTP failures]',
+          'queries=[error detection for MongoTimeoutException/MongoSocketOpenException from rest-fights, fight HTTP failures; STATS queries for sustained MongoDB error rate in rest-fights]',
       },
       metadata: {
         difficulty: 'medium',
@@ -897,16 +968,42 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'fallback-detection-query',
             text: 'Must generate an ES|QL query that detects the fault tolerance fallback activation ("Falling back on Hero" or "Fallback hero") in rest-fights logs',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'fight-degradation-query',
             text: 'Should generate a query detecting fight simulation degradation (villains always winning due to fallback hero)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                },
+              },
+            ],
+          },
+          {
+            id: 'stats-fallback-rate-detection',
+            text: 'Should generate a STATS query measuring the fallback activation rate in rest-fights. Since there are no errors in this scenario, the fallback rate is the primary signal for STATS-based detection.',
+            score: 2,
           },
         ],
         expected_categories: ['resource_health', 'operational'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[fallback activation detection for rest-heroes unreachable (Falling back on Hero, Fallback hero in fight results)]',
+          'queries=[fallback activation detection for rest-heroes unreachable (Falling back on Hero, Fallback hero in fight results); STATS queries for fallback activation rate as primary degradation signal (no errors present in this scenario)]',
       },
       metadata: {
         difficulty: 'medium',
@@ -925,18 +1022,49 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         criteria: [
           {
             id: 'reactive-db-error-query',
-            text: 'Must generate an ES|QL query that catches Vert.x reactive pool timeout errors from rest-heroes (NoStackTraceThrowable or HR000021 — either signature is sufficient)',
+            text: 'Must generate an ES|QL query that catches Vert.x reactive pool timeout errors from rest-heroes (HR000021: DDL command failed or HTTP Request to /api/heroes/random failed — either signature is sufficient)',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-heroes' } }],
+                  should: [
+                    { match_phrase: { 'body.text': 'io.vertx.core.impl.NoStackTraceThrowable' } },
+                    { match_phrase: { 'body.text': 'HR000021' } },
+                    { match_phrase: { 'body.text': 'HTTP Request to /api/heroes/random failed' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'fight-degradation-query',
             text: 'Should generate a query detecting fight degradation in rest-fights (Falling back on Hero / Fallback hero)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
+                  should: [
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+          {
+            id: 'stats-fallback-rate-detection',
+            text: 'Should generate a STATS query measuring the fallback activation rate in rest-fights (~10 fallbacks/min). The rest-heroes hard errors are too sparse (~5 total) for rate-based detection — the sustained fallback rate in rest-fights is the reliable STATS signal for this scenario.',
+            score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[Vert.x reactive pool timeout errors in rest-heroes (NoStackTraceThrowable / HR000021), fight fallback degradation in rest-fights]',
+          'queries=[Vert.x reactive pool timeout errors in rest-heroes (NoStackTraceThrowable / HR000021), fight fallback degradation in rest-fights; STATS queries for fallback activation rate in rest-fights as primary detection signal]',
       },
       metadata: {
         difficulty: 'medium',

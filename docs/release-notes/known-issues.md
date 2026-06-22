@@ -8,6 +8,50 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Fleet bulk agent actions can affect agents in other spaces
+
+Applies to: {{stack}} 9.1.x, 9.2.0–9.2.7, 9.3.0–9.3.2
+
+**Details**
+
+A KQL operator precedence issue in Fleet's bulk action code causes the namespace filter to be ignored when a user-supplied kuery is also present. When issuing a bulk agent action (unenroll, reassign, upgrade, or rollback) with "Select everything on all pages" in the UI, or using the bulk actions API with a `kuery` parameter, agents in other {{kib}} spaces can be unintentionally affected.
+
+**Workaround**
+
+When performing bulk agent actions across all pages, select agents individually or in smaller batches using explicit filtering within a single space rather than relying on "Select everything on all pages" with a kuery.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.2.8, 9.3.3, 9.4.0. Version 9.1 is end of life — upgrade to {{stack}} 9.2.8+ or 9.3.3+.
+
+::::
+
+::::{dropdown} Upgrading to 9.3.x fails when a rule action contains oversized content
+
+Applies to: {{stack}} 9.3.0, 9.3.1, 9.3.2, 9.3.3, 9.3.4
+
+**Details**
+
+Upgrading from 9.2.x to 9.3.x can fail if any rule (Stack, Observability, or Security) has a connector action whose parameter values are larger than 32,766 bytes. Common examples include email message bodies or HTML templates, large webhook payloads, or Slack messages built from verbose templates.
+
+During the upgrade, {{kib}} migrates rule saved objects to a new internal mapping. Any oversized action parameter value causes the migration to abort with an error similar to:
+
+````
+Flattened field [alert.actions.params] contains one immense field whose keyed encoding is longer than the allowed max length of 32766 bytes
+````
+
+**Workaround**
+
+Upgrade to 9.3.5 or 9.4.2.
+
+If the upgrade to 9.3.0, 9.3.1, 9.3.2, 9.3.3, 9.3.4 failed with this error, identify rules that use connectors with large content (particularly email, webhook, and Slack connectors) and shorten the action parameter values, such as message bodies or HTML templates. Then retry the upgrade.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.3.5 and 9.4.2.
+
+::::
+
 ::::{dropdown} Stack alerts remain active instead of transitioning to recovered
 
 Applies to: {{stack}} 9.2.7, 9.2.8, 9.3.2, 9.3.3

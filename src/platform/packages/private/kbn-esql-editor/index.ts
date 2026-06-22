@@ -17,6 +17,9 @@ export type { QuickSearchVisorProps } from './src/editor_visor';
 export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';
 export { ESQLEditorTelemetryService } from './src/telemetry/telemetry_service';
 
+export { reportEsqlError } from './src/report_error';
+export type { ReportEsqlErrorOptions } from './src/report_error';
+
 // React.lazy support
 // eslint-disable-next-line import/no-default-export
 export default ESQLEditor;

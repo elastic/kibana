@@ -22,10 +22,28 @@ interface SearchWorkflowExecutionsParams {
   workflowExecutionIndex: string;
   query: QueryDslQueryContainer;
   sort?: Sort;
+  collapse?: { field: string };
   size?: number;
   from?: number;
   page?: number;
 }
+
+/** Fields required to build {@link WorkflowExecutionListDto} without fetching full execution snapshots. */
+export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
+  'spaceId',
+  'stepId',
+  'status',
+  'error',
+  'isTestRun',
+  'startedAt',
+  'finishedAt',
+  'duration',
+  'workflowId',
+  'triggeredBy',
+  'executedBy',
+  'createdBy',
+  'concurrencyGroupKey',
+] as const;
 
 export const searchWorkflowExecutions = async ({
   esClient,
@@ -33,6 +51,7 @@ export const searchWorkflowExecutions = async ({
   workflowExecutionIndex,
   query,
   sort = [{ createdAt: 'desc' }],
+  collapse,
   size = 100,
   from,
   page = 1,
@@ -42,9 +61,11 @@ export const searchWorkflowExecutions = async ({
     const response = await esClient.search<EsWorkflowExecution>({
       index: workflowExecutionIndex,
       query,
+      _source: { includes: [...WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES] },
       sort,
       size,
       from,
+      collapse,
       track_total_hits: true,
     });
 
@@ -91,6 +112,7 @@ function transformToWorkflowExecutionListModel(
           workflowId: source.workflowId,
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
+          concurrencyGroupKey: source.concurrencyGroupKey,
         });
       }
       return acc;

@@ -27,9 +27,8 @@ spaceTest.describe(
       await setupTracesExperience(scoutSpace, config);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -37,6 +36,8 @@ spaceTest.describe(
     });
 
     spaceTest('should render RED metrics charts in ESQL mode', async ({ pageObjects }) => {
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+
       await spaceTest.step('run ESQL query for traces', async () => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
       });
@@ -54,6 +55,8 @@ spaceTest.describe(
     });
 
     spaceTest('should render RED metrics charts with WHERE filter', async ({ pageObjects }) => {
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+
       await spaceTest.step('run ESQL query with WHERE filter', async () => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(
           `${TRACES.ESQL_QUERY} | WHERE service.name == "${RICH_TRACE.SERVICE_NAME}"`
@@ -75,6 +78,8 @@ spaceTest.describe(
     spaceTest(
       'should not render RED metrics charts with transformative ESQL query',
       async ({ pageObjects }) => {
+        await pageObjects.discover.goto({ queryMode: 'esql' });
+
         await spaceTest.step('run transformative ESQL query', async () => {
           await pageObjects.discover.writeAndSubmitEsqlQuery(
             `${TRACES.ESQL_QUERY} | STATS count()`
@@ -90,6 +95,8 @@ spaceTest.describe(
     spaceTest(
       'should not render RED metrics charts in data view mode',
       async ({ page, pageObjects }) => {
+        await pageObjects.discover.goto({ queryMode: 'classic' });
+
         await spaceTest.step('verify data table is loaded', async () => {
           await pageObjects.discover.waitForDocTableRendered();
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();

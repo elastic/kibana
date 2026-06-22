@@ -1,0 +1,16 @@
+{
+    "stateful": [
+        ".buildkite/ftr-manifests/ftr_platform_stateful_configs.yml",
+        ".buildkite/ftr-manifests/ftr_oblt_stateful_configs.yml",
+        ".buildkite/ftr-manifests/ftr_security_stateful_configs.yml",
+        ".buildkite/ftr-manifests/ftr_search_stateful_configs.yml"
+    ],
+    "serverless" : [
+        ".buildkite/ftr-manifests/ftr_base_serverless_configs.yml",
+        ".buildkite/ftr-manifests/ftr_oblt_serverless_configs.yml",
+        ".buildkite/ftr-manifests/ftr_security_serverless_configs.yml",
+        ".buildkite/ftr-manifests/ftr_search_serverless_configs.yml",
+        ".buildkite/ftr-manifests/ftr_workplace_ai_serverless_configs.yml",
+        ".buildkite/ftr-manifests/ftr_vectordb_serverless_configs.yml"
+    ]
+}

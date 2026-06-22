@@ -541,7 +541,7 @@ describe('generateOpenApiDocument', () => {
           versionedRouters: {},
         } as CreateTestRouterArgs,
         expectedPath: '/test-path/{id}/{path}',
-        expectedState: 'Technical Preview',
+        expectedState: 'Experimental',
       },
       {
         name: 'router with beta stability',
@@ -616,7 +616,7 @@ describe('generateOpenApiDocument', () => {
           },
         } as CreateTestRouterArgs,
         expectedPath: '/test-path',
-        expectedState: 'Technical Preview',
+        expectedState: 'Experimental',
       },
       {
         name: 'versioned router with beta stability',
@@ -742,7 +742,14 @@ describe('generateOpenApiDocument', () => {
   });
 
   it('merges operation objects', async () => {
-    const oasOperationObject = () => ({
+    const oasOperationObject = async () => ({
+      description: 'Merged operation description',
+      'x-codeSamples': [
+        {
+          lang: 'curl',
+          source: 'curl https://test.oas/foo',
+        },
+      ],
       requestBody: {
         content: {
           'application/json': {
@@ -816,6 +823,16 @@ describe('generateOpenApiDocument', () => {
         value: 999,
       },
     });
+
+    expect(get(oas, ['paths', '/foo/{id}/{path}', 'get', 'description'])).toBe(
+      'Merged operation description'
+    );
+    expect(get(oas, ['paths', '/foo/{id}/{path}', 'get', 'x-codeSamples'])).toEqual([
+      {
+        lang: 'curl',
+        source: 'curl https://test.oas/foo',
+      },
+    ]);
 
     expect(
       get(oas, ['paths', '/bar', 'get', 'requestBody', 'content', 'application/json', 'examples'])

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
@@ -60,6 +61,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
@@ -68,6 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     beforeEach(async () => {
@@ -117,7 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(updateStreamResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql(queries);
+      expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(queries, 'id'));
 
       const rules = await alertingApi.searchRules(
         roleAuthc,
@@ -422,11 +425,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([
+      const expectedQueries = [
         firstQuery,
         { ...updateThirdQuery, type: 'match' },
         { ...newQuery, type: 'match' },
-      ]);
+      ];
+      expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(expectedQueries, 'id'));
 
       const updatedRules = await alertingApi.searchRules(roleAuthc, '');
       expect(updatedRules.body.data).to.have.length(3);

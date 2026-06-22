@@ -8,7 +8,6 @@
  */
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
-import chalk from 'chalk';
 import _ from 'lodash';
 import { resolve } from 'path';
 import url from 'url';
@@ -207,6 +206,27 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
+  // Inject EIS connectors discovered by bootstrap.ts (--eis flag) into the
+  // Kibana config as preconfigured action connectors.
+  const eisConnectorsJson = process.env.KBN_EIS_CONNECTORS;
+  if (opts.eis && eisConnectorsJson) {
+    try {
+      const eisConnectors = JSON.parse(eisConnectorsJson);
+      if (eisConnectors && typeof eisConnectors === 'object' && !Array.isArray(eisConnectors)) {
+        const existing = get('xpack.actions.preconfigured', {});
+        set('xpack.actions.preconfigured', { ...existing, ...eisConnectors });
+      } else {
+        console.warn(
+          `Ignoring KBN_EIS_CONNECTORS: expected a plain object, got ${
+            Array.isArray(eisConnectors) ? 'array' : typeof eisConnectors
+          }.`
+        );
+      }
+    } catch (error) {
+      console.warn(`Failed to parse KBN_EIS_CONNECTORS env var: ${error.message}`);
+    }
+  }
+
   _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
   _.merge(rawConfig, keystoreConfig);
 
@@ -284,6 +304,11 @@ export default function (program) {
       .option(
         '--no-uiam',
         'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
+      )
+      .option(
+        '--eis',
+        'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis). ' +
+          'Override ES credentials via KBN_EIS_ES_USERNAME (default: elastic) and KBN_EIS_ES_PASSWORD (default: changeme).'
       );
   }
 
@@ -317,11 +342,9 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      // For Serverless SAML Mock IdP we also disable the base path because Serverless does not
-      // support a custom `server.basePath`. The stateful SAML Mock IdP path keeps the base path
-      // proxy enabled and pins it to a fixed value via `server.basePath` (see
-      // `tryConfigureStatefulSamlProvider`), so SP/ACS endpoints stay aligned with Kibana's URL.
-      basePath: opts.runExamples || isServerlessSamlSupported ? false : !!opts.basePath,
+      // Serverless Kibana does not support a custom `server.basePath`, so we also disable the
+      // dev proxy's randomized base path in serverless mode.
+      basePath: opts.runExamples || isServerlessMode ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,
@@ -329,6 +352,7 @@ export default function (program) {
       dist: !!opts.dist,
       serverless: isServerlessMode,
       uiam: isServerlessSamlSupported && opts.uiam !== false,
+      eis: !!opts.eis,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -438,6 +462,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_OAUTH_BASE_URL,
     MOCK_IDP_UIAM_SERVICE_URL,
     MOCK_IDP_UIAM_SHARED_SECRET,
     MOCK_IDP_UIAM_ORGANIZATION_ID,
@@ -455,19 +480,6 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   );
   if (conflict) {
     return false;
-  }
-
-  if (_.has(rawConfig, 'server.basePath')) {
-    console.warn(
-      `Custom base path is not supported when running in Serverless, it will be removed.`
-    );
-    _.unset(rawConfig, 'server.basePath');
-  }
-
-  if (opts.ssl) {
-    console.info(
-      'Kibana is being served over HTTPS. Make sure to adjust the `--kibanaUrl` parameter while running the local Serverless ES cluster.'
-    );
   }
 
   // Make SAML provider the first in the provider chain
@@ -503,6 +515,14 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
     lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
+
+    // SAML POST binding submits the response cross-origin to UIAM's ACS endpoint, so the
+    // enforced `form-action` directive (default `'self'`) needs to allow the UIAM origin.
+    const uiamOAuthOrigin = new url.URL(MOCK_IDP_UIAM_OAUTH_BASE_URL).origin;
+    const existingFormAction = _.get(rawConfig, 'csp.form_action', []);
+    if (!existingFormAction.includes(uiamOAuthOrigin)) {
+      lodashSet(rawConfig, 'csp.form_action', [...existingFormAction, uiamOAuthOrigin]);
+    }
 
     if (!_.has(rawConfig, 'xpack.security.uiam.url')) {
       lodashSet(rawConfig, 'xpack.security.uiam.url', MOCK_IDP_UIAM_SERVICE_URL);
@@ -564,9 +584,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
 
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
-    MOCK_IDP_KIBANA_BASE_PATH,
-    MOCK_IDP_REALM_NAME,
-    MOCK_IDP_UIAM_ORGANIZATION_ID, // eslint-disable-next-line import/no-dynamic-require
+    MOCK_IDP_REALM_NAME, // eslint-disable-next-line import/no-dynamic-require
   } = require(MOCK_IDP_PLUGIN_PATH);
 
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
@@ -607,41 +625,6 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
       order: Number.MAX_SAFE_INTEGER,
     });
-  }
-
-  // Set a fake cloud.id so that the cloud plugin is activated (required by the mockIdpPlugin).
-  if (!_.has(rawConfig, 'xpack.cloud.id')) {
-    lodashSet(rawConfig, 'xpack.cloud.id', 'ftr_fake_cloud_id');
-  }
-
-  if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
-    lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
-  }
-
-  // Pin a stable base path so SP/ACS endpoints stay aligned with the SAML realm across restarts.
-  if (opts.basePath !== false && !opts.runExamples && !_.has(rawConfig, 'server.basePath')) {
-    lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
-  }
-
-  // Expose the proxy URL so the mock IdP stamps `Destination` correctly — the inner port from
-  // `getServerInfo()` would mismatch the realm config.
-  if (!_.has(rawConfig, 'server.publicBaseUrl')) {
-    const protocol = _.get(rawConfig, 'server.ssl.enabled') ? 'https' : 'http';
-    const host = _.get(rawConfig, 'server.host', 'localhost');
-    const port = _.get(rawConfig, 'server.port', 5601);
-    const basePath = _.get(rawConfig, 'server.basePath', '');
-    lodashSet(rawConfig, 'server.publicBaseUrl', `${protocol}://${host}:${port}${basePath}`);
-  }
-
-  if (_.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH) {
-    const publicBaseUrl = _.get(rawConfig, 'server.publicBaseUrl');
-    const label = chalk.black.bgYellow(' saml-mock-idp ');
-    console.warn(label, '='.repeat(100));
-    console.warn(
-      label,
-      `Kibana is running with a non-default base path. Make sure to use the --kibanaUrl=${publicBaseUrl} parameter while running the local ES cluster.`
-    );
-    console.warn(label, '='.repeat(100));
   }
 
   return true;

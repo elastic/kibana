@@ -8,7 +8,7 @@
 import React, { useMemo, useRef } from 'react';
 import { EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
@@ -98,7 +98,12 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
   }, [parsedTemplateData, parentDefinition]);
 
   const parentFieldNames = useMemo(
-    () => new Set(parentDefinition?.fields.map((f) => f.name) ?? []),
+    () =>
+      new Set(
+        (parentDefinition?.fields ?? [])
+          .map((f) => f.name)
+          .filter((name): name is string => typeof name === 'string')
+      ),
     [parentDefinition]
   );
 

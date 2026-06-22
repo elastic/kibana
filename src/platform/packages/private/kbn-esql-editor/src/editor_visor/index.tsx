@@ -14,8 +14,8 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
-  useEuiTheme,
   type EuiComboBoxOptionOption,
+  useEuiTheme,
 } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -30,6 +30,8 @@ import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { reportEsqlError } from '../report_error';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export { VisorMode } from './mode_selector';
 
@@ -53,9 +55,10 @@ export interface QuickSearchVisorProps {
   // Handling smaller space for the visor
   isSpaceReduced?: boolean;
   // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
-  editorIsInline?: boolean;
+  isInline?: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
+  telemetryService?: ESQLEditorTelemetryService;
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
@@ -63,7 +66,7 @@ export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlacehol
 });
 
 const searchPlaceholderShort = i18n.translate('esqlEditor.visor.searchPlaceholderShort', {
-  defaultMessage: 'Filter…',
+  defaultMessage: 'Filter using KQL',
 });
 
 const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
@@ -71,7 +74,7 @@ const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
 });
 
 const nlPlaceholderShort = i18n.translate('esqlEditor.visor.nlPlaceholderShort', {
-  defaultMessage: 'Ask in plain language',
+  defaultMessage: 'Describe in plain language',
 });
 
 const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
@@ -85,13 +88,15 @@ const submitVisorLabel = i18n.translate('esqlEditor.visor.submitAriaLabel', {
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
-  editorIsInline,
+  isInline,
   onUpdateAndSubmitQuery,
+  telemetryService,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
+  const useShortPlaceholder = useMemo(() => isInline || isSpaceReduced, [isInline, isSpaceReduced]);
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(getInitialVisorMode);
@@ -128,11 +133,32 @@ export function QuickSearchVisor({
     [selectedSources, query, onUpdateAndSubmitQuery]
   );
 
+  const trackNlResult = useCallback(
+    (
+      nlLength: number,
+      contextQueryLength: number,
+      startTime: number,
+      success: boolean,
+      errorCode?: string,
+      generatedQueryLength?: number
+    ) =>
+      telemetryService?.trackVisorNlSubmitted({
+        nlLength,
+        contextQueryLength,
+        success,
+        durationMs: Date.now() - startTime,
+        ...(errorCode ? { errorCode } : {}),
+        ...(generatedQueryLength !== undefined ? { generatedQueryLength } : {}),
+      }),
+    [telemetryService]
+  );
+
   const onNlSubmit = useCallback(async () => {
     const trimmed = nlValue.trim();
     if (!trimmed || isNlLoading) return;
 
     setIsNlLoading(true);
+    const startTime = Date.now();
     try {
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
@@ -141,10 +167,23 @@ export function QuickSearchVisor({
         }),
       });
       if (result.content) {
+        trackNlResult(
+          trimmed.length,
+          query.length,
+          startTime,
+          true,
+          undefined,
+          result.content.length
+        );
         onUpdateAndSubmitQuery(result.content);
         setNlValue('');
       }
     } catch (error) {
+      reportEsqlError(error, { errorType: 'NlToEsql' });
+      const errorCode = String(
+        (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
+      );
+      trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
       const message =
         (error as { body?: { message?: string } })?.body?.message ??
         i18n.translate('esqlEditor.visor.nlError', {
@@ -154,7 +193,15 @@ export function QuickSearchVisor({
     } finally {
       setIsNlLoading(false);
     }
-  }, [nlValue, isNlLoading, core.http, core.notifications.toasts, onUpdateAndSubmitQuery, query]);
+  }, [
+    nlValue,
+    isNlLoading,
+    core.http,
+    core.notifications.toasts,
+    onUpdateAndSubmitQuery,
+    query,
+    trackNlResult,
+  ]);
 
   const checkConnectorAvailability = useCallback(async () => {
     if (connectorCheckRef.current) return;
@@ -243,7 +290,7 @@ export function QuickSearchVisor({
     comboBoxWidth,
     Boolean(isSpaceReduced),
     visorMode,
-    Boolean(editorIsInline)
+    Boolean(isInline)
   );
 
   if (!KQLComponent) {
@@ -289,7 +336,7 @@ export function QuickSearchVisor({
                   }}
                 />
               </EuiFlexItem>
-              {!editorIsInline && <EuiFlexItem grow={false} css={styles.separator} />}
+              {!isInline && <EuiFlexItem grow={false} css={styles.separator} />}
               <EuiFlexItem css={styles.searchWrapper}>
                 <EuiFlexGroup
                   gutterSize="none"
@@ -310,7 +357,7 @@ export function QuickSearchVisor({
                           language: 'kuery',
                         }}
                         disableAutoFocus={true}
-                        placeholder={editorIsInline ? searchPlaceholderShort : searchPlaceholder}
+                        placeholder={useShortPlaceholder ? searchPlaceholderShort : searchPlaceholder}
                         onChange={(newQuery) => {
                           onKqlValueChange(newQuery.query as string);
                         }}
@@ -353,7 +400,7 @@ export function QuickSearchVisor({
                   <EuiFlexItem>
                     <NLInput
                       value={nlValue}
-                      placeholder={editorIsInline ? nlPlaceholderShort : nlPlaceholder}
+                      placeholder={useShortPlaceholder ? nlPlaceholderShort : nlPlaceholder}
                       disabled={isNlLoading}
                       onChange={setNlValue}
                       onSubmit={onNlSubmit}

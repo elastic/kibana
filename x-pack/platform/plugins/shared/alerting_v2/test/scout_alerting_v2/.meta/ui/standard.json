@@ -1,17 +1,121 @@
 {
-  "sha1": "32f5479779939fba58407b4a063c0656a853e2fb",
+  "sha1": "cddcc14c7e0ed497fa510fccd524f8c2440df095",
   "tests": [
     {
-      "id": "8065d296c26f2cd-b37771106c4b8c3",
-      "title": "Breadcrumb navigation clicking the \"Rules\" breadcrumb navigates to the rules list without duplicating the path",
+      "id": "a3a9f820a79c452-b8b452a1ef0f11e",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: open flyout, define query, step through, and submit",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/breadcrumb_navigation.spec.ts",
-        "line": 22,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-039ec3b1b89e8b7",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: pencil icon opens flyout with pre-populated name, save updates rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 139,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-8c58be25f025b7d",
+      "title": "ComposeDiscoverFlyout — create and edit flows step validation: Next disabled without query, name validation blocks advancement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 204,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-db351a61fa1773d",
+      "title": "ComposeDiscoverFlyout — create and edit flows cancel: closing flyout via Cancel button dismisses without saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 267,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-34e6c15d6389044",
+      "title": "ComposeDiscoverFlyout — create and edit flows sandbox: Apply commits query, closing without Apply discards changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 281,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-6c141dc0d4a74ef",
+      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: Apply without typing anything disables Next",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 312,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-5767614bd465dd1",
+      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: base-only query shows callout and disables Next",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 331,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-0bc3e3ef257d7ca",
+      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: no callout when both base and alert condition are provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 357,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-c9d354100b88881",
+      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: missing breach query keeps user on Alert Condition step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 379,
+        "column": 9
       }
     },
     {
@@ -36,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
-        "line": 44,
+        "line": 46,
         "column": 7
       }
     },
@@ -69,67 +173,15 @@
       }
     },
     {
-      "id": "4a7d2ce0033e93a-20bca93d1cc197d",
-      "title": "Quick edit rule flyout opens the quick edit flyout from the table pencil icon",
+      "id": "885339228dd56a5-73c89e4070ac6f5",
+      "title": "Execution history — smoke loads the page and shows the empty state when there are no events",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 34,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-4b9a9b1a258e7d7",
-      "title": "Quick edit rule flyout opens the quick edit flyout from the rule summary flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 57,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-f170f3e9b100bd7",
-      "title": "Quick edit rule flyout edits a rule name and persists the change",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 79,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-1ab8bdf5d5cc418",
-      "title": "Quick edit rule flyout cancel discards changes",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 104,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-1d465f4dc87ac95",
-      "title": "Quick edit rule flyout opening the summary flyout closes the quick edit flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 121,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
+        "line": 21,
         "column": 7
       }
     },
@@ -142,7 +194,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 43,
+        "line": 48,
         "column": 7
       }
     },
@@ -155,7 +207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 51,
+        "line": 57,
         "column": 7
       }
     },
@@ -168,85 +220,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 63,
-        "column": 7
-      }
-    },
-    {
-      "id": "e12f6e30742fe83-fce7878b5f39621",
-      "title": "Rule name validation — dedicated page displays \"Untitled rule\" as the default placeholder",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 22,
-        "column": 7
-      }
-    },
-    {
-      "id": "e12f6e30742fe83-342dc74d66cb7ac",
-      "title": "Rule name validation — dedicated page shows \"Name is required\" error when saving with empty default value",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 26,
-        "column": 7
-      }
-    },
-    {
-      "id": "e12f6e30742fe83-2aa2ef5feef3e9c",
-      "title": "Rule name validation — dedicated page shows validation error when rule name is cleared after editing",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 34,
-        "column": 7
-      }
-    },
-    {
-      "id": "e12f6e30742fe83-31f2fe98d8c1c90",
-      "title": "Rule name validation — dedicated page shows name validation error when saving after confirming the default placeholder text",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 50,
-        "column": 7
-      }
-    },
-    {
-      "id": "e12f6e30742fe83-2094fd68a6246c9",
-      "title": "Rule name validation — dedicated page error callout scrolls into view on failed submission",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 65,
-        "column": 7
-      }
-    },
-    {
-      "id": "e12f6e30742fe83-64bddd0c59606c2",
-      "title": "Rule name validation — dedicated page no name validation error with a custom rule name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 72,
+        "line": 71,
         "column": 7
       }
     },

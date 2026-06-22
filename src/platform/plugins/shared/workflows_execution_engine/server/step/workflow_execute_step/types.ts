@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
+
 export interface StrategyResult {
   status: 'completed' | 'failed' | 'waiting' | 'cancelled';
-  output?: Record<string, unknown>;
+  output?: JsonValue;
   error?: Error;
 }

@@ -10,7 +10,7 @@
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
-import type { MonacoMessage } from '../../language';
+import type { MonacoMessage } from '../providers/types';
 
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
@@ -45,18 +45,14 @@ export const offsetRangeToMonacoRange = (
       endLineNumber: number;
     }
   | undefined => {
-  if (range.start === range.end) {
-    return;
-  }
-
   let startColumn = NaN;
   let endColumn = 0;
   let startOfCurrentLine = 0;
   let currentLine = 1;
 
   // find the line and start column
-  for (let i = 0; i < expression.length; i++) {
-    if (expression[i] === '\n') {
+  for (let i = 0; i <= expression.length; i++) {
+    if (i < expression.length && expression[i] === '\n') {
       currentLine++;
       startOfCurrentLine = i + 1;
     }

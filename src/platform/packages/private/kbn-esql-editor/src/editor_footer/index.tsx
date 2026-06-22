@@ -17,7 +17,7 @@ import {
   LanguageDocumentationInline,
 } from '@kbn/language-documentation';
 import React, { memo, useCallback, useState } from 'react';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { MonacoMessage } from '@kbn/code-editor';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';

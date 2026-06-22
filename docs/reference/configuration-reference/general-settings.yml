@@ -1,6 +1,6 @@
 ---
 # This file is used to generate the "General settings in Kibana" page in the product docs.
-# For the schema and an example refer to the automated settings reference: 
+# For the schema and an example refer to the automated settings reference:
 # https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
@@ -27,10 +27,9 @@ groups:
       - setting: execution_context.enabled
         description: |
           Propagate request-specific metadata to Elasticsearch server by way of the `x-opaque-id` header.
-          It is available in {{ecloud}} 8.1.0 and later versions.
         datatype: bool
         applies_to:
-          stack: ga
+          stack: ga 8.1
           ech: ga
           self: ga
 
@@ -125,6 +124,17 @@ groups:
       - setting: status.allowAnonymous
         description: |
           If authentication is enabled, setting this to `true` enables unauthenticated users to access the {{kib}} server status API and status page.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: status.statusPageBypassMonitorPrivilege
+        description: |
+          Allow all authenticated users to access the full {{kib}} server status API. When `false`, users are required to have the Elasticsearch `monitor` cluster privilege.
+          NOTE: This setting is only relevant if `status.allowAnonymous` is `false` (default).
         datatype: bool
         default: false
         applies_to:
@@ -240,14 +250,25 @@ groups:
           self: ga
         note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityresponseheaders-disableembedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
 
+      - setting: csp.form_action
+        description: |
+          Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action).
+        datatype: string
+        default: "'self'"
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
+
       - setting: csp.report_only.form_action
         description: |
           Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
         datatype: string
         applies_to:
-          stack: ga
-          ech: unavailable
-          self: ga
+          - "stack: deprecated 9.5"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Use `csp.form_action` instead."
 
       - setting: csp.report_only.object_src
         description: |
@@ -258,6 +279,15 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "This setting is deprecated in favor of `csp.object_src`."
+
+      - setting: csp.report_only.connect_src
+        description: |
+          Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src) in reporting mode.
+        datatype: string
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
 
       - setting: csp.report_uri
         description: |
@@ -380,11 +410,10 @@ groups:
       - setting: elasticsearch.compression
         description: |
           Specifies whether {{kib}} should use compression for communications with {{es}}.
-          It is available in {{ecloud}} 8.3.0 and later versions.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -422,11 +451,10 @@ groups:
         id: elasticsearch-maxsockets
         description: |
           The maximum number of sockets that can be used for communications with {{es}}.
-          It is available in {{ecloud}} 8.2.0 and later versions.
         datatype: int
         default: 800
         applies_to:
-          stack: ga
+          stack: ga 8.2
           ech: ga
           self: ga
 
@@ -780,20 +808,18 @@ groups:
       - setting: migrations.discardUnknownObjects
         description: |
           Discard saved objects with unknown types during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
-          It is available in {{ecloud}} 8.4.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.4
           ech: ga
           self: ga
 
       - setting: migrations.discardCorruptObjects
         description: |
           Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
-          It is available in {{ecloud}} 8.4.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.4
           ech: ga
           self: ga
 
@@ -819,9 +845,12 @@ groups:
 
       - setting: migrations.useCumulativeLogger
         description: |
-          Skip logging migration progress unless there are any errors. Set to `false` when troubleshooting migration issues and not automatically shown.
+          When enabled, migration progress is only logged if the migration fails, reducing log volume during successful startups. When disabled (the default), migration steps are logged continuously, which keeps failing or stuck migrations visible. Set to `true` to reduce startup log volume.
+        note: |
+          :applies_to: stack: ga 9.2-9.4
+          In these versions, this setting defaults to `true`.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           - "stack: ga 9.2"
           - "ech: unavailable"
@@ -863,9 +892,13 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` or upgrade to a later version.
 
       - setting: data.autocomplete.valueSuggestions.timeout
         description: |
@@ -873,9 +906,13 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.timeout` or upgrade to a later version.
 
       - setting: unifiedSearch.autocomplete.valueSuggestions.timeout
         description: |
@@ -883,7 +920,7 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -893,7 +930,7 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
         note: "To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide."
@@ -947,6 +984,7 @@ groups:
         id: server-maxpayload
         description: |
           The maximum payload size in bytes for incoming server requests.
+          This option controls the maximum payload size Kibana can handle, rather than the incoming request size, which also limits the inflated size when compression is used.
         datatype: int
         default: 1048576
         applies_to:
@@ -1099,11 +1137,10 @@ groups:
       - setting: server.compression.brotli.enabled
         description: |
           Set to `true` to enable brotli (br) compression format. Browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`.
-          It is available in {{ecloud}} 8.6.0 and later versions.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: ga 8.6
           ech: ga
           self: ga
 
@@ -1263,7 +1300,6 @@ groups:
         id: server-securityresponseheaders-crossoriginopenerpolicy
         description: |
           Controls whether the [`Cross-Origin-Opener-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`.
-          It is available in {{ecloud}} 8.7.0 and later versions.
         datatype: enum
         default: '"same-origin"'
         options:
@@ -1272,7 +1308,7 @@ groups:
           - option: same-origin
           - option: "null"
         applies_to:
-          stack: ga
+          stack: ga 8.7
           ech: ga
           self: ga
 
@@ -1433,11 +1469,10 @@ groups:
           ```text
           *Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
           ```
-          It is available in {{ecloud}} 8.0.0 and later versions.
         datatype: string
         default: "[]"
         applies_to:
-          stack: ga
+          stack: ga 8.0
           ech: ga
           self: ga
 
@@ -1504,18 +1539,28 @@ groups:
           - "ech: ga"
           - "self: ga"
 
-      - setting: vis_type_table.legacyVisEnabled
+      - setting: vis_type_timelion.enabled
         description: |
-          Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
+          Set to `false` to disable Timelion visualizations.
         datatype: bool
+        default: true
         applies_to:
           stack: ga
           ech: ga
           self: ga
 
-      - setting: vis_type_vega.enable
+      - setting: vis_type_table.legacyVisEnabled
         description: |
-          For 7.7 version and later, set to `false` to disable Vega vizualizations.
+          Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
+        datatype: bool
+        applies_to:
+          stack: removed 8.0
+          ech: ga
+          self: ga
+
+      - setting: vis_type_vega.enabled
+        description: |
+          For versions 7.7 and later, set to `false` to disable Vega visualizations.
         datatype: bool
         default: true
         applies_to:
@@ -1635,10 +1680,9 @@ groups:
       - setting: xpack.securitySolution.maxUploadResponseActionFileBytes
         description: |
           Allow to configure the max file upload size for use with the Upload File Response action available with the Defend Integration. To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
-          It is available in {{ecloud}} 8.9.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.9
           ech: ga
           self: ga
 
