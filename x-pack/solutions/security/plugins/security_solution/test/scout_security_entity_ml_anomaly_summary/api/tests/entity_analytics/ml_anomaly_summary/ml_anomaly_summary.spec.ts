@@ -399,7 +399,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: returns 200 with correct response shape for entity with anomaly records',
+      'Anomaly overview API: returns expected response for entity with anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
@@ -409,73 +409,33 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
-        expect(body.entityId).toBe(CAROL_EUID);
-        expect(body.entityType).toBe('user');
-        expect(Array.isArray(body.anomalies)).toBe(true);
-        expect(typeof body.totalAnomaliesCount).toBe('number');
-        expect(typeof body.tacticCounts).toBe('object');
-        expect(typeof body.from).toBe('number');
-        expect(typeof body.to).toBe('number');
-        expect(body.to).toBeGreaterThan(body.from);
-      }
-    );
 
-    apiTest(
-      'Anomaly overview API: returns anomaly entries with correct shape for each time bucket',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
-          responseType: 'json',
-          body: {},
-        });
+        // Response shape
+        expect.soft(body.entityId).toBe(CAROL_EUID);
+        expect.soft(body.entityType).toBe('user');
+        expect.soft(Array.isArray(body.anomalies)).toBe(true);
+        expect.soft(typeof body.from).toBe('number');
+        expect.soft(typeof body.to).toBe('number');
+        expect.soft(body.to).toBeGreaterThan(body.from);
 
-        expect(response).toHaveStatusCode(200);
-        const body = response.body as AnomalyOverviewResponse;
-        expect(body.anomalies.length).toBeGreaterThanOrEqual(1);
-
-        for (const entry of body.anomalies) {
-          expect(typeof entry.timestamp).toBe('string');
-          expect(new Date(entry.timestamp).toISOString()).toBe(entry.timestamp);
-          expect(typeof entry.maxScore).toBe('number');
-          expect(entry.maxScore).toBeGreaterThan(0);
-          expect(Array.isArray(entry.threatTactics)).toBe(true);
-        }
-      }
-    );
-
-    apiTest(
-      'Anomaly overview API: reflects the total anomaly record count across all buckets',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
-          responseType: 'json',
-          body: {},
-        });
-
-        expect(response).toHaveStatusCode(200);
-        const body = response.body as AnomalyOverviewResponse;
         // Carol has 2 indexed anomaly records: pad_windows_rare_region_name_by_user_ea and auth_high_count_logon_events_ea
-        expect(body.totalAnomaliesCount).toBe(2);
-      }
-    );
+        expect.soft(body.totalAnomaliesCount).toBe(2);
 
-    apiTest(
-      'Anomaly overview API: tacticCounts reflects tactic distribution from jobs that fired',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
-          responseType: 'json',
-          body: {},
-        });
+        // Per-bucket entry shape
+        expect.soft(body.anomalies.length).toBeGreaterThanOrEqual(1);
+        for (const entry of body.anomalies) {
+          expect.soft(typeof entry.timestamp).toBe('string');
+          expect.soft(new Date(entry.timestamp).toISOString()).toBe(entry.timestamp);
+          expect.soft(typeof entry.maxScore).toBe('number');
+          expect.soft(entry.maxScore).toBeGreaterThan(0);
+          expect.soft(Array.isArray(entry.threatTactics)).toBe(true);
+        }
 
-        expect(response).toHaveStatusCode(200);
-        const body = response.body as AnomalyOverviewResponse;
         // auth_high_count_logon_events_ea contributes 'Credential Access' and 'Initial Access'
-        expect(Object.keys(body.tacticCounts)).toContain('Credential Access');
-        expect(Object.keys(body.tacticCounts)).toContain('Initial Access');
+        expect.soft(Object.keys(body.tacticCounts)).toContain('Credential Access');
+        expect.soft(Object.keys(body.tacticCounts)).toContain('Initial Access');
         for (const count of Object.values(body.tacticCounts)) {
-          expect(typeof count).toBe('number');
-          expect(count).toBeGreaterThan(0);
+          expect.soft(count).toBeGreaterThan(0);
         }
       }
     );
