@@ -112,8 +112,7 @@ export const useGetRuleTypesPermissions = ({
     authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.read);
 
   const authorizedToReadAnyAlerts =
-    authorizedToReadAnyRules ||
-    Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show);
+    authorizedToReadAnyRules || Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show);
 
   return {
     ruleTypesState: {
