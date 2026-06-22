@@ -91,7 +91,7 @@ export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
 // Canonical persisted feature. Once a feature has been stored and read back it
 // always carries its derived `uuid`.
 export const featureSchema = featureUpsertSchema.and(
-  z.object({
+  z.strictObject({
     uuid: z.string().max(MAX_ID_LENGTH),
   })
 );
