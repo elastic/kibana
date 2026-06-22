@@ -210,8 +210,10 @@ export const WaitForInputStepSchema = BaseStepSchema.extend({
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalSlackChannelSchema = z.object({
-  'connector-id': z.string().min(1).describe('Slack connector saved object id or name'),
-  channel: z.string().min(1).describe('Slack channel name, e.g. "#security-approvals"'),
+  'connector-id': z
+    .string()
+    .min(1)
+    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
 });
 
 export const WaitForApprovalSlackApiChannelSchema = z.object({

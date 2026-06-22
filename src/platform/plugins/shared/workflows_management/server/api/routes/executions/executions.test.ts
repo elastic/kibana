@@ -699,7 +699,7 @@ describe('Execution Routes', () => {
 
     it('should resume via signed token and return HTML', async () => {
       mockApi.resumeWorkflowExecutionExternally.mockResolvedValue({
-        resumedBy: 'external_resume:token-jti',
+        resumedBy: 'api_key:token-jti',
       });
       const h = handler('GET', path)!;
       const request = {

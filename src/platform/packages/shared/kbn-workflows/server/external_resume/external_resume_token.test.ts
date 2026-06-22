@@ -22,6 +22,7 @@ describe('external resume token', () => {
     spaceId: 'default',
     executionId: 'exec-1',
     stepId: 'request-approval',
+    apiKeyId: 'api-key-id',
     ttlMs: 60_000,
     jti: 'token-jti',
   });
@@ -53,7 +54,7 @@ describe('external resume token', () => {
     );
   });
 
-  it('builds a resume URL with the token query parameter', () => {
+  it('builds a resume URL with only the token query parameter', () => {
     const token = signExternalResumeToken(basePayload, SIGNING_KEY);
     const url = buildExternalResumeUrl({
       kibanaUrl: 'https://kibana.example',
@@ -80,5 +81,6 @@ describe('external resume token', () => {
     });
 
     expect(url).toContain('approved=true');
+    expect(url).not.toContain('apiKey=');
   });
 });

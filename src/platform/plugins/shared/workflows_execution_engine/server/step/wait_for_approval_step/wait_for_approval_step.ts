@@ -14,6 +14,7 @@ import {
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
+import { createExternalResumeApiKey } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
   hasExternalApprovalChannels,
@@ -85,13 +86,41 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
     });
 
+    const signingKey = this.dependencies.externalResumeSigningKey;
+    const execution = this.workflowRuntime.getWorkflowExecution();
+    const spaceId = this.dependencies.spaceId ?? execution.spaceId;
+    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+
+    let apiKeyId: string | undefined;
+    if (signingKey && spaceId) {
+      apiKeyId = await this.mintExternalResumeApiKey({
+        message,
+        approveLabel,
+        rejectLabel,
+        execution,
+        spaceId,
+        timeout,
+      });
+    }
+
     const channels = withConfig?.channels;
     if (hasExternalApprovalChannels(channels)) {
+      if (!signingKey || !spaceId || !apiKeyId) {
+        throw new Error(
+          'External approval notifications require a configured signing key and space'
+        );
+      }
+
       await this.sendExternalNotifications({
         channels,
         message,
         approveLabel,
         rejectLabel,
+        apiKeyId,
+        signingKey,
+        timeout,
+        execution,
+        spaceId,
       });
     }
 
@@ -100,11 +129,52 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     });
   }
 
+  private async mintExternalResumeApiKey({
+    message,
+    approveLabel,
+    rejectLabel,
+    execution,
+    spaceId,
+    timeout,
+  }: {
+    message: string;
+    approveLabel: string;
+    rejectLabel: string;
+    execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
+    spaceId: string;
+    timeout: string;
+  }): Promise<string> {
+    const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
+    const apiKey = await createExternalResumeApiKey({
+      esClient,
+      executionId: execution.id,
+      stepId: this.node.stepId,
+      workflowId: execution.workflowId,
+      spaceId,
+      expiration: timeout,
+    });
+
+    this.stepExecutionRuntime.setInput({
+      ...(message.length > 0 && { message }),
+      approveLabel,
+      rejectLabel,
+      schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
+      externalResumeEncodedApiKey: apiKey.encoded,
+    });
+
+    return apiKey.id;
+  }
+
   private async sendExternalNotifications({
     channels,
     message,
     approveLabel,
     rejectLabel,
+    apiKeyId,
+    signingKey,
+    timeout,
+    execution,
+    spaceId,
   }: {
     channels: NonNullable<
       NonNullable<WaitForApprovalGraphNode['configuration']['with']>['channels']
@@ -112,15 +182,12 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     message: string;
     approveLabel: string;
     rejectLabel: string;
+    apiKeyId: string;
+    signingKey: string;
+    timeout: string;
+    execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
+    spaceId: string;
   }): Promise<void> {
-    const signingKey = this.dependencies.externalResumeSigningKey;
-    const spaceId = this.dependencies.spaceId;
-    if (!signingKey || !spaceId) {
-      throw new Error('External approval notifications require a configured signing key and space');
-    }
-
-    const execution = this.workflowRuntime.getWorkflowExecution();
-    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
     const resumeLinks = buildWaitForApprovalResumeLinks({
       kibanaUrl: getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup),
       spaceId,
@@ -128,6 +195,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       stepId: this.node.stepId,
       timeout,
       signingKey,
+      apiKeyId,
     });
 
     await sendWaitForApprovalNotifications({

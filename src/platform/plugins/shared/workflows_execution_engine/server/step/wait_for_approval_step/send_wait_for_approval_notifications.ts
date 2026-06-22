@@ -30,7 +30,7 @@ export function hasExternalApprovalChannels(
     return false;
   }
 
-  const hasSlack = Boolean(channels.slack?.['connector-id']) && Boolean(channels.slack?.channel);
+  const hasSlack = Boolean(channels.slack?.['connector-id']);
   const hasSlackApi =
     Boolean(channels.slack_api?.['connector-id']) && Boolean(channels.slack_api?.channels?.length);
 
@@ -44,6 +44,7 @@ export function buildWaitForApprovalResumeLinks({
   stepId,
   timeout,
   signingKey,
+  apiKeyId,
 }: {
   kibanaUrl: string;
   spaceId: string;
@@ -51,11 +52,13 @@ export function buildWaitForApprovalResumeLinks({
   stepId: string;
   timeout: string;
   signingKey: string;
+  apiKeyId: string;
 }): WaitForApprovalResumeLinks {
   const payload = createExternalResumeTokenPayload({
     spaceId,
     executionId,
     stepId,
+    apiKeyId,
     ttlMs: parseDuration(timeout),
   });
   const token = signExternalResumeToken(payload, signingKey);
@@ -65,6 +68,10 @@ export function buildWaitForApprovalResumeLinks({
     approveUrl: buildExternalResumeUrl({ ...baseParams, approved: true }),
     rejectUrl: buildExternalResumeUrl({ ...baseParams, approved: false }),
   };
+}
+
+function escapeSlackMrkdwnUrl(url: string): string {
+  return url.replace(/&/g, '&amp;');
 }
 
 function buildSlackMessage({
@@ -81,7 +88,9 @@ function buildSlackMessage({
   rejectUrl: string;
 }): string {
   const prompt = message.length > 0 ? `${message}\n\n` : '';
-  return `${prompt}<${approveUrl}|${approveLabel}>  <${rejectUrl}|${rejectLabel}>`;
+  return `${prompt}<${escapeSlackMrkdwnUrl(approveUrl)}|${approveLabel}>  <${escapeSlackMrkdwnUrl(
+    rejectUrl
+  )}|${rejectLabel}>`;
 }
 
 function buildSlackApiBlocks({
@@ -127,6 +136,25 @@ function buildSlackApiBlocks({
   return blocks;
 }
 
+function buildSlackApiBlockkitInput(
+  linkParams: {
+    message: string;
+    approveLabel: string;
+    rejectLabel: string;
+    approveUrl: string;
+    rejectUrl: string;
+  },
+  target: { channelNames?: string[]; channelIds?: string[] }
+) {
+  return {
+    subAction: 'postBlockkit' as const,
+    subActionParams: {
+      ...target,
+      text: JSON.stringify({ blocks: buildSlackApiBlocks(linkParams) }),
+    },
+  };
+}
+
 function assertConnectorSucceeded(result: {
   status: string;
   message?: string;
@@ -164,31 +192,27 @@ export async function sendWaitForApprovalNotifications({
     rejectUrl: resumeLinks.rejectUrl,
   };
 
-  if (channels.slack?.['connector-id'] && channels.slack.channel) {
+  const slackConfig = channels.slack;
+  if (slackConfig?.['connector-id']) {
     const result = await connectorExecutor.execute({
       connectorType: 'slack',
-      connectorNameOrId: channels.slack['connector-id'],
+      connectorNameOrId: slackConfig['connector-id'],
       input: {
         message: buildSlackMessage(linkParams),
-        channel: channels.slack.channel,
       },
       abortController,
     });
     assertConnectorSucceeded(result);
   }
 
-  if (channels.slack_api?.['connector-id'] && channels.slack_api.channels?.length) {
+  const slackApiChannelId = channels.slack_api?.channels?.[0];
+  if (channels.slack_api?.['connector-id'] && slackApiChannelId) {
     const result = await connectorExecutor.execute({
       connectorType: 'slack_api',
       connectorNameOrId: channels.slack_api['connector-id'],
-      input: {
-        subAction: 'postMessage',
-        subActionParams: {
-          channels: channels.slack_api.channels,
-          text: message.length > 0 ? message : `${approveLabel} / ${rejectLabel}`,
-          blocks: buildSlackApiBlocks(linkParams),
-        },
-      },
+      input: buildSlackApiBlockkitInput(linkParams, {
+        channelIds: [slackApiChannelId],
+      }),
       abortController,
     });
     assertConnectorSucceeded(result);

@@ -128,7 +128,6 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private readonly externalResumeSigningKey: string;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private coreSetup?: CoreSetup<
@@ -143,7 +142,10 @@ export class WorkflowsExecutionEnginePlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.externalResumeSigningKey = resolveExternalResumeSigningKey(
+  }
+
+  private getExternalResumeSigningKey(): string {
+    return resolveExternalResumeSigningKey(
       this.config.externalResume?.signingKey,
       this.logger,
       'workflowsExecutionEngine.externalResume.signingKey'
@@ -236,6 +238,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
+                externalResumeSigningKey: this.getExternalResumeSigningKey(),
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -347,6 +350,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
+                externalResumeSigningKey: this.getExternalResumeSigningKey(),
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -466,6 +470,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
+                externalResumeSigningKey: this.getExternalResumeSigningKey(),
               };
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -654,7 +659,7 @@ export class WorkflowsExecutionEnginePlugin
       taskManager: plugins.taskManager,
       workflowsExtensions: plugins.workflowsExtensions,
       config: this.config,
-      externalResumeSigningKey: this.externalResumeSigningKey,
+      externalResumeSigningKey: this.getExternalResumeSigningKey(),
     };
 
     // Re-check that a workflow is still enabled right before persisting an
@@ -1313,7 +1318,10 @@ export class WorkflowsExecutionEnginePlugin
         });
 
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId);
+      await workflowTaskManager.forceRunIdleTasks(executionId, {
+        spaceId,
+        fakeRequest: request,
+      });
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;

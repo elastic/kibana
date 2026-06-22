@@ -9,6 +9,7 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
+import { externalResumeServerArgs } from '../external_resume_test_constants';
 
 /**
  * Custom Scout server configuration for Workflows Management UI tests.
@@ -26,6 +27,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       // Allow short alert rule intervals for alert trigger tests (default minimum is 1m)
       '--xpack.alerting.rules.minimumScheduleInterval.value=15s',
+      ...externalResumeServerArgs,
     ],
   },
 };

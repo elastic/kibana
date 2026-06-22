@@ -11,11 +11,12 @@
 
 import { createHmac, randomUUID, timingSafeEqual } from 'crypto';
 
-export const EXTERNAL_RESUME_TOKEN_VERSION = 1 as const;
+export const EXTERNAL_RESUME_TOKEN_VERSION = 2 as const;
 
 export interface ExternalResumeTokenPayload {
   v: typeof EXTERNAL_RESUME_TOKEN_VERSION;
   jti: string;
+  apiKeyId: string;
   exp: number;
   spaceId: string;
   executionId: string;
@@ -33,12 +34,14 @@ export function createExternalResumeTokenPayload({
   spaceId,
   executionId,
   stepId,
+  apiKeyId,
   ttlMs,
   jti,
 }: {
   spaceId: string;
   executionId: string;
   stepId: string;
+  apiKeyId: string;
   ttlMs: number;
   jti?: string;
 }): ExternalResumeTokenPayload {
@@ -48,6 +51,7 @@ export function createExternalResumeTokenPayload({
   return {
     v: EXTERNAL_RESUME_TOKEN_VERSION,
     jti: jti ?? randomUUID(),
+    apiKeyId,
     exp: nowSeconds + ttlSeconds,
     spaceId,
     executionId,
@@ -59,6 +63,7 @@ function canonicalPayloadB64(payload: ExternalResumeTokenPayload): string {
   const ordered: ExternalResumeTokenPayload = {
     v: payload.v,
     jti: payload.jti,
+    apiKeyId: payload.apiKeyId,
     exp: payload.exp,
     spaceId: payload.spaceId,
     executionId: payload.executionId,
@@ -91,6 +96,8 @@ function assertTokenPayload(value: unknown): ExternalResumeTokenPayload {
     payload.v !== EXTERNAL_RESUME_TOKEN_VERSION ||
     typeof payload.jti !== 'string' ||
     payload.jti.length === 0 ||
+    typeof payload.apiKeyId !== 'string' ||
+    payload.apiKeyId.length === 0 ||
     typeof payload.exp !== 'number' ||
     typeof payload.spaceId !== 'string' ||
     payload.spaceId.length === 0 ||

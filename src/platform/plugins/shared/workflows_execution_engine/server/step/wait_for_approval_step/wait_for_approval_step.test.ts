@@ -9,6 +9,11 @@
 
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
+import {
+  buildWaitForApprovalResumeLinks,
+  hasExternalApprovalChannels,
+  sendWaitForApprovalNotifications,
+} from './send_wait_for_approval_notifications';
 import { WaitForApprovalStepImpl } from './wait_for_approval_step';
 import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -16,11 +21,29 @@ import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
+jest.mock('@kbn/workflows/server', () => ({
+  ...jest.requireActual('@kbn/workflows/server'),
+  createExternalResumeApiKey: jest.fn().mockResolvedValue({
+    id: 'api-key-id',
+    encoded: 'encoded-api-key',
+  }),
+}));
+
+const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
+  .createExternalResumeApiKey as jest.Mock;
+
 jest.mock('./send_wait_for_approval_notifications', () => ({
   hasExternalApprovalChannels: jest.fn().mockReturnValue(false),
-  buildWaitForApprovalResumeLinks: jest.fn(),
+  buildWaitForApprovalResumeLinks: jest.fn().mockReturnValue({
+    approveUrl: 'https://kibana/approve',
+    rejectUrl: 'https://kibana/reject',
+  }),
   sendWaitForApprovalNotifications: jest.fn(),
 }));
+
+const mockHasExternalApprovalChannels = hasExternalApprovalChannels as jest.Mock;
+const mockBuildWaitForApprovalResumeLinks = buildWaitForApprovalResumeLinks as jest.Mock;
+const mockSendWaitForApprovalNotifications = sendWaitForApprovalNotifications as jest.Mock;
 
 describe('WaitForApprovalStepImpl', () => {
   let underTest: WaitForApprovalStepImpl;
@@ -32,6 +55,11 @@ describe('WaitForApprovalStepImpl', () => {
   let dependencies: ContextDependencies;
 
   beforeEach(() => {
+    mockHasExternalApprovalChannels.mockReturnValue(false);
+    mockBuildWaitForApprovalResumeLinks.mockClear();
+    mockSendWaitForApprovalNotifications.mockClear();
+    mockCreateExternalResumeApiKey.mockClear();
+
     node = {
       id: 'request-approval',
       type: 'waitForApproval',
@@ -57,6 +85,7 @@ describe('WaitForApprovalStepImpl', () => {
       abortController: new AbortController(),
       contextManager: {
         renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
+        getEsClientAsUser: jest.fn().mockReturnValue({ security: { createApiKey: jest.fn() } }),
       },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
@@ -98,6 +127,15 @@ describe('WaitForApprovalStepImpl', () => {
     });
   });
 
+  it('mints an external resume API key when a signing key is configured', async () => {
+    await underTest.run();
+
+    expect(mockCreateExternalResumeApiKey).toHaveBeenCalled();
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+      expect.objectContaining({ externalResumeEncodedApiKey: 'encoded-api-key' })
+    );
+  });
+
   it('finishes with approval output shape on resume', async () => {
     mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
     mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
@@ -112,5 +150,43 @@ describe('WaitForApprovalStepImpl', () => {
       respondedBy: 'user-1',
     });
     expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
+  });
+
+  it('uses workflow execution spaceId when dependencies.spaceId is missing', async () => {
+    mockHasExternalApprovalChannels.mockReturnValue(true);
+    node.configuration = {
+      ...node.configuration,
+      with: {
+        ...node.configuration.with,
+        channels: {
+          slack: { 'connector-id': 'slack-1' },
+        },
+      },
+    } as WaitForApprovalStep;
+    dependencies = {
+      externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
+      coreStart: {},
+    } as ContextDependencies;
+    mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+      id: 'exec-abc',
+      workflowId: 'wf-1',
+      spaceId: 'custom-space',
+      context: {},
+    });
+    underTest = new WaitForApprovalStepImpl(
+      node,
+      mockStepExecutionRuntime,
+      mockWorkflowRuntime,
+      workflowLogger,
+      connectorExecutor,
+      dependencies
+    );
+
+    await underTest.run();
+
+    expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'custom-space' })
+    );
+    expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
   });
 });

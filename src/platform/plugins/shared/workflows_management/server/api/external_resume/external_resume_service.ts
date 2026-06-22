@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { FakeRawRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
 import { ExecutionStatus, isHitlWaitStepType } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
+  WorkflowExecutionInvalidStatusError,
+  WorkflowExecutionNotFoundError,
+} from '@kbn/workflows/common/errors';
+import {
   ExternalResumeTokenVerificationError,
+  getAuthenticatedExternalResumeApiKeyId,
+  getExternalResumeEncodedApiKeyFromStepInput,
+  invalidateExternalResumeApiKey,
   verifyExternalResumeToken,
 } from '@kbn/workflows/server';
+import { createExternalResumeApiKeyRequest } from './create_external_resume_api_key_request';
 import { ExternalResumeError } from './external_resume_error';
 import type { WorkflowsService } from '../workflows_management_service';
 
@@ -26,6 +30,13 @@ export interface ExternalResumeWorkflowExecutionParams {
   signingKey: string;
   spaceId: string;
   token: string;
+}
+
+interface ApiKeyAuthenticateResponse {
+  api_key?: {
+    id?: string;
+    name?: string;
+  };
 }
 
 export async function resumeWorkflowExecutionExternally(
@@ -50,11 +61,19 @@ export async function resumeWorkflowExecutionExternally(
     throw new ExternalResumeError('Resume token does not match this space', 403);
   }
 
-  const stepExecution = await getWaitingStepExecution(workflowsService, {
-    executionId,
-    spaceId,
-    stepId: payload.stepId,
-  });
+  const execution = await workflowsService.getWorkflowExecution(
+    payload.executionId,
+    payload.spaceId,
+    {
+      includeInput: true,
+    }
+  );
+
+  if (!execution) {
+    throw new ExternalResumeError('Workflow execution not found', 404);
+  }
+
+  const stepExecution = getWaitingStepExecutionFromDto(execution, payload.stepId);
 
   if (!stepExecution) {
     throw new ExternalResumeError('Workflow execution is not waiting for external input', 409);
@@ -64,56 +83,78 @@ export async function resumeWorkflowExecutionExternally(
     throw new ExternalResumeError('This workflow response link is no longer valid', 409);
   }
 
-  const workflowsExecutionEngine = await workflowsService.getWorkflowsExecutionEngine();
-  const externalRequest = createExternalResumeRequest(spaceId);
-  const resumedBy = `external_resume:${payload.jti}`;
+  const coreStart = await workflowsService.getCoreStart();
+  const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-  return workflowsExecutionEngine.resumeWorkflowExecution(
-    executionId,
-    spaceId,
-    { approved },
-    externalRequest,
-    { resumedBy }
+  const encodedApiKey = getExternalResumeEncodedApiKeyFromStepInput(stepExecution.input);
+  if (!encodedApiKey) {
+    throw new ExternalResumeError('This workflow response link is no longer valid', 409);
+  }
+
+  const apiKeyRequest = createExternalResumeApiKeyRequest(encodedApiKey, spaceId);
+  let authentication: ApiKeyAuthenticateResponse;
+  try {
+    authentication = (await coreStart.elasticsearch.client
+      .asScoped(apiKeyRequest)
+      .asCurrentUser.security.authenticate()) as ApiKeyAuthenticateResponse;
+  } catch {
+    throw new ExternalResumeError('Invalid external resume API key', 401);
+  }
+
+  const authenticatedApiKeyId = getAuthenticatedExternalResumeApiKeyId(
+    authentication,
+    encodedApiKey
   );
-}
-
-function createExternalResumeRequest(spaceId: string): KibanaRequest {
-  const fakeRawRequest: FakeRawRequest = {
-    headers: {},
-    spaceId: asSpaceId(spaceId),
-  };
-  return kibanaRequestFactory(fakeRawRequest);
-}
-
-async function getWaitingStepExecution(
-  workflowsService: WorkflowsService,
-  {
-    executionId,
-    spaceId,
-    stepId,
-  }: {
-    executionId: string;
-    spaceId: string;
-    stepId: string;
-  }
-): Promise<WorkflowStepExecutionDto | undefined> {
-  const execution = await workflowsService.getWorkflowExecution(executionId, spaceId);
-
-  if (!execution) {
-    throw new ExternalResumeError('Workflow execution not found', 404);
+  if (!authenticatedApiKeyId || authenticatedApiKeyId !== payload.apiKeyId) {
+    throw new ExternalResumeError('Invalid external resume API key', 401);
   }
 
+  const workflowsExecutionEngine = await workflowsService.getWorkflowsExecutionEngine();
+  const resumedBy = `api_key:${payload.apiKeyId}`;
+
+  try {
+    const result = await workflowsExecutionEngine.resumeWorkflowExecution(
+      payload.executionId,
+      payload.spaceId,
+      { approved },
+      apiKeyRequest,
+      { resumedBy }
+    );
+
+    await invalidateExternalResumeApiKey(internalEsClient, payload.apiKeyId);
+
+    return result;
+  } catch (error) {
+    if (error instanceof WorkflowExecutionNotFoundError) {
+      throw new ExternalResumeError('Workflow execution not found', 404);
+    }
+    if (error instanceof WorkflowExecutionInvalidStatusError) {
+      throw new ExternalResumeError('Workflow execution is not waiting for external input', 409);
+    }
+    throw error;
+  }
+}
+
+function getWaitingStepExecutionFromDto(
+  execution: {
+    id: string;
+    status: ExecutionStatus;
+    finishedAt?: string;
+    stepExecutions: WorkflowStepExecutionDto[];
+  },
+  stepId: string
+): WorkflowStepExecutionDto | undefined {
   if (execution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
-    throw new ExternalResumeError('Workflow execution is not waiting for external input', 409);
+    return undefined;
   }
 
   if (execution.finishedAt) {
-    throw new ExternalResumeError('This workflow response link is no longer valid', 409);
+    return undefined;
   }
 
   return execution.stepExecutions.find(
     (stepExecution) =>
-      stepExecution.workflowRunId === executionId &&
+      stepExecution.workflowRunId === execution.id &&
       stepExecution.stepId === stepId &&
       isHitlWaitStepType(stepExecution.stepType) &&
       stepExecution.status === ExecutionStatus.WAITING_FOR_INPUT

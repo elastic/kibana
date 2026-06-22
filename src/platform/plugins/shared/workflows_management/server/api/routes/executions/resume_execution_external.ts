@@ -23,12 +23,13 @@ import { withAvailabilityCheck } from '../utils/with_availability_check';
 const EXTERNAL_RESUME_SECURITY = {
   authc: {
     enabled: false,
-    reason: 'External resume uses a signed capability token instead of a Kibana session.',
+    reason:
+      'External resume uses a signed token containing an API key id instead of a Kibana session.',
   },
   authz: {
     enabled: false,
     reason:
-      'External resume authorizes by verifying a signed token bound to the waiting waitForInput step.',
+      'External resume authorizes by verifying a signed token and validating the bound API key by id.',
   },
 } as const;
 
@@ -56,7 +57,10 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
             params: executionIdParamSchema,
             query: schema.object({
               token: schema.string({
-                meta: { description: 'Signed external resume capability token.' },
+                meta: {
+                  description:
+                    'Signed external resume capability token containing the bound API key id.',
+                },
               }),
               approved: schema.oneOf(
                 [schema.boolean(), schema.literal('true'), schema.literal('false')],

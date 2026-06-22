@@ -7,21 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const COMMON_HEADERS = {
-  'kbn-xsrf': 'true',
-};
-
-/** Must match externalResumeServerArgs in kbn-scout workflows_ui config sets */
+/** Keep in sync with workflows_management scout test fixtures/constants.ts */
 export const SCOUT_EXTERNAL_RESUME_SIGNING_KEY = 'scout-external-resume-signing-key-min-32-chars';
 
-export const SIMPLE_WORKFLOW_YAML = `name: ImportTest Workflow
-description: A simple test workflow for import
-enabled: false
-triggers:
-  - type: manual
-steps:
-  - type: console
-    name: Step 1
-    with:
-      message: hello
-`;
+export const externalResumeServerArgs = [
+  `--workflowsManagement.externalResume.signingKey=${SCOUT_EXTERNAL_RESUME_SIGNING_KEY}`,
+  `--workflowsExecutionEngine.externalResume.signingKey=${SCOUT_EXTERNAL_RESUME_SIGNING_KEY}`,
+];

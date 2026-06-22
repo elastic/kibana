@@ -119,15 +119,8 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
   return parts.join('_');
 }
 
-function normalizeWaitForApprovalTimeout(step: BaseStep): BaseStep {
-  if (step.type === 'waitForApproval' && !(step as TimeoutProp).timeout) {
-    return { ...step, timeout: DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT };
-  }
-  return step;
-}
-
 function visitAbstractStep(originalStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
-  const currentStep = normalizeWaitForApprovalTimeout(originalStep);
+  const currentStep = originalStep;
   if ((currentStep as StepWithOnFailure)['on-failure']) {
     const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
 
@@ -144,6 +137,28 @@ function visitAbstractStep(originalStep: BaseStep, context: GraphBuildContext): 
     }
   }
 
+  return visitTypedAbstractStep(currentStep, context);
+}
+
+function tryVisitHitlWaitStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType | undefined {
+  if (currentStep.type === 'waitForInput') {
+    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
+  }
+
+  if (currentStep.type === 'waitForApproval') {
+    return visitWaitForApprovalStep(currentStep as WaitForApprovalStep, context);
+  }
+
+  return undefined;
+}
+
+function visitTypedAbstractStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   if ((currentStep as StepWithIfCondition).if) {
     return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
@@ -162,6 +177,13 @@ function visitAbstractStep(originalStep: BaseStep, context: GraphBuildContext): 
 
   if (currentStep.type === 'loop.continue') {
     return visitLoopContinueStep(currentStep as LoopContinueStep, context);
+  }
+
+  // HITL wait steps use `timeout` as the approval/input wait duration, not as a
+  // step-level execution timeout zone. Handle them before the generic timeout branch.
+  const hitlWaitGraph = tryVisitHitlWaitStep(currentStep, context);
+  if (hitlWaitGraph) {
+    return hitlWaitGraph;
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -189,14 +211,6 @@ function visitAbstractStep(originalStep: BaseStep, context: GraphBuildContext): 
 
   if (currentStep.type === 'wait') {
     return visitWaitStep(currentStep as WaitStep, context);
-  }
-
-  if (currentStep.type === 'waitForInput') {
-    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
-  }
-
-  if (currentStep.type === 'waitForApproval') {
-    return visitWaitForApprovalStep(currentStep as WaitForApprovalStep, context);
   }
 
   if (currentStep.type === 'data.set') {
@@ -302,6 +316,7 @@ export function visitWaitForApprovalStep(
     stepType: currentStep.type,
     configuration: {
       ...currentStep,
+      timeout: currentStep.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
     },
   };
   graph.setNode(waitForApprovalNode.id, waitForApprovalNode);

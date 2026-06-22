@@ -291,8 +291,10 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     rejectLabel: Decline
     channels:
       slack:
-        connector-id: my-slack-connector
-        channel: '#security-approvals'`,
+        connector-id: my-slack-webhook-connector
+      slack_api:
+        connector-id: my-slack-api-connector
+        channels: ['C0123456789']`,
       ],
     },
   },

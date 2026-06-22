@@ -12,18 +12,33 @@
 import { randomBytes } from 'crypto';
 import type { Logger } from '@kbn/core/server';
 
+let sharedSigningKey: string | undefined;
+
 export function resolveExternalResumeSigningKey(
   configuredSigningKey: string | undefined,
   logger: Logger,
   configPath: string
 ): string {
   if (configuredSigningKey) {
+    sharedSigningKey = configuredSigningKey;
     return configuredSigningKey;
   }
 
+  if (sharedSigningKey) {
+    return sharedSigningKey;
+  }
+
   logger.warn(
-    `Generating a random key for ${configPath}. To prevent external resume links from being invalidated on restart, set ${configPath} in kibana.yml or use bin/kibana-encryption-keys generate.`
+    `Generating an ephemeral external resume signing key (${configPath} is unset). ` +
+      `Set the same value for workflowsManagement.externalResume.signingKey and ` +
+      `workflowsExecutionEngine.externalResume.signingKey in kibana.yml to persist across restarts.`
   );
 
-  return randomBytes(32).toString('hex');
+  sharedSigningKey = randomBytes(32).toString('hex');
+  return sharedSigningKey;
+}
+
+/** @internal */
+export function resetExternalResumeSigningKeyForTests(): void {
+  sharedSigningKey = undefined;
 }

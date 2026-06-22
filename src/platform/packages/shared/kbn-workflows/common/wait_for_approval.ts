@@ -28,5 +28,13 @@ export const WAIT_FOR_APPROVAL_STEP_TYPES = ['waitForInput', 'waitForApproval'] 
 
 export type HitlWaitStepType = (typeof WAIT_FOR_APPROVAL_STEP_TYPES)[number];
 
+/** Maps `with.channels` keys to Kibana connector action types for connector-id autocomplete/validation. */
+export const WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES = {
+  slack: 'slack',
+  slack_api: 'slack_api',
+} as const satisfies Record<string, string>;
+
+export type WaitForApprovalChannelKey = keyof typeof WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES;
+
 export const isHitlWaitStepType = (stepType: string | undefined): stepType is HitlWaitStepType =>
   stepType === 'waitForInput' || stepType === 'waitForApproval';

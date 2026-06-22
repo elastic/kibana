@@ -28,9 +28,22 @@ export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
 
 export {
   EXTERNAL_RESUME_API_PATH,
+  EXTERNAL_RESUME_CONSUMED_JTIS_CONTEXT_KEY,
+  EXTERNAL_RESUME_RESUMED_BY_PREFIX,
+  WORKFLOW_EXTERNAL_RESUME_APPLICATION,
+  WORKFLOW_EXTERNAL_RESUME_ROLE,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
 } from './external_resume/constants';
 export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';
+export {
+  createExternalResumeApiKey,
+  invalidateExternalResumeApiKey,
+} from './external_resume/create_external_resume_api_key';
+export type { ExternalResumeApiKey } from './external_resume/create_external_resume_api_key';
+export {
+  getAuthenticatedExternalResumeApiKeyId,
+  getExternalResumeEncodedApiKeyFromStepInput,
+} from './external_resume/external_resume_api_key_request';
 export {
   createExternalResumeTokenPayload,
   ExternalResumeTokenVerificationError,
