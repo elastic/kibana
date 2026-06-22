@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -14,7 +13,6 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -104,7 +102,6 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const { euiTheme } = useEuiTheme();
   const [isOptionalOpen, setIsOptionalOpen] = useState(false);
   const optionalId = useGeneratedHtmlId({
     prefix: 'createDataSourceFlyoutAzureFederatedOptionalSettings',
@@ -218,13 +215,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
               defaultMessage: 'Show optional authentication settings',
             })}
       </EuiButtonEmpty>
-      <div
-        id={optionalId}
-        hidden={!isOptionalOpen}
-        css={css`
-          padding-left: ${euiTheme.size.l};
-        `}
-      >
+      <div id={optionalId} hidden={!isOptionalOpen}>
         <EuiSpacer size="s" />
         <EuiFormRow
           label={i18n.translate('dataSets.createFlyout.azure.fields.jwtAudience', {

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
@@ -49,8 +48,6 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   if (
     !DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType) ||
     !showsAuthenticationCredentialFields(authenticationMode, dataSourceType)
@@ -61,11 +58,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   return (
     <>
       <EuiSpacer size="m" />
-      <div
-        css={css`
-          padding-left: ${euiTheme.size.l};
-        `}
-      >
+      <div>
         {dataSourceType === 's3' && authenticationMode === 'access_and_secret_keys' ? (
           <CreateDataSourceFlyoutTypeSettingsS3Credentials
             control={control}

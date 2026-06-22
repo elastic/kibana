@@ -6,9 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
@@ -48,7 +47,6 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const contentId = useGeneratedHtmlId({ prefix: 'createDataSourceFlyoutConnectionSettings' });
 
@@ -72,13 +70,7 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
               defaultMessage: 'Show connection settings',
             })}
       </EuiButtonEmpty>
-      <div
-        id={contentId}
-        hidden={!isOpen}
-        css={css`
-          padding-left: ${euiTheme.size.l};
-        `}
-      >
+      <div id={contentId} hidden={!isOpen}>
         <EuiSpacer size="s" />
         <CreateDataSourceFlyoutTypeSettings {...props} />
       </div>

@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -14,7 +13,6 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -182,7 +180,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
-  const { euiTheme } = useEuiTheme();
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const advancedId = useGeneratedHtmlId({ prefix: 'createDataSourceFlyoutS3FederatedAdvanced' });
 
@@ -267,13 +264,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
               defaultMessage: 'Show optional authentication settings',
             })}
       </EuiButtonEmpty>
-      <div
-        id={advancedId}
-        hidden={!isAdvancedOpen}
-        css={css`
-          padding-left: ${euiTheme.size.l};
-        `}
-      >
+      <div id={advancedId} hidden={!isAdvancedOpen}>
         <EuiSpacer size="s" />
         <EuiFormRow
           label={i18n.translate('dataSets.createFlyout.s3.fields.jwtAudience', {
