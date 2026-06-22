@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -17,36 +18,33 @@ import {
   EuiFlexGrid,
   EuiFormRow,
   EuiPanel,
-  EuiSpacer,
   EuiStat,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
-  EuiIconTip,
 } from '@elastic/eui';
 import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ChooseColumnPopover } from './choose_column_popover';
-import { DataControlEditorStrings } from '../data_control_constants';
 
 export const ESQLValuesPreview: React.FC<{
   previewOptions: string[] | number[];
   previewColumns: ESQLColumn[];
   previewError?: Error;
   updateQuery: (column: string) => void;
-  queryNeedsRunning: boolean;
   isQueryRunning: boolean;
-  dataSource: string;
+  header?: ReactElement;
+  useRange?: boolean;
 }> = ({
   previewOptions,
   previewError,
   previewColumns,
   updateQuery,
-  queryNeedsRunning,
   isQueryRunning,
-  dataSource,
+  header,
+  useRange = true, // TODO: Remove when variable controls can produce range sliders
 }) => {
   const isEmpty = useMemo(() => previewOptions.length === 0, [previewOptions]);
 
@@ -57,12 +55,13 @@ export const ESQLValuesPreview: React.FC<{
   );
 
   const range = useMemo(() => {
+    if (!useRange) return null;
     if (isNumericType(singleColumn?.type)) {
       const optionsAsNumbers = previewOptions.map((v) => Number(v));
       return { min: min(optionsAsNumbers), max: max(optionsAsNumbers) };
     }
     return null;
-  }, [previewOptions, singleColumn]);
+  }, [previewOptions, singleColumn, useRange]);
 
   const body = previewError ? (
     <EuiPanel
@@ -75,7 +74,9 @@ export const ESQLValuesPreview: React.FC<{
     >
       <EuiCallOut
         announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
+        title={i18n.translate('controls.editorsSharedUi.valuesPreview.errorTitle', {
+          defaultMessage: 'Error getting values preview',
+        })}
         color="danger"
         iconType="error"
         size="s"
@@ -94,16 +95,23 @@ export const ESQLValuesPreview: React.FC<{
     >
       <EuiCallOut
         announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
+        title={i18n.translate('controls.editorsSharedUi.valuesPreview.multiColumnErrorTitle', {
+          defaultMessage: 'Query must return a single column',
+        })}
         color="warning"
         iconType="warning"
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
       >
         <p>
-          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
-            previewColumns.length
-          )}
+          <FormattedMessage
+            id="controls.editorsSharedUi.valuesPreview.multiColumnErrorBody"
+            defaultMessage="Your query is currently returning {totalColumns} columns. Choose a column, or use {statsBy} to narrow your query down."
+            values={{
+              totalColumns: previewColumns.length,
+              statsBy: <EuiCode>STATS BY</EuiCode>,
+            }}
+          />
         </p>
         <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
       </EuiCallOut>
@@ -119,13 +127,19 @@ export const ESQLValuesPreview: React.FC<{
     >
       <EuiCallOut
         announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyTitle()}
+        title={i18n.translate('controls.editorsSharedUi.valuesPreview.emptyTitle', {
+          defaultMessage: 'No values returned',
+        })}
         color="warning"
         iconType="warning"
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
       >
-        <p>{DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}</p>
+        <p>
+          {i18n.translate('controls.editorsSharedUi.valuesPreview.emptyText', {
+            defaultMessage: "This query isn't returning any values. Edit it and run it again.",
+          })}
+        </p>
       </EuiCallOut>
     </EuiPanel>
   ) : range ? (
@@ -133,12 +147,16 @@ export const ESQLValuesPreview: React.FC<{
       <EuiStat
         titleSize="s"
         title={range.min}
-        description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMinText()}
+        description={i18n.translate('controls.editorsSharedUi.valuesPreview.minText', {
+          defaultMessage: 'Minimum value',
+        })}
       />
       <EuiStat
         titleSize="s"
         title={range.max}
-        description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMaxText()}
+        description={i18n.translate('controls.editorsSharedUi.valuesPreview.maxText', {
+          defaultMessage: 'Maximum value',
+        })}
       />
     </EuiFlexGrid>
   ) : (
@@ -169,43 +187,15 @@ export const ESQLValuesPreview: React.FC<{
     </EuiPanel>
   ) : (
     <>
-      {singleColumn && (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getDataSourceLabel()}
-              >
-                <EuiCode>{dataSource}</EuiCode>
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={
-                  <>
-                    {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getFieldLabel()}{' '}
-                    <EuiIconTip
-                      type="question"
-                      color="primary"
-                      content={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getFieldTooltip()}
-                    />
-                  </>
-                }
-              >
-                <EuiCode>{singleColumn.name}</EuiCode>
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      {!queryNeedsRunning && (
-        <EuiFormRow
-          label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getTitle()}
-        >
-          {body}
-        </EuiFormRow>
-      )}
+      {header}
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('controls.editorsSharedUi.valuesPreview.title', {
+          defaultMessage: 'Values preview',
+        })}
+      >
+        {body}
+      </EuiFormRow>
     </>
   );
 };

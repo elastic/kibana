@@ -12,7 +12,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiButtonEmpty, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ESQLColumn } from '@kbn/es-types';
-import { DataControlEditorStrings } from '../data_control_constants';
+import { i18n } from '@kbn/i18n';
 
 export function ChooseColumnPopover({
   columns,
@@ -37,7 +37,9 @@ export function ChooseColumnPopover({
       onClick={onButtonClick}
       data-test-subj="chooseColumnBtn"
     >
-      {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getSelectAColumnText()}
+      {i18n.translate('controls.editorsSharedUi.valuesPreview.selectAColumnText', {
+        defaultMessage: 'Select a column',
+      })}
     </EuiButtonEmpty>
   );
 
@@ -55,13 +57,17 @@ export function ChooseColumnPopover({
 
   return (
     <EuiPopover
-      aria-label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getColumnsListLabel()}
+      aria-label={i18n.translate('controls.editorsSharedUi.valuesPreview.columnsListLabel', {
+        defaultMessage: 'Columns',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
       <EuiSelectable
-        aria-label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getSelectAColumnText()}
+        aria-label={i18n.translate('controls.editorsSharedUi.valuesPreview.selectAColumnText', {
+          defaultMessage: 'Select a column',
+        })}
         searchable
         searchProps={{
           'data-test-subj': 'selectableColumnSearch',
