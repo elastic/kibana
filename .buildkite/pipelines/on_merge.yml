@@ -142,6 +142,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n4-highcpu-32
+      diskType: hyperdisk-balanced
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
