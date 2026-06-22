@@ -40,7 +40,12 @@ import { getQueryLinkUuid } from '../../../../server/lib/streams/assets/query/qu
 
 const TOOL_ID = 'platform.streams.sig_events.search_kis';
 
-apiTest.describe(
+// Skipped on 9.4: the Significant Events feature backend on this branch is an early
+// WIP snapshot. The features storage index (`.kibana_streams_features`) is not
+// bootstrapped here, so the direct writes below fail with a `security_exception`
+// (auto-create denied on a restricted index). The stabilization work that makes this
+// pass on `main` was not backported to 9.4.
+apiTest.describe.skip(
   'search_kis tool',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

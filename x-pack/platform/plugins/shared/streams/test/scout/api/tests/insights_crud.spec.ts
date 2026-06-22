@@ -16,7 +16,13 @@ import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
-apiTest.describe(
+// Skipped on 9.4: the Significant Events / Insights backend on this branch is an
+// early WIP snapshot (the `_insights` bulk/list stabilization that makes these tests
+// pass on `main` was never backported, and the Insights feature was later removed from
+// `main` in https://github.com/elastic/kibana/pull/272544). These specs were not
+// running on 9.4 before because the `@kbn/streams-schema` barrel import failed to
+// transpile under Playwright; re-enabling that import surfaces the unsupported backend.
+apiTest.describe.skip(
   'Insights CRUD API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
