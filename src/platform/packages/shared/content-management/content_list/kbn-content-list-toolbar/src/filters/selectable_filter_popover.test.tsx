@@ -165,4 +165,82 @@ describe('SelectableFilterPopover', () => {
 
     expect(onChange.mock.calls[0][0].text).toContain('-tag:(Production)');
   });
+
+  it('uses Shift to add a match-all (bare scalar) filter', async () => {
+    const onChange = jest.fn();
+
+    render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        query={Query.parse('')}
+        onChange={onChange}
+        options={options}
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Tags'));
+
+    const productionOption = await screen.findByText('Production');
+
+    fireEvent.mouseDown(productionOption, { shiftKey: true });
+    fireEvent.click(productionOption, { shiftKey: true });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    // Match-all is written as a bare scalar clause, not an OR-group.
+    expect(onChange.mock.calls[0][0].text).toBe('tag:Production');
+  });
+
+  it('falls back to match-any when Shift is used but allowMatchAll is false', async () => {
+    const onChange = jest.fn();
+
+    render(
+      <SelectableFilterPopover
+        fieldName="createdBy"
+        title="Creators"
+        query={Query.parse('')}
+        onChange={onChange}
+        options={options}
+        allowMatchAll={false}
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Creators'));
+
+    const productionOption = await screen.findByText('Production');
+
+    fireEvent.mouseDown(productionOption, { shiftKey: true });
+    fireEvent.click(productionOption, { shiftKey: true });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    expect(onChange.mock.calls[0][0].text).toBe('createdBy:(Production)');
+  });
+
+  it('omits the match-all hint when allowMatchAll is false', async () => {
+    render(
+      <SelectableFilterPopover
+        fieldName="createdBy"
+        title="Creators"
+        query={Query.parse('')}
+        options={options}
+        allowMatchAll={false}
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Creators'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/\+ click exclude/)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/\+ click match all/)).not.toBeInTheDocument();
+  });
 });
