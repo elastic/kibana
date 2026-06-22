@@ -5,61 +5,8 @@
  * 2.0.
  */
 
-import type { FsEntry, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
-
-// ============================================================================
-// Volume types
-// ============================================================================
-
-/**
- * Options passed to volume glob operations.
- */
-export interface VolumeGlobOptions {
-  /** Only return files (no directories) */
-  onlyFiles?: boolean;
-  /** Only return directories (no files) */
-  onlyDirectories?: boolean;
-}
-
-/**
- * A volume is a source of file entries.
- * Volumes are queried by the VirtualFileSystem - they don't push data.
- * All methods are async to support lazy/remote implementations.
- */
-export interface Volume {
-  /** Unique identifier for this volume */
-  readonly id: string;
-
-  /**
-   * Get a file entry by exact path.
-   * Returns undefined if the file doesn't exist in this volume.
-   */
-  get(path: string): Promise<FileEntry | undefined>;
-
-  /**
-   * List contents of a directory.
-   * Returns files and subdirectories directly under the given path.
-   * Returns empty array if directory doesn't exist.
-   * Volumes are responsible for computing implicit directories from their files.
-   */
-  list(dirPath: string): Promise<FsEntry[]>;
-
-  /**
-   * Find all entries matching the glob pattern(s).
-   * Returns both files and directories that match.
-   */
-  glob(patterns: string | string[], options?: VolumeGlobOptions): Promise<FsEntry[]>;
-
-  /**
-   * Check if a path exists (file or directory).
-   */
-  exists(path: string): Promise<boolean>;
-
-  /**
-   * Optional lifecycle hook - called when volume is unmounted.
-   */
-  dispose?(): Promise<void>;
-}
+import type { FsEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { Volume } from '@kbn/agent-builder-server/runner';
 
 // ============================================================================
 // VirtualFileSystem types
