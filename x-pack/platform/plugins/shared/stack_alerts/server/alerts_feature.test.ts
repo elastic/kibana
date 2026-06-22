@@ -165,8 +165,58 @@ describe('Stack Alerts Only Feature Privileges', () => {
     `);
   });
 
-  test('"read" privilege does NOT grant any rule privileges', () => {
-    expect(readPrivilege?.alerting?.rule).toBeUndefined();
+  test('"read" privilege grants rule.read for all stack rule types', () => {
+    expect(readPrivilege?.alerting?.rule?.read).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".index-threshold",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".geo-containment",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "transform_health",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+            "discover",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "xpack.ml.anomaly_detection_alert",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "observability.rules.custom_threshold",
+        },
+      ]
+    `);
+  });
+
+  test('"read" privilege does NOT grant rule.all, rule.enable, or rule.manage_rule_settings', () => {
+    expect(readPrivilege?.alerting?.rule?.all).toBeUndefined();
+    expect(readPrivilege?.alerting?.rule?.enable).toBeUndefined();
+    expect(readPrivilege?.alerting?.rule?.manage_rule_settings).toBeUndefined();
   });
 
   test('both privileges include rac API access', () => {

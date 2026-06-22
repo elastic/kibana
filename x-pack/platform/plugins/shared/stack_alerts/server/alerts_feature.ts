@@ -47,6 +47,7 @@ export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         alert: { read: alertingFeatures },
+        rule: { read: alertingFeatures },
       },
       savedObject: { all: [], read: [] },
       api: ['rac'],

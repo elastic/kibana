@@ -310,6 +310,18 @@ apiTest.describe(
     });
 
     apiTest.describe('with stackAlertsOnly read privilege', () => {
+      apiTest.describe('rule read', () => {
+        apiTest('can get a rule by ID', async ({ apiClient }) => {
+          const rule = createdRules[0];
+          if (!rule) return;
+          const response = await apiClient.get(`api/alerting/rule/${rule.ruleId}`, {
+            headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+        });
+      });
+
       apiTest.describe('alert read', () => {
         apiTest('can find alerts via RAC', async ({ apiClient }) => {
           const response = await apiClient.post('internal/rac/alerts/find', {
