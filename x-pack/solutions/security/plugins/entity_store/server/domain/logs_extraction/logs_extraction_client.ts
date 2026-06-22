@@ -320,6 +320,7 @@ export class LogsExtractionClient {
 
     return {
       ...mainResult,
+      isRemote: remoteStrategyIndexPatterns.length > 0,
       indexPatterns: [...localIndexPatterns, ...remoteStrategyIndexPatterns],
       remoteError: remoteResult.error,
     };
