@@ -54,22 +54,6 @@ export function CreateDatasetFlyoutSettings({
         `}
       >
         <EuiSpacer size="s" />
-        {/**
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
-        <EuiSelect
-          options={formatOptions}
-          data-test-subj="createDatasetFlyoutSettingsFormat"
-          fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
-          value={formatField.value}
-          onChange={(e) => formatField.onChange(e.target.value)}
-          name={formatField.name}
-          inputRef={formatField.ref}
-        />
-      </EuiFormRow>
-        {showFileSettings ? <CreateDatasetFlyoutFileSettings control={control} /> : null}
-
-      */}
         <CreateDatasetFlyoutFileSettings control={control} />
       </div>
     </>
@@ -85,32 +69,11 @@ function CreateDatasetFlyoutFileSettings({
     name: 'settings.error_mode',
     control,
   });
-  /*
-  const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
-    name: 'settings.max_errors',
-    control,
-    rules: { validate: validateMaxErrors },
-  });
-  const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
-    name: 'settings.max_error_ratio',
-    control,
-    rules: { validate: validateMaxErrorRatio },
-  });
-  */
+
   const { field: partitionDetectionField } = useController({
     name: 'settings.partition_detection',
     control,
   });
-  /*
-  const { field: partitionPathField } = useController({
-    name: 'settings.partition_path',
-    control,
-  });
-  const { field: hivePartitioningField } = useController({
-    name: 'settings.hive_partitioning',
-    control,
-  });
-  */
 
   const errorModeOptions = useMemo(
     () => [
@@ -174,51 +137,6 @@ function CreateDatasetFlyoutFileSettings({
           inputRef={errorModeField.ref}
         />
       </EuiFormRow>
-      {/**
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxErrorsLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxErrorsHelp()}
-        fullWidth
-        isInvalid={Boolean(maxErrorsState.error)}
-        error={maxErrorsState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxErrors"
-          fullWidth
-          min={0}
-          step={1}
-          isInvalid={Boolean(maxErrorsState.error)}
-          value={maxErrorsField.value === '' ? undefined : Number(maxErrorsField.value)}
-          onChange={(e) =>
-            maxErrorsField.onChange(e.target.value === undefined ? '' : String(e.target.value))
-          }
-          name={maxErrorsField.name}
-          inputRef={maxErrorsField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxErrorRatioLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxErrorRatioHelp()}
-        fullWidth
-        isInvalid={Boolean(maxErrorRatioState.error)}
-        error={maxErrorRatioState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxErrorRatio"
-          fullWidth
-          min={0}
-          max={1}
-          step={0.01}
-          isInvalid={Boolean(maxErrorRatioState.error)}
-          value={maxErrorRatioField.value === '' ? undefined : Number(maxErrorRatioField.value)}
-          onChange={(e) =>
-            maxErrorRatioField.onChange(e.target.value === undefined ? '' : String(e.target.value))
-          }
-          name={maxErrorRatioField.name}
-          inputRef={maxErrorRatioField.ref}
-        />
-      </EuiFormRow>
-      */}
       <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>
         <EuiSelect
           options={partitionDetectionOptions}
@@ -231,33 +149,6 @@ function CreateDatasetFlyoutFileSettings({
           inputRef={partitionDetectionField.ref}
         />
       </EuiFormRow>
-      {/**
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsPartitionPathLabel()}
-        helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsPartitionPath"
-          fullWidth
-          autoComplete="off"
-          value={partitionPathField.value}
-          onChange={(e) => partitionPathField.onChange(e.target.value)}
-          name={partitionPathField.name}
-          inputRef={partitionPathField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()} fullWidth>
-        <EuiSwitch
-          data-test-subj="createDatasetFlyoutSettingsHivePartitioning"
-          label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
-          showLabel={false}
-          checked={hivePartitioningField.value}
-          onChange={(e) => hivePartitioningField.onChange(e.target.checked)}
-          name={hivePartitioningField.name}
-        />
-      </EuiFormRow>
-      */}
     </>
   );
 }

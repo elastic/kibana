@@ -14,10 +14,7 @@ import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 import { CreateDataSourceFlyoutTypeSettingsAzure } from './create_data_source_flyout_type_settings_azure';
-// import { CreateDataSourceFlyoutTypeSettingsFlight } from './create_data_source_flyout_type_settings_flight';
 import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
-// import { CreateDataSourceFlyoutTypeSettingsIceberg } from './create_data_source_flyout_type_settings_iceberg';
-// import { CreateDataSourceFlyoutTypeSettingsJdbc } from './create_data_source_flyout_type_settings_jdbc';
 import { CreateDataSourceFlyoutTypeSettingsS3 } from './create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutTypeSettings({
@@ -40,20 +37,6 @@ export function CreateDataSourceFlyoutTypeSettings({
   if (dataSourceType === 'azure') {
     return <CreateDataSourceFlyoutTypeSettingsAzure control={control} unregister={unregister} />;
   }
-
-  /*
-  if (dataSourceType === 'iceberg') {
-    return <CreateDataSourceFlyoutTypeSettingsIceberg control={control} unregister={unregister} />;
-  }
-
-  if (dataSourceType === 'jdbc') {
-    return <CreateDataSourceFlyoutTypeSettingsJdbc control={control} unregister={unregister} />;
-  }
-
-  if (dataSourceType === 'flight') {
-    return <CreateDataSourceFlyoutTypeSettingsFlight control={control} unregister={unregister} />;
-  }
-*/
   return null;
 }
 

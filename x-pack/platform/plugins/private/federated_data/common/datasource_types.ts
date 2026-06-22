@@ -18,29 +18,16 @@ export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
 }
 
 export type DataSource = S3DataSource | GCSDataSource | AzureDataSource;
-// | IcebergDataSource
-// | JdbcDataSource
-// | FlightDataSource;
 
 export type DataSourceWithSecrets =
   | S3DataSourceWithSecrets
   | GCSDataSourceWithSecrets
   | AzureDataSourceWithSecrets;
-// | IcebergDataSourceWithSecrets
-// | JdbcDataSourceWithSecrets
-// | FlightDataSource;
 
-export type DataSourceType = 's3' | 'gcs' | 'azure'; // | 'iceberg' | 'jdbc' | 'flight';
+export type DataSourceType = 's3' | 'gcs' | 'azure';
 
 /** All supported data source type values, for select components and validation. */
-export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = [
-  's3',
-  'gcs',
-  'azure',
-  // 'iceberg',
-  // 'jdbc',
-  // 'flight',
-];
+export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = ['s3', 'gcs', 'azure'];
 
 /**
  * UI icon types for data source types (EUI icon names).
@@ -51,9 +38,6 @@ export const DATA_SOURCE_TYPES_TO_ICONS: Record<DataSourceType, string> = {
   s3: 'logoAWS',
   gcs: 'logoGCP',
   azure: 'logoAzure',
-  // iceberg: 'logoIceberg',
-  // jdbc: 'logoJdbc',
-  // flight: 'logoFlight',
 } as const;
 
 export const DATA_SOURCE_TYPES_TO_HELP_TEXT: Partial<Record<DataSourceType, string>> = {
@@ -62,9 +46,6 @@ export const DATA_SOURCE_TYPES_TO_HELP_TEXT: Partial<Record<DataSourceType, stri
   s3: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
   gcs: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
   azure: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
-  // iceberg: 'icebergHelpText',
-  // jdbc: 'jdbcHelpText',
-  // flight: 'flightHelpText',
 } as const;
 
 export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;
@@ -126,46 +107,3 @@ export interface AzureDataSourceSettingsWithSecrets extends AzureDataSourceSetti
   client_id?: string;
   jwt_audience?: string;
 }
-/*
-export type IcebergDataSource = DataSourceCommon<'iceberg', IcebergDataSourceSettings>;
-
-export type IcebergDataSourceWithSecrets = DataSourceCommon<
-  'iceberg',
-  IcebergDataSourceSettingsWithSecrets
->;
-
-export interface IcebergDataSourceSettings {
-  region?: string;
-  endpoint?: string;
-  access_key?: string;
-  secret_key?: string;
-}
-
-export interface IcebergDataSourceSettingsWithSecrets extends IcebergDataSourceSettings {
-  access_key?: string;
-  secret_key?: string;
-}
-
-export type JdbcDataSource = DataSourceCommon<'jdbc', JdbcDataSourceSettings>;
-
-export type JdbcDataSourceWithSecrets = DataSourceCommon<'jdbc', JdbcDataSourceSettingsWithSecrets>;
-
-export interface JdbcDataSourceSettings {
-  host: string;
-  port: string;
-  database: string;
-  ssl?: boolean;
-}
-
-export interface JdbcDataSourceSettingsWithSecrets extends JdbcDataSourceSettings {
-  username?: string;
-  password?: string;
-}
-
-export type FlightDataSource = DataSourceCommon<'flight', FlightDataSourceSettings>;
-
-export interface FlightDataSourceSettings {
-  host: string;
-  port?: number;
-}
-*/

@@ -76,7 +76,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 }) => {
   const isEditMode = initialDataSource !== undefined;
 
-  // todo take a closer look
   const formDefaultValues = useMemo(
     (): CreateDataSourceFlyoutFormValues =>
       initialDataSource

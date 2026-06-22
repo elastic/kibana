@@ -63,17 +63,7 @@ export class DataSourcesClient {
         })
       );
     }
-    // todo check if data source already exists
-    /*
-    const existing = await this.get();
-    if (existing.some((row) => row.name === name)) {
-      throw new Error(
-        i18n.translate('dataSets.errors.duplicateName', {
-          defaultMessage: 'A data source with this name already exists.',
-        })
-      );
-    }
-      */
+
     const withoutName = omit(dataSource, 'name');
     const body = omitBy(
       {
