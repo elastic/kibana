@@ -7,6 +7,7 @@
 
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
+import type { Logger } from '@kbn/core/server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
 import type {
@@ -301,22 +302,63 @@ export const validateExtendedFieldsInRequest = async ({
 };
 
 /**
+ * Fetches and parses a template's inline fields for use in close-time validation.
+ * Returns [] if the template is not found or its definition is unparseable.
+ * Callers in bulk operations should pre-resolve templates by ID to avoid N SO fetches.
+ */
+export const resolveTemplateFieldsForClose = async ({
+  templateId,
+  templatesService,
+  logger,
+}: {
+  templateId: string;
+  templatesService: TemplatesService;
+  logger: Logger;
+}): Promise<InlineField[]> => {
+  const templateSO = await templatesService.getTemplate(templateId);
+  if (!templateSO) {
+    return [];
+  }
+  try {
+    const parsedTemplate = parseTemplate(templateSO.attributes);
+    return parsedTemplate.definition.fields.filter(isInlineField);
+  } catch (err) {
+    logger.warn(
+      `Failed to parse template "${templateId}" definition during close validation — skipping template field enforcement: ${err}`
+    );
+    return [];
+  }
+};
+
+/**
  * Validates that all `required_on_close` fields are filled when a case transitions to closed.
  * Operates on the merged extended_fields (existing SO state + request updates).
  * Only checks fields with `required_on_close: true` — regular required fields are a write-time
  * concern and are not re-validated here. Orphaned keys from old templates are silently ignored.
+ *
+ * Template fields must be pre-resolved by the caller (via resolveTemplateFieldsForClose) so that
+ * bulk operations can deduplicate SO fetches across cases sharing the same template.
+ *
+ * NOTE: We intentionally do not delegate to the common validateExtendedFields({ onClose: true })
+ * here, even though that option was added in the same PR, because:
+ *   1. The common function is designed for client-side real-time preview (no SO access; caller
+ *      provides a flat extendedFields map). Here we operate on pre-merged SO + request state.
+ *   2. This implementation passes fieldControlMap to evaluateCondition for correct
+ *      CHECKBOX_GROUP / USER_PICKER show_when evaluation — the common function omits it
+ *      (pre-existing gap). If the common function gains fieldControlMap support, this can
+ *      be revisited.
  */
-export const validateExtendedFieldsOnClose = async ({
+export const validateExtendedFieldsOnClose = ({
   updateReq,
   originalCase,
-  templatesService,
+  templateFields,
   globalFields,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
-  templatesService: TemplatesService;
+  templateFields: InlineField[];
   globalFields: InlineField[];
-}): Promise<void> => {
+}): void => {
   if (
     updateReq.status !== CaseStatuses.closed ||
     originalCase.attributes.status === CaseStatuses.closed
@@ -328,24 +370,6 @@ export const validateExtendedFieldsOnClose = async ({
     ...(originalCase.attributes.extended_fields ?? {}),
     ...(updateReq.extended_fields ?? {}),
   };
-
-  const templateId =
-    updateReq.template === null
-      ? null
-      : updateReq.template?.id ?? originalCase.attributes.template?.id;
-
-  let templateFields: InlineField[] = [];
-  if (templateId) {
-    const templateSO = await templatesService.getTemplate(templateId);
-    if (templateSO) {
-      try {
-        const parsedTemplate = parseTemplate(templateSO.attributes);
-        templateFields = parsedTemplate.definition.fields.filter(isInlineField);
-      } catch {
-        // Invalid template definition — skip template field validation on close
-      }
-    }
-  }
 
   const allFields = [...globalFields, ...templateFields];
 
@@ -381,7 +405,7 @@ export const validateExtendedFieldsOnClose = async ({
 
   if (errors.length > 0) {
     throw Boom.badRequest(
-      `Cannot close case, required fields must be filled: ${errors.join('; ')}`
+      `Cannot close case ${updateReq.id}, required fields must be filled: ${errors.join('; ')}`
     );
   }
 };

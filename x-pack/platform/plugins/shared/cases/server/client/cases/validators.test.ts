@@ -6,6 +6,8 @@
  */
 
 import { stringify as yamlStringify } from 'yaml';
+import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
 import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import type { CasesSearchRequest } from '../../../common/types/api';
@@ -17,6 +19,7 @@ import {
   validateSearchCasesCustomFields,
   validateExtendedFieldsInRequest,
   validateExtendedFieldsOnClose,
+  resolveTemplateFieldsForClose,
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
@@ -1071,21 +1074,6 @@ describe('validators', () => {
         },
       } as unknown as CaseSavedObjectTransformed);
 
-    const makeTemplatesSO = (definition: object) => ({
-      id: 'so-id',
-      type: 'cases-templates',
-      references: [],
-      attributes: {
-        templateId: 'tpl-1',
-        name: 'Test Template',
-        owner: 'securitySolution',
-        definition: yamlStringify({ name: 'Test Template', fields: [], ...definition }),
-        templateVersion: 1,
-        deletedAt: null,
-        isLatest: true,
-      },
-    });
-
     const makeGlobalFields = (
       defs: Array<{
         name: string;
@@ -1102,7 +1090,213 @@ describe('validators', () => {
         ...(validation ? { validation } : {}),
       })) as unknown as InlineField[];
 
-    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    const makeTemplateField = (
+      def: Partial<{
+        name: string;
+        label: string;
+        type: string;
+        validation: Record<string, unknown>;
+      }> = {}
+    ): InlineField =>
+      ({
+        control: 'INPUT_TEXT' as const,
+        name: def.name ?? 'resolution',
+        type: def.type ?? 'keyword',
+        label: def.label ?? def.name ?? 'resolution',
+        ...(def.validation ? { validation: def.validation } : {}),
+      } as unknown as InlineField);
+
+    const requiredOnCloseField = makeTemplateField({
+      name: 'resolution',
+      label: 'Resolution',
+      validation: { required_on_close: true },
+    });
+
+    it('returns without error when status is not being set to closed', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.open },
+          originalCase: makeOriginalCase({ status: CaseStatuses.open }),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('returns without error when case is already closed (no transition)', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase({ status: CaseStatuses.closed }),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('returns without error when no template fields and no global required_on_close fields', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [],
+          globalFields: makeGlobalFields([{ name: 'notes', type: 'keyword' }]),
+        })
+      ).not.toThrow();
+    });
+
+    it('throws when closing and required_on_close field is missing from merged extended_fields', () => {
+      // FAILURE SCENARIO: user closes the case without filling the required_on_close field
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('error message includes the case ID', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'my-case-id', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case my-case-id, required fields must be filled');
+    });
+
+    it('throws when closing and required_on_close field is empty string in extended_fields', () => {
+      // FAILURE SCENARIO: field was explicitly cleared before closing
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            status: CaseStatuses.closed,
+            extended_fields: { resolution_as_keyword: '' },
+          },
+          originalCase: makeOriginalCase(),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('passes when closing and required_on_close field is filled in the request', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            status: CaseStatuses.closed,
+            extended_fields: { resolution_as_keyword: 'Fixed the issue' },
+          },
+          originalCase: makeOriginalCase(),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('passes when required_on_close field was filled previously and is not in the request', () => {
+      // The existing SO already has the value — no extended_fields in this update request
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase({ extendedFields: { resolution_as_keyword: 'Resolved' } }),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('uses merged extended_fields (request value overrides existing SO value)', () => {
+      // FAILURE SCENARIO: existing SO has the field filled, but the request clears it
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            status: CaseStatuses.closed,
+            extended_fields: { resolution_as_keyword: '' },
+          },
+          originalCase: makeOriginalCase({ extendedFields: { resolution_as_keyword: 'was filled' } }),
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('passes when no template fields are given (template cleared by caller)', () => {
+      // Caller passes [] when template is null — no template fields to enforce
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase({
+            templateId: 'tpl-1',
+            extendedFields: { resolution_as_keyword: 'old value' },
+          }),
+          templateFields: [],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('enforces required_on_close on global fields when closing', () => {
+      // FAILURE SCENARIO: global field has required_on_close but is not filled
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [],
+          globalFields: makeGlobalFields([
+            {
+              name: 'impact',
+              type: 'keyword',
+              label: 'Impact',
+              validation: { required_on_close: true },
+            },
+          ]),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('does not enforce regular required fields (write-time concern only)', () => {
+      // A field with required:true but NOT required_on_close:true should not block closing
+      const regularRequiredField = makeTemplateField({
+        name: 'summary',
+        label: 'Summary',
+        validation: { required: true },
+      });
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [regularRequiredField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe('resolveTemplateFieldsForClose', () => {
+    const makeTemplatesSO = (definition: object) => ({
+      id: 'so-id',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tpl-1',
+        name: 'Test Template',
+        owner: 'securitySolution',
+        definition: yamlStringify({ name: 'Test Template', fields: [], ...definition }),
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+      },
+    });
 
     const templateWithRequiredOnClose = () =>
       makeTemplatesSO({
@@ -1117,239 +1311,54 @@ describe('validators', () => {
         ],
       });
 
+    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let logger: jest.Mocked<Logger>;
+
     beforeEach(() => {
       templatesService = {
         getTemplate: jest.fn().mockResolvedValue(templateWithRequiredOnClose()),
       };
+      logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     });
 
-    it('returns without error when status is not being set to closed', async () => {
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.open },
-          originalCase: makeOriginalCase({ status: CaseStatuses.open }),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
-      expect(templatesService.getTemplate).not.toHaveBeenCalled();
-    });
-
-    it('returns without error when case is already closed (no transition)', async () => {
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase({ status: CaseStatuses.closed }),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
-      expect(templatesService.getTemplate).not.toHaveBeenCalled();
-    });
-
-    it('returns without error when no template and no global required_on_close fields', async () => {
-      templatesService.getTemplate.mockResolvedValue(undefined);
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields([{ name: 'notes', type: 'keyword' }]),
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('throws when closing and required_on_close field is missing from merged extended_fields', async () => {
-      // FAILURE SCENARIO: user closes the case without filling the required_on_close field
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            template: { id: 'tpl-1', version: 1 },
-          },
-          originalCase: makeOriginalCase(),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).rejects.toThrow('Cannot close case, required fields must be filled');
-    });
-
-    it('throws when closing and required_on_close field is empty string in extended_fields', async () => {
-      // FAILURE SCENARIO: field was explicitly cleared before closing
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            template: { id: 'tpl-1', version: 1 },
-            extended_fields: { resolution_as_keyword: '' },
-          },
-          originalCase: makeOriginalCase(),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).rejects.toThrow('Cannot close case, required fields must be filled');
-    });
-
-    it('passes when closing and required_on_close field is filled in the request', async () => {
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            template: { id: 'tpl-1', version: 1 },
-            extended_fields: { resolution_as_keyword: 'Fixed the issue' },
-          },
-          originalCase: makeOriginalCase(),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('passes when required_on_close field was filled previously and is not in the request', async () => {
-      // The existing SO already has the value — no extended_fields in this update request
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase({
-            templateId: 'tpl-1',
-            extendedFields: { resolution_as_keyword: 'Resolved' },
-          }),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('uses merged extended_fields (request value overrides existing SO value)', async () => {
-      // FAILURE SCENARIO: existing SO has the field filled, but the request clears it
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            extended_fields: { resolution_as_keyword: '' },
-          },
-          originalCase: makeOriginalCase({
-            templateId: 'tpl-1',
-            extendedFields: { resolution_as_keyword: 'was filled' },
-          }),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).rejects.toThrow('Cannot close case, required fields must be filled');
-    });
-
-    it('uses template from original case when not set in the update request', async () => {
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            extended_fields: { resolution_as_keyword: 'Fixed' },
-          },
-          originalCase: makeOriginalCase({ templateId: 'tpl-1' }),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
+    it('returns parsed inline fields from a valid template SO', async () => {
+      const fields = await resolveTemplateFieldsForClose({
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        logger,
+      });
+      expect(fields.length).toBeGreaterThan(0);
+      expect(fields[0].name).toBe('resolution');
       expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1');
     });
 
-    it('treats template as cleared when update sets template to null', async () => {
-      // template: null means template is being removed; no template fields to enforce
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            template: null,
-          },
-          originalCase: makeOriginalCase({ templateId: 'tpl-1' }),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
-      expect(templatesService.getTemplate).not.toHaveBeenCalled();
-    });
-
-    it('does not fail on orphaned template keys in the existing SO when template is cleared', async () => {
-      // Case has orphaned keys from an old template — they should not cause unknown-key errors
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            template: null,
-          },
-          originalCase: makeOriginalCase({
-            templateId: 'tpl-1',
-            extendedFields: { resolution_as_keyword: 'old value' },
-          }),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('enforces required_on_close on global fields when closing', async () => {
-      // FAILURE SCENARIO: global field has required_on_close but is not filled
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields([
-            {
-              name: 'impact',
-              type: 'keyword',
-              label: 'Impact',
-              validation: { required_on_close: true },
-            },
-          ]),
-        })
-      ).rejects.toThrow('Cannot close case, required fields must be filled');
-    });
-
-    it('does not enforce regular required fields (write-time concern only)', async () => {
-      // A field with required:true but NOT required_on_close:true should not block closing
-      const templateWithRequired = makeTemplatesSO({
-        fields: [
-          {
-            control: 'INPUT_TEXT',
-            name: 'summary',
-            label: 'Summary',
-            type: 'keyword',
-            validation: { required: true },
-          },
-        ],
+    it('returns [] when template is not found', async () => {
+      templatesService.getTemplate.mockResolvedValue(undefined);
+      const fields = await resolveTemplateFieldsForClose({
+        templateId: 'tpl-missing',
+        templatesService: templatesService as unknown as TemplatesService,
+        logger,
       });
-      templatesService.getTemplate.mockResolvedValue(templateWithRequired);
+      expect(fields).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
 
-      // The field is missing from extended_fields but it's only required (not required_on_close),
-      // so close validation should not block this.
-      await expect(
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            template: { id: 'tpl-1', version: 1 },
-          },
-          originalCase: makeOriginalCase(),
-          templatesService: templatesService as unknown as TemplatesService,
-          globalFields: makeGlobalFields(),
-        })
-      ).resolves.toBeUndefined();
+    it('returns [] and logs a warning when template definition is unparseable', async () => {
+      const invalidSO = makeTemplatesSO({});
+      templatesService.getTemplate.mockResolvedValue({
+        ...invalidSO,
+        attributes: { ...invalidSO.attributes, definition: '{invalid yaml: [unclosed' },
+      } as unknown as Awaited<ReturnType<TemplatesService['getTemplate']>>);
+
+      const fields = await resolveTemplateFieldsForClose({
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        logger,
+      });
+      expect(fields).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to parse template "tpl-1"')
+      );
     });
   });
 });

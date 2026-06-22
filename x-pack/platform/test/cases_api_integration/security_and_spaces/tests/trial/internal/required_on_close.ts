@@ -266,7 +266,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(400);
 
-        expect(body.message).to.contain('Cannot close case, required fields must be filled');
+        expect(body.message).to.contain(`Cannot close case ${postedCase.id}, required fields must be filled`);
         expect(body.message).to.contain('Resolution Notes');
       });
     });
