@@ -16,12 +16,21 @@ apiTest.describe('content management - created_by', { tag: tags.deploymentAgnost
   // Admin API key: authenticated user without a SAML session → no user profile → no created_by.
   let adminCredentials: RoleApiCredentials;
 
+  // Tracks every dashboard ID created during the suite so afterEach can delete only those,
+  // avoiding cleanStandardList() which would wipe dashboards belonging to concurrent specs.
+  const createdDashboardIds = new Set<string>();
+
   apiTest.beforeAll(async ({ requestAuth }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+  apiTest.afterEach(async ({ apiClient }) => {
+    for (const id of createdDashboardIds) {
+      await apiClient.delete(`${DASHBOARD_API_PATH}/${id}`, {
+        headers: { ...DASHBOARD_HEADERS, ...adminCredentials.apiKeyHeader },
+      });
+    }
+    createdDashboardIds.clear();
   });
 
   apiTest('created_by is absent for non-interactive user', async ({ apiClient }) => {
@@ -32,6 +41,7 @@ apiTest.describe('content management - created_by', { tag: tags.deploymentAgnost
     });
 
     expect(response).toHaveStatusCode(201);
+    createdDashboardIds.add(response.body.id);
     expect(response.body.data).toBeDefined();
     expect(response.body.meta.created_by).toBeUndefined();
   });
@@ -56,6 +66,7 @@ apiTest.describe('content management - created_by', { tag: tags.deploymentAgnost
       });
 
       expect(response).toHaveStatusCode(201);
+      createdDashboardIds.add(response.body.id);
       expect(response.body.data).toBeDefined();
       expect(response.body.meta.created_by).toBe(profileUid);
     }

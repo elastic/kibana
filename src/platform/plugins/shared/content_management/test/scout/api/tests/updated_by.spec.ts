@@ -31,6 +31,10 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
     updated_at: string;
   };
 
+  // Tracks every dashboard ID created during the suite so afterEach can delete only those,
+  // avoiding cleanStandardList() which would wipe dashboards belonging to concurrent specs.
+  const createdDashboardIds = new Set<string>();
+
   apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth, config }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
     const privilegedRoleName =
@@ -63,10 +67,16 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
     expect(response).toHaveStatusCode(201);
     dashboardId = response.body.id;
     dashboardMeta = response.body.meta;
+    createdDashboardIds.add(dashboardId);
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+  apiTest.afterEach(async ({ apiClient }) => {
+    for (const id of createdDashboardIds) {
+      await apiClient.delete(`${DASHBOARD_API_PATH}/${id}`, {
+        headers: { ...DASHBOARD_HEADERS, ...adminCredentials.apiKeyHeader },
+      });
+    }
+    createdDashboardIds.clear();
   });
 
   // Non-interactive user (API key): creates and updates a dashboard — neither field should be set.
@@ -76,6 +86,7 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
       body: { title: 'Sample dashboard' },
     });
     expect(createResponse).toHaveStatusCode(201);
+    createdDashboardIds.add(createResponse.body.id);
     expect(createResponse.body.meta.updated_by).toBeUndefined();
 
     const updateResponse = await apiClient.put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`, {
