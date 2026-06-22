@@ -243,7 +243,7 @@ export class StreamsAppPlugin
         renderFlyoutStreamField: createDiscoverFlyoutStreamFieldLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          http: _coreStart.http,
+          http: coreStart.http,
           isServerless,
         }),
         renderFlyoutStreamFieldByStreamName: createDiscoverFlyoutStreamFieldByStreamNameLink({
@@ -254,7 +254,7 @@ export class StreamsAppPlugin
           fieldFormats: pluginsStart.fieldFormats,
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          http: _coreStart.http,
+          http: coreStart.http,
           isServerless,
         }),
       });
