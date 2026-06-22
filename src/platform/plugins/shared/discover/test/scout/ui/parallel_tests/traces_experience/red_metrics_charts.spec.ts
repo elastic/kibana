@@ -143,10 +143,9 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify charts render legend with multiple series', async () => {
-          const legendItems = charts.redMetricsCharts.locator('[data-testid="echLegendItemLabel"]');
-          await expect(async () => {
-            expect(await legendItems.count()).toBeGreaterThanOrEqual(BREAKDOWN.MIN_LEGEND_ITEMS);
-          }).toPass();
+          await expect
+            .poll(async () => charts.legendItems.count())
+            .toBeGreaterThanOrEqual(BREAKDOWN.MIN_LEGEND_ITEMS);
         });
       }
     );
@@ -182,10 +181,9 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify charts render legend with multiple series', async () => {
-          const legendItems = charts.redMetricsCharts.locator('[data-testid="echLegendItemLabel"]');
-          await expect(async () => {
-            expect(await legendItems.count()).toBeGreaterThanOrEqual(BREAKDOWN.MIN_LEGEND_ITEMS);
-          }).toPass();
+          await expect
+            .poll(async () => charts.legendItems.count())
+            .toBeGreaterThanOrEqual(BREAKDOWN.MIN_LEGEND_ITEMS);
         });
       }
     );
