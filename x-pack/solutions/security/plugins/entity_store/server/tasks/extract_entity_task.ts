@@ -82,7 +82,11 @@ async function runTask({
       logger.info(
         `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
       );
-      entityStoreMetrics.extractionTaskSuccess.add(1, { entity_type: entityType, namespace, remote });
+      entityStoreMetrics.extractionTaskSuccess.add(1, {
+        entity_type: entityType,
+        namespace,
+        remote,
+      });
     }
 
     const updatedState = {

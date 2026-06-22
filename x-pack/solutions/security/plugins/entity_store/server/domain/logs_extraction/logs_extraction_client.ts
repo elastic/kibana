@@ -585,7 +585,7 @@ export class LogsExtractionClient {
         `Resuming with paginationId ${recoveryId} and extraction window from ${fromDateISO} (checkpoint at ${
           state.checkpointTimestamp ?? 'n/a'
         }).`
-      )
+      );
     }
 
     try {
