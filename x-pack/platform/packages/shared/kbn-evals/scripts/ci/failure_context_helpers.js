@@ -7,6 +7,12 @@
  */
 
 const { slugifyId } = require('./slugify_id');
+const {
+  parseMaybeBase64Json,
+  parseVaultConfig,
+  connectorIdToLitellmModel,
+  buildLitellmConnectorFromVault,
+} = require('./ai_connectors');
 
 const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
@@ -199,94 +205,6 @@ function buildLitellmChatRequest(connector, messages) {
   };
 }
 
-function parseVaultConfig() {
-  const configB64 = process.env.KBN_EVALS_CONFIG_B64 || '';
-  if (!configB64) {
-    return null;
-  }
-
-  try {
-    const config = JSON.parse(Buffer.from(configB64, 'base64').toString('utf8'));
-    return config && typeof config === 'object' ? config : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Maps a LiteLLM connector id (e.g. litellm-llm-gateway-gpt-4o) to a LiteLLM model group name.
- */
-function connectorIdToLitellmModel(connectorId) {
-  const stripped = String(connectorId).replace(/^litellm-/, '');
-  const prefix = 'llm-gateway-';
-  if (stripped.startsWith(prefix)) {
-    return `llm-gateway/${stripped.slice(prefix.length)}`;
-  }
-  return stripped;
-}
-
-/**
- * Build a minimal LiteLLM connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
- */
-function buildLitellmConnectorFromVault(modelConnectorId) {
-  const config = parseVaultConfig();
-  const litellm = config?.litellm;
-  const baseUrl =
-    process.env.LITELLM_BASE_URL ||
-    (litellm && typeof litellm === 'object' && typeof litellm.baseUrl === 'string'
-      ? litellm.baseUrl
-      : '');
-  const apiKey =
-    process.env.LITELLM_VIRTUAL_KEY ||
-    (litellm && typeof litellm === 'object' && typeof litellm.virtualKey === 'string'
-      ? litellm.virtualKey
-      : '');
-  if (!baseUrl || !apiKey) {
-    throw new Error(
-      'LiteLLM credentials are missing (set LITELLM_BASE_URL/LITELLM_VIRTUAL_KEY or KBN_EVALS_CONFIG_B64)'
-    );
-  }
-
-  return {
-    config: {
-      apiUrl: `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`,
-      defaultModel: connectorIdToLitellmModel(modelConnectorId),
-    },
-    secrets: { apiKey },
-  };
-}
-
-/**
- * Decode KIBANA_TESTING_AI_CONNECTORS (base64-encoded JSON in CI, raw JSON locally).
- */
-function decodeAiConnectors() {
-  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
-  if (!raw) {
-    return {};
-  }
-
-  const tryParse = (text) => {
-    try {
-      const parsed = JSON.parse(text);
-      return parsed && typeof parsed === 'object' ? parsed : null;
-    } catch {
-      return null;
-    }
-  };
-
-  const direct = tryParse(raw);
-  if (direct) {
-    return direct;
-  }
-
-  try {
-    const decoded = tryParse(Buffer.from(raw, 'base64').toString('utf8'));
-    return decoded ?? {};
-  } catch {
-    return {};
-  }
-}
-
 /**
  * Resolve the LiteLLM model used to generate Slack/GitHub triage text.
  * override with `EVAL_TRIAGE_MODEL_ID`.
@@ -357,7 +275,9 @@ function resolveTriageConnector() {
     throw new Error(`Unsupported triage model connector id (expected litellm-): ${modelId}`);
   }
 
-  const connector = decodeAiConnectors()[modelId] ?? buildLitellmConnectorFromVault(modelId);
+  const connector =
+    parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || '')[modelId] ??
+    buildLitellmConnectorFromVault(modelId);
   if (!connector) {
     throw new Error(
       `Model connector ${modelId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
@@ -441,7 +361,6 @@ module.exports = {
   MAX_CONTEXT_JSON_BYTES,
   DEFAULT_TRIAGE_MODEL_ID,
   TRIAGE_SYSTEM_PROMPT,
-  decodeAiConnectors,
   resolveTriageModelId,
   failureLogMetadataKey,
   truncateText,

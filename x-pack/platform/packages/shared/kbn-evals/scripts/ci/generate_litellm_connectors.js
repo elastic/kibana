@@ -84,21 +84,12 @@ function unwrapCandidates(payload) {
   );
 }
 
-function normalizeTeamName(value) {
-  return String(value)
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 function findTeamIdByName(teams, teamName) {
-  const target = normalizeTeamName(teamName);
+  const target = slugifyId(teamName);
   for (const t of teams) {
     if (!t || typeof t !== 'object') continue;
     const aliasRaw = (t.team_alias ?? t.team_name ?? t.name ?? t.alias ?? '').toString();
-    const alias = normalizeTeamName(aliasRaw);
+    const alias = slugifyId(aliasRaw);
     if (alias && alias === target) {
       return t.team_id ?? t.id ?? t.teamId;
     }
