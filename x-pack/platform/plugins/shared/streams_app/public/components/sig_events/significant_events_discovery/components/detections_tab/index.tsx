@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiLoadingSpinner,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -38,9 +37,6 @@ const DISCOVERY_STATUS_LABELS = {
   processed: i18n.translate('xpack.streams.detectionsTab.statusProcessed', {
     defaultMessage: 'Processed',
   }),
-  missed: i18n.translate('xpack.streams.detectionsTab.statusMissed', {
-    defaultMessage: 'Missed',
-  }),
   pending: i18n.translate('xpack.streams.detectionsTab.statusPending', {
     defaultMessage: 'Pending',
   }),
@@ -58,13 +54,6 @@ const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
 const kindLabel = (kind: Detection['kind']) => DETECTION_KIND_LABELS[kind] ?? kind;
 const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'default';
 
-// Unhandled detections older than this window are outside the discovery lookback
-// and won't be picked up automatically by the discovery pipeline.
-const DISCOVERY_LOOKBACK_MS = 4 * 60 * 60 * 1000;
-
-const getDetectionItemId = (detection: Detection) =>
-  detection.detection_id ?? `${detection.rule_uuid}-${detection['@timestamp']}`;
-
 export const DetectionsTab = () => {
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
@@ -79,13 +68,11 @@ export const DetectionsTab = () => {
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
-  const selectedDetectionId = selectedDetection ? getDetectionItemId(selectedDetection) : undefined;
+  const selectedDetectionId = selectedDetection?.detection_id;
 
   const toggleSelectedDetection = useCallback((detection: Detection) => {
     setSelectedDetection((current) =>
-      current && getDetectionItemId(current) === getDetectionItemId(detection)
-        ? undefined
-        : detection
+      current?.detection_id === detection.detection_id ? undefined : detection
     );
   }, []);
 
@@ -108,7 +95,7 @@ export const DetectionsTab = () => {
         name: '',
         width: '40px',
         render: (detection: Detection) => {
-          const isExpanded = selectedDetectionId === getDetectionItemId(detection);
+          const isExpanded = selectedDetectionId === detection.detection_id;
           return (
             <EuiToolTip
               content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
@@ -184,22 +171,9 @@ export const DetectionsTab = () => {
           if (detection.processed) {
             return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
           }
-          const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
-          if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
-            return <EuiBadge color="warning">{DISCOVERY_STATUS_LABELS.missed}</EuiBadge>;
-          }
           return (
             <EuiBadge color="hollow">
-              <span
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${euiTheme.size.xs};
-                `}
-              >
-                <EuiLoadingSpinner size="s" />
                 {DISCOVERY_STATUS_LABELS.pending}
-              </span>
             </EuiBadge>
           );
         },
@@ -250,7 +224,7 @@ export const DetectionsTab = () => {
             defaultMessage: 'Detections',
           })}
           items={data?.hits ?? []}
-          itemId={getDetectionItemId}
+          itemId="detection_id"
           columns={columns}
           pagination={euiPagination}
           onChange={onTableChange}
@@ -259,7 +233,7 @@ export const DetectionsTab = () => {
             defaultMessage: 'No detections found.',
           })}
           rowProps={(detection: Detection) => ({
-            isSelected: selectedDetectionId === getDetectionItemId(detection),
+            isSelected: selectedDetectionId === detection.detection_id,
           })}
         />
       </EuiFlexItem>
