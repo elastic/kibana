@@ -73,16 +73,12 @@ const OBS_RULE_TEST_PARAMS: Record<string, Record<string, unknown>> = {
   },
   'metrics.alert.threshold': {
     sourceId: 'default',
-    criteria: [
-      { aggType: 'count', comparator: '>', threshold: [0], timeSize: 1, timeUnit: 'm' },
-    ],
+    criteria: [{ aggType: 'count', comparator: '>', threshold: [0], timeSize: 1, timeUnit: 'm' }],
   },
   'metrics.alert.inventory.threshold': {
     sourceId: 'default',
     nodeType: 'host',
-    criteria: [
-      { metric: 'cpu', comparator: '>', threshold: [40], timeSize: 1, timeUnit: 'm' },
-    ],
+    criteria: [{ metric: 'cpu', comparator: '>', threshold: [40], timeSize: 1, timeUnit: 'm' }],
   },
   'logs.alert.document.count': {
     logView: { logViewId: 'Default', type: 'log-view-reference' },
