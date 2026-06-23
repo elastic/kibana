@@ -17,7 +17,6 @@ jest.mock('@kbn/security-solution-navigation', () => ({
 
 jest.mock('./use_stored_state', () => ({
   ...jest.requireActual('./use_stored_state'),
-  useStoredCloudOnboardingConsumed: jest.fn(),
   useStoredUrlDetails: jest.fn(),
 }));
 
@@ -45,7 +44,7 @@ jest.mock('react-router-dom', () => {
 });
 
 // Import the mocked modules for type-checking and setting implementations
-import { useStoredCloudOnboardingConsumed, useStoredUrlDetails } from './use_stored_state';
+import { useStoredUrlDetails } from './use_stored_state';
 import { useTopicId } from './use_topic_id';
 import { useCloudTopicId } from './use_cloud_topic_id';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
@@ -194,7 +193,6 @@ describe('getCardIdFromHash', () => {
 // --- Tests for useSyncUrlDetails ---
 describe('useSyncUrlDetails', () => {
   let mockSetStoredUrlDetail: jest.Mock;
-  let mockSetCloudOnboardingConsumed: jest.Mock;
   let mockNavigateTo: jest.Mock;
   let mockReportCardOpen: jest.Mock;
   let mockStartGetCloudTopicId: jest.Mock;
@@ -204,7 +202,6 @@ describe('useSyncUrlDetails', () => {
   beforeEach(() => {
     window.history.replaceState({}, '', '/app/security/get_started');
     mockSetStoredUrlDetail = jest.fn();
-    mockSetCloudOnboardingConsumed = jest.fn();
     mockNavigateTo = jest.fn();
     mockReportCardOpen = jest.fn();
     mockStartGetCloudTopicId = jest.fn();
@@ -212,10 +209,6 @@ describe('useSyncUrlDetails', () => {
 
     // Provide default values for the dependencies used inside useUrlDetail
     (useStoredUrlDetails as jest.Mock).mockReturnValue([null, mockSetStoredUrlDetail]);
-    (useStoredCloudOnboardingConsumed as jest.Mock).mockReturnValue([
-      false,
-      mockSetCloudOnboardingConsumed,
-    ]);
     (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
     (useTopicId as jest.Mock).mockReturnValue(OnboardingTopicId.default);
     (useCloudTopicId as jest.Mock).mockImplementation(({ onComplete }) => {
@@ -299,33 +292,17 @@ describe('useSyncUrlDetails', () => {
     expect(mockStartGetCloudTopicId).toHaveBeenCalled();
   });
 
-  it('does not call startGetCloudTopicId when the cloud onboarding redirect was consumed', () => {
-    (useStoredUrlDetails as jest.Mock).mockReturnValue([undefined, mockSetStoredUrlDetail]);
-    (useStoredCloudOnboardingConsumed as jest.Mock).mockReturnValue([
-      true,
-      mockSetCloudOnboardingConsumed,
-    ]);
-
-    renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
-
-    expect(mockStartGetCloudTopicId).not.toHaveBeenCalled();
-    expect(mockNavigateTo).not.toHaveBeenCalled();
-    expect(mockSetStoredUrlDetail).not.toHaveBeenCalled();
-  });
-
-  it('navigates to SIEM migrations manage and stores the consumed flag', () => {
+  it('navigates to SIEM migrations topic after clearing stored detail', () => {
     renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
 
     act(() => {
       mockCloudOnComplete(OnboardingTopicId.siemMigrations);
     });
-    expect(mockSetCloudOnboardingConsumed).toHaveBeenCalledWith(true);
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.landing,
       path: OnboardingTopicId.siemMigrations,
     });
-    expect(mockSetCloudOnboardingConsumed).toHaveBeenCalledWith(true);
-    expect(mockSetStoredUrlDetail).not.toHaveBeenCalled();
+    expect(mockSetStoredUrlDetail).toHaveBeenCalledWith(null);
   });
 
   it('clears stored detail if the stored topic is invalid', () => {
