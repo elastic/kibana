@@ -100,24 +100,12 @@ spaceTest.describe(
 
     spaceTest(
       'enables bulk close and closes matching alerts when the exception references a runtime field',
-      async ({ pageObjects, page, esClient }) => {
+      async ({ pageObjects, page, esClient, apiServices }) => {
         await spaceTest.step('navigate and wait for the alert to fire', async () => {
           await pageObjects.alertsTablePage.navigate();
           await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
           // The rule executes on schedule. Poll until the alert lands.
-          await expect
-            .poll(
-              async () => {
-                await esClient.indices.refresh({ index: alertsIndex });
-                const res = await esClient.count({
-                  index: alertsIndex,
-                  query: { term: { 'kibana.alert.rule.name': ruleName } },
-                });
-                return res.count;
-              },
-              { timeout: 120_000, intervals: [2_000] }
-            )
-            .toBeGreaterThan(0);
+          await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 120_000);
           // Refresh the table so the new alert is visible.
           await page.reload();
           await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
