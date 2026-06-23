@@ -538,7 +538,11 @@ const enrichEntityResult = async ({
     }
   } catch (errors) {
     // Swallow enrichment errors and continue to return the base entity data.
-    logger.debug(`Failed to enrich entity ${rowEntityId}: ${errors instanceof Error ? errors.message : String(errors)}`);
+    logger.debug(
+      `Failed to enrich entity ${rowEntityId}: ${
+        errors instanceof Error ? errors.message : String(errors)
+      }`
+    );
   }
 
   if (interval) {

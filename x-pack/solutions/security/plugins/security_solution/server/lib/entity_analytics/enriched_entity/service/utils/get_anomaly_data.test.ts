@@ -32,7 +32,6 @@ const soClient = savedObjectsClientMock.create();
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
 
-
 const makeEntity = (opts: { id?: string; type?: string }): Entity => {
   const base = {
     entity: {
