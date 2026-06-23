@@ -129,11 +129,10 @@ export function createQueryKnowledgeIndicatorTool({
         streamType = getStreamTypeFromDefinition(definition);
 
         const kiClient = await getKnowledgeIndicatorClient();
-        const { expires_at, ...restQueryInput } = queryInput;
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
           kiClient,
           definition,
-          queryInput: { ...restQueryInput, expires_at },
+          queryInput,
           logger,
         });
 

@@ -49,11 +49,11 @@ export async function persistQueries(
 
   const defaultExpiresAt = kiClient.getDefaultExpiresAt();
 
-  const resolveExpiresAt = (priorId: string | undefined): string | undefined => {
+  const resolveExpiresAt = (priorId?: string): string | undefined => {
     if (!priorId) return defaultExpiresAt;
     const prior = existingById.get(priorId);
     if (!prior) return defaultExpiresAt;
-    return prior.expires_at !== undefined ? defaultExpiresAt : undefined;
+    if (prior.expires_at) return defaultExpiresAt;
   };
 
   const standardOps: KIBulkOperation[] = [];
@@ -82,7 +82,9 @@ export async function persistQueries(
         ruleEligibleExpiresAt.set(queryId, expiresAt);
       } else {
         standardOps.push({
-          index: { query: { id: queryId, expires_at: expiresAt, ...indexFields, rule_backed: false } },
+          index: {
+            query: { id: queryId, expires_at: expiresAt, ...indexFields, rule_backed: false },
+          },
         });
       }
       persistedQueries.push({ ...query, id: queryId });
@@ -93,7 +95,9 @@ export async function persistQueries(
         ruleEligibleExpiresAt.set(id, defaultExpiresAt);
       } else {
         standardOps.push({
-          index: { query: { id, expires_at: defaultExpiresAt, ...indexFields, rule_backed: false } },
+          index: {
+            query: { id, expires_at: defaultExpiresAt, ...indexFields, rule_backed: false },
+          },
         });
       }
       persistedQueries.push({ ...query, id });
