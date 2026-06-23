@@ -20,7 +20,7 @@ import { RuleObjectId } from '../../model/rule_schema/common_attributes.gen';
 import { UUID } from '../../../model/primitives.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 
-export const RestoreRuleRequestParams = lazySchema(() =>
+export const RestoreRuleFromHistoryRequestParams = lazySchema(() =>
   z.object({
     /**
      * The rule's object `id` value (Saved Object id).
@@ -32,12 +32,20 @@ export const RestoreRuleRequestParams = lazySchema(() =>
     changeId: UUID,
   })
 );
-export type RestoreRuleRequestParams = z.infer<typeof RestoreRuleRequestParams>;
-export type RestoreRuleRequestParamsInput = z.input<typeof RestoreRuleRequestParams>;
+export type RestoreRuleFromHistoryRequestParams = z.infer<
+  typeof RestoreRuleFromHistoryRequestParams
+>;
+export type RestoreRuleFromHistoryRequestParamsInput = z.input<
+  typeof RestoreRuleFromHistoryRequestParams
+>;
 
-export const RestoreRuleResponse = lazySchema(() =>
+export const RestoreRuleFromHistoryResponse = lazySchema(() =>
   z.object({
     rule: RuleResponse,
+    /**
+     * True when the rule was already at the requested historical state and no update was applied.
+     */
+    no_change: z.boolean().optional(),
   })
 );
-export type RestoreRuleResponse = z.infer<typeof RestoreRuleResponse>;
+export type RestoreRuleFromHistoryResponse = z.infer<typeof RestoreRuleFromHistoryResponse>;

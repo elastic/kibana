@@ -30,14 +30,15 @@ import { RuleChangesHistoryTimeline } from '../changes_history_timeline';
 import { useInfiniteChangeHistory } from '../../../rule_management/api/hooks/use_infinite_change_history';
 import { RuleDetailTabs } from '../../pages/rule_details/use_rule_details_tabs';
 import { RuleChangesDiff } from '../changes_diff/changes_diff';
-import * as i18n from './translations';
 import { useChangeHistoryAutoSelection } from './use_change_history_auto_selection';
+import { useRuleRestoreFromHistory } from './use_rule_restore_from_history';
+import * as i18n from './translations';
 
 const SIDEBAR_WIDTH = 400;
 const NO_HISTORY_IMG_SIZE = 128;
 
 interface RuleChangesHistoryProps {
-  ruleId: string;
+  ruleId: string; // RuleObjectId
   header?: React.ReactNode;
 }
 
@@ -66,6 +67,8 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
 
     fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const { restoreFromHistory } = useRuleRestoreFromHistory({ ruleId });
 
   const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
   const hasNoHistory = !isLoading && items.length === 0;
@@ -183,6 +186,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
             startedAt={changeHistoryStartedAt}
             onLoadMore={handleNextPageLoading}
             onSelectItem={setSelectedItem}
+            onRestore={restoreFromHistory}
           />
         </EuiFlyoutBody>
       </EuiFlyout>

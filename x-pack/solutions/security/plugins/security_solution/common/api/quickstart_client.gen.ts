@@ -85,9 +85,9 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
-  RestoreRuleRequestParamsInput,
-  RestoreRuleResponse,
-} from './detection_engine/rule_management/restore_rule/restore_rule_route.gen';
+  RestoreRuleFromHistoryRequestParamsInput,
+  RestoreRuleFromHistoryResponse,
+} from './detection_engine/rule_management/restore_rule_from_history/restore_rule_from_history_route.gen';
 import type {
   RuleChangesHistoryRequestQueryInput,
   RuleChangesHistoryRequestParamsInput,
@@ -3147,10 +3147,10 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     * Restore a detection rule to a specific historical snapshot.
 
     */
-  async restoreRule(props: RestoreRuleProps) {
-    this.log.info(`${new Date().toISOString()} Calling API RestoreRule`);
+  async restoreRuleFromHistory(props: RestoreRuleFromHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RestoreRuleFromHistory`);
     return this.kbnClient
-      .request<RestoreRuleResponse>({
+      .request<RestoreRuleFromHistoryResponse>({
         path: replaceParams(
           '/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore',
           props.params
@@ -4313,8 +4313,8 @@ export interface ReadRuleExecutionResultsProps {
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
-export interface RestoreRuleProps {
-  params: RestoreRuleRequestParamsInput;
+export interface RestoreRuleFromHistoryProps {
+  params: RestoreRuleFromHistoryRequestParamsInput;
 }
 export interface ReviewRuleInstallationProps {
   body: ReviewRuleInstallationRequestBodyInput;

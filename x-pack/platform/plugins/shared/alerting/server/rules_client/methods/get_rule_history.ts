@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { ChangeHistoryDocument, GetHistoryResult } from '@kbn/change-history';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -68,28 +69,57 @@ const DEFAULT_SIZE = 20;
 
 export async function getRuleHistory(
   context: RulesClientContext,
-  {
-    module,
-    ruleId,
-    from = DEFAULT_FROM,
-    size = DEFAULT_SIZE,
-    sort,
-    filters: additionalFilters,
-  }: GetRuleHistoryParams
+  { module, ruleId, from = DEFAULT_FROM, size = DEFAULT_SIZE, sort, filters }: GetRuleHistoryParams
 ): Promise<GetRuleHistoryResult> {
   if (!context.changeTrackingService) {
     throw new RuleChangeTrackingDisabledError();
   }
 
-  const currentRule = await getRuleSo({
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-    id: ruleId,
-  });
+  // Resolve auth info from the rule saved object. When the rule is deleted, fall back to
+  // the most recent history snapshot so we can still authorize and serve the history.
+  let ruleTypeId: string | undefined;
+  let consumer: string | undefined;
+  let ruleName: string | undefined;
+
+  try {
+    const currentRule = await getRuleSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      id: ruleId,
+    });
+    ruleTypeId = currentRule.attributes.alertTypeId;
+    consumer = currentRule.attributes.consumer;
+    ruleName = currentRule.attributes.name;
+  } catch (error) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      throw error;
+    }
+
+    // Rule was deleted. Extract auth info from the most recent history snapshot.
+    const latestHistory = await context.changeTrackingService.getHistory(
+      module,
+      context.spaceId,
+      ruleId,
+      { from: 0, size: 1, sort: [{ '@timestamp': { order: 'desc' } }] }
+    );
+
+    if (latestHistory.items.length === 0) {
+      return { total: 0, items: [] };
+    }
+
+    const rawAttributes = latestHistory.items[0].object.snapshot?.attributes as RawRule | undefined;
+    ruleTypeId = rawAttributes?.alertTypeId;
+    consumer = rawAttributes?.consumer;
+    ruleName = rawAttributes?.name;
+  }
+
+  if (!ruleTypeId || !consumer) {
+    return { total: 0, items: [] };
+  }
 
   try {
     await context.authorization.ensureAuthorized({
-      ruleTypeId: currentRule.attributes.alertTypeId,
-      consumer: currentRule.attributes.consumer,
+      ruleTypeId,
+      consumer,
       operation: ReadOperations.GetHistory,
       entity: AlertingAuthorizationEntity.Rule,
     });
@@ -100,7 +130,7 @@ export async function getRuleHistory(
         savedObject: {
           type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
-          name: currentRule.attributes.name,
+          name: ruleName,
         },
         error,
       })
@@ -111,7 +141,7 @@ export async function getRuleHistory(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_HISTORY,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: currentRule.attributes.name },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: ruleName },
     })
   );
 
@@ -119,7 +149,7 @@ export async function getRuleHistory(
     from,
     size,
     sort,
-    additionalFilters,
+    additionalFilters: filters,
   });
 
   const itemsRule: RuleChangeHistoryDocument[] = [];
@@ -134,7 +164,6 @@ export async function getRuleHistory(
 
   return {
     ...result,
-    total: itemsRule.length,
     items: itemsRule,
   };
 }

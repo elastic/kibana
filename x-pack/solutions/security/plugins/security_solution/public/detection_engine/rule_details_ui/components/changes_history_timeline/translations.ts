@@ -61,8 +61,8 @@ export const ACTION_LABEL_INSTALLED = i18n.translate(
 );
 
 export const ACTION_LABEL_UPGRADED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelUpgraded',
-  { defaultMessage: 'Upgraded the rule' }
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelUpdated',
+  { defaultMessage: 'Updated the rule' }
 );
 
 export const ACTION_LABEL_DUPLICATED = i18n.translate(
@@ -78,6 +78,11 @@ export const ACTION_LABEL_IMPORTED = i18n.translate(
 export const ACTION_LABEL_REVERTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelReverted',
   { defaultMessage: 'Reverted the rule' }
+);
+
+export const ACTION_LABEL_RESTORED_FROM_HISTORY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelRestoredFromHistory',
+  { defaultMessage: 'Restored' }
 );
 
 export const SYSTEM_USER_LABEL = i18n.translate(
@@ -106,5 +111,26 @@ export const LOADING_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.loadingLabel',
   {
     defaultMessage: 'Loading change history',
+  }
+);
+
+export const RESTORE_ACTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreActionsLabel',
+  {
+    defaultMessage: 'Restore actions',
+  }
+);
+
+export const RESTORE_VERSION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreVersionLabel',
+  {
+    defaultMessage: 'Restore this version',
+  }
+);
+
+export const CURRENT_VERSION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.currentVersionTooltip',
+  {
+    defaultMessage: 'This is the current version',
   }
 );

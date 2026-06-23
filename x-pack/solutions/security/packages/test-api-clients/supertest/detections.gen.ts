@@ -45,7 +45,7 @@ import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
-import type { RestoreRuleRequestParamsInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/restore_rule/restore_rule_route.gen';
+import type { RestoreRuleFromHistoryRequestParamsInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/restore_rule_from_history/restore_rule_from_history_route.gen';
 import type { ReviewRuleInstallationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type { ReviewRuleUpgradeRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
 import type {
@@ -462,7 +462,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       * Restore a detection rule to a specific historical snapshot.
 
       */
-  restoreRule(props: RestoreRuleProps, kibanaSpace: string = 'default') {
+  restoreRuleFromHistory(props: RestoreRuleFromHistoryProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
         getRouteUrlForSpace(
@@ -765,8 +765,8 @@ export interface ReadRuleExecutionResultsProps {
   params: ReadRuleExecutionResultsRequestParamsInput;
   body: ReadRuleExecutionResultsRequestBodyInput;
 }
-export interface RestoreRuleProps {
-  params: RestoreRuleRequestParamsInput;
+export interface RestoreRuleFromHistoryProps {
+  params: RestoreRuleFromHistoryRequestParamsInput;
 }
 export interface ReviewRuleInstallationProps {
   body: ReviewRuleInstallationRequestBodyInput;

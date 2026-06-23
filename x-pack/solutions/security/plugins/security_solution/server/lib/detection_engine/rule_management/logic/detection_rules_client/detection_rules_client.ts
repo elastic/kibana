@@ -35,7 +35,7 @@ import type {
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
-import type { RestoreRuleResponse } from '../../../../../../common/api/detection_engine/rule_management';
+import type { RestoreRuleFromHistoryResponse } from '../../../../../../common/api/detection_engine/rule_management';
 import { createRule } from './methods/create_rule';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
@@ -235,9 +235,9 @@ export const createDetectionRulesClient = ({
     async restoreRuleFromHistory({
       ruleId,
       changeId,
-    }: RestoreRuleFromHistoryArgs): Promise<RestoreRuleResponse> {
+    }: RestoreRuleFromHistoryArgs): Promise<RestoreRuleFromHistoryResponse> {
       return withSecuritySpan('DetectionRulesClient.restoreRuleFromHistory', async () => {
-        const rule = await restoreRuleFromHistory({
+        return restoreRuleFromHistory({
           actionsClient,
           rulesClient,
           prebuiltRuleAssetClient,
@@ -246,8 +246,6 @@ export const createDetectionRulesClient = ({
           ruleId,
           changeId,
         });
-
-        return { rule };
       });
     },
   };

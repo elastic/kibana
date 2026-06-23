@@ -18,7 +18,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import type {
   RuleChangesHistoryResponse,
-  RestoreRuleResponse,
+  RestoreRuleFromHistoryResponse,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { IRuleSourceImporter } from '../import/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
@@ -39,7 +39,9 @@ export interface IDetectionRulesClient {
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
   getHistoryForRule: (args: GetHistoryForRuleArgs) => Promise<RuleChangesHistoryResponse>;
-  restoreRuleFromHistory: (args: RestoreRuleFromHistoryArgs) => Promise<RestoreRuleResponse>;
+  restoreRuleFromHistory: (
+    args: RestoreRuleFromHistoryArgs
+  ) => Promise<RestoreRuleFromHistoryResponse>;
 }
 
 export interface CreateCustomRuleArgs {

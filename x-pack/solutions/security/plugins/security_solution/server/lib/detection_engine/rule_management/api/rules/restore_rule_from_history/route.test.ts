@@ -58,7 +58,9 @@ describe('Restore rule from history route', () => {
   });
 
   test('rejects requests with missing ruleId at validation', () => {
-    const result = server.validate(buildRestoreRequest({ params: { changeId: 'change-abc-123' } }));
+    const result = server.validate(
+      buildRestoreRequest({ params: { changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f' } })
+    );
     expect(result.badRequest).toHaveBeenCalled();
   });
 

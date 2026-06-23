@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-types';
-
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { convertRuleToDiffable } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type {
   RuleResponse,
@@ -18,6 +20,7 @@ import type {
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleParams } from '../../../../rule_schema';
+import { SERVER_APP_ID } from '../../../../../../../common';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
@@ -40,14 +43,8 @@ export const restoreRuleFromHistory = async ({
   rulesAuthz: DetectionRulesAuthz;
   ruleId: RuleObjectId;
   changeId: string;
-}): Promise<RuleResponse> => {
+}): Promise<{ rule: RuleResponse; no_change?: true }> => {
   const existingRule = await getRuleById({ rulesClient, id: ruleId });
-
-  if (existingRule == null) {
-    throw new ClientError(`id: "${ruleId}" not found`, 404);
-  }
-
-  await validateMlAuth(mlAuthz, existingRule.type);
 
   // `from` is intentionally omitted: the event.id term-filter makes the target
   // document the first (and only) hit; ES default of 0 is correct here.
@@ -65,10 +62,47 @@ export const restoreRuleFromHistory = async ({
   const item = historyResult.items[0];
 
   if (!item.rule) {
-    throw new ClientError(`Snapshot for changeId: "${changeId}" could not be hydrated`, 500);
+    throw new Error(`Snapshot for changeId: "${changeId}" could not be hydrated`);
   }
 
   const snapshotRule = convertAlertingRuleToRuleResponse(item.rule as SanitizedRule<RuleParams>);
+
+  if (existingRule == null) {
+    await validateMlAuth(mlAuthz, snapshotRule.type);
+
+    validateFieldWritePermissions(
+      {
+        exceptions_list: snapshotRule.exceptions_list,
+        note: snapshotRule.note,
+        investigation_fields: snapshotRule.investigation_fields,
+        enabled: snapshotRule.enabled,
+      },
+      rulesAuthz
+    );
+
+    const createdRule = await rulesClient.create<RuleParams>({
+      data: {
+        ...convertRuleResponseToAlertingRule(snapshotRule, actionsClient),
+        alertTypeId: ruleTypeMappings[snapshotRule.type],
+        consumer: SERVER_APP_ID,
+        enabled: snapshotRule.enabled ?? false,
+      },
+      options: { id: ruleId },
+      changeTracking: {
+        action: SecurityRuleChangeTrackingAction.ruleRestore,
+        metadata: { restoredFromChangeId: changeId },
+        refresh: 'wait_for',
+      },
+    });
+
+    return { rule: convertAlertingRuleToRuleResponse(createdRule) };
+  }
+
+  await validateMlAuth(mlAuthz, existingRule.type);
+
+  if (isEqual(convertRuleToDiffable(existingRule), convertRuleToDiffable(snapshotRule))) {
+    return { rule: existingRule, no_change: true };
+  }
 
   const ruleWithUpdates = await applyRuleUpdate({
     prebuiltRuleAssetClient,
@@ -76,29 +110,27 @@ export const restoreRuleFromHistory = async ({
     ruleUpdate: snapshotRule,
   });
 
-  // Restore preserves the current enabled state per phase decision D-02.
-  // Execution fields (e.g. execution_summary) are never part of the update
-  // payload because they are not in RuleUpdateProps (research Pitfall 2).
-  ruleWithUpdates.enabled = existingRule.enabled;
+  const ruleToSave = { ...ruleWithUpdates, enabled: existingRule.enabled };
 
   validateFieldWritePermissions(
     {
-      exceptions_list: ruleWithUpdates.exceptions_list,
-      note: ruleWithUpdates.note,
-      investigation_fields: ruleWithUpdates.investigation_fields,
-      enabled: ruleWithUpdates.enabled,
+      exceptions_list: ruleToSave.exceptions_list,
+      note: ruleToSave.note,
+      investigation_fields: ruleToSave.investigation_fields,
+      enabled: ruleToSave.enabled,
     },
     rulesAuthz
   );
 
   const updatedRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
+    data: convertRuleResponseToAlertingRule(ruleToSave, actionsClient),
     changeTracking: {
       action: SecurityRuleChangeTrackingAction.ruleRestore,
       metadata: { restoredFromChangeId: changeId },
+      refresh: 'wait_for',
     },
   });
 
-  return convertAlertingRuleToRuleResponse(updatedRule);
+  return { rule: convertAlertingRuleToRuleResponse(updatedRule) };
 };

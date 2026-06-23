@@ -64,6 +64,12 @@ export interface RuleChangeTracking<ChangeAction extends string = string> {
    * change. E.g. `metadata.bulkCount` says about how many rules were involved in a bulk operation.
    */
   metadata?: RuleChangeTrackingMetadata;
+  /**
+   * Controls ES index refresh behavior after the change is written.
+   * Use `'wait_for'` when the caller needs the history entry to be immediately
+   * searchable (e.g. rule restore, where the client refetches history right after).
+   */
+  refresh?: boolean | 'wait_for';
 }
 
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;

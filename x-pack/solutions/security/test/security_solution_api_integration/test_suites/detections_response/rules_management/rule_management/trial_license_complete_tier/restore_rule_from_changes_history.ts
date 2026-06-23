@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await clearHistory();
     });
 
-    it('restores a custom rule to a previous revision', async () => {
+    it('restores a custom rule to a previous state', async () => {
       const { body: rule } = await detectionsApi
         .createRule({ body: getCustomQueryRuleParams({ name: 'original name' }) })
         .expect(200);
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = createEntry.id;
 
       const { body } = await detectionsApi
-        .restoreRule({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
         .expect(200);
 
       expect(body.rule.name).toBe('original name');
@@ -90,10 +90,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body2.items[0].action).toBe('rule_restore');
-      expect(body2.items[0].metadata.changeId).toBe(changeId);
+      expect(body2.items[0].metadata.restored_from_change_id).toBe(changeId);
     });
 
-    it('restores a customized prebuilt rule to a previous revision', async () => {
+    it('restores a customized prebuilt rule to a previous state', async () => {
       await createPrebuiltRuleAssetSavedObjects(es, [
         createRuleAssetSavedObject({ rule_id: 'prebuilt-restore-customized', version: 1 }),
       ]);
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = installEntry.id;
 
       const { body } = await detectionsApi
-        .restoreRule({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
         .expect(200);
 
       expect(body.rule.name).not.toBe('customized name');
@@ -131,10 +131,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body2.items[0].action).toBe('rule_restore');
-      expect(body2.items[0].metadata.changeId).toBe(changeId);
+      expect(body2.items[0].metadata.restored_from_change_id).toBe(changeId);
     });
 
-    it('restores a non-customized prebuilt rule', async () => {
+    it('restores a non-customized prebuilt rule to a previous state', async () => {
       await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
         createRuleAssetSavedObject({ rule_id: 'prebuilt-restore-pure', version: 1 }),
       ]);
@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = installEntry.id;
 
       const { body } = await detectionsApi
-        .restoreRule({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
         .expect(200);
 
       expect(body.rule.version).toBe(1);
@@ -176,13 +176,29 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body2.items[0].action).toBe('rule_restore');
-      expect(body2.items[0].metadata.changeId).toBe(changeId);
+      expect(body2.items[0].metadata.restored_from_change_id).toBe(changeId);
     });
 
-    it('returns 404 when the rule does not exist', async () => {
-      await detectionsApi
-        .restoreRule({ params: { ruleId: uuidv4(), changeId: uuidv4() } })
-        .expect(404);
+    it("returns 200 when rule doesn't exist (deleted rule)", async () => {
+      const { body: rule } = await detectionsApi
+        .createRule({ body: getCustomQueryRuleParams() })
+        .expect(200);
+
+      await refreshHistory();
+
+      const { body: historyBody } = await detectionsApi
+        .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+        .expect(200);
+
+      const changeId = historyBody.items[0].id;
+
+      await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
+
+      const { body } = await detectionsApi
+        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+        .expect(200);
+
+      expect(body.rule.id).toBe(rule.id);
     });
 
     it('returns 404 when the changeId does not exist for a valid rule', async () => {
@@ -191,11 +207,11 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       await detectionsApi
-        .restoreRule({ params: { ruleId: rule.id, changeId: uuidv4() } })
+        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId: uuidv4() } })
         .expect(404);
     });
 
-    it('succeeds gracefully when restoring the most recent revision', async () => {
+    it('make zero side effect when restoring the state equals to the current state', async () => {
       const { body: rule } = await detectionsApi
         .createRule({ body: getCustomQueryRuleParams() })
         .expect(200);
@@ -209,7 +225,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = historyBody.items[0].id;
 
       const { body } = await detectionsApi
-        .restoreRule({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
         .expect(200);
 
       expect(body.rule.id).toBe(rule.id);
@@ -220,7 +236,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
         .expect(200);
 
-      expect(body2.items[0].action).toBe('rule_restore');
+      expect(body2.items.length).toBe(1);
+      expect(body2.items[0].action).toBe('rule_create');
     });
 
     describe('@skipInServerless RBAC', () => {
@@ -248,7 +265,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const changeId = historyBody.items[0].id;
         const restrictedApis = detectionsApi.withUser({ username: role, password: 'changeme' });
 
-        await restrictedApis.restoreRule({ params: { ruleId: rule.id, changeId } }).expect(403);
+        await restrictedApis
+          .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+          .expect(403);
       });
     });
   });

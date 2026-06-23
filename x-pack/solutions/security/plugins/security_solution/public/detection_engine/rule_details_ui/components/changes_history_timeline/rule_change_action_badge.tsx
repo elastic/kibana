@@ -57,6 +57,9 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
     case SecurityRuleChangeTrackingAction.ruleRevert:
       return <ChangeActionBadge icon="framePrevious" text={i18n.ACTION_LABEL_REVERTED} />;
 
+    case SecurityRuleChangeTrackingAction.ruleRestore:
+      return <ChangeActionBadge icon="upload" text={i18n.ACTION_LABEL_RESTORED_FROM_HISTORY} />;
+
     default: {
       const isPrebuiltRule = item.rule.rule_source.type === 'external';
 

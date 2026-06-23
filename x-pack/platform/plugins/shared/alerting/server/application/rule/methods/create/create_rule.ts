@@ -265,6 +265,7 @@ export async function createRule<Params extends RuleParams = never>(
       action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
       timestamp: createTime,
       metadata: changeTracking?.metadata,
+      refresh: changeTracking?.refresh,
     },
   });
 

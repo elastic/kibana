@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-import { v4 as uuidv4 } from 'uuid';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -83,10 +82,20 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(item.old_values).toBeNull();
       });
 
-      it('returns 404 when the rule does not exist', async () => {
-        await detectionsApi
-          .ruleChangesHistory({ params: { ruleId: uuidv4() }, query: {} })
-          .expect(404);
+      it("returns 200 when rule doesn't exist (deleted rule)", async () => {
+        const { body: rule } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams() })
+          .expect(200);
+
+        await refreshHistory();
+
+        await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
+
+        const { body } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        expect(body.total).toBeGreaterThan(0);
       });
 
       it('rejects the request when the "ruleId" path parameter is missing', async () => {
@@ -390,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.items).toHaveLength(1);
         expect(body.items[0].action).toBe('rule_duplicate');
-        expect(body.items[0].metadata?.originalRuleSoId).toBe(original.id);
+        expect(body.items[0].metadata?.original_rule_so_id).toBe(original.id);
       });
 
       it('records rule_revert when reverting a prebuilt rule', async () => {
@@ -447,7 +456,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
           .expect(200);
 
-        expect(body.items[0].metadata?.bulkCount).toBe(3);
+        expect(body.items[0].metadata?.bulk_count).toBe(3);
       });
 
       it('records bulkCount equal to the number of installed prebuilt rules', async () => {
@@ -467,7 +476,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
           .expect(200);
 
-        expect(body.items[0].metadata?.bulkCount).toBe(2);
+        expect(body.items[0].metadata?.bulk_count).toBe(2);
       });
 
       it('records bulkCount equal to the number of upgraded prebuilt rules', async () => {
@@ -498,7 +507,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // Most recent event (index 0) is the upgrade with bulkCount = 2.
-        expect(body.items[0].metadata?.bulkCount).toBe(2);
+        expect(body.items[0].metadata?.bulk_count).toBe(2);
       });
     });
   });

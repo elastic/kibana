@@ -17,9 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { ChangeHistoryItem } from './change_history_item';
 import { TrackingStartedFooter } from './change_history_footer';
+import { DIFFABLE_CHANGE_ACTIONS } from './constants';
 import * as i18n from './translations';
 
 interface ChangeHistoryTimelineProps {
@@ -28,6 +30,7 @@ interface ChangeHistoryTimelineProps {
   startedAt?: Date;
   isLoading?: boolean;
   onSelectItem?: (item: RuleHistoryItem) => void;
+  onRestore: (item: RuleHistoryItem) => void;
   /**
    * Requests loading more data
    */
@@ -40,10 +43,14 @@ export function RuleChangesHistoryTimeline({
   startedAt,
   isLoading,
   onSelectItem,
+  onRestore,
   onLoadMore,
 }: ChangeHistoryTimelineProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const {
+    rules: { edit: canEditRules },
+  } = useUserPrivileges().rulesPrivileges;
 
   // Track scrolling to load more items
   useEffect(() => {
@@ -101,12 +108,15 @@ export function RuleChangesHistoryTimeline({
         aria-label={i18n.TIMELINE_ARIA_LABEL}
         data-test-subj="ruleChangeHistoryList"
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <ChangeHistoryItem
             key={item.id}
             item={item}
             selected={selectedItem?.id === item.id}
-            onClick={() => onSelectItem?.(item)}
+            onRestore={
+              isRestorableItem(item) && index !== 0 && canEditRules ? onRestore : undefined
+            }
+            onClick={onSelectItem}
           />
         ))}
         <div ref={sentinelRef} />
@@ -152,4 +162,8 @@ function NoData(): JSX.Element {
       />
     </EuiPanel>
   );
+}
+
+function isRestorableItem(item: RuleHistoryItem): boolean {
+  return DIFFABLE_CHANGE_ACTIONS.includes(item.action);
 }

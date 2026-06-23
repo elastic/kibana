@@ -8,7 +8,7 @@ paths:
       x-labels: [ess, serverless]
       x-internal: true
       x-codegen-enabled: true
-      operationId: RestoreRule
+      operationId: RestoreRuleFromHistory
       summary: Restore a detection rule to a historical revision
       description: |
         Restore a detection rule to a specific historical snapshot.
@@ -39,6 +39,9 @@ paths:
                 properties:
                   rule:
                     $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                  no_change:
+                    type: boolean
+                    description: True when the rule was already at the requested historical state and no update was applied.
         '400':
           description: Invalid request.
         '403':

@@ -11,9 +11,9 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   RULE_RESTORE_FROM_HISTORY_URL,
-  RestoreRuleRequestParams,
+  RestoreRuleFromHistoryRequestParams,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { RestoreRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { RestoreRuleFromHistoryResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';
 
@@ -33,11 +33,15 @@ export const restoreRuleFromHistoryRoute = (router: SecuritySolutionPluginRouter
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(RestoreRuleRequestParams),
+            params: buildRouteValidationWithZod(RestoreRuleFromHistoryRequestParams),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<RestoreRuleResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<RestoreRuleFromHistoryResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

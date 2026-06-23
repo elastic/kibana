@@ -34,3 +34,29 @@ export const NO_CHANGE_HISTORY_BODY = i18n.translate(
     defaultMessage: 'Subsequent edits will appear here.',
   }
 );
+
+export const CUSTOM_RULE_RESTORE_SUCCESS_TOAST = (revision: number): string =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreSuccessToast', {
+    defaultMessage: 'Rule restored to revision {revision}',
+    values: { revision },
+  });
+
+export const PREBUILT_RULE_RESTORE_SUCCESS_TOAST = (version: number, revision: number): string =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreSuccessToast', {
+    defaultMessage: 'Rule restored to version {version} and revision {revision}',
+    values: { version, revision },
+  });
+
+export const RESTORE_NO_CHANGE_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreNoChangeToast',
+  {
+    defaultMessage: "Rule hasn't changed. The rule is already at this historical state.",
+  }
+);
+
+export const RESTORE_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreErrorToast',
+  {
+    defaultMessage: 'Failed to restore the rule',
+  }
+);
