@@ -27,6 +27,7 @@ import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loadi
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { ServicePanelContent } from './content';
 import { ServicePanelHeader } from './header';
+import { ServicePanelFooter } from './footer';
 import { useObservedService } from './hooks/use_observed_service';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
@@ -39,6 +40,7 @@ import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_pan
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
@@ -68,6 +70,7 @@ export const ServicePanel = memo(function ServicePanel({
 }: ServicePanelProps) {
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const assetInventoryEnabled = useUiSetting<boolean>(ENABLE_ASSET_INVENTORY_SETTING, true);
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
@@ -230,6 +233,14 @@ export const ServicePanel = memo(function ServicePanel({
           />
         )}
       </FlyoutBody>
+      {!isPreviewMode && assetInventoryEnabled && (
+        <ServicePanelFooter
+          identityFields={documentEntityIdentifiers}
+          entity={
+            entityStoreV2Enabled ? entityFromStoreResult.entityRecord ?? undefined : undefined
+          }
+        />
+      )}
     </>
   );
 });

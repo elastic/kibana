@@ -67,7 +67,14 @@ const renderFooter = (
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);
   mockUseKibana.mockReturnValue({
-    services: { cases: { config: { attachmentsEnabled } } },
+    services: {
+      cases: {
+        config: { attachmentsEnabled },
+        helpers: {
+          canUseCases: () => ({ create: true, update: true, createComment: true }),
+        },
+      },
+    },
   });
 
   return render(

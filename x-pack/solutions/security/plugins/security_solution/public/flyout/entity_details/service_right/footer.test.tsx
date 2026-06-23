@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
-import { HostPanelFooter } from './footer';
+import { ServicePanelFooter } from './footer';
 import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
@@ -54,7 +54,7 @@ jest.mock('../../../cases/attachments/entity/components/add_to_existing_case', (
   ),
 }));
 
-const HOST_IDENTITY_FIELDS = { 'host.name': 'host-alice' };
+const SERVICE_IDENTITY_FIELDS = { 'service.name': 'service-alice' };
 const ENTITY_STORE_RECORD = {
   entity: { id: 'entity-store-id-abc' },
 } as unknown as EntityStoreRecord;
@@ -63,7 +63,7 @@ const renderFooter = (
   entityAttachmentsEnabled: boolean,
   attachmentsEnabled: boolean,
   entity?: EntityStoreRecord,
-  identityFields = HOST_IDENTITY_FIELDS
+  identityFields = SERVICE_IDENTITY_FIELDS
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);
   mockUseKibana.mockReturnValue({
@@ -79,12 +79,12 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <HostPanelFooter identityFields={identityFields} entity={entity} />
+      <ServicePanelFooter identityFields={identityFields} entity={entity} />
     </TestProviders>
   );
 };
 
-describe('HostPanelFooter – entity attachment actions', () => {
+describe('ServicePanelFooter – entity attachment actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders Add to new case and Add to existing case when all conditions are met', () => {
@@ -115,8 +115,8 @@ describe('HostPanelFooter – entity attachment actions', () => {
     expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('renders no case actions when hostName resolves to an empty string', () => {
-    renderFooter(true, true, ENTITY_STORE_RECORD, { 'host.name': '' });
+  it('renders no case actions when serviceName resolves to an empty string', () => {
+    renderFooter(true, true, ENTITY_STORE_RECORD, { 'service.name': '' });
 
     expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
