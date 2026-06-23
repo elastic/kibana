@@ -14,6 +14,7 @@ import { useChartLayers } from './use_chart_layers';
 import {
   LensConfigBuilder,
   type LensAttributes,
+  type LensLegendConfig,
   type LensSeriesLayer,
 } from '@kbn/lens-embeddable-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -47,6 +48,7 @@ describe('useLensProps', () => {
 
   const mockEmptyChartLayers: Array<LensSeriesLayer> = [];
   const mockError = new Error('Test error');
+  const legendConfig: LensLegendConfig = { show: true, position: 'right' };
 
   const fetchParams = getFetchParamsMock();
   let discoverFetch$: UnifiedHistogramFetch$;
@@ -205,7 +207,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
-        legend: { show: true, position: 'right' },
+        legend: legendConfig,
         profileId: 'testProfileId',
       })
     );
