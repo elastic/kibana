@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const cisco_secure_email_gatewayEvaluations = {
-  integration: 'cisco_secure_email_gateway',
+  integration: "cisco_secure_email_gateway",
   evaluations: [
     {
-      id: 'detection_flags',
-      section: 'Detection flags (mandatory \u2014 run first)',
+      id: "detection_flags",
+      section: "Detection flags (mandatory \u2014 run first)",
       esql: `| EVAL
   actor_exists = user.id IS NOT NULL OR user.name IS NOT NULL OR user.email IS NOT NULL
     OR client.ip IS NOT NULL OR host.ip IS NOT NULL
@@ -24,8 +27,8 @@ export const cisco_secure_email_gatewayEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: 'optional_classification',
-      section: 'Optional classification helpers (when needed)',
+      id: "optional_classification",
+      section: "Optional classification helpers (when needed)",
       esql: `| EVAL
   entity.target.type = CASE(
     entity.target.type IS NOT NULL, entity.target.type,
@@ -45,8 +48,8 @@ export const cisco_secure_email_gatewayEvaluations = {
   )`,
     },
     {
-      id: 'actor',
-      section: 'Combined ES|QL \u2014 actor fields',
+      id: "actor",
+      section: "Combined ES|QL \u2014 actor fields",
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
@@ -76,8 +79,8 @@ export const cisco_secure_email_gatewayEvaluations = {
   )`,
     },
     {
-      id: 'event_action',
-      section: 'Combined ES|QL \u2014 event action',
+      id: "event_action",
+      section: "Combined ES|QL \u2014 event action",
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
@@ -91,8 +94,8 @@ export const cisco_secure_email_gatewayEvaluations = {
   )`,
     },
     {
-      id: 'target',
-      section: 'Combined ES|QL \u2014 target fields',
+      id: "target",
+      section: "Combined ES|QL \u2014 target fields",
       esql: `| EVAL
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,

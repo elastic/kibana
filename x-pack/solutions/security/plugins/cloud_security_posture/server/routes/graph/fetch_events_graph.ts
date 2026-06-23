@@ -120,7 +120,9 @@ export const fetchEvents = async ({
     pinnedIds,
   });
 
-  logger.trace(`Executing events query [project_routing: ${projectRouting ?? 'default'}]`);
+  logger.trace(
+    `Executing events query [project_routing: ${projectRouting ?? 'default'}] [${query}]`
+  );
 
   return esClient.asCurrentUser.helpers
     .esql({
@@ -414,6 +416,17 @@ ${buildV2TargetResolution()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(pinnedIds)}
+// Create actor and target data - entity object built by TypeScript enrichment
+| EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
+    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+  ${JSON_OBJECT_END})
+| EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
+    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+  ${JSON_OBJECT_END})
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
@@ -455,7 +468,7 @@ ${buildPinnedEsql(pinnedIds)}
 // Per-triple rows. All grouping (action × actor/target type × origin/pinned)
 // happens in TypeScript via regroupEvents. STATS … BY (action, actorEntityId, targetEntityId, …)
 // would inflate row count beyond ES|QL's 10,000-row hard cap on dense graphs.
-| KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes
+| KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes, actorDocData, targetDocData
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
 | SORT action DESC, pinnedSort ASC, isOrigin
 | LIMIT 1000

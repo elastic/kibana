@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const darktraceEvaluations = {
-  integration: 'darktrace',
+  integration: "darktrace",
   evaluations: [
     {
-      id: 'detection_flags',
-      section: 'Detection flags (mandatory \u2014 run first)',
+      id: "detection_flags",
+      section: "Detection flags (mandatory \u2014 run first)",
       esql: `| EVAL
   actor_exists = host.id IS NOT NULL OR host.ip IS NOT NULL OR host.name IS NOT NULL
     OR host.hostname IS NOT NULL OR host.mac IS NOT NULL OR host.type IS NOT NULL,
@@ -22,8 +25,8 @@ export const darktraceEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: 'actor',
-      section: 'Combined ES|QL \u2014 actor fields',
+      id: "actor",
+      section: "Combined ES|QL \u2014 actor fields",
       esql: `| EVAL
   host.name = CASE(
     host.name IS NOT NULL, host.name,
@@ -32,8 +35,8 @@ export const darktraceEvaluations = {
   )`,
     },
     {
-      id: 'event_action',
-      section: 'Combined ES|QL \u2014 event action',
+      id: "event_action",
+      section: "Combined ES|QL \u2014 event action",
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
@@ -44,8 +47,8 @@ export const darktraceEvaluations = {
   )`,
     },
     {
-      id: 'target',
-      section: 'Combined ES|QL \u2014 target fields',
+      id: "target",
+      section: "Combined ES|QL \u2014 target fields",
       esql: `| EVAL
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,

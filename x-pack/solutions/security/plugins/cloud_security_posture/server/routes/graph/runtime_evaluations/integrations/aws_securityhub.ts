@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const aws_securityhubEvaluations = {
-  integration: 'aws_securityhub',
+  integration: "aws_securityhub",
   evaluations: [
     {
-      id: 'actor',
-      section: 'Combined ES|QL \u2014 actor fields',
+      id: "actor",
+      section: "Combined ES|QL \u2014 actor fields",
       esql: `| EVAL
   service.id = CASE(
     service.id IS NOT NULL, service.id,
@@ -31,8 +34,8 @@ export const aws_securityhubEvaluations = {
   )`,
     },
     {
-      id: 'target',
-      section: 'Combined ES|QL \u2014 target fields',
+      id: "target",
+      section: "Combined ES|QL \u2014 target fields",
       esql: `| EVAL
   host.target.id = CASE(
     host.target.id IS NOT NULL, host.target.id,

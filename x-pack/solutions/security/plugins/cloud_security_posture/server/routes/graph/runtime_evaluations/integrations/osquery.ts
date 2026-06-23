@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const osqueryEvaluations = {
-  integration: 'osquery',
-  evaluations: [],
+  integration: "osquery",
+  evaluations: [
+  ],
 } as const satisfies IntegrationEvaluations;

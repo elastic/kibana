@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const aws_bedrock_agentcoreEvaluations = {
   integration: 'aws_bedrock_agentcore',

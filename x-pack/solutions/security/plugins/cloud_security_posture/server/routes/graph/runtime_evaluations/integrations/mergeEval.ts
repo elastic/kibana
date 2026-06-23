@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
 /** Parse and merge `| EVAL` snippets from integration evaluation constants. */
 
 export interface CaseBranch {

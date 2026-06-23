@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   type EuidSourceFields,
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
-  getGraphActorEuidSourceFields,
-  getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common';
-import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { getField, getFieldArray } from '../../../../flyout/document_details/shared/utils';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
 import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
@@ -58,14 +52,6 @@ export interface UseGraphPreviewResult {
   hasGraphData: boolean;
 }
 
-const hasEuidIdentity = (
-  fieldsByType: EuidSourceFields,
-  flattened: DataTableRecord['flattened']
-): boolean =>
-  ALL_ENTITY_TYPES.some((type) =>
-    fieldsByType[type].some((field) => getFieldArray(flattened[field]).length > 0)
-  );
-
 /**
  * Derives graph preview parameters from a `DataTableRecord`. Used by the Flyout v2
  * graph preview and by legacy expandable-flyout graph surfaces (which build a `hit`
@@ -80,37 +66,11 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
-  // `useEntityStoreEuidApi` is async-hydrated (see `entity_store/public/euid_api_context.tsx`);
-  // it returns `null` until the lazy chunk loads. The `useMemo` recomputes once `euid` is available.
-  const euid = useEntityStoreEuidApi()?.euid;
-
-  // Actor and target detection covers both entity-store v1 (`*.entity.id` and `*.target.entity.id`,
-  // still emitted in v2 backfill) and v2 raw identity fields (`host.id`, `host.name`, …) — the same
-  // idiom used in `highlighted_fields.tsx` / `prevalence_details_view.tsx`. For targets, identity
-  // fields are checked in their `.target.` namespace (e.g. `user.id` → `user.target.id`).
-  const hasV1Actor = GRAPH_ACTOR_ENTITY_FIELDS.some(
-    (field) => getFieldArray(hit.flattened[field]).length > 0
-  );
-  const hasV2Actor = useMemo(
-    () => euid != null && hasEuidIdentity(getGraphActorEuidSourceFields(euid), hit.flattened),
-    [euid, hit.flattened]
-  );
-  const hasActor = hasV1Actor || hasV2Actor;
-
-  const hasV1Target = GRAPH_TARGET_ENTITY_FIELDS.some(
-    (field) => getFieldArray(hit.flattened[field]).length > 0
-  );
-  const hasV2Target = useMemo(
-    () => euid != null && hasEuidIdentity(getGraphTargetEuidSourceFields(euid), hit.flattened),
-    [euid, hit.flattened]
-  );
-  const hasTarget = hasV1Target || hasV2Target;
-
   const actionField = getFieldsData('event.action');
   const action: string[] | undefined =
     actionField != null ? (getFieldArray(actionField) as string[]) : undefined;
 
-  const hasGraphData = Boolean(timestamp); // TODO: DISCUSS THIS PART && Boolean(action?.length) && eventIds.length > 0 && hasActor && hasTarget;
+  const hasGraphData = Boolean(timestamp); // TODO: we need to escape supported data sets/integrations with runtime mappings
 
   const hasRequiredLicense = useHasGraphVisualizationLicense();
   // Entity-store availability is detected via two complementary signals because either may be

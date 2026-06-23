@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const ping_federateEvaluations = {
-  integration: 'ping_federate',
+  integration: "ping_federate",
   evaluations: [
     {
-      id: 'detection_flags',
-      section: 'Detection flags (mandatory \u2014 run first)',
+      id: "detection_flags",
+      section: "Detection flags (mandatory \u2014 run first)",
       esql: `| EVAL
   actor_exists = user.id IS NOT NULL OR user.name IS NOT NULL OR user.email IS NOT NULL
     OR host.id IS NOT NULL OR host.ip IS NOT NULL OR host.name IS NOT NULL
@@ -25,8 +28,8 @@ export const ping_federateEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: 'actor',
-      section: 'Combined ES|QL \u2014 actor fields',
+      id: "actor",
+      section: "Combined ES|QL \u2014 actor fields",
       esql: `| EVAL
   host.ip = CASE(
     host.ip IS NOT NULL, host.ip,
@@ -35,8 +38,8 @@ export const ping_federateEvaluations = {
   )`,
     },
     {
-      id: 'target',
-      section: 'Combined ES|QL \u2014 target fields',
+      id: "target",
+      section: "Combined ES|QL \u2014 target fields",
       esql: `| EVAL
   entity.target.name = CASE(
     entity.target.name IS NOT NULL, entity.target.name,

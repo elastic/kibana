@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const ti_mispEvaluations = {
-  integration: 'ti_misp',
+  integration: "ti_misp",
   evaluations: [
     {
-      id: 'detection_flags',
-      section: 'Detection flags (mandatory \u2014 run first)',
+      id: "detection_flags",
+      section: "Detection flags (mandatory \u2014 run first)",
       esql: `| EVAL
   actor_exists = user.id IS NOT NULL OR user.name IS NOT NULL
     OR entity.id IS NOT NULL OR entity.name IS NOT NULL,
@@ -23,8 +26,8 @@ export const ti_mispEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: 'actor',
-      section: 'Combined ES|QL \u2014 actor fields',
+      id: "actor",
+      section: "Combined ES|QL \u2014 actor fields",
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
@@ -60,8 +63,8 @@ export const ti_mispEvaluations = {
   )`,
     },
     {
-      id: 'target',
-      section: 'Combined ES|QL \u2014 target fields',
+      id: "target",
+      section: "Combined ES|QL \u2014 target fields",
       esql: `| EVAL
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,

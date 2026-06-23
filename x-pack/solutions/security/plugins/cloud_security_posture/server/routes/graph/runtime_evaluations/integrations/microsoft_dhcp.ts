@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const microsoft_dhcpEvaluations = {
-  integration: 'microsoft_dhcp',
+  integration: "microsoft_dhcp",
   evaluations: [
     {
-      id: 'detection_flags',
-      section: 'Detection flags (mandatory \u2014 run first)',
+      id: "detection_flags",
+      section: "Detection flags (mandatory \u2014 run first)",
       esql: `| EVAL
   actor_exists = user.id IS NOT NULL OR user.name IS NOT NULL OR user.email IS NOT NULL
     OR entity.id IS NOT NULL OR entity.name IS NOT NULL
@@ -24,8 +27,8 @@ export const microsoft_dhcpEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: 'actor',
-      section: 'Combined ES|QL \u2014 actor fields',
+      id: "actor",
+      section: "Combined ES|QL \u2014 actor fields",
       esql: `| EVAL
   host.name = CASE(
     data_stream.dataset == "microsoft_dhcp.log" AND event.action != "rogue-server-detection" AND event.code != "1103" AND source.address IS NOT NULL, source.address,
@@ -53,8 +56,8 @@ export const microsoft_dhcpEvaluations = {
   )`,
     },
     {
-      id: 'target',
-      section: 'Combined ES|QL \u2014 target fields',
+      id: "target",
+      section: "Combined ES|QL \u2014 target fields",
       esql: `| EVAL
   host.target.ip = CASE(
     host.target.ip IS NOT NULL, host.target.ip,

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from '../types';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type { IntegrationEvaluations } from "../types";
 
 export const aws_vpcflow_otelEvaluations = {
-  integration: 'aws_vpcflow_otel',
+  integration: "aws_vpcflow_otel",
   evaluations: [
     {
-      id: 'detection_flags',
-      section: 'Detection flags (mandatory \u2014 run first)',
+      id: "detection_flags",
+      section: "Detection flags (mandatory \u2014 run first)",
       esql: `| EVAL
   actor_exists = host.id IS NOT NULL OR host.ip IS NOT NULL OR host.name IS NOT NULL
     OR service.id IS NOT NULL OR service.name IS NOT NULL
@@ -23,8 +26,8 @@ export const aws_vpcflow_otelEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: 'optional_classification',
-      section: 'Optional classification helpers (when needed)',
+      id: "optional_classification",
+      section: "Optional classification helpers (when needed)",
       esql: `| EVAL
   entity.target.type = CASE(
     entity.target.type IS NOT NULL, entity.target.type,
@@ -34,8 +37,8 @@ export const aws_vpcflow_otelEvaluations = {
   )`,
     },
     {
-      id: 'actor',
-      section: 'Combined ES|QL \u2014 actor fields',
+      id: "actor",
+      section: "Combined ES|QL \u2014 actor fields",
       esql: `| EVAL
   host.ip = CASE(
     host.ip IS NOT NULL, host.ip,
@@ -49,8 +52,8 @@ export const aws_vpcflow_otelEvaluations = {
   )`,
     },
     {
-      id: 'event_action',
-      section: 'Combined ES|QL \u2014 event action',
+      id: "event_action",
+      section: "Combined ES|QL \u2014 event action",
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
@@ -59,8 +62,8 @@ export const aws_vpcflow_otelEvaluations = {
   )`,
     },
     {
-      id: 'target',
-      section: 'Combined ES|QL \u2014 target fields',
+      id: "target",
+      section: "Combined ES|QL \u2014 target fields",
       esql: `| EVAL
   host.target.ip = CASE(
     host.target.ip IS NOT NULL, host.target.ip,
