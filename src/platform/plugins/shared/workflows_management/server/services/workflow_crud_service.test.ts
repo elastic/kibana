@@ -1306,18 +1306,33 @@ describe('WorkflowCrudService', () => {
         definition: scheduledDefinition,
       });
 
-      client.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: existingSource,
-              _seq_no: 2,
-              _primary_term: 1,
-            },
-          ],
-        },
-      });
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: existingSource,
+                _seq_no: 2,
+                _primary_term: 1,
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: {
+                  ...existingSource,
+                  tags: ['new'],
+                  lastUpdatedBy: 'alice',
+                },
+              },
+            ],
+          },
+        });
 
       const service = new WorkflowCrudService(deps);
       await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
