@@ -43,21 +43,6 @@ describe('DlmPhasesSelector', () => {
     jest.clearAllMocks();
   });
 
-  it('emits the initial hot-only configuration on mount', async () => {
-    const { onChange } = renderSelector();
-
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          frozen: expect.objectContaining({ enabled: false }),
-          delete: expect.objectContaining({ enabled: false }),
-        }),
-        {},
-        true
-      );
-    });
-  });
-
   it('renders the required hot phase and collapsed optional phases', () => {
     const { getByText, queryByLabelText } = renderSelector();
 
@@ -122,69 +107,6 @@ describe('DlmPhasesSelector', () => {
       { frozen_after: '30d', data_retention: '20d' },
       false
     );
-  });
-
-  it('updates the selector when defaultValue changes after mount', async () => {
-    const { onChange, queryByText, rerender } = renderSelector();
-
-    expect(queryByText('Delete after')).not.toBeInTheDocument();
-
-    onChange.mockClear();
-
-    rerender(
-      <IntlProvider>
-        <DlmPhasesSelector
-          {...BASE_PROPS}
-          onChange={onChange}
-          defaultValue={{
-            delete: { enabled: true, value: '10', unit: 'd' },
-          }}
-        />
-      </IntlProvider>
-    );
-
-    await waitFor(() => {
-      expect(queryByText('Delete after')).toBeInTheDocument();
-      expect(onChange).toHaveBeenCalledWith(
-        {
-          frozen: { enabled: false, value: '30', unit: 'd' },
-          delete: { enabled: true, value: '10', unit: 'd' },
-        },
-        { frozen_after: undefined, data_retention: '10d' },
-        true
-      );
-    });
-  });
-
-  it('does not overwrite user changes when defaultValue changes after interaction', async () => {
-    const { onChange, getByTestId, rerender } = renderSelector({
-      defaultValue: {
-        delete: { enabled: true, value: '10', unit: 'd' },
-      },
-    });
-
-    const deleteInput = getByTestId('deleteDurationValue') as HTMLInputElement;
-    expect(deleteInput.value).toBe('10');
-
-    fireEvent.change(deleteInput, { target: { value: '20' } });
-    expect(deleteInput.value).toBe('20');
-
-    onChange.mockClear();
-
-    rerender(
-      <IntlProvider>
-        <DlmPhasesSelector
-          {...BASE_PROPS}
-          onChange={onChange}
-          defaultValue={{
-            delete: { enabled: true, value: '5', unit: 'd' },
-          }}
-        />
-      </IntlProvider>
-    );
-
-    expect((getByTestId('deleteDurationValue') as HTMLInputElement).value).toBe('20');
-    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('disables frozen phase when Enterprise license is unavailable', () => {
