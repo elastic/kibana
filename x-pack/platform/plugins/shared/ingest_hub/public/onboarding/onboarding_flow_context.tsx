@@ -16,14 +16,13 @@ export interface ConnectStepState {
   staticKeys?: AwsStaticKeyCredentials;
 }
 
-export interface DeployPackageResult {
-  status: 'idle' | 'success' | 'error';
-  errorMessage?: string;
-}
+export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
 
 export interface DeployStepState {
   isDeploying: boolean;
-  packageStatuses: Record<string, DeployPackageResult>;
+  serviceStatuses: Record<string, ServiceChipState>;
+  policyIdsByPackage: Record<string, string>;
+  failedPackages: string[];
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
@@ -106,13 +105,20 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const [deployStep, setDeployStep] = useState<DeployStepState>({
     isDeploying: false,
-    packageStatuses: {},
+    serviceStatuses: {},
+    policyIdsByPackage: {},
+    failedPackages: [],
   });
 
   const deployHandlerRef = useRef<((packageNames?: string[]) => void) | null>(null);
 
   const updateDeployStep = useCallback((update: Partial<DeployStepState>) => {
-    setDeployStep((prev) => ({ ...prev, ...update }));
+    setDeployStep((prev) => ({
+      ...prev,
+      ...update,
+      serviceStatuses: { ...prev.serviceStatuses, ...update.serviceStatuses },
+      policyIdsByPackage: { ...prev.policyIdsByPackage, ...update.policyIdsByPackage },
+    }));
   }, []);
 
   const registerDeployHandler = useCallback((fn: (packageNames?: string[]) => void) => {

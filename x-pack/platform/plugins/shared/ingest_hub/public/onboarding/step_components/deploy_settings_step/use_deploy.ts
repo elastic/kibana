@@ -13,7 +13,7 @@ import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-p
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { ConnectStepState, DeployPackageResult } from '../../onboarding_flow_context';
+import type { ConnectStepState, ServiceChipState } from '../../onboarding_flow_context';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
@@ -27,7 +27,6 @@ export interface UseDeployResult {
   namespace: string;
   setNamespace: (ns: string) => void;
   isDeploying: boolean;
-  packageStatuses: Record<string, DeployPackageResult>;
   failedPackages: string[];
   handleDeploy: (packageNames?: string[]) => void;
 }
@@ -119,6 +118,10 @@ function buildPackageVars(
   return Object.keys(vars).length > 0 ? vars : undefined;
 }
 
+interface PackageDeployOutcome {
+  policyId?: string;
+}
+
 async function deployPackage(
   packageName: string,
   services: AwsServiceMatrixEntry[],
@@ -133,7 +136,7 @@ async function deployPackage(
     storedServiceVars: Record<string, ServiceVars>;
     connectStep: ConnectStepState;
   }
-): Promise<void> {
+): Promise<PackageDeployOutcome> {
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
   const pkgVersion = pkgInfoResponse.data?.item?.version;
   if (!pkgVersion) {
@@ -144,7 +147,7 @@ async function deployPackage(
   const inputs = buildPackageInputs(services, storedServiceVars, globalRegion);
   const vars = buildPackageVars(globalRegion, staticKeys);
 
-  await sendCreateAgentlessPolicy({
+  const response = await sendCreateAgentlessPolicy({
     name: `aws-onboarding-${packageName}`,
     namespace,
     package: { name: packageName, version: pkgVersion },
@@ -152,38 +155,46 @@ async function deployPackage(
     inputs,
     ...(connectorId ? { cloud_connector: { enabled: true, cloud_connector_id: connectorId } } : {}),
   });
-}
 
-function extractErrorMessage(reason: unknown): string {
-  if (reason instanceof Error) return reason.message;
-  if (reason !== null && typeof reason === 'object' && 'message' in reason) {
-    return String((reason as { message: unknown }).message);
-  }
-  return String(reason);
+  return { policyId: (response as any)?.data?.item?.policy_ids?.[0] };
 }
 
 export function collectDeployResults(
-  results: PromiseSettledResult<void>[],
+  results: PromiseSettledResult<PackageDeployOutcome>[],
   targets: string[]
-): { nextStatuses: Record<string, DeployPackageResult>; anyFailed: boolean } {
-  const nextStatuses: Record<string, DeployPackageResult> = {};
-  let anyFailed = false;
+): { policyIdsByPackage: Record<string, string>; failedPackages: string[] } {
+  const policyIdsByPackage: Record<string, string> = {};
+  const failedPackages: string[] = [];
 
   for (let i = 0; i < targets.length; i++) {
     const pkg = targets[i];
     const result = results[i];
     if (result.status === 'fulfilled') {
-      nextStatuses[pkg] = { status: 'success' };
+      if (result.value.policyId) policyIdsByPackage[pkg] = result.value.policyId;
     } else {
-      anyFailed = true;
-      nextStatuses[pkg] = {
-        status: 'error',
-        errorMessage: extractErrorMessage(result.reason),
-      };
+      failedPackages.push(pkg);
     }
   }
 
-  return { nextStatuses, anyFailed };
+  return { policyIdsByPackage, failedPackages };
+}
+
+export function buildServiceStatuses(
+  targets: string[],
+  failedPackages: string[],
+  servicesByPackage: Map<string, AwsServiceMatrixEntry[]>
+): Record<string, ServiceChipState> {
+  const statuses: Record<string, ServiceChipState> = {};
+  const failedSet = new Set(failedPackages);
+
+  for (const pkg of targets) {
+    const chipState: ServiceChipState = failedSet.has(pkg) ? 'error' : 'instantiating';
+    for (const service of servicesByPackage.get(pkg) ?? []) {
+      statuses[service.id] = chipState;
+    }
+  }
+
+  return statuses;
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
@@ -198,7 +209,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
   const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
-  const [packageStatuses, setPackageStatuses] = useState<Record<string, DeployPackageResult>>({});
+  const [failedPackages, setFailedPackages] = useState<string[]>([]);
 
   const agentlessServices: AwsServiceMatrixEntry[] = useMemo(
     () =>
@@ -221,14 +232,6 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     return map;
   }, [agentlessServices]);
 
-  const failedPackages = useMemo(
-    () =>
-      Object.entries(packageStatuses)
-        .filter(([, s]) => s.status === 'error')
-        .map(([pkg]) => pkg),
-    [packageStatuses]
-  );
-
   const handleDeploy = useCallback(
     async (packageNames?: string[]) => {
       const targets = packageNames ?? [...servicesByPackage.keys()];
@@ -239,12 +242,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         return;
       }
 
-      const idleStatuses = Object.fromEntries(
-        targets.map((pkg) => [pkg, { status: 'idle' as const }])
-      );
       setIsDeploying(true);
-      setPackageStatuses((prev) => ({ ...prev, ...idleStatuses }));
-      updateDeployStep({ isDeploying: true, packageStatuses: idleStatuses });
+      updateDeployStep({ isDeploying: true });
 
       if (isInitialDeploy) {
         onContinue();
@@ -264,12 +263,19 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         )
       );
 
-      const { nextStatuses } = collectDeployResults(results, targets);
-      setPackageStatuses((prev) => ({ ...prev, ...nextStatuses }));
+      const { policyIdsByPackage, failedPackages: newFailed } = collectDeployResults(
+        results,
+        targets
+      );
+      const newServiceStatuses = buildServiceStatuses(targets, newFailed, servicesByPackage);
+
       setIsDeploying(false);
+      setFailedPackages(newFailed);
       updateDeployStep({
         isDeploying: false,
-        packageStatuses: { ...idleStatuses, ...nextStatuses },
+        serviceStatuses: newServiceStatuses,
+        policyIdsByPackage,
+        failedPackages: newFailed,
       });
     },
     [servicesByPackage, serviceSettings, connectStep, namespace, onContinue, updateDeployStep]
@@ -279,5 +285,5 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     registerDeployHandler(handleDeploy);
   }, [handleDeploy, registerDeployHandler]);
 
-  return { namespace, setNamespace, isDeploying, packageStatuses, failedPackages, handleDeploy };
+  return { namespace, setNamespace, isDeploying, failedPackages, handleDeploy };
 }

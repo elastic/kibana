@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -28,27 +28,14 @@ interface DeployAndDetectStepProps {
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
   const { deployStep, retryDeploy } = useOnboardingFlow();
-  const { isDeploying, packageStatuses } = deployStep;
+  const { isDeploying, serviceStatuses, failedPackages } = deployStep;
 
-  const hasStarted = Object.keys(packageStatuses).length > 0;
-
-  const failedPackages = useMemo(
-    () =>
-      Object.entries(packageStatuses)
-        .filter(([, s]) => s.status === 'error')
-        .map(([pkg]) => pkg),
-    [packageStatuses]
-  );
-
-  const succeededPackages = useMemo(
-    () =>
-      Object.entries(packageStatuses)
-        .filter(([, s]) => s.status === 'success')
-        .map(([pkg]) => pkg),
-    [packageStatuses]
-  );
-
+  const hasStarted = Object.keys(serviceStatuses).length > 0;
   const allSucceeded = hasStarted && !isDeploying && failedPackages.length === 0;
+
+  const succeededServiceIds = Object.entries(serviceStatuses)
+    .filter(([, state]) => state !== 'error')
+    .map(([id]) => id);
 
   return (
     <div data-test-subj="onboardingStep-deploy-and-detect">
@@ -88,14 +75,14 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
 
       {!isDeploying && hasStarted && (
         <>
-          {succeededPackages.map((pkg) => (
-            <EuiFlexGroup key={pkg} alignItems="center" gutterSize="s" responsive={false}>
+          {succeededServiceIds.map((serviceId) => (
+            <EuiFlexGroup key={serviceId} alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">
-                  <strong>{pkg}</strong>
+                  <strong>{serviceId}</strong>
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -117,15 +104,11 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                 announceOnMount
                 data-test-subj="deployAndDetectStep-errorCallout"
               >
-                {failedPackages.map((pkg) => {
-                  const errorMessage = packageStatuses[pkg]?.errorMessage;
-                  return (
-                    <EuiText key={pkg} size="s">
-                      <strong>{pkg}</strong>
-                      {errorMessage && `: ${errorMessage}`}
-                    </EuiText>
-                  );
-                })}
+                {failedPackages.map((pkg) => (
+                  <EuiText key={pkg} size="s">
+                    <strong>{pkg}</strong>
+                  </EuiText>
+                ))}
                 <EuiSpacer size="s" />
                 <EuiButton
                   size="s"

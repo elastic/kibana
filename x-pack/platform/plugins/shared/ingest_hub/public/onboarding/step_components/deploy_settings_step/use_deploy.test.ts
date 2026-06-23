@@ -12,6 +12,7 @@ import {
   buildStreamVars,
   buildPackageInputs,
   collectDeployResults,
+  buildServiceStatuses,
   useDeploy,
 } from './use_deploy';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -216,49 +217,79 @@ describe('buildPackageInputs', () => {
 // ─── collectDeployResults ────────────────────────────────────────────────────
 
 describe('collectDeployResults', () => {
-  it('maps fulfilled results to success status', () => {
-    const results: PromiseSettledResult<void>[] = [{ status: 'fulfilled', value: undefined }];
-    const { nextStatuses, anyFailed } = collectDeployResults(results, ['aws']);
-    expect(nextStatuses.aws.status).toBe('success');
-    expect(anyFailed).toBe(false);
+  it('extracts policyId from fulfilled result', () => {
+    const results = [{ status: 'fulfilled' as const, value: { policyId: 'policy-abc' } }];
+    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, ['aws']);
+    expect(policyIdsByPackage.aws).toBe('policy-abc');
+    expect(failedPackages).toHaveLength(0);
   });
 
-  it('maps rejected results to error status with message', () => {
-    const results: PromiseSettledResult<void>[] = [
-      { status: 'rejected', reason: new Error('Network failure') },
+  it('omits policyId when response does not include one', () => {
+    const results = [{ status: 'fulfilled' as const, value: {} }];
+    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, ['aws']);
+    expect(policyIdsByPackage).not.toHaveProperty('aws');
+    expect(failedPackages).toHaveLength(0);
+  });
+
+  it('adds package to failedPackages on rejection', () => {
+    const results = [{ status: 'rejected' as const, reason: new Error('Network failure') }];
+    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, ['aws']);
+    expect(failedPackages).toContain('aws');
+    expect(policyIdsByPackage).not.toHaveProperty('aws');
+  });
+
+  it('handles mixed fulfilled and rejected results', () => {
+    const results = [
+      { status: 'fulfilled' as const, value: { policyId: 'p1' } },
+      { status: 'rejected' as const, reason: new Error('fail') },
     ];
-    const { nextStatuses, anyFailed } = collectDeployResults(results, ['aws']);
-    expect(nextStatuses.aws.status).toBe('error');
-    expect(nextStatuses.aws.errorMessage).toBe('Network failure');
-    expect(anyFailed).toBe(true);
+    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, [
+      'pkg-a',
+      'pkg-b',
+    ]);
+    expect(policyIdsByPackage['pkg-a']).toBe('p1');
+    expect(failedPackages).toContain('pkg-b');
+  });
+});
+
+// ─── buildServiceStatuses ────────────────────────────────────────────────────
+
+describe('buildServiceStatuses', () => {
+  it('sets succeeded package services to "instantiating"', () => {
+    const servicesByPackage = new Map([
+      ['aws', [makeService({ id: 'ec2_metrics' }), makeService({ id: 's3_logs' })]],
+    ]);
+    const statuses = buildServiceStatuses(['aws'], [], servicesByPackage);
+    expect(statuses.ec2_metrics).toBe('instantiating');
+    expect(statuses.s3_logs).toBe('instantiating');
   });
 
-  it('handles string rejection reasons', () => {
-    const results: PromiseSettledResult<void>[] = [{ status: 'rejected', reason: 'string error' }];
-    const { nextStatuses } = collectDeployResults(results, ['aws']);
-    expect(nextStatuses.aws.errorMessage).toBe('string error');
+  it('sets failed package services to "error"', () => {
+    const servicesByPackage = new Map([
+      ['aws', [makeService({ id: 'ec2_metrics' }), makeService({ id: 's3_logs' })]],
+    ]);
+    const statuses = buildServiceStatuses(['aws'], ['aws'], servicesByPackage);
+    expect(statuses.ec2_metrics).toBe('error');
+    expect(statuses.s3_logs).toBe('error');
   });
 
-  it('handles plain-object rejection reasons (Fleet API error shape)', () => {
-    const results: PromiseSettledResult<void>[] = [
-      {
-        status: 'rejected',
-        reason: { statusCode: 404, error: 'Not Found', message: 'Saved object not found' },
-      },
-    ];
-    const { nextStatuses } = collectDeployResults(results, ['aws']);
-    expect(nextStatuses.aws.errorMessage).toBe('Saved object not found');
+  it('handles mixed succeeded and failed packages', () => {
+    const servicesByPackage = new Map([
+      ['aws', [makeService({ id: 'ec2_metrics' })]],
+      ['aws_bedrock', [makeService({ id: 'bedrock_logs', packageName: 'aws_bedrock' })]],
+    ]);
+    const statuses = buildServiceStatuses(
+      ['aws', 'aws_bedrock'],
+      ['aws_bedrock'],
+      servicesByPackage
+    );
+    expect(statuses.ec2_metrics).toBe('instantiating');
+    expect(statuses.bedrock_logs).toBe('error');
   });
 
-  it('handles mixed results and sets anyFailed when at least one fails', () => {
-    const results: PromiseSettledResult<void>[] = [
-      { status: 'fulfilled', value: undefined },
-      { status: 'rejected', reason: new Error('fail') },
-    ];
-    const { nextStatuses, anyFailed } = collectDeployResults(results, ['pkg-a', 'pkg-b']);
-    expect(nextStatuses['pkg-a'].status).toBe('success');
-    expect(nextStatuses['pkg-b'].status).toBe('error');
-    expect(anyFailed).toBe(true);
+  it('returns empty object when targets is empty', () => {
+    const statuses = buildServiceStatuses([], [], new Map());
+    expect(statuses).toEqual({});
   });
 });
 
@@ -280,7 +311,12 @@ function setupMocks({
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
     connectStep: { connectorId, staticKeys },
-    deployStep: { isDeploying: false, packageStatuses: {} },
+    deployStep: {
+      isDeploying: false,
+      serviceStatuses: {},
+      policyIdsByPackage: {},
+      failedPackages: [],
+    },
     updateDeployStep: jest.fn(),
     registerDeployHandler: jest.fn(),
     retryDeploy: jest.fn(),
@@ -418,7 +454,7 @@ describe('useDeploy', () => {
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
-  it('throws when package version cannot be resolved', async () => {
+  it('adds to failedPackages when package version cannot be resolved', async () => {
     setupMocks({ selectedServiceIds: ['ec2_metrics'] });
     mockSendGetPackageInfoByKey.mockResolvedValue({ data: { item: { version: undefined } } });
     const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
