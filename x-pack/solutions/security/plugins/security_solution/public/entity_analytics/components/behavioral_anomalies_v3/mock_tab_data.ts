@@ -402,17 +402,29 @@ const buildTableRows = (): BehavioralAnomalyV3TableRow[] => {
   // Padded rows are stamped strictly older than any template row (max template
   // is 8 days ago) so the 8 templates always occupy ranks 1-8 of the
   // descending-timestamp sort — guarantees page 1 reflects the curated mix.
-  const PADDED_ROW_FLOOR_DAYS = 12;
+  // Day range is bounded so EVERY padded row falls inside the BA-v.3 left
+  // tab's default "Last 30 days" filter; combined with the templates this
+  // keeps the right-panel "{N} anomalies" stat (= MOCK_ANOMALY_V3_TOTAL_COUNT)
+  // consistent with the in-table count under the default filter.
+  const PADDED_ROW_FLOOR_DAYS = 9;
+  // 9..29 days ago, inclusive — 21 day slots for 27 padded rows; some days
+  // repeat but the hour-jitter below keeps every padded timestamp unique.
+  const PADDED_ROW_RANGE_DAYS = 21;
+  // Coprime-with-24 multiplier (17) walks the hour-of-day uniformly so the
+  // 6 days that repeat (27 rows / 21 slots ≈ 1.3) don't collide on the
+  // same hour.
+  const PADDED_HOUR_JITTER_MULTIPLIER = 17;
   let counter = rows.length;
   while (rows.length < MOCK_ANOMALY_V3_TOTAL_COUNT) {
     const template = TABLE_ROWS_TEMPLATE[counter % TABLE_ROWS_TEMPLATE.length];
     const padOffsetIndex = counter - TABLE_ROWS_TEMPLATE.length;
+    const dayOffset = PADDED_ROW_FLOOR_DAYS + (padOffsetIndex % PADDED_ROW_RANGE_DAYS);
+    const hourJitter = (padOffsetIndex * PADDED_HOUR_JITTER_MULTIPLIER) % 24;
     rows.push({
       id: `anomaly-row-v3-${counter}`,
       jobId: template.jobId,
       jobDisplayName: template.jobDisplayName,
-      timestamp:
-        now - (PADDED_ROW_FLOOR_DAYS + padOffsetIndex) * 24 * HOUR_MS - (padOffsetIndex % 7) * HOUR_MS,
+      timestamp: now - dayOffset * 24 * HOUR_MS - hourJitter * HOUR_MS,
       baseline: template.baseline,
       anomaly: template.anomaly,
       spike: template.spike,
