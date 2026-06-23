@@ -124,6 +124,29 @@ spaceTest.describe(
       }
     );
 
+    // Kept as its own test (not chained with the filter actions above): adding/removing filters
+    // re-searches Discover and re-renders the push flyout, which destabilises the cell-actions
+    // popover. From a fresh flyout the grid is stable, so the toggle-column action is reliable.
+    spaceTest(
+      'add as column cell action adds the field to the Discover table',
+      async ({ pageObjects }) => {
+        const { securityDiscoverFlyout, discover } = pageObjects;
+        const field = 'host.name';
+
+        await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
+        await securityDiscoverFlyout.waitForAlertHeader();
+
+        await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
+        // The cell-actions popover (EuiPopover + per-button EuiToolTip) re-renders on open and can be
+        // reported "not stable"; the button is resolved, so force the click to fire its onClick.
+        await securityDiscoverFlyout.cellActionToggleColumn.click({ force: true });
+
+        // The column is added to the grid behind the flyout; close it and assert the header.
+        await discover.closeDocViewerFlyout();
+        expect(await discover.getDocHeader()).toContain(field);
+      }
+    );
+
     spaceTest(
       'doc viewer tabs: security Overview is the default tab and Table / JSON tabs switch',
       async ({ pageObjects }) => {
