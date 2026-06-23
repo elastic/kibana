@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
 import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
@@ -45,6 +44,7 @@ const validSubFeaturePrivilegeLicensesSchema = schema.oneOf([
   schema.literal('trial'),
 ]);
 
+// codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
 const listOfCapabilitiesSchema = schema.arrayOf(
   schema.string({
     validate(key: string) {
@@ -65,6 +65,7 @@ const managementSchema = schema.recordOf(
   listOfCapabilitiesSchema
 );
 const catalogueSchema = listOfCapabilitiesSchema;
+// codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
 const alertingSchema = schema.arrayOf(
   schema.object({
     ruleTypeId: schema.string(),
@@ -81,6 +82,7 @@ const alertingRuleSchemaSpec = {
   read: schema.maybe(alertingSchema),
 };
 
+// codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
 const casesSchema = schema.arrayOf(schema.string());
 
 const appCategorySchema = schema.object({
@@ -113,7 +115,9 @@ const kibanaPrivilegeSchema = schema.object({
   disabled: schema.maybe(schema.boolean()),
   management: schema.maybe(managementSchema),
   catalogue: schema.maybe(catalogueSchema),
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   api: schema.maybe(schema.arrayOf(schema.string())),
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   app: schema.maybe(schema.arrayOf(schema.string())),
   alerting: schema.maybe(
     schema.object({
@@ -128,20 +132,28 @@ const kibanaPrivilegeSchema = schema.object({
   ),
   cases: casesSchemaObject,
   savedObject: schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
     all: schema.arrayOf(schema.string()),
+    // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
   replacedBy: schema.maybe(
     schema.oneOf([
+      // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
       schema.arrayOf(
+        // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
         schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
       ),
       schema.object({
+        // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
         minimal: schema.arrayOf(
+          // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
           schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
         ),
+        // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
         default: schema.arrayOf(
+          // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
           schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
         ),
       }),
@@ -175,15 +187,21 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     })
   ),
   cases: casesSchemaObject,
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   api: schema.maybe(schema.arrayOf(schema.string())),
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   app: schema.maybe(schema.arrayOf(schema.string())),
   savedObject: schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
     all: schema.arrayOf(schema.string()),
+    // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
   replacedBy: schema.maybe(
+    // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
     schema.arrayOf(
+      // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
       schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
     )
   ),
@@ -200,6 +218,7 @@ const kibanaSubFeatureSchema = schema.object({
   privilegesTooltip: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
   privilegeGroups: schema.maybe(
+    // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
     schema.arrayOf(
       schema.oneOf([
         schema.object({
@@ -241,6 +260,7 @@ const kibanaFeatureSchema = schema.object({
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   minimumLicense: schema.maybe(validLicenseSchema),
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   app: schema.arrayOf(schema.string()),
   management: schema.maybe(managementSchema),
   catalogue: schema.maybe(catalogueSchema),
@@ -259,6 +279,7 @@ const kibanaFeatureSchema = schema.object({
       null,
       // allows an empty array only
       schema.arrayOf(schema.never(), { maxSize: 0 }),
+      // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
       schema.arrayOf(kibanaSubFeatureSchema)
     )
   ),
@@ -266,6 +287,7 @@ const kibanaFeatureSchema = schema.object({
   reserved: schema.maybe(
     schema.object({
       description: schema.string(),
+      // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
       privileges: schema.arrayOf(
         schema.object({
           id: schema.string({
@@ -283,17 +305,22 @@ const kibanaFeatureSchema = schema.object({
   deprecated: schema.maybe(
     schema.object({
       notice: schema.string(),
+      // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
       replacedBy: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
 });
 
 const elasticsearchPrivilegeSchema = schema.object({
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   ui: schema.arrayOf(schema.string()),
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   requiredClusterPrivileges: schema.maybe(schema.arrayOf(schema.string())),
   requiredIndexPrivileges: schema.maybe(
+    // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
     schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
   ),
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   requiredRoles: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -310,6 +337,7 @@ const elasticsearchFeatureSchema = schema.object({
   }),
   management: schema.maybe(managementSchema),
   catalogue: schema.maybe(catalogueSchema),
+  // codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
   privileges: schema.arrayOf(elasticsearchPrivilegeSchema),
 });
 
