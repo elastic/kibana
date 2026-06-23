@@ -78,7 +78,6 @@ import { getEventType } from './cases/attachments/event';
 import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { getIndicatorAttachment } from './cases/attachments/indicator';
-import { getEntityAttachment } from './cases/attachments/entity';
 import { getTimelineAttachment } from './cases/attachments/timeline';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
@@ -304,7 +303,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases.attachmentFramework.registerUnified(getTimelineAttachment());
 
     if (this.experimentalFeatures.entityAttachmentsEnabled) {
-      cases.attachmentFramework.registerUnified(getEntityAttachment());
+      // Lazily registered: the entity attachment is only rendered inside a case view
+      // (a lazy-loaded route), so keep its module graph out of the page-load bundle.
+      void import('./cases/attachments/entity').then(({ getEntityAttachment }) => {
+        cases.attachmentFramework.registerUnified(getEntityAttachment());
+      });
     }
 
     this.registerDiscoverSharedFeatures(core, plugins);
