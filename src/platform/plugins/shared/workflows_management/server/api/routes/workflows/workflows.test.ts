@@ -199,7 +199,7 @@ describe('Workflow routes', () => {
           sortOrder: 'asc',
         }),
         'default-space',
-        { includeExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
       );
     });
 
