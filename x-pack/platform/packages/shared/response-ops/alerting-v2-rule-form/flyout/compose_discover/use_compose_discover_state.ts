@@ -53,7 +53,7 @@ export const createInitialState = ({
     activeTab: defaultTabForTabs(
       getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType })
     ),
-    childOpen: forceYamlMode || (mode === 'create' && !isBuilderMode),
+    childOpen: forceYamlMode || mode === 'create',
     queryCommitted: mode === 'edit' || isQueryPrePopulated,
     yamlMode: forceYamlMode,
   };
