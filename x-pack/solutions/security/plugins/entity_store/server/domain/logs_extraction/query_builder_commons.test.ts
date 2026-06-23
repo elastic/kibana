@@ -195,7 +195,9 @@ describe('aggregationStats', () => {
     it('allowAPIUpdate alone does not affect STATS output', () => {
       const withoutAPIUpdate = keywordField({ skipExtraction: false, allowAPIUpdate: false });
       const withAPIUpdate = keywordField({ skipExtraction: false, allowAPIUpdate: true });
-      expect(aggregationStats([withoutAPIUpdate], false)).toBe(aggregationStats([withAPIUpdate], false));
+      expect(aggregationStats([withoutAPIUpdate], false)).toBe(
+        aggregationStats([withAPIUpdate], false)
+      );
     });
   });
 });
@@ -222,8 +224,18 @@ describe('fieldsToKeep', () => {
 
   it('should omit skipExtraction:true fields from KEEP patterns', () => {
     const definitionFields: EntityField[] = [
-      { source: 'a', destination: 'included.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: false },
-      { source: 'b', destination: 'skipped.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: true },
+      {
+        source: 'a',
+        destination: 'included.field',
+        retention: { operation: 'prefer_newest_value' },
+        skipExtraction: false,
+      },
+      {
+        source: 'b',
+        destination: 'skipped.field',
+        retention: { operation: 'prefer_newest_value' },
+        skipExtraction: true,
+      },
     ];
     const result = fieldsToKeep(definitionFields, []);
     expect(result).toContain('included*');
@@ -488,8 +500,18 @@ describe('statsFieldDestinations', () => {
 
   it('should exclude skipExtraction:true fields from the destination set', () => {
     const fields: EntityField[] = [
-      { source: 'a', destination: 'included.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: false },
-      { source: 'b', destination: 'skipped.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: true },
+      {
+        source: 'a',
+        destination: 'included.field',
+        retention: { operation: 'prefer_newest_value' },
+        skipExtraction: false,
+      },
+      {
+        source: 'b',
+        destination: 'skipped.field',
+        retention: { operation: 'prefer_newest_value' },
+        skipExtraction: true,
+      },
     ];
     const dest = statsFieldDestinations(fields);
     expect(dest.has('included.field')).toBe(true);
