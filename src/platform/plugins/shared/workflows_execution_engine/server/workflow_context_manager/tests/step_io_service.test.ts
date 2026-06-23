@@ -25,7 +25,7 @@ import { buildStepExecutionId } from '../../utils';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
-const TEST_STEP_EXECUTIONS_INDEX = '.workflows-step-executions-000001';
+const TEST_STEP_EXECUTIONS_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 
 /**
  * Builds a state + service pair backed by jest-mock repositories. Returns

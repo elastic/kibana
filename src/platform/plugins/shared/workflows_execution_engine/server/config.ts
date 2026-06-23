@@ -12,15 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
-export const DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL = '5m'; // 1 day
-
-export const DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL = '10'; // 1 day
-
-export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE = '10'; // 7 days
-
-export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE = '1gb'; // 10GB
-
-export const DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE = '20d'; // 7 days
+export const DEFAULT_EXECUTION_DATA_STREAM_RETENTION = '20d';
 
 const EventTriggersConfigSchema = schema.object({
   /**
@@ -75,43 +67,12 @@ const configSchema = schema.object({
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
   }),
-  executionIndexRolloverTaskInterval: schema.string({
-    defaultValue: DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL,
+  executionDataStreamRetention: schema.string({
+    defaultValue: DEFAULT_EXECUTION_DATA_STREAM_RETENTION,
     meta: {
       description:
-        'Task Manager schedule interval for the workflow execution index rollover background task. ' +
-        'Uses Elasticsearch duration format (e.g. "1d", "12h"). Changes take effect on next Kibana restart.',
-    },
-  }),
-  executionIndexRolloverMaxAge: schema.string({
-    defaultValue: DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE,
-    meta: {
-      description:
-        'Rollover the workflow execution write index when its age exceeds this value. ' +
-        'Uses Elasticsearch duration format (e.g. "1m", "1d").',
-    },
-  }),
-  executionIndexRolloverMaxPrimaryShardSize: schema.string({
-    defaultValue: DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE,
-    meta: {
-      description:
-        'Rollover the workflow execution write index when its primary shard size exceeds this value. ' +
-        'Uses Elasticsearch byte size format (e.g. "1gb", "500mb").',
-    },
-  }),
-  executionIndexCleanupTaskInterval: schema.string({
-    defaultValue: DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
-    meta: {
-      description:
-        'Task Manager schedule interval for the workflow execution index cleanup background task. ' +
-        'Uses Elasticsearch duration format (e.g. "1d", "12h"). Changes take effect on next Kibana restart.',
-    },
-  }),
-  executionIndexCleanupMinIndexAge: schema.string({
-    defaultValue: DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE,
-    meta: {
-      description:
-        'Minimum age of a non-write backing index before it is deleted. ' +
+        'Data lifecycle retention for workflow and step execution data streams. ' +
+        'Written into the composable index template as data_stream.lifecycle.data_retention when streams are registered. ' +
         'Uses Elasticsearch duration format (e.g. "30d", "1d"). Should be much greater than the maximum workflow timeout.',
     },
   }),

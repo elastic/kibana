@@ -8,18 +8,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { extractBackingIndexSuffix } from '../resolve_backing_index/resolve_backing_index';
 
 export function generateEncodedWorkflowExecutionId({
-  indexName,
-  indexPattern,
+  backingIndexName,
+  backingIndexPrefix,
 }: {
-  indexName: string;
-  indexPattern: string;
+  backingIndexName: string;
+  backingIndexPrefix: string;
 }): string {
-  if (!indexPattern.endsWith('*')) {
-    throw new Error('indexPattern must end with *');
-  }
-  const indexSuffix = indexName.replace(indexPattern.slice(0, -1), '');
+  const indexSuffix = extractBackingIndexSuffix({ backingIndexName, backingIndexPrefix });
   const uuid = uuidv4().replace(/-/g, '');
   const decodedId = `${indexSuffix}_${uuid}`;
 

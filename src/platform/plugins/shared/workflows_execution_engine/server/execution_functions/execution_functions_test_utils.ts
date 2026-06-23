@@ -13,22 +13,11 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import {
-  DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE,
-  DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
-  DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE,
-  DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE,
-  DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL,
-} from '../config';
+import { DEFAULT_EXECUTION_DATA_STREAM_RETENTION } from '../config';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 
-const defaultExecutionIndexConfig = {
-  executionIndexRolloverTaskInterval: DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL,
-  executionIndexRolloverMaxAge: DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE,
-  executionIndexRolloverMaxPrimaryShardSize:
-    DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE,
-  executionIndexCleanupTaskInterval: DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
-  executionIndexCleanupMinIndexAge: DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE,
+const defaultExecutionDataStreamConfig = {
+  executionDataStreamRetention: DEFAULT_EXECUTION_DATA_STREAM_RETENTION,
 } as const;
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
@@ -40,7 +29,7 @@ export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEng
   maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
   eviction: { minPayloadSize: new ByteSizeValue(10 * 1024) },
   collectQueueMetrics: false,
-  ...defaultExecutionIndexConfig,
+  ...defaultExecutionDataStreamConfig,
 });
 
 export const createMockLogger = (): Logger =>

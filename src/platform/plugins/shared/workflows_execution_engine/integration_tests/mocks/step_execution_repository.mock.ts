@@ -18,7 +18,7 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
 
   public resolveWriteIndex(): Promise<string> {
-    return Promise.resolve('.workflows-step-executions-000001');
+    return Promise.resolve('.ds-.workflows-step-executions-2026.06.22-000001');
   }
 
   public searchStepExecutionsByExecutionId(

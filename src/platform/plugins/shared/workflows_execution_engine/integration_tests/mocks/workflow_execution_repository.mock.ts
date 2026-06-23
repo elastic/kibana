@@ -16,7 +16,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   public workflowExecutions = new Map<string, EsWorkflowExecution>();
 
   public resolveWriteIndex(): Promise<string> {
-    return Promise.resolve('.workflows-executions-000001');
+    return Promise.resolve('.ds-.workflows-executions-2026.06.22-000001');
   }
 
   public getWorkflowExecutionById(

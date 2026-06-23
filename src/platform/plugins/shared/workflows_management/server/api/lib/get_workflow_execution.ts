@@ -13,10 +13,13 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
+import {
+  WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
+  WORKFLOWS_EXECUTIONS_INDEX,
+} from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
-import { decodeEncodedWorkflowExecutionId, resolveIndex } from '@kbn/workflows/server/utils';
+import { decodeEncodedWorkflowExecutionId, resolveBackingIndex } from '@kbn/workflows/server/utils';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
-import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../../common';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -29,10 +32,19 @@ interface GetWorkflowExecutionParams {
   includeOutput?: boolean;
 }
 
+const resolveWorkflowExecutionGetIndex = (indexSuffix: string): string =>
+  resolveBackingIndex({
+    backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
+    indexSuffix,
+  });
+
+const resolveLegacyWorkflowExecutionGetIndex = (indexSuffix: string): string =>
+  `${WORKFLOWS_EXECUTIONS_INDEX}-${indexSuffix}`;
+
 export const getWorkflowExecution = async ({
   esClient,
   logger,
-  workflowExecutionIndex,
+  workflowExecutionIndex: _workflowExecutionIndex,
   stepsExecutionIndex,
   workflowExecutionId,
   spaceId,
@@ -47,31 +59,33 @@ export const getWorkflowExecution = async ({
   }
 
   const { indexSuffix } = result;
+  const dataStreamIndex = resolveWorkflowExecutionGetIndex(indexSuffix);
+  const legacyIndex = resolveLegacyWorkflowExecutionGetIndex(indexSuffix);
 
   try {
-    // Use direct GET by _id for O(1) lookup performance instead of search
-    // This is critical for reducing ES CPU load from frequent UI polling
-    let response;
-    try {
-      response = await esClient.get<EsWorkflowExecution>({
-        index: resolveIndex({ indexSuffix, indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN }),
-        id: workflowExecutionId,
-      });
-    } catch (error: unknown) {
-      // Handle 404 - document not found
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
-        return null;
+    const fetchDoc = async (index: string) => {
+      try {
+        const response = await esClient.get<EsWorkflowExecution>({
+          index,
+          id: workflowExecutionId,
+        });
+        return response._source ?? null;
+      } catch (error: unknown) {
+        if (
+          error instanceof Error &&
+          'meta' in error &&
+          (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+        ) {
+          return null;
+        }
+        throw error;
       }
-      throw error;
-    }
+    };
 
-    const doc = response._source;
+    const doc =
+      (await fetchDoc(dataStreamIndex)) ??
+      (legacyIndex !== dataStreamIndex ? await fetchDoc(legacyIndex) : null);
 
-    // Verify spaceId matches for security/multi-tenancy
     if (!doc || doc.spaceId !== spaceId) {
       return null;
     }
@@ -103,7 +117,6 @@ function transformToWorkflowExecutionDetailDto(
   logger: Logger
 ): WorkflowExecutionDto {
   let yaml = workflowExecution.yaml;
-  // backward compatibility for workflow executions created before yaml was added to the workflow execution object
   try {
     if (!yaml) {
       yaml = stringifyWorkflowDefinition(workflowExecution.workflowDefinition);

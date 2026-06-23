@@ -9,16 +9,16 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX } from '@kbn/workflows';
 import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { getWorkflowExecution } from './get_workflow_execution';
-import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../../common';
 
-const TEST_BACKING_INDEX = '.workflows-executions-000001';
+const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
 
 const createEncodedId = () =>
   generateEncodedWorkflowExecutionId({
-    indexName: TEST_BACKING_INDEX,
-    indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+    backingIndexName: TEST_BACKING_INDEX,
+    backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
   });
 
 describe('getWorkflowExecution', () => {
@@ -39,7 +39,7 @@ describe('getWorkflowExecution', () => {
     status: 'completed',
     startedAt: '2024-01-01T00:00:00Z',
     stepExecutionIds: ['step-doc-1', 'step-doc-2'],
-    stepExecutionsIndex: '.workflows-step-executions-000001',
+    stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
     workflowDefinition: { version: '1', name: 'test', enabled: true, triggers: [], steps: [] },
     concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
   };

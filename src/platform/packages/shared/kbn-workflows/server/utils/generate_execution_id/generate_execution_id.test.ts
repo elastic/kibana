@@ -11,6 +11,8 @@ import {
   decodeEncodedWorkflowExecutionId,
   generateEncodedWorkflowExecutionId,
 } from './generate_execution_id';
+import { WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX } from '../../../common/execution_storage_constants';
+import { resolveBackingIndex } from '../resolve_backing_index/resolve_backing_index';
 
 jest.mock('uuid', () => ({
   v4: () => '550e8400-e29b-41d4-a716-446655440000',
@@ -19,14 +21,15 @@ jest.mock('uuid', () => ({
 const MOCK_UUID = '550e8400-e29b-41d4-a716-446655440000';
 const MOCK_UUID_HEX = '550e8400e29b41d4a716446655440000';
 
-const INDEX_PATTERN = '.workflows-executions-*';
-const INDEX_NAME = '.workflows-executions-000001';
+const BACKING_INDEX_PREFIX = WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX;
+const BACKING_INDEX_NAME = '.ds-.workflows-executions-2026.06.22-000001';
+const INDEX_SUFFIX = '2026.06.22-000001';
 
 describe('generateEncodedWorkflowExecutionId', () => {
   it('should return a base64url-encoded string', () => {
     const result = generateEncodedWorkflowExecutionId({
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
+      backingIndexName: BACKING_INDEX_NAME,
+      backingIndexPrefix: BACKING_INDEX_PREFIX,
     });
 
     expect(result).not.toContain('+');
@@ -36,12 +39,12 @@ describe('generateEncodedWorkflowExecutionId', () => {
 
   it('should produce a deterministic result for a given uuid and index', () => {
     const result = generateEncodedWorkflowExecutionId({
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
+      backingIndexName: BACKING_INDEX_NAME,
+      backingIndexPrefix: BACKING_INDEX_PREFIX,
     });
 
     expect(result).toBe(
-      Buffer.from(`000001_${MOCK_UUID_HEX}`)
+      Buffer.from(`${INDEX_SUFFIX}_${MOCK_UUID_HEX}`)
         .toString('base64')
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
@@ -49,10 +52,11 @@ describe('generateEncodedWorkflowExecutionId', () => {
     );
   });
 
-  it('should derive the index suffix by stripping the pattern prefix', () => {
+  it('should derive the index suffix by stripping the backing index prefix', () => {
+    const prefix = '.ds-.my-index-';
     const result = generateEncodedWorkflowExecutionId({
-      indexName: '.my-index-abc_def',
-      indexPattern: '.my-index-*',
+      backingIndexName: `${prefix}abc_def`,
+      backingIndexPrefix: prefix,
     });
     const decoded = decodeEncodedWorkflowExecutionId(result);
 
@@ -62,44 +66,62 @@ describe('generateEncodedWorkflowExecutionId', () => {
     }
   });
 
-  it('should throw if indexPattern does not end with *', () => {
+  it('should throw if backing index does not match prefix', () => {
     expect(() =>
       generateEncodedWorkflowExecutionId({
-        indexName: INDEX_NAME,
-        indexPattern: '.workflows-executions-',
+        backingIndexName: '.workflows-executions-000001',
+        backingIndexPrefix: BACKING_INDEX_PREFIX,
       })
-    ).toThrow('indexPattern must end with *');
+    ).toThrow(/does not start with prefix/);
   });
 
-  it('should handle index name that equals the pattern prefix (empty suffix)', () => {
+  it('should handle backing index that equals the prefix (empty suffix)', () => {
     const result = generateEncodedWorkflowExecutionId({
-      indexName: '.workflows-executions-',
-      indexPattern: INDEX_PATTERN,
+      backingIndexName: BACKING_INDEX_PREFIX,
+      backingIndexPrefix: BACKING_INDEX_PREFIX,
     });
     const decoded = decodeEncodedWorkflowExecutionId(result);
 
     expect(decoded).toEqual({ success: true, indexSuffix: '', uuid: MOCK_UUID });
+  });
+
+  it('roundtrips backing index through encode, decode, and resolveBackingIndex', () => {
+    const encoded = generateEncodedWorkflowExecutionId({
+      backingIndexName: BACKING_INDEX_NAME,
+      backingIndexPrefix: BACKING_INDEX_PREFIX,
+    });
+    const decoded = decodeEncodedWorkflowExecutionId(encoded);
+
+    expect(decoded.success).toBe(true);
+    if (decoded.success) {
+      expect(
+        resolveBackingIndex({
+          backingIndexPrefix: BACKING_INDEX_PREFIX,
+          indexSuffix: decoded.indexSuffix,
+        })
+      ).toBe(BACKING_INDEX_NAME);
+    }
   });
 });
 
 describe('decodeEncodedWorkflowExecutionId', () => {
   it('should roundtrip with generateEncodedWorkflowExecutionId', () => {
     const encoded = generateEncodedWorkflowExecutionId({
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
+      backingIndexName: BACKING_INDEX_NAME,
+      backingIndexPrefix: BACKING_INDEX_PREFIX,
     });
 
     expect(decodeEncodedWorkflowExecutionId(encoded)).toEqual({
       success: true,
-      indexSuffix: '000001',
+      indexSuffix: INDEX_SUFFIX,
       uuid: MOCK_UUID,
     });
   });
 
   it('should return uuid with dashes in 8-4-4-4-12 format', () => {
     const encoded = generateEncodedWorkflowExecutionId({
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
+      backingIndexName: BACKING_INDEX_NAME,
+      backingIndexPrefix: BACKING_INDEX_PREFIX,
     });
     const decoded = decodeEncodedWorkflowExecutionId(encoded);
 
@@ -113,29 +135,28 @@ describe('decodeEncodedWorkflowExecutionId', () => {
 
   it('should roundtrip with various index suffixes', () => {
     const cases = [
-      { indexName: '.idx-000001', indexPattern: '.idx-*', expectedSuffix: '000001' },
-      { indexName: '.idx-my-index', indexPattern: '.idx-*', expectedSuffix: 'my-index' },
-      { indexName: '.idx-abc_def', indexPattern: '.idx-*', expectedSuffix: 'abc_def' },
-      {
-        indexName: '.prefix-some.long.suffix',
-        indexPattern: '.prefix-*',
-        expectedSuffix: 'some.long.suffix',
-      },
+      { suffix: '000001', prefix: '.ds-.idx-' },
+      { suffix: 'my-index', prefix: '.ds-.idx-' },
+      { suffix: 'abc_def', prefix: '.ds-.idx-' },
+      { suffix: 'some.long.suffix', prefix: '.ds-.prefix-' },
     ];
 
-    for (const { indexName, indexPattern, expectedSuffix } of cases) {
-      const encoded = generateEncodedWorkflowExecutionId({ indexName, indexPattern });
+    for (const { suffix, prefix } of cases) {
+      const encoded = generateEncodedWorkflowExecutionId({
+        backingIndexName: `${prefix}${suffix}`,
+        backingIndexPrefix: prefix,
+      });
 
       expect(decodeEncodedWorkflowExecutionId(encoded)).toEqual({
         success: true,
-        indexSuffix: expectedSuffix,
+        indexSuffix: suffix,
         uuid: MOCK_UUID,
       });
     }
   });
 
   it('should correctly reverse base64url encoding', () => {
-    const original = `000001_${MOCK_UUID_HEX}`;
+    const original = `${INDEX_SUFFIX}_${MOCK_UUID_HEX}`;
     const encoded = Buffer.from(original)
       .toString('base64')
       .replace(/\+/g, '-')
@@ -144,7 +165,7 @@ describe('decodeEncodedWorkflowExecutionId', () => {
 
     expect(decodeEncodedWorkflowExecutionId(encoded)).toEqual({
       success: true,
-      indexSuffix: '000001',
+      indexSuffix: INDEX_SUFFIX,
       uuid: MOCK_UUID,
     });
   });
@@ -163,7 +184,7 @@ describe('decodeEncodedWorkflowExecutionId', () => {
   });
 
   it('should return error for malformed UUID hex (wrong length)', () => {
-    const encoded = Buffer.from('000001_tooshort')
+    const encoded = Buffer.from(`${INDEX_SUFFIX}_tooshort`)
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
@@ -176,7 +197,7 @@ describe('decodeEncodedWorkflowExecutionId', () => {
   });
 
   it('should return error for malformed UUID hex (non-hex characters)', () => {
-    const encoded = Buffer.from('000001_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+    const encoded = Buffer.from(`${INDEX_SUFFIX}_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz`)
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')

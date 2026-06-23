@@ -9,7 +9,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX } from '@kbn/workflows';
 import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 
 import {
@@ -21,7 +21,6 @@ import {
   TASK_RECOVERY_ERROR_TYPE,
   taskRecoveryMessages,
 } from './task_recovery';
-import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../common/workflow_executions_index';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -29,15 +28,15 @@ jest.mock('uuid', () => ({
   v4: () => '550e8400-e29b-41d4-a716-446655440000',
 }));
 
-const TEST_EXECUTIONS_INDEX = '.workflows-executions-000001';
-const TEST_STEP_EXECUTIONS_INDEX = '.workflows-step-executions-000001';
+const TEST_EXECUTIONS_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
+const TEST_STEP_EXECUTIONS_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 const WORKFLOW_RUN_ID = generateEncodedWorkflowExecutionId({
-  indexName: TEST_EXECUTIONS_INDEX,
-  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+  backingIndexName: TEST_EXECUTIONS_INDEX,
+  backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
 });
 const MISSING_WORKFLOW_RUN_ID = generateEncodedWorkflowExecutionId({
-  indexName: '.workflows-executions-000002',
-  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+  backingIndexName: '.ds-.workflows-executions-2026.06.22-000002',
+  backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
 });
 
 function createElasticsearchNotFoundError(): Error {

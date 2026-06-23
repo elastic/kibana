@@ -263,6 +263,7 @@ export class WorkflowExecutionState {
     await this.workflowExecutionRepository.updateWorkflowExecution({
       ...changes,
       id: this.workflowExecution.id,
+      executionsIndex: this.workflowExecution.executionsIndex,
     });
   }
 

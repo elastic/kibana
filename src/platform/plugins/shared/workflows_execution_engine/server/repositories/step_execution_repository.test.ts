@@ -10,7 +10,7 @@
 import { StepExecutionRepository } from './step_execution_repository';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
-const TARGET_INDEX = '.workflows-step-executions-000001';
+const TARGET_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
@@ -20,7 +20,7 @@ describe('StepExecutionRepository', () => {
     bulk: jest.Mock;
     mget: jest.Mock;
     search: jest.Mock;
-    indices: { exists: jest.Mock; create: jest.Mock; getAlias: jest.Mock };
+    indices: { exists: jest.Mock; create: jest.Mock; getDataStream: jest.Mock };
   };
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('StepExecutionRepository', () => {
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
-        getAlias: jest.fn(),
+        getDataStream: jest.fn(),
       },
     };
     underTest = new StepExecutionRepository(esClient as any);
@@ -63,11 +63,29 @@ describe('StepExecutionRepository', () => {
         index: expect.any(String),
         body: [
           { update: { _id: 'step-1' } },
-          { doc: stepExecutions[0], doc_as_upsert: true },
+          {
+            doc: expect.objectContaining({
+              ...stepExecutions[0],
+              '@timestamp': expect.any(String),
+            }),
+            doc_as_upsert: true,
+          },
           { update: { _id: 'step-2' } },
-          { doc: stepExecutions[1], doc_as_upsert: true },
+          {
+            doc: expect.objectContaining({
+              ...stepExecutions[1],
+              '@timestamp': expect.any(String),
+            }),
+            doc_as_upsert: true,
+          },
           { update: { _id: 'step-3' } },
-          { doc: stepExecutions[2], doc_as_upsert: true },
+          {
+            doc: expect.objectContaining({
+              ...stepExecutions[2],
+              '@timestamp': expect.any(String),
+            }),
+            doc_as_upsert: true,
+          },
         ],
       });
     });
@@ -208,7 +226,10 @@ describe('StepExecutionRepository', () => {
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
       expect(bulkCall.body[1]).toEqual({
-        doc: stepExecutions[0],
+        doc: expect.objectContaining({
+          ...stepExecutions[0],
+          '@timestamp': expect.any(String),
+        }),
         doc_as_upsert: true,
       });
     });
@@ -226,7 +247,16 @@ describe('StepExecutionRepository', () => {
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
         index: expect.any(String),
-        body: [{ update: { _id: 'step-1' } }, { doc: stepExecutions[0], doc_as_upsert: true }],
+        body: [
+          { update: { _id: 'step-1' } },
+          {
+            doc: expect.objectContaining({
+              ...stepExecutions[0],
+              '@timestamp': expect.any(String),
+            }),
+            doc_as_upsert: true,
+          },
+        ],
       });
     });
 
@@ -250,7 +280,12 @@ describe('StepExecutionRepository', () => {
       await underTest.bulkUpsert(stepExecutions as any);
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
-      expect(bulkCall.body[1].doc).toEqual(stepExecutions[0]);
+      expect(bulkCall.body[1].doc).toEqual(
+        expect.objectContaining({
+          ...stepExecutions[0],
+          '@timestamp': expect.any(String),
+        })
+      );
     });
 
     it('should handle multiple validation errors', async () => {
@@ -461,14 +496,17 @@ describe('StepExecutionRepository', () => {
   });
 
   describe('resolveWriteIndex', () => {
-    it('returns the index marked as write index', async () => {
-      esClient.indices.getAlias.mockResolvedValue({
-        '.workflows-step-executions-000002': {
-          aliases: { [WORKFLOWS_STEP_EXECUTIONS_INDEX]: { is_write_index: false } },
-        },
-        [TARGET_INDEX]: {
-          aliases: { [WORKFLOWS_STEP_EXECUTIONS_INDEX]: { is_write_index: true } },
-        },
+    it('returns the latest backing index from the data stream', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+            indices: [
+              { index_name: '.ds-.workflows-step-executions-2026.06.22-000001' },
+              { index_name: TARGET_INDEX },
+            ],
+          },
+        ],
       });
 
       await expect(underTest.resolveWriteIndex()).resolves.toBe(TARGET_INDEX);

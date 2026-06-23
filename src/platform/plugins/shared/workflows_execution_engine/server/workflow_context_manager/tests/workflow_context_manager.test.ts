@@ -75,7 +75,7 @@ describe('WorkflowContextManager', () => {
     const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
     const workflowExecutionState: WorkflowExecutionState = {} as WorkflowExecutionState;
     workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-      stepExecutionsIndex: '.workflows-step-executions-000001',
+      stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
       scopeStack: [] as StackFrame[],
       workflowDefinition: workflow,
     } as EsWorkflowExecution);
@@ -216,7 +216,7 @@ describe('WorkflowContextManager', () => {
 
     it('should override consts with mocked data', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -256,7 +256,7 @@ describe('WorkflowContextManager', () => {
 
     it('should have event from execution context', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         scopeStack: [] as StackFrame[],
         workflowDefinition: workflow,
         context: {
@@ -275,7 +275,7 @@ describe('WorkflowContextManager', () => {
 
     it('should override event context with mocked data', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -328,7 +328,7 @@ describe('WorkflowContextManager', () => {
 
     it('should have inputs from execution context', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         scopeStack: [] as StackFrame[],
         workflowDefinition: workflow,
         context: {
@@ -345,7 +345,7 @@ describe('WorkflowContextManager', () => {
 
     it('should override inputs from mock', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -387,7 +387,7 @@ describe('WorkflowContextManager', () => {
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         workflowId: 'fake-workflow-id',
         spaceId: 'fake-space-id',
@@ -426,7 +426,7 @@ describe('WorkflowContextManager', () => {
 
     it('should override workflow context with mocked data', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         workflowId: 'fake-workflow-id',
         spaceId: 'fake-space-id',
@@ -466,7 +466,7 @@ describe('WorkflowContextManager', () => {
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         id: 'fake-execution-id',
         scopeStack: [] as StackFrame[],
@@ -487,7 +487,7 @@ describe('WorkflowContextManager', () => {
     describe('isTestRun flag', () => {
       it('should return true in isTestRun flag if isTestRun in workflow execution is true', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-          stepExecutionsIndex: '.workflows-step-executions-000001',
+          stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
           workflowDefinition: workflow,
           scopeStack: [] as StackFrame[],
           isTestRun: true,
@@ -500,7 +500,7 @@ describe('WorkflowContextManager', () => {
         'should return false in isTestRun flag if isTestRun in workflow execution is %s',
         (isTestRun) => {
           testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-            stepExecutionsIndex: '.workflows-step-executions-000001',
+            stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
             workflowDefinition: workflow,
             scopeStack: [] as StackFrame[],
             isTestRun,
@@ -512,7 +512,7 @@ describe('WorkflowContextManager', () => {
 
       it('should enrich execution context with mocked data', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-          stepExecutionsIndex: '.workflows-step-executions-000001',
+          stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
           workflowDefinition: workflow,
           id: 'fake-execution-id',
           scopeStack: [] as StackFrame[],
@@ -583,7 +583,7 @@ describe('WorkflowContextManager', () => {
 
     it('should have foreach equal to the inner foreach step state for step innerLogStep', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [
           {
@@ -636,7 +636,7 @@ describe('WorkflowContextManager', () => {
 
     it('should have foreach scope undefined for step lastLogStep', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
       } as EsWorkflowExecution);
@@ -647,7 +647,7 @@ describe('WorkflowContextManager', () => {
 
     it('should override foreach context', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -675,7 +675,7 @@ describe('WorkflowContextManager', () => {
 
     it('should not override foreach context if contextOverride.foreach is not present', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [
           {
@@ -721,7 +721,7 @@ describe('WorkflowContextManager', () => {
 
     it('should populate steps[foreachStepId] with item, items, index, total for a single foreach', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [
           {
@@ -768,7 +768,7 @@ describe('WorkflowContextManager', () => {
 
       beforeEach(() => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-          stepExecutionsIndex: '.workflows-step-executions-000001',
+          stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
           workflowDefinition: workflow,
           scopeStack: [
             {
@@ -958,7 +958,7 @@ describe('WorkflowContextManager', () => {
       beforeEach(() => {
         testContainer = createTestContainer(workflow);
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-          stepExecutionsIndex: '.workflows-step-executions-000001',
+          stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
           workflowDefinition: workflow,
           scopeStack: [
             {
@@ -1057,7 +1057,7 @@ describe('WorkflowContextManager', () => {
 
       it('should produce empty items when foreach step input is null', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-          stepExecutionsIndex: '.workflows-step-executions-000001',
+          stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
           workflowDefinition: workflow,
           scopeStack: [
             {
@@ -1088,7 +1088,7 @@ describe('WorkflowContextManager', () => {
 
       it('should produce empty items when foreach step input has no foreach key', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-          stepExecutionsIndex: '.workflows-step-executions-000001',
+          stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
           workflowDefinition: workflow,
           scopeStack: [
             {
@@ -1150,7 +1150,7 @@ describe('WorkflowContextManager', () => {
 
     it('should populate while.iteration from step state', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [
           {
@@ -1181,7 +1181,7 @@ describe('WorkflowContextManager', () => {
 
     it('should default iteration to 0 when state has no iteration', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [
           {
@@ -1212,7 +1212,7 @@ describe('WorkflowContextManager', () => {
 
     it('should merge iteration into steps[stepId]', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [
           {
@@ -1243,7 +1243,7 @@ describe('WorkflowContextManager', () => {
 
     it('should have while undefined when no while scope is active', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
       } as EsWorkflowExecution);
@@ -1254,7 +1254,7 @@ describe('WorkflowContextManager', () => {
 
     it('should resolve nested while: while.iteration is innermost, outer accessible via steps', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [
           {
@@ -1345,7 +1345,7 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
       fakeNode.id = 'thirdLogStep';
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
       } as EsWorkflowExecution);
@@ -1417,7 +1417,7 @@ describe('WorkflowContextManager', () => {
 
     it('should enrich steps context with mocked data', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
@@ -1481,7 +1481,7 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
       fakeNode.id = 'processData';
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        stepExecutionsIndex: '.workflows-step-executions-000001',
+        stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
         workflowDefinition: workflow,
         id: 'exec-123',
         workflowId: 'workflow-456',

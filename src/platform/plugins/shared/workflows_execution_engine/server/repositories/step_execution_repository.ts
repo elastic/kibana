@@ -28,15 +28,14 @@ export class StepExecutionRepository {
    * if ILM rolls over mid-execution.
    */
   public async resolveWriteIndex(): Promise<string> {
-    const aliasInfo = await this.esClient.indices.getAlias({ name: this.indexName });
-    for (const [indexName, indexAliases] of Object.entries(aliasInfo)) {
-      const alias = indexAliases.aliases[this.indexName];
-      if (alias?.is_write_index) {
-        return indexName;
-      }
+    const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
+      name: this.indexName,
+    });
+    const writeIndex = dataStreams[0]?.indices.at(-1)?.index_name;
+    if (!writeIndex) {
+      throw new Error(`No write backing index found for data stream ${this.indexName}`);
     }
-    // Fallback: single-index setup (no alias) or pre-rollover state
-    return this.indexName;
+    return writeIndex;
   }
 
   /**
@@ -171,10 +170,19 @@ export class StepExecutionRepository {
     const bulkResponse = await this.esClient.bulk({
       refresh: false,
       index: targetIndex ?? this.indexName,
-      body: stepExecutions.flatMap((stepExecution) => [
-        { update: { _id: stepExecution.id } },
-        { doc: stepExecution, doc_as_upsert: true },
-      ]),
+      body: stepExecutions.flatMap((stepExecution) => {
+        const timestamp = stepExecution.startedAt ?? new Date().toISOString();
+        return [
+          { update: { _id: stepExecution.id } },
+          {
+            doc: {
+              ...stepExecution,
+              '@timestamp': timestamp,
+            },
+            doc_as_upsert: true,
+          },
+        ];
+      }),
     });
 
     if (bulkResponse.errors) {

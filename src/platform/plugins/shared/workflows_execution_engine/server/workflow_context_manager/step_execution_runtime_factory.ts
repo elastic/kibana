@@ -10,6 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
+import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { StepIoService } from './step_io_service';
@@ -17,7 +18,6 @@ import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { generateEncodedStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -124,8 +124,8 @@ export class StepExecutionRuntimeFactory {
       executionId: workflowExecution.id,
       stepId: node.stepId,
       stackFrames: modifiedStackFrames,
-      indexName: workflowExecution.stepExecutionsIndex,
-      indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
+      backingIndexName: workflowExecution.stepExecutionsIndex,
+      backingIndexPrefix: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
     });
 
     const stepLogger = this.params.workflowLogger.createStepLogger(

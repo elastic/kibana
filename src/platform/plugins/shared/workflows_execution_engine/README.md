@@ -711,14 +711,9 @@ workflowsExecutionEngine:
   http:
     allowedHosts: ['*']  # Use specific hosts in production
 
-  # Task Manager intervals for execution backing-index maintenance (e.g. "1d", "12h")
-  executionIndexRolloverTaskInterval: "1d"
-  executionIndexCleanupTaskInterval: "1d"
-  # Rollover write indexes when age or primary-shard size thresholds are exceeded
-  executionIndexRolloverMaxAge: "1m"
-  executionIndexRolloverMaxPrimaryShardSize: "1gb"
-  # Delete non-write backing indexes older than this (should exceed max workflow timeout)
-  executionIndexCleanupMinIndexAge: "30d"
+  # Data lifecycle retention for workflow and step execution data streams (e.g. "30d", "1d")
+  # Should exceed the maximum workflow timeout
+  executionDataStreamRetention: "30d"
 ```
 
 ### Event-driven and depth settings
@@ -736,7 +731,7 @@ workflowsExecutionEngine:
 ```
 workflows_execution_engine/
 ├── common/                         # Shared utilities
-│   ├── create_indexes.ts          # Index creation utilities
+│   ├── create_index.ts            # Index creation utilities
 │   └── mappings.ts                # Elasticsearch mappings
 ├── server/                         # Server-side code
 │   ├── plugin.ts                  # Main plugin class

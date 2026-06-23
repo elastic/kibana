@@ -9,7 +9,7 @@
 
 import { StepExecutionRuntimeFactory } from '../step_execution_runtime_factory';
 
-const TEST_STEP_EXECUTIONS_INDEX = '.workflows-step-executions-000001';
+const TEST_STEP_EXECUTIONS_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 
 const createParams = () => {
   const node = {

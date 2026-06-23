@@ -9,6 +9,7 @@
 
 import type { StackFrame } from '../../../types/v1';
 import { buildStepExecutionId } from '../build_step_execution_id/build_step_execution_id';
+import { extractBackingIndexSuffix } from '../resolve_backing_index/resolve_backing_index';
 
 const HASH_HEX_LENGTH = 32;
 const HASH_HEX_REGEX = /^[a-f0-9]{32}$/;
@@ -17,20 +18,17 @@ export function generateEncodedStepExecutionId({
   executionId,
   stepId,
   stackFrames,
-  indexName,
-  indexPattern,
+  backingIndexName,
+  backingIndexPrefix,
 }: {
   executionId: string;
   stepId: string;
   stackFrames: StackFrame[];
-  indexName: string;
-  indexPattern: string;
+  backingIndexName: string;
+  backingIndexPrefix: string;
 }): string {
-  if (!indexPattern.endsWith('*')) {
-    throw new Error('indexPattern must end with *');
-  }
   const hash = buildStepExecutionId(executionId, stepId, stackFrames);
-  const indexSuffix = indexName.replace(indexPattern.slice(0, -1), '');
+  const indexSuffix = extractBackingIndexSuffix({ backingIndexName, backingIndexPrefix });
   const decodedId = `${indexSuffix}_${hash}`;
 
   return Buffer.from(decodedId)

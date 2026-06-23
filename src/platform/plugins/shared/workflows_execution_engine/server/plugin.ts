@@ -16,12 +16,17 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  pickManagedWorkflowFields,
+  WorkflowRepository,
+  WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
 } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
@@ -50,13 +55,9 @@ import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
+import { initializeStepExecutionsDataStream } from './repositories/step_executions_data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import {
-  registerExecutionIndexCleanupTask,
-  registerExecutionIndexRolloverTask,
-  scheduleExecutionIndexCleanupTask,
-  scheduleExecutionIndexRolloverTask,
-} from './tasks';
+import { initializeWorkflowExecutionsDataStream } from './repositories/workflow_executions_data_stream';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -95,8 +96,6 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
-import { createIndexes } from '../common';
-import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -166,6 +165,8 @@ export class WorkflowsExecutionEnginePlugin
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
+    initializeWorkflowExecutionsDataStream(core.dataStreams, config.executionDataStreamRetention);
+    initializeStepExecutionsDataStream(core.dataStreams, config.executionDataStreamRetention);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -546,8 +547,8 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateEncodedWorkflowExecutionId({
-                  indexName: resolvedExecutionsIndex,
-                  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+                  backingIndexName: resolvedExecutionsIndex,
+                  backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
                 }),
                 spaceId,
                 workflowId: workflow.id,
@@ -635,24 +636,6 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
 
-    registerExecutionIndexRolloverTask({
-      taskManager: plugins.taskManager,
-      logger: this.logger.get('execution-index-rollover'),
-      core,
-      getRolloverConditions: () => ({
-        maxAge: this.config.executionIndexRolloverMaxAge,
-        maxPrimaryShardSize: this.config.executionIndexRolloverMaxPrimaryShardSize,
-      }),
-    });
-    registerExecutionIndexCleanupTask({
-      taskManager: plugins.taskManager,
-      logger: this.logger.get('execution-index-cleanup'),
-      core,
-      getCleanupOptions: () => ({
-        minIndexAge: this.config.executionIndexCleanupMinIndexAge,
-      }),
-    });
-
     return {};
   }
 
@@ -665,17 +648,6 @@ export class WorkflowsExecutionEnginePlugin
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
-
-    void scheduleExecutionIndexRolloverTask({
-      taskManager: plugins.taskManager,
-      logger: this.logger.get('execution-index-rollover'),
-      interval: this.config.executionIndexRolloverTaskInterval,
-    });
-    void scheduleExecutionIndexCleanupTask({
-      taskManager: plugins.taskManager,
-      logger: this.logger.get('execution-index-cleanup'),
-      interval: this.config.executionIndexCleanupTaskInterval,
-    });
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
@@ -760,8 +732,8 @@ export class WorkflowsExecutionEnginePlugin
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: WorkflowExecutionForInputRendering = {
         id: generateEncodedWorkflowExecutionId({
-          indexName: resolvedExecutionsIndex,
-          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+          backingIndexName: resolvedExecutionsIndex,
+          backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
         }),
         stepExecutionsIndex: resolvedStepExecutionsIndex,
         executionsIndex: resolvedExecutionsIndex,
@@ -1191,8 +1163,8 @@ export class WorkflowsExecutionEnginePlugin
       ]);
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateEncodedWorkflowExecutionId({
-          indexName: resolvedExecutionsIndex,
-          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+          backingIndexName: resolvedExecutionsIndex,
+          backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
         }),
         spaceId: workflow.spaceId,
         stepId,
@@ -1438,20 +1410,7 @@ export class WorkflowsExecutionEnginePlugin
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {
-      // Clear the cached promise on rejection so a transient failure (e.g. an ES
-      // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
-      // callers still share the same attempt; only the *next* call after rejection
-      // gets a fresh `createIndexes` invocation.
-      const attempt = createIndexes({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      });
-      this.initializePromise = attempt;
-      attempt.catch(() => {
-        if (this.initializePromise === attempt) {
-          this.initializePromise = undefined;
-        }
-      });
+      this.initializePromise = Promise.resolve();
     }
     await this.initializePromise;
   }

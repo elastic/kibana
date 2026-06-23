@@ -152,7 +152,7 @@ steps:
                         continue: true
                       with:
                         method: GET
-                        path: _alias/{{foreach.item.alias_name}}
+                        path: _data_stream/{{foreach.item.alias_name}}
 
                     - name: index_indexes_count
                       type: elasticsearch.request
@@ -163,7 +163,7 @@ steps:
                         body:
                           "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
                           metric: '{{foreach.item.group}}.backing_indexes_count'
-                          value: ${{steps.get_backing_indexes_count.output | entries | size}}
+                          value: ${{steps.get_backing_indexes_count.output.data_streams[0].indices | size}}
                           unit: int
                     
                     - name: get_alias_disk_size

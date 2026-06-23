@@ -11,9 +11,18 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { decodeEncodedWorkflowExecutionId, resolveIndex } from '@kbn/workflows/server/utils';
+import { decodeEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
+import {
+  resolveLegacyWorkflowExecutionBackingIndexFromSuffix,
+  resolveWorkflowExecutionBackingIndexFromSuffix,
+} from './resolve_execution_backing_index';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
-import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../common/workflow_executions_index';
+
+const resolveWorkflowExecutionUpdateIndex = (
+  workflowExecution: Partial<EsWorkflowExecution>,
+  indexSuffix: string
+): string =>
+  workflowExecution.executionsIndex ?? resolveWorkflowExecutionBackingIndexFromSuffix(indexSuffix);
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
@@ -21,20 +30,49 @@ export class WorkflowExecutionRepository {
   constructor(private esClient: ElasticsearchClient) {}
 
   /**
-   * Resolves the current write index backing the workflow executions alias.
+   * Resolves the current write backing index for the workflow executions data stream.
    * Called once when a workflow execution starts so the backing index name
-   * can be pinned on the execution document, ensuring all updates for that
-   * execution target the same backing index even if ILM rolls over mid-execution.
+   * can be pinned on the execution document.
    */
   public async resolveWriteIndex(): Promise<string> {
-    const aliasInfo = await this.esClient.indices.getAlias({ name: this.indexName });
-    for (const [name, indexAliases] of Object.entries(aliasInfo)) {
-      const alias = indexAliases.aliases[this.indexName];
-      if (alias?.is_write_index) {
-        return name;
-      }
+    const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
+      name: this.indexName,
+    });
+    const writeIndex = dataStreams[0]?.indices.at(-1)?.index_name;
+    if (!writeIndex) {
+      throw new Error(`No write backing index found for data stream ${this.indexName}`);
     }
-    return this.indexName;
+    return writeIndex;
+  }
+
+  private async getWorkflowExecutionDocument(
+    workflowExecutionId: string,
+    index: string
+  ): Promise<EsWorkflowExecution | null> {
+    try {
+      const response = await this.esClient.get<EsWorkflowExecution>({
+        index,
+        id: workflowExecutionId,
+      });
+      return response._source ?? null;
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  private isNotFoundError(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      'meta' in error &&
+      (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+    );
   }
 
   /**
@@ -59,28 +97,35 @@ export class WorkflowExecutionRepository {
       }
 
       const { indexSuffix } = result;
-      const response = await this.esClient.get<EsWorkflowExecution>({
-        index: resolveIndex({ indexSuffix, indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN }),
-        id: workflowExecutionId,
-      });
+      const dataStreamIndex = resolveWorkflowExecutionBackingIndexFromSuffix(indexSuffix);
+      const legacyIndex = resolveLegacyWorkflowExecutionBackingIndexFromSuffix(indexSuffix);
 
-      const doc = response._source;
-      // Verify spaceId matches for security/multi-tenancy
+      const doc =
+        (await this.getWorkflowExecutionDocument(workflowExecutionId, dataStreamIndex)) ??
+        (legacyIndex !== dataStreamIndex
+          ? await this.getWorkflowExecutionDocument(workflowExecutionId, legacyIndex)
+          : null);
+
       if (!doc || doc.spaceId !== spaceId) {
         return null;
       }
       return doc;
     } catch (error: unknown) {
-      // Handle 404 - document not found
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
+      if (this.isNotFoundError(error)) {
         return null;
       }
       throw error;
     }
+  }
+
+  private withTimestamp(
+    workflowExecution: Partial<EsWorkflowExecution>
+  ): Partial<EsWorkflowExecution> {
+    const timestamp = workflowExecution.createdAt ?? new Date().toISOString();
+    return {
+      ...workflowExecution,
+      '@timestamp': timestamp,
+    };
   }
 
   /**
@@ -105,7 +150,7 @@ export class WorkflowExecutionRepository {
       index: this.indexName,
       id: workflowExecution.id,
       refresh: options.refresh ?? false,
-      document: workflowExecution,
+      document: this.withTimestamp(workflowExecution),
     });
   }
 
@@ -135,7 +180,10 @@ export class WorkflowExecutionRepository {
     const bulkResponse = await this.esClient.bulk({
       refresh: options.refresh ?? false,
       index: this.indexName,
-      operations: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
+      operations: executions.flatMap((execution) => [
+        { create: { _id: execution.id } },
+        this.withTimestamp(execution),
+      ]),
     });
 
     return bulkResponse.items.map((item, idx) => {
@@ -160,11 +208,6 @@ export class WorkflowExecutionRepository {
    * @throws {Error} If the `id` property is not provided in the `workflowExecution` object.
    * @returns A promise that resolves when the update operation is complete.
    */
-  /**
-   * @param targetIndex When provided, the update targets this specific backing
-   *   index instead of the alias. Used to pin updates to the backing index that
-   *   was current when the execution was created.
-   */
   public async updateWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
@@ -179,10 +222,7 @@ export class WorkflowExecutionRepository {
     }
 
     await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index: resolveIndex({
-        indexSuffix: result.indexSuffix,
-        indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
-      }),
+      index: resolveWorkflowExecutionUpdateIndex(workflowExecution, result.indexSuffix),
       id: workflowExecution.id,
       refresh: false,
       doc: workflowExecution,
@@ -214,10 +254,7 @@ export class WorkflowExecutionRepository {
         throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
       }
 
-      const index = resolveIndex({
-        indexSuffix: result.indexSuffix,
-        indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
-      });
+      const index = resolveWorkflowExecutionUpdateIndex(update, result.indexSuffix);
 
       return [{ update: { _index: index, _id: update.id } }, { doc: update }];
     });
@@ -284,7 +321,6 @@ export class WorkflowExecutionRepository {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { workflowId } },
       { term: { spaceId } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
           status: NonTerminalExecutionStatuses,
@@ -298,13 +334,13 @@ export class WorkflowExecutionRepository {
 
     const response = await this.esClient.search<EsWorkflowExecution>({
       index: this.indexName,
-      size: 0, // Don't need the document, just checking existence
-      terminate_after: 1, // Stop after finding 1 match
+      size: 0,
+      terminate_after: 1,
       track_total_hits: true,
-      _source: false, // Don't fetch document content, only check existence
+      _source: false,
       query: {
         bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
+          filter: filterClauses,
         },
       },
     });
@@ -334,7 +370,6 @@ export class WorkflowExecutionRepository {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { workflowId } },
       { term: { spaceId } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
           status: NonTerminalExecutionStatuses,
@@ -349,10 +384,10 @@ export class WorkflowExecutionRepository {
     const response = await this.esClient.search<EsWorkflowExecution>({
       index: this.indexName,
       size: 1,
-      terminate_after: 1, // Stop after finding 1 match
+      terminate_after: 1,
       query: {
         bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
+          filter: filterClauses,
         },
       },
     });
@@ -383,7 +418,6 @@ export class WorkflowExecutionRepository {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
       { term: { spaceId } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
           status: NonTerminalExecutionStatuses,
@@ -391,10 +425,6 @@ export class WorkflowExecutionRepository {
       },
     ];
 
-    // Add exclusion as a nested bool query in filter context.
-    // We nest must_not inside a bool query within the filter array (rather than using
-    // a top-level must_not) to keep all clauses in the same filter context for consistency
-    // and optimal performance. The nested must_not is still in filter context (no scoring).
     if (excludeExecutionId) {
       filterClauses.push({
         bool: {
@@ -407,12 +437,12 @@ export class WorkflowExecutionRepository {
       index: this.indexName,
       query: {
         bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
+          filter: filterClauses,
         },
       },
-      _source: ['id'], // Only fetch ID field for efficiency
-      sort: [{ createdAt: { order: 'asc' } }], // Oldest first
-      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }],
+      size: Math.min(size, 10000),
     });
 
     return response.hits.hits
@@ -451,7 +481,7 @@ export class WorkflowExecutionRepository {
       },
     ];
 
-    const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
+    const pageSize = Math.min(size, 10000);
 
     const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
       index: this.indexName,

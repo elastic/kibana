@@ -7,23 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '@kbn/workflows';
 import { TOKEN_USAGE_MAPPING } from './step_executions_index';
+
+export { WORKFLOWS_EXECUTIONS_INDEX };
 
 export const PLUGIN_ID = 'workflowsExecutionEngine';
 export const PLUGIN_NAME = 'Workflows Execution Engine';
 
-export const WORKFLOWS_EXECUTIONS_INDEX_PREFIX = '.workflows-executions';
-
-/** Alias used for reads (fans out to all backing indexes) and new writes (routes to write index). */
-export const WORKFLOWS_EXECUTIONS_INDEX = WORKFLOWS_EXECUTIONS_INDEX_PREFIX;
-
-export const WORKFLOWS_EXECUTIONS_INDEX_PATTERN = `${WORKFLOWS_EXECUTIONS_INDEX_PREFIX}-*`;
-
-export const WORKFLOWS_EXECUTIONS_INITIAL_INDEX = `${WORKFLOWS_EXECUTIONS_INDEX_PREFIX}-000001`;
-
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
+    '@timestamp': {
+      type: 'date',
+    },
     spaceId: {
       type: 'keyword',
     },
@@ -92,8 +89,19 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     concurrencyGroupKey: {
       type: 'keyword',
     },
+    executionsIndex: {
+      type: 'keyword',
+    },
+    stepExecutionsIndex: {
+      type: 'keyword',
+    },
     // Aggregated token usage across all token-consuming steps, accumulated
     // incrementally as each step finishes.
     usage: TOKEN_USAGE_MAPPING,
   },
 };
+
+/**
+ * Bump when Elasticsearch index mappings for the workflows executions data stream change.
+ */
+export const WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION = 1;

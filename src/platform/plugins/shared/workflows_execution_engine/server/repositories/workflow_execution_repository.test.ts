@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+  WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
+} from '@kbn/workflows';
 import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
-import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../common/workflow_executions_index';
 
-const TEST_BACKING_INDEX = '.workflows-executions-000001';
+const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
 
 const createEncodedId = () =>
   generateEncodedWorkflowExecutionId({
-    indexName: TEST_BACKING_INDEX,
-    indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+    backingIndexName: TEST_BACKING_INDEX,
+    backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
   });
 
 describe('WorkflowExecutionRepository', () => {
@@ -29,7 +32,7 @@ describe('WorkflowExecutionRepository', () => {
     search: jest.Mock;
     get: jest.Mock;
     bulk: jest.Mock;
-    indices: { exists: jest.Mock; create: jest.Mock };
+    indices: { exists: jest.Mock; create: jest.Mock; getDataStream: jest.Mock };
   };
 
   beforeEach(() => {
@@ -42,6 +45,7 @@ describe('WorkflowExecutionRepository', () => {
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
+        getDataStream: jest.fn(),
       },
     };
     repository = new WorkflowExecutionRepository(esClient as any);
@@ -55,7 +59,12 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: '1',
         refresh: false,
-        document: workflowExecution,
+        document: expect.objectContaining({
+          id: '1',
+          workflowId: 'test-workflow',
+          spaceId: 'default',
+          '@timestamp': expect.any(String),
+        }),
       });
     });
 
@@ -94,9 +103,9 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         operations: [
           { create: { _id: 'e1' } },
-          executions[0],
+          expect.objectContaining({ ...executions[0], '@timestamp': expect.any(String) }),
           { create: { _id: 'e2' } },
-          executions[1],
+          expect.objectContaining({ ...executions[1], '@timestamp': expect.any(String) }),
         ],
       });
 
@@ -198,10 +207,11 @@ describe('WorkflowExecutionRepository', () => {
       const encodedId = createEncodedId();
       const notFoundError = new Error('Not Found');
       (notFoundError as any).meta = { statusCode: 404 };
-      esClient.get.mockRejectedValueOnce(notFoundError);
+      esClient.get.mockRejectedValue(notFoundError);
 
       const result = await repository.getWorkflowExecutionById(encodedId, 'space1');
 
+      expect(esClient.get).toHaveBeenCalledTimes(2);
       expect(result).toBeNull();
     });
 

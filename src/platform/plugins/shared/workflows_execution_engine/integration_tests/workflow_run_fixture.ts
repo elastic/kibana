@@ -113,8 +113,8 @@ export class WorkflowRunFixture {
       createdAt: new Date().toISOString(),
       createdBy: 'system',
       triggeredBy: 'system',
-      stepExecutionsIndex: '.workflows-step-executions-000001',
-      executionsIndex: '.workflows-executions-000001',
+      stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
+      executionsIndex: '.ds-.workflows-executions-2026.06.22-000001',
     };
     this.workflowExecutionRepositoryMock.workflowExecutions.set(
       'fake_workflow_execution_id',
@@ -173,8 +173,8 @@ export class WorkflowRunFixture {
       createdAt: new Date().toISOString(),
       createdBy: 'system',
       triggeredBy: 'system',
-      stepExecutionsIndex: '.workflows-step-executions-000001',
-      executionsIndex: '.workflows-executions-000001',
+      stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
+      executionsIndex: '.ds-.workflows-executions-2026.06.22-000001',
     };
     this.workflowExecutionRepositoryMock.workflowExecutions.set(
       'fake_workflow_execution_id',

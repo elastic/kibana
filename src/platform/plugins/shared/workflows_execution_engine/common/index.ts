@@ -9,4 +9,3 @@
 
 export { WORKFLOWS_STEP_EXECUTIONS_INDEX } from './step_executions_index';
 export { WORKFLOWS_EXECUTIONS_INDEX } from './workflow_executions_index';
-export { createIndexes } from './create_indexes';

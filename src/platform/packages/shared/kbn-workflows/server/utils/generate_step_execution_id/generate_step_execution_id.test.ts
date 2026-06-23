@@ -14,9 +14,12 @@ import {
   generateEncodedStepExecutionId,
 } from './generate_step_execution_id';
 import type { StackFrame } from '../../..';
+import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX } from '../../../common/execution_storage_constants';
+import { resolveBackingIndex } from '../resolve_backing_index/resolve_backing_index';
 
-const INDEX_PATTERN = '.workflows-step-executions-*';
-const INDEX_NAME = '.workflows-step-executions-000001';
+const BACKING_INDEX_PREFIX = WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX;
+const BACKING_INDEX_NAME = '.ds-.workflows-step-executions-2026.06.22-000001';
+const INDEX_SUFFIX = '2026.06.22-000001';
 
 const EXECUTION_ID = 'workflow-exec-abc123';
 const STEP_ID = 'connector-send-email';
@@ -28,15 +31,17 @@ const EXPECTED_HASH = crypto
   .digest('hex')
   .slice(0, 32);
 
+const baseArgs = {
+  executionId: EXECUTION_ID,
+  stepId: STEP_ID,
+  stackFrames: STACK_FRAMES,
+  backingIndexName: BACKING_INDEX_NAME,
+  backingIndexPrefix: BACKING_INDEX_PREFIX,
+};
+
 describe('generateEncodedStepExecutionId', () => {
   it('should return a base64url-encoded string', () => {
-    const result = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: STACK_FRAMES,
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
-    });
+    const result = generateEncodedStepExecutionId(baseArgs);
 
     expect(result).not.toContain('+');
     expect(result).not.toContain('/');
@@ -44,31 +49,17 @@ describe('generateEncodedStepExecutionId', () => {
   });
 
   it('should produce a deterministic result for the same inputs', () => {
-    const args = {
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: STACK_FRAMES,
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
-    };
-
-    const result1 = generateEncodedStepExecutionId(args);
-    const result2 = generateEncodedStepExecutionId(args);
+    const result1 = generateEncodedStepExecutionId(baseArgs);
+    const result2 = generateEncodedStepExecutionId(baseArgs);
 
     expect(result1).toBe(result2);
   });
 
   it('should encode indexSuffix + hash as base64url', () => {
-    const result = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: STACK_FRAMES,
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
-    });
+    const result = generateEncodedStepExecutionId(baseArgs);
 
     expect(result).toBe(
-      Buffer.from(`000001_${EXPECTED_HASH}`)
+      Buffer.from(`${INDEX_SUFFIX}_${EXPECTED_HASH}`)
         .toString('base64')
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
@@ -76,13 +67,12 @@ describe('generateEncodedStepExecutionId', () => {
     );
   });
 
-  it('should derive the index suffix by stripping the pattern prefix', () => {
+  it('should derive the index suffix by stripping the backing index prefix', () => {
+    const prefix = '.ds-.my-index-';
     const result = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: STACK_FRAMES,
-      indexName: '.my-index-abc_def',
-      indexPattern: '.my-index-*',
+      ...baseArgs,
+      backingIndexName: `${prefix}abc_def`,
+      backingIndexPrefix: prefix,
     });
     const decoded = decodeEncodedStepExecutionId(result);
 
@@ -92,25 +82,19 @@ describe('generateEncodedStepExecutionId', () => {
     }
   });
 
-  it('should throw if indexPattern does not end with *', () => {
+  it('should throw if backing index does not match prefix', () => {
     expect(() =>
       generateEncodedStepExecutionId({
-        executionId: EXECUTION_ID,
-        stepId: STEP_ID,
-        stackFrames: STACK_FRAMES,
-        indexName: INDEX_NAME,
-        indexPattern: '.workflows-step-executions-',
+        ...baseArgs,
+        backingIndexName: '.workflows-step-executions-000001',
       })
-    ).toThrow('indexPattern must end with *');
+    ).toThrow(/does not start with prefix/);
   });
 
-  it('should handle index name that equals the pattern prefix (empty suffix)', () => {
+  it('should handle backing index that equals the prefix (empty suffix)', () => {
     const result = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: STACK_FRAMES,
-      indexName: '.workflows-step-executions-',
-      indexPattern: INDEX_PATTERN,
+      ...baseArgs,
+      backingIndexName: BACKING_INDEX_PREFIX,
     });
     const decoded = decodeEncodedStepExecutionId(result);
 
@@ -123,54 +107,48 @@ describe('generateEncodedStepExecutionId', () => {
 
   it('should include stack frames in the hash', () => {
     const withFrames = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
+      ...baseArgs,
       stackFrames: [
         {
           stepId: 'foreachstep',
           nestedScopes: [{ nodeId: 'enterForeach_step1', nodeType: 'foreach', scopeId: '1' }],
         },
       ],
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
     });
-    const withoutFrames = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: [],
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
-    });
+    const withoutFrames = generateEncodedStepExecutionId(baseArgs);
 
     expect(withFrames).not.toBe(withoutFrames);
+  });
+
+  it('roundtrips backing index through encode, decode, and resolveBackingIndex', () => {
+    const encoded = generateEncodedStepExecutionId(baseArgs);
+    const decoded = decodeEncodedStepExecutionId(encoded);
+
+    expect(decoded.success).toBe(true);
+    if (decoded.success) {
+      expect(
+        resolveBackingIndex({
+          backingIndexPrefix: BACKING_INDEX_PREFIX,
+          indexSuffix: decoded.indexSuffix,
+        })
+      ).toBe(BACKING_INDEX_NAME);
+    }
   });
 });
 
 describe('decodeEncodedStepExecutionId', () => {
   it('should roundtrip with generateEncodedStepExecutionId', () => {
-    const encoded = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: STACK_FRAMES,
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
-    });
+    const encoded = generateEncodedStepExecutionId(baseArgs);
 
     expect(decodeEncodedStepExecutionId(encoded)).toEqual({
       success: true,
-      indexSuffix: '000001',
+      indexSuffix: INDEX_SUFFIX,
       stepExecutionHash: EXPECTED_HASH,
     });
   });
 
   it('should return a 32-char hex hash', () => {
-    const encoded = generateEncodedStepExecutionId({
-      executionId: EXECUTION_ID,
-      stepId: STEP_ID,
-      stackFrames: STACK_FRAMES,
-      indexName: INDEX_NAME,
-      indexPattern: INDEX_PATTERN,
-    });
+    const encoded = generateEncodedStepExecutionId(baseArgs);
     const decoded = decodeEncodedStepExecutionId(encoded);
 
     expect(decoded.success).toBe(true);
@@ -181,36 +159,30 @@ describe('decodeEncodedStepExecutionId', () => {
 
   it('should roundtrip with various index suffixes', () => {
     const cases = [
-      { indexName: '.idx-000001', indexPattern: '.idx-*', expectedSuffix: '000001' },
-      { indexName: '.idx-my-index', indexPattern: '.idx-*', expectedSuffix: 'my-index' },
-      { indexName: '.idx-abc_def', indexPattern: '.idx-*', expectedSuffix: 'abc_def' },
-      {
-        indexName: '.prefix-some.long.suffix',
-        indexPattern: '.prefix-*',
-        expectedSuffix: 'some.long.suffix',
-      },
+      { suffix: '000001', prefix: '.ds-.idx-' },
+      { suffix: 'my-index', prefix: '.ds-.idx-' },
+      { suffix: 'abc_def', prefix: '.ds-.idx-' },
+      { suffix: 'some.long.suffix', prefix: '.ds-.prefix-' },
     ];
 
-    for (const { indexName, indexPattern, expectedSuffix } of cases) {
+    for (const { suffix, prefix } of cases) {
       const encoded = generateEncodedStepExecutionId({
-        executionId: EXECUTION_ID,
-        stepId: STEP_ID,
-        stackFrames: STACK_FRAMES,
-        indexName,
-        indexPattern,
+        ...baseArgs,
+        backingIndexName: `${prefix}${suffix}`,
+        backingIndexPrefix: prefix,
       });
       const decoded = decodeEncodedStepExecutionId(encoded);
 
       expect(decoded.success).toBe(true);
       if (decoded.success) {
-        expect(decoded.indexSuffix).toBe(expectedSuffix);
+        expect(decoded.indexSuffix).toBe(suffix);
         expect(decoded.stepExecutionHash).toBe(EXPECTED_HASH);
       }
     }
   });
 
   it('should correctly reverse base64url encoding', () => {
-    const original = `000001_${EXPECTED_HASH}`;
+    const original = `${INDEX_SUFFIX}_${EXPECTED_HASH}`;
     const encoded = Buffer.from(original)
       .toString('base64')
       .replace(/\+/g, '-')
@@ -219,7 +191,7 @@ describe('decodeEncodedStepExecutionId', () => {
 
     expect(decodeEncodedStepExecutionId(encoded)).toEqual({
       success: true,
-      indexSuffix: '000001',
+      indexSuffix: INDEX_SUFFIX,
       stepExecutionHash: EXPECTED_HASH,
     });
   });
@@ -238,7 +210,7 @@ describe('decodeEncodedStepExecutionId', () => {
   });
 
   it('should return error for malformed hash (wrong length)', () => {
-    const encoded = Buffer.from('000001_tooshort')
+    const encoded = Buffer.from(`${INDEX_SUFFIX}_tooshort`)
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
@@ -252,7 +224,7 @@ describe('decodeEncodedStepExecutionId', () => {
 
   it('should return error for malformed hash (non-hex characters)', () => {
     const nonHex = 'z'.repeat(32);
-    const encoded = Buffer.from(`000001_${nonHex}`)
+    const encoded = Buffer.from(`${INDEX_SUFFIX}_${nonHex}`)
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')

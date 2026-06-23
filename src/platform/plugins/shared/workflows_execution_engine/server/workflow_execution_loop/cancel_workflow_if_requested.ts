@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
+import {
+  ExecutionStatus,
+  WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
+} from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { generateEncodedStepExecutionId } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -75,8 +77,8 @@ export async function cancelWorkflowIfRequested(
       executionId: workflowExecutionState.getWorkflowExecution().id,
       stepId: scopeData.stepId,
       stackFrames: nodeStack.stackFrames,
-      indexName: stepExecutionsIndex,
-      indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
+      backingIndexName: stepExecutionsIndex,
+      backingIndexPrefix: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
     });
 
     if (workflowExecutionState.getStepExecution(stepExecutionId)) {

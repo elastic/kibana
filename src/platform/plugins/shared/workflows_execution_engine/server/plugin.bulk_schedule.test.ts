@@ -13,9 +13,6 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
-jest.mock('../common', () => ({
-  createIndexes: jest.fn().mockResolvedValue(undefined),
-}));
 jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));
@@ -25,10 +22,12 @@ jest.mock('./lib/get_user', () => ({
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
-const mockResolveExecutionsWriteIndex = jest.fn().mockResolvedValue('.workflows-executions-000001');
+const mockResolveExecutionsWriteIndex = jest
+  .fn()
+  .mockResolvedValue('.ds-.workflows-executions-2026.06.22-000001');
 const mockResolveStepExecutionsWriteIndex = jest
   .fn()
-  .mockResolvedValue('.workflows-step-executions-000001');
+  .mockResolvedValue('.ds-.workflows-step-executions-2026.06.22-000001');
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,

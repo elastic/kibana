@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
 
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX = '.workflows-step-executions';
-
-/** Alias used for reads (fans out to all backing indexes) and new writes (routes to write index). */
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX;
-
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN = `${WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX}-*`;
-
-export const WORKFLOWS_STEP_EXECUTIONS_INITIAL_INDEX = `${WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX}-000001`;
+export { WORKFLOWS_STEP_EXECUTIONS_INDEX };
 
 // Normalized LLM token usage. Shared between the step-execution mapping (per-step
 // usage extracted from `output.metadata.usage`) and the execution mapping (the
@@ -32,6 +26,9 @@ export const TOKEN_USAGE_MAPPING: MappingProperty = {
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
+    '@timestamp': {
+      type: 'date',
+    },
     spaceId: {
       type: 'keyword',
     },
@@ -106,3 +103,8 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     usage: TOKEN_USAGE_MAPPING,
   },
 };
+
+/**
+ * Bump when Elasticsearch index mappings for the workflows step executions data stream change.
+ */
+export const WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION = 1;

@@ -17,6 +17,7 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
   TerminalExecutionStatuses,
+  WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
 } from '@kbn/workflows';
 import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
@@ -24,13 +25,12 @@ import { StepExecutionRepository } from './repositories/step_execution_repositor
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
-import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
 
-const TEST_BACKING_INDEX = '.workflows-executions-000001';
+const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
 const createEncodedExecutionId = () =>
   generateEncodedWorkflowExecutionId({
-    indexName: TEST_BACKING_INDEX,
-    indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+    backingIndexName: TEST_BACKING_INDEX,
+    backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
   });
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
