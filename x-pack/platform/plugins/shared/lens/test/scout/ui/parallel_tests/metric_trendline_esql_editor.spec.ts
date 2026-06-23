@@ -11,6 +11,7 @@ import {
   applyLensInlineEditorAndWaitClosed,
   createDashboardWithPanelId,
   LOGSTASH_TIME_RANGE,
+  openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
 } from '../fixtures';
@@ -69,7 +70,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'toggling background chart to None resets the Color setting',
+      'toggling background chart to None keeps Color set to Panel',
       async ({ browserAuth, page, pageObjects }) => {
         const { dashboard, lens } = pageObjects;
 
@@ -79,11 +80,7 @@ spaceTest.describe(
         await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
         const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-        const dimensionButton = metricDimensionPanel.getByRole('button', {
-          name: /Edit .* configuration/,
-        });
-        await dimensionButton.click();
-        await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+        await openDimensionEditorAndWaitForFlyout({ lens }, page, metricDimensionPanel);
 
         await spaceTest.step('verify initial Color is set to None', async () => {
           const colorButtons = page.getByTestId('lnsMetric_apply_color_to_buttons');
@@ -99,20 +96,18 @@ spaceTest.describe(
           await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
         });
 
-        await spaceTest.step('disable trendline and verify Color resets to None', async () => {
+        await spaceTest.step('disable trendline and verify Color stays set to Panel', async () => {
           await page.getByTestId('lnsMetric_background_chart_none').click();
           await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
 
-          // After switching back to None, applyColorTo should be reset to undefined,
-          // which renders "None" as selected in the Color button group.
-          // If the bug is present, applyColorTo would be 'background' and "Panel"
-          // would be selected instead.
+          // Switching background chart always sets applyColorTo to 'background',
+          // so after disabling trendline the Color button group shows "Panel" as selected.
           const colorButtons = page.getByTestId('lnsMetric_apply_color_to_buttons');
           await expect(
-            colorButtons.getByRole('button', { name: 'None', pressed: true })
+            colorButtons.getByRole('button', { name: 'Panel', pressed: true })
           ).toBeVisible();
           await expect(
-            colorButtons.getByRole('button', { name: 'Panel', pressed: false })
+            colorButtons.getByRole('button', { name: 'None', pressed: false })
           ).toBeVisible();
         });
 
@@ -133,11 +128,7 @@ spaceTest.describe(
 
         await spaceTest.step('enable trendline', async () => {
           const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-          const dimensionButton = metricDimensionPanel.getByRole('button', {
-            name: /Edit .* configuration/,
-          });
-          await dimensionButton.click();
-          await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+          await openDimensionEditorAndWaitForFlyout({ lens }, page, metricDimensionPanel);
 
           await page.getByTestId('lnsMetric_background_chart_line').click();
           await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();

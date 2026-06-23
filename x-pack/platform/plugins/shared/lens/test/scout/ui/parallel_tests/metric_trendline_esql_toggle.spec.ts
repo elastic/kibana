@@ -11,6 +11,7 @@ import {
   applyLensInlineEditorAndWaitClosed,
   createDashboardWithPanelId,
   LOGSTASH_TIME_RANGE,
+  openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
 } from '../fixtures';
@@ -82,11 +83,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
         await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
         const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-        const dimensionButton = metricDimensionPanel.getByRole('button', {
-          name: /Edit .* configuration/,
-        });
-        await dimensionButton.click();
-        await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+        await openDimensionEditorAndWaitForFlyout({ lens }, page, metricDimensionPanel);
 
         await page.getByTestId('lnsMetric_background_chart_line').click();
         await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
@@ -116,11 +113,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
         await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
         const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-        const dimensionButton = metricDimensionPanel.getByRole('button', {
-          name: /Edit .* configuration/,
-        });
-        await dimensionButton.click();
-        await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+        await openDimensionEditorAndWaitForFlyout({ lens }, page, metricDimensionPanel);
 
         await page.getByTestId('lnsMetric_background_chart_none').click();
         await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
