@@ -113,47 +113,20 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const transformed = useMemo(() => transformWorkflowToGraph(workflow), [workflow]);
 
-  // Build slug→step-name and slug→trigger maps by re-running the same
-  // transform the canvas uses, so node ids line up with WorkflowLookup keys
-  // for ALL steps (top-level, branches, foreach bodies, parallel branches).
-  const { slugToName, slugToTrigger } = useMemo(() => {
-    const nameMap: Record<string, string> = {};
-    const triggerMap: Record<string, NonNullable<WorkflowYaml['triggers']>[number]> = {};
-    if (!workflow) return { slugToName: nameMap, slugToTrigger: triggerMap };
-    // The transform allocates trigger ids in declaration order, one per
-    // trigger. We assume one trigger per type in practice (the common case);
-    // map by stepType from the resulting node data back to the source trigger.
-    const triggersByType = new Map<string, NonNullable<WorkflowYaml['triggers']>[number]>();
-    for (const trigger of workflow.triggers ?? []) {
-      if (!triggersByType.has(trigger.type)) triggersByType.set(trigger.type, trigger);
-    }
-    const { nodes, foreachGroups } = transformed;
-    // Top-level + branches/parallel inner nodes live in `nodes`; nodes inside
-    // a top-level foreach container live in `foreachGroups[].innerNodes`.
-    const allNodes = [...nodes, ...foreachGroups.flatMap((g) => g.innerNodes)];
-    for (const n of allNodes) {
-      const { data } = n;
-      if (n.type === 'trigger') {
-        const t = data.stepType ? triggersByType.get(data.stepType) : undefined;
-        if (t) triggerMap[n.id] = t;
-      } else if (typeof data.label === 'string') {
-        nameMap[n.id] = data.label;
-      }
-    }
-    return { slugToName: nameMap, slugToTrigger: triggerMap };
-  }, [transformed, workflow]);
-
   const flyoutTarget = useMemo<FlyoutTarget | null>(() => {
     if (!selectedStepId) return null;
-    const stepName = slugToName[selectedStepId];
-    if (stepName) {
+    const ref = transformed.nodeRefs[selectedStepId];
+    if (!ref) return null;
+    if (ref.kind === 'step') {
       return {
         kind: 'step',
-        stepName,
-        stepInfo: workflowLookup?.steps[stepName],
+        stepName: ref.stepName,
+        stepInfo: workflowLookup?.steps[ref.stepName],
       };
     }
-    const trigger = slugToTrigger[selectedStepId];
+    // kind === 'trigger' — use the exact declaration-order index so two
+    // triggers of the same type are distinguished correctly.
+    const trigger = workflow?.triggers?.[ref.triggerIndex];
     if (trigger) {
       const yamlSnippet = stringifyYaml({ triggers: [trigger] });
       return {
@@ -164,7 +137,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       };
     }
     return null;
-  }, [selectedStepId, slugToName, slugToTrigger, workflowLookup]);
+  }, [selectedStepId, transformed.nodeRefs, workflowLookup, workflow]);
 
   const renderStepIcon = useCallback<RenderStepIcon>(
     ({ stepType, isTrigger: _isTrigger }) => (

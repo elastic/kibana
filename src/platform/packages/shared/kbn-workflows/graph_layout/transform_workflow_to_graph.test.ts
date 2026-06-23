@@ -516,3 +516,140 @@ describe('computeTopologyFingerprint', () => {
     expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfMutated));
   });
 });
+
+// ─── nodeRefs ────────────────────────────────────────────────────────────────
+describe('transformWorkflowToGraph — nodeRefs', () => {
+  it('returns an empty nodeRefs map for undefined workflow', () => {
+    const r = transformWorkflowToGraph(undefined);
+    expect(r.nodeRefs).toEqual({});
+  });
+
+  it('maps trigger node id to kind:trigger with correct index and type', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        triggers: [{ type: 'manual', enabled: true }] as unknown as WorkflowYaml['triggers'],
+        steps: [],
+      })
+    );
+    const triggerNode = r.nodes.find((n) => n.type === 'trigger');
+    expect(triggerNode).toBeDefined();
+    expect(r.nodeRefs[triggerNode!.id]).toEqual({
+      kind: 'trigger',
+      triggerIndex: 0,
+      triggerType: 'manual',
+    });
+  });
+
+  it('maps multiple triggers by declaration index — two triggers of the same type', () => {
+    // This is the case the old "one trigger per type" heuristic would have got wrong.
+    const r = transformWorkflowToGraph(
+      minimal({
+        triggers: [
+          { type: 'alert', enabled: true },
+          { type: 'alert', enabled: true },
+        ] as unknown as WorkflowYaml['triggers'],
+        steps: [],
+      })
+    );
+    const triggerNodes = r.nodes.filter((n) => n.type === 'trigger');
+    expect(triggerNodes).toHaveLength(2);
+    // Each maps to its own index; types are both 'alert' but indices differ.
+    const refs = triggerNodes.map((n) => r.nodeRefs[n.id]);
+    expect(refs).toContainEqual({ kind: 'trigger', triggerIndex: 0, triggerType: 'alert' });
+    expect(refs).toContainEqual({ kind: 'trigger', triggerIndex: 1, triggerType: 'alert' });
+    // The two node ids must be different.
+    expect(triggerNodes[0].id).not.toEqual(triggerNodes[1].id);
+  });
+
+  it('maps regular step node id to kind:step with the exact step name', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          { name: 'fetch-data', type: 'http', with: { url: 'x' } },
+          { name: 'send-alert', type: 'http', with: { url: 'y' } },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const fetchNode = r.nodes.find((n) => 'label' in n.data && n.data.label === 'fetch-data');
+    const alertNode = r.nodes.find((n) => 'label' in n.data && n.data.label === 'send-alert');
+    expect(fetchNode).toBeDefined();
+    expect(alertNode).toBeDefined();
+    expect(r.nodeRefs[fetchNode!.id]).toEqual({ kind: 'step', stepName: 'fetch-data' });
+    expect(r.nodeRefs[alertNode!.id]).toEqual({ kind: 'step', stepName: 'send-alert' });
+  });
+
+  it('maps the foreach container node to kind:step with the foreach step name', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'loop-over-items',
+            type: 'foreach',
+            each: '{{ items }}',
+            steps: [{ name: 'inner-step', type: 'http', with: { url: 'x' } }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const groupNode = r.nodes.find((n) => n.type === 'foreachGroup');
+    const innerNode = r.foreachGroups[0]?.innerNodes[0];
+    expect(groupNode).toBeDefined();
+    expect(innerNode).toBeDefined();
+    expect(r.nodeRefs[groupNode!.id]).toEqual({ kind: 'step', stepName: 'loop-over-items' });
+    expect(r.nodeRefs[innerNode!.id]).toEqual({ kind: 'step', stepName: 'inner-step' });
+  });
+
+  it('maps branch-body step nodes inside an if block to kind:step', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x > 1',
+            steps: [{ name: 'then-step', type: 'http' }],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const gateNode = r.nodes.find((n) => 'label' in n.data && n.data.label === 'gate');
+    const thenNode = r.nodes.find((n) => 'label' in n.data && n.data.label === 'then-step');
+    const elseNode = r.nodes.find((n) => 'label' in n.data && n.data.label === 'else-step');
+    expect(r.nodeRefs[gateNode!.id]).toEqual({ kind: 'step', stepName: 'gate' });
+    expect(r.nodeRefs[thenNode!.id]).toEqual({ kind: 'step', stepName: 'then-step' });
+    expect(r.nodeRefs[elseNode!.id]).toEqual({ kind: 'step', stepName: 'else-step' });
+  });
+
+  it('covers every node id — no node is missing from nodeRefs', () => {
+    // A complex workflow with triggers + flat steps + if + parallel.
+    const r = transformWorkflowToGraph(
+      minimal({
+        triggers: [
+          { type: 'manual', enabled: true },
+          { type: 'scheduled', enabled: true, with: { every: '1h' } },
+        ] as unknown as WorkflowYaml['triggers'],
+        steps: [
+          { name: 'first', type: 'http', with: { url: 'x' } },
+          {
+            name: 'fan-out',
+            type: 'parallel',
+            branches: [
+              { name: 'branch-a', steps: [{ name: 'step-a', type: 'http' }] },
+              { name: 'branch-b', steps: [{ name: 'step-b', type: 'http' }] },
+            ],
+          },
+          { name: 'last', type: 'http', with: { url: 'z' } },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // Collect all node ids from nodes + foreachGroup inner nodes.
+    const allIds = [
+      ...r.nodes.map((n) => n.id),
+      ...r.foreachGroups.flatMap((g) => g.innerNodes.map((n) => n.id)),
+    ];
+    for (const id of allIds) {
+      expect(r.nodeRefs).toHaveProperty(id);
+    }
+  });
+});

@@ -11,6 +11,7 @@ import { IdAllocator } from './id_allocator';
 import type {
   ForeachGroup,
   GraphEdge,
+  NodeRef,
   PreLayoutForeachGroupNode,
   PreLayoutNode,
   PreLayoutStepNode,
@@ -46,6 +47,13 @@ export interface TransformResult {
   nodes: PreLayoutNode[];
   edges: GraphEdge[];
   foreachGroups: ForeachGroup[];
+  /**
+   * Maps every node id to its source in the workflow definition.
+   * The transform is the single place that mints node ids (via `IdAllocator`),
+   * so it is the authoritative owner of this mapping — callers must not
+   * reconstruct it by reading `node.data`.
+   */
+  nodeRefs: Record<string, NodeRef>;
 }
 
 interface InternalTransformResult extends TransformResult {
@@ -67,15 +75,15 @@ interface InternalTransformResult extends TransformResult {
  * Pure: same input → same output. Safe to memoize on the topology fingerprint.
  */
 export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): TransformResult {
-  if (!workflow) return { nodes: [], edges: [], foreachGroups: [] };
+  if (!workflow) return { nodes: [], edges: [], foreachGroups: [], nodeRefs: {} };
 
   const ids = new IdAllocator();
-  const { nodes, edges, foreachGroups } = transformInternal(
+  const { nodes, edges, foreachGroups, nodeRefs } = transformInternal(
     workflow.triggers ?? [],
     workflow.steps ?? [],
     ids
   );
-  return { nodes, edges, foreachGroups };
+  return { nodes, edges, foreachGroups, nodeRefs };
 }
 
 function transformInternal(
@@ -86,11 +94,15 @@ function transformInternal(
   const nodes: PreLayoutNode[] = [];
   const edges: GraphEdge[] = [];
   const foreachGroups: ForeachGroup[] = [];
+  const nodeRefs: Record<string, NodeRef> = {};
 
   const triggerIds: string[] = [];
+  let triggerIndex = 0;
   for (const trigger of triggers) {
     const id = ids.allocate(trigger.type);
     triggerIds.push(id);
+    nodeRefs[id] = { kind: 'trigger', triggerIndex, triggerType: trigger.type };
+    triggerIndex += 1;
     const triggerNode: PreLayoutTriggerNode = {
       id,
       type: 'trigger',
@@ -132,6 +144,11 @@ function transformInternal(
     // this with the leaves of their branches.
     let exitIds: string[] = [id];
 
+    // Record the back-pointer from this node id to its source step.  Both
+    // `step` and `foreachGroup` node kinds map to the same step name — the
+    // foreachGroup container IS that step, just rendered differently.
+    nodeRefs[id] = { kind: 'step', stepName: step.name };
+
     // Every foreach with a `steps` body renders as a group container, at any
     // nesting depth. The container is a self-contained "folder": one edge in
     // (from the previous outer step), one edge out (to the next outer step),
@@ -152,6 +169,7 @@ function transformInternal(
 
       const childSteps = (foreachStep.steps as Step[]) ?? [];
       const inner = transformInternal([], childSteps, ids);
+      Object.assign(nodeRefs, inner.nodeRefs);
       foreachGroups.push({
         id,
         innerNodes: inner.nodes,
@@ -184,6 +202,7 @@ function transformInternal(
 
       if (thenSteps.length > 0) {
         const inner = transformInternal([], thenSteps, ids);
+        Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
@@ -205,6 +224,7 @@ function transformInternal(
 
       if (elseSteps.length > 0) {
         const inner = transformInternal([], elseSteps, ids);
+        Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
@@ -236,6 +256,7 @@ function transformInternal(
           return;
         }
         const inner = transformInternal([], branch.steps, ids);
+        Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
@@ -269,6 +290,7 @@ function transformInternal(
           return;
         }
         const inner = transformInternal([], caseItem.steps as Step[], ids);
+        Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
@@ -288,6 +310,7 @@ function transformInternal(
       // Rule 2 — `default` branch, labeled 'default'.
       if (hasDefault) {
         const inner = transformInternal([], defaultSteps as Step[], ids);
+        Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
@@ -313,6 +336,7 @@ function transformInternal(
       const mergeStep = step as MergeStep;
       const childSteps = (mergeStep.steps as Step[]) ?? [];
       const inner = transformInternal([], childSteps, ids);
+      Object.assign(nodeRefs, inner.nodeRefs);
       nodes.push(...inner.nodes);
       edges.push(...inner.edges);
       foreachGroups.push(...inner.foreachGroups);
@@ -326,5 +350,5 @@ function transformInternal(
     prevExitIds = exitIds;
   }
 
-  return { nodes, edges, foreachGroups, leafIds: prevExitIds };
+  return { nodes, edges, foreachGroups, nodeRefs, leafIds: prevExitIds };
 }

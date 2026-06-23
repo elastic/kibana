@@ -101,6 +101,17 @@ export interface ForeachGroup {
   innerEdges: GraphEdge[];
 }
 
+/**
+ * A typed back-pointer from a laid-out graph node back to its source in the
+ * workflow definition — either a step (identified by its exact `name` string,
+ * which is the key used in `WorkflowLookup`) or a trigger (identified by its
+ * zero-based declaration index so callers can do an exact `triggers[index]`
+ * lookup rather than guessing by type).
+ */
+export type NodeRef =
+  | { readonly kind: 'step'; readonly stepName: string }
+  | { readonly kind: 'trigger'; readonly triggerIndex: number; readonly triggerType: string };
+
 /** Side a node anchors its source/target handle on. Maps to `@xyflow/react`'s `Position`. */
 export type HandleSide = 'top' | 'right' | 'bottom' | 'left';
 

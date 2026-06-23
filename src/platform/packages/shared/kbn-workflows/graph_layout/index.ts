@@ -17,6 +17,7 @@ export {
   type GraphEdge,
   type HandleSide,
   type LayoutDirection,
+  type NodeRef,
   type NodeStyle,
   type PreLayoutNode,
   type PreLayoutStepNode,
