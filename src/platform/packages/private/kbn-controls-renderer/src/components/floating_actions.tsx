@@ -61,7 +61,7 @@ const getFloatingActionItem = (
           iconType={action.getIconType(context) ?? 'empty'}
           color="text"
           onClick={() => action.execute(context)}
-          aria-label={action.getDisplayName(context)}
+          aria-label={action.getDisplayNameTooltip?.(context) || action.getDisplayName(context)}
           data-test-subj={`embeddablePanelAction-${action.id}`}
         />
       </EuiToolTip>
