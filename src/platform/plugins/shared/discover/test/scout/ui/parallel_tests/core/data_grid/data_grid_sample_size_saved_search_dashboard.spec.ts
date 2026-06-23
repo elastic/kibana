@@ -55,7 +55,7 @@ spaceTest.describe(
       const savedSearchName = `With sample size ${scoutSpace.id}`;
 
       await spaceTest.step('save a search with a custom sample size', async () => {
-        await discover.goto();
+        await discover.goto({ queryMode: 'classic' });
         await dataGrid.waitUntilSearchingHasFinished();
         await dataGrid.waitForDocTableRendered();
         await dataGrid.openGridDisplaySettings();
@@ -130,7 +130,7 @@ spaceTest.describe(
         const dashboardName = `dashboard sample size ${scoutSpace.id}`;
 
         await spaceTest.step('save a search with a custom sample size', async () => {
-          await discover.goto();
+          await discover.goto({ queryMode: 'classic' });
           await dataGrid.waitUntilSearchingHasFinished();
           await dataGrid.waitForDocTableRendered();
           await dataGrid.openGridDisplaySettings();

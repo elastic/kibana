@@ -60,7 +60,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('render the default Discover rows-per-page setting', async () => {
-          await discover.goto();
+          await discover.goto({ queryMode: 'classic' });
           await dataGrid.waitUntilSearchingHasFinished();
 
           expect(await dataGrid.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
@@ -131,7 +131,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('classic mode shows pagination', async () => {
-          await discover.goto();
+          await discover.goto({ queryMode: 'classic' });
           await dataGrid.waitUntilSearchingHasFinished();
 
           expect(await dataGrid.getDocTableRowCount()).toBe(ESQL_ROWS_PER_PAGE);
