@@ -29,7 +29,6 @@ import { css } from '@emotion/react';
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { NavExtensionPointBaseComponentProps, NavTemplateActionConfig } from '../types';
-import { getField, getStringField } from '../utils/get_field';
 
 interface NormalizedRow {
   id: string;
@@ -50,18 +49,12 @@ interface ListTemplateAddItemConfig {
 }
 
 export type ListTemplateConfig<Data = SerializableRecord> = {
-  item: {
-    /** field property path of the data record, mapped as the displayed item's id */
-    idField: keyof Data;
-    /** field property path of the data record, mapped as the displayed item's label */
-    labelField: keyof Data;
-    /** field property path of the data record, mapped as the displayed item's href */
-    hrefField: keyof Data;
-    /** field property path of the data record, mapped as the displayed item's icon */
-    iconField?: keyof Data;
-    /** field property path of the data record, mapped as the displayed item's badge */
-    badgeField?: keyof Data;
-  };
+  /**
+   * Optional function to map the data to a normalized row.
+   * If provided, the function will be called for each data item and the result will be used to render the list.
+   * If not provided, the expectation is that the data is already in the {@link NormalizedRow} row format.
+   */
+  mapData?: (data: Data) => NormalizedRow;
   /** Optional section-level actions. */
   actions?: NavTemplateActionConfig<Data>[];
   /** Message shown when the data source emits no rows. */
@@ -89,7 +82,7 @@ export type NavListTemplateProps<Data = SerializableRecord> = NavExtensionPointB
   ListTemplateConfig<Data>
 >;
 
-function normalizeRows<Data = SerializableRecord>(
+function normalizeRows<Data extends NormalizedRow | SerializableRecord>(
   data: Data[] | undefined,
   config: ListTemplateConfig<Data>
 ): Map<string, NormalizedRow> {
@@ -97,27 +90,26 @@ function normalizeRows<Data = SerializableRecord>(
     return new Map();
   }
 
-  const { item, max } = config;
+  const { mapData, max } = config;
 
-  return data.reduce((acc, row, index) => {
-    const id = getStringField(row, String(item.idField));
-    const label = getStringField(row, String(item.labelField));
-    const href = getStringField(row, String(item.hrefField));
+  return (mapData ? data.map(mapData) : data).reduce(
+    (acc, { id, label, href, iconType }, index) => {
+      if (!id || !label || !href || (typeof max === 'number' && index >= max)) {
+        return acc;
+      }
 
-    if (!id || !label || !href || (typeof max === 'number' && index >= max)) {
+      acc.set(String(id), {
+        id: String(id),
+        index,
+        label: String(label),
+        href: String(href),
+        iconType: iconType ? (iconType as IconType) : undefined,
+      });
+
       return acc;
-    }
-
-    acc.set(id, {
-      id,
-      index,
-      label,
-      href,
-      iconType: item.iconField ? (getField(row, String(item.iconField)) as IconType) : undefined,
-    });
-
-    return acc;
-  }, new Map() as Map<string, NormalizedRow>);
+    },
+    new Map() as Map<string, NormalizedRow>
+  );
 }
 
 const getListTemplateStyles = ({ euiTheme }: UseEuiTheme) => ({
@@ -139,7 +131,7 @@ const getListTemplateStyles = ({ euiTheme }: UseEuiTheme) => ({
  * Renders a list of links from an array data source, with optional client-side
  * search and declarative section actions. Field names are read from config.
  */
-export function ListTemplate<Data = SerializableRecord>({
+export function ListTemplate<Data extends SerializableRecord = SerializableRecord>({
   data,
   config,
   context,

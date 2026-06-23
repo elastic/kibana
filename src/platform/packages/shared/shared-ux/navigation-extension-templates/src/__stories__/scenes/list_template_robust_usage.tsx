@@ -10,10 +10,11 @@
 import { faker } from '@faker-js/faker';
 import type { StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import type { SerializableRecord } from '@kbn/utility-types';
 import React from 'react';
 import { ListTemplate } from '../../templates/list_template';
 
-interface ListTemplateData {
+interface ListTemplateData extends SerializableRecord {
   id: string;
   label: string;
   href: string;
@@ -54,11 +55,6 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
         },
       ],
       emptyMessage: 'No items yet',
-      item: {
-        idField: 'id',
-        labelField: 'label',
-        hrefField: 'href',
-      },
     },
     context: {
       slotId: 'slotId',
