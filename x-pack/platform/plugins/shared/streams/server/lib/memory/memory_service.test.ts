@@ -146,7 +146,7 @@ const createInMemoryEsClient = () => {
       return { hits: { hits: [], total: { value: 0 } } } as never;
     }
 
-    // Retriever-based queries (semantic/hybrid) embed the ids filter inside the retriever.
+    // Retriever-based queries (hybrid) embed the ids filter inside the retriever.
     // Extract it so the mock can apply the same correctness invariant as a plain query.
     const effectiveQuery = request.query ?? extractRetrieverFilter(request.retriever!);
 

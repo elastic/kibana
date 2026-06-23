@@ -194,6 +194,23 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   /**
+   * Resolve the current latest version of each given page id (filtering on `id` is safe — it is
+   * invariant), dropping any that are tombstoned. Used as phase two of reads that match on mutable
+   * fields, so callers see each page's true latest state rather than the version that matched.
+   */
+  private async _resolveLatestByIds(
+    ids: string[]
+  ): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
+    if (ids.length === 0) return [];
+    const hits = await this._searchLatest({
+      query: { bool: { filter: [{ terms: { id: ids } }] } },
+      collapseField: 'id',
+      size: ids.length,
+    });
+    return hits.filter((hit) => hit._source.is_deleted !== true);
+  }
+
+  /**
    * Phase one of a mutable-field read: collect the distinct page ids of documents matching `query`,
    * without fetching `_source` (only the `id` field). The matched versions may be stale, so callers
    * must re-resolve the current latest via {@link _resolveLatestByIds}.
@@ -216,23 +233,6 @@ export class MemoryServiceImpl implements MemoryService {
       if (isIndexNotFoundError(err)) return [];
       throw err;
     }
-  }
-
-  /**
-   * Resolve the current latest version of each given page id (filtering on `id` is safe — it is
-   * invariant), dropping any that are tombstoned. Used as phase two of reads that match on mutable
-   * fields, so callers see each page's true latest state rather than the version that matched.
-   */
-  private async _resolveLatestByIds(
-    ids: string[]
-  ): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
-    if (ids.length === 0) return [];
-    const hits = await this._searchLatest({
-      query: { bool: { filter: [{ terms: { id: ids } }] } },
-      collapseField: 'id',
-      size: ids.length,
-    });
-    return hits.filter((hit) => hit._source.is_deleted !== true);
   }
 
   // ── Public API ──
@@ -503,9 +503,9 @@ export class MemoryServiceImpl implements MemoryService {
 
     // Phase 1: collect the id of every page that might be relevant (ids only, cheap).
     // For keyword mode: narrow by the text query so the candidate set stays small.
-    // For semantic/hybrid: use only structural filters (or match_all) so Phase 3's
-    // retriever handles text relevance — a keyword-only Phase 1 would silently drop
-    // pages that are semantically relevant but don't keyword-match any version.
+    // For hybrid: use only structural filters (or match_all) so Phase 3's retriever
+    // handles text relevance — a keyword-only Phase 1 would silently drop pages that
+    // are semantically relevant but don't keyword-match any version.
     const phase1Query: QueryDslQueryContainer =
       mode === 'keyword'
         ? { bool: { filter: structuredFilters, must: [fuzzyMatch] } }
@@ -590,26 +590,7 @@ export class MemoryServiceImpl implements MemoryService {
 
     let retriever: RetrieverContainer | undefined;
 
-    if (mode === 'semantic') {
-      retriever = {
-        linear: {
-          retrievers: [
-            {
-              retriever: {
-                standard: {
-                  query: { match: { search_embedding: query } },
-                  filter: { bool: { filter: allFilters } },
-                },
-              },
-              weight: 1,
-              normalizer: 'minmax',
-            },
-          ],
-          rank_window_size: size,
-          min_score: minScore,
-        },
-      };
-    } else if (mode === 'hybrid') {
+    if (mode === 'hybrid') {
       retriever = {
         rrf: {
           retrievers: [

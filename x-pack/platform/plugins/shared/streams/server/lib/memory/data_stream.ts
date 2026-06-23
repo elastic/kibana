@@ -19,7 +19,7 @@ export const memoriesMappings = {
     name: mappings.keyword(),
     title: mappings.text({ fields: { keyword: { type: 'keyword', ignore_above: 512 } } }),
     content: mappings.text(),
-    // Semantic embedding — populated on write, queried via 'semantic' or 'hybrid' search mode
+    // Vector embedding — populated on write, queried via 'hybrid' search mode
     search_embedding: mappings.semanticText(),
     // Classification
     categories: mappings.keyword(),
