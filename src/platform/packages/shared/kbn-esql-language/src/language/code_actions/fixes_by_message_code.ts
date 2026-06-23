@@ -9,7 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { EsqlQuery, mutate } from '@elastic/esql';
+import { ESQL_SYNTAX_ERROR_CODE } from '../../constants';
 import { getColumnTypeConflictQuickFixes } from './column_type_conflict';
+import { getQuoteIdentifierQuickFixes } from './quote_identifier';
 import type { QuickFix, QuickFixMessage } from './types';
 import type { ErrorTypes } from '../../commands/definitions/types';
 import { EsqlSettingNames } from '../../commands/definitions/generated/settings';
@@ -17,6 +19,7 @@ import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { hasWiredStreamsInQuery } from '../../commands/definitions/utils/sources';
 
 type QuickFixProvider = (message: QuickFixMessage) => QuickFix[];
+type QuickFixableCode = ErrorTypes | typeof ESQL_SYNTAX_ERROR_CODE;
 
 const loadUnmappedFieldsQuickFix: QuickFix = {
   title: i18n.translate('kbn-esql-language.esql.quickFix.loadUnmappedFields', {
@@ -34,10 +37,11 @@ const loadUnmappedFieldsQuickFix: QuickFix = {
   },
 };
 
-const fixesByMessageCode: Partial<Record<ErrorTypes, QuickFixProvider>> = {
+const fixesByMessageCode: Partial<Record<QuickFixableCode, QuickFixProvider>> = {
   unknownColumn: () => [loadUnmappedFieldsQuickFix],
   columnTypeConflict: getColumnTypeConflictQuickFixes,
+  [ESQL_SYNTAX_ERROR_CODE]: getQuoteIdentifierQuickFixes,
 };
 
 export const getQuickFixesByMessageCode = (message: QuickFixMessage): QuickFix[] =>
-  fixesByMessageCode[message.code as ErrorTypes]?.(message) ?? [];
+  fixesByMessageCode[message.code as QuickFixableCode]?.(message) ?? [];

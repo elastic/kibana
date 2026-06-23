@@ -8,6 +8,7 @@
  */
 
 import { monaco } from '../../../../monaco_imports';
+import { ESQL_SYNTAX_ERROR_CODE } from '@kbn/esql-language';
 import { createDisposedTextModel, createIndexSource, createTextModel } from './test_helpers';
 import { esqlValidate } from './validate';
 
@@ -39,6 +40,23 @@ describe('esqlValidate', () => {
         }),
       ]);
       expect(result.warnings).toEqual([]);
+    });
+
+    it('adds location metadata to syntax errors', async () => {
+      const query = 'FROM a_index | KEEP agent-id';
+      const model = createTextModel({ value: query });
+
+      const result = await esqlValidate(model, query);
+
+      expect(result.errors[0]).toEqual(
+        expect.objectContaining({
+          code: ESQL_SYNTAX_ERROR_CODE,
+          location: {
+            min: query.indexOf('-'),
+            max: query.indexOf('-'),
+          },
+        })
+      );
     });
   });
 

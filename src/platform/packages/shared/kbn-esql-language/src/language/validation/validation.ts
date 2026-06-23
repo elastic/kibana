@@ -22,6 +22,7 @@ import { getSubqueriesToValidate } from './subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 import type { ESQLMessage } from '../../commands';
+import { ESQL_SYNTAX_ERROR_CODE } from '../../constants';
 
 /**
  * ES|QL validation public API
@@ -175,6 +176,7 @@ async function validateAst(
    * See https://github.com/elastic/elasticsearch/pull/124177 for context.
    */
   for (const error of parserErrors) {
+    error.code = ESQL_SYNTAX_ERROR_CODE;
     error.message = error.message.replace(/\bLP\b/, "'('");
     error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
   }

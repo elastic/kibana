@@ -28,6 +28,16 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   throw new Error('Algorithm failure');
 }
 
+function rowColumnToOffset(expression: string, lineNumber: number, column: number): number {
+  const lines = expression.split(/\n/);
+
+  return (
+    lines.slice(0, lineNumber - 1).reduce((offset, line) => offset + line.length + 1, 0) +
+    column -
+    1
+  );
+}
+
 function convertSeverityToMonacoKind(severity: 'error' | 'warning' | number) {
   if (typeof severity === 'number') return severity;
   return severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning;
@@ -40,8 +50,15 @@ export function wrapAsMonacoMessages(
   const fallbackPosition = { column: 0, lineNumber: 0 };
   return messages.map((e) => {
     if ('severity' in e) {
+      const startOffset = rowColumnToOffset(queryString, e.startLineNumber, e.startColumn);
+      const endOffset = rowColumnToOffset(queryString, e.endLineNumber, e.endColumn);
+
       return {
         ...e,
+        location: {
+          min: startOffset,
+          max: Math.max(startOffset, endOffset - 1),
+        },
         severity: convertSeverityToMonacoKind(e.severity),
       };
     }

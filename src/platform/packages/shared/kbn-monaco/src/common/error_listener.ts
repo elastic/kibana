@@ -9,6 +9,7 @@
 
 import type { Recognizer, RecognitionException } from 'antlr4';
 import { ErrorListener } from 'antlr4';
+import { ESQL_SYNTAX_ERROR_CODE } from '@kbn/esql-language';
 import type { MonacoEditorError } from '../types';
 
 export class ANTLRErrorListener extends ErrorListener<any> {
@@ -35,7 +36,7 @@ export class ANTLRErrorListener extends ErrorListener<any> {
       endColumn,
       message,
       severity: 8,
-      code: 'syntaxError',
+      code: ESQL_SYNTAX_ERROR_CODE,
     });
   }
 

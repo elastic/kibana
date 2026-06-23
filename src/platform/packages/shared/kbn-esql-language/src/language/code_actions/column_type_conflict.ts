@@ -27,7 +27,7 @@ export const getColumnTypeConflictQuickFixes = (message: QuickFixMessage): Quick
     return [];
   }
 
-  const { columnName, types } = data;
+  const { columnName, columnParts, types } = data;
 
   return getTypeConversions(types).map(({ functionName, targetType }) => ({
     title: i18n.translate('kbn-esql-language.esql.quickFix.convertColumnTypeConflict', {
@@ -37,14 +37,14 @@ export const getColumnTypeConflictQuickFixes = (message: QuickFixMessage): Quick
         type: targetType,
       },
     }),
-    fixQuery: (query) => insertColumnTypeConversionEval(query, columnName, functionName, message),
+    fixQuery: (query) => insertColumnTypeConversionEval(query, columnParts, functionName, message),
   }));
 };
 
 /** Insert the conversion before the command that reported the conflict. */
 const insertColumnTypeConversionEval = (
   query: string,
-  columnName: string,
+  columnParts: string[],
   conversionFunctionName: string,
   message: QuickFixMessage
 ): string | undefined => {
@@ -55,7 +55,7 @@ const insertColumnTypeConversionEval = (
     return;
   }
 
-  const column = BasicPrettyPrinter.print(synth.col(columnName));
+  const column = BasicPrettyPrinter.print(synth.col(columnParts));
   mutate.generic.commands.insert(
     esqlQuery.ast,
     synth.cmd(`EVAL ${column} = ${conversionFunctionName.toUpperCase()}(${column})`, {

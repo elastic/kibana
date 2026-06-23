@@ -798,6 +798,7 @@ export const errors = {
           }),
           data: {
             columnName,
+            columnParts: column.type === 'identifier' ? [column.name] : column.parts,
             types,
           },
         },
