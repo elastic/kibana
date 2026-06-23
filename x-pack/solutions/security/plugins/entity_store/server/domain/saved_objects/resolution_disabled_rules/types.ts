@@ -21,7 +21,7 @@ export const EntityStoreResolutionDisabledRulesTypeMappings: SavedObjectsType['m
 };
 
 const disabledRulesSchemaV1 = schema.object({
-  disabledRuleIds: schema.arrayOf(schema.string({ maxLength: 256 })),
+  disabledRuleIds: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 1000 }),
 });
 
 const version1: SavedObjectsFullModelVersion = {

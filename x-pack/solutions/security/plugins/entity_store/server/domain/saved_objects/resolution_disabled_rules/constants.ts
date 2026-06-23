@@ -11,5 +11,5 @@ export type ResolutionDisabledRules = z.infer<typeof ResolutionDisabledRules>;
 export const ResolutionDisabledRules = z.object({
   // Ids of resolution rules an operator has turned off. A rule absent from this
   // list is enabled (the default).
-  disabledRuleIds: z.array(z.string().max(256)).default([]),
+  disabledRuleIds: z.array(z.string().max(256)).max(1000).default([]),
 });
