@@ -65,8 +65,8 @@ import {
   removeConflictingIds,
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
-import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
+import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
