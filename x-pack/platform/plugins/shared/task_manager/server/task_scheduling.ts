@@ -252,9 +252,9 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
-   * `schedule` and `runAt` will be recalculated after task run finishes.
-   *
+   * Only tasks with `idle` status will be updated. Running tasks are skipped even when
+   * `regenerateApiKey` is provided, because their `schedule` and `runAt` are recalculated after
+   * the task run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
    * @returns {Promise<BulkUpdateTaskResult>}
