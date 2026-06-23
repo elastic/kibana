@@ -225,6 +225,112 @@ export async function getDegradedDocCountsForStreams(options: {
   return results;
 }
 
+export async function getIngestionDocCountsForStreams(options: {
+  esClient: ElasticsearchClient;
+  start: number;
+  end: number;
+  streamName?: string;
+}): Promise<StreamDocsStat[]> {
+  const { esClient, start, end, streamName } = options;
+
+  const { data_streams: streams } = streamName
+    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
+        if (isNotFoundError(error)) {
+          return { data_streams: [] };
+        }
+        throw error;
+      })
+    : await esClient.indices.getDataStream();
+
+  if (!streams.length) {
+    return [];
+  }
+
+  const indexToStream = new Map<string, string>();
+  for (const stream of streams) {
+    for (const index of stream.indices ?? []) {
+      indexToStream.set(index.index_name, stream.name);
+    }
+  }
+
+  const allIndices = Array.from(indexToStream.keys());
+  if (!allIndices.length) {
+    return [];
+  }
+
+  interface PerIndexAggs {
+    per_index: { buckets: Record<string, { doc_count: number }> };
+  }
+
+  const chunkResponses = await processAsyncInChunks<
+    string,
+    { indices: string[]; buckets: Record<string, { doc_count: number }> }
+  >({
+    items: allIndices,
+    processChunk: async (indicesInChunk) => {
+      // Build a filters aggregation keyed by index name so we get per-index counts in a single search.
+      const filters: Record<string, QueryDslQueryContainer> = {};
+      for (const index of indicesInChunk) {
+        filters[index] = {
+          term: {
+            _index: index,
+          },
+        };
+      }
+
+      const response = await esClient.search<unknown, PerIndexAggs>({
+        index: indicesInChunk,
+        size: 0,
+        track_total_hits: false,
+        query: {
+          range: {
+            '@timestamp': {
+              gte: start,
+              lte: end,
+              format: 'epoch_millis',
+            },
+          },
+        },
+        aggs: {
+          per_index: {
+            filters: {
+              filters,
+            },
+          },
+        },
+      });
+
+      const buckets = response.aggregations?.per_index?.buckets ?? {};
+
+      return { indices: indicesInChunk, buckets };
+    },
+  });
+
+  const countsByStream = new Map<string, number>();
+
+  for (const { indices, buckets } of chunkResponses) {
+    for (const index of indices) {
+      const docCount = buckets[index]?.doc_count ?? 0;
+
+      if (docCount <= 0) {
+        continue;
+      }
+
+      const stream = indexToStream.get(index);
+      if (stream) {
+        countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + docCount);
+      }
+    }
+  }
+
+  return Array.from(countsByStream.entries()).map(
+    ([stream, count]): StreamDocsStat => ({
+      stream,
+      count,
+    })
+  );
+}
+
 /**
  * Fetches failed document counts for one or all streams.
  *

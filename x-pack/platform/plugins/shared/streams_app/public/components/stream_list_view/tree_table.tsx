@@ -211,16 +211,10 @@ export function StreamsTreeTable({
   const qualityLoaded =
     !!totalDocsResult.value && !!degradedDocsResult.value && !!failedDocsResult.value;
 
-  const streamNamesWithData = React.useMemo(
-    () => streams.filter((s) => !!s.data_stream).map((s) => s.stream.name),
-    [streams]
-  );
-
   const { ingestionByStream, ingestionLoaded } = useStreamsIngestionRates({
-    streamNames: streamNamesWithData,
+    ingestionDocCount: docCountsFetch.ingestionDocCount,
     timeStart: timeState.start,
     timeEnd: timeState.end,
-    getStreamHistogram,
   });
 
   const { storageByStream, storageLoaded } = useStreamsStorageStats();

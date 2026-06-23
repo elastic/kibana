@@ -238,6 +238,79 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('GET /internal/streams/doc_counts/ingestion', () => {
+      it('returns range-scoped document counts for all streams', async () => {
+        const now = Date.now();
+        const start = now - 3600000;
+        const end = now + 60000;
+
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/ingestion', {
+          params: {
+            query: {
+              start,
+              end,
+            },
+          },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body).to.be.an('array');
+
+        const stream1Count = response.body.find(
+          (stat: any) => stat.stream === 'logs.otel.test-stream-1'
+        );
+        const stream2Count = response.body.find(
+          (stat: any) => stat.stream === 'logs.otel.test-stream-2'
+        );
+
+        expect(stream1Count).to.not.be(undefined);
+        expect(stream1Count?.count).to.eql(2);
+        expect(stream2Count).to.not.be(undefined);
+        expect(stream2Count?.count).to.eql(1);
+      });
+
+      it('excludes documents outside the requested time range', async () => {
+        // A range far in the past should match none of the just-indexed documents.
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/ingestion', {
+          params: {
+            query: {
+              start: 0,
+              end: 1,
+            },
+          },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body).to.be.an('array');
+        expect(response.body).to.have.length(0);
+      });
+
+      it('supports querying ingestion counts for a single stream', async () => {
+        const now = Date.now();
+        const start = now - 3600000;
+        const end = now + 60000;
+
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/ingestion', {
+          params: {
+            query: {
+              start,
+              end,
+              stream: 'logs.otel.test-stream-1',
+            },
+          },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body).to.be.an('array');
+        expect(response.body.length).to.be.greaterThan(0);
+
+        const entry = response.body.find((stat: any) => stat.stream === 'logs.otel.test-stream-1');
+
+        expect(entry).to.not.be(undefined);
+        expect(entry?.count).to.eql(2);
+      });
+    });
+
     describe('GET /internal/streams/doc_counts/degraded', () => {
       it('returns empty array when no degraded documents exist', async () => {
         const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/degraded');

@@ -13,6 +13,7 @@ import {
   getDegradedDocCountsForStreams,
   getDocCountsForStreams,
   getFailedDocCountsForStreams,
+  getIngestionDocCountsForStreams,
 } from './get_streams_doc_counts';
 
 const degradedDocCountsRoute = createServerRoute({
@@ -107,8 +108,40 @@ const failedDocCountsRoute = createServerRoute({
   },
 });
 
+const ingestionDocCountsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/doc_counts/ingestion',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z.object({
+      start: z.coerce.number(),
+      end: z.coerce.number(),
+      stream: z.string().optional(),
+    }),
+  }),
+  handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const esClient = scopedClusterClient.asCurrentUser;
+    const { start, end, stream } = params.query;
+
+    return await getIngestionDocCountsForStreams({
+      esClient,
+      start,
+      end,
+      streamName: stream,
+    });
+  },
+});
+
 export const docCountsRoutes = {
   ...degradedDocCountsRoute,
   ...totalDocCountsRoute,
   ...failedDocCountsRoute,
+  ...ingestionDocCountsRoute,
 };

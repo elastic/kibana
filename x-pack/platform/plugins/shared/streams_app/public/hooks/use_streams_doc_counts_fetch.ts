@@ -41,6 +41,7 @@ export interface StreamDocCountsFetch {
   docCount: Promise<StreamDocsStat[]>;
   failedDocCount: Promise<StreamDocsStat[]>;
   degradedDocCount: Promise<StreamDocsStat[]>;
+  ingestionDocCount: Promise<StreamDocsStat[]>;
 }
 
 interface UseDocCountFetchProps {
@@ -160,10 +161,25 @@ export function useStreamDocCountsFetch({
         }
       );
 
+      const ingestionCountPromise = streamsRepositoryClient.fetch(
+        'GET /internal/streams/doc_counts/ingestion',
+        {
+          signal: abortController.signal,
+          params: {
+            query: {
+              start: timeState.start,
+              end: timeState.end,
+              ...(streamName ? { stream: streamName } : {}),
+            },
+          },
+        }
+      );
+
       const docCountsFetch: StreamDocCountsFetch = {
         docCount: countPromise,
         failedDocCount: failedCountPromise,
         degradedDocCount: degradedCountPromise,
+        ingestionDocCount: ingestionCountPromise,
       };
 
       docCountsPromiseCache.current = docCountsFetch;
