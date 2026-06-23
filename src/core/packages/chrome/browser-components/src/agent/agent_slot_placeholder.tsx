@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import {
@@ -44,22 +44,12 @@ const DISCOVER_APP_ID = 'discover';
 const DASHBOARDS_APP_ID = 'dashboards';
 
 /**
- * POC placeholder for the agent workspace chrome slot (Checkpoint 2).
- * Bootstraps Discover in the application workspace and provides orchestration buttons.
+ * POC placeholder for the agent workspace chrome slot (Phase 1 orchestration fallback).
+ * Used when Agent Builder has not registered agent workspace content.
  */
 export function AgentSlotPlaceholder() {
   const navigateToApp = useNavigateToApp();
   const currentAppId = useCurrentAppId();
-  const hasBootstrappedRef = useRef(false);
-
-  useEffect(() => {
-    if (hasBootstrappedRef.current) {
-      return;
-    }
-
-    hasBootstrappedRef.current = true;
-    navigateToApp(DISCOVER_APP_ID);
-  }, [navigateToApp]);
 
   return (
     <div css={rootStyles} data-test-subj="agentSlotPlaceholder">

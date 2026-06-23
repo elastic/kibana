@@ -51,6 +51,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-application-common",
     "@kbn/core-application-browser",
+    "@kbn/core-application-browser-internal",
+    "@kbn/core-chrome-browser-components",
     "@kbn/core-ui-settings-server",
     "@kbn/utility-types",
     "@kbn/inference-tracing",

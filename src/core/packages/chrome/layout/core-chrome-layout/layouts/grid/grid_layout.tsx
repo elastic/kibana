@@ -22,8 +22,9 @@ import {
   ChromelessHeader,
   AppMenuBar,
   Sidebar,
-  AgentSlotPlaceholder,
   AgentWorkspacePanel,
+  AgentWorkspaceSlot,
+  ApplicationWorkspaceBootstrap,
   useHasAppMenu,
   useHasChromeAppHeaderContent,
   useHasInlineAppHeader,
@@ -197,13 +198,13 @@ export class GridLayout implements LayoutService {
 
       if (showAgentWorkspace) {
         agent = (
-          <AgentWorkspacePanel
+            <AgentWorkspacePanel
             width={agentWorkspaceWidth}
             navigationWidth={navigationWidth}
             sidebarWidth={sidebarWidth}
             onWidthChange={setAgentWorkspaceWidthClamped}
           >
-            <AgentSlotPlaceholder />
+            <AgentWorkspaceSlot />
           </AgentWorkspacePanel>
         );
       }
@@ -225,6 +226,7 @@ export class GridLayout implements LayoutService {
                 {!chromeVisible && <ChromelessHeader />}
 
                 <div id="globalBannerList">{appBannerComponent}</div>
+                {showAgentWorkspace && <ApplicationWorkspaceBootstrap />}
                 <AppWrapper chromeVisible={chromeVisible}>
                   <div id={APP_FIXED_VIEWPORT_ID} />
                   {appComponent}
