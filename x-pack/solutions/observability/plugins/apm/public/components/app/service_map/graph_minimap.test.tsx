@@ -256,6 +256,18 @@ describe('ServiceMapGraph - MiniMap', () => {
       expect(screen.getByTestId('serviceMapMinimap')).toBeInTheDocument();
       expect(screen.getByTestId('serviceMapOptionsPanelToggle')).toBeInTheDocument();
     });
+
+    it('auto-expands the quick-filters panel when maximized so users immediately see the controls', () => {
+      render(
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} isEmbedded showEmbeddedControls />
+        </ReactFlowProvider>
+      );
+
+      // The options panel itself (not just the toggle) should be visible without the user
+      // having to click anything.
+      expect(screen.getByTestId('serviceMapOptionsPanel')).toBeInTheDocument();
+    });
   });
 
   describe('nodeColor', () => {
