@@ -7,13 +7,15 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
 import { DataStreamClient } from '@kbn/data-streams';
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { createMemoryHistoryStorage } from './history_storage';
 import { memoriesDataStream, type memoriesMappings, type StoredMemoryPage } from './data_stream';
 import { MEMORIES_DATA_STREAM } from '../../../common/constants';
+import { resolveSearchMode, type SearchMode } from '../../../common/queries';
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../common/sig_events_tuning_config';
 import type {
   MemoryEntry,
   MemoryVersionRecord,
@@ -85,6 +87,9 @@ export class MemoryServiceImpl implements MemoryService {
       name: entry.name,
       title: entry.title,
       content: entry.content,
+      // Populate search_embedding for live pages so semantic/hybrid search can rank them.
+      // Tombstones omit it — there is no value in embedding a soft-delete marker.
+      ...(!entry.is_deleted && { search_embedding: `${entry.title}\n\n${entry.content}` }),
       categories: entry.categories,
       tags: entry.tags,
       references: entry.references,
@@ -470,6 +475,7 @@ export class MemoryServiceImpl implements MemoryService {
 
   async search(params: SearchMemoryParams): Promise<MemorySearchResult[]> {
     const { query, tags, categories, references, size = 10 } = params;
+    const mode = resolveSearchMode(params.mode);
     const escapedQuery = query.toLowerCase().replace(/[\\*?]/g, '\\$&');
 
     const structuredFilters: QueryDslQueryContainer[] = [];
@@ -496,18 +502,23 @@ export class MemoryServiceImpl implements MemoryService {
       },
     };
 
-    // Phase 1: collect the id of every page that has ANY version matching the query (ids only, so
-    // this stays cheap even when widened). The matched version may be stale; we only keep the page
-    // ids here and re-validate each page's latest version in phases 2-3. Fetching all matching pages
-    // (up to MAX_PAGES) — rather than a relevance-capped window — means a page whose latest matches
-    // can never be dropped before it reaches the authoritative phase 3 ranking.
+    // Phase 1: collect the id of every page that might be relevant (ids only, cheap).
+    // For keyword mode: narrow by the text query so the candidate set stays small.
+    // For semantic/hybrid: use only structural filters (or match_all) so Phase 3's
+    // retriever handles text relevance — a keyword-only Phase 1 would silently drop
+    // pages that are semantically relevant but don't keyword-match any version.
+    const phase1Query: QueryDslQueryContainer =
+      mode === 'keyword'
+        ? { bool: { filter: structuredFilters, must: [fuzzyMatch] } }
+        : { bool: structuredFilters.length ? { filter: structuredFilters } : { must: [{ match_all: {} }] } };
+
     let candidateIds: string[];
     try {
       const candidateResponse = await this.esClient.search({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         collapse: { field: 'id' },
-        query: { bool: { filter: structuredFilters, must: [fuzzyMatch] } },
+        query: phase1Query,
         size: MAX_PAGES,
         _source: false,
         fields: ['id'],
@@ -526,30 +537,12 @@ export class MemoryServiceImpl implements MemoryService {
     const latestLiveIds = (await this._resolveLatestByIds(candidateIds)).map((hit) => hit._id);
     if (latestLiveIds.length === 0) return [];
 
-    // Phase 3: re-run the query against ONLY those latest documents (via an `ids` filter), so a
-    // result can come only from a page whose LATEST version satisfies the filters and the text
-    // query — a stale older version that once matched, or a soft-deleted page, can never surface.
-    let response;
-    try {
-      response = await this.esClient.search<MemoryEntry>({
-        index: MEMORIES_DATA_STREAM,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [{ ids: { values: latestLiveIds } }, ...structuredFilters],
-            must: [fuzzyMatch],
-          },
-        },
-        sort: [{ _score: { order: 'desc' } }],
-        size,
-        highlight: {
-          fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} },
-        },
-      });
-    } catch (err) {
-      if (isIndexNotFoundError(err)) return [];
-      throw err;
-    }
+    // Phase 3: re-run against ONLY the latest live documents so a result can only come from
+    // a page whose current version satisfies both the structural filters and the text query.
+    // Semantic and hybrid modes use a retriever instead of a plain query so ES can apply
+    // vector scoring; keyword mode keeps the original bool query path.
+    const response = await this._executePhase3(mode, params.mode, query, latestLiveIds, structuredFilters, fuzzyMatch, size);
+    if (!response) return [];
 
     return response.hits.hits.flatMap((hit) => {
       const source = hit._source;
@@ -568,6 +561,123 @@ export class MemoryServiceImpl implements MemoryService {
         },
       ];
     });
+  }
+
+  private async _executePhase3(
+    mode: SearchMode,
+    requestedMode: SearchMode | undefined,
+    query: string,
+    latestLiveIds: string[],
+    structuredFilters: QueryDslQueryContainer[],
+    fuzzyMatch: QueryDslQueryContainer,
+    size: number
+  ) {
+    const { semantic_min_score: minScore, rrf_rank_constant: rankConstant } =
+      DEFAULT_SIG_EVENTS_TUNING_CONFIG;
+    const idsFilter: QueryDslQueryContainer = { ids: { values: latestLiveIds } };
+    const allFilters = [idsFilter, ...structuredFilters];
+
+    let retriever: RetrieverContainer | undefined;
+
+    if (mode === 'semantic') {
+      retriever = {
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: { match: { search_embedding: query } },
+                  filter: { bool: { filter: allFilters } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: size,
+          min_score: minScore,
+        },
+      };
+    } else if (mode === 'hybrid') {
+      retriever = {
+        rrf: {
+          retrievers: [
+            {
+              standard: {
+                query: { bool: { must: [fuzzyMatch] } },
+              },
+            },
+            {
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: { match: { search_embedding: query } },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: size,
+                min_score: minScore,
+              },
+            },
+          ],
+          filter: { bool: { filter: allFilters } },
+          rank_window_size: size,
+          rank_constant: rankConstant,
+        },
+      };
+    }
+
+    try {
+      if (retriever) {
+        return await this.esClient.search<MemoryEntry>({
+          index: MEMORIES_DATA_STREAM,
+          track_total_hits: false,
+          retriever,
+          size,
+          highlight: {
+            fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} },
+          },
+        });
+      }
+
+      // keyword mode: plain bool query, no retriever
+      return await this.esClient.search<MemoryEntry>({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
+        query: { bool: { filter: allFilters, must: [fuzzyMatch] } },
+        sort: [{ _score: { order: 'desc' } }],
+        size,
+        highlight: {
+          fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} },
+        },
+      });
+    } catch (err) {
+      if (mode !== 'keyword' && !requestedMode) {
+        // Auto-resolved mode failed (inference endpoint unavailable) — fall back to keyword.
+        this.logger.warn(
+          `Memory search mode "${mode}" failed, falling back to keyword: ${
+            (err as Error).message
+          }`
+        );
+        return this.esClient.search<MemoryEntry>({
+          index: MEMORIES_DATA_STREAM,
+          track_total_hits: false,
+          query: { bool: { filter: allFilters, must: [fuzzyMatch] } },
+          sort: [{ _score: { order: 'desc' } }],
+          size,
+          highlight: {
+            fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} },
+          },
+        });
+      }
+      if (isIndexNotFoundError(err)) return null;
+      throw err;
+    }
   }
 
   async listAll(): Promise<MemoryEntry[]> {

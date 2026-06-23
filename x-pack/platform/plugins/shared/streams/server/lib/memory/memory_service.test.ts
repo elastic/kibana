@@ -89,6 +89,21 @@ const collapseDocuments = (
     .slice(0, size);
 };
 
+// For retriever-based queries (semantic/hybrid), extract the effective filter so the mock can
+// apply the same ids-based correctness invariant as a plain bool query.
+const extractRetrieverFilter = (retriever: Record<string, unknown>): Record<string, unknown> => {
+  const rrf = retriever.rrf as { filter?: Record<string, unknown> } | undefined;
+  if (rrf?.filter) return rrf.filter;
+
+  type InnerStandard = { retriever?: { standard?: { filter?: Record<string, unknown> } } };
+  type LinearRetriever = { retrievers?: InnerStandard[] };
+  const linear = retriever.linear as LinearRetriever | undefined;
+  const innerFilter = linear?.retrievers?.[0]?.retriever?.standard?.filter;
+  if (innerFilter) return innerFilter;
+
+  return { match_all: {} };
+};
+
 const createInMemoryEsClient = () => {
   const memoryDocs: MemoryDocument[] = [];
   let docCounter = 0;
@@ -116,17 +131,22 @@ const createInMemoryEsClient = () => {
     const request = params as {
       index?: string;
       query?: Record<string, unknown>;
+      retriever?: Record<string, unknown>;
       collapse?: { field?: string };
       size?: number;
       _source?: boolean;
       fields?: string[];
     };
 
-    if (request.index !== MEMORIES_DATA_STREAM || !request.query) {
+    if (request.index !== MEMORIES_DATA_STREAM || (!request.query && !request.retriever)) {
       return { hits: { hits: [], total: { value: 0 } } } as never;
     }
 
-    const filtered = filterByQuery(memoryDocs, request.query);
+    // Retriever-based queries (semantic/hybrid) embed the ids filter inside the retriever.
+    // Extract it so the mock can apply the same correctness invariant as a plain query.
+    const effectiveQuery = request.query ?? extractRetrieverFilter(request.retriever!);
+
+    const filtered = filterByQuery(memoryDocs, effectiveQuery);
     const collapseField = request.collapse?.field as keyof MemoryDocument | undefined;
     const size = request.size ?? filtered.length;
 
