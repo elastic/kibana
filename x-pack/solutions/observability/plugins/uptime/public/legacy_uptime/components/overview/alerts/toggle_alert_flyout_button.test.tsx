@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen, screen } from '@elastic/eui/test-env/test/rtl';
 import {
   render,
   forNearestButton,

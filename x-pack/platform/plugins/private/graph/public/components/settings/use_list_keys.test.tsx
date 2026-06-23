@@ -10,7 +10,7 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { useListKeys } from './use_list_keys';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+jest.mock('@elastic/eui/test-env/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 

@@ -17,7 +17,7 @@ import { useGetChoicesResponse } from '../create/mock';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import { TEMPLATE_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS, CASE_SETTINGS } from './translations';
 import { FormFields } from './form_fields';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 

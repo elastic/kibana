@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
 import userEvent from '@testing-library/user-event';

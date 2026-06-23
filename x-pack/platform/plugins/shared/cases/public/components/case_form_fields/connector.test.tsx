@@ -16,7 +16,7 @@ import { choices } from '../connectors/mock';
 import { noConnectorsCasePermission, renderWithTestingProviders } from '../../common/mock';
 
 import { FormTestComponent } from '../../common/test_utils';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../connectors/servicenow/use_get_choices');

@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { ContextSwitcher } from './context_switcher';
 import type { ContextSwitcherProps, SpaceItem } from './types';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 const buildSpaces = (): SpaceItem[] => [
   { id: 'default', name: 'Default', solution: 'Security', solutionIcon: 'logoSecurity' },

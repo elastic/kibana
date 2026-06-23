@@ -15,7 +15,7 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { OPERATOR_TITLES } from '../../translations';
 
 let onRemoveMock: jest.Mock;

@@ -13,7 +13,7 @@ import type { ReactWrapper } from 'enzyme';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { HeatmapOptionsProps } from './heatmap';
 import HeatmapOptions from './heatmap';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 import { act } from 'react-dom/test-utils';
 
 describe('PalettePicker', function () {

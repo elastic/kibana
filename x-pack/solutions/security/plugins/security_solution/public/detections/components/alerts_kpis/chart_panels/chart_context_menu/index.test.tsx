@@ -6,7 +6,7 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import React from 'react';
 
 import { RESET_GROUP_BY_FIELDS } from '../chart_settings_popover/configurations/default/translations';

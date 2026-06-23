@@ -11,7 +11,7 @@ import type { PopoverItemsProps } from '.';
 import { PopoverItems } from '.';
 import { TestProviders } from '../../mock';
 import { render, screen, within } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 

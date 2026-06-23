@@ -11,7 +11,7 @@ import type { ChangeEvent } from 'react';
 import React from 'react';
 import { screen, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 import type { EuiListGroupItemProps, EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox, EuiListGroup, EuiRange, EuiSelect } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';

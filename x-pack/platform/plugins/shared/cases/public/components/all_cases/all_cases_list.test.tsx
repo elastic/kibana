@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment-timezone';
 import { waitFor, screen, within, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 import {
   TestProviders,

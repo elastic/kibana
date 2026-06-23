@@ -8,7 +8,7 @@ import * as React from 'react';
 import moment from 'moment';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import type { RuleTableItem, RuleTypeModel } from '../../../../types';

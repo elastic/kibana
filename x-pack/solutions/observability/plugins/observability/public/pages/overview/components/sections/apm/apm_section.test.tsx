@@ -7,7 +7,7 @@
 
 import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
-import { screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/test-env/test/rtl';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
 import type { CoreStart } from '@kbn/core/public';
 import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';

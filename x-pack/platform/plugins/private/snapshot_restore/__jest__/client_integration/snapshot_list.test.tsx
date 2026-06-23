@@ -40,7 +40,7 @@ jest.mock('../../public/application/services/http', () => ({
 /*
  * Mocking EuiSearchBar because its onChange is not firing during tests
  */
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+jest.mock('@elastic/eui/test-env/components/search_bar/search_box', () => {
   return {
     EuiSearchBox: (props: EuiSearchBoxProps) => (
       <input

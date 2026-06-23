@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { TitleDocsPopover } from './title_docs_popover';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 describe('DataViewEditor TitleDocsPopover', () => {
   it('should render normally', async () => {

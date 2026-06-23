@@ -16,7 +16,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 import { act } from 'react-dom/test-utils';
 import type { PartitionVisComponentProps } from './partition_vis_component';
 import PartitionVisComponent from './partition_vis_component';

@@ -10,7 +10,7 @@
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';

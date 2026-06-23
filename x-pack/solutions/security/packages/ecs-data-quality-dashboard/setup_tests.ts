@@ -10,8 +10,8 @@ import '@testing-library/jest-dom';
 
 // context:
 // https://github.com/elastic/eui/issues/4408#issuecomment-754125867
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
+jest.mock('@elastic/eui/test-env//services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/test-env/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 

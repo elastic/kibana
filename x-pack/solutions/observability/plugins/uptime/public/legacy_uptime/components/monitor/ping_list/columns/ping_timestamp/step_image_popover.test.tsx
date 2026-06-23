@@ -6,7 +6,7 @@
  */
 
 import { fireEvent, waitFor } from '@testing-library/react';
-import { screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/test-env/test/rtl';
 import React from 'react';
 import type { StepImagePopoverProps } from './step_image_popover';
 import { StepImagePopover } from './step_image_popover';

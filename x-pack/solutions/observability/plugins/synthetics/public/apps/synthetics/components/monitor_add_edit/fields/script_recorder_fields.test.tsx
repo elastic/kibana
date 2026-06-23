@@ -10,8 +10,8 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { ScriptRecorderFields } from './script_recorder_fields';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
+jest.mock('@elastic/eui/test-env/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/test-env/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 

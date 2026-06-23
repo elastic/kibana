@@ -8,7 +8,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 import type { AssigneesFilterPopoverProps } from './assignees_filter';
 import { AssigneesFilterPopover } from './assignees_filter';

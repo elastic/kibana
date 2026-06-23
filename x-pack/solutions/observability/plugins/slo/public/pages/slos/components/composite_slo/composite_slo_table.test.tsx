@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import { fireEvent, screen } from '@testing-library/react';

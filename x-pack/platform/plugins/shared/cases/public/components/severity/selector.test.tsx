@@ -7,7 +7,7 @@
 
 import { CaseSeverity } from '../../../common/types/domain';
 import { render, screen } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import React from 'react';
 import { SeveritySelector } from './selector';
 import userEvent from '@testing-library/user-event';

@@ -9,7 +9,7 @@ import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
 import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';

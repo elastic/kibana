@@ -10,7 +10,7 @@ import { waitFor, renderHook, screen } from '@testing-library/react';
 import {
   waitForEuiPopoverOpen,
   waitForEuiContextMenuPanelTransition,
-} from '@elastic/eui/lib/test/rtl';
+} from '@elastic/eui/test-env/test/rtl';
 
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';

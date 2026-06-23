@@ -24,7 +24,7 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
-import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
+import { setupEuiMatchers } from '@elastic/eui/test-env/test/rtl/matchers';
 
 jest.mock('@kbn/esql-utils', () => {
   const actual = jest.requireActual('@kbn/esql-utils');

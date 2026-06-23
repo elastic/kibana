@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import type { TruncateLabelsOptionProps } from './truncate_labels';
 import { TruncateLabelsOption } from './truncate_labels';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 
 describe('TruncateLabelsOption', function () {
   let props: TruncateLabelsOptionProps;

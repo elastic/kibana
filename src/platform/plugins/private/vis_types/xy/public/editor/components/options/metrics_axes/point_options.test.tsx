@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 
 import type { SeriesParam } from '../../../../types';
 import type { PointOptionsParams } from './point_options';

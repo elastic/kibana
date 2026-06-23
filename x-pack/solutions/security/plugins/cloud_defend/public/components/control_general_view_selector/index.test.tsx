@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render, fireEvent, within } from '@testing-library/react';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { showEuiComboBoxOptions } from '@elastic/eui/test-env/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';

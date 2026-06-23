@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen, screen } from '@elastic/eui/test-env/test/rtl';
 import userEvent from '@testing-library/user-event';
 
 import { renderWithTestingProviders } from '../../../common/mock';

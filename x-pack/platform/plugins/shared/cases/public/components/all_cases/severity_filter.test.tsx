@@ -10,7 +10,7 @@ import React from 'react';
 
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { SeverityFilter } from './severity_filter';
 import { renderWithTestingProviders } from '../../common/mock';
 

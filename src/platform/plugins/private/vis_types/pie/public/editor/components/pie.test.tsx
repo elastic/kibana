@@ -13,7 +13,7 @@ import type { ReactWrapper } from 'enzyme';
 import type { PieOptionsProps } from './pie';
 import PieOptions from './pie';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 import { act } from 'react-dom/test-utils';
 
 describe('PalettePicker', function () {

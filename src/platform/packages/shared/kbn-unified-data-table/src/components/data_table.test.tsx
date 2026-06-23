@@ -49,7 +49,7 @@ import {
 import { render, screen, waitFor } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 import { useColumns } from '../hooks/use_data_grid_columns';
-import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const mockUseDataGridColumnsCellActions = jest.fn((_prop: unknown) => []);

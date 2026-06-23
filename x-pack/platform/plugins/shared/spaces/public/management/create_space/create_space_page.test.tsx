@@ -22,7 +22,7 @@ import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 
-jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
+jest.mock('@elastic/eui/test-env/components/overlay_mask', () => {
   return {
     EuiOverlayMask: (props: any) => <div>{props.children}</div>,
   };
