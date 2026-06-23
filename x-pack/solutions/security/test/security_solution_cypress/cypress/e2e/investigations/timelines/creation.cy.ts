@@ -102,9 +102,8 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     // Saved
     cy.get(TIMELINE_STATUS).should('not.exist');
 
-    // Offsetting the extra save that is happening in the background
-    // for the saved search object.
-    cy.get(LOADING_INDICATOR).should('be.visible');
+    // Wait for any background saves (e.g. saved search object) to settle
+    // before typing in the KQL bar to avoid interfering with in-flight requests.
     cy.get(LOADING_INDICATOR).should('not.exist');
 
     executeTimelineKQL('agent.name : *');
@@ -124,9 +123,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     openTimelineUsingToggle();
     addNameToTimelineAndSave('First');
 
-    // Offsetting the extra save that is happening in the background
-    // for the saved search object.
-    cy.get(LOADING_INDICATOR).should('be.visible');
+    // Wait for any background saves (e.g. saved search object) to settle.
     cy.get(LOADING_INDICATOR).should('not.exist');
 
     addNameToTimelineAndSaveAsNew('Second');
