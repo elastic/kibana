@@ -21,7 +21,11 @@ import {
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
-import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
+import {
+  createTimelineTemplate,
+  deleteTimelines,
+  deleteTimelineTemplates,
+} from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
@@ -47,6 +51,7 @@ const mockTimeline = getTimeline();
 describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
     deleteTimelines();
+    deleteTimelineTemplates();
   });
 
   it('should create a timeline from a template and should have the same query and open the timeline modal', () => {
