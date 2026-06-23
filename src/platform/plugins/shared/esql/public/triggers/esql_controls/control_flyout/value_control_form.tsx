@@ -225,19 +225,18 @@ export function ValueControlForm({
               : rawValues.map((option) => String(option)),
             [column]
           );
-          setPreviewError(undefined);
-          setEsqlQueryErrors([]);
+
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setIsValid(true);
         } else {
           updatePreviewOptionsAndColumns([], columns);
-          setPreviewError(undefined);
-          setEsqlQueryErrors([]);
           setIsValid(false);
         }
 
         setValuesQuery(query);
+        setPreviewError(undefined);
+        setEsqlQueryErrors([]);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {
           return;
