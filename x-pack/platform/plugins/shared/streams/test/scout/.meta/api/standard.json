@@ -1,5 +1,5 @@
 {
-  "sha1": "f1f1017c7e84345e55ad8d7cd02d9b9d4c7dd269",
+  "sha1": "f0f47bc3d5813d360763b9200f4cc744c2389b91",
   "tests": [
     {
       "id": "4aaafd2a7000640-70ec3e6d9549722",
@@ -104,8 +104,8 @@
       }
     },
     {
-      "id": "a940fbb08bf35e5-b0497b949dc6073",
-      "title": "Insights CRUD API should create a new insight",
+      "id": "504e25785616fe1-1d8b985de6fcd2d",
+      "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -114,14 +114,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 45,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "line": 29,
         "column": 12
       }
     },
     {
-      "id": "b44f6c2216cb6bc-597176718a618d6",
-      "title": "Memory CRUD API a freshly written page is immediately readable without polling",
+      "id": "504e25785616fe1-6eae18e8b4c773e",
+      "title": "Onboarding bulk status API rejects an empty streamNames array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -130,14 +130,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 216,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "line": 55,
         "column": 12
       }
     },
     {
-      "id": "b44f6c2216cb6bc-24f17689411c1be",
-      "title": "Memory CRUD API removing a category does not return the stale older version",
+      "id": "504e25785616fe1-4d182347c2af93f",
+      "title": "Onboarding bulk status API returns 403 when significant events is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -146,88 +146,8 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 305,
-        "column": 12
-      }
-    },
-    {
-      "id": "b44f6c2216cb6bc-0f36a39d57a31b9",
-      "title": "Memory CRUD API search does not return a page whose latest version no longer matches the filter",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 379,
-        "column": 12
-      }
-    },
-    {
-      "id": "b44f6c2216cb6bc-695cc6450b8de2c",
-      "title": "Memory CRUD API search does not return a soft-deleted page even if its latest version matches the filter",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 442,
-        "column": 12
-      }
-    },
-    {
-      "id": "54ee3174f5dbdf3-5bab250ba3d86c5",
-      "title": "ki_search tool returns knowledge indicators (features + queries) by default",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
-        "line": 93,
-        "column": 12
-      }
-    },
-    {
-      "id": "54ee3174f5dbdf3-9752a372fadba87",
-      "title": "ki_search tool supports kind=[query] (queries-only KIs)",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
-        "line": 193,
-        "column": 12
-      }
-    },
-    {
-      "id": "54ee3174f5dbdf3-2717e2cf72d2328",
-      "title": "ki_search tool returns an error result when Significant Events is disabled",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
-        "line": 217,
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "line": 67,
         "column": 12
       }
     },
@@ -241,7 +161,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
-        "line": 27,
+        "line": 30,
         "column": 12
       }
     },
