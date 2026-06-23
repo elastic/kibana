@@ -11,14 +11,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const DETECTION_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_RULES_BULK_ACTION_URL = '/api/detection_engine/rules/_bulk_action';
-const EXCEPTION_LIST_URL = '/api/exception_lists';
-const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
 const ALERTS_INDEX = '.internal.alerts-security.alerts-default-000001';
 
 /**
  * Deliberately-shaped noisy rules, one per diagnostic branch the skill must
- * distinguish. Each alert population has ONE correct read so both deterministic checks
- * and an LLM judge (against a faithful gold) can grade it:
+ * distinguish. Each alert population has ONE correct read so the LLM judge (against a
+ * faithful gold) can grade it:
  *
  *  A. benign-concentration  -> 32/40 alerts from ONE host, all closed `benign_positive`
  *                              => analyst-confirmed benign activity from a known host
@@ -30,13 +28,9 @@ const ALERTS_INDEX = '.internal.alerts-security.alerts-default-000001';
  *                              => LEAD with exceptions for the confirmed patterns; because
  *                              they are spread, a query change is a reasonable OPTION too
  *                              (not the mandated primary action).
- *  C. open-diffuse          -> 40 open, undispositioned alerts across ~20 hosts, no
+ *  C. open-diffuse          -> 40 open, undispositioned alerts across ~10 hosts, no
  *                              `workflow_reason` => loud but unproven; no dominant entity
  *                              => do NOT assert a verdict; defer to alert-analysis / review.
- *  D. exception-exists      -> 28/32 alerts closed `false_positive` on ONE host that the rule
- *                              ALREADY has an exception for => recognise the existing exception
- *                              (do NOT recommend adding a duplicate); if alerts persist, the
- *                              exception may not be taking effect.
  *  E. concentrated-open     -> 30/34 OPEN, undispositioned alerts from ONE user (svc-ci)
  *                              spread across hosts, no `workflow_reason` => concentrated but
  *                              UNCONFIRMED => recommend alert SUPPRESSION on the user (not a
@@ -47,9 +41,8 @@ const ALERTS_INDEX = '.internal.alerts-security.alerts-default-000001';
 const RULE_A_NAME = 'Suspicious PowerShell Execution on Endpoints';
 const RULE_B_NAME = 'Unusual Parent Process for cmd.exe';
 const RULE_C_NAME = 'Outbound RDP to External Host';
-const RULE_D_NAME = 'Service Account Interactive Logon';
 const RULE_E_NAME = 'Scripted Process Launch by Account';
-const ALL_RULE_NAMES = [RULE_A_NAME, RULE_B_NAME, RULE_C_NAME, RULE_D_NAME, RULE_E_NAME];
+const ALL_RULE_NAMES = [RULE_A_NAME, RULE_B_NAME, RULE_C_NAME, RULE_E_NAME];
 
 // Scenario A — dominant alerts share a consistent user + process + parent so the
 // exception proposal can cluster on more than just host.name.
@@ -67,13 +60,6 @@ const B_OPEN_HOSTS = ['ws-13', 'ws-14']; // 2 each = 4 open -> 40 total
 
 // Scenario C
 const C_HOSTS = Array.from({ length: 10 }, (_, i) => `host-${String(i + 1).padStart(2, '0')}`); // 4 each = 40 open
-
-// Scenario D (an exception already covers the noisy host)
-const D_EXCEPTION_HOST = 'svc-runner-01';
-const D_FP_COUNT = 28; // closed false_positive on the already-excepted host
-const D_OTHER_HOSTS = ['ops-02', 'ops-03']; // 2 each = 4 open -> 32 total
-const D_EXCEPTION_LIST_ID = 'investigate-rule-eval-exceptions';
-const D_EXCEPTION_ITEM_ID = 'investigate-rule-eval-exception-host';
 
 // Scenario E — one dominant USER, all open, no disposition (concentrated but unconfirmed).
 const E_DOMINANT_USER = 'svc-ci';
@@ -105,7 +91,6 @@ export interface InvestigateRuleFixtures {
   };
   falsePositive: SeededScenario & { fpCount: number };
   openDiffuse: SeededScenario & { hostCount: number };
-  existingException: SeededScenario & { exceptionHost: string; fpCount: number };
   concentratedOpen: SeededScenario & { dominantUser: string; dominantCount: number };
   cleanup: () => Promise<void>;
 }
@@ -225,61 +210,6 @@ async function createRule(
   return { id: response.data.id, ruleId: response.data.rule_id, name: response.data.name };
 }
 
-interface CreatedExceptionList {
-  id: string;
-  listId: string;
-}
-
-/**
- * Creates a detection exception list with a single host-match item, so a rule can
- * reference it via `exceptions_list` and the skill can observe an already-present
- * exception for the noisy host.
- */
-async function createHostExceptionList(
-  kbnClient: KbnClient,
-  host: string
-): Promise<CreatedExceptionList> {
-  const list = await kbnClient.request<{ id: string; list_id: string }>({
-    path: EXCEPTION_LIST_URL,
-    method: 'POST',
-    body: {
-      list_id: D_EXCEPTION_LIST_ID,
-      name: 'Investigate-rule eval exceptions',
-      description: 'Seeded exception list for the investigate-rule existing-exception scenario',
-      type: 'detection',
-      namespace_type: 'single',
-    },
-  });
-  await kbnClient.request({
-    path: EXCEPTION_LIST_ITEM_URL,
-    method: 'POST',
-    body: {
-      list_id: D_EXCEPTION_LIST_ID,
-      item_id: D_EXCEPTION_ITEM_ID,
-      name: `Exclude ${host}`,
-      description: `Known-good host ${host} is excluded from this rule`,
-      type: 'simple',
-      namespace_type: 'single',
-      entries: [{ field: 'host.name', operator: 'included', type: 'match', value: host }],
-    },
-  });
-  return { id: list.data.id, listId: list.data.list_id };
-}
-
-async function deleteHostExceptionList(kbnClient: KbnClient, log: ToolingLog): Promise<void> {
-  try {
-    await kbnClient.request({
-      path: `${EXCEPTION_LIST_URL}?list_id=${D_EXCEPTION_LIST_ID}&namespace_type=single`,
-      method: 'DELETE',
-    });
-  } catch (err) {
-    // 404 when there is nothing to clean up; ignore.
-    if (err?.response?.status !== 404) {
-      log.warning(`[investigate-rule eval] Exception list cleanup failed: ${err.message}`);
-    }
-  }
-}
-
 export async function seedInvestigateRuleFixtures({
   kbnClient,
   esClient,
@@ -324,10 +254,6 @@ export async function seedInvestigateRuleFixtures({
   } catch (err) {
     log.warning(`[investigate-rule eval] Pre-seed alert cleanup failed: ${err.message}`);
   }
-
-  // The exception list has a fixed list_id, so a leftover from a crashed run would
-  // collide on create — remove it first.
-  await deleteHostExceptionList(kbnClient, log);
 
   log.info('[investigate-rule eval] Seeding 4 scenario rules...');
 
@@ -376,31 +302,6 @@ export async function seedInvestigateRuleFixtures({
       },
     })
   );
-
-  // D references an exception list that already excludes the noisy host, so the
-  // skill should recognise the existing exception rather than recommend a new one.
-  const exceptionList = await createHostExceptionList(kbnClient, D_EXCEPTION_HOST);
-  const ruleDBody = buildRuleBody({
-    name: RULE_D_NAME,
-    description: 'Detects interactive logon by service accounts.',
-    query: 'event.category:"authentication" and user.name:"svc-*"',
-    threat: {
-      tacticId: 'TA0001',
-      tacticName: 'Initial Access',
-      techniqueId: 'T1078',
-      techniqueName: 'Valid Accounts',
-    },
-  });
-  ruleDBody.exceptions_list = [
-    {
-      id: exceptionList.id,
-      list_id: exceptionList.listId,
-      type: 'detection',
-      namespace_type: 'single',
-    },
-  ];
-  const ruleD = await createRule(kbnClient, ruleDBody);
-
   const ruleE = await createRule(
     kbnClient,
     buildRuleBody({
@@ -455,21 +356,6 @@ export async function seedInvestigateRuleFixtures({
     for (let i = 0; i < 4; i++) alerts.push(buildAlertDoc({ rule: ruleC, host, status: 'open' }));
   }
 
-  // D: 28 closed false_positive on the already-excepted host + 4 open elsewhere.
-  for (let i = 0; i < D_FP_COUNT; i++) {
-    alerts.push(
-      buildAlertDoc({
-        rule: ruleD,
-        host: D_EXCEPTION_HOST,
-        status: 'closed',
-        reason: 'false_positive',
-      })
-    );
-  }
-  for (const host of D_OTHER_HOSTS) {
-    for (let i = 0; i < 2; i++) alerts.push(buildAlertDoc({ rule: ruleD, host, status: 'open' }));
-  }
-
   // E: 30 OPEN, undispositioned alerts concentrated on ONE user (svc-ci) across 6 hosts,
   // + 4 open from other users. No `workflow_reason` anywhere => concentrated but UNCONFIRMED.
   // Correct read: suppression on the user (NOT a permanent exception), and/or alert-analysis.
@@ -493,15 +379,12 @@ export async function seedInvestigateRuleFixtures({
   log.info(
     `[investigate-rule eval] Seeded: A(${ruleA.id}) benign-concentration, ` +
       `B(${ruleB.id}) false-positive, C(${ruleC.id}) open-diffuse, ` +
-      `D(${ruleD.id}) exception-exists, E(${ruleE.id}) concentrated-open — ` +
-      `${alerts.length} alerts total`
+      `E(${ruleE.id}) concentrated-open — ${alerts.length} alerts total`
   );
 
-  const ruleIds = [ruleA.id, ruleB.id, ruleC.id, ruleD.id, ruleE.id];
+  const ruleIds = [ruleA.id, ruleB.id, ruleC.id, ruleE.id];
   const cleanup = async () => {
-    log.info(
-      '[investigate-rule eval] Cleaning up seeded rules, alerts, and exceptions (scoped)...'
-    );
+    log.info('[investigate-rule eval] Cleaning up seeded rules and alerts (scoped)...');
     try {
       await kbnClient.request({
         path: DETECTION_RULES_BULK_ACTION_URL,
@@ -521,7 +404,6 @@ export async function seedInvestigateRuleFixtures({
     } catch (err) {
       log.warning(`[investigate-rule eval] Alert scoped delete failed: ${err.message}`);
     }
-    await deleteHostExceptionList(kbnClient, log);
     log.info('[investigate-rule eval] Cleanup complete');
   };
 
@@ -544,12 +426,6 @@ export async function seedInvestigateRuleFixtures({
       rule: ruleC,
       hostCount: C_HOSTS.length,
       totalAlerts: C_HOSTS.length * 4,
-    },
-    existingException: {
-      rule: ruleD,
-      exceptionHost: D_EXCEPTION_HOST,
-      fpCount: D_FP_COUNT,
-      totalAlerts: D_FP_COUNT + D_OTHER_HOSTS.length * 2,
     },
     concentratedOpen: {
       rule: ruleE,
