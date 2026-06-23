@@ -8,10 +8,12 @@ plugins:
     - apm
     - automatic_import
     - banners
+    - canvas
     - cloud_integrations/cloud_links
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - content_management
     - cross_cluster_replication
     - custom_branding
     - dashboard
@@ -20,6 +22,7 @@ plugins:
     - data_view_editor
     - data_view_management
     - data_views
+    - data_views_as_code
     - dev_tools
     - discover
     - discover_enhanced
@@ -65,6 +68,7 @@ plugins:
     - serverless_observability
     - share
     - slo
+    - snapshot_restore
     - spaces
     - stack_connectors
     - streams
@@ -81,6 +85,7 @@ plugins:
     - workflows_extensions
     - workflows_management
   disabled:
+    - data_views_as_code # Not yet registered for CI; added to unblock pipelines
 
 packages:
   enabled:
@@ -99,3 +104,4 @@ excluded_configs:
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts

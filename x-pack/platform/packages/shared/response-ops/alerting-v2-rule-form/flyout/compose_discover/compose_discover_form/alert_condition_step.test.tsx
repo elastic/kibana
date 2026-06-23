@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useForm, FormProvider, useFormContext } from 'react-hook-form';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { useForm, FormProvider } from 'react-hook-form';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
@@ -16,6 +16,7 @@ import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
 import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
 import { AlertConditionStep } from './alert_condition_step';
+import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
 
 jest.mock('@kbn/code-editor', () => ({
   ...jest.requireActual('@kbn/code-editor'),
@@ -25,17 +26,6 @@ jest.mock('@kbn/code-editor', () => ({
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
 }));
-
-jest.mock('../../../form/hooks/use_data_fields', () => ({
-  useDataFields: jest.fn(() => ({ data: {} })),
-}));
-
-let getFormValues: (() => ComposeFormValues) | undefined;
-
-const CaptureFormGetValues = () => {
-  getFormValues = useFormContext<ComposeFormValues>().getValues;
-  return null;
-};
 
 const BASE_QUERY = 'FROM logs-*';
 const ALERT_BLOCK = '| WHERE count > 100';
@@ -53,7 +43,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   query: {
     format: 'composed',
     base: BASE_QUERY,
-    blocks: { breach: ALERT_BLOCK },
+    breach: { segment: ALERT_BLOCK },
   },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -76,7 +66,14 @@ const createComposeFormWrapper = (
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
             <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              {children}
+              <ComposeDiscoverTimeFieldContextProvider
+                value={{
+                  timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+                  isTimeFieldResolved: true,
+                }}
+              >
+                {children}
+              </ComposeDiscoverTimeFieldContextProvider>
             </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
@@ -90,54 +87,47 @@ const createComposeFormWrapper = (
 interface RenderOptions {
   isEditing?: boolean;
   formValueOverrides?: Partial<ComposeFormValues>;
-  captureForm?: boolean;
 }
 
 const renderStep = (
   stateOverrides: Partial<ComposeDiscoverState> = {},
-  { isEditing = false, formValueOverrides = {}, captureForm = false }: RenderOptions = {}
+  { isEditing = false, formValueOverrides = {} }: RenderOptions = {}
 ) => {
-  if (!captureForm) getFormValues = undefined;
   const state = createState({
     queryCommitted: true,
     ...stateOverrides,
   });
   const dispatch = jest.fn();
-  const onKindChange = jest.fn();
   const services = createMockServices();
 
   render(
-    <>
-      {captureForm && <CaptureFormGetValues />}
-      <AlertConditionStep
-        state={state}
-        dispatch={dispatch}
-        services={services}
-        onKindChange={onKindChange}
-        isEditing={isEditing}
-      />
-    </>,
+    <AlertConditionStep
+      state={state}
+      dispatch={dispatch}
+      services={services}
+      isEditing={isEditing}
+    />,
     { wrapper: createComposeFormWrapper(formValueOverrides, services) }
   );
 
-  return { dispatch, state, onKindChange };
+  return { dispatch, state };
 };
 
 const STANDALONE_QUERY: RuleQuery = {
   format: 'standalone',
-  breach: 'FROM logs-* | LIMIT 10',
+  breach: { query: 'FROM logs-* | LIMIT 10' },
 };
 
 const COMPOSED_QUERY: RuleQuery = {
   format: 'composed',
   base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
-  blocks: { breach: '| WHERE count > 100' },
+  breach: { segment: '| WHERE count > 100' },
 };
 
 const COMPOSED_QUERY_EMPTY_BASE: RuleQuery = {
   format: 'composed',
   base: '',
-  blocks: { breach: '| WHERE count > 100' },
+  breach: { segment: '| WHERE count > 100' },
 };
 
 describe('AlertConditionStep', () => {
@@ -178,6 +168,75 @@ describe('AlertConditionStep', () => {
       expect(
         screen.getByText(/Couldn't automatically separate base query from alert condition/)
       ).toBeInTheDocument();
+    });
+
+    it('shows alert-condition-missing callout when base query is present but alert condition is empty', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('composeDiscoverAlertQueryMissing')).toBeInTheDocument();
+      expect(screen.getByText('Alert condition required')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Define an alert condition in the query editor before continuing to the next step.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('does not show alert-condition-missing callout when splitFailed callout is already shown', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: '', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(
+        screen.getByText(/Couldn't automatically separate base query from alert condition/)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout when both queries are defined', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout for signal kind', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout when query is not committed', () => {
+      renderStep(
+        { queryCommitted: false },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
     });
   });
 
@@ -241,183 +300,6 @@ describe('AlertConditionStep', () => {
     });
   });
 
-  describe('tracking toggle', () => {
-    it('is enabled when queryCommitted is true and not editing', () => {
-      renderStep({ queryCommitted: true }, { isEditing: false });
-
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).not.toBeDisabled();
-    });
-
-    it('is disabled when editing an existing rule', () => {
-      renderStep({ queryCommitted: true }, { isEditing: true });
-
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).toBeDisabled();
-    });
-
-    it('is disabled when query is not committed', () => {
-      renderStep({ queryCommitted: false }, { isEditing: false });
-
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).toBeDisabled();
-    });
-
-    it('is checked when kind is alert', () => {
-      renderStep({ queryCommitted: true }, { formValueOverrides: { kind: 'alert' } });
-
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).toBeChecked();
-    });
-
-    it('is unchecked when kind is signal', () => {
-      renderStep(
-        { queryCommitted: true },
-        { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
-      );
-
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).not.toBeChecked();
-    });
-
-    it('calls onKindChange when toggled', () => {
-      const { onKindChange } = renderStep(
-        { queryCommitted: true },
-        { formValueOverrides: { kind: 'alert' } }
-      );
-
-      fireEvent.click(screen.getByTestId('composeDiscoverTrackingToggle'));
-
-      expect(onKindChange).toHaveBeenCalledWith('signal');
-    });
-  });
-
-  describe('schedule and lookback', () => {
-    it('renders schedule and lookback fields', () => {
-      renderStep({ queryCommitted: true });
-
-      expect(screen.getByText('Schedule')).toBeInTheDocument();
-      expect(screen.getByText('Lookback Window')).toBeInTheDocument();
-    });
-  });
-
-  describe('alert delay', () => {
-    it('renders AlertDelayField when tracking is enabled', () => {
-      renderStep({}, { formValueOverrides: { kind: 'alert' } });
-
-      expect(screen.getByTestId('alertDelayFormRow')).toBeTruthy();
-    });
-
-    it('does not render AlertDelayField when tracking is disabled', () => {
-      renderStep(
-        {},
-        {
-          formValueOverrides: {
-            kind: 'signal',
-            query: { format: 'standalone', breach: `${BASE_QUERY}\n${ALERT_BLOCK}` },
-          },
-        }
-      );
-
-      expect(screen.queryByTestId('alertDelayFormRow')).toBeNull();
-    });
-
-    it('defaults to Immediate mode', () => {
-      renderStep(
-        {},
-        { formValueOverrides: { kind: 'alert', stateTransitionAlertDelayMode: 'immediate' } }
-      );
-
-      expect(screen.getByTestId('stateTransitionImmediateDescription').textContent).toContain(
-        'No delay - Alerts on first breach'
-      );
-    });
-
-    it('renders Breaches controls when alert delay mode is breaches', () => {
-      renderStep(
-        {},
-        {
-          formValueOverrides: {
-            stateTransitionAlertDelayMode: 'breaches',
-            stateTransition: { pendingCount: 5 },
-          },
-        }
-      );
-
-      expect(screen.getByTestId('stateTransitionCountInput')).toBeTruthy();
-    });
-
-    it('renders Duration controls when alert delay mode is duration', () => {
-      renderStep(
-        {},
-        {
-          formValueOverrides: {
-            stateTransitionAlertDelayMode: 'duration',
-            stateTransition: { pendingTimeframe: '10m' },
-          },
-        }
-      );
-
-      expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeTruthy();
-    });
-
-    it('switches between Immediate, Breaches, Duration, and back to Immediate', () => {
-      renderStep({}, { formValueOverrides: { stateTransitionAlertDelayMode: 'immediate' } });
-
-      const alertRow = screen.getByTestId('alertDelayFormRow');
-      fireEvent.click(within(alertRow).getByText('Breaches'));
-      expect(screen.getByTestId('stateTransitionCountInput')).toBeTruthy();
-
-      fireEvent.click(within(alertRow).getByText('Duration'));
-      expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeTruthy();
-
-      fireEvent.click(within(alertRow).getByText('Immediate'));
-      expect(screen.getByTestId('stateTransitionImmediateDescription')).toBeTruthy();
-      expect(screen.queryByTestId('stateTransitionCountInput')).toBeNull();
-      expect(screen.queryByTestId('stateTransitionTimeframeNumberInput')).toBeNull();
-    });
-
-    it('clears pending fields without affecting recovery fields when switching to Immediate', () => {
-      renderStep(
-        {},
-        {
-          captureForm: true,
-          formValueOverrides: {
-            stateTransitionAlertDelayMode: 'breaches',
-            stateTransitionRecoveryDelayMode: 'recoveries',
-            stateTransition: {
-              pendingCount: 2,
-              pendingTimeframe: null,
-              recoveringCount: 3,
-              recoveringTimeframe: null,
-            },
-          },
-        }
-      );
-
-      fireEvent.click(within(screen.getByTestId('alertDelayFormRow')).getByText('Immediate'));
-
-      const values = getFormValues!();
-      expect(values.stateTransition?.pendingCount).toBeNull();
-      expect(values.stateTransition?.pendingTimeframe).toBeNull();
-      expect(values.stateTransition?.recoveringCount).toBe(3);
-    });
-
-    it('uses default count when switching from immediate with pendingCount: 0 to breaches', () => {
-      renderStep(
-        {},
-        {
-          captureForm: true,
-          formValueOverrides: {
-            stateTransitionAlertDelayMode: 'immediate',
-            stateTransition: { pendingCount: 0 },
-          },
-        }
-      );
-
-      fireEvent.click(within(screen.getByTestId('alertDelayFormRow')).getByText('Breaches'));
-
-      const values = getFormValues!();
-      expect(values.stateTransitionAlertDelayMode).toBe('breaches');
-      expect(values.stateTransition?.pendingCount).toBe(2);
-    });
-  });
-
   describe('group-by auto-population in tracking mode', () => {
     it('extracts BY columns from the base query (composed format)', async () => {
       renderStep(
@@ -427,7 +309,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
-              blocks: { breach: '| WHERE count > 100' },
+              breach: { segment: '| WHERE count > 100' },
             },
           },
         }
@@ -446,7 +328,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM kibana_sample_data_ecommerce\n| STATS total = SUM(taxful_total_price) BY customer_gender, day_of_week',
-              blocks: { breach: '| WHERE total > 1000' },
+              breach: { segment: '| WHERE total > 1000' },
             },
           },
         }
@@ -466,7 +348,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*)',
-              blocks: { breach: '| WHERE count > 100' },
+              breach: { segment: '| WHERE count > 100' },
             },
           },
         }
