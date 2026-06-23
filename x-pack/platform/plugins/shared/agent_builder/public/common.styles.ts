@@ -31,3 +31,8 @@ export const lineClampStyles = (numLines: number) => css`
   -webkit-box-orient: vertical;
   overflow: hidden;
 `;
+
+/** Emoji font stack for consistent rendering across Linux, macOS, and Windows */
+export const emojiFontStack = css`
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+`;

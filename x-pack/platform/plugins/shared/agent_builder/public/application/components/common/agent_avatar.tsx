@@ -11,7 +11,8 @@ import { EuiAvatar, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { EuiAvatarProps, EuiPanelProps } from '@elastic/eui';
 import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
-import { roundedBorderRadiusStyles } from '../../../common.styles';
+import { roundedBorderRadiusStyles, emojiFontStack } from '../../../common.styles';
+import { isEmoji } from '../../utils/avatar_emojis';
 
 // Icon size should be one size larger than the avatar size
 const getIconSize = ({ size }: { size: 's' | 'm' | 'l' | 'xl' | undefined }) => {
@@ -109,6 +110,31 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
       </EuiPanel>
     );
+  }
+
+  // When symbol is an emoji, render with font-size 18 and emoji font stack instead of EuiAvatar initials
+  if (symbol && isEmoji(symbol)) {
+    const avatarSizeMap = {
+      s: euiTheme.size.l,
+      m: euiTheme.size.xl,
+      l: euiTheme.size.xxl,
+      xl: euiTheme.size.xxxxl,
+    } as const;
+    const dimension = size ? avatarSizeMap[size] : euiTheme.size.xxl;
+    const emojiAvatarStyles = css`
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: ${dimension};
+      height: ${dimension};
+      background-color: ${color ?? euiTheme.colors.lightShade};
+      border-radius: ${shape === 'circle' ? '50%' : euiTheme.border.radius.medium};
+      font-size: 18px;
+      line-height: 1;
+      ${emojiFontStack}
+      ${shape === 'square' ? roundedBorderRadiusStyles : ''}
+    `;
+    return <div css={emojiAvatarStyles}>{symbol}</div>;
   }
 
   let type: 'user' | 'space' | undefined;
