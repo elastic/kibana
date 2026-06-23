@@ -6,7 +6,8 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { z } from '@kbn/zod/v4';
 import type { ExperimentalFeatures } from '../../../common';
@@ -327,7 +328,11 @@ describe('createDetectionRuleTool', () => {
           })
         );
 
-        const resultData = (result.results[0] as { data: Record<string, unknown> }).data;
+        expect(isToolHandlerStandardReturn(result)).toBe(true);
+        const resultData = (result as ToolHandlerStandardReturn).results[0].data as Record<
+          string,
+          unknown
+        >;
         expect(resultData.isNewCard).toBe(true);
 
         // Minted id must be hyphen-free (no markdown-shatter risk)
@@ -348,7 +353,11 @@ describe('createDetectionRuleTool', () => {
 
         const result = await tool.handler({ user_query: userQuery }, context);
 
-        const resultData = (result.results[0] as { data: Record<string, unknown> }).data;
+        expect(isToolHandlerStandardReturn(result)).toBe(true);
+        const resultData = (result as ToolHandlerStandardReturn).results[0].data as Record<
+          string,
+          unknown
+        >;
         expect(resultData.success).toBe(true);
         expect(resultData.isNewCard).toBe(true);
         expect(resultData.version).toBe(1);
@@ -375,7 +384,11 @@ describe('createDetectionRuleTool', () => {
           current_version: 1,
         });
         const result1 = await tool.handler({ user_query: userQuery }, ctx1);
-        const data1 = (result1.results[0] as { data: Record<string, unknown> }).data;
+        expect(isToolHandlerStandardReturn(result1)).toBe(true);
+        const data1 = (result1 as ToolHandlerStandardReturn).results[0].data as Record<
+          string,
+          unknown
+        >;
         expect(data1.isNewCard).toBe(false);
         expect(data1.attachmentId).toBe(SECURITY_RULE_ATTACHMENT_ID);
         expect(ctx1.attachments.add).not.toHaveBeenCalled();
@@ -401,7 +414,11 @@ describe('createDetectionRuleTool', () => {
           current_version: 1,
         });
         const result2 = await tool.handler({ user_query: userQuery }, ctx2);
-        const data2 = (result2.results[0] as { data: Record<string, unknown> }).data;
+        expect(isToolHandlerStandardReturn(result2)).toBe(true);
+        const data2 = (result2 as ToolHandlerStandardReturn).results[0].data as Record<
+          string,
+          unknown
+        >;
         expect(data2.isNewCard).toBe(true);
         expect(data2.attachmentId).not.toBe(SECURITY_RULE_ATTACHMENT_ID);
         expect(ctx2.attachments.update).not.toHaveBeenCalled();
@@ -450,7 +467,11 @@ describe('createDetectionRuleTool', () => {
           })
         );
 
-        const resultData = (result.results[0] as { data: Record<string, unknown> }).data;
+        expect(isToolHandlerStandardReturn(result)).toBe(true);
+        const resultData = (result as ToolHandlerStandardReturn).results[0].data as Record<
+          string,
+          unknown
+        >;
         expect(resultData.isNewCard).toBe(false);
         expect(resultData.attachmentId).toBe(existingAttachmentId);
         expect(resultData.version).toBe(2);
@@ -548,7 +569,11 @@ describe('createDetectionRuleTool', () => {
           context
         );
 
-        const resultData = (result.results[0] as { data: Record<string, unknown> }).data;
+        expect(isToolHandlerStandardReturn(result)).toBe(true);
+        const resultData = (result as ToolHandlerStandardReturn).results[0].data as Record<
+          string,
+          unknown
+        >;
         expect(resultData.isNewCard).toBe(false);
       });
     });
