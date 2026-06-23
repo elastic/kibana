@@ -699,6 +699,37 @@ describe('start', () => {
       });
     });
 
+    describe('hidePrimaryLabels$', () => {
+      it('should return false by default', async () => {
+        const { chrome, service } = await start();
+        const hidePrimaryLabels = await firstValueFrom(chrome.sideNav.getHidePrimaryLabels$());
+        service.stop();
+        expect(hidePrimaryLabels).toBe(false);
+      });
+
+      it('should read the localStorage value', async () => {
+        store.set('core.chrome.hideSideNavPrimaryLabels', 'true');
+        const { chrome, service } = await start();
+        const hidePrimaryLabels = await firstValueFrom(chrome.sideNav.getHidePrimaryLabels$());
+        service.stop();
+        expect(hidePrimaryLabels).toBe(true);
+      });
+    });
+
+    describe('setHidePrimaryLabels', () => {
+      it('should update the hidePrimaryLabels$ observable', async () => {
+        const { chrome, service } = await start();
+        const hidePrimaryLabels$ = chrome.sideNav.getHidePrimaryLabels$();
+        const hidePrimaryLabels = await firstValueFrom(hidePrimaryLabels$);
+
+        chrome.sideNav.setHidePrimaryLabels(!hidePrimaryLabels);
+
+        const updatedHidePrimaryLabels = await firstValueFrom(hidePrimaryLabels$);
+        service.stop();
+        expect(updatedHidePrimaryLabels).toBe(!hidePrimaryLabels);
+      });
+    });
+
     describe('width', () => {
       it('should return 0 by default', async () => {
         const { chrome, service } = await start();

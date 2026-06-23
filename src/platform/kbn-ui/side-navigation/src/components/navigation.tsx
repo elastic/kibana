@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useCallback, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiButton, EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -25,7 +25,9 @@ import { SideNav } from './side_nav';
 import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
-import { useLayoutWidth } from '../hooks/use_layout_width';
+import { useSidePanelLayoutWidth } from '../hooks/use_side_panel_layout_width';
+import { useSidePanelWidth } from '../hooks/use_side_panel_width';
+import { useSidePanelVisibility } from '../hooks/use_side_panel_visibility';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
@@ -41,9 +43,15 @@ export interface NavigationProps {
    */
   activeItemId?: string;
   /**
-   * Whether the navigation is collapsed. This can be controlled by the parent component.
+   * Whether the secondary navigation side panel is collapsed.
+   * This can be controlled by the parent component via the collapse button.
    */
   isCollapsed: boolean;
+  /**
+   * Whether primary navigation labels are hidden (icon-only mode).
+   * When omitted, defaults to false. On small viewports labels are always hidden.
+   */
+  hidePrimaryLabels?: boolean;
   /**
    * The navigation structure containing primary, secondary, and footer items.
    */
@@ -62,6 +70,7 @@ export interface NavigationProps {
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /**
    * Callback fired when the collapse button is toggled.
+   * Controls secondary navigation (side panel) visibility only.
    *
    * The collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject
    * that is persisted to localStorage. External consumers rely on this state.
@@ -77,6 +86,11 @@ export interface NavigationProps {
    */
   showTopSeparator?: boolean;
   /**
+   * (optional) Callback fired when the customize button is clicked.
+   * When not provided, the button is hidden.
+   */
+  onCustomizeNavigation?: () => void;
+  /**
    * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
@@ -85,8 +99,10 @@ export interface NavigationProps {
 export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
+  hidePrimaryLabels: hidePrimaryLabelsProp = false,
   items,
   logo,
+  onCustomizeNavigation,
   onItemClick,
   onToggleCollapsed,
   setWidth,
@@ -96,6 +112,7 @@ export const Navigation = ({
 }: NavigationProps) => {
   const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = forcedCollapsed || isCollapsedProp;
+  const hidePrimaryLabels = forcedCollapsed || hidePrimaryLabelsProp;
   const euiThemeContext = useEuiTheme();
 
   const topSeparatorStyles = css`
@@ -120,23 +137,61 @@ export const Navigation = ({
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
+    hidePrimaryLabels,
     items.primaryItems
   );
 
-  const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
+  const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
+  const hasMoreMenu = allOverflowItems.length > 0;
+
+  const setSize = visibleMenuItems.length + (hasMoreMenu ? 1 : 0);
 
   const { getIsNewPrimary, getIsNewSecondary } = useNewItems(
-    [...items.primaryItems, ...items.footerItems],
+    [...items.primaryItems, ...(items.overflowItems ?? []), ...items.footerItems],
     activeItemId
   );
 
-  useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
+  const { width: sidePanelWidth, setWidth: setSidePanelWidth, setDragWidth: setSidePanelDragWidth, commitDragWidth: commitSidePanelDragWidth } = useSidePanelWidth();
 
-  // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
-  const collapseButton =
+  const {
+    isSidePanelAnimating,
+    isSidePanelRendered,
+    isSidePanelShown,
+    renderedOpenerNode,
+    onSidePanelAnimationEnd,
+  } = useSidePanelVisibility(isSidePanelOpen, openerNode);
+
+  const handleSidePanelCollapse = useCallback(() => {
+    onToggleCollapsed?.(true);
+  }, [onToggleCollapsed]);
+
+  const handleSidePanelDragCommit = useCallback(
+    (rawWidth: number) => {
+      const shouldCollapse = commitSidePanelDragWidth(rawWidth);
+      if (shouldCollapse) {
+        handleSidePanelCollapse();
+      }
+      return shouldCollapse;
+    },
+    [commitSidePanelDragWidth, handleSidePanelCollapse]
+  );
+
+  useSidePanelLayoutWidth({
+    hidePrimaryLabels,
+    isSidePanelOpen,
+    isSidePanelVisibilityAnimating: isSidePanelAnimating,
+    sidePanelWidth,
+    setWidth,
+  });
+
+  // Create the collapse button if a toggle callback is provided and the navigation is not forced to be collapsed (e.g. on mobile)
+  const renderCollapseButton = (excludeFromRovingFocus = false) =>
     onToggleCollapsed && !forcedCollapsed ? (
-      <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
+      <SideNavCollapseButton
+        excludeFromRovingFocus={excludeFromRovingFocus}
+        isCollapsed={isCollapsedProp}
+        toggle={onToggleCollapsed}
+      />
     ) : null;
 
   return (
@@ -145,11 +200,11 @@ export const Navigation = ({
       data-test-subj={rest['data-test-subj'] ?? NAVIGATION_ROOT_SELECTOR}
       id={NAVIGATION_ROOT_SELECTOR}
     >
-      <SideNav isCollapsed={isCollapsed}>
+      <SideNav hidePrimaryLabels={hidePrimaryLabels}>
         {showTopSeparator && <div css={topSeparatorStyles} aria-hidden />}
         {logo && (
           <SideNav.Logo
-            isCollapsed={isCollapsed}
+            hidePrimaryLabels={hidePrimaryLabels}
             isCurrent={actualActiveItemId === logo.id}
             isHighlighted={visuallyActivePageId === logo.id}
             onClick={() => onItemClick?.(logo)}
@@ -157,7 +212,7 @@ export const Navigation = ({
           />
         )}
 
-        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
+        <SideNav.PrimaryMenu ref={primaryMenuRef} hidePrimaryLabels={hidePrimaryLabels}>
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
@@ -178,7 +233,7 @@ export const Navigation = ({
                         aria-posinset={index + 1}
                         aria-setsize={setSize}
                         hasContent={getHasSubmenu(item)}
-                        isCollapsed={isCollapsed}
+                        hidePrimaryLabels={hidePrimaryLabels}
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
                         isNew={getIsNewPrimary(item.id)}
@@ -194,6 +249,7 @@ export const Navigation = ({
                         title={item.label}
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
+                        collapseButton={renderCollapseButton(true)}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -237,7 +293,7 @@ export const Navigation = ({
                 );
               })}
 
-              {overflowMenuItems.length > 0 && (
+              {hasMoreMenu && (
                 <SideNav.Popover
                   hasContent
                   isSidePanelOpen={false}
@@ -255,11 +311,11 @@ export const Navigation = ({
                       hasContent
                       iconType="boxesVertical"
                       id={MORE_MENU_ID}
-                      isCollapsed={isCollapsed}
-                      isHighlighted={overflowMenuItems.some(
+                      hidePrimaryLabels={hidePrimaryLabels}
+                      isHighlighted={allOverflowItems.some(
                         (item) => item.id === visuallyActivePageId
                       )}
-                      isNew={overflowMenuItems.some((item) => getIsNewPrimary(item.id))}
+                      isNew={allOverflowItems.some((item) => getIsNewPrimary(item.id))}
                       label={i18n.translate('kbnUI.sideNavigation.moreMenuItemLabel', {
                         defaultMessage: 'More',
                       })}
@@ -280,48 +336,71 @@ export const Navigation = ({
                         })}
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
-                          <SideNav.NestedSecondaryMenu.Section>
-                            {overflowMenuItems.map((item, index) => {
-                              const hasSubmenu = getHasSubmenu(item);
-                              const { sections, ...itemProps } = item;
-                              const isFirstItem = index === 0;
-                              const ariaDescribedBy =
-                                [
-                                  isFirstItem && panelNavigationInstructionsId,
-                                  hasSubmenu && panelEnterSubmenuInstructionsId,
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ') || undefined;
-                              return (
-                                <SideNav.NestedSecondaryMenu.PrimaryMenuItem
-                                  key={item.id}
-                                  aria-describedby={ariaDescribedBy}
-                                  isHighlighted={item.id === visuallyActivePageId}
-                                  isNew={getIsNewPrimary(item.id)}
-                                  hasSubmenu={hasSubmenu}
-                                  onClick={() => {
-                                    onItemClick?.(item);
-                                    if (!hasSubmenu) {
+                          <>
+                            <SideNav.NestedSecondaryMenu.Section>
+                              {allOverflowItems.map((item, index) => {
+                                const hasSubmenu = getHasSubmenu(item);
+                                const { sections, ...itemProps } = item;
+                                const isFirstItem = index === 0;
+                                const ariaDescribedBy =
+                                  [
+                                    isFirstItem && panelNavigationInstructionsId,
+                                    hasSubmenu && panelEnterSubmenuInstructionsId,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(' ') || undefined;
+                                return (
+                                  <SideNav.NestedSecondaryMenu.PrimaryMenuItem
+                                    key={item.id}
+                                    aria-describedby={ariaDescribedBy}
+                                    isHighlighted={item.id === visuallyActivePageId}
+                                    isNew={getIsNewPrimary(item.id)}
+                                    hasSubmenu={hasSubmenu}
+                                    onClick={() => {
+                                      onItemClick?.(item);
+                                      if (!hasSubmenu) {
+                                        closePopover();
+                                        focusMainContent();
+                                      }
+                                    }}
+                                    {...itemProps}
+                                  >
+                                    {item.label}
+                                  </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
+                                );
+                              })}
+                              {onCustomizeNavigation && (
+                                <>
+                                  <EuiSpacer size="s" />
+                                  <EuiButton
+                                    iconType="controls"
+                                    color="text"
+                                    size="s"
+                                    onClick={() => {
                                       closePopover();
-                                      focusMainContent();
-                                    }
-                                  }}
-                                  {...itemProps}
-                                >
-                                  {item.label}
-                                </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
-                              );
-                            })}
-                          </SideNav.NestedSecondaryMenu.Section>
+                                      onCustomizeNavigation();
+                                    }}
+                                    data-test-subj="customizeNavigationMoreMenuButton"
+                                  >
+                                    <FormattedMessage
+                                      id="kbnUI.sideNavigation.customizeNavigationButton"
+                                      defaultMessage="Customize navigation"
+                                    />
+                                  </EuiButton>
+                                </>
+                              )}
+                            </SideNav.NestedSecondaryMenu.Section>
+                          </>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
-                      {overflowMenuItems.filter(getHasSubmenu).map((item) => (
+                      {allOverflowItems.filter(getHasSubmenu).map((item) => (
                         <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
                           {({ panelNavigationInstructionsId }) => (
                             <>
                               <SideNav.NestedSecondaryMenu.Header
                                 title={item.label}
                                 aria-describedby={panelNavigationInstructionsId}
+                                collapseButton={renderCollapseButton(true)}
                               />
                               {item.sections?.map((section) => (
                                 <SideNav.NestedSecondaryMenu.Section
@@ -358,7 +437,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
+        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
@@ -391,6 +470,7 @@ export const Navigation = ({
                         title={item.label}
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
+                        collapseButton={renderCollapseButton(true)}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -438,21 +518,33 @@ export const Navigation = ({
         </SideNav.Footer>
       </SideNav>
 
-      {isSidePanelOpen && openerNode && (
-        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
+      {isSidePanelRendered && renderedOpenerNode && (
+        <SideNav.SidePanel
+          footer={sidePanelFooter}
+          isAnimating={isSidePanelAnimating}
+          isPanelShown={isSidePanelShown}
+          onAnimationEnd={onSidePanelAnimationEnd}
+          openerNode={renderedOpenerNode}
+          sidePanelWidth={sidePanelWidth}
+          onSidePanelDragWidthChange={setSidePanelDragWidth}
+          onSidePanelDragWidthCommit={handleSidePanelDragCommit}
+          onSidePanelCollapse={handleSidePanelCollapse}
+          onSidePanelWidthChange={setSidePanelWidth}
+        >
           {({ secondaryNavigationInstructionsId }) => {
-            const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
+            const firstNonEmptySectionIndex = renderedOpenerNode.sections?.findIndex(
               (s) => s.items.length > 0
             );
 
             return (
               <SideNav.SecondaryMenu
-                badgeType={openerNode.badgeType}
+                badgeType={renderedOpenerNode.badgeType}
                 isPanel
-                title={openerNode.label}
-                isNew={getIsNewSecondary(openerNode.id)}
+                title={renderedOpenerNode.label}
+                isNew={getIsNewSecondary(renderedOpenerNode.id)}
+                collapseButton={renderCollapseButton()}
               >
-                {openerNode.sections?.map((section, sectionIndex) => (
+                {renderedOpenerNode.sections?.map((section, sectionIndex) => (
                   <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
                     {section.items.map((subItem, subItemIndex) => {
                       const isFirstItem =

@@ -14,6 +14,7 @@ export {
   type LayoutConfig as ChromeLayoutConfig,
   type LayoutConfigProviderProps as ChromeLayoutConfigProviderProps,
   useLayoutUpdate,
+  useOptionalLayoutUpdate,
   useLayoutConfig,
 } from './src/layout_config_context';
 

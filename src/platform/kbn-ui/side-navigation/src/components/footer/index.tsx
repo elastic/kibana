@@ -12,7 +12,6 @@ import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react'
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiHorizontalRule,
   EuiScreenReaderOnly,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -26,7 +25,7 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
 
-const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boolean) => {
+const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, hidePrimaryLabels: boolean) => {
   const { euiTheme: theme } = euiThemeContext;
   return {
     root: css`
@@ -36,13 +35,7 @@ const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boole
       flex-direction: column;
       gap: ${theme.size.xs};
       justify-content: center;
-      padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
-
-      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
-    `,
-    collapseDivider: css`
-      position: relative;
-      background-color: transparent;
+      padding-top: ${hidePrimaryLabels ? theme.size.s : theme.size.m};
 
       ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
     `,
@@ -57,8 +50,7 @@ export type FooterChildren = ReactNode | ((ids: FooterIds) => ReactNode);
 
 export interface FooterProps {
   children: FooterChildren;
-  isCollapsed: boolean;
-  collapseButton?: ReactNode;
+  hidePrimaryLabels: boolean;
 }
 
 interface FooterComponent
@@ -67,7 +59,7 @@ interface FooterComponent
 }
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
-  ({ children, isCollapsed, collapseButton }, ref) => {
+  ({ children, hidePrimaryLabels }, ref) => {
     const euiThemeContext = useEuiTheme();
     const footerNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'footer-navigation-instructions',
@@ -87,8 +79,8 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
     };
 
     const wrapperStyles = useMemo(
-      () => getFooterWrapperStyles(euiThemeContext, isCollapsed),
-      [euiThemeContext, isCollapsed]
+      () => getFooterWrapperStyles(euiThemeContext, hidePrimaryLabels),
+      [euiThemeContext, hidePrimaryLabels]
     );
 
     const renderChildren = () => {
@@ -120,12 +112,6 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
         >
           {renderChildren()}
-          {collapseButton && (
-            <>
-              <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
-              {collapseButton}
-            </>
-          )}
         </footer>
       </>
     );

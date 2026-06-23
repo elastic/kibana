@@ -8,42 +8,37 @@ exports[`Collapsed mode should render the side navigation 1`] = `
     id="kbnChromeNav-root"
   >
     <div
-      class="kbnChromeNav-root css-8nqrb0-getNavWrapperStyles"
+      class="kbnChromeNav-root css-vka7tb-getNavWrapperStyles"
     >
-      <span
-        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-        id="generated-id_euiToolTipAnchor"
+      <div
+        class="css-1ja8ujo-wrapperStyles"
+        data-test-subj="kbnChromeNav-logoWrapper"
       >
-        <div
-          class="css-1lxxlvf-wrapperStyles"
-          data-test-subj="kbnChromeNav-logoWrapper"
+        <a
+          aria-label="Solution homepage"
+          class="css-r2tafp-buttonStyles"
+          data-highlighted="false"
+          data-menu-item="true"
+          data-test-subj="kbnChromeNav-logo"
+          href="/"
+          id="home"
         >
-          <a
-            aria-label="Solution homepage"
-            class="css-r2tafp-buttonStyles"
-            data-highlighted="false"
-            data-menu-item="true"
-            data-test-subj="kbnChromeNav-logo"
-            href="/"
-            id="home"
+          <div
+            class="kbnChromeNav-iconWrapper"
           >
-            <div
-              class="kbnChromeNav-iconWrapper"
-            >
-              <span
-                aria-hidden="true"
-                color="currentColor"
-                data-euiicon-type="logoElastic"
-              />
-            </div>
-            <div
-              class="euiText emotion-euiText-m-euiScreenReaderOnly"
-            >
-              Solution
-            </div>
-          </a>
-        </div>
-      </span>
+            <span
+              aria-hidden="true"
+              color="currentColor"
+              data-euiicon-type="logoElastic"
+            />
+          </div>
+          <div
+            class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
+          >
+            Solution
+          </div>
+        </a>
+      </div>
       <p
         class="emotion-euiScreenReaderOnly"
         id="main-navigation-instructions_generated-id"
@@ -52,7 +47,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       </p>
       <nav
         aria-label="Main"
-        class="css-1d7jr1a-getPrimaryMenuStyles"
+        class="css-175v8l8-getPrimaryMenuStyles"
         data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >
@@ -62,40 +57,35 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           <div
             class="euiPopover emotion-euiPopover-block"
           >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
-              id="generated-id_euiToolTipAnchor"
+            <a
+              aria-describedby="main-navigation-instructions_generated-id"
+              aria-haspopup="false"
+              aria-posinset="1"
+              aria-setsize="3"
+              class="css-r2tafp-buttonStyles"
+              data-highlighted="false"
+              data-menu-item="true"
+              data-test-subj="kbnChromeNav-primaryItem-dashboards"
+              href="/dashboards"
+              id="dashboards"
+              label="Dashboards"
+              tabindex="0"
             >
-              <a
-                aria-describedby="main-navigation-instructions_generated-id"
-                aria-haspopup="false"
-                aria-posinset="1"
-                aria-setsize="3"
-                class="css-r2tafp-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-primaryItem-dashboards"
-                href="/dashboards"
-                id="dashboards"
-                label="Dashboards"
-                tabindex="0"
+              <div
+                class="kbnChromeNav-iconWrapper"
               >
-                <div
-                  class="kbnChromeNav-iconWrapper"
-                >
-                  <span
-                    aria-hidden="true"
-                    color="currentColor"
-                    data-euiicon-type="dashboardApp"
-                  />
-                </div>
-                <div
-                  class="euiText emotion-euiText-m-euiScreenReaderOnly"
-                >
-                  Dashboards
-                </div>
-              </a>
-            </span>
+                <span
+                  aria-hidden="true"
+                  color="currentColor"
+                  data-euiicon-type="dashboardApp"
+                />
+              </div>
+              <div
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+              >
+                Dashboards
+              </div>
+            </a>
           </div>
         </div>
         <div
@@ -104,39 +94,34 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           <div
             class="euiPopover emotion-euiPopover-block"
           >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
-              id="generated-id_euiToolTipAnchor"
+            <a
+              aria-haspopup="false"
+              aria-posinset="2"
+              aria-setsize="3"
+              class="css-r2tafp-buttonStyles"
+              data-highlighted="false"
+              data-menu-item="true"
+              data-test-subj="kbnChromeNav-primaryItem-discover"
+              href="/discover"
+              id="discover"
+              label="Discover"
+              tabindex="-1"
             >
-              <a
-                aria-haspopup="false"
-                aria-posinset="2"
-                aria-setsize="3"
-                class="css-r2tafp-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-primaryItem-discover"
-                href="/discover"
-                id="discover"
-                label="Discover"
-                tabindex="-1"
+              <div
+                class="kbnChromeNav-iconWrapper"
               >
-                <div
-                  class="kbnChromeNav-iconWrapper"
-                >
-                  <span
-                    aria-hidden="true"
-                    color="currentColor"
-                    data-euiicon-type="discoverApp"
-                  />
-                </div>
-                <div
-                  class="euiText emotion-euiText-m-euiScreenReaderOnly"
-                >
-                  Discover
-                </div>
-              </a>
-            </span>
+                <span
+                  aria-hidden="true"
+                  color="currentColor"
+                  data-euiicon-type="discoverApp"
+                />
+              </div>
+              <div
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+              >
+                Discover
+              </div>
+            </a>
           </div>
         </div>
         <div
@@ -176,7 +161,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiScreenReaderOnly"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Apps
               </div>
@@ -192,7 +177,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       </p>
       <footer
         aria-label="Side navigation"
-        class="css-3mngca-root"
+        class="css-18gcnxt-root"
         data-test-subj="kbnChromeNav-footer"
       >
         <div
@@ -377,35 +362,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               </div>
             </span>
           </div>
-        </div>
-        <hr
-          class="euiHorizontalRule emotion-euiHorizontalRule-full-xs-collapseDivider"
-        />
-        <div
-          class="sideNavCollapseButtonWrapper css-1y5smli-sideNavCollapseButtonWrapper"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-            id="generated-id_euiToolTipAnchor"
-          >
-            <button
-              aria-controls="kbnChromeNav-primaryNavigation"
-              aria-expanded="false"
-              aria-label="Expand navigation menu"
-              aria-pressed="false"
-              class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-sideNavCollapseButton"
-              data-test-subj="sideNavCollapseButton"
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="transitionLeftIn"
-              />
-            </button>
-          </span>
         </div>
       </footer>
     </div>

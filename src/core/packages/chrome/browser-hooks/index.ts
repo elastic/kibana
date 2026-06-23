@@ -13,5 +13,6 @@ export { useIsChromeVisible } from './use_is_chrome_visible';
 export { useIsNextChrome } from './use_is_next_chrome';
 export { useSidebarWidth } from './use_sidebar_width';
 export { useSideNavCollapsed } from './use_side_nav_collapsed';
+export { useSideNavHidePrimaryLabels } from './use_side_nav_hide_primary_labels';
 export { useSideNavWidth } from './use_side_nav_width';
 export { RegisterAppMenu } from './components';

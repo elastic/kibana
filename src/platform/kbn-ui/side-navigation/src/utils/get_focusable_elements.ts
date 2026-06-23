@@ -15,6 +15,9 @@
  */
 export const getFocusableElements = (container: HTMLElement) => {
   return Array.from(container.querySelectorAll('button, a')).filter(
-    (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
+    (el) =>
+      !el.hasAttribute('disabled') &&
+      !el.getAttribute('aria-hidden') &&
+      !el.hasAttribute('data-side-nav-roving-exempt')
   ) as HTMLElement[];
 };

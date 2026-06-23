@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 import { css, Global } from '@emotion/react';
-import { useSideNavCollapsed, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
+import { useSideNavCollapsed, useSideNavHidePrimaryLabels, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { Navigation } from './navigation';
 import { useAutoCollapse } from './use_auto_collapse';
@@ -21,6 +21,7 @@ function useSideNavSetWidth(): (width: number) => void {
 
 export const GridLayoutProjectSideNav = () => {
   const { isCollapsed, setIsCollapsed: onToggleCollapsed } = useSideNavCollapsed();
+  const { hidePrimaryLabels } = useSideNavHidePrimaryLabels();
   const setWidth = useSideNavSetWidth();
   const sidebarWidth = useSidebarWidth();
   const isAutoCollapsed = useAutoCollapse(sidebarWidth);
@@ -36,6 +37,7 @@ export const GridLayoutProjectSideNav = () => {
       />
       <Navigation
         isCollapsed={isCollapsed || isAutoCollapsed}
+        hidePrimaryLabels={hidePrimaryLabels}
         setWidth={setWidth}
         // Hide the toggle button when the viewport forces collapse — the user
         // cannot override it, so showing an unresponsive "expand" button would
