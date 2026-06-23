@@ -56,10 +56,7 @@ export interface YamlRuleFormProps {
 }
 
 const yamlRuleFormLabel = (
-  <FormattedMessage
-    id="xpack.alertingV2.yamlRuleForm.label"
-    defaultMessage="Rule definition (YAML)"
-  />
+  <FormattedMessage id="xpack.alertingV2.yamlRuleForm.label" defaultMessage="Rule definition" />
 );
 
 const yamlRuleFormHelpText = (
