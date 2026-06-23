@@ -29,7 +29,6 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { buildTokenResponseOptions } from '../lib/request_oauth_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
-import { EarsConfigError } from '../lib/ears/errors';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
@@ -682,8 +681,7 @@ export const oauthCallbackRoute = (
           }
 
           return respondWithError(res, {
-            details:
-              err instanceof EarsConfigError ? EarsConfigError.userMessage : GENERIC_OAUTH_ERROR,
+            details: typeof err.message === 'string' ? err.message : GENERIC_OAUTH_ERROR,
             statusCode: getErrorStatusCode(err),
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,

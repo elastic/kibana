@@ -23,7 +23,6 @@ import type { ActionsConfig } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { EarsConfigError } from './lib/ears/errors';
 import type { AwsSesConfig, ResponseSettings } from './types';
 import type { ValidateEmailAddressesOptions } from '../common';
 import {
@@ -227,7 +226,7 @@ export function getActionsConfigurationUtilities(
         try {
           return readFileSync(filePath);
         } catch (err) {
-          throw new EarsConfigError(
+          throw new Error(
             `EARS SSL configuration error: failed to read ${configKey} file: ${err.message}`
           );
         }
