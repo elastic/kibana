@@ -19,6 +19,7 @@ export const handlePreview = async ({
   dashboardLocator,
   checkSavedDashboardExist,
   openCanvas,
+  preferCanvasPreview = false,
 }: {
   attachment: DashboardAttachment;
   dashboardApi?: DashboardApi;
@@ -27,9 +28,11 @@ export const handlePreview = async ({
   dashboardLocator?: DashboardRendererProps['locator'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
+  /** Agent-first chrome: preview in the agent column canvas, not the application workspace dashboard. */
+  preferCanvasPreview?: boolean;
 }) => {
   // sidebar in dashboard experience - synchronize dashboard app to attachment
-  if (dashboardApi && canWriteDashboards) {
+  if (!preferCanvasPreview && dashboardApi && canWriteDashboards) {
     return previewAttachmentInDashboard({
       attachment,
       dashboardApi,

@@ -10,7 +10,8 @@ import { combineLatest, EMPTY, from, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { ChromeStart } from '@kbn/core/public';
+import type { ChromeStart, FeatureFlagsStart } from '@kbn/core/public';
+import { isAgentFirst, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
@@ -53,6 +54,7 @@ const LazyDashboardCanvasAttachment = React.lazy(async () => {
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
   chrome,
+  featureFlags,
   dashboardLocator,
   unifiedSearch,
   data,
@@ -61,12 +63,14 @@ export const registerDashboardAttachmentUiDefinition = ({
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
+  featureFlags: FeatureFlagsStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
 }): (() => void) => {
+  const isAgentFirstChrome = isAgentFirst(featureFlags) && isNextChrome(featureFlags);
   let dashboardApi: DashboardApi | undefined;
   const draftAttachmentId = createIdGenerator();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
@@ -95,8 +99,8 @@ export const registerDashboardAttachmentUiDefinition = ({
       switchMap(([api, appId]) => {
         // maintains a dashboardApi reference for access in getActionButtons
         dashboardApi = api;
-        // integrates dashboard app with agent only when both dashboard and chat are active
-        const isAgentOpen = appId === 'agentBuilder';
+        // integrates dashboard app with agent when sidebar chat or agent-first chrome is active
+        const isAgentOpen = appId === 'agentBuilder' || isAgentFirstChrome;
         return api && isAgentOpen
           ? from(import('./async_services')).pipe(
               switchMap(({ createDashboardAppIntegration$ }) =>
@@ -164,6 +168,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               dashboardLocator,
               checkSavedDashboardExist,
               openCanvas,
+              preferCanvasPreview: isAgentFirstChrome,
             });
           },
         },

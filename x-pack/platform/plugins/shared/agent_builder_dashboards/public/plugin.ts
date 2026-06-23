@@ -45,6 +45,7 @@ export class AgentBuilderDashboardsPlugin
     this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
       agentBuilder: plugins.agentBuilder,
       chrome: core.chrome,
+      featureFlags: core.featureFlags,
       canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
       dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
       unifiedSearch: plugins.unifiedSearch,
