@@ -7,18 +7,16 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import {
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-} from '@kbn/workflows';
 import { streamsApiTest as apiTest } from '../../fixtures';
 import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
+// Inline IDs to avoid pulling in @kbn/workflows which imports YAML files that
+// Playwright's esbuild transform cannot load. These strings are stable managed
+// workflow identifiers defined in @kbn/workflows managed/definitions/streams_memory.
 const MEMORY_WORKFLOW_IDS = [
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  'system-streams-memory-synthesis',
+  'system-streams-memory-consolidation',
+  'system-streams-memory-conversation-scraper',
 ];
 
 /**
