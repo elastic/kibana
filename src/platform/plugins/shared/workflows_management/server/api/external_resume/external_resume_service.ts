@@ -16,9 +16,9 @@ import {
 import {
   ExternalResumeTokenVerificationError,
   getAuthenticatedExternalResumeApiKeyId,
-  getExternalResumeEncodedApiKeyFromStepInput,
   invalidateExternalResumeApiKey,
   verifyExternalResumeToken,
+  WORKFLOW_EXTERNAL_CRED_PURPOSE,
 } from '@kbn/workflows/server';
 import { createExternalResumeApiKeyRequest } from './create_external_resume_api_key_request';
 import { ExternalResumeError } from './external_resume_error';
@@ -61,12 +61,18 @@ export async function resumeWorkflowExecutionExternally(
     throw new ExternalResumeError('Resume token does not match this space', 403);
   }
 
+  const externalCredsStore = await workflowsService.getExternalCredsStore();
+  const encodedApiKey = await externalCredsStore.get({
+    id: payload.apiKeyId,
+    expectedPurpose: WORKFLOW_EXTERNAL_CRED_PURPOSE.EXTERNAL_RESUME,
+  });
+  if (!encodedApiKey) {
+    throw new ExternalResumeError('This workflow response link is no longer valid', 409);
+  }
+
   const execution = await workflowsService.getWorkflowExecution(
     payload.executionId,
-    payload.spaceId,
-    {
-      includeInput: true,
-    }
+    payload.spaceId
   );
 
   if (!execution) {
@@ -85,11 +91,6 @@ export async function resumeWorkflowExecutionExternally(
 
   const coreStart = await workflowsService.getCoreStart();
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
-
-  const encodedApiKey = getExternalResumeEncodedApiKeyFromStepInput(stepExecution.input);
-  if (!encodedApiKey) {
-    throw new ExternalResumeError('This workflow response link is no longer valid', 409);
-  }
 
   const apiKeyRequest = createExternalResumeApiKeyRequest(encodedApiKey, spaceId);
   let authentication: ApiKeyAuthenticateResponse;
@@ -122,6 +123,7 @@ export async function resumeWorkflowExecutionExternally(
     );
 
     await invalidateExternalResumeApiKey(internalEsClient, payload.apiKeyId);
+    await externalCredsStore.delete(payload.apiKeyId);
 
     return result;
   } catch (error) {

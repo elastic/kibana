@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_EXTERNAL_CREDS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from './mappings';
-export { createIndexes } from './create_indexes';
+export const WORKFLOWS_EXTERNAL_CREDS_INDEX = '.workflows-external-creds' as const;
+
+export const WORKFLOW_EXTERNAL_CRED_PURPOSE = {
+  EXTERNAL_RESUME: 'external_resume',
+} as const;
+
+export type WorkflowExternalCredPurpose =
+  (typeof WORKFLOW_EXTERNAL_CRED_PURPOSE)[keyof typeof WORKFLOW_EXTERNAL_CRED_PURPOSE];

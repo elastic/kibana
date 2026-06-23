@@ -10,7 +10,11 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ExecutionStatus } from '@kbn/workflows';
-import { createExternalResumeTokenPayload, signExternalResumeToken } from '@kbn/workflows/server';
+import {
+  createExternalResumeTokenPayload,
+  signExternalResumeToken,
+  WORKFLOW_EXTERNAL_RESUME_APPLICATION,
+} from '@kbn/workflows/server';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { apiTest } from '../../fixtures';
@@ -36,23 +40,19 @@ const APPROVAL_STEP_ID = 'approval';
 const SPACE_ID = 'default';
 const WAIT_TIMEOUT_MS = 30_000;
 
-function getApiKeyIdFromEncoded(encodedApiKey: string): string {
-  return Buffer.from(encodedApiKey, 'base64').toString('utf8').split(':')[0];
-}
-
 function buildExternalResumeToken({
   executionId,
-  encodedApiKey,
+  apiKeyId,
 }: {
   executionId: string;
-  encodedApiKey: string;
+  apiKeyId: string;
 }): string {
   return signExternalResumeToken(
     createExternalResumeTokenPayload({
       spaceId: SPACE_ID,
       executionId,
       stepId: APPROVAL_STEP_ID,
-      apiKeyId: getApiKeyIdFromEncoded(encodedApiKey),
+      apiKeyId,
       ttlMs: 60_000,
     }),
     SCOUT_EXTERNAL_RESUME_SIGNING_KEY
@@ -68,7 +68,7 @@ function buildExternalResumePath(executionId: string, token: string, approved: b
   return `s/${SPACE_ID}/api/workflows/executions/${executionId}/resume/external?${params.toString()}`;
 }
 
-async function waitForApprovalStepInput(
+async function waitForApprovalStepWaiting(
   workflowsApi: WorkflowsApiService,
   workflowExecutionId: string
 ) {
@@ -82,15 +82,47 @@ async function waitForApprovalStepInput(
       const approvalStep = execution.stepExecutions.find(
         (stepExecution) => stepExecution.stepId === APPROVAL_STEP_ID
       );
-      const input = approvalStep?.input as { externalResumeEncodedApiKey?: string } | undefined;
 
-      return !!input?.externalResumeEncodedApiKey;
+      return approvalStep?.status === ExecutionStatus.WAITING_FOR_INPUT;
     },
     interval: 1000,
     timeout: WAIT_TIMEOUT_MS,
     errorMessage: (execution) =>
-      `Execution ${workflowExecutionId} did not reach waitForApproval with resume credentials within ${WAIT_TIMEOUT_MS}ms (last status: ${execution?.status})`,
+      `Execution ${workflowExecutionId} did not reach waitForApproval within ${WAIT_TIMEOUT_MS}ms (last status: ${execution?.status})`,
   });
+}
+
+async function getExternalResumeApiKeyId(
+  esClient: {
+    security: {
+      queryApiKey: (params: {
+        query: {
+          bool: {
+            filter: Array<{ term: Record<string, string> }>;
+          };
+        };
+      }) => Promise<{ api_keys?: Array<{ id?: string }> }>;
+    };
+  },
+  workflowExecutionId: string
+): Promise<string> {
+  const response = await esClient.security.queryApiKey({
+    query: {
+      bool: {
+        filter: [
+          { term: { 'metadata.application': WORKFLOW_EXTERNAL_RESUME_APPLICATION } },
+          { term: { 'metadata.workflow_execution_id': workflowExecutionId } },
+        ],
+      },
+    },
+  });
+
+  const apiKeyId = response.api_keys?.[0]?.id;
+  if (!apiKeyId) {
+    throw new Error(`External resume API key not found for execution ${workflowExecutionId}`);
+  }
+
+  return apiKeyId;
 }
 
 apiTest.describe('External resume API', { tag: tags.deploymentAgnostic }, () => {
@@ -111,19 +143,20 @@ apiTest.describe('External resume API', { tag: tags.deploymentAgnostic }, () => 
 
   apiTest(
     'resumes a waitForApproval execution via signed external link without session auth',
-    async ({ apiClient }) => {
+    async ({ apiClient, esClient }) => {
       const { workflowExecutionId } = await workflowsApi.run(workflowId, {});
 
-      const waitingExecution = await waitForApprovalStepInput(workflowsApi, workflowExecutionId);
+      const waitingExecution = await waitForApprovalStepWaiting(workflowsApi, workflowExecutionId);
       const approvalStep = waitingExecution?.stepExecutions.find(
         (stepExecution) => stepExecution.stepId === APPROVAL_STEP_ID
       );
-      const encodedApiKey = (approvalStep?.input as { externalResumeEncodedApiKey: string })
-        .externalResumeEncodedApiKey;
 
+      expect(approvalStep?.input).not.toHaveProperty('externalResumeEncodedApiKey');
+
+      const apiKeyId = await getExternalResumeApiKeyId(esClient, workflowExecutionId);
       const token = buildExternalResumeToken({
         executionId: workflowExecutionId,
-        encodedApiKey,
+        apiKeyId,
       });
 
       const resumeResponse = await apiClient.get(

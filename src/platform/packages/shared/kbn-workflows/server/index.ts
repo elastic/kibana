@@ -40,10 +40,14 @@ export {
   invalidateExternalResumeApiKey,
 } from './external_resume/create_external_resume_api_key';
 export type { ExternalResumeApiKey } from './external_resume/create_external_resume_api_key';
+export { getAuthenticatedExternalResumeApiKeyId } from './external_resume/external_resume_api_key_request';
 export {
-  getAuthenticatedExternalResumeApiKeyId,
-  getExternalResumeEncodedApiKeyFromStepInput,
-} from './external_resume/external_resume_api_key_request';
+  WORKFLOWS_EXTERNAL_CREDS_INDEX,
+  WORKFLOW_EXTERNAL_CRED_PURPOSE,
+} from './external_resume/external_creds_constants';
+export type { WorkflowExternalCredPurpose } from './external_resume/external_creds_constants';
+export { WORKFLOWS_EXTERNAL_CREDS_INDEX_MAPPINGS } from './external_resume/external_creds_mappings';
+export { WorkflowExternalCredsStore } from './external_resume/workflow_external_creds_store';
 export {
   createExternalResumeTokenPayload,
   ExternalResumeTokenVerificationError,

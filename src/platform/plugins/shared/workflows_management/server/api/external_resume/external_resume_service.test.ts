@@ -11,7 +11,11 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { WorkflowExecutionInvalidStatusError } from '@kbn/workflows/common/errors';
-import { createExternalResumeTokenPayload, signExternalResumeToken } from '@kbn/workflows/server';
+import {
+  createExternalResumeTokenPayload,
+  signExternalResumeToken,
+  WORKFLOW_EXTERNAL_CRED_PURPOSE,
+} from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { ExternalResumeError } from './external_resume_error';
 import {
@@ -24,8 +28,14 @@ const SIGNING_KEY = 'test-signing-key-with-at-least-32-characters';
 const ENCODED_API_KEY = Buffer.from('api-key-id:secret').toString('base64');
 
 describe('resumeWorkflowExecutionExternally', () => {
+  const externalCredsStore = {
+    get: jest.fn(),
+    delete: jest.fn(),
+  };
+
   const workflowsService = {
     getCoreStart: jest.fn(),
+    getExternalCredsStore: jest.fn().mockResolvedValue(externalCredsStore),
     getWorkflowExecution: jest.fn(),
     getWorkflowsExecutionEngine: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsService>;
@@ -44,6 +54,9 @@ describe('resumeWorkflowExecutionExternally', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    externalCredsStore.get.mockResolvedValue(ENCODED_API_KEY);
+    workflowsService.getExternalCredsStore.mockResolvedValue(externalCredsStore as never);
+
     const coreStart = coreMock.createStart();
     coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
       asCurrentUser: {
@@ -69,9 +82,6 @@ describe('resumeWorkflowExecutionExternally', () => {
           stepId: 'request-approval',
           stepType: 'waitForApproval',
           status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: {
-            externalResumeEncodedApiKey: ENCODED_API_KEY,
-          },
         } as unknown as WorkflowStepExecutionDto,
       ],
     } as unknown as WorkflowExecutionDto);
@@ -89,6 +99,11 @@ describe('resumeWorkflowExecutionExternally', () => {
       token,
     });
 
+    expect(externalCredsStore.get).toHaveBeenCalledWith({
+      id: 'api-key-id',
+      expectedPurpose: WORKFLOW_EXTERNAL_CRED_PURPOSE.EXTERNAL_RESUME,
+    });
+
     const coreStart = await workflowsService.getCoreStart();
     const engine = await workflowsService.getWorkflowsExecutionEngine();
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
@@ -104,6 +119,23 @@ describe('resumeWorkflowExecutionExternally', () => {
     expect(
       coreStart.elasticsearch.client.asInternalUser.security.invalidateApiKey
     ).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+    expect(externalCredsStore.delete).toHaveBeenCalledWith('api-key-id');
+  });
+
+  it('rejects when stored credentials are missing', async () => {
+    externalCredsStore.get.mockResolvedValue(undefined);
+
+    await expect(
+      resumeWorkflowExecutionExternally(workflowsService, {
+        approved: true,
+        executionId: 'exec-1',
+        signingKey: SIGNING_KEY,
+        spaceId: 'default',
+        token,
+      })
+    ).rejects.toEqual(
+      new ExternalResumeError('This workflow response link is no longer valid', 409)
+    );
   });
 
   it('rejects when API key authentication fails', async () => {

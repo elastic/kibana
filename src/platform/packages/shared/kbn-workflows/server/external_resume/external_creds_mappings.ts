@@ -7,9 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_EXTERNAL_CREDS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from './mappings';
-export { createIndexes } from './create_indexes';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+
+export const WORKFLOWS_EXTERNAL_CREDS_INDEX_MAPPINGS: MappingTypeMapping = {
+  dynamic: false,
+  properties: {
+    purpose: {
+      type: 'keyword',
+      index: false,
+    },
+    secret: {
+      type: 'keyword',
+      index: false,
+    },
+    expiresAt: {
+      type: 'date',
+      index: false,
+    },
+  },
+};

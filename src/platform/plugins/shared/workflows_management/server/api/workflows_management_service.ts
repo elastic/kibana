@@ -37,6 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import { WorkflowExternalCredsStore } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -131,6 +132,7 @@ export class WorkflowsService {
   private managedWorkflowsService!: ManagedWorkflowsService;
   private workflowVersioningEnabled!: boolean;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
+  private externalCredsStore!: WorkflowExternalCredsStore;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
     request: KibanaRequest
@@ -168,6 +170,7 @@ export class WorkflowsService {
     this.coreStart = coreStart;
     this.pluginsStart = pluginsStart;
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
+    this.externalCredsStore = new WorkflowExternalCredsStore(this.esClient);
     this.taskScheduler = new WorkflowTaskScheduler(this.logger, pluginsStart.taskManager);
 
     this.workflowStorage = createStorage({
@@ -244,6 +247,11 @@ export class WorkflowsService {
   public async getCoreStart(): Promise<CoreStart> {
     await this.ensureInitialized();
     return this.coreStart;
+  }
+
+  public async getExternalCredsStore(): Promise<WorkflowExternalCredsStore> {
+    await this.ensureInitialized();
+    return this.externalCredsStore;
   }
 
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {

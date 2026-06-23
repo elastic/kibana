@@ -30,13 +30,3 @@ function decodeApiKeyId(encodedApiKey: string): string | undefined {
     return undefined;
   }
 }
-
-export function getExternalResumeEncodedApiKeyFromStepInput(input: unknown): string | undefined {
-  if (input == null || typeof input !== 'object' || !('externalResumeEncodedApiKey' in input)) {
-    return undefined;
-  }
-
-  const encodedApiKey = (input as { externalResumeEncodedApiKey?: unknown })
-    .externalResumeEncodedApiKey;
-  return typeof encodedApiKey === 'string' && encodedApiKey.length > 0 ? encodedApiKey : undefined;
-}

@@ -28,7 +28,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { resolveExternalResumeSigningKey } from '@kbn/workflows/server';
+import { resolveExternalResumeSigningKey, WorkflowExternalCredsStore } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -136,6 +136,7 @@ export class WorkflowsExecutionEnginePlugin
   >;
   private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
+  private externalCredsStore?: WorkflowExternalCredsStore;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
@@ -239,6 +240,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
                 externalResumeSigningKey: this.getExternalResumeSigningKey(),
+                externalCredsStore:
+                  this.externalCredsStore ??
+                  new WorkflowExternalCredsStore(coreStart.elasticsearch.client.asInternalUser),
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -351,6 +355,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
                 externalResumeSigningKey: this.getExternalResumeSigningKey(),
+                externalCredsStore:
+                  this.externalCredsStore ??
+                  new WorkflowExternalCredsStore(coreStart.elasticsearch.client.asInternalUser),
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -471,6 +478,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
                 externalResumeSigningKey: this.getExternalResumeSigningKey(),
+                externalCredsStore:
+                  this.externalCredsStore ??
+                  new WorkflowExternalCredsStore(coreStart.elasticsearch.client.asInternalUser),
               };
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -641,6 +651,7 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
+    this.externalCredsStore = new WorkflowExternalCredsStore(esClient);
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
 
     // Initialize ConcurrencyManager with dependencies
@@ -660,6 +671,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowsExtensions: plugins.workflowsExtensions,
       config: this.config,
       externalResumeSigningKey: this.getExternalResumeSigningKey(),
+      externalCredsStore: this.externalCredsStore,
     };
 
     // Re-check that a workflow is still enabled right before persisting an

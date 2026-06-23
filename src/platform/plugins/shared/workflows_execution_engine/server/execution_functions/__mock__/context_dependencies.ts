@@ -21,6 +21,11 @@ export const mockContextDependencies = () => ({
   taskManager: taskManagerMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
+  externalCredsStore: {
+    put: jest.fn(),
+    get: jest.fn(),
+    delete: jest.fn(),
+  },
   config: {
     enabled: true,
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },

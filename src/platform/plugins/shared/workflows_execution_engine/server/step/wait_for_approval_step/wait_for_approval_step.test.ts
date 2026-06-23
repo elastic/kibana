@@ -32,6 +32,10 @@ jest.mock('@kbn/workflows/server', () => ({
 const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
   .createExternalResumeApiKey as jest.Mock;
 
+const externalCredsStore = {
+  put: jest.fn().mockResolvedValue(undefined),
+};
+
 jest.mock('./send_wait_for_approval_notifications', () => ({
   hasExternalApprovalChannels: jest.fn().mockReturnValue(false),
   buildWaitForApprovalResumeLinks: jest.fn().mockReturnValue({
@@ -102,6 +106,7 @@ describe('WaitForApprovalStepImpl', () => {
     dependencies = {
       externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
       spaceId: 'default',
+      externalCredsStore,
     } as ContextDependencies;
 
     underTest = new WaitForApprovalStepImpl(
@@ -127,12 +132,19 @@ describe('WaitForApprovalStepImpl', () => {
     });
   });
 
-  it('mints an external resume API key when a signing key is configured', async () => {
+  it('stores external resume credentials without exposing secrets in step input', async () => {
     await underTest.run();
 
     expect(mockCreateExternalResumeApiKey).toHaveBeenCalled();
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
-      expect.objectContaining({ externalResumeEncodedApiKey: 'encoded-api-key' })
+    expect(externalCredsStore.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'api-key-id',
+        secret: 'encoded-api-key',
+        purpose: 'external_resume',
+      })
+    );
+    expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalledWith(
+      expect.objectContaining({ externalResumeEncodedApiKey: expect.anything() })
     );
   });
 
@@ -166,6 +178,7 @@ describe('WaitForApprovalStepImpl', () => {
     dependencies = {
       externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
       coreStart: {},
+      externalCredsStore,
     } as ContextDependencies;
     mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
       id: 'exec-abc',

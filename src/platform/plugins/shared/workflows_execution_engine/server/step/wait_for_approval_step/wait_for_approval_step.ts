@@ -14,13 +14,14 @@ import {
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
-import { createExternalResumeApiKey } from '@kbn/workflows/server';
+import { createExternalResumeApiKey, WORKFLOW_EXTERNAL_CRED_PURPOSE } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
   hasExternalApprovalChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 import type { ConnectorExecutor } from '../../connector_executor';
+import { parseDuration } from '../../utils';
 import { getKibanaUrl } from '../../utils/get_kibana_url';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
@@ -94,9 +95,6 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     let apiKeyId: string | undefined;
     if (signingKey && spaceId) {
       apiKeyId = await this.mintExternalResumeApiKey({
-        message,
-        approveLabel,
-        rejectLabel,
         execution,
         spaceId,
         timeout,
@@ -130,16 +128,10 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
   }
 
   private async mintExternalResumeApiKey({
-    message,
-    approveLabel,
-    rejectLabel,
     execution,
     spaceId,
     timeout,
   }: {
-    message: string;
-    approveLabel: string;
-    rejectLabel: string;
     execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
     spaceId: string;
     timeout: string;
@@ -154,12 +146,16 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       expiration: timeout,
     });
 
-    this.stepExecutionRuntime.setInput({
-      ...(message.length > 0 && { message }),
-      approveLabel,
-      rejectLabel,
-      schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
-      externalResumeEncodedApiKey: apiKey.encoded,
+    const externalCredsStore = this.dependencies.externalCredsStore;
+    if (!externalCredsStore) {
+      throw new Error('External credentials store is not configured');
+    }
+
+    await externalCredsStore.put({
+      id: apiKey.id,
+      purpose: WORKFLOW_EXTERNAL_CRED_PURPOSE.EXTERNAL_RESUME,
+      secret: apiKey.encoded,
+      expiresAt: new Date(Date.now() + parseDuration(timeout)).toISOString(),
     });
 
     return apiKey.id;
