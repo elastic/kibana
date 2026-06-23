@@ -48,9 +48,7 @@ const createTestContext = (
   const toolAttachmentType = createToolAttachmentType();
   const attachments = createAttachmentStateManager([], {
     getTypeDefinition: (type) =>
-      type === TOOL_ATTACHMENT_TYPE
-        ? (toolAttachmentType as AttachmentTypeDefinition)
-        : undefined,
+      type === TOOL_ATTACHMENT_TYPE ? (toolAttachmentType as AttachmentTypeDefinition) : undefined,
   });
 
   const context = {
@@ -228,9 +226,9 @@ describe('patch_tool tool', () => {
 
     expect(result.results[0].type).toBe(ToolResultType.other);
     const stored = attachments.get(attachmentId);
-    expect((stored?.data.data as { configuration: { query: string } }).configuration.query).toContain(
-      'IN ("ERROR", "FATAL")'
-    );
+    expect(
+      (stored?.data.data as { configuration: { query: string } }).configuration.query
+    ).toContain('IN ("ERROR", "FATAL")');
   });
 
   it('renames a parameter via query patch + params_to_add/remove', async () => {
@@ -255,7 +253,9 @@ describe('patch_tool tool', () => {
 
     expect(result.results[0].type).toBe(ToolResultType.other);
     const stored = attachments.get(attachmentId);
-    const config = (stored?.data.data as { configuration: { query: string; params: Record<string, unknown> } }).configuration;
+    const config = (
+      stored?.data.data as { configuration: { query: string; params: Record<string, unknown> } }
+    ).configuration;
     expect(config.query).toContain('LIMIT ?limit');
     expect(config.params).toHaveProperty('limit');
     expect(config.params).not.toHaveProperty('top_n');

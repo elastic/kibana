@@ -7,7 +7,11 @@
 
 import { validateQuery } from '@kbn/esql-language';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParamValue } from '@kbn/agent-builder-common';
+import type {
+  EsqlToolConfig,
+  EsqlToolFieldTypes,
+  EsqlToolParamValue,
+} from '@kbn/agent-builder-common';
 
 /**
  * Lightweight mirror of the ES|QL tool type's `validateConfig` in
@@ -50,8 +54,9 @@ export const validateEsqlConfigForChat = async (
   const undefinedParams = queryParams.filter((p) => !definedParams.includes(p));
   if (undefinedParams.length > 0) {
     errors.push(
-      `Query references parameters that aren't defined in 'params': ${undefinedParams.join(', ')}. ` +
-        `Defined params: ${definedParams.join(', ') || '(none)'}.`
+      `Query references parameters that aren't defined in 'params': ${undefinedParams.join(
+        ', '
+      )}. ` + `Defined params: ${definedParams.join(', ') || '(none)'}.`
     );
   }
 

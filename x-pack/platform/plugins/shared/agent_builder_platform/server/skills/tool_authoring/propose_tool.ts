@@ -27,14 +27,11 @@ const esqlParamSchema = z.object({
   optional: z
     .boolean()
     .optional()
-    .describe('Defaults to false. Set true only when the query works correctly with the parameter unset.'),
+    .describe(
+      'Defaults to false. Set true only when the query works correctly with the parameter unset.'
+    ),
   defaultValue: z
-    .union([
-      z.string(),
-      z.number(),
-      z.boolean(),
-      z.array(z.union([z.string(), z.number()])),
-    ])
+    .union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))])
     .optional()
     .describe(
       "Only allowed when 'optional: true'. Type must match 'type' (e.g. integer for 'integer', ISO string for 'date')."
@@ -60,9 +57,7 @@ const proposeToolSchema = z.object({
     .describe(
       'Stable identifier. Lowercase letters, numbers, dots, hyphens, underscores; must start and end with a letter or number. Max 64 chars. Example: "logs.top_error_counts". Must not collide with any tool already in the registry.'
     ),
-  type: z
-    .literal(ToolType.esql)
-    .describe('Currently only "esql" is supported in chat authoring.'),
+  type: z.literal(ToolType.esql).describe('Currently only "esql" is supported in chat authoring.'),
   description: z
     .string()
     .describe(

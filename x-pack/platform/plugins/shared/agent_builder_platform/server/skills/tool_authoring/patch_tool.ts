@@ -20,9 +20,7 @@ const queryPatchSchema = z.object({
     .describe(
       'Exact substring to find in the current ES|QL query. Must match exactly once; include enough surrounding context to make it unique.'
     ),
-  replace: z
-    .string()
-    .describe('Replacement text. Use an empty string to delete the matched text.'),
+  replace: z.string().describe('Replacement text. Use an empty string to delete the matched text.'),
 });
 
 const paramShape = z.object({
@@ -30,18 +28,15 @@ const paramShape = z.object({
   description: z.string(),
   optional: z.boolean().optional(),
   defaultValue: z
-    .union([
-      z.string(),
-      z.number(),
-      z.boolean(),
-      z.array(z.union([z.string(), z.number()])),
-    ])
+    .union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))])
     .optional(),
 });
 
-const paramUpdateShape = paramShape.partial().describe(
-  'Partial param definition. Only the listed fields are overwritten; omitted fields keep their current value.'
-);
+const paramUpdateShape = paramShape
+  .partial()
+  .describe(
+    'Partial param definition. Only the listed fields are overwritten; omitted fields keep their current value.'
+  );
 
 const patchToolSchema = z.object({
   attachment_id: z
@@ -56,7 +51,7 @@ const patchToolSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Full replacement for the ES|QL query. Use this for large rewrites; prefer `query_patches` for small edits. If both are present, `query` is applied first, then `query_patches`."
+      'Full replacement for the ES|QL query. Use this for large rewrites; prefer `query_patches` for small edits. If both are present, `query` is applied first, then `query_patches`.'
     ),
   query_patches: z
     .array(queryPatchSchema)
@@ -68,7 +63,7 @@ const patchToolSchema = z.object({
     .record(z.string(), paramShape)
     .optional()
     .describe(
-      "New params keyed by name. Fails if a name collides with an existing param — use `params_to_update` for that."
+      'New params keyed by name. Fails if a name collides with an existing param — use `params_to_update` for that.'
     ),
   params_to_update: z
     .record(z.string(), paramUpdateShape)
@@ -227,11 +222,7 @@ export const createPatchToolTool = (): BuiltinSkillBoundedTool<typeof patchToolS
       id: current.id,
       type: current.type,
       description: description ?? current.description,
-      ...(tags !== undefined
-        ? { tags }
-        : current.tags !== undefined
-        ? { tags: current.tags }
-        : {}),
+      ...(tags !== undefined ? { tags } : current.tags !== undefined ? { tags: current.tags } : {}),
       configuration: { query: nextQuery, params: nextParams },
     };
 

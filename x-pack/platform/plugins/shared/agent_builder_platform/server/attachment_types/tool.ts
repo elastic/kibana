@@ -71,7 +71,8 @@ export const createToolAttachmentType = (): AttachmentTypeDefinition<
         const paramSummary = Object.entries(data.configuration.params)
           .map(([name, p]: [string, EsqlToolParam]) => {
             const optional = p.optional ? ' (optional)' : '';
-            const def = p.defaultValue !== undefined ? `, default=${JSON.stringify(p.defaultValue)}` : '';
+            const def =
+              p.defaultValue !== undefined ? `, default=${JSON.stringify(p.defaultValue)}` : '';
             return `- ${name}: ${p.type}${optional}${def} — ${p.description}`;
           })
           .join('\n');
