@@ -121,6 +121,7 @@ export const getEntityAnomalyOverview = async ({
     const resp = await mlSystem.mlAnomalySearch<RawAnomalyRecord>(
       {
         size: NUM_RECENT_ANOMALIES,
+        track_total_hits: true,
         runtime_mappings: {
           entity_id: euid.painless.getEuidRuntimeMapping(entityType),
         },
@@ -203,7 +204,7 @@ export const getEntityAnomalyOverview = async ({
     if (detector?.function === 'rare') {
       anomalousValue = anomaly.by_field_value;
     } else {
-      anomalousValue = String(anomaly.actual?.[0]);
+      anomalousValue = anomaly.actual?.[0] != null ? String(anomaly.actual[0]) : undefined;
     }
     return {
       jobId: anomaly.job_id,
