@@ -220,24 +220,24 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
       {index && index.length > 0 && (
         <>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <IndexPatterns patterns={index} />
         </>
       )}
 
       {filters && filters.length > 0 && (
         <>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <FiltersDisplay filters={filters} />
         </>
       )}
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <RuleTypeDetails rule={rule} />
 
       {rule.tags && rule.tags.length > 0 && (
         <>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <SectionHeading>
             {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.tagsHeading', {
               defaultMessage: 'Tags',
@@ -250,7 +250,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
       {rule.threat && rule.threat.length > 0 && (
         <>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <SectionHeading>
             {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.mitreHeading', {
               defaultMessage: 'MITRE ATT&CK',
@@ -261,12 +261,12 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <SeverityRiskScore severity={rule.severity} riskScore={rule.risk_score} />
 
       {interval && (
         <>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <ScheduleDisplay interval={interval} from={from} />
         </>
       )}
