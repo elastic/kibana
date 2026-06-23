@@ -50,7 +50,6 @@ const defaultProps = {
   end: '2026-01-02T00:00:00.000Z',
   onSloClick: jest.fn(),
   alertsTabHref: '/services/test-service/alerts',
-  overviewTabHref: '/services/test-service/overview',
 };
 
 function renderBadges(props = defaultProps) {
@@ -245,7 +244,7 @@ describe('ServiceHeaderBadges', () => {
     expect(screen.getByText(/Critical \(82\)/)).toBeInTheDocument();
   });
 
-  it('links the anomalies badge to the service overview tab', () => {
+  it('renders the anomalies badge as non-interactive (not a link)', () => {
     setupMocks({
       canReadMlJobs: true,
       alertsCount: 0,
@@ -256,7 +255,7 @@ describe('ServiceHeaderBadges', () => {
     renderBadges();
 
     const badge = screen.getByTestId('apmAnomaliesBadge');
-    expect(badge.closest('a')).toHaveAttribute('href', '/services/test-service/overview');
+    expect(badge.closest('a')).toBeNull();
   });
 
   it('hides anomalies badge when ML jobs cannot be read even if anomaly score data is present', () => {
