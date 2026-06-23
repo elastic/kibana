@@ -40,36 +40,6 @@ export interface StandaloneQuery {
 
 export type RuleQuery = ComposedQuery | StandaloneQuery;
 
-const joinComposedQuerySegment = (base: string, segment: string): string => {
-  const trimmedBase = base.trim();
-  const trimmedSegment = segment.trim();
-
-  if (!trimmedSegment) {
-    return trimmedBase;
-  }
-
-  if (!trimmedBase) {
-    return trimmedSegment.startsWith('|') ? trimmedSegment : `| ${trimmedSegment}`;
-  }
-
-  const normalizedSegment = trimmedSegment.startsWith('|') ? trimmedSegment : `| ${trimmedSegment}`;
-
-  return `${trimmedBase}\n${normalizedSegment}`;
-};
-
-export function getBreachQuery(query: RuleQuery | undefined): string {
-  if (!query) return '';
-  if (query.format === 'standalone') return query.breach.query;
-  return joinComposedQuerySegment(query.base, query.breach.segment);
-}
-
-export function getRecoverQuery(query: RuleQuery | undefined): string {
-  if (!query) return '';
-  if (query.format === 'standalone') return query.recovery?.query ?? '';
-  if (!query.recovery?.segment.trim()) return '';
-  return joinComposedQuerySegment(query.base, query.recovery.segment);
-}
-
 // ---------------------------------------------------------------------------
 // Shared sub-types
 // ---------------------------------------------------------------------------
@@ -131,23 +101,3 @@ export interface FormValues {
   runbookArtifacts?: RuleArtifact[];
   dashboardArtifacts?: RuleArtifact[];
 }
-
-/** Derives alert-delay mode from persisted `state_transition`. */
-export const deriveAlertDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionAlertDelayMode'] => {
-  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
-    return DELAY_MODE.breaches;
-  return DELAY_MODE.immediate;
-};
-
-/** Derives recovery-delay mode from persisted `state_transition`. */
-export const deriveRecoveryDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionRecoveryDelayMode'] => {
-  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
-    return DELAY_MODE.recoveries;
-  return DELAY_MODE.immediate;
-};

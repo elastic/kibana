@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Query } from '@kbn/alerting-v2-schemas';
 import { dump, load } from 'js-yaml';
 import type { FormValues, StateTransition, RuleQuery } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
-} from '../types';
+} from './state_transition_helpers';
+import { ruleQueryToApiQuery } from './query_mappers';
 import { mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
 
 export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
@@ -42,28 +44,12 @@ interface YamlStateTransition {
   recovering_timeframe?: string;
 }
 
-interface YamlComposedQuery {
-  format: 'composed';
-  base: string;
-  breach: { segment: string };
-  recovery?: { segment: string };
-}
-
-interface YamlStandaloneQuery {
-  format: 'standalone';
-  breach: { query: string };
-  recovery?: { query: string };
-  no_data?: { query: string };
-}
-
-type YamlQuery = YamlComposedQuery | YamlStandaloneQuery;
-
 interface YamlRuleObject {
   kind: string;
   metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback: string };
-  query: YamlQuery;
+  query: Query;
   recovery_strategy?: string;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
@@ -78,23 +64,6 @@ const serializeStateTransition = (st?: StateTransition): YamlStateTransition | u
   if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
   if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
   return Object.keys(out).length ? out : undefined;
-};
-
-const serializeQuery = (query: RuleQuery): YamlQuery => {
-  if (query.format === 'composed') {
-    return {
-      format: 'composed',
-      base: query.base,
-      breach: { segment: query.breach.segment },
-      ...(query.recovery ? { recovery: { segment: query.recovery.segment } } : {}),
-    };
-  }
-  return {
-    format: 'standalone',
-    breach: { query: query.breach.query },
-    ...(query.recovery ? { recovery: { query: query.recovery.query } } : {}),
-    ...(query.no_data ? { no_data: { query: query.no_data.query } } : {}),
-  };
 };
 
 /**
@@ -123,7 +92,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       every: values.schedule.every,
       lookback: values.schedule.lookback,
     },
-    query: serializeQuery(values.query),
+    query: ruleQueryToApiQuery(values.query, { includeNoData: true }),
     ...(hasRecovery ? { recovery_strategy: 'query' } : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),

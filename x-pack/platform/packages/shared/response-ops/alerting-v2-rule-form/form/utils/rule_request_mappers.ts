@@ -7,11 +7,12 @@
 
 import type { RuleResponse, CreateRuleData, Query, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { DELAY_MODE } from '../types';
-import type { FormValues, StateTransition, RuleQuery } from '../types';
+import type { FormValues, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
-} from '../types';
+} from './state_transition_helpers';
+import { ruleQueryToApiQuery, apiQueryToFormQuery } from './query_mappers';
 import {
   mapArtifacts,
   mergeArtifactsByType,
@@ -34,22 +35,6 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
   every: schedule.every,
   lookback: schedule.lookback,
 });
-
-const mapQuery = (query: RuleQuery): Query => {
-  if (query.format === 'composed') {
-    return {
-      format: 'composed',
-      base: query.base,
-      breach: { segment: query.breach.segment },
-      ...(query.recovery ? { recovery: { segment: query.recovery.segment } } : {}),
-    };
-  }
-  return {
-    format: 'standalone',
-    breach: { query: query.breach.query },
-    ...(query.recovery ? { recovery: { query: query.recovery.query } } : {}),
-  };
-};
 
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
@@ -126,7 +111,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     metadata: mapMetadata(metadata),
     time_field: timeField,
     schedule: mapSchedule(schedule),
-    query: mapQuery(query),
+    query: ruleQueryToApiQuery(query),
     ...(hasRecovery ? { recovery_strategy: 'query' as const } : {}),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
@@ -154,29 +139,6 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
 // API response → FormValues
 // ---------------------------------------------------------------------------
 
-const apiQueryToRuleQuery = (
-  q: RuleResponse['query'],
-  recoveryStrategy?: RuleResponse['recovery_strategy']
-): RuleQuery => {
-  if (q.format === 'composed') {
-    return {
-      format: 'composed',
-      base: q.base,
-      breach: { segment: q.breach.segment },
-      ...(recoveryStrategy === 'query' && q.recovery
-        ? { recovery: { segment: q.recovery.segment } }
-        : {}),
-    };
-  }
-  return {
-    format: 'standalone',
-    breach: { query: q.breach.query },
-    ...(recoveryStrategy === 'query' && q.recovery
-      ? { recovery: { query: q.recovery.query } }
-      : {}),
-  };
-};
-
 export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormValues> => {
   const stateTransition: StateTransition = {
     pendingCount: rule.state_transition?.pending_count ?? null,
@@ -199,7 +161,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
+    query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
