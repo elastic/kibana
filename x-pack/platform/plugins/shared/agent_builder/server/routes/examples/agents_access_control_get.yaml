@@ -4,11 +4,11 @@ responses:
     content:
       application/json:
         examples:
-          getAgentAclResponseExample:
-            description: "Example response for a caller who can manage the ACL — the agent has two grantees."
+          getAgentAccessControlResponseExample:
+            description: "Example response for a caller who can manage access control — the agent has two grantees."
             value:
-              can_manage: true
-              acl:
+              access_control:
+                access_mode: private
                 entries:
                   - type: user
                     name: alice
@@ -16,12 +16,19 @@ responses:
                   - type: user
                     name: bob
                     role: user
-          getAgentAclMaskedResponseExample:
-            description: "Example response for a caller without manage permission — the principal list is hidden and `entries` is always empty."
+              permissions:
+                update_access_control: true
+          getAgentAccessControlMaskedResponseExample:
+            description: "Example response for a caller without manage permission — only the caller's own entry is returned."
             value:
-              can_manage: false
-              acl:
-                entries: []
+              access_control:
+                access_mode: private
+                entries:
+                  - type: user
+                    name: bob
+                    role: user
+              permissions:
+                update_access_control: false
   404:
     description: "Not Found — no agent with this ID is visible to the caller. Matches the existing `agentNotFound` shape, so unprivileged callers cannot probe for hidden agents."
     content:
@@ -38,8 +45,8 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+        -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |
-      GET kbn://api/agent_builder/agents/{id}/acl
+      GET kbn://api/agent_builder/agents/{id}/access_control

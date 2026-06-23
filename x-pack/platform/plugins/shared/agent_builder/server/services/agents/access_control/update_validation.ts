@@ -6,22 +6,24 @@
  */
 
 import {
-  AGENT_ACL_MAX_ENTRIES,
-  AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
-  isAgentAclRole,
-  type AgentAclEntry,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAccessControlRole,
+  type AgentAccessControlEntry,
 } from '@kbn/agent-builder-common';
 
 /**
- * Validates the entries provided in an ACL update. Returns a string describing the first
+ * Validates the entries provided in an access control update. Returns a string describing the first
  * error encountered, or `undefined` when the input is valid.
  */
-export const validateAclUpdate = (entries: AgentAclEntry[]): string | undefined => {
+export const validateAccessControlUpdate = (
+  entries: AgentAccessControlEntry[]
+): string | undefined => {
   if (!Array.isArray(entries)) {
     return 'ACL entries must be an array';
   }
-  if (entries.length > AGENT_ACL_MAX_ENTRIES) {
-    return `ACL entries exceed maximum of ${AGENT_ACL_MAX_ENTRIES}`;
+  if (entries.length > AGENT_ACCESS_CONTROL_MAX_ENTRIES) {
+    return `ACL entries exceed maximum of ${AGENT_ACCESS_CONTROL_MAX_ENTRIES}`;
   }
   const seen = new Set<string>();
   for (const entry of entries) {
@@ -32,10 +34,10 @@ export const validateAclUpdate = (entries: AgentAclEntry[]): string | undefined 
     if (typeof entry.name !== 'string' || entry.name.length === 0) {
       return 'Each ACL entry requires a non-empty name';
     }
-    if (entry.name.length > AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH) {
-      return `ACL principal name exceeds maximum length of ${AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH}`;
+    if (entry.name.length > AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH) {
+      return `ACL principal name exceeds maximum length of ${AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH}`;
     }
-    if (!isAgentAclRole(entry.role)) {
+    if (!isAgentAccessControlRole(entry.role)) {
       return `Unknown ACL role: ${String(entry.role)}`;
     }
     const key = `${entry.type}:${entry.name}`;
