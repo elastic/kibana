@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-/* Some tests assert via shared retention helpers (verifyRetentionDisplay, etc.). */
-/* eslint-disable playwright/expect-expect */
-
 import { type EsClient, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { omit } from 'lodash';
@@ -17,10 +14,10 @@ import {
   ensureDslLifecycle,
   openLifecycleMethodFlyout,
   removeDeletePhase,
+  RETENTION_TEST_IDS,
   saveRetentionChanges,
   setCustomRetention,
   toggleInheritSwitch,
-  verifyRetentionDisplay,
 } from '../../../fixtures/data_lifecycle_helpers';
 
 async function createTsdbIndexTemplate({
@@ -133,23 +130,23 @@ test.describe(
     test('should set and reset retention policy', async ({ page }) => {
       // Set a specific retention period (DSL delete phase)
       await setCustomRetention(page, '7', 'd');
-      await verifyRetentionDisplay(page, '7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
       // Reset to indefinite retention by removing the delete phase
       await removeDeletePhase(page);
-      await verifyRetentionDisplay(page, '∞');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
     });
 
     // Smoke test: Verifies persistence across page refresh (UI-specific behavior)
     test('should persist retention value across page refresh', async ({ page, pageObjects }) => {
       await setCustomRetention(page, '30', 'd');
-      await verifyRetentionDisplay(page, '30 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
 
       // Refresh the page
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Verify the value persists
-      await verifyRetentionDisplay(page, '30 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
     });
 
     // Smoke test: Verifies classic stream retention UI workflow
@@ -171,19 +168,19 @@ test.describe(
       await setCustomRetention(page, '7', 'd', {
         expectOverrideConfirmation: config.serverless,
       });
-      await verifyRetentionDisplay(page, '7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
     });
 
     // Verifies the inherit lifecycle flyout flow
     test('should switch lifecycle to inherit from parent', async ({ page }) => {
       await setCustomRetention(page, '7', 'd');
-      await verifyRetentionDisplay(page, '7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
       // Switch to inherit via the lifecycle method flyout
       await openLifecycleMethodFlyout(page);
       await toggleInheritSwitch(page, true);
       await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '∞');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
     });
 
     test('should open DSL lifecycle phase popup and display phase details', async ({

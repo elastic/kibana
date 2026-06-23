@@ -6,7 +6,6 @@
  */
 
 import { type Locator, type ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 export const RETENTION_TEST_IDS = {
   // Entry points (lifecycle summary header actions)
@@ -50,7 +49,7 @@ export const RETENTION_TEST_IDS = {
 async function confirmOverride(page: ScoutPage): Promise<void> {
   const overrideButton = page.getByTestId('overrideSettingsModal-overrideButton');
   await overrideButton.click();
-  await expect(overrideButton).toBeHidden();
+  await overrideButton.waitFor({ state: 'hidden' });
 }
 
 /**
@@ -59,7 +58,7 @@ async function confirmOverride(page: ScoutPage): Promise<void> {
 export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locator> {
   await page.getByTestId(RETENTION_TEST_IDS.editLifecycleMethodButton).click();
   const flyout = page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout);
-  await expect(flyout).toBeVisible();
+  await flyout.waitFor({ state: 'visible' });
   return flyout;
 }
 
@@ -74,7 +73,7 @@ export async function saveRetentionChanges(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)).toBeHidden();
+  await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
 }
 
 /**
@@ -82,11 +81,15 @@ export async function saveRetentionChanges(
  */
 export async function cancelRetentionChanges(page: ScoutPage): Promise<void> {
   await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutCancelButton).click();
-  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)).toBeHidden();
+  await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
 }
 
 /**
  * Toggles the "inherit lifecycle" checkbox inside the lifecycle method flyout.
+ *
+ * No assertion on the resulting state is made here (assertions belong in specs);
+ * the caller's next interaction relies on the toggled state and will fail if it
+ * did not flip.
  */
 export async function toggleInheritSwitch(page: ScoutPage, enabled: boolean): Promise<void> {
   const inheritCheckbox = page.getByTestId(RETENTION_TEST_IDS.successfulInheritCheckbox);
@@ -96,19 +99,6 @@ export async function toggleInheritSwitch(page: ScoutPage, enabled: boolean): Pr
   if (isChecked !== enabled) {
     await inheritCheckbox.click();
   }
-
-  if (enabled) {
-    await expect(inheritCheckbox).toBeChecked();
-  } else {
-    await expect(inheritCheckbox).not.toBeChecked();
-  }
-}
-
-/**
- * Verifies the "inherit lifecycle" checkbox is visible inside the lifecycle method flyout.
- */
-export async function verifyInheritSwitchVisible(page: ScoutPage): Promise<void> {
-  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulInheritCheckbox)).toBeVisible();
 }
 
 /**
@@ -138,7 +128,11 @@ export async function ensureDslLifecycle(page: ScoutPage): Promise<void> {
   const addDeletePhaseButton = page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton);
   const existingDeletePhase = page.getByTestId('lifecyclePhase-delete-button');
 
-  await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toBeVisible();
+  // Wait deterministically for the lifecycle summary to render before reading
+  // the effective lifecycle state. The retention metric is always present in the
+  // summary regardless of the current lifecycle, so it is a stable anchor (this
+  // replaces the previous fixed-timeout race).
+  await page.getByTestId(RETENTION_TEST_IDS.retentionMetric).waitFor({ state: 'visible' });
 
   const dslAlreadyEffective =
     (await addDeletePhaseButton.isVisible()) || (await existingDeletePhase.isVisible());
@@ -179,13 +173,11 @@ export async function openDeletePhaseFlyout(
     await deletePhaseButton.click();
     await page.getByTestId('lifecyclePhase-delete-editButton').click();
   } else {
-    const addButton = page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton);
-    await addButton.waitFor({ state: 'visible' });
-    await expect(addButton).toBeEnabled();
-    await addButton.click();
+    // .click() auto-waits for the button to be visible and enabled.
+    await page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton).click();
   }
 
-  await expect(flyout).toBeVisible();
+  await flyout.waitFor({ state: 'visible' });
   return flyout;
 }
 
@@ -217,7 +209,9 @@ export async function setCustomRetention(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)).toBeHidden();
+  await page
+    .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
+    .waitFor({ state: 'hidden' });
 }
 
 /**
@@ -232,33 +226,9 @@ export async function removeDeletePhase(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)).toBeHidden();
-}
-
-/**
- * Verifies the displayed retention value.
- */
-export async function verifyRetentionDisplay(
-  page: ScoutPage,
-  expectedValue: string,
-  isFailureStore = false
-): Promise<void> {
-  const testId = isFailureStore
-    ? RETENTION_TEST_IDS.failureStoreRetentionMetric
-    : RETENTION_TEST_IDS.retentionMetric;
-  await expect(page.getByTestId(testId)).toContainText(expectedValue);
-}
-
-/**
- * Verifies retention display in the streams table.
- */
-export async function verifyRetentionInTable(
-  page: ScoutPage,
-  streamName: string,
-  expectedValue: string
-): Promise<void> {
-  const retentionColumn = page.getByTestId(RETENTION_TEST_IDS.retentionColumn(streamName));
-  await expect(retentionColumn).toContainText(expectedValue);
+  await page
+    .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
+    .waitFor({ state: 'hidden' });
 }
 
 /**

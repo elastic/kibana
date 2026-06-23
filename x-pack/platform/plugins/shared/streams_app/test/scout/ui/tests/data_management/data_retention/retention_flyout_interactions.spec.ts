@@ -14,7 +14,6 @@ import {
   closeToastsIfPresent,
   openLifecycleMethodFlyout,
   setCustomRetention,
-  verifyRetentionDisplay,
   RETENTION_TEST_IDS,
 } from '../../../fixtures/data_lifecycle_helpers';
 
@@ -72,7 +71,7 @@ test.describe(
     test('should preserve values on cancel and update on save', async ({ page }) => {
       // Set initial custom retention via the delete-phase flyout
       await setCustomRetention(page, '7', 'd');
-      await verifyRetentionDisplay(page, '7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
       // Open the delete-phase flyout, change the value but cancel - original preserved
       await page.getByTestId('lifecyclePhase-delete-button').click();
@@ -82,11 +81,11 @@ test.describe(
       await deletePhaseFlyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseValue).fill('14');
       await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseCancelButton).click();
       await expect(deletePhaseFlyout).toBeHidden();
-      await verifyRetentionDisplay(page, '7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
       // Set a new value and save - value updates
       await setCustomRetention(page, '30', 'd', { existing: true });
-      await verifyRetentionDisplay(page, '30 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
     });
   }
 );

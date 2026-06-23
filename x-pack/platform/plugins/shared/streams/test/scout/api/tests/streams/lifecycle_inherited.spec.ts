@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EsClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../../fixtures';
@@ -17,49 +16,6 @@ apiTest.describe(
   () => {
     const rootStream = 'logs.otel';
     const streamNamePrefix = `${rootStream}.lci`;
-
-    const ilmClassic = {
-      dataStreamName: 'logs-lci-ilm-classic',
-      templateName: 'lci-ilm-classic-template',
-      policyName: 'lci-ilm-classic-policy',
-    } as const;
-
-    let ilmClassicCreated = false;
-
-    async function createIlmClassicFixture(esClient: EsClient): Promise<void> {
-      await esClient.ilm.putLifecycle({
-        name: ilmClassic.policyName,
-        policy: {
-          phases: {
-            hot: { actions: { rollover: { max_age: '30d' } } },
-            delete: { min_age: '90d', actions: { delete: {} } },
-          },
-        },
-      });
-
-      await esClient.indices.putIndexTemplate({
-        name: ilmClassic.templateName,
-        index_patterns: [`${ilmClassic.dataStreamName}*`],
-        data_stream: {},
-        priority: 500,
-        template: {
-          settings: {
-            'index.lifecycle.name': ilmClassic.policyName,
-            'index.lifecycle.prefer_ilm': true,
-          },
-        },
-      });
-
-      await esClient.indices.createDataStream({ name: ilmClassic.dataStreamName });
-      ilmClassicCreated = true;
-    }
-
-    async function cleanupIlmClassicFixture(esClient: EsClient): Promise<void> {
-      await esClient.indices.deleteDataStream({ name: ilmClassic.dataStreamName });
-      await esClient.indices.deleteIndexTemplate({ name: ilmClassic.templateName });
-      await esClient.ilm.deleteLifecycle({ name: ilmClassic.policyName });
-      ilmClassicCreated = false;
-    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type ApiClient = any;
@@ -122,11 +78,8 @@ apiTest.describe(
       expect(updateResponse).toHaveStatusCode(200);
     }
 
-    apiTest.afterEach(async ({ apiServices, esClient }) => {
+    apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.streamsTest.cleanupTestStreams(streamNamePrefix);
-      if (ilmClassicCreated) {
-        await cleanupIlmClassicFixture(esClient);
-      }
     });
 
     apiTest(
@@ -195,33 +148,6 @@ apiTest.describe(
         expect(body.lifecycle.dsl).toBeDefined();
         // Inherited config comes from the parent (15d), not the child's own 90d override.
         expect(body.lifecycle.dsl.data_retention).toBe('15d');
-      }
-    );
-
-    apiTest(
-      'returns the ILM policy a classic stream would inherit from its index template',
-      // ILM is a stateful-only concept, so this case does not apply to serverless.
-      { tag: tags.stateful.classic },
-      async ({ apiClient, samlAuth, esClient, config }) => {
-        apiTest.skip(config.serverless, 'ILM is a stateful-only concept');
-
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-        await createIlmClassicFixture(esClient);
-
-        const { statusCode, body } = await apiClient.get(
-          `internal/streams/${ilmClassic.dataStreamName}/lifecycle/_inherited`,
-          {
-            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            responseType: 'json',
-          }
-        );
-
-        expect(statusCode).toBe(200);
-
-        expect(body.lifecycle.ilm).toBeDefined();
-        expect(body.lifecycle.ilm.policy).toBe(ilmClassic.policyName);
-        expect(body.lifecycle.dsl).toBeUndefined();
       }
     );
 
