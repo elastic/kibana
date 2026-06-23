@@ -7,45 +7,65 @@
 
 import dedent from 'dedent';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { createProposeSkillTool } from './propose_skill';
-import { createPatchSkillTool } from './patch_skill';
+import { createListSkillsTool } from './list_skills';
 import { createListToolsTool } from './list_tools';
+import { createLoadSkillForEditingTool } from './load_skill_for_editing';
+import { createPatchSkillTool } from './patch_skill';
+import { createProposeSkillTool } from './propose_skill';
 
 const SKILL_AUTHORING_REFERENCE_NAME = 'skill-authoring-examples';
 
 /**
- * Built-in skill that teaches the agent how to author Agent Builder skills
- * conversationally.
+ * Built-in skill that lets the user author new Agent Builder skills and
+ * view or modify existing ones conversationally. For new skills the agent
+ * calls `propose_skill` to draft an attachment; for existing skills it calls
+ * `load_skill_for_editing` to fetch the persisted content. In both flows
+ * `patch_skill` refines the draft and the card's button (Create / Save
+ * changes) persists it.
  */
-export const skillAuthoringSkill = defineSkillType({
-  id: 'skill-authoring',
-  name: 'skill-authoring',
+export const skillManagementSkill = defineSkillType({
+  id: 'skill-management',
+  name: 'skill-management',
   basePath: 'skills/platform/agent-builder',
   experimental: true,
   description:
-    'Author a new Agent Builder skill from a chat description. Use when the user asks to create, build, generate, or design a skill, capability, or expertise area for an agent.',
+    'Author a new Agent Builder skill, or view or edit an existing one. Use when the user asks to create, build, generate, design, scaffold, see, show, display, view, edit, update, modify, change, improve, or fix a skill, capability, or expertise area for an agent.',
   content: dedent(`
 ## When to Use This Skill
 
 Use this skill when:
 - The user asks to "create / build / make / design / scaffold a skill" for an agent.
 - The user describes a recurring task they want an agent to handle and the right answer is a reusable skill.
-- The user wants to teach the agent something they expect to reuse in future conversations.
+- The user wants to view or display an existing skill.
+- The user asks to "edit / update / modify / change / improve / fix" an existing skill.
+- The user references a specific skill by name or id, whether or not they want changes.
+- The user wants to add or remove tools from a skill they already own.
 
 Do **not** use this skill when:
 - The user only wants a one-off answer (just answer it).
-- The user wants to edit an already-persisted skill — direct them to the skill editor at /manage/skills.
 - The user wants to author a tool, plugin, or agent (different entity types, not yet supported in chat).
+- The user is asking about a built-in (readonly) skill — those cannot be loaded or edited via chat.
+
+## Pick a Flow First
+
+Before doing anything else, decide which flow applies:
+
+- **Authoring a new skill** — the user is creating a skill that does not yet exist. Use \`list_tools\` → \`propose_skill\` → \`patch_skill\`.
+- **Viewing or editing an existing skill** — the user references a skill they already own. Use \`list_skills\` → \`load_skill_for_editing\` → \`patch_skill\`.
+
+If the user's intent is ambiguous, ask before committing to a flow. The two flows do not mix in a single round — do not call \`propose_skill\` and \`load_skill_for_editing\` together.
 
 ## Available Tools
 
 This skill exposes the following tools:
 
 - **list_tools** — Enumerate registered tools. Call this before \`propose_skill\`, and again before any \`patch_skill\` that changes \`tool_ids\`.
-- **propose_skill** — Submit the first draft. Returns \`attachment_id\` needed for \`<render_attachment>\`.
-- **patch_skill** — Refine an existing draft. Prefer this over re-calling \`propose_skill\`.
+- **list_skills** — Lists all user-created skills (id, name, description). Call this first in the edit flow to confirm the correct skill id before loading.
+- **propose_skill** — Submit the first draft of a new skill. Returns \`attachment_id\` needed for \`<render_attachment>\`.
+- **load_skill_for_editing** — Fetches an existing user-created skill by id and renders it as an inline attachment. If no changes are needed the card shows an "Edit in Management" link. If \`patch_skill\` is called afterwards, a "Save changes" button appears automatically.
+- **patch_skill** — Refine an existing draft. Used by both flows (rename, edit description, swap tool_ids, search-replace on \`content\` or referenced files, add/remove referenced files). Prefer this over re-calling \`propose_skill\`.
 
-## Authoring Workflow
+## Authoring Workflow (New Skill)
 
 1. **Clarify intent before drafting.**
    - If the request is vague, ask before writing anything. You need enough to write a specific, useful skill — not just a rough one.
@@ -87,7 +107,7 @@ This skill exposes the following tools:
 5. **Pick the registry tools the skill needs.**
    - Always call \`list_tools\` first and use the results as the single source of truth for the list of available tools.
    - Pick ids verbatim from the \`list_tools\` results. Use the \`description\` field to match the user's intent.
-   - Keep the list focused on tools the skill genuinely requires — don't add tools the agent would use anyway without the skill
+   - Keep the list focused on tools the skill genuinely requires — don't add tools the agent would use anyway without the skill.
    - If the user mentions a tool that isn't in the registry, say so and either suggest a similar one or offer to proceed without it.
 
 6. **(Optional) Add referenced files for long examples or reference material.**
@@ -106,9 +126,60 @@ This skill exposes the following tools:
 9. **When the user approves the draft, direct them to the create button on the card.**
    - The card handles submission — you do not need to call any API endpoint yourself.
 
-## Examples
-
 See the referenced file \`${SKILL_AUTHORING_REFERENCE_NAME}.md\` for a complete worked example (initial draft + a follow-up patch).
+
+## Editing Workflow (Existing Skill)
+
+1. **Identify the skill.**
+   - Call \`list_skills\` to confirm the correct id.
+   - Do **not** guess an id — an incorrect id returns an error.
+
+2. **Call \`load_skill_for_editing\`** with the confirmed skill id.
+
+3. **Render the attachment only when appropriate.**
+   - If the user just wants to view the skill, emit \`<render_attachment id="ATTACHMENT_ID" />\` so they see the current content.
+   - If the user already asked for changes that you will apply via \`patch_skill\` in this same round, **skip this render** — emit \`<render_attachment>\` only after the final patch. Showing the pre-patch state is redundant and clutters the response.
+
+4. **If the user wants changes, apply them via \`patch_skill\`.**
+   - Use targeted search-replace patches rather than rewriting fields wholesale.
+   - Prefer \`content_patches\` for surgical edits to the markdown body.
+   - Use \`tool_ids\` replacement only when the full list is changing.
+   - After the final patch, emit \`<render_attachment id="ATTACHMENT_ID" />\` once so the user sees the updated draft.
+
+5. **When the user is happy, point them at the Save button.**
+   - The card's "Save changes" button calls \`PUT /api/agent_builder/skills/:id\`. You do **not** need to call any HTTP endpoint yourself.
+
+### Edit Examples
+
+#### Example A: view only
+
+User: "Show me the api-security skill."
+
+Steps:
+1. Call \`list_skills\` to confirm \`skill_id: "api-security"\`.
+2. Call \`load_skill_for_editing\` with that id.
+3. Emit \`<render_attachment id="att-xyz" />\`.
+
+#### Example B: edit — add content
+
+User: "Add a section about rate limiting to the api-security skill."
+
+Steps:
+1. Call \`list_skills\` to confirm \`skill_id: "api-security"\`.
+2. Call \`load_skill_for_editing\`.
+3. Call \`patch_skill\` to insert the rate limiting section.
+4. Emit \`<render_attachment id="att-xyz" />\` once so the user sees the updated draft.
+5. Ask the user to review and click Save changes when ready.
+
+#### Example C: edit — remove a tool
+
+User: "Remove the execute_esql tool from my logs-debug skill."
+
+Steps:
+1. Call \`list_skills\` to confirm \`skill_id: "logs-debug"\`.
+2. Call \`load_skill_for_editing\`.
+3. Call \`patch_skill\` with the updated \`tool_ids\` and a \`content_patch\` removing the tool reference.
+4. Emit \`<render_attachment id="att-abc" />\` once so the user sees the updated draft.
   `),
   referencedContent: [
     {
@@ -234,5 +305,11 @@ If the skill includes long, copy-pasteable templates (a 60-line ES|QL query temp
 `),
     },
   ],
-  getInlineTools: () => [createListToolsTool(), createProposeSkillTool(), createPatchSkillTool()],
+  getInlineTools: () => [
+    createListToolsTool(),
+    createListSkillsTool(),
+    createProposeSkillTool(),
+    createLoadSkillForEditingTool(),
+    createPatchSkillTool(),
+  ],
 });

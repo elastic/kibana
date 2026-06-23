@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { skillAuthoringSkill } from './skill_authoring_skill';
 export { skillManagementSkill } from './skill_management_skill';
