@@ -89,16 +89,7 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   }),
   duration: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
-    display: (
-      <div
-        css={css`
-          text-align: left;
-          width: 100%;
-        `}
-      >
-        {column.displayAsText ?? column.id}
-      </div>
-    ),
+    displayHeaderCellProps: { style: { textAlign: 'left' } },
   }),
 };
 
