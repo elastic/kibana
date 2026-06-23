@@ -10,37 +10,87 @@
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 
+/**
+ * Host-backed profile state API exposed to profile extension point implementations.
+ */
 export interface ProfileStateAdapter<TState extends object> {
+  /**
+   * Returns the current state, falling back to the definition's default state before any value is
+   * written by the host.
+   */
   getState: () => TState;
+  /**
+   * Emits the current state and subsequent state changes.
+   */
   getState$: () => Observable<TState>;
+  /**
+   * Replaces the full state value.
+   */
   setState: (state: TState) => void;
+  /**
+   * Applies a shallow immutable update to the current state.
+   */
   updateState: (stateUpdate: Partial<TState>) => void;
 }
 
+/**
+ * Field-level lifetime preference for profile state values.
+ */
 export enum ProfileStateType {
+  /**
+   * Ephemeral UI state for the current host/session.
+   */
   Ui = 'ui',
+  /**
+   * URL-addressable state when the host supports URL syncing.
+   */
   Url = 'url',
+  /**
+   * Persisted state when the host supports state persistence.
+   */
   Persistent = 'persistent',
 }
 
+/**
+ * Describes the intended lifetime for each field in a profile state definition.
+ */
 export type ProfileStateDescriptor<TState extends object> = {
   [key in keyof TState]: {
     type: ProfileStateType;
   };
 };
 
+/**
+ * Typed state definition registered by profile providers and consumed via
+ * `ContextAwarenessToolkit.getStateAdapter`.
+ */
 export interface ProfileStateDefinition<TState extends object> {
+  /**
+   * Unique storage key for this profile state blob.
+   */
   key: string;
+  /**
+   * Field-level lifetime metadata for this state shape.
+   */
   descriptor: ProfileStateDescriptor<TState>;
+  /**
+   * Typed fallback returned before any host state has been written.
+   */
   defaultState: TState;
 }
 
+/**
+ * Registry of profile state definitions supported by Discover.
+ */
 export class ProfileStateRegistry {
   private readonly stateDefinitions = new Map<
     string,
     ProfileStateDefinition<Record<string, unknown>>
   >();
 
+  /**
+   * Registers a profile state definition. Keys must be globally unique.
+   */
   public registerDefinition<TState extends object>(definition: ProfileStateDefinition<TState>) {
     if (this.stateDefinitions.has(definition.key)) {
       throw new Error(`State with key ${definition.key} is already registered.`);
@@ -52,6 +102,9 @@ export class ProfileStateRegistry {
     );
   }
 
+  /**
+   * Returns true when the requested definition matches the registered descriptor and default state.
+   */
   public hasDefinition<TState extends object>(definition: ProfileStateDefinition<TState>): boolean {
     const registeredDefinition = this.stateDefinitions.get(definition.key);
 
@@ -65,6 +118,9 @@ export class ProfileStateRegistry {
     );
   }
 
+  /**
+   * Returns the subset of registered profile state fields matching the requested lifetime type.
+   */
   public pickStateByType({
     profileState,
     stateType,

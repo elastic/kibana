@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createInMemoryContextAwarenessToolkit } from './in_memory_profile_state_toolkit';
+import { createInMemoryContextAwarenessToolkit } from './in_memory_toolkit';
 import {
   type ProfileStateDefinition,
   ProfileStateRegistry,

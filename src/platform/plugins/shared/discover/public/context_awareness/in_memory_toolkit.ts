@@ -16,6 +16,10 @@ import type {
   ProfileStateRegistry,
 } from './profile_state';
 
+/**
+ * Creates a complete context awareness toolkit for hosts that do not have tab-backed state.
+ * Profile state is kept in memory for the lifetime of the scoped host instance.
+ */
 export const createInMemoryContextAwarenessToolkit = ({
   actions = {},
   profileStateRegistry,
