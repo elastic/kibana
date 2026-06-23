@@ -1,0 +1,48 @@
+{
+  "10.11.0": [
+    {
+      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
+      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
+      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
+      "HINT": "You can use the template below and create sample objects for 10.11.0 and 10.12.0 versions.",
+      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
+      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
+      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+    }
+  ],
+  "10.12.0": [
+    {
+      "taskType": "string",
+      "scheduledAt": "string",
+      "startedAt": "string?|null",
+      "retryAt": "string?|null",
+      "runAt": "string",
+      "schedule": "object?",
+      "params": "string",
+      "state": "string",
+      "stateVersion": "number?",
+      "traceparent": "string",
+      "user": "string?",
+      "scope": "array?",
+      "ownerId": "string?|null",
+      "enabled": "boolean?",
+      "timeoutOverride": "string?",
+      "attempts": "number",
+      "status": "idle|claiming|running|failed|unrecognized|dead_letter",
+      "version": "string?",
+      "partition": "number?",
+      "priority": "number?",
+      "apiKey": "string?",
+      "cost": "string?",
+      "uiamApiKey": "string?",
+      "userScope": {
+        "apiKeyId": "string",
+        "uiamApiKeyId": "string?",
+        "spaceId": "string",
+        "apiKeyCreatedByUser": "boolean",
+        "userProfileId": "string?",
+        "userName": "string?"
+      }
+    }
+  ]
+}
