@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { OBS_ALERTING_FEATURES } from '@kbn/rule-data-utils';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import { observabilityAlertsFeatureId, observabilityAppId } from '../../common';
+import { observabilityAlertsFeatureId } from '../../common';
 
 export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
   return {
@@ -19,12 +19,12 @@ export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
     }),
     order: 1300,
     category: DEFAULT_APP_CATEGORIES.observability,
-    app: [observabilityAppId],
+    app: [],
     catalogue: [],
     alerting: OBS_ALERTING_FEATURES,
     privileges: {
       all: {
-        app: [observabilityAppId],
+        app: [],
         catalogue: [],
         savedObject: { all: [], read: [] },
         alerting: {
@@ -35,7 +35,7 @@ export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
         ui: ['show'],
       },
       read: {
-        app: [observabilityAppId],
+        app: [],
         catalogue: [],
         savedObject: { all: [], read: [] },
         alerting: {
