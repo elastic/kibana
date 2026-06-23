@@ -39,6 +39,8 @@ apiTest.describe(
 
     for (const spec of RULE_SPECS) {
       apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+        apiTest.skip(!rule, `${spec.ruleTypeId} is not registered on this deployment`);
         const response = await apiClient.post('api/alerting/rule', {
           headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
           body: {
@@ -112,18 +114,20 @@ apiTest.describe(
 
     for (const spec of RULE_SPECS) {
       apiTest(`can mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+        apiTest.skip(!rule, `${spec.ruleTypeId} is not registered on this deployment`);
         const response = await apiClient.post(
-          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+          `api/alerting/rule/${rule!.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
           { headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(204);
       });
 
       apiTest(`can unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+        apiTest.skip(!rule, `${spec.ruleTypeId} is not registered on this deployment`);
         const response = await apiClient.post(
-          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+          `api/alerting/rule/${rule!.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
           { headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(204);

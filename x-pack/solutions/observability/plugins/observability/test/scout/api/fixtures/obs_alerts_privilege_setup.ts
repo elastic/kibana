@@ -157,10 +157,23 @@ export const setupObsAlertsPrivilegeRules = async ({
   samlAuth: SamlAuth;
 }): Promise<ObsAlertsPrivilegeState> => {
   const adminCreds = await requestAuth.getApiKeyForAdmin();
+
+  const ruleTypesResponse = await apiClient.get('api/alerting/rule_types', {
+    headers: { ...KIBANA_HEADERS, ...adminCreds.apiKeyHeader },
+    responseType: 'json',
+  });
+  const registeredIds = new Set(
+    (ruleTypesResponse.body as Array<{ id: string }>).map((rt) => rt.id)
+  );
+
   const createdRules: Array<{ ruleTypeId: string; ruleId: string }> = [];
   let enabledRuleId: string | undefined;
 
   for (const spec of RULE_SPECS) {
+    if (!registeredIds.has(spec.ruleTypeId)) {
+      continue;
+    }
+
     const response = await apiClient.post('api/alerting/rule', {
       headers: { ...KIBANA_HEADERS, ...adminCreds.apiKeyHeader },
       body: {

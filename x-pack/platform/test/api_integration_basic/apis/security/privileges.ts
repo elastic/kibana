@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
             observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCasesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCasesV3: ['all', 'read', 'minimal_all', 'minimal_read'],
+            observabilityAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read'],
             agentContextLayer: ['all', 'read', 'minimal_all', 'minimal_read'],

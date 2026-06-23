@@ -39,18 +39,20 @@ apiTest.describe(
 
     for (const spec of RULE_SPECS) {
       apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+        apiTest.skip(!rule, `${spec.ruleTypeId} is not registered on this deployment`);
         const response = await apiClient.post(
-          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+          `api/alerting/rule/${rule!.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
           { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(403);
       });
 
       apiTest(`cannot unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+        apiTest.skip(!rule, `${spec.ruleTypeId} is not registered on this deployment`);
         const response = await apiClient.post(
-          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+          `api/alerting/rule/${rule!.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
           { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(403);
