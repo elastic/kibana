@@ -6,9 +6,6 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import {
-  type EuidSourceFields,
-} from '@kbn/cloud-security-posture-common';
 import { getField, getFieldArray } from '../../../../flyout/document_details/shared/utils';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
 import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
