@@ -265,6 +265,20 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.recovery_strategy).toBe('no_breach');
     expect(result.no_data_strategy).toBe('emit');
   });
+
+  it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      query: {
+        format: 'composed',
+        base: BASE,
+        breach: { segment: ALERT_SEGMENT },
+        recovery: { segment: RECOVERY_SEGMENT },
+      },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBe('query');
+  });
 });
 
 // ── mapRuleToComposeFormValues ───────────────────────────────────────────────

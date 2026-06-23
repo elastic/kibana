@@ -564,6 +564,22 @@ describe('rule_request_mappers', () => {
 
       expect(result.artifacts).toBeNull();
     });
+
+    it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE count > 100' },
+          recovery: { segment: 'WHERE count < 50' },
+        },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBe('query');
+    });
   });
 
   describe('mapRuleResponseToFormValues', () => {

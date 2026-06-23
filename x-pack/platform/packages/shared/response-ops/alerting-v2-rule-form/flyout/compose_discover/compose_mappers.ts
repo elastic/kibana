@@ -123,9 +123,12 @@ export const composeFormToUpdateRequest = (
       ...metadata,
       builder_type: metadata.builder_type ?? null,
     },
-    // Read directly from formValues to bypass the create-path inference that
-    // re-adds 'query' when a recovery query block exists (see composeFormToCreateRequest).
-    recovery_strategy: formValues.recoveryStrategy ?? null,
+    // When recoveryStrategy is explicitly set (loaded from API), use it as-is.
+    // When undefined (user added a recovery block via the form), infer from the query.
+    recovery_strategy:
+      formValues.recoveryStrategy !== undefined
+        ? formValues.recoveryStrategy ?? null
+        : resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,

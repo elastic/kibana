@@ -29,7 +29,7 @@ export {
   mapRuleResponseToFormValues,
 } from './utils/rule_request_mappers';
 export type { RuleRequestCommon } from './utils/rule_request_mappers';
-export { isNonRepresentableRule, isNonRepresentableFormValues } from './utils/is_non_representable';
+export { isNonRepresentableRule } from './utils/is_non_representable';
 
 // Field groups — for composing custom form layouts
 export { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
