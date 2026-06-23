@@ -1077,7 +1077,7 @@ export function DimensionEditorAdditionalSection({
             setState({
               ...state,
               showBar: supportingVisualizationType === 'bar',
-              applyColorTo: supportingVisualizationType === 'none' ? undefined : 'background',
+              applyColorTo: 'background',
             });
 
             if (supportingVisualizationType === 'trendline') {
