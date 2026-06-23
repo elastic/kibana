@@ -13,6 +13,9 @@ import type {
   Example,
   TaskOutput,
 } from '@kbn/evals';
+import { createSkillInvocationEvaluator } from '@kbn/evals';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { SiemReadinessEvalChatClient } from './chat_client';
 
 export interface SiemReadinessDatasetExample extends Example {
@@ -80,10 +83,14 @@ export function createEvaluateSiemReadinessDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SiemReadinessEvalChatClient;
+  traceEsClient?: Client;
+  log?: ToolingLog;
 }): EvaluateSiemReadinessDataset {
   return async function evaluateSiemReadinessDataset({
     dataset: { name, description, examples },
@@ -103,6 +110,25 @@ export function createEvaluateSiemReadinessDataset({
     const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
       evaluators.traceBasedEvaluators;
 
+    const baseEvaluators: Evaluator<SiemReadinessDatasetExample, TaskOutput>[] = [
+      createSiemReadinessCriteriaEvaluator({ evaluators }),
+      toolCalls as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      latency as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      inputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      outputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      cachedTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+    ];
+
+    if (traceEsClient && log) {
+      baseEvaluators.push(
+        createSkillInvocationEvaluator({
+          skillName: 'siem-readiness',
+          traceEsClient,
+          log,
+        }) as Evaluator<SiemReadinessDatasetExample, TaskOutput>
+      );
+    }
+
     await executorClient.runExperiment(
       {
         datasets: [dataset],
@@ -117,14 +143,7 @@ export function createEvaluateSiemReadinessDataset({
           };
         },
       },
-      [
-        createSiemReadinessCriteriaEvaluator({ evaluators }),
-        toolCalls as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
-        latency as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
-        inputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
-        outputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
-        cachedTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
-      ]
+      baseEvaluators
     );
   };
 }
