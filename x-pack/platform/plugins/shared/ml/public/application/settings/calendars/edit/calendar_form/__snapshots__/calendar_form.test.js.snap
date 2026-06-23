@@ -6,9 +6,6 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
   data-test-subj="mlCalendarFormEdit"
 >
   <div
-    data-test-subj="mlCalendarTitle"
-  />
-  <div
     class="euiText emotion-euiText-m"
     data-test-subj="mlCalendarDescriptionText"
   >
