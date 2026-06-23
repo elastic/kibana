@@ -3,7 +3,7 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/data-sets-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/data-sets-plugin'
+id: '@kbn/federated-data-plugin'
 layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
@@ -11,8 +11,8 @@ toolchains:
   default: node
 language: typescript
 project:
-  title: '@kbn/data-sets-plugin'
-  description: Moon project for @kbn/data-sets-plugin
+  title: '@kbn/federated-data-plugin'
+  description: Moon project for @kbn/federated-data-plugin
   channel: ''
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/private/federated_data

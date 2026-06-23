@@ -18,7 +18,7 @@ export const mountManagementSection = (
   { element }: ManagementAppMountParams,
   { cloud }: { cloud?: CloudStart }
 ) => {
-  const enableFederatedIdentityAuth = Boolean(cloud?.isCloudEnabled);
+  const enableFederatedIdentityAuth = true; // Boolean(cloud?.isCloudEnabled);
 
   ReactDOM.render(
     coreStart.rendering.addContext(

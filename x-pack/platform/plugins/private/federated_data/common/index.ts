@@ -57,13 +57,6 @@ export const PLUGIN_NAME = i18n.translate('dataSets.pluginName', {
   defaultMessage: 'ES|QL Data Federation',
 });
 
-export const LIST_BREADCRUMB = [
-  {
-    text: PLUGIN_NAME,
-    href: '#/management/kibana/data_federation',
-  },
-];
-
 const DATA_SOURCES_PATH = '/_query/data_source';
 const DATA_SETS_PATH = '/_query/dataset';
 export const DATA_SOURCE_BY_ID_PATH = `${DATA_SOURCES_PATH}/{id}`;

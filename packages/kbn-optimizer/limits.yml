@@ -36,6 +36,7 @@ pageLoadAssetSize:
   dashboard: 20000
   dashboardMarkdown: 8661
   data: 496646
+  federatedData: 79339
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743

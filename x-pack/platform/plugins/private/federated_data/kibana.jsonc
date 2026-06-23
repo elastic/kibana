@@ -1,6 +1,6 @@
 {
   "type": "plugin",
-  "id": "@kbn/data-sets-plugin",
+  "id": "@kbn/federated-data-plugin",
   "owner": [
     "@elastic/kibana-management"
   ],
@@ -8,7 +8,7 @@
   "visibility": "private",
   "description": "Data sets and data sources apis and management",
   "plugin": {
-    "id": "data_federation",
+    "id": "federatedData",
     "browser": true,
     "server": true,
     "requiredPlugins": [

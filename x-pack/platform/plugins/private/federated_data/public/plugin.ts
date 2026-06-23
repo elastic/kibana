@@ -7,15 +7,26 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { i18n } from '@kbn/i18n';
 import type { SetupDependencies, StartDependencies, DatasetsPluginStart } from './types';
+
+const PLUGIN_NAME = i18n.translate('dataFederation.pluginName', {
+  defaultMessage: 'ES|QL Data Federation',
+});
+
+const LIST_BREADCRUMB = [
+  {
+    text: PLUGIN_NAME,
+    href: '#/management/kibana/data_federation',
+  },
+];
 
 export class DatasetsPlugin
   implements Plugin<void, DatasetsPluginStart, SetupDependencies, StartDependencies>
 {
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     management.sections.section.data.registerApp({
-      id: PLUGIN_ID,
+      id: 'data_federation',
       title: PLUGIN_NAME,
       order: 2,
       async mount(params: ManagementAppMountParams) {

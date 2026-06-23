@@ -59,7 +59,7 @@ describe('DatasetsClient', () => {
         resource: 'r',
         description: '',
         settings: {
-          error_mode: '',
+          error_mode: undefined,
           partition_detection: 'hive',
         },
       };

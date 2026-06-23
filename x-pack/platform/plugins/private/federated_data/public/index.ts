@@ -7,12 +7,6 @@
 
 import { DatasetsPlugin } from './plugin';
 
-export type { CreateDatasetFlyoutProps, CreateDatasetFormValues } from './create_dataset_flyout';
-export { CreateDatasetFlyout } from './create_dataset_flyout';
-export type { CreateDataSourceFlyoutProps } from './create_data_source_flyout';
-export { CreateDataSourceFlyout } from './create_data_source_flyout';
-export { DatasetsClient } from './datasets_client';
-export { DataSourcesClient } from './data_sources_client';
 export type { DatasetsPluginStart } from './types';
 
 export function plugin() {
