@@ -7,9 +7,13 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { PUBLIC_HEADERS, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { clearEntityStoreIndices } from '../fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  installAllEntityTypes,
+  uninstallAllEntityTypes,
+} from '../fixtures/helpers';
 import { getMetadataEntitiesDataStreamName } from '../../../../server/domain/asset_manager/metadata_data_stream';
 import { getMetadataIndexIngestPipelineId } from '../../../../server/domain/asset_manager/metadata_index_ingest_pipeline';
 
@@ -35,11 +39,7 @@ apiTest.describe(
     });
 
     apiTest.afterEach(async ({ apiClient, esClient }) => {
-      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      await uninstallAllEntityTypes(apiClient, defaultHeaders);
       await esClient.indices.deleteDataStream({ name: METADATA_DATA_STREAM }, { ignore: [404] });
       await clearEntityStoreIndices(esClient);
     });
@@ -47,11 +47,7 @@ apiTest.describe(
     apiTest(
       'creates the .entities.v2.metadata.security_default datastream on install',
       async ({ apiClient, esClient }) => {
-        const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {},
-        });
+        const install = await installAllEntityTypes(apiClient, defaultHeaders);
         expect(install.statusCode).toBe(201);
 
         const dataStreams = await esClient.indices.getDataStream({
@@ -73,11 +69,7 @@ apiTest.describe(
     apiTest(
       'installs an ingest pipeline that auto-populates event.ingested on indexed docs',
       async ({ apiClient, esClient }) => {
-        const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {},
-        });
+        const install = await installAllEntityTypes(apiClient, defaultHeaders);
         expect(install.statusCode).toBe(201);
 
         // Pipeline exists.
