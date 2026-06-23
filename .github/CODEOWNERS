@@ -2592,6 +2592,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elasti
 src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/box/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/dropbox/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
