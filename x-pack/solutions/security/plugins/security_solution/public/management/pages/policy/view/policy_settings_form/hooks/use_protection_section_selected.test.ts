@@ -105,5 +105,4 @@ describe('useProtectionSectionSelected', () => {
 
     expect(result.current.sectionSelected).toBe(true);
   });
-
 });
