@@ -81,17 +81,18 @@ For each archive, data fixture, or setup pattern found:
 3. **Classify setup timing**: can data be loaded once (shared across all tests) or does each test need fresh data?
 4. **Flag fresh-server tests**: tests that require a completely clean ES/Kibana state (candidates for a dedicated server config)
 5. **Catalog UI settings mutations**: list every `kibanaServer.uiSettings.replace`, `uiSettings.update`, `uiSettings.delete` call, which tests use them, and whether they use replace-all semantics (wipes all settings) vs selective set
-6. **Catalog repeated magic values**: archive paths, index names, time ranges, saved object IDs that appear in multiple files. These are candidates for a shared constants file.
+6. **Catalog repeated magic values**: archive paths, index names, time ranges, saved object IDs that appear in multiple files. Be conservative: only propose a constant when the value is genuinely reused and extracting it removes real duplication; prefer inline otherwise. Avoid proposing constants for deployment tags unless the same tag set is reused across multiple suites.
 
 ### 6. Auth and roles
 
 1. **Catalog every role**: list every FTR role from configs and test files, with the full privilege definition (ES cluster/index privileges, Kibana feature/space privileges)
 2. **Note usage frequency**: how many test files use each role
 3. **Flag over-privileged tests**: tests that run as `superuser` or the FTR default role when a narrower role would suffice. For each, note what privileges the test actually exercises
-4. **Flag roles used widely** (≥3 files): these warrant a shared auth helper rather than inline definitions
-5. **Flag special auth patterns**: `run_as`, API-key-based auth, certificate auth, or any non-standard FTR auth
+4. **Recommend a target Scout role**: for each role, recommend the least-privileged Cloud-compatible built-in role (`viewer` → privileged/`editor` → `admin`) unless the test specifically validates permission-scoped behavior (e.g. a user limited to index X can see Y but not Z) that no built-in role expresses — only then keep a custom role. Many FTR suites scoped custom roles needlessly; flag those as candidates for a default role rather than a 1:1 custom-role port.
+5. **Flag roles used widely** (≥3 files): these warrant a shared auth helper rather than inline definitions
+6. **Flag special auth patterns**: `run_as`, API-key-based auth, certificate auth, or any non-standard FTR auth
 
-The execution step will decide the specific Scout auth API to use; the plan just provides the complete role inventory with privilege definitions and usage context.
+The execution step picks the specific Scout auth method (`loginAsViewer`, `loginWithCustomRole`, etc.); the plan provides the role inventory, privilege definitions, usage context, and the default-vs-custom recommendation.
 
 ### 7. Reusability and abstraction audit
 
