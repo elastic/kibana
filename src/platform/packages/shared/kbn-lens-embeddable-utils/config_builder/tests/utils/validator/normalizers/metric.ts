@@ -361,35 +361,27 @@ const alignTextBasedColumns: NormalizerConfig<MetricAttributes> = {
   },
 };
 
-/**
- * A `static_value` max accessor renders a fixed background bar that the metric API does not model.
- * The round-trip is inconsistent here: some panels drop it (transformed loses the column) while
- * others keep it verbatim. Run the same self-guarding drop on both sides so they converge no matter
- * which way the transform went; when present, the whole column must go (the `columnOrder` entry, the
- * column itself, the `maxAccessor`, and the forced `showBar`).
- */
-const dropStaticValueMax = (attributes: MetricAttributes): MetricAttributes => {
-  const viz = attributes.state.visualization;
-  if (viz.maxAccessor !== 'metric_accessor_max') {
-    return attributes;
-  }
-  const formBased = getFormBasedDatasourceState(attributes.state.datasourceStates);
-  const layer = formBased?.layers?.[DEFAULT_LAYER_ID];
-  const maxColumn = layer?.columns?.metric_accessor_max as { operationType?: string } | undefined;
-  if (!layer || maxColumn?.operationType !== 'static_value') {
-    return attributes;
-  }
-
-  delete layer.columns.metric_accessor_max;
-  layer.columnOrder = layer.columnOrder.filter((id: string) => id !== 'metric_accessor_max');
-  delete viz.maxAccessor;
-  viz.showBar = false;
-  return attributes;
-};
-
 const alignStaticValueMax: NormalizerConfig<MetricAttributes> = {
-  original: dropStaticValueMax,
-  transformed: dropStaticValueMax,
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    // Only drop when trendline takes precedence
+    if (!viz.trendlineLayerId || viz.maxAccessor !== 'metric_accessor_max') {
+      return attributes;
+    }
+    const formBased = getFormBasedDatasourceState(attributes.state.datasourceStates);
+    const layer = formBased?.layers?.[DEFAULT_LAYER_ID];
+    const maxColumn = layer?.columns?.metric_accessor_max as { operationType?: string } | undefined;
+    if (!layer || maxColumn?.operationType !== 'static_value') {
+      return attributes;
+    }
+    
+    delete layer.columns.metric_accessor_max;
+    layer.columnOrder = layer.columnOrder.filter((id: string) => id !== 'metric_accessor_max');
+    delete viz.maxAccessor;
+    viz.showBar = false;
+    return attributes;
+  },
+  // No `transformed` —> the non-trendline panels should round-trip cleanly
 };
 
 /**
