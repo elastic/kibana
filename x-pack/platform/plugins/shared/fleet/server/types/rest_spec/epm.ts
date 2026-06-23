@@ -628,7 +628,7 @@ export const GetInstalledPackagesRequestSchema = {
           schema.literal('metrics'),
           schema.literal('traces'),
           schema.literal('synthetics'),
-          schema.literal('profiling'),
+          schema.literal('profiles'),
         ],
         { meta: { description: 'Filter by data stream type' } }
       )
@@ -665,7 +665,7 @@ export const GetDataStreamsRequestSchema = {
           schema.literal('metrics'),
           schema.literal('traces'),
           schema.literal('synthetics'),
-          schema.literal('profiling'),
+          schema.literal('profiles'),
         ],
         { meta: { description: 'Filter by data stream type' } }
       )
@@ -1088,7 +1088,7 @@ export const CreateCustomIntegrationRequestSchema = {
             schema.literal('metrics'),
             schema.literal('traces'),
             schema.literal('synthetics'),
-            schema.literal('profiling'),
+            schema.literal('profiles'),
           ]),
         }),
         { maxSize: 10 }
