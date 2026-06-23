@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/security-evals-rule-data-snapshot'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-common'
 tags:
   - functional-tests
   - package
