@@ -9,10 +9,11 @@ import type { PanelFailure } from '../utils';
 import type { DashboardOperation } from './registry';
 import {
   PANEL_TYPE_DEFINITIONS,
+  toCreatePanelResolutionRequest,
   type AddPanelsItemInput,
   type NewPanelInput,
   type PanelContent,
-  type PanelRequestInput,
+  type RequestPanelInput,
   type ResolvePanelContent,
 } from './panels';
 
@@ -21,7 +22,7 @@ type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 export type PanelCreationRequest =
   | {
       operationType: 'add_section';
-      panelInput: PanelRequestInput;
+      panelInput: RequestPanelInput;
       panelInputIndex: number;
     }
   | {
@@ -127,15 +128,9 @@ export const resolvePanelCreationRequests = async ({
           await Promise.all(
             requests.map(async (request) => ({
               request,
-              resolvedPanel: await resolvePanelContent({
-                type: request.panelInput.type,
-                operationType: request.operationType,
-                identifier: request.panelInput.query,
-                nlQuery: request.panelInput.query,
-                index: request.panelInput.index,
-                chartType: request.panelInput.chartType,
-                esql: request.panelInput.esql,
-              }),
+              resolvedPanel: await resolvePanelContent(
+                toCreatePanelResolutionRequest(request.panelInput, request.operationType)
+              ),
             }))
           ),
         ] as const

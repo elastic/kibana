@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { PanelContentAttempt } from '../../resolve_panel';
+import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { InlinePanelOperationType, PanelContentAttempt } from '../../resolve_panel';
 import type { PanelTypeDefinition } from './panel_type';
 import {
   visPanelConfigInputSchema,
@@ -15,6 +16,11 @@ import {
   editPanelRequestInputSchema,
   type VisPanelResolutionRequest,
 } from './vis';
+import {
+  vegaPanelRequestSchema,
+  editVegaPanelRequestInputSchema,
+  type VegaPanelResolutionRequest,
+} from './vega';
 import {
   markdownPanelConfigInputSchema,
   markdownPanelDefinition,
@@ -36,10 +42,17 @@ import {
  *   asynchronously from a query).
  * - `type`: which panel type — `'vis'`, `'markdown'`, … (maps to an embeddable).
  *
- * Today `source: 'request'` only resolves `type: 'vis'`; adding another
- * resolvable type is additive and needs no operation-handler changes.
+ * `source: 'request'` resolves `type: 'vis'` (Lens) or `type: 'vega'` (custom
+ * Vega-Lite). Adding another resolvable type is additive: contribute its
+ * request/edit schemas from a per-type module and extend the request unions and
+ * resolution-request mappers below; operation handlers stay type-agnostic.
  */
 export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
+export type {
+  VegaPanelRequestInput,
+  EditVegaPanelRequestInput,
+  VegaPanelResolutionRequest,
+} from './vega';
 export type { PanelContent } from './panel_type';
 
 /**
@@ -70,13 +83,27 @@ const sectionIdField = z
     'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
   );
 
+/**
+ * A `source: 'request'` panel input, discriminated by `type`: resolve a Lens
+ * visualization (`vis`) or a custom Vega-Lite visualization (`vega`).
+ */
+export const requestPanelInputSchema = z.discriminatedUnion('type', [
+  panelRequestSchema,
+  vegaPanelRequestSchema,
+]);
+
+export type RequestPanelInput = z.infer<typeof requestPanelInputSchema>;
+
 /** A single panel item accepted by `add_panels` (any panel type, optionally targeting a section). */
 export const addPanelsItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion('type', [
     visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
     markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
   ]),
-  panelRequestSchema.extend({ sectionId: sectionIdField }),
+  z.discriminatedUnion('type', [
+    panelRequestSchema.extend({ sectionId: sectionIdField }),
+    vegaPanelRequestSchema.extend({ sectionId: sectionIdField }),
+  ]),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -84,7 +111,7 @@ export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 /** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
   configPanelInputSchema,
-  panelRequestSchema,
+  requestPanelInputSchema,
 ]);
 
 /**
@@ -95,9 +122,20 @@ export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
  */
 export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
 
+/**
+ * A `source: 'request'` edit input, discriminated by `type`: re-resolve a Lens
+ * (`vis`) or Vega (`vega`) panel from a natural-language description.
+ */
+export const editRequestPanelInputSchema = z.discriminatedUnion('type', [
+  editPanelRequestInputSchema,
+  editVegaPanelRequestInputSchema,
+]);
+
+export type EditRequestPanelInput = z.infer<typeof editRequestPanelInputSchema>;
+
 /** A single panel item accepted by `edit_panels` (targets an existing panel by id). */
 export const editPanelItemSchema = z.discriminatedUnion('source', [
-  editPanelRequestInputSchema,
+  editRequestPanelInputSchema,
   editMarkdownPanelConfigInputSchema,
 ]);
 
@@ -108,7 +146,69 @@ export type EditPanelItem = z.infer<typeof editPanelItemSchema>;
  * `type`. Extend this union as more panel types gain inline resolution support;
  * each type contributes its request shape from its own module.
  */
-export type PanelResolutionRequest = VisPanelResolutionRequest;
+export type PanelResolutionRequest = VisPanelResolutionRequest | VegaPanelResolutionRequest;
+
+/**
+ * Map a `source: 'request'` create input to its typed resolution request,
+ * keeping operation handlers and `panel_creation` free of per-type branching.
+ */
+export const toCreatePanelResolutionRequest = (
+  panelInput: RequestPanelInput,
+  operationType: InlinePanelOperationType
+): PanelResolutionRequest => {
+  if (panelInput.type === 'vega') {
+    return {
+      type: 'vega',
+      operationType,
+      identifier: panelInput.query,
+      nlQuery: panelInput.query,
+      index: panelInput.index,
+      esql: panelInput.esql,
+    };
+  }
+
+  return {
+    type: 'vis',
+    operationType,
+    identifier: panelInput.query,
+    nlQuery: panelInput.query,
+    index: panelInput.index,
+    chartType: panelInput.chartType,
+    esql: panelInput.esql,
+  };
+};
+
+/**
+ * Map a `source: 'request'` edit input (plus the existing panel) to its typed
+ * resolution request. The resolver validates that `existingPanel` is compatible
+ * with the requested type.
+ */
+export const toEditPanelResolutionRequest = (
+  panelInput: EditRequestPanelInput,
+  operationType: InlinePanelOperationType,
+  existingPanel: AttachmentPanel
+): PanelResolutionRequest => {
+  if (panelInput.type === 'vega') {
+    return {
+      type: 'vega',
+      operationType,
+      identifier: panelInput.panelId,
+      nlQuery: panelInput.query,
+      esql: panelInput.esql,
+      existingPanel,
+    };
+  }
+
+  return {
+    type: 'vis',
+    operationType,
+    identifier: panelInput.panelId,
+    nlQuery: panelInput.query,
+    chartType: panelInput.chartType,
+    esql: panelInput.esql,
+    existingPanel,
+  };
+};
 
 /**
  * Contract for inline panel content resolution. The generate core consumes this

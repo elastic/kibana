@@ -6,5 +6,7 @@
  */
 
 export { buildVisualizationConfig } from './build_visualization_config';
+export { buildVegaConfig } from './build_vega_config';
+export type { BuildVegaConfigParams, BuildVegaConfigResult } from './build_vega_config';
 export { getChartTypeSelectionPromptContent } from './chart_type_guidance';
 export type { VisualizationConfig } from './types';

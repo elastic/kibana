@@ -19,12 +19,21 @@ import type {
 } from '../types';
 import { isSection } from '../types';
 import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
+import { convertVegaPanelToLegacyVisPanel, isVegaAttachmentPanel } from './vega_to_legacy_vis';
 
 /**
  * Converts an AttachmentPanel to a DashboardPanel.
  * For Lens panels with API format attributes, converts to internal format.
+ * For Vega panels (stored in the forthcoming Vega embeddable API shape),
+ * temporarily converts to a legacy visualize panel so they render today.
  */
-const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
+const buildPanelFromConfig = (panel: AttachmentPanel): DashboardPanel => {
+  const { config, type, id, grid } = panel;
+
+  if (isVegaAttachmentPanel(panel)) {
+    return convertVegaPanelToLegacyVisPanel(panel);
+  }
+
   let configObject = config;
   if (type === LENS_EMBEDDABLE_TYPE && isLensAPIFormat(config)) {
     const lensAttributes = new LensConfigBuilder().fromAPIFormat(config);

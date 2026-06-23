@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export { esqlResponseToJson, extractEsqlQueries, executeEsql, interpolateEsqlQuery } from './esql';
+export {
+  esqlResponseToJson,
+  extractEsqlQueries,
+  executeEsql,
+  interpolateEsqlQuery,
+  buildTimeRangeParams,
+} from './esql';
 export {
   flattenMapping,
   cleanupMapping,

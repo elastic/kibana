@@ -33,8 +33,12 @@ For an existing dashboard:
 
 ## Panel Inputs
 
-- Use \`source: "request"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
-- Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+- Use \`source: "request"\` to create or edit a visualization from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
+- A \`source: "request"\` panel has a \`type\`:
+  - \`type: "vis"\` (default choice) resolves a **Lens** visualization. Use it for standard charts: metric, xy, bar, line, area, pie/donut, table, gauge, heatmap, tagcloud, etc. You may pass an optional \`chartType\`.
+  - \`type: "vega"\` resolves a custom **Vega-Lite** visualization whose spec is *invented* from your \`query\`. Use it **only** when Lens cannot express the request, e.g. small multiples / faceting (one sub-chart per category), repeated layers, layered/combo charts Lens does not support, or bespoke encodings. Prefer \`vis\` whenever Lens can do the job.
+- For both \`vis\` and \`vega\` requests, you may pass \`index\` and \`esql\`; omit them to let the tool discover the index and generate the query. Only pass \`esql\` from reliable sources (other tool calls or the user) — never invent ES|QL directly.
+- Use \`source: "config"\` only for content you have already resolved (an existing Lens visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly. There is no \`config\` source for \`vega\`.
 
 ${dashboardDesignGuidancePrompt}
 
@@ -42,7 +46,7 @@ ${dashboardDesignGuidancePrompt}
 
 - Never invent a \`source: "config"\` payload for content you have not actually resolved. If you cannot obtain a panel's configuration, report it clearly instead of fabricating one.
 - Use \`update_panel_layouts\` when the user wants to resize, reposition, or move panels without changing panel content.
-- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens visualization panels (\`source: "request"\`) and markdown panels (\`source: "config"\`, \`type: "markdown"\`).
+- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens visualization panels (\`source: "request"\`, \`type: "vis"\`), Vega visualization panels (\`source: "request"\`, \`type: "vega"\`), and markdown panels (\`source: "config"\`, \`type: "markdown"\`).
 - A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
 - If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
 - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement operations.`;
