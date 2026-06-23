@@ -84,6 +84,7 @@ describe('accessesFrequentlyMaintainer', () => {
       applied: 8,
       droppedNotInStore: 0,
       failed: 0,
+      metadataDocsApplied: 8,
     });
 
     expect(payload.sources).toEqual([

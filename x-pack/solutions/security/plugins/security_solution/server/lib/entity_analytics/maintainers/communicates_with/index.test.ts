@@ -85,6 +85,7 @@ describe('communicatesWithMaintainer', () => {
       applied: 6,
       droppedNotInStore: 0,
       failed: 0,
+      metadataDocsApplied: 6,
     });
 
     expect(payload.sources).toEqual([

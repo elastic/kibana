@@ -46,6 +46,9 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       telemetryCollector: collector,
     });
 
+    logger.info(
+      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
+    );
     telemetry.report({
       iterations: result.totalIterations,
       truncated: result.truncated,
@@ -56,23 +59,10 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
         failed: result.totalWriteErrors,
+        metadataDocsApplied: result.totalMetadataDocsApplied,
       },
       sources: collector.sources,
       // no breakdown — communicates_with is a single relationship type
-    });
-
-    logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
-    );
-    telemetry.report({
-      funnel: {
-        scanned: result.totalBuckets,
-        qualified: result.totalRecords,
-        applied: result.totalWritten,
-        droppedNotInStore: result.totalNotFound,
-        failed: result.totalWriteErrors,
-        metadataDocsApplied: result.totalMetadataDocsApplied,
-      },
     });
     return result;
   },

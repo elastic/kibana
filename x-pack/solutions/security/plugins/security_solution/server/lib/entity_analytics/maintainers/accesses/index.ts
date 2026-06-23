@@ -47,6 +47,9 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       telemetryCollector: collector,
     });
 
+    logger.info(
+      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
+    );
     telemetry.report({
       iterations: result.totalIterations,
       truncated: result.truncated,
@@ -57,6 +60,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
         failed: result.totalWriteErrors,
+        metadataDocsApplied: result.totalMetadataDocsApplied,
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -65,20 +69,6 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
           count,
         })),
       }),
-    });
-
-    logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
-    );
-    telemetry.report({
-      funnel: {
-        scanned: result.totalBuckets,
-        qualified: result.totalRecords,
-        applied: result.totalWritten,
-        droppedNotInStore: result.totalNotFound,
-        failed: result.totalWriteErrors,
-        metadataDocsApplied: result.totalMetadataDocsApplied,
-      },
     });
     return result;
   },
