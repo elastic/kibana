@@ -61,6 +61,7 @@ export const getCommonFieldDescriptions = (
   newestValue({
     source: `${ecsField}.risk.calculated_level`,
     destination: 'entity.risk.calculated_level',
+    skipExtraction: true,
   }),
   newestValue({
     source: `${ecsField}.risk.calculated_score`,
@@ -68,6 +69,7 @@ export const getCommonFieldDescriptions = (
     mapping: {
       type: 'float',
     },
+    skipExtraction: true,
   }),
   newestValue({
     source: `${ecsField}.risk.calculated_score_norm`,
@@ -75,6 +77,7 @@ export const getCommonFieldDescriptions = (
     mapping: {
       type: 'float',
     },
+    skipExtraction: true,
   }),
 ];
 
@@ -96,6 +99,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.attributes.watchlists',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
+      skipExtraction: true,
     }),
     newestValue({
       source: `${prefix}.attributes.asset`,
@@ -167,12 +171,14 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.behaviors.rule_names',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
+      skipExtraction: true,
     }),
     collectValues({
       source: `${prefix}.behaviors.anomaly_job_ids`,
       destination: 'entity.behaviors.anomaly_job_ids',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
+      skipExtraction: true,
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
@@ -199,24 +205,28 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.relationships.resolution.resolved_to',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
+      skipExtraction: true,
     }),
     newestValue({
       source: `${prefix}.relationships.resolution.risk.calculated_level`,
       destination: 'entity.relationships.resolution.risk.calculated_level',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
+      skipExtraction: true,
     }),
     newestValue({
       source: `${prefix}.relationships.resolution.risk.calculated_score`,
       destination: 'entity.relationships.resolution.risk.calculated_score',
       mapping: { type: 'float' },
       allowAPIUpdate: true,
+      skipExtraction: true,
     }),
     newestValue({
       source: `${prefix}.relationships.resolution.risk.calculated_score_norm`,
       destination: 'entity.relationships.resolution.risk.calculated_score_norm',
       mapping: { type: 'float' },
       allowAPIUpdate: true,
+      skipExtraction: true,
     }),
   ];
 };
