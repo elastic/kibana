@@ -96,15 +96,11 @@ function DefaultEditorAgg({
     }
   }
 
-  const [aggDescription, setAggDescription] = useState(buildAggDescription(agg));
-
-  // This useEffect is required to update the timeRange value and initiate rerender to keep labels up to date (Issue #57822).
-  useEffect(() => {
-    if (timeRange && aggName === 'date_histogram') {
-      agg.aggConfigs.setTimeRange(timeRange);
-    }
-    setAggDescription(buildAggDescription(agg));
-  }, [agg, aggName, timeRange]);
+  if (timeRange && aggName === 'date_histogram') {
+    // Keep interval labels in sync with the current time range before child controls render.
+    agg.aggConfigs.setTimeRange(timeRange);
+  }
+  const aggDescription = buildAggDescription(agg);
 
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(aggName)) {
