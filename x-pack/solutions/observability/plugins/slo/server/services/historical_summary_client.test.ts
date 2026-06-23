@@ -171,19 +171,22 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
       const client = new HistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch({
-        list: [
-          {
-            timeWindow: slo.timeWindow,
-            groupBy: slo.groupBy,
-            budgetingMethod: slo.budgetingMethod,
-            objective: slo.objective,
-            revision: slo.revision,
-            sloId: slo.id,
-            instanceId: ALL_VALUE,
-          },
-        ],
-      });
+      const results = await client.fetch(
+        {
+          list: [
+            {
+              timeWindow: slo.timeWindow,
+              groupBy: slo.groupBy,
+              budgetingMethod: slo.budgetingMethod,
+              objective: slo.objective,
+              revision: slo.revision,
+              sloId: slo.id,
+              instanceId: ALL_VALUE,
+            },
+          ],
+        },
+        { spaceId: 'default' }
+      );
 
       results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
@@ -204,20 +207,23 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
       const client = new HistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch({
-        list: [
-          {
-            timeWindow: slo.timeWindow,
-            groupBy: slo.groupBy,
-            budgetingMethod: slo.budgetingMethod,
-            objective: slo.objective,
-            revision: slo.revision,
-            sloId: slo.id,
-            instanceId: ALL_VALUE,
-            range,
-          },
-        ],
-      });
+      const results = await client.fetch(
+        {
+          list: [
+            {
+              timeWindow: slo.timeWindow,
+              groupBy: slo.groupBy,
+              budgetingMethod: slo.budgetingMethod,
+              objective: slo.objective,
+              revision: slo.revision,
+              sloId: slo.id,
+              instanceId: ALL_VALUE,
+              range,
+            },
+          ],
+        },
+        { spaceId: 'default' }
+      );
 
       results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
@@ -236,19 +242,22 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
       const client = new HistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch({
-        list: [
-          {
-            timeWindow: slo.timeWindow,
-            groupBy: slo.groupBy,
-            budgetingMethod: slo.budgetingMethod,
-            objective: slo.objective,
-            revision: slo.revision,
-            sloId: slo.id,
-            instanceId: ALL_VALUE,
-          },
-        ],
-      });
+      const results = await client.fetch(
+        {
+          list: [
+            {
+              timeWindow: slo.timeWindow,
+              groupBy: slo.groupBy,
+              budgetingMethod: slo.budgetingMethod,
+              objective: slo.objective,
+              revision: slo.revision,
+              sloId: slo.id,
+              instanceId: ALL_VALUE,
+            },
+          ],
+        },
+        { spaceId: 'default' }
+      );
 
       results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
@@ -270,20 +279,23 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
       const client = new HistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch({
-        list: [
-          {
-            timeWindow: slo.timeWindow,
-            groupBy: slo.groupBy,
-            budgetingMethod: slo.budgetingMethod,
-            objective: slo.objective,
-            revision: slo.revision,
-            sloId: slo.id,
-            instanceId: ALL_VALUE,
-            range,
-          },
-        ],
-      });
+      const results = await client.fetch(
+        {
+          list: [
+            {
+              timeWindow: slo.timeWindow,
+              groupBy: slo.groupBy,
+              budgetingMethod: slo.budgetingMethod,
+              objective: slo.objective,
+              revision: slo.revision,
+              sloId: slo.id,
+              instanceId: ALL_VALUE,
+              range,
+            },
+          ],
+        },
+        { spaceId: 'default' }
+      );
 
       results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
@@ -304,19 +316,22 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
       const client = new HistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch({
-        list: [
-          {
-            timeWindow: slo.timeWindow,
-            groupBy: slo.groupBy,
-            budgetingMethod: slo.budgetingMethod,
-            objective: slo.objective,
-            revision: slo.revision,
-            sloId: slo.id,
-            instanceId: ALL_VALUE,
-          },
-        ],
-      });
+      const results = await client.fetch(
+        {
+          list: [
+            {
+              timeWindow: slo.timeWindow,
+              groupBy: slo.groupBy,
+              budgetingMethod: slo.budgetingMethod,
+              objective: slo.objective,
+              revision: slo.revision,
+              sloId: slo.id,
+              instanceId: ALL_VALUE,
+            },
+          ],
+        },
+        { spaceId: 'default' }
+      );
 
       results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
@@ -338,19 +353,22 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
       const client = new HistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch({
-        list: [
-          {
-            timeWindow: slo.timeWindow,
-            groupBy: slo.groupBy,
-            budgetingMethod: slo.budgetingMethod,
-            objective: slo.objective,
-            revision: slo.revision,
-            sloId: slo.id,
-            instanceId: ALL_VALUE,
-          },
-        ],
-      });
+      const results = await client.fetch(
+        {
+          list: [
+            {
+              timeWindow: slo.timeWindow,
+              groupBy: slo.groupBy,
+              budgetingMethod: slo.budgetingMethod,
+              objective: slo.objective,
+              revision: slo.revision,
+              sloId: slo.id,
+              instanceId: ALL_VALUE,
+            },
+          ],
+        },
+        { spaceId: 'default' }
+      );
 
       results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
@@ -369,23 +387,26 @@ describe('FetchHistoricalSummary', () => {
     esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
     const client = new HistoricalSummaryClient(esClientMock);
 
-    const results = await client.fetch({
-      list: [
-        {
-          timeWindow: slo.timeWindow,
-          groupBy: slo.groupBy,
-          budgetingMethod: slo.budgetingMethod,
-          objective: slo.objective,
-          revision: slo.revision,
-          sloId: slo.id,
-          instanceId: 'host-abc',
-        },
-      ],
-    });
+    const results = await client.fetch(
+      {
+        list: [
+          {
+            timeWindow: slo.timeWindow,
+            groupBy: slo.groupBy,
+            budgetingMethod: slo.budgetingMethod,
+            objective: slo.objective,
+            revision: slo.revision,
+            sloId: slo.id,
+            instanceId: 'host-abc',
+          },
+        ],
+      },
+      { spaceId: 'default' }
+    );
 
     expect(
       // @ts-ignore
-      esClientMock.msearch.mock.calls[0][0].searches[1].query.bool.filter[3]
+      esClientMock.msearch.mock.calls[0][0].searches[1].query.bool.filter[4]
     ).toEqual({ term: { 'slo.instanceId': 'host-abc' } });
 
     results[0].data.forEach((dailyResult) =>
