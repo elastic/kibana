@@ -16,10 +16,12 @@ import { OutputSection } from './output_section';
 import { AgentBinarySection } from './agent_binary_section';
 import { FleetProxiesSection } from './fleet_proxies_section';
 import { AdvancedSection } from './advanced_section';
-import { SETTINGS_PAGE_CONTENT_MAX_WIDTH } from './constants';
+
+// Matches EUI's default restricted page width (1200px).
+const PAGE_CONTENT_MAX_WIDTH = 1200;
 
 const settingsPageContentWrapperCss = css`
-  max-width: ${SETTINGS_PAGE_CONTENT_MAX_WIDTH}px;
+  max-width: ${PAGE_CONTENT_MAX_WIDTH}px;
   margin-inline: auto;
 `;
 
