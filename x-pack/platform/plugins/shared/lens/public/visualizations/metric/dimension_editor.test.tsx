@@ -1219,11 +1219,7 @@ describe('dimension editor', () => {
           });
           await clickOnSupportingVis('none');
 
-          expect(mockSetState).toHaveBeenCalledWith({
-            ...stateWOTrend,
-            showBar: false,
-            applyColorTo: 'background',
-          });
+          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.removeLayer).not.toHaveBeenCalled();
         });
 
