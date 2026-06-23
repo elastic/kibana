@@ -182,18 +182,6 @@ export function MetricAppearanceSettings({
               }}
               dataTestSubj="lens-metric-appearance-primary-metric-font-size-btn"
             />
-            <AppearanceOption
-              label={i18n.translate('xpack.lens.metric.appearancePopover.spacing', {
-                defaultMessage: 'Spacing',
-              })}
-              value={state.spacing ?? LENS_METRIC_STATE_DEFAULTS.spacing}
-              options={spacingOptions}
-              onChange={(id) => {
-                setIsCustomStyle(false);
-                setState({ ...state, spacing: id });
-              }}
-              dataTestSubj="lens-metric-appearance-primary-metric-spacing-btn"
-            />
           </AppearanceOptionGroup>
           <EuiHorizontalRule margin="m" />
           <AppearanceOptionGroup
@@ -280,6 +268,18 @@ export function MetricAppearanceSettings({
               }}
               isDisabled={disabledStates.iconAlign}
               dataTestSubj="lens-metric-appearance-other-icon-position-btn"
+            />
+            <AppearanceOption
+              label={i18n.translate('xpack.lens.metric.appearancePopover.spacing', {
+                defaultMessage: 'Spacing & size',
+              })}
+              value={state.spacing ?? LENS_METRIC_STATE_DEFAULTS.spacing}
+              options={spacingOptions}
+              onChange={(id) => {
+                setIsCustomStyle(false);
+                setState({ ...state, spacing: id });
+              }}
+              dataTestSubj="lens-metric-appearance-other-spacing-btn"
             />
           </AppearanceOptionGroup>
         </div>

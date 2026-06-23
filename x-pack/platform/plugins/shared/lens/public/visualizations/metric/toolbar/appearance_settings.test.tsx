@@ -222,7 +222,7 @@ describe('appearance settings', () => {
     renderComponent({ spacing: 'small' });
 
     const btnGroup = new EuiButtonGroupTestHarness(
-      'lens-metric-appearance-primary-metric-spacing-btn'
+      'lens-metric-appearance-other-spacing-btn'
     );
 
     expect(btnGroup.getSelected()?.textContent).toBe('Small');
