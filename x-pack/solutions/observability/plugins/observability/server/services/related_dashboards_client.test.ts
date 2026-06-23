@@ -12,6 +12,7 @@ import type { AlertData } from './alert_data';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ReferencedPanelManager } from './referenced_panel_manager';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 describe('RelatedDashboardsClient', () => {
   const mockGetDashboard = jest.fn();
@@ -313,7 +314,8 @@ describe('RelatedDashboardsClient', () => {
 
     it('should fetch referenced panels when fetching dashboards', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_TYPE = 'lens';
+      const PANEL_EMBEDDABLE_TYPE = LENS_EMBEDDABLE_TYPE;
+      const PANEL_SO_TYPE = 'lens'; // saved object content type for Lens
       const PANEL_UID = 'panelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
       mockScanDashboards.mockResolvedValue({
@@ -321,8 +323,8 @@ describe('RelatedDashboardsClient', () => {
           {
             id: 'dashboard1',
             title: 'Dashboard 1',
-            panels: [{ config: {}, uid: PANEL_UID, type: PANEL_TYPE }],
-            references: [{ name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID }],
+            panels: [{ config: {}, id: PANEL_UID, type: PANEL_EMBEDDABLE_TYPE }],
+            references: [{ name: PANEL_UID, type: PANEL_SO_TYPE, id: PANEL_SO_ID }],
           },
         ],
         total: 1,
@@ -330,13 +332,13 @@ describe('RelatedDashboardsClient', () => {
 
       soClientMock.bulkGet.mockResolvedValueOnce({
         saved_objects: [
-          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_TYPE, id: PANEL_SO_ID, references: [] },
+          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_SO_TYPE, id: PANEL_SO_ID, references: [] },
         ],
       });
 
       // @ts-ignore next-line
       await client.fetchDashboards({ page: 1 });
-      expect(soClientMock.bulkGet).toHaveBeenCalledWith([{ id: PANEL_SO_ID, type: PANEL_TYPE }]);
+      expect(soClientMock.bulkGet).toHaveBeenCalledWith([{ id: PANEL_SO_ID, type: PANEL_SO_TYPE }]);
       // @ts-ignore next-line
       expect(client.referencedPanelManager.getByUid(PANEL_UID)).toStrictEqual({
         ...PANEL_SO_ATTRIBUTES,
@@ -346,7 +348,8 @@ describe('RelatedDashboardsClient', () => {
 
     it('should not refetch a referenced panel if it was fetched before', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_TYPE = 'lens';
+      const PANEL_EMBEDDABLE_TYPE = LENS_EMBEDDABLE_TYPE;
+      const PANEL_SO_TYPE = 'lens'; // saved object content type for Lens
       const PANEL_UID = 'panelUid';
       const OTHER_PANEL_UID = 'otherPanelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
@@ -356,12 +359,12 @@ describe('RelatedDashboardsClient', () => {
             id: 'dashboard1',
             title: 'Dashboard 1',
             panels: [
-              { config: {}, uid: PANEL_UID, type: PANEL_TYPE },
-              { config: {}, uid: OTHER_PANEL_UID, type: PANEL_TYPE },
+              { config: {}, id: PANEL_UID, type: PANEL_EMBEDDABLE_TYPE },
+              { config: {}, id: OTHER_PANEL_UID, type: PANEL_EMBEDDABLE_TYPE },
             ],
             references: [
-              { name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
-              { name: OTHER_PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
+              { name: PANEL_UID, type: PANEL_SO_TYPE, id: PANEL_SO_ID },
+              { name: OTHER_PANEL_UID, type: PANEL_SO_TYPE, id: PANEL_SO_ID },
             ],
           },
         ],
@@ -370,7 +373,7 @@ describe('RelatedDashboardsClient', () => {
 
       soClientMock.bulkGet.mockResolvedValueOnce({
         saved_objects: [
-          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_TYPE, id: PANEL_SO_ID, references: [] },
+          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_SO_TYPE, id: PANEL_SO_ID, references: [] },
         ],
       });
 
