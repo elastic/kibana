@@ -16,6 +16,7 @@ project:
   sourceRoot: src/platform/test
 dependsOn:
   - '@kbn/core'
+  - '@kbn/content-list-common'
   - '@kbn/dashboard-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/saved-objects-management-plugin'
