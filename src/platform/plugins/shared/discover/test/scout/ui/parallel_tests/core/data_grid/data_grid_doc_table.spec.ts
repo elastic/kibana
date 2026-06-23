@@ -14,7 +14,7 @@
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
-import { testData } from '../../fixtures/common';
+import { testData } from '../../../fixtures/common';
 
 const NARROWED_TIME_RANGE = {
   from: 'Sep 20, 2015 @ 23:00:00.000',
@@ -41,10 +41,10 @@ spaceTest.describe('Discover data grid - doc table', { tag: tags.stateful.all },
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     // Search can finish before the grid leaves "Loading documents" (histogram may
     // render first). Wait until the table reports a stable render before row counts.
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -68,8 +68,8 @@ spaceTest.describe('Discover data grid - doc table', { tag: tags.stateful.all },
     expect(initialCount).toBeGreaterThan(0);
 
     await pageObjects.datePicker.setAbsoluteRange(NARROWED_TIME_RANGE);
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForDocTableRendered();
 
     const finalCount = await rows.count();
     expect(finalCount).toBeLessThan(initialCount);
@@ -79,11 +79,11 @@ spaceTest.describe('Discover data grid - doc table', { tag: tags.stateful.all },
     for (const column of EXTRA_COLUMNS) {
       await addColumnFromSidebar(page, column);
     }
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
     for (const column of EXTRA_COLUMNS) {
       await expect(
-        pageObjects.discover.getColumnHeader(column),
+        pageObjects.dataGrid.getColumnHeader(column),
         `column ${column} should be present in the grid header`
       ).toBeVisible();
     }
@@ -94,14 +94,14 @@ spaceTest.describe('Discover data grid - doc table', { tag: tags.stateful.all },
     for (const column of EXTRA_COLUMNS) {
       await addColumnFromSidebar(page, column);
     }
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
     const [firstColumn, secondColumn] = EXTRA_COLUMNS;
     await page.testSubj.fill('fieldListFiltersFieldSearch', secondColumn);
     await page.testSubj.click(`fieldToggle-${secondColumn}`);
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
-    await expect(pageObjects.discover.getColumnHeader(secondColumn)).toBeHidden();
-    await expect(pageObjects.discover.getColumnHeader(firstColumn)).toBeVisible();
+    await expect(pageObjects.dataGrid.getColumnHeader(secondColumn)).toBeHidden();
+    await expect(pageObjects.dataGrid.getColumnHeader(firstColumn)).toBeVisible();
   });
 });
