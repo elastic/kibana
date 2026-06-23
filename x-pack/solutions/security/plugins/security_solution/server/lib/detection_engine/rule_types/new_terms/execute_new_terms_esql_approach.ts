@@ -68,8 +68,9 @@ const buildNewTermsEsqlQuery = ({
 
   // Timestamp override: synthesize a combined timestamp from primary/secondary
   if (aggregatableTimestampField === 'kibana.combined_timestamp' && secondaryTimestamp) {
-    query = query
-      .pipe`EVAL ${esql.col(aggregatableTimestampField)} = CASE(${esql.col(primaryTimestamp)} IS NOT NULL, ${esql.col(primaryTimestamp)}, ${esql.col(secondaryTimestamp)})`;
+    query = query.pipe`EVAL ${esql.col(aggregatableTimestampField)} = CASE(${esql.col(
+      primaryTimestamp
+    )} IS NOT NULL, ${esql.col(primaryTimestamp)}, ${esql.col(secondaryTimestamp)})`;
   }
 
   // Null filters: exclude documents where any new terms field is null.
@@ -85,8 +86,9 @@ const buildNewTermsEsqlQuery = ({
 
   // Aggregate: compute first_seen per unique terms combination
   const byColumns = newTermsFields.map((f) => esql.col(f));
-  query = query
-    .pipe`STATS first_seen = MIN(${esql.col(aggregatableTimestampField)}) BY ${byColumns}`;
+  query = query.pipe`STATS first_seen = MIN(${esql.col(
+    aggregatableTimestampField
+  )}) BY ${byColumns}`;
 
   // Keep only combinations first seen after the rule interval start (genuinely new)
   query = query.pipe`WHERE first_seen > ${ruleIntervalFrom}`;
