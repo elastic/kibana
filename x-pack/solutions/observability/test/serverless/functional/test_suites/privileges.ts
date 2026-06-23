@@ -62,9 +62,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Synthetics\nAll\nRead\nNone',
         'Agent Context Layer\nAll\nRead\nNone',
         'Cases\nAll\nRead\nNone',
-        'Observability Alerts\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
+        'Observability Alerts\nAll\nRead\nNone',
         'Workflows\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
       ]);
