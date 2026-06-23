@@ -362,8 +362,9 @@ const enumerateDistinctValues = async ({
       });
 
       if (!response.complete) {
+        logger.warn(`_terms_enum on '${field}' returned complete=false; failing closed`);
         throw new SmlAuthzEnumerationIncompleteError(
-          `_terms_enum on '${field}' returned complete=false; failing closed to avoid over-authorization`
+          `Could not complete permission authorization for this search; please retry.`
         );
       }
 
@@ -386,7 +387,9 @@ const enumerateDistinctValues = async ({
   }
 
   throw new SmlCorpusTooLargeError(
-    `Distinct '${field}' values exceed enumeration ceiling (${maxPages} x ${pageSize})`
+    `Too many distinct permission values to authorize this search; the limit is ${
+      maxPages * pageSize
+    }.`
   );
 };
 
@@ -693,11 +696,9 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  *
  * Empty string or `*`: plain sorted scan — no FORK/FUSE, no relevance signal.
  *
- * Spaces filter uses MV_CONTAINS rather than `==` because `==` returns null
- * (not false) when the field has multiple values — a known ES|QL multi-value
- * semantic that would silently drop multi-space documents.
- *
- * Tag filter similarly uses MV_CONTAINS for the same reason.
+ * Spaces and tag filters use MV_CONTAINS rather than `==` because `==` returns
+ * null (not false) on multi-value fields — an ES|QL semantic that would
+ * silently drop multi-space / multi-tag documents.
  *
  * Authorization is enforced in-query via the `authz` param (pre-aggregation):
  * a doc is authorized iff its required permissions are a subset of what the
@@ -731,23 +732,14 @@ const buildSmlEsqlQuery = ({
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
 
-  // spaces filter — MV_CONTAINS handles multi-value docs (== returns null for them)
+  // spaces filter (see docblock for the MV_CONTAINS rationale)
   params.push(spaceId);
   lines.push('| WHERE MV_CONTAINS(spaces, ?)');
 
-  // Authorization pre-filter (pre-aggregation). A doc is authorized for a
-  // dimension iff its required values are a subset of the caller's authorized
-  // set: `MV_CONTAINS(authorized, field)` is true when every value of `field`
-  // is contained in `authorized`. Public KIs (null/empty field = empty set)
-  // pass automatically, and an empty authorized array correctly admits only
-  // those public KIs.
-  //
-  // The authorized array is bound as a single positional param (a multivalue
-  // constant). ES|QL rejects an inline `[?, ?]` list of placeholders, so the
-  // whole array must be one `?` — this also keeps the values injection-safe.
-  //
-  // A clause is emitted only when the corpus actually uses the dimension;
-  // when unused, the field is absent everywhere and the filter is unnecessary.
+  // Authorization pre-filter. The authorized set is bound as a single
+  // multivalue param (ES|QL rejects an inline `[?, ?]` list), and a clause is
+  // emitted only for dimensions the corpus actually uses. See docblock for the
+  // subset semantics.
   if (authz) {
     const pushAuthzClause = (
       authorized: string[],
@@ -1019,9 +1011,6 @@ const searchSml = async ({
   let authz: AuthorizedUniverse | undefined;
   if (securityAuthz) {
     authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger });
-    // Corpus uses a permission dimension but the caller holds nothing in it →
-    // only public KIs are visible. If the corpus uses no permission dimensions
-    // at all, the universes are empty and no authz clause is emitted.
     logger.debug(
       `SML search authz: actions=${authz.authorizedActions.length}, indices=${authz.authorizedIndices.length}`
     );

@@ -296,8 +296,7 @@ describe('SmlService', () => {
     // `jest.Mocked` does not unwrap overloaded functions, so extract as jest.Mock directly.
     esqlQueryMock = (esClient as unknown as { esql: { query: jest.Mock } }).esql.query;
     termsEnumMock = (esClient as unknown as { termsEnum: jest.Mock }).termsEnum;
-    // Default: empty corpus universe (no permission dimensions used). Tests that
-    // exercise the pre-aggregation authz filter override this per-case.
+    // Default to an empty permission universe; per-case tests override this.
     termsEnumMock.mockImplementation(async () => ({ complete: true, terms: [] }));
     scopedClient = createMockScopedClient(esClient);
     logger = createMockLogger();
@@ -706,7 +705,7 @@ describe('SmlService', () => {
     it('pushes an MV_CONTAINS authz filter into the query when securityAuthz is present', async () => {
       // Corpus uses two Kibana privileges; caller is authorized for one. The
       // pre-aggregation pass resolves the authorized subset and pushes it into
-      // the ES|QL query (ES, not JS, then filters).
+      // the ES|QL query so ES does the filtering.
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       termsEnumMock.mockImplementation(
         buildTermsEnumMock({
