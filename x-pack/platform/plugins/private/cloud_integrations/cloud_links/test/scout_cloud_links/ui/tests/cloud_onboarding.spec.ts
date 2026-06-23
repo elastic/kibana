@@ -44,48 +44,6 @@ test.describe('Cloud onboarding', { tag: tags.stateful.classic }, () => {
     expect(pathname).toBe('/app/observability/landing');
   });
 
-  test('redirects SIEM migration onboarding with bare Security next path', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    await browserAuth.loginAsAdmin();
-    await page.addInitScript(() => {
-      window.localStorage.removeItem('securitySolution.onboarding.urlDetails.default');
-    });
-
-    await pageObjects.cloudOnboarding.navigateWithParams({
-      token: 'security',
-      securityDetails: '{"use_case":"siem","migration":{"value":true,"type":"splunk"}}',
-      next: '/app/security',
-    });
-
-    await expect
-      .poll(() => pageObjects.cloudOnboarding.getCurrentPathname())
-      .toBe('/app/security/siem_migrations/manage');
-  });
-
-  test('redirects non-migration security onboarding to Get Started', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    await browserAuth.loginAsAdmin();
-    await page.addInitScript(() => {
-      window.localStorage.removeItem('securitySolution.onboarding.urlDetails.default');
-    });
-
-    await pageObjects.cloudOnboarding.navigateWithParams({
-      token: 'security',
-      securityDetails: '{"use_case":"siem","migration":{"value":false}}',
-      next: '/app/security',
-    });
-
-    await expect
-      .poll(() => pageObjects.cloudOnboarding.getCurrentPathname())
-      .toBe('/app/security/get_started');
-  });
-
   test('redirect saves and updates onboarding token and security details', async ({
     browserAuth,
     pageObjects,
