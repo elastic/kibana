@@ -869,35 +869,19 @@ export function ComposeDiscoverFlyout({
 
             <EuiFlyoutBody css={uiState.yamlMode ? composeDiscoverYamlFlyoutBodyCss : undefined}>
               {uiState.yamlMode ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    flex: 1,
-                    minHeight: 0,
-                  }}
-                >
+                <>
                   {validationCallout}
-                  <div
-                    style={{
-                      flex: 1,
-                      minHeight: 0,
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <React.Suspense fallback={null}>
-                      <LazyYamlRuleForm
-                        services={baseServices}
-                        yamlText={yamlText}
-                        setYamlText={handleSetYamlText}
-                        onBlurSync={handleBlurSync}
-                        isSubmitting={isSaving}
-                        fullHeight
-                      />
-                    </React.Suspense>
-                  </div>
-                </div>
+                  <React.Suspense fallback={null}>
+                    <LazyYamlRuleForm
+                      services={baseServices}
+                      yamlText={yamlText}
+                      setYamlText={handleSetYamlText}
+                      onBlurSync={handleBlurSync}
+                      isSubmitting={isSaving}
+                      fullHeight
+                    />
+                  </React.Suspense>
+                </>
               ) : (
                 <>
                   {validationCallout}

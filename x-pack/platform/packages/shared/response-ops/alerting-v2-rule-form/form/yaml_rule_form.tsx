@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -15,12 +15,12 @@ import {
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useFormContext } from 'react-hook-form';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEsqlCallbacks } from './hooks/use_esql_callbacks';
-import { useFlyoutBodyAvailableHeight } from './hooks/use_flyout_body_available_height';
 import type { FormValues } from './types';
 import { RULE_FORM_ID } from './constants';
 import type { RuleFormServices } from './contexts';
@@ -80,8 +80,21 @@ const yamlRuleFormLabelWithHelp = (
   </EuiFlexGroup>
 );
 
-/** Used when flyout measurement is not yet available. Matches YamlRuleEditor default min. */
-const FULL_HEIGHT_EDITOR_FALLBACK = 'clamp(320px, calc(100vh - 500px), 750px)';
+const fullHeightFlexColumnCss = css`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+`;
+
+const fullHeightFormRowCss = css`
+  height: 100%;
+
+  .euiFormRow__fieldWrapper {
+    height: 100%;
+  }
+`;
 
 /**
  * YAML-based rule form editor.
@@ -154,13 +167,7 @@ export const YamlRuleForm = ({
   );
 
   const isReadOnly = isDisabled || isSubmitting;
-  const editorContainerRef = useRef<HTMLElement | null>(null);
-  const availableEditorHeight = useFlyoutBodyAvailableHeight(editorContainerRef, fullHeight);
-  const editorHeight = fullHeight
-    ? availableEditorHeight > 0
-      ? availableEditorHeight
-      : FULL_HEIGHT_EDITOR_FALLBACK
-    : undefined;
+  const editorHeight = fullHeight ? '100%' : undefined;
 
   const editor = (
     <YamlRuleEditor
@@ -197,35 +204,26 @@ export const YamlRuleForm = ({
         id={RULE_FORM_ID}
         component="form"
         onSubmit={handleSubmit}
-        style={
-          fullHeight
-            ? { display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }
-            : undefined
-        }
+        css={fullHeight ? fullHeightFlexColumnCss : undefined}
       >
-        <EuiFormRow label={yamlRuleFormLabelWithHelp} fullWidth>
-          <div
-            ref={fullHeight ? (editorContainerRef as React.RefObject<HTMLDivElement>) : undefined}
-          >
-            {editor}
-          </div>
-        </EuiFormRow>
+        <EuiFlexGroup direction="column" gutterSize="none" css={fullHeight ? fullHeightFlexColumnCss : undefined}>
+          <EuiFlexItem grow>
+            <EuiFormRow
+              label={yamlRuleFormLabelWithHelp}
+              fullWidth
+              css={fullHeight ? fullHeightFormRowCss : undefined}
+            >
+              {editor}
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiForm>
     </>
   );
 
   if (fullHeight) {
     return (
-      <div
-        data-test-subj="yamlRuleFormFullHeight"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minHeight: 0,
-          height: '100%',
-        }}
-      >
+      <div data-test-subj="yamlRuleFormFullHeight" css={fullHeightFlexColumnCss}>
         {content}
       </div>
     );
