@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 import type { StepContext } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -53,6 +54,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   waitingStepExecutionId,
 }) => {
   const { notifications } = useKibana().services;
+  const queryClient = useQueryClient();
   const workflowsApi = useWorkflowsApi();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
@@ -112,6 +114,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         : undefined;
       try {
         await workflowsApi.resumeExecution(executionId, { input: stepInputs });
+        await queryClient.invalidateQueries({ queryKey: ['stepExecution', executionId] });
         notifications?.toasts.addSuccess({
           title: i18n.translate(
             'workflowsManagement.executionDetail.resumeButton.successNotificationTitle',
@@ -145,7 +148,16 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         setIsSubmitting(false);
       }
     },
-    [executionId, workflowId, stepStartedAt, workflowsApi, notifications, telemetry, closeModal]
+    [
+      executionId,
+      workflowId,
+      stepStartedAt,
+      workflowsApi,
+      queryClient,
+      notifications,
+      telemetry,
+      closeModal,
+    ]
   );
 
   const handleModalSubmit = useCallback(
