@@ -18,6 +18,7 @@ import type {
 } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { ComposeFormValues } from '../compose_form_types';
+import { getBreachQuery } from '../compose_form_types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { isActionValid } from '../../../actions_form';
@@ -54,7 +55,17 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         isEditing={props.isEditing}
       />
     ),
-    validate: (_methods, s) => s.queryCommitted,
+    validate: (methods, s) => {
+      if (!s.queryCommitted) {
+        return false;
+      }
+      const kind = methods.getValues('kind');
+      const query = methods.getValues('query');
+      if (kind === 'alert' && query.format === 'composed') {
+        return query.base.trim().length > 0 && query.breach.segment.trim().length > 0;
+      }
+      return getBreachQuery(query).trim().length > 0;
+    },
   },
   builderCondition: {
     id: 'builderCondition',

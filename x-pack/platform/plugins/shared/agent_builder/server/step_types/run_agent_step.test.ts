@@ -530,8 +530,8 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
-      // Output should be from the last round
-      expect(res.output?.message).toBe('final');
+      // Output should be from the first round (events.find returns first match)
+      expect(res.output?.message).toBe('intermediate');
       // Usage should be the sum across all rounds
       expect(res.output?.metadata?.usage).toEqual({
         inputTokens: 500,

@@ -314,7 +314,7 @@ tags:
     x-displayName: Streams
     externalDocs:
       description: Streams documentation
-      url: https://www.elastic.co/docs/solutions/observability/streams
+      url: https://www.elastic.co/docs/solutions/observability/streams/streams
   - name: system
     x-displayName: System
     description: |
@@ -2786,6 +2786,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
+                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
                         type: object
                         properties:
                           answers:
@@ -2808,7 +2809,7 @@ paths:
                             type: array
                         required:
                           - answers
-                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
+                  description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
         '200':
@@ -3211,6 +3212,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
+                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
                         type: object
                         properties:
                           answers:
@@ -3233,7 +3235,7 @@ paths:
                             type: array
                         required:
                           - answers
-                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
+                  description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
         '200':
@@ -19064,6 +19066,7 @@ paths:
               properties:
                 description:
                   description: Description of the watchlist
+                  maxLength: 1000
                   type: string
                 entitySources:
                   description: Optional entity sources to create and link to the watchlist
@@ -19077,20 +19080,26 @@ paths:
                         $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
                       identifierField:
                         description: Field used to query the entity store for index-type sources
+                        maxLength: 256
                         type: string
                       indexPattern:
+                        maxLength: 1000
                         type: string
                       integrationName:
                         description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+                        maxLength: 256
                         type: string
                       matchers:
                         items:
                           $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+                        maxItems: 100
                         type: array
                       name:
+                        maxLength: 256
                         type: string
                       queryRule:
                         description: KQL query used to filter data from the provided index patterns
+                        maxLength: 4096
                         type: string
                       range:
                         $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
@@ -19099,12 +19108,14 @@ paths:
                     required:
                       - type
                       - name
+                  maxItems: 100
                   type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
                 name:
                   description: Unique name for the watchlist
+                  maxLength: 256
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
@@ -19206,6 +19217,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -19223,12 +19235,14 @@ paths:
               properties:
                 description:
                   description: Description of the watchlist
+                  maxLength: 1000
                   type: string
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
                 name:
                   description: Unique name of the watchlist
+                  maxLength: 256
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
@@ -25764,7 +25778,7 @@ paths:
                     deployment: azure
                     posture: cspm
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_create_package_policy_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_create_agentless_policy_request'
       responses:
         '200':
           content:
@@ -38920,7 +38934,7 @@ paths:
                       success: true
               schema:
                 items:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_status_response'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_delete_package_policies_response_item'
                 maxItems: 10000
                 type: array
           description: Successful response
@@ -61085,6 +61099,24 @@ paths:
               - managed
               - unmanaged
             type: string
+        - description: Field to sort by.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - name
+              - enabled
+            type: string
+        - description: Sort direction.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
       responses:
         '200':
           content:
@@ -61136,11 +61168,11 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/workflows?size=20&page=1" \
+              -X GET "${KIBANA_URL}/api/workflows?size=20&page=1&sortField=name&sortOrder=asc" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/workflows?size=20&page=1
+            GET kbn://api/workflows?size=20&page=1&sortField=name&sortOrder=asc
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -68632,6 +68664,7 @@ components:
           type: string
         data_view_id:
           description: The data view ID used to run change point detection.
+          maxLength: 10000
           minLength: 1
           type: string
         description:
@@ -68648,17 +68681,20 @@ components:
           type: number
         metric_field:
           description: The metric field used by the aggregation function.
+          maxLength: 10000
           minLength: 1
           type: string
         partitions:
           description: Optional split field values to include in the panel.
           items:
+            maxLength: 10000
             minLength: 1
             type: string
           maxItems: 10000
           type: array
         split_field:
           description: The optional field used to split change point results.
+          maxLength: 10000
           minLength: 1
           type: string
         time_range:
@@ -71083,6 +71119,218 @@ components:
         - operation
       title: Count Metric Operation
       type: object
+    Kibana_HTTP_APIs_create_agentless_policy_request:
+      additionalProperties: false
+      properties:
+        additional_datastreams_permissions:
+          description: Additional data stream permissions that will be added to the agent policy.
+          items:
+            type: string
+          maxItems: 100
+          nullable: true
+          type: array
+        cloud_connector:
+          additionalProperties: false
+          type: object
+          properties:
+            cloud_connector_id:
+              description: ID of an existing cloud connector to reuse. If not provided, a new connector is created.
+              type: string
+            enabled:
+              default: false
+              description: Set to `true` to enable cloud connectors for this policy.
+              type: boolean
+            name:
+              description: Name for the cloud connector. If not provided, a name is generated automatically from the credentials.
+              maxLength: 255
+              minLength: 1
+              type: string
+            target_csp:
+              description: Target cloud service provider. If not provided, the provider is detected automatically from the inputs.
+              enum:
+                - aws
+                - azure
+                - gcp
+              type: string
+        condition:
+          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
+          type: string
+        create_dataset_templates:
+          description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
+          type: boolean
+        description:
+          description: Policy description.
+          type: string
+        force:
+          description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
+          type: boolean
+        global_data_tags:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              name:
+                description: Name of the custom field. The name cannot contain spaces.
+                type: string
+              value:
+                anyOf:
+                  - type: string
+                  - type: number
+                description: Value of the custom field.
+            required:
+              - name
+              - value
+          maxItems: 100
+          type: array
+        id:
+          description: Policy unique identifier.
+          type: string
+        inputs:
+          additionalProperties:
+            additionalProperties: false
+            type: object
+            properties:
+              condition:
+                description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
+                type: string
+              deprecated:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+              enabled:
+                description: Enable or disable that input. Defaults to `true` (enabled).
+                type: boolean
+              streams:
+                additionalProperties:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    condition:
+                      description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
+                      type: string
+                    deprecated:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                    enabled:
+                      description: Enable or disable that stream. Defaults to `true` (enabled).
+                      type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
+                    vars:
+                      additionalProperties:
+                        anyOf:
+                          - type: string
+                          - type: number
+                          - type: boolean
+                          - items:
+                              type: string
+                            maxItems: 100
+                            type: array
+                          - items:
+                              type: number
+                            maxItems: 100
+                            type: array
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              isSecretRef:
+                                type: boolean
+                            required:
+                              - id
+                              - isSecretRef
+                        default: null
+                        nullable: true
+                      description: Input/stream level variable. Refer to the integration documentation for more information.
+                      type: object
+                description: Input streams. Refer to the integration documentation to know which streams are available.
+                type: object
+              vars:
+                additionalProperties:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                    - items:
+                        type: string
+                      maxItems: 100
+                      type: array
+                    - items:
+                        type: number
+                      maxItems: 100
+                      type: array
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        isSecretRef:
+                          type: boolean
+                      required:
+                        - id
+                        - isSecretRef
+                  default: null
+                  nullable: true
+                description: Input/stream level variable. Refer to the integration documentation for more information.
+                type: object
+          description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
+          type: object
+        name:
+          description: Unique name for the policy.
+          type: string
+        namespace:
+          description: Policy namespace. When not specified, it inherits the agent policy namespace.
+          type: string
+        package:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
+        policy_template:
+          description: The policy template to use for the agentless package policy. If not provided, the default policy template is used.
+          type: string
+        var_group_selections:
+          additionalProperties:
+            type: string
+          description: Variable group selections. Maps var_group name to the selected option name within that group.
+          type: object
+        vars:
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: number
+              - type: boolean
+              - items:
+                  type: string
+                maxItems: 100
+                type: array
+              - items:
+                  type: number
+                maxItems: 100
+                type: array
+              - additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    type: string
+                  isSecretRef:
+                    type: boolean
+                required:
+                  - id
+                  - isSecretRef
+            default: null
+            nullable: true
+          description: Input/stream level variable. Refer to the integration documentation for more information.
+          type: object
+      required:
+        - name
+        - package
+      title: create_agentless_policy_request
+      type: object
     Kibana_HTTP_APIs_create_custom_integration_request:
       additionalProperties: false
       properties:
@@ -71423,7 +71671,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -71447,7 +71695,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -71467,6 +71714,74 @@ components:
         - pattern
       title: Custom Format
       type: object
+    Kibana_HTTP_APIs_data_visualizer_field_stats:
+      anyOf:
+        - additionalProperties: false
+          type: object
+          properties:
+            data_view_id:
+              description: Data view ID (stored as a panel reference).
+              maxLength: 1000
+              minLength: 1
+              type: string
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            show_distributions:
+              default: false
+              description: Whether to show the distribution mini-charts in the table.
+              type: boolean
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+            view_type:
+              enum:
+                - dataview
+              type: string
+          required:
+            - view_type
+            - data_view_id
+        - additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            query:
+              additionalProperties: false
+              description: ES|QL query.
+              type: object
+              properties:
+                esql:
+                  description: The ES|QL query string.
+                  maxLength: 1000
+                  type: string
+              required:
+                - esql
+            show_distributions:
+              default: false
+              description: Whether to show the distribution mini-charts in the table.
+              type: boolean
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+            view_type:
+              enum:
+                - esql
+              type: string
+          required:
+            - view_type
+            - query
+      description: Field statistics table embeddable schema
+      title: data_visualizer_field_stats
     Kibana_HTTP_APIs_datasetquality-degradeddocs-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -72127,7 +72442,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -72177,7 +72492,6 @@ components:
           minimum: 0
           type: number
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -73636,6 +73950,47 @@ components:
       required:
         - packagePolicyIds
       title: delete_package_policies_request
+      type: object
+    Kibana_HTTP_APIs_delete_package_policies_response_item:
+      additionalProperties: false
+      properties:
+        body:
+          additionalProperties: false
+          type: object
+          properties:
+            message:
+              type: string
+          required:
+            - message
+        id:
+          type: string
+        name:
+          type: string
+        output_id:
+          nullable: true
+          type: string
+        package:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
+        policy_id:
+          deprecated: true
+          description: Use `policy_ids` instead
+          nullable: true
+          type: string
+        policy_ids:
+          items:
+            type: string
+          maxItems: 10000
+          type: array
+        statusCode:
+          type: number
+        success:
+          type: boolean
+      required:
+        - id
+        - success
+        - policy_ids
+        - package
+      title: delete_package_policies_response_item
       type: object
     Kibana_HTTP_APIs_delete_package_response:
       additionalProperties: false
@@ -77767,7 +78122,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color scale configuration for the heatmap cells.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -77791,7 +78146,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -79367,107 +79721,12 @@ components:
       description: A dropdown control that filters data by selecting field values from a data view. Define the data view, field, and selection settings in `config`.
       properties:
         config:
-          additionalProperties: false
-          type: object
-          properties:
-            data_view_id:
-              description: The ID of the data view that provides field options for this control.
-              minLength: 1
-              type: string
-            display_settings:
-              additionalProperties: false
-              type: object
-              properties:
-                hide_action_bar:
-                  description: When `true`, the search bar, sorting options, and select all toggle are hidden from the control.
-                  type: boolean
-                hide_exclude:
-                  description: When `true`, the exclude mode toggle is hidden from the control.
-                  type: boolean
-                hide_exists:
-                  description: When `true`, the exists filter option is hidden from the control.
-                  type: boolean
-                hide_sort:
-                  description: When `true`, the sort selector is hidden from the control.
-                  type: boolean
-                placeholder:
-                  description: Placeholder text displayed in the control input when no option is selected.
-                  type: string
-            exclude:
-              default: false
-              description: When `true`, the control filters to documents that do NOT match the selected options. Defaults to `false`.
-              type: boolean
-            exists_selected:
-              default: false
-              description: When `true`, the control filters to documents where the field exists, regardless of the field's value. Defaults to `false`.
-              type: boolean
-            field_name:
-              description: The name of the field in the data view that this control filters on.
-              minLength: 1
-              type: string
-            ignore_validations:
-              default: false
-              description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
-              type: boolean
-            run_past_timeout:
-              default: false
-              description: When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.
-              type: boolean
-            search_technique:
-              default: wildcard
-              description: The matching technique used when searching available options. `prefix` matches values starting with the search term, `wildcard` matches values containing the search term, and `exact` requires a complete match. Only applies to string and IP fields. Defaults to `wildcard`.
-              enum:
-                - prefix
-                - wildcard
-                - exact
-              type: string
-            selected_options:
-              default: []
-              description: The list of currently selected option values.
-              items:
-                anyOf:
-                  - type: string
-                  - type: number
-                description: A selected option value. Accepts a string or a number.
-              maxItems: 10000
-              type: array
-            single_select:
-              default: false
-              description: When `true`, only one option can be selected at a time. Selecting a new option deselects any previously selected option. Defaults to `false`.
-              type: boolean
-            sort:
-              additionalProperties: false
-              default:
-                by: _count
-                direction: desc
-              description: 'Defines how the available options are sorted in the control popover. Defaults to `{ by: "_count", direction: "desc" }`.'
-              type: object
-              properties:
-                by:
-                  description: The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.
-                  enum:
-                    - _count
-                    - _key
-                  type: string
-                direction:
-                  description: The sort direction. `asc` sorts ascending and `desc` sorts descending.
-                  enum:
-                    - asc
-                    - desc
-                  type: string
-              required:
-                - by
-                - direction
-            title:
-              description: A human-readable title for the control.
-              type: string
-            use_global_filters:
-              default: true
-              description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
-              type: boolean
-          required:
-            - data_view_id
-            - field_name
+          discriminator:
+            mapping:
+              esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
+            propertyName: values_source
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
         grow:
           default: false
           description: When `true`, the control expands to fill any available horizontal space. Defaults to `false`.
@@ -79497,43 +79756,12 @@ components:
       description: A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.
       properties:
         config:
-          additionalProperties: false
-          type: object
-          properties:
-            data_view_id:
-              description: The ID of the data view that provides field options for this control.
-              minLength: 1
-              type: string
-            field_name:
-              description: The name of the field in the data view that this control filters on.
-              minLength: 1
-              type: string
-            ignore_validations:
-              default: false
-              description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
-              type: boolean
-            step:
-              default: 1
-              description: The step size between selectable range values.
-              minimum: 0
-              type: number
-            title:
-              description: A human-readable title for the control.
-              type: string
-            use_global_filters:
-              default: true
-              description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
-              type: boolean
-            value:
-              description: The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.
-              items:
-                type: string
-              maxItems: 2
-              minItems: 2
-              type: array
-          required:
-            - data_view_id
-            - field_name
+          discriminator:
+            mapping:
+              esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
+            propertyName: values_source
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
         grow:
           default: false
           description: When `true`, the control expands to fill any available horizontal space. Defaults to `false`.
@@ -79606,6 +79834,221 @@ components:
         - config
       title: time_slider_control
       type: object
+    Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql:
+      additionalProperties: false
+      description: An options list control whose available options come from an ES|QL query's results.
+      properties:
+        display_settings:
+          additionalProperties: false
+          type: object
+          properties:
+            hide_action_bar:
+              description: When `true`, the search bar, sorting options, and select all toggle are hidden from the control.
+              type: boolean
+            hide_exclude:
+              description: When `true`, the exclude mode toggle is hidden from the control.
+              type: boolean
+            hide_exists:
+              description: When `true`, the exists filter option is hidden from the control.
+              type: boolean
+            hide_sort:
+              description: When `true`, the sort selector is hidden from the control.
+              type: boolean
+            placeholder:
+              description: Placeholder text displayed in the control input when no option is selected.
+              type: string
+        esql_query:
+          description: The ES|QL query that provides field options for this control
+          minLength: 1
+          type: string
+        exclude:
+          default: false
+          description: When `true`, the control filters to documents that do NOT match the selected options. Defaults to `false`.
+          type: boolean
+        exists_selected:
+          default: false
+          description: When `true`, the control filters to documents where the field exists, regardless of the field's value. Defaults to `false`.
+          type: boolean
+        ignore_validations:
+          default: false
+          description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
+          type: boolean
+        run_past_timeout:
+          default: false
+          description: When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.
+          type: boolean
+        search_technique:
+          default: wildcard
+          description: The matching technique used when searching available options. `prefix` matches values starting with the search term, `wildcard` matches values containing the search term, and `exact` requires a complete match. Only applies to string and IP fields. Defaults to `wildcard`.
+          enum:
+            - prefix
+            - wildcard
+            - exact
+          type: string
+        selected_options:
+          default: []
+          description: The list of currently selected option values.
+          items:
+            anyOf:
+              - type: string
+              - type: number
+            description: A selected option value. Accepts a string or a number.
+          maxItems: 10000
+          type: array
+        single_select:
+          default: false
+          description: When `true`, only one option can be selected at a time. Selecting a new option deselects any previously selected option. Defaults to `false`.
+          type: boolean
+        sort:
+          additionalProperties: false
+          default:
+            by: _count
+            direction: desc
+          description: 'Defines how the available options are sorted in the control popover. Defaults to `{ by: "_count", direction: "desc" }`.'
+          type: object
+          properties:
+            by:
+              description: The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.
+              enum:
+                - _count
+                - _key
+              type: string
+            direction:
+              description: The sort direction. `asc` sorts ascending and `desc` sorts descending.
+              enum:
+                - asc
+                - desc
+              type: string
+          required:
+            - by
+            - direction
+        title:
+          description: A human-readable title for the control.
+          type: string
+        use_global_filters:
+          default: true
+          description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
+          type: boolean
+        values_source:
+          enum:
+            - esql
+          type: string
+      required:
+        - values_source
+        - esql_query
+      title: EsqlOptionsListControl
+      type: object
+    Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field:
+      additionalProperties: false
+      description: An options list control whose available options come from a data view field.
+      properties:
+        data_view_id:
+          description: The ID of the data view that provides field options for this control.
+          minLength: 1
+          type: string
+        display_settings:
+          additionalProperties: false
+          type: object
+          properties:
+            hide_action_bar:
+              description: When `true`, the search bar, sorting options, and select all toggle are hidden from the control.
+              type: boolean
+            hide_exclude:
+              description: When `true`, the exclude mode toggle is hidden from the control.
+              type: boolean
+            hide_exists:
+              description: When `true`, the exists filter option is hidden from the control.
+              type: boolean
+            hide_sort:
+              description: When `true`, the sort selector is hidden from the control.
+              type: boolean
+            placeholder:
+              description: Placeholder text displayed in the control input when no option is selected.
+              type: string
+        exclude:
+          default: false
+          description: When `true`, the control filters to documents that do NOT match the selected options. Defaults to `false`.
+          type: boolean
+        exists_selected:
+          default: false
+          description: When `true`, the control filters to documents where the field exists, regardless of the field's value. Defaults to `false`.
+          type: boolean
+        field_name:
+          description: The name of the field in the data view that this control filters on.
+          minLength: 1
+          type: string
+        ignore_validations:
+          default: false
+          description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
+          type: boolean
+        run_past_timeout:
+          default: false
+          description: When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.
+          type: boolean
+        search_technique:
+          default: wildcard
+          description: The matching technique used when searching available options. `prefix` matches values starting with the search term, `wildcard` matches values containing the search term, and `exact` requires a complete match. Only applies to string and IP fields. Defaults to `wildcard`.
+          enum:
+            - prefix
+            - wildcard
+            - exact
+          type: string
+        selected_options:
+          default: []
+          description: The list of currently selected option values.
+          items:
+            anyOf:
+              - type: string
+              - type: number
+            description: A selected option value. Accepts a string or a number.
+          maxItems: 10000
+          type: array
+        single_select:
+          default: false
+          description: When `true`, only one option can be selected at a time. Selecting a new option deselects any previously selected option. Defaults to `false`.
+          type: boolean
+        sort:
+          additionalProperties: false
+          default:
+            by: _count
+            direction: desc
+          description: 'Defines how the available options are sorted in the control popover. Defaults to `{ by: "_count", direction: "desc" }`.'
+          type: object
+          properties:
+            by:
+              description: The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.
+              enum:
+                - _count
+                - _key
+              type: string
+            direction:
+              description: The sort direction. `asc` sorts ascending and `desc` sorts descending.
+              enum:
+                - asc
+                - desc
+              type: string
+          required:
+            - by
+            - direction
+        title:
+          description: A human-readable title for the control.
+          type: string
+        use_global_filters:
+          default: true
+          description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
+          type: boolean
+        values_source:
+          default: field
+          description: The source of the field options for this control. Defaults to `field` for legacy controls.
+          enum:
+            - field
+          type: string
+      required:
+        - data_view_id
+        - field_name
+      title: FieldOptionsListControl
+      type: object
+      x-oas-discriminator-default-case: true
     Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-static-values:
       additionalProperties: false
       description: An ES|QL variable control with a fixed list of selectable options defined directly in `available_options`.
@@ -79735,6 +80178,93 @@ components:
         - esql_query
       title: VALUES_FROM_QUERY
       type: object
+    Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql:
+      additionalProperties: false
+      description: A range slider control whose values come from an ES|QL query's results.
+      properties:
+        esql_query:
+          description: The ES|QL query that provides field options for this control
+          minLength: 1
+          type: string
+        ignore_validations:
+          default: false
+          description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
+          type: boolean
+        step:
+          default: 1
+          description: The step size between selectable range values.
+          minimum: 0
+          type: number
+        title:
+          description: A human-readable title for the control.
+          type: string
+        use_global_filters:
+          default: true
+          description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
+          type: boolean
+        value:
+          description: The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.
+          items:
+            type: string
+          maxItems: 2
+          minItems: 2
+          type: array
+        values_source:
+          enum:
+            - esql
+          type: string
+      required:
+        - values_source
+        - esql_query
+      title: EsqlRangeSliderControl
+      type: object
+    Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field:
+      additionalProperties: false
+      description: A range slider control whose values come from a numeric data view field.
+      properties:
+        data_view_id:
+          description: The ID of the data view that provides field options for this control.
+          minLength: 1
+          type: string
+        field_name:
+          description: The name of the field in the data view that this control filters on.
+          minLength: 1
+          type: string
+        ignore_validations:
+          default: false
+          description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
+          type: boolean
+        step:
+          default: 1
+          description: The step size between selectable range values.
+          minimum: 0
+          type: number
+        title:
+          description: A human-readable title for the control.
+          type: string
+        use_global_filters:
+          default: true
+          description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
+          type: boolean
+        value:
+          description: The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.
+          items:
+            type: string
+          maxItems: 2
+          minItems: 2
+          type: array
+        values_source:
+          default: field
+          description: The source of the field options for this control. Defaults to `field` for legacy controls.
+          enum:
+            - field
+          type: string
+      required:
+        - data_view_id
+        - field_name
+      title: FieldRangeSliderControl
+      type: object
+      x-oas-discriminator-default-case: true
     Kibana_HTTP_APIs_kbn-dashboard-access-control:
       additionalProperties: false
       description: Access control settings for the dashboard.
@@ -79774,11 +80304,13 @@ components:
           items:
             anyOf:
               - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
@@ -79786,6 +80318,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_error_budget'
@@ -80211,6 +80744,7 @@ components:
                         required:
                           - data_source
                       - additionalProperties: false
+                        description: ES|QL (Elasticsearch Query Language) data source.
                         type: object
                         properties:
                           column_order:
@@ -80461,6 +80995,26 @@ components:
         - type
         - config
       title: ES|QL variable control
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_data_visualizer_field_stats'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - field_stats_table
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Field statistics table
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-image:
       additionalProperties: false
@@ -80754,6 +81308,26 @@ components:
         - config
       title: Markdown
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_anomaly_charts'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ml_anomaly_charts
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Anomaly charts
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane:
       additionalProperties: false
       properties:
@@ -80774,111 +81348,33 @@ components:
         - config
       title: Anomaly swim lane
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_single_metric_viewer'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ml_single_metric_viewer
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Single metric viewer
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control:
       additionalProperties: false
       properties:
         config:
-          additionalProperties: false
-          type: object
-          properties:
-            data_view_id:
-              description: The ID of the data view that provides field options for this control.
-              minLength: 1
-              type: string
-            display_settings:
-              additionalProperties: false
-              type: object
-              properties:
-                hide_action_bar:
-                  description: When `true`, the search bar, sorting options, and select all toggle are hidden from the control.
-                  type: boolean
-                hide_exclude:
-                  description: When `true`, the exclude mode toggle is hidden from the control.
-                  type: boolean
-                hide_exists:
-                  description: When `true`, the exists filter option is hidden from the control.
-                  type: boolean
-                hide_sort:
-                  description: When `true`, the sort selector is hidden from the control.
-                  type: boolean
-                placeholder:
-                  description: Placeholder text displayed in the control input when no option is selected.
-                  type: string
-            exclude:
-              default: false
-              description: When `true`, the control filters to documents that do NOT match the selected options. Defaults to `false`.
-              type: boolean
-            exists_selected:
-              default: false
-              description: When `true`, the control filters to documents where the field exists, regardless of the field's value. Defaults to `false`.
-              type: boolean
-            field_name:
-              description: The name of the field in the data view that this control filters on.
-              minLength: 1
-              type: string
-            ignore_validations:
-              default: false
-              description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
-              type: boolean
-            run_past_timeout:
-              default: false
-              description: When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.
-              type: boolean
-            search_technique:
-              default: wildcard
-              description: The matching technique used when searching available options. `prefix` matches values starting with the search term, `wildcard` matches values containing the search term, and `exact` requires a complete match. Only applies to string and IP fields. Defaults to `wildcard`.
-              enum:
-                - prefix
-                - wildcard
-                - exact
-              type: string
-            selected_options:
-              default: []
-              description: The list of currently selected option values.
-              items:
-                anyOf:
-                  - type: string
-                  - type: number
-                description: A selected option value. Accepts a string or a number.
-              maxItems: 10000
-              type: array
-            single_select:
-              default: false
-              description: When `true`, only one option can be selected at a time. Selecting a new option deselects any previously selected option. Defaults to `false`.
-              type: boolean
-            sort:
-              additionalProperties: false
-              default:
-                by: _count
-                direction: desc
-              description: 'Defines how the available options are sorted in the control popover. Defaults to `{ by: "_count", direction: "desc" }`.'
-              type: object
-              properties:
-                by:
-                  description: The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.
-                  enum:
-                    - _count
-                    - _key
-                  type: string
-                direction:
-                  description: The sort direction. `asc` sorts ascending and `desc` sorts descending.
-                  enum:
-                    - asc
-                    - desc
-                  type: string
-              required:
-                - by
-                - direction
-            title:
-              description: A human-readable title for the control.
-              type: string
-            use_global_filters:
-              default: true
-              description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
-              type: boolean
-          required:
-            - data_view_id
-            - field_name
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -80898,43 +81394,9 @@ components:
       additionalProperties: false
       properties:
         config:
-          additionalProperties: false
-          type: object
-          properties:
-            data_view_id:
-              description: The ID of the data view that provides field options for this control.
-              minLength: 1
-              type: string
-            field_name:
-              description: The name of the field in the data view that this control filters on.
-              minLength: 1
-              type: string
-            ignore_validations:
-              default: false
-              description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.
-              type: boolean
-            step:
-              default: 1
-              description: The step size between selectable range values.
-              minimum: 0
-              type: number
-            title:
-              description: A human-readable title for the control.
-              type: string
-            use_global_filters:
-              default: true
-              description: When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.
-              type: boolean
-            value:
-              description: The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.
-              items:
-                type: string
-              maxItems: 2
-              minItems: 2
-              type: array
-          required:
-            - data_view_id
-            - field_name
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -81553,10 +82015,13 @@ components:
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
+                field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
                 image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
+                ml_anomaly_charts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
                 ml_anomaly_swimlane: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
+                ml_single_metric_viewer: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
                 options_list_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
                 range_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
                 slo_alerts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
@@ -81569,11 +82034,13 @@ components:
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               propertyName: type
             oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
@@ -81581,6 +82048,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_error_budget'
@@ -81656,6 +82124,7 @@ components:
           type: object
         index_pattern:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
+          minLength: 1
           title: Index pattern
           type: string
         time_field:
@@ -84267,7 +84736,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration for the primary metric value or background.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -84298,7 +84767,6 @@ components:
             - primary
           type: string
       required:
-        - field
         - operation
         - type
       title: Cumulative Sum Operation
@@ -85361,7 +85829,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricCompareToPrimary'
           description: Compare the secondary metric to a baseline value or to the primary metric.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -85389,7 +85857,6 @@ components:
             - secondary
           type: string
       required:
-        - field
         - operation
         - type
       title: Cumulative Sum Operation
@@ -85954,6 +86421,109 @@ components:
         - operation
       title: Stats Metric Operation
       type: object
+    Kibana_HTTP_APIs_ml_anomaly_charts:
+      additionalProperties: false
+      description: Anomaly Charts embeddable
+      properties:
+        description:
+          type: string
+        hide_border:
+          type: boolean
+        hide_title:
+          type: boolean
+        job_ids:
+          description: Anomaly detection job or group IDs whose results are shown in the charts.
+          items:
+            maxLength: 1000
+            minLength: 1
+            type: string
+          maxItems: 10000
+          minItems: 1
+          type: array
+        max_series_to_plot:
+          description: Maximum number of anomaly series to plot.
+          maximum: 50
+          minimum: 1
+          type: number
+        severity_threshold:
+          description: Severity threshold ranges used to filter anomaly results.
+          items:
+            anyOf:
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 3
+                    type: integer
+                  min:
+                    enum:
+                      - 0
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 25
+                    type: integer
+                  min:
+                    enum:
+                      - 3
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 50
+                    type: integer
+                  min:
+                    enum:
+                      - 25
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 75
+                    type: integer
+                  min:
+                    enum:
+                      - 50
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  min:
+                    enum:
+                      - 75
+                    type: integer
+                required:
+                  - min
+          maxItems: 5
+          type: array
+        time_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+        title:
+          type: string
+      required:
+        - job_ids
+      title: ml_anomaly_charts
+      type: object
     Kibana_HTTP_APIs_ml_anomaly_swimlane:
       anyOf:
         - additionalProperties: false
@@ -86030,6 +86600,54 @@ components:
             - view_by
       description: Anomaly Swim Lane embeddable
       title: ml_anomaly_swimlane
+    Kibana_HTTP_APIs_ml_single_metric_viewer:
+      additionalProperties: false
+      description: Single Metric Viewer embeddable
+      properties:
+        description:
+          type: string
+        forecast_id:
+          description: Identifier of a forecast to overlay on the chart.
+          maxLength: 1000
+          type: string
+        function_description:
+          description: 'For detectors that use the `metric` function, selects which value to plot: `min`, `max`, or `mean`. Ignored for other detector functions. When omitted, the viewer derives a default from the highest-scoring anomaly record.'
+          maxLength: 1000
+          type: string
+        hide_border:
+          type: boolean
+        hide_title:
+          type: boolean
+        job_ids:
+          description: Anomaly detection job ID whose results are shown in the single metric viewer.
+          items:
+            maxLength: 1000
+            minLength: 1
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        selected_detector_index:
+          default: 0
+          description: Zero-based index of the detector (the Elasticsearch detector_index) within the job whose results are shown.
+          minimum: 0
+          type: number
+        selected_entities:
+          additionalProperties:
+            anyOf:
+              - maxLength: 10000
+                type: string
+              - type: number
+          description: Values of the partition, by, or over fields that identify the single time series to display.
+          type: object
+        time_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+        title:
+          type: string
+      required:
+        - job_ids
+      title: ml_single_metric_viewer
+      type: object
     Kibana_HTTP_APIs_monitoring-alert-cluster-health-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -88377,7 +88995,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -88401,7 +89019,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -92560,7 +93177,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -92584,7 +93201,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -94910,29 +95526,6 @@ components:
           maxItems: 100
           nullable: true
           type: array
-        cloud_connector:
-          additionalProperties: false
-          type: object
-          properties:
-            cloud_connector_id:
-              description: ID of an existing cloud connector to reuse. If not provided, a new connector will be created.
-              type: string
-            enabled:
-              default: false
-              description: Whether cloud connectors are enabled for this policy.
-              type: boolean
-            name:
-              description: Optional name for the cloud connector. If not provided, will be auto-generated from credentials.
-              maxLength: 255
-              minLength: 1
-              type: string
-            target_csp:
-              description: Target cloud service provider. If not provided, will be auto-detected from inputs.
-              enum:
-                - aws
-                - azure
-                - gcp
-              type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           maxLength: 10000
@@ -94947,24 +95540,6 @@ components:
         force:
           description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
           type: boolean
-        global_data_tags:
-          items:
-            additionalProperties: false
-            type: object
-            properties:
-              name:
-                description: The name of the custom field. Cannot contain spaces.
-                type: string
-              value:
-                anyOf:
-                  - type: string
-                  - type: number
-                description: The value of the custom field.
-            required:
-              - name
-              - value
-          maxItems: 100
-          type: array
         id:
           description: Policy unique identifier.
           type: string
@@ -95069,11 +95644,27 @@ components:
         namespace:
           description: Policy namespace. When not specified, it inherits the agent policy namespace.
           type: string
+        output_id:
+          nullable: true
+          type: string
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
-        policy_template:
-          description: The policy template to use for the agentless package policy. If not provided, the default policy template will be used.
+        policy_id:
+          deprecated: true
+          description: Deprecated. Use policy_ids instead.
+          nullable: true
           type: string
+        policy_ids:
+          description: IDs of the agent policies that the package policy will be added to.
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        supports_agentless:
+          deprecated: true
+          description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
+          nullable: true
+          type: boolean
         var_group_selections:
           additionalProperties:
             type: string
@@ -97025,7 +97616,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -97049,7 +97640,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -98730,7 +99320,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -98754,7 +99344,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -101227,7 +101816,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -101251,7 +101840,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -105611,7 +106199,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -105635,7 +106223,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -116872,6 +117459,9 @@ components:
               isCompleted:
                 description: Whether the response action is completed for the agent ID
                 type: boolean
+              wasCanceled:
+                description: Whether the response action was canceled for the agent ID
+                type: boolean
               wasSuccessful:
                 description: Whether the response action was successful for the agent ID
                 type: boolean
@@ -116942,6 +117532,9 @@ components:
         status:
           description: The response action status
           type: string
+        wasCanceled:
+          description: Whether the response action was canceled
+          type: boolean
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean
@@ -117707,9 +118300,11 @@ components:
       properties:
         end:
           description: End of the lookback period (date math or ISO string, e.g. "now")
+          maxLength: 256
           type: string
         start:
           description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+          maxLength: 256
           type: string
       required:
         - start
@@ -118223,8 +118818,10 @@ components:
       properties:
         kuery:
           oneOf:
-            - type: string
-            - type: object
+            - maxLength: 4096
+              type: string
+            - additionalProperties: false
+              type: object
     Security_Entity_Analytics_API_GenericEntity:
       additionalProperties: false
       description: A generic entity record. Maps only the `entity` and `asset` namespaces. Add additional field mappings here as needed.
@@ -118393,6 +118990,7 @@ components:
               type: string
         syncMarkerIndex:
           description: Index to read latest sync markers from
+          maxLength: 1000
           type: string
     Security_Entity_Analytics_API_Interval:
       description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
@@ -118404,17 +119002,22 @@ components:
       properties:
         fields:
           items:
+            maxLength: 256
             type: string
+          maxItems: 100
           type: array
         values:
           description: |
             Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
           oneOf:
             - items:
+                maxLength: 256
                 type: string
+              maxItems: 1000
               type: array
             - items:
                 type: boolean
+              maxItems: 1000
               type: array
       required:
         - fields
@@ -118466,17 +119069,22 @@ components:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringLabel'
               type: array
         id:
+          maxLength: 256
           type: string
         labels:
           type: object
           properties:
             source_ids:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             source_integrations:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             sources:
               items:
@@ -118484,6 +119092,7 @@ components:
                   - csv
                   - index_sync
                   - api
+              maxItems: 100
               type: array
         user:
           type: object
@@ -118492,6 +119101,7 @@ components:
               description: Indicates if the user is privileged.
               type: boolean
             name:
+              maxLength: 512
               type: string
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
@@ -118534,10 +119144,12 @@ components:
       type: object
       properties:
         field:
+          maxLength: 256
           type: string
         source:
           type: string
         value:
+          maxLength: 256
           type: string
       required:
         - field
@@ -118825,21 +119437,27 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
         identifierField:
           description: Field used to query the entity store for index-type sources
+          maxLength: 256
           type: string
         indexPattern:
+          maxLength: 1000
           type: string
         integrationName:
+          maxLength: 256
           type: string
         integrations:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_Integrations'
         matchers:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+          maxItems: 100
           type: array
         name:
+          maxLength: 256
           type: string
         queryRule:
           description: KQL query used to filter data from the provided index patterns
+          maxLength: 4096
           type: string
         range:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
@@ -118926,6 +119544,7 @@ components:
                 properties:
                   field:
                     description: The field name for the label
+                    maxLength: 256
                     type: string
                   source:
                     description: The source where this label was created (api, csv, or index_sync)
@@ -118936,13 +119555,16 @@ components:
                     type: string
                   value:
                     description: The value of the label
+                    maxLength: 256
                     type: string
+              maxItems: 100
               type: array
         user:
           type: object
           properties:
             name:
               description: The name of the user.
+              maxLength: 512
               type: string
     Security_Entity_Analytics_API_WatchlistCsvUploadResponseItem:
       example:

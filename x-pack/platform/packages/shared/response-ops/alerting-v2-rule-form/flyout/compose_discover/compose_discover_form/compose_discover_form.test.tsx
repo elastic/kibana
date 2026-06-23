@@ -104,11 +104,38 @@ describe('step validation', () => {
   describe('alertCondition.validate', () => {
     const alertStep = getSteps(false).steps.find((s) => s.id === 'alertCondition')!;
 
-    it('returns true when queryCommitted is true', async () => {
+    it('returns true when queryCommitted and composed alert query is complete', async () => {
       const state = createState({ queryCommitted: true });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
+      const methods = {
+        getValues: (field?: keyof ComposeFormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '| WHERE status == "error"' },
+            };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<ComposeFormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(true);
+    });
+
+    it('returns false when queryCommitted but breach segment is empty', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        getValues: (field?: keyof ComposeFormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<ComposeFormValues>;
+
+      expect(await alertStep.validate!(methods, state)).toBe(false);
     });
 
     it('returns false when queryCommitted is false', async () => {

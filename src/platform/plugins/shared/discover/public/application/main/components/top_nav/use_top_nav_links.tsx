@@ -26,6 +26,7 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
@@ -90,6 +91,7 @@ export const useTopNavLinks = ({
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
   const subscribe = useInternalStateSubscribe();
+
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -144,8 +146,27 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const canCreateESQLRule = !!services.capabilities.alertingVTwo;
+  const canCreateESQLRule = services.settings.globalClient.get<boolean>(
+    ALERTING_V2_ENABLED_SETTING_ID,
+    false
+  );
+
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
+
+  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
+
+  const profileAppMenuExtension = useMemo(() => {
+    const getAppMenu = getAppMenuAccessor(() => ({
+      appMenuRegistry: (registry) => registry,
+    }));
+
+    return getAppMenu(discoverParams);
+  }, [getAppMenuAccessor, discoverParams]);
+
+  const additionalLegacyRuleTypes = useMemo(
+    () => profileAppMenuExtension.getAlertsLegacyRuleTypes?.() ?? [],
+    [profileAppMenuExtension]
+  );
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
@@ -160,8 +181,9 @@ export const useTopNavLinks = ({
         tabId: currentTab.id,
         getState,
         dispatch,
-        subscribe,
         showCreateRuleV2,
+        subscribe,
+        additionalLegacyRuleTypes,
       });
       items.push(alertsAppMenuItem);
     }
@@ -247,7 +269,7 @@ export const useTopNavLinks = ({
         tooltipContent: isDataViewMode
           ? i18n.translate('discover.localMenu.switchToESQLTooltip', {
               defaultMessage:
-                'Search, transform, join, and aggregate your data with ES|QL or PromQL',
+                'Search, transform, join and aggregate your data with ES|QL or PromQL',
             })
           : i18n.translate('discover.localMenu.switchToClassicTooltip', {
               defaultMessage: 'Search your data with data views and KQL in Classic Discover',
@@ -296,9 +318,8 @@ export const useTopNavLinks = ({
     intl,
     showCreateRuleV2,
     switchLanguageMode,
+    additionalLegacyRuleTypes,
   ]);
-
-  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
 
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
@@ -401,16 +422,11 @@ export const useTopNavLinks = ({
     }
 
     // Allow profile accessors to add additional items/popover items
-    const getAppMenu = getAppMenuAccessor(() => ({
-      appMenuRegistry: () => newAppMenuRegistry,
-    }));
-
-    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+    const registry = profileAppMenuExtension.appMenuRegistry(newAppMenuRegistry);
 
     return registry;
   }, [
-    getAppMenuAccessor,
-    discoverParams,
+    profileAppMenuExtension,
     appMenuItems,
     services,
     dispatch,
