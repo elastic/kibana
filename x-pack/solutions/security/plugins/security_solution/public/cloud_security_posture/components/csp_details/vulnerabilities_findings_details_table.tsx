@@ -126,12 +126,24 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
+    onShowVulnerability,
   }: {
     identityField: CloudPostureEntityIdentifier;
     value: string;
     scopeId: string;
     entityId?: string;
     entityType?: string;
+    /**
+     * Navigates to a vulnerability finding. When omitted, the table falls back to
+     * opening the legacy expandable-flyout preview panel.
+     */
+    onShowVulnerability?: (params: {
+      vulnerabilityId: string;
+      resourceId: string;
+      packageName: string;
+      packageVersion: string;
+      eventId: string;
+    }) => void;
   }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
@@ -149,6 +161,43 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const { openPreviewPanel } = useExpandableFlyoutApi();
+
+    const handleShowVulnerability = useCallback(
+      (params: {
+        vulnerabilityId: string;
+        resourceId: string;
+        packageName: string;
+        packageVersion: string;
+        eventId: string;
+      }) => {
+        if (onShowVulnerability) {
+          onShowVulnerability(params);
+          return;
+        }
+
+        const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
+          id: VulnerabilityFindingsPreviewPanelKey,
+          params: {
+            ...params,
+            scopeId,
+            isPreviewMode: true,
+            banner: {
+              title: i18n.translate(
+                'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
+                {
+                  defaultMessage: 'Preview vulnerability details',
+                }
+              ),
+              backgroundColor: 'warning',
+              textColor: 'warning',
+            },
+          },
+        };
+
+        openPreviewPanel(previewPanelProps);
+      },
+      [onShowVulnerability, openPreviewPanel, scopeId]
+    );
 
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField === 'score' ? 'vulnerability.score.base' : sortField] =
@@ -332,7 +381,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         ) => (
           <EuiToolTip
             content={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonTooltip',
               {
                 defaultMessage: 'Preview vulnerability details',
               }
@@ -342,30 +391,16 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             <EuiButtonIcon
               iconType="maximize"
               onClick={() => {
-                const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
-                  id: VulnerabilityFindingsPreviewPanelKey,
-                  params: {
-                    vulnerabilityId: vulnerability?.id,
-                    resourceId: finding?.resource?.id,
-                    packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
-                    packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
-                    eventId: finding?.event?.id,
-                    scopeId,
-                    isPreviewMode: true,
-                    banner: {
-                      title: i18n.translate(
-                        'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
-                        {
-                          defaultMessage: 'Preview vulnerability details',
-                        }
-                      ),
-                      backgroundColor: 'warning',
-                      textColor: 'warning',
-                    },
-                  },
-                };
-
-                openPreviewPanel(previewPanelProps);
+                const vulnerabilityId = Array.isArray(vulnerability?.id)
+                  ? vulnerability.id[0]
+                  : vulnerability?.id;
+                handleShowVulnerability({
+                  vulnerabilityId: vulnerabilityId ?? '',
+                  resourceId: finding?.resource?.id ?? '',
+                  packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
+                  packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
+                  eventId: finding?.event?.id ?? '',
+                });
               }}
               aria-label={i18n.translate(
                 'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
@@ -385,7 +420,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           </EuiText>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.cvssColumnName',
           { defaultMessage: 'CVSS' }
         ),
         width: '10%',
@@ -428,7 +463,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           </>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.severityColumnName',
           { defaultMessage: 'Severity' }
         ),
         width: '10%',
@@ -439,7 +474,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         render: (packageName: string, finding: VulnerabilitiesFindingDetailFields) =>
           renderMultiValueCell(VULNERABILITY_FINDING.PACKAGE_NAME, finding),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.packageColumnName',
           { defaultMessage: 'Package' }
         ),
         width: '30%',

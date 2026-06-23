@@ -8,88 +8,48 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
-import { TestProviders } from '../../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../../common/entity_analytics/types';
 
-jest.mock('@kbn/cloud-security-posture', () => ({
-  useVulnerabilitiesFindings: jest.fn().mockReturnValue({ data: { page: [] }, isLoading: false }),
-  getVulnerabilityStats: jest.fn().mockReturnValue([]),
-  hasVulnerabilitiesData: jest.fn().mockReturnValue(false),
-  SecuritySolutionLinkAnchor: ({ children }: { children: React.ReactNode }) => (
-    <a href="/">{children}</a>
-  ),
+jest.mock('../../csp_details/vulnerabilities_findings_details_table', () => ({
+  VulnerabilitiesFindingsDetailsTable: jest.fn(() => (
+    <div data-test-subj="base-vulnerabilities-table" />
+  )),
 }));
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities', () => ({
-  useHasVulnerabilities: jest.fn().mockReturnValue({ hasVulnerabilitiesFindings: false }),
-}));
+import { VulnerabilitiesFindingsDetailsTable as VulnerabilitiesFindingsDetailsTableBase } from '../../csp_details/vulnerabilities_findings_details_table';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params', () => ({
-  useGetNavigationUrlParams: jest.fn().mockReturnValue(jest.fn().mockReturnValue('')),
-}));
-
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color', () => ({
-  useGetSeverityStatusColor: jest
-    .fn()
-    .mockReturnValue({ getSeverityStatusColor: jest.fn().mockReturnValue('#000') }),
-}));
-
-jest.mock('@kbn/entity-store/public', () => ({
-  ...jest.requireActual('@kbn/entity-store/public'),
-  useEntityStoreEuidApi: jest.fn().mockReturnValue({ euid: null }),
-}));
-
-jest.mock('../../../../common/lib/kibana', () => ({
-  useUiSetting: jest.fn().mockReturnValue(false),
-  useKibana: jest.fn().mockReturnValue({ services: {} }),
-}));
-
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
-}));
-
-jest.mock('../../../../common/components/links', () => ({
-  SecuritySolutionLinkAnchor: ({ children }: { children: React.ReactNode }) => (
-    <a href="/">{children}</a>
-  ),
-}));
-
-describe('VulnerabilitiesFindingsDetailsTable (v2)', () => {
-  const mockOnShowVulnerability = jest.fn();
+describe('VulnerabilitiesFindingsDetailsTable (flyout v2 wrapper)', () => {
+  const onShowVulnerability = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders without crashing', () => {
+  it('composes the v1 table and forwards props including onShowVulnerability', () => {
     const { getByTestId } = render(
-      <TestProviders>
-        <VulnerabilitiesFindingsDetailsTable
-          identityField={EntityIdentifierFields.hostName}
-          value="my-host"
-          scopeId="scope-id"
-          onShowVulnerability={mockOnShowVulnerability}
-        />
-      </TestProviders>
+      <VulnerabilitiesFindingsDetailsTable
+        identityField={EntityIdentifierFields.hostName}
+        value="my-host"
+        scopeId="scope-id"
+        entityId="host-entity-id"
+        entityType="host"
+        onShowVulnerability={onShowVulnerability}
+      />
     );
 
-    expect(getByTestId('securitySolutionFlyoutVulnerabilitiesFindingsTable')).toBeInTheDocument();
-  });
+    expect(getByTestId('base-vulnerabilities-table')).toBeInTheDocument();
 
-  it('accepts required onShowVulnerability callback without throwing', () => {
-    expect(() =>
-      render(
-        <TestProviders>
-          <VulnerabilitiesFindingsDetailsTable
-            identityField={EntityIdentifierFields.hostName}
-            value="my-host"
-            scopeId="scope-id"
-            entityId="host-entity-id"
-            entityType="host"
-            onShowVulnerability={mockOnShowVulnerability}
-          />
-        </TestProviders>
-      )
-    ).not.toThrow();
+    const props = (VulnerabilitiesFindingsDetailsTableBase as unknown as jest.Mock).mock
+      .calls[0][0];
+    expect(props).toEqual(
+      expect.objectContaining({
+        identityField: EntityIdentifierFields.hostName,
+        value: 'my-host',
+        scopeId: 'scope-id',
+        entityId: 'host-entity-id',
+        entityType: 'host',
+        onShowVulnerability,
+      })
+    );
   });
 });

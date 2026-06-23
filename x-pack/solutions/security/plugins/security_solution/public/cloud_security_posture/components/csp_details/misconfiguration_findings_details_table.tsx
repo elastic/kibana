@@ -181,6 +181,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
+    onShowFinding,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
@@ -188,6 +189,11 @@ export const MisconfigurationFindingsDetailsTable = memo(
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with v2 FF, identity fields are loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: string;
+    /**
+     * Navigates to a misconfiguration finding. When omitted, the table falls back to
+     * opening the legacy expandable-flyout preview panel.
+     */
+    onShowFinding?: (resourceId: string, ruleId: string) => void;
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -328,6 +334,38 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const { openPreviewPanel } = useExpandableFlyoutApi();
 
+    const handleShowFinding = useCallback(
+      (resourceId: string, ruleId: string) => {
+        if (onShowFinding) {
+          onShowFinding(resourceId, ruleId);
+          return;
+        }
+
+        const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = {
+          id: MisconfigurationFindingsPreviewPanelKey,
+          params: {
+            resourceId,
+            ruleId,
+            scopeId,
+            isPreviewMode: true,
+            banner: {
+              title: i18n.translate(
+                'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
+                {
+                  defaultMessage: 'Preview finding details',
+                }
+              ),
+              backgroundColor: 'warning',
+              textColor: 'warning',
+            },
+          },
+        };
+
+        openPreviewPanel(previewPanelProps);
+      },
+      [onShowFinding, openPreviewPanel, scopeId]
+    );
+
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
         field: 'rule',
@@ -357,28 +395,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                   NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
                 );
 
-                const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview =
-                  {
-                    id: MisconfigurationFindingsPreviewPanelKey,
-                    params: {
-                      resourceId: finding.resource.id,
-                      ruleId: finding.rule.id,
-                      scopeId,
-                      isPreviewMode: true,
-                      banner: {
-                        title: i18n.translate(
-                          'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
-                          {
-                            defaultMessage: 'Preview finding details',
-                          }
-                        ),
-                        backgroundColor: 'warning',
-                        textColor: 'warning',
-                      },
-                    },
-                  };
-
-                openPreviewPanel(previewPanelProps);
+                handleShowFinding(finding.resource.id, finding.rule.id);
               }}
             />
           </EuiToolTip>

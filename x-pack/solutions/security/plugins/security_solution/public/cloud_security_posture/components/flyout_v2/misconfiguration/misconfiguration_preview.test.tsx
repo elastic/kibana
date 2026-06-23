@@ -8,24 +8,39 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MisconfigurationsPreview } from './misconfiguration_preview';
-import { TestProviders } from '../../../../common/mock/test_providers';
 
-describe('MisconfigurationsPreview (v2)', () => {
-  const mockOpenDetailsPanel = jest.fn();
+jest.mock('../../misconfiguration/misconfiguration_preview', () => ({
+  MisconfigurationsPreview: jest.fn(() => <div data-test-subj="base-misconfiguration-preview" />),
+}));
 
-  it('renders', () => {
+import { MisconfigurationsPreview as MisconfigurationsPreviewBase } from '../../misconfiguration/misconfiguration_preview';
+
+describe('MisconfigurationsPreview (flyout v2 wrapper)', () => {
+  const openDetailsPanel = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('composes the v1 MisconfigurationsPreview with isPreviewMode enabled and forwards props', () => {
     const { getByTestId } = render(
-      <TestProviders>
-        <MisconfigurationsPreview
-          passedFindings={1}
-          failedFindings={1}
-          openDetailsPanel={mockOpenDetailsPanel}
-        />
-      </TestProviders>
+      <MisconfigurationsPreview
+        passedFindings={2}
+        failedFindings={1}
+        openDetailsPanel={openDetailsPanel}
+      />
     );
 
-    expect(
-      getByTestId('securitySolutionFlyoutInsightsMisconfigurationsTitleLink')
-    ).toBeInTheDocument();
+    expect(getByTestId('base-misconfiguration-preview')).toBeInTheDocument();
+
+    const props = (MisconfigurationsPreviewBase as jest.Mock).mock.calls[0][0];
+    expect(props).toEqual(
+      expect.objectContaining({
+        passedFindings: 2,
+        failedFindings: 1,
+        openDetailsPanel,
+        isPreviewMode: true,
+      })
+    );
   });
 });

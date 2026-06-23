@@ -95,12 +95,18 @@ export const AlertsDetailsTable = memo(
     value,
     entityId,
     entityType,
+    onShowAlert,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: 'host' | 'user';
+    /**
+     * Navigates to the alert details for a row. When omitted, the table falls back to
+     * opening the legacy expandable-flyout preview panel.
+     */
+    onShowAlert?: (eventId: string, indexName: string) => void;
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -330,8 +336,14 @@ export const AlertsDetailsTable = memo(
 
     const { openPreviewPanel } = useExpandableFlyoutApi();
 
-    const handleOnEventAlertDetailPanelOpened = useCallback(
-      (eventId: string, indexName: string, tableId: string) => {
+    const tableId = TableId.alertsOnRuleDetailsPage;
+
+    const handleShowAlert = useCallback(
+      (eventId: string, indexName: string) => {
+        if (onShowAlert) {
+          onShowAlert(eventId, indexName);
+          return;
+        }
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
@@ -343,10 +355,8 @@ export const AlertsDetailsTable = memo(
           },
         });
       },
-      [openPreviewPanel]
+      [onShowAlert, openPreviewPanel, tableId]
     );
-
-    const tableId = TableId.alertsOnRuleDetailsPage;
 
     const columns: Array<EuiBasicTableColumn<ContextualFlyoutAlertsField>> = [
       {
@@ -354,7 +364,7 @@ export const AlertsDetailsTable = memo(
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}>
+          <EuiLink onClick={() => handleShowAlert(id, alert.index)}>
             <EuiIcon type={'expand'} aria-hidden={true} />
           </EuiLink>
         ),
@@ -448,7 +458,7 @@ export const AlertsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
-            data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
+            data-test-subj={'securitySolutionFlyoutAlertsFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.alerts.tableCaption',

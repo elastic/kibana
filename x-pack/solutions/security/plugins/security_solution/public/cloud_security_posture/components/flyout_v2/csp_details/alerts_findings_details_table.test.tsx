@@ -8,90 +8,43 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
-import { TestProviders } from '../../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../../common/entity_analytics/types';
 
-jest.mock('@kbn/entity-store/public', () => ({
-  ...jest.requireActual('@kbn/entity-store/public'),
-  useEntityStoreEuidApi: jest.fn().mockReturnValue({ euid: null }),
+jest.mock('../../csp_details/alerts_findings_details_table', () => ({
+  AlertsDetailsTable: jest.fn(() => <div data-test-subj="base-alerts-table" />),
 }));
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useUiSetting: jest.fn().mockReturnValue(false),
-  useKibana: jest.fn().mockReturnValue({ services: {} }),
-}));
+import { AlertsDetailsTable as AlertsDetailsTableBase } from '../../csp_details/alerts_findings_details_table';
 
-jest.mock('../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
-}));
-
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: jest.fn().mockReturnValue({
-    loading: false,
-    data: null,
-    setQuery: jest.fn(),
-    response: '',
-    request: '',
-    refetch: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
-  useSignalIndex: jest.fn().mockReturnValue({
-    loading: false,
-    signalIndexName: '.alerts-security',
-  }),
-}));
-
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
-}));
-
-jest.mock('../../../hooks/use_non_closed_alerts', () => ({
-  useNonClosedAlerts: jest.fn().mockReturnValue({
-    hasNonClosedAlerts: false,
-    filteredAlertsData: null,
-  }),
-}));
-
-jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => ({
-  useNavigateToAlertsPageWithFilters: jest.fn().mockReturnValue(jest.fn()),
-}));
-
-describe('AlertsDetailsTable (v2)', () => {
-  const mockOnShowAlert = jest.fn();
+describe('AlertsDetailsTable (flyout v2 wrapper)', () => {
+  const onShowAlert = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders without crashing', () => {
+  it('composes the v1 table and forwards props including onShowAlert', () => {
     const { getByTestId } = render(
-      <TestProviders>
-        <AlertsDetailsTable
-          field={EntityIdentifierFields.hostName}
-          value="my-host"
-          onShowAlert={mockOnShowAlert}
-        />
-      </TestProviders>
+      <AlertsDetailsTable
+        field={EntityIdentifierFields.hostName}
+        value="my-host"
+        entityId="host-entity-id"
+        entityType="host"
+        onShowAlert={onShowAlert}
+      />
     );
 
-    expect(getByTestId('securitySolutionFlyoutAlertsFindingsTable')).toBeInTheDocument();
-  });
+    expect(getByTestId('base-alerts-table')).toBeInTheDocument();
 
-  it('accepts required onShowAlert callback without throwing', () => {
-    expect(() =>
-      render(
-        <TestProviders>
-          <AlertsDetailsTable
-            field={EntityIdentifierFields.hostName}
-            value="my-host"
-            entityId="host-entity-id"
-            entityType="host"
-            onShowAlert={mockOnShowAlert}
-          />
-        </TestProviders>
-      )
-    ).not.toThrow();
+    const props = (AlertsDetailsTableBase as unknown as jest.Mock).mock.calls[0][0];
+    expect(props).toEqual(
+      expect.objectContaining({
+        field: EntityIdentifierFields.hostName,
+        value: 'my-host',
+        entityId: 'host-entity-id',
+        entityType: 'host',
+        onShowAlert,
+      })
+    );
   });
 });

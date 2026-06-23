@@ -8,32 +8,37 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { VulnerabilitiesPreview } from './vulnerabilities_preview';
-import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { TestProviders } from '../../../../common/mock/test_providers';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+jest.mock('../../vulnerabilities/vulnerabilities_preview', () => ({
+  VulnerabilitiesPreview: jest.fn(() => <div data-test-subj="base-vulnerabilities-preview" />),
+}));
 
-describe('VulnerabilitiesPreview (v2)', () => {
-  const mockOpenDetailsPanel = jest.fn();
+import { VulnerabilitiesPreview as VulnerabilitiesPreviewBase } from '../../vulnerabilities/vulnerabilities_preview';
+
+describe('VulnerabilitiesPreview (flyout v2 wrapper)', () => {
+  const openDetailsPanel = jest.fn();
 
   beforeEach(() => {
-    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
-      data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
-    });
+    jest.clearAllMocks();
   });
 
-  it('renders', () => {
+  it('composes the v1 VulnerabilitiesPreview with isPreviewMode enabled and forwards props', () => {
     const { getByTestId } = render(
-      <TestProviders>
-        <VulnerabilitiesPreview
-          identityFields={{ 'host.name': 'host1' }}
-          openDetailsPanel={mockOpenDetailsPanel}
-        />
-      </TestProviders>
+      <VulnerabilitiesPreview
+        identityFields={{ 'host.name': 'my-host' }}
+        openDetailsPanel={openDetailsPanel}
+      />
     );
 
-    expect(
-      getByTestId('securitySolutionFlyoutInsightsVulnerabilitiesTitleLink')
-    ).toBeInTheDocument();
+    expect(getByTestId('base-vulnerabilities-preview')).toBeInTheDocument();
+
+    const props = (VulnerabilitiesPreviewBase as jest.Mock).mock.calls[0][0];
+    expect(props).toEqual(
+      expect.objectContaining({
+        identityFields: { 'host.name': 'my-host' },
+        openDetailsPanel,
+        isPreviewMode: true,
+      })
+    );
   });
 });
