@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
 import { AttackFlyoutWrapper } from './attack_flyout_wrapper';
 
@@ -30,8 +29,6 @@ const mockSearchHit = {
   _source: {},
   fields: {},
 };
-
-const mockAttack = { id: 'attack-1' } as AttackDiscoveryAlert;
 
 const renderWrapper = (props: Partial<React.ComponentProps<typeof AttackFlyoutWrapper>> = {}) =>
   render(
@@ -65,7 +62,6 @@ describe('<AttackFlyoutWrapper />', () => {
     (useAttackDetails as jest.Mock).mockReturnValue({
       loading: true,
       searchHit: mockSearchHit,
-      attack: mockAttack,
       refetch: jest.fn(),
     });
 
@@ -79,7 +75,6 @@ describe('<AttackFlyoutWrapper />', () => {
     (useAttackDetails as jest.Mock).mockReturnValue({
       loading: false,
       searchHit: undefined,
-      attack: null,
       refetch: jest.fn(),
     });
 
@@ -88,24 +83,10 @@ describe('<AttackFlyoutWrapper />', () => {
     expect(getByTestId('attack-flyout-wrapper-error')).toBeInTheDocument();
   });
 
-  it('renders error callout when attack cannot be resolved from searchHit', () => {
+  it('renders AttackFlyout when searchHit is available', () => {
     (useAttackDetails as jest.Mock).mockReturnValue({
       loading: false,
       searchHit: mockSearchHit,
-      attack: null,
-      refetch: jest.fn(),
-    });
-
-    const { getByTestId } = renderWrapper();
-
-    expect(getByTestId('attack-flyout-wrapper-error')).toBeInTheDocument();
-  });
-
-  it('renders AttackFlyout when both searchHit and attack are available', () => {
-    (useAttackDetails as jest.Mock).mockReturnValue({
-      loading: false,
-      searchHit: mockSearchHit,
-      attack: mockAttack,
       refetch: jest.fn(),
     });
 
@@ -114,26 +95,12 @@ describe('<AttackFlyoutWrapper />', () => {
     expect(getByTestId('attackFlyoutStub')).toBeInTheDocument();
   });
 
-  it('passes the resolved attack to AttackFlyout', () => {
-    (useAttackDetails as jest.Mock).mockReturnValue({
-      loading: false,
-      searchHit: mockSearchHit,
-      attack: mockAttack,
-      refetch: jest.fn(),
-    });
-
-    renderWrapper();
-
-    expect(mockAttackFlyout).toHaveBeenCalledWith(expect.objectContaining({ attack: mockAttack }));
-  });
-
   it('invokes the consumer onAttackUpdated AND refetches when AttackFlyout reports an update', () => {
     const refetch = jest.fn();
     const onAttackUpdated = jest.fn();
     (useAttackDetails as jest.Mock).mockReturnValue({
       loading: false,
       searchHit: mockSearchHit,
-      attack: mockAttack,
       refetch,
     });
 
@@ -149,7 +116,6 @@ describe('<AttackFlyoutWrapper />', () => {
     (useAttackDetails as jest.Mock).mockReturnValue({
       loading: true,
       searchHit: undefined,
-      attack: null,
       refetch: jest.fn(),
     });
 

@@ -6,10 +6,9 @@
  */
 
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -33,7 +32,7 @@ export interface AISummarySectionProps {
 }
 
 /**
- * Prop-driven AI Summary section for the attack flyout v2.
+ * Prop-driven AI Summary section for the attack flyout overview.
  * Reads the four markdown fields from hit via getFieldValue.
  * Manages local state for the anonymized toggle and settings popover.
  */
@@ -83,20 +82,10 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
     <ExpandableSection
       expanded={expanded}
       title={
-        <>
-          <FormattedMessage
-            id="xpack.securitySolution.flyoutV2.attack.overview.AISummary.sectionTitle"
-            defaultMessage="Attack Summary"
-          />
-          <EuiIcon
-            css={css`
-              margin-left: 4px;
-            `}
-            type="sparkles"
-            color="primary"
-            aria-hidden={true}
-          />
-        </>
+        <FormattedMessage
+          id="xpack.securitySolution.flyoutV2.attack.overview.AISummary.sectionTitle"
+          defaultMessage="Attack Summary"
+        />
       }
       localStorageKey={STORAGE_KEY}
       sectionId={KEY}

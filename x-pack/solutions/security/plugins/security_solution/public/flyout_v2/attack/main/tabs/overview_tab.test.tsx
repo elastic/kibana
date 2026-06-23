@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { OverviewTab } from './overview_tab';
 
 jest.mock('../components/ai_summary_section', () => ({
@@ -30,29 +29,25 @@ const buildHit = (extra: Record<string, unknown> = {}): DataTableRecord =>
     isAnchor: false,
   } as unknown as DataTableRecord);
 
-const mockAttack = {} as AttackDiscoveryAlert;
-
 describe('<OverviewTab />', () => {
   it('renders without errors', () => {
-    const { container } = render(
-      <OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-    );
+    const { container } = render(<OverviewTab hit={buildHit()} />);
     expect(container).toBeTruthy();
   });
 
   it('renders AISummarySection', () => {
-    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
+    render(<OverviewTab hit={buildHit()} />);
     expect(screen.getByTestId('mock-ai-summary-section')).toBeInTheDocument();
   });
 
   it('renders the overview tab container', () => {
-    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
+    render(<OverviewTab hit={buildHit()} />);
     expect(screen.getByTestId('attack-flyout-overview-tab')).toBeInTheDocument();
   });
 
   it('passes hit to AISummarySection', () => {
     const hit = buildHit();
-    render(<OverviewTab hit={hit} attack={mockAttack} onAttackUpdated={jest.fn()} />);
+    render(<OverviewTab hit={hit} />);
     expect(screen.getByTestId('mock-ai-summary-section')).toHaveAttribute(
       'data-hit-id',
       'attack-1'

@@ -9,7 +9,6 @@ import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
@@ -30,11 +29,6 @@ export interface AttackFlyoutProps {
    */
   hit: DataTableRecord;
   /**
-   * The attack discovery alert object resolved from the same fetch as `hit`.
-   * Owned by `AttackFlyoutWrapper` so the flyout has a single source of truth.
-   */
-  attack: AttackDiscoveryAlert;
-  /**
    * Callback invoked after attack mutations (status change, assignee update, etc.).
    * Provided by `AttackFlyoutWrapper`; it refetches the attack document so the
    * flyout UI reflects the mutation without the user having to close and re-open it,
@@ -44,12 +38,11 @@ export interface AttackFlyoutProps {
 }
 
 /**
- * Content for the v2 attack flyout. Receives a fully-resolved `hit` and `attack`
- * from `AttackFlyoutWrapper` (which owns the single data fetch) and renders the
- * header and overview tab. The footer is wired in a subsequent PR; it currently
- * renders a placeholder.
+ * Content for the attack flyout. Receives a fully-resolved `hit` from
+ * `AttackFlyoutWrapper` and renders the header and overview tab. The footer is
+ * wired in a subsequent PR; it currently renders a placeholder.
  */
-export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyoutProps) => {
+export const AttackFlyout = memo(({ hit, onAttackUpdated }: AttackFlyoutProps) => {
   const { services } = useKibana();
   const { overlays } = services;
   const store = useStore();
@@ -73,7 +66,7 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="attack-flyout-body">
-        <OverviewTab hit={hit} attack={attack} onAttackUpdated={onAttackUpdated} />
+        <OverviewTab hit={hit} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
         <EuiText>
