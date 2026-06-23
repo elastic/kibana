@@ -15,7 +15,8 @@ import { getESQLSingleColumnValues } from './get_esql_single_column_values';
 
 const mockGetESQLResults = jest.fn();
 jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: (...args: any[]) => mockGetESQLResults(...args),
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
 }));
 
 const searchMock = {} as ISearchGeneric;
@@ -24,10 +25,10 @@ describe('getESQLSingleColumnValues', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-  it('returns only options on success', async () => {
+  it('returns string values for non-numeric columns', async () => {
     mockGetESQLResults.mockResolvedValueOnce({
       response: {
-        columns: [{ name: 'column1' }],
+        columns: [{ name: 'column1', type: 'keyword' }],
         values: [['option1'], ['option2']],
       },
     });
@@ -37,16 +38,43 @@ describe('getESQLSingleColumnValues', () => {
       esqlVariables: [],
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "columnType": undefined,
-        "values": Array [
-          "option1",
-          "option2",
-        ],
-      }
-    `);
+    expect(getESQLSingleColumnValues.isNumericResult(result)).toBe(false);
+    expect(result.values).toEqual(['option1', 'option2']);
   });
+
+  it('coerces values to numbers when the column type is numeric', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        columns: [{ name: 'column1', type: 'long' }],
+        values: [['10'], ['20'], ['30']],
+      },
+    });
+    const result = (await getESQLSingleColumnValues({
+      query: 'FROM index | KEEP bytes',
+      search: searchMock,
+      esqlVariables: [],
+    })) as GetESQLSingleColumnValuesSuccess;
+    expect(getESQLSingleColumnValues.isNumericResult(result)).toBe(true);
+    expect(result.values).toEqual([10, 20, 30]);
+  });
+
+  it('reports the no-results case so callers can distinguish "empty" from "failure"', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        columns: [],
+        all_columns: [{ name: 'column1', type: 'keyword' }],
+        values: [],
+      },
+    });
+    const result = await getESQLSingleColumnValues({
+      query: 'FROM index | WHERE never',
+      search: searchMock,
+      esqlVariables: [],
+    });
+    expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
+    expect(getESQLSingleColumnValues.hasNoResults(result)).toBe(true);
+  });
+
   it('returns an error when query returns multiple columns', async () => {
     mockGetESQLResults.mockResolvedValueOnce({
       response: {
@@ -60,14 +88,8 @@ describe('getESQLSingleColumnValues', () => {
       esqlVariables: [],
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
-    expect('values' in result).toBe(false);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [
-          [Error: Query must return a single column],
-        ],
-      }
-    `);
+    expect(getESQLSingleColumnValues.isMultiColumnError(result)).toBe(true);
+    expect(result.errors[0].message).toBe('Query must return a single column');
   });
   it('returns an error on a failed query', async () => {
     mockGetESQLResults.mockRejectedValueOnce('Invalid ES|QL query');

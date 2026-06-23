@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { DSLOptionsListComponentApi } from './data_controls/options_list_control/types';
-import type { OptionsListComponentApi } from './types';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 
-export const isDSLOptionsListApi = (
-  api: OptionsListComponentApi
-): api is DSLOptionsListComponentApi => {
-  return api.type === OPTIONS_LIST_CONTROL;
-};
+import { coreServices } from '../../services/kibana_services';
+
+export const getControlsTimezone = (): 'Browser' | string | undefined =>
+  coreServices.uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
