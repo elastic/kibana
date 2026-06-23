@@ -220,7 +220,19 @@ export async function createSingleCompileConfig(
     // Only externalize shared deps (npm packages), NOT cross-plugin imports
     // In single compilation mode, cross-plugin imports are bundled together
     // This ensures proper module deduplication and service initialization order
-    externals: sharedDepsExternals,
+    externals: [
+      // Function externals: skip externalizing react-redux when imported by kea
+      // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
+      ({ context, request }: { context?: string; request?: string }, callback: Function) => {
+        if (context && request === 'react-redux' && /node_modules[\\/]kea/.test(context)) {
+          return callback();
+        }
+        if (request && request in sharedDepsExternals) {
+          return callback(null, sharedDepsExternals[request]);
+        }
+        return callback();
+      },
+    ],
 
     // Use shared resolve config (same as external plugins)
     resolve: {
