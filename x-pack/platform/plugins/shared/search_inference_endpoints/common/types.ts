@@ -18,6 +18,7 @@ export const APIRoutes = {
   PUT_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
   GET_INFERENCE_FEATURES: '/internal/search_inference_endpoints/features',
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  REGION_POLICY: '/internal/search_inference_endpoints/region_policy',
 } as const;
 
 export interface InferenceConnectorsResponse {
@@ -99,6 +100,23 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
     };
   };
 };
+
+export interface RegionCspPair {
+  csp: string;
+  region: string;
+}
+
+export interface RegionPolicyBody {
+  allowed_regions?: RegionCspPair[];
+  allowed_geos?: string[];
+  fallback_region?: RegionCspPair;
+}
+
+export interface RegionPolicyResponse {
+  region_policy: RegionPolicyBody;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export enum EisModelStatus {
   Preview = 'preview',
