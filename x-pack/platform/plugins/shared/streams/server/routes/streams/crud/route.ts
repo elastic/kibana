@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { badData } from '@hapi/boom';
-import { omit } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -176,13 +175,7 @@ export const editStreamRoute = createServerRoute({
     path: z.object({
       name: z.string().describe('The name of the stream.'),
     }),
-    // Significant-event queries are managed via the `/api/streams/{name}/queries` endpoints and are
-    // not part of the stream upsert. Older clients may still send a top-level `queries` field (for
-    // example during a rolling upgrade); tolerate it here so `DeepStrict` does not reject it as an
-    // unrecognized key, and the handler drops it instead of failing the request.
-    body: Streams.all.UpsertRequest.right.and(
-      z.object({ queries: z.array(z.unknown()).optional() })
-    ),
+    body: Streams.all.UpsertRequest.right,
   }),
   handler: async ({
     params,
@@ -192,23 +185,21 @@ export const editStreamRoute = createServerRoute({
   }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    // Significant-event queries are managed via the `/api/streams/{name}/queries` endpoints. The
-    // route body tolerates a stray top-level `queries` field from older clients (e.g. during a
-    // rolling upgrade); drop it here so the upsert only touches the stream structure.
-    const body = omit(params.body, 'queries') as Streams.all.UpsertRequest;
-
     // Replicated data streams are managed by the source cluster via CCR.
     // Only Kibana-side data (description, dashboards, rules) can be updated.
-    if (Streams.ClassicStream.UpsertRequest.is(body)) {
+    if (Streams.ClassicStream.UpsertRequest.is(params.body)) {
       const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
-      if (dataStream?.replicated && classicIngestHasEsLevelChanges(body.stream.ingest)) {
+      if (dataStream?.replicated && classicIngestHasEsLevelChanges(params.body.stream.ingest)) {
         throw badData(
           'Cannot modify Elasticsearch-managed settings (processing, lifecycle, settings, field overrides, failure store) of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
         );
       }
     }
 
-    if (Streams.WiredStream.UpsertRequest.is(body) && !(await streamsClient.isStreamsEnabled())) {
+    if (
+      Streams.WiredStream.UpsertRequest.is(params.body) &&
+      !(await streamsClient.isStreamsEnabled())
+    ) {
       throw badData('Streams are not enabled for Wired streams.');
     }
 
@@ -217,12 +208,12 @@ export const editStreamRoute = createServerRoute({
       OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS
     );
 
-    if (Streams.QueryStream.UpsertRequest.is(body) && !queryStreamsEnabled) {
+    if (Streams.QueryStream.UpsertRequest.is(params.body) && !queryStreamsEnabled) {
       throw badData('Streams are not enabled for Query streams.');
     }
 
     return await streamsClient.upsertStream({
-      request: body,
+      request: params.body,
       name: params.path.name,
     });
   },
