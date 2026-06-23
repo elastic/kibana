@@ -6,7 +6,6 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { FormValues } from '../types';
 
 /**
  * Determines whether a rule (from the API response) contains features that
@@ -30,26 +29,6 @@ export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
   }
 
   if (rule.no_data_strategy != null && rule.no_data_strategy !== 'none') {
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * Determines whether the current form state (e.g. parsed from YAML) contains
- * features that the GUI form cannot represent. Used to block YAML→Form toggle.
- */
-export const isNonRepresentableFormValues = (values: FormValues): boolean => {
-  if (values.kind !== 'alert') return false;
-
-  if (values.query.format === 'standalone') return true;
-
-  if (values.recoveryStrategy != null && values.recoveryStrategy !== 'query') {
-    return true;
-  }
-
-  if (values.noDataStrategy != null && values.noDataStrategy !== 'none') {
     return true;
   }
 

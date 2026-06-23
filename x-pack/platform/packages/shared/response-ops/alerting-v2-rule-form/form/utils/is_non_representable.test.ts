@@ -6,9 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { isNonRepresentableRule, isNonRepresentableFormValues } from './is_non_representable';
-import type { FormValues } from '../types';
-import { defaultTestFormValues } from '../../test_utils';
+import { isNonRepresentableRule } from './is_non_representable';
 
 const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
   ({
@@ -93,50 +91,5 @@ describe('isNonRepresentableRule', () => {
 
   it('returns false for no_data_strategy: none', () => {
     expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'none' }))).toBe(false);
-  });
-});
-
-describe('isNonRepresentableFormValues', () => {
-  const composedFormValues: FormValues = {
-    ...defaultTestFormValues,
-    query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE c > 10' } },
-  };
-
-  it('returns false for standard composed form values', () => {
-    expect(isNonRepresentableFormValues(composedFormValues)).toBe(false);
-  });
-
-  it('returns true for alert + standalone query', () => {
-    const values: FormValues = {
-      ...defaultTestFormValues,
-      kind: 'alert',
-      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-    };
-    expect(isNonRepresentableFormValues(values)).toBe(true);
-  });
-
-  it('returns true for recoveryStrategy: no_breach', () => {
-    const values: FormValues = {
-      ...composedFormValues,
-      recoveryStrategy: 'no_breach',
-    };
-    expect(isNonRepresentableFormValues(values)).toBe(true);
-  });
-
-  it('returns true for noDataStrategy: emit', () => {
-    const values: FormValues = {
-      ...composedFormValues,
-      noDataStrategy: 'emit',
-    };
-    expect(isNonRepresentableFormValues(values)).toBe(true);
-  });
-
-  it('returns false for signal kind regardless of format', () => {
-    const values: FormValues = {
-      ...defaultTestFormValues,
-      kind: 'signal',
-      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-    };
-    expect(isNonRepresentableFormValues(values)).toBe(false);
   });
 });
