@@ -195,7 +195,6 @@ describe('<PipelinesCreate />', () => {
   });
 });
 
-
 describe('<PipelinesCreate /> field access pattern', () => {
   const { httpSetup } = setupEnvironment();
 
