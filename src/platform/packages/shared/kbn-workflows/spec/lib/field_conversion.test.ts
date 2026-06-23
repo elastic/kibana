@@ -15,7 +15,9 @@ import {
   extractNormalizedInputsFromYaml,
   getInputsFromDefinition,
   normalizeFieldsToJsonSchema,
+  resolveRef,
 } from './field_conversion';
+import { builtinWorkflowInputDefinitions } from '../builtin_workflow_input_definitions';
 import type { WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { LegacyWorkflowInputSchema } from '../schema/triggers/manual_trigger_schema';
@@ -342,6 +344,63 @@ describe('applyInputDefaults', () => {
     expect(result).toEqual({
       name: 'Custom Name',
       age: 25,
+    });
+  });
+
+  it('should render default values when a renderer is provided', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: '{{ user }}' },
+      },
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema, (value) =>
+      value === '{{ user }}' ? 'Alice' : value
+    );
+
+    expect(result).toEqual({
+      name: 'Alice',
+    });
+  });
+
+  it('should render provided values when a renderer is provided', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: 'Default Name' },
+        message: { type: 'string', default: '{{ greeting }}' },
+      },
+    });
+
+    const result = applyInputDefaults(
+      { name: '{{ user }}', message: 'custom' },
+      inputsSchema,
+      (value) => (value === '{{ user }}' ? 'Alice' : value)
+    );
+
+    expect(result).toEqual({
+      name: 'Alice',
+      message: 'custom',
+    });
+  });
+
+  it('should render provided nested object values when a renderer is provided', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        settings: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+      },
+    });
+
+    const result = applyInputDefaults({ settings: { name: '{{ user }}' } }, inputsSchema, (value) =>
+      value === '{{ user }}' ? 'Alice' : value
+    );
+
+    expect(result).toEqual({
+      settings: { name: 'Alice' },
     });
   });
 
@@ -712,6 +771,61 @@ describe('applyInputDefaults', () => {
         notifyTeams: ['SOC', 'Management'],
       },
     });
+  });
+});
+
+describe('resolveRef (#/kibana/definitions/...)', () => {
+  const testBuiltinId = 'TestBuiltinPayload';
+  let registrySnapshot: typeof builtinWorkflowInputDefinitions;
+
+  beforeEach(() => {
+    registrySnapshot = { ...builtinWorkflowInputDefinitions };
+  });
+
+  afterEach(() => {
+    for (const key of Object.keys(builtinWorkflowInputDefinitions)) {
+      delete builtinWorkflowInputDefinitions[key];
+    }
+    Object.assign(builtinWorkflowInputDefinitions, registrySnapshot);
+  });
+
+  it('resolves a registered built-in and applyInputDefaults uses it', () => {
+    builtinWorkflowInputDefinitions[testBuiltinId] = {
+      type: 'object',
+      properties: {
+        token: { type: 'string', default: 'abc' },
+      },
+      required: ['token'],
+      additionalProperties: false,
+    };
+
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        payload: { $ref: '#/kibana/definitions/TestBuiltinPayload' },
+      },
+      required: ['payload'],
+      additionalProperties: false,
+    });
+
+    expect(resolveRef('#/kibana/definitions/TestBuiltinPayload', inputsSchema)).toEqual(
+      builtinWorkflowInputDefinitions[testBuiltinId]
+    );
+    expect(applyInputDefaults(undefined, inputsSchema)).toEqual({
+      payload: { token: 'abc' },
+    });
+  });
+
+  it('returns null for an unknown built-in id', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        x: { $ref: '#/kibana/definitions/DoesNotExist' },
+      },
+    });
+    expect(resolveRef('#/kibana/definitions/DoesNotExist', inputsSchema)).toBeNull();
+  });
+
+  it('returns null when the id contains a slash (invalid ref shape)', () => {
+    expect(resolveRef('#/kibana/definitions/a/b', undefined)).toBeNull();
   });
 });
 

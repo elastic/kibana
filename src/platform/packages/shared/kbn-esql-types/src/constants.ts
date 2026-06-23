@@ -32,4 +32,5 @@ export enum SOURCES_TYPES {
   LOOKUP = 'Lookup',
   WIRED_STREAM = 'Wired Stream',
   CLASSIC_STREAM = 'Classic Stream',
+  QUERY_STREAM = 'Query Stream',
 }

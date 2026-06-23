@@ -8,9 +8,13 @@
 import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { TaskResult } from '@kbn/streams-schema';
-import { featureSchema, generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
-import { notFound } from '@hapi/boom';
+import { notFound, serverUnavailable } from '@hapi/boom';
+import {
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
@@ -21,23 +25,8 @@ import type {
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
 import type { StreamsServer } from '../../../types';
-import { taskActionSchema } from '../../../lib/tasks/task_action_schema';
-import { handleTaskAction } from '../../utils/task_helpers';
-import {
-  CONVERSATION_SCRAPER_TASK_TYPE,
-  type ConversationScraperTaskParams,
-  type ConversationScraperTaskResult,
-} from '../../../lib/tasks/task_definitions/conversation_scraper';
-import {
-  MEMORY_CONSOLIDATION_TASK_TYPE,
-  type MemoryConsolidationTaskParams,
-  type MemoryConsolidationTaskResult,
-} from '../../../lib/tasks/task_definitions/memory_consolidation';
+import { triggerMemorySynthesisWorkflow } from '../../../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import {
-  MEMORY_GENERATION_TASK_TYPE,
-  type MemoryGenerationTaskParams,
-} from '../../../lib/tasks/task_definitions/memory_generation';
 import { isSignificantEventsMemoryEnabled } from '../../../lib/memory/is_significant_events_memory_enabled';
 import { FeatureNotEnabledError } from '../../../lib/streams/errors/feature_not_enabled_error';
 
@@ -458,166 +447,104 @@ const recentChangesRoute = createServerRoute({
   },
 });
 
-const SCRAPER_TASK_ID = 'streams_conversation_scraper_singleton';
-const CONSOLIDATION_TASK_ID = 'streams_memory_consolidation_singleton';
-
-const scrapeConversationsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/memory/_scrape_conversations',
-  options: {
-    access: 'internal',
-    summary: 'Trigger conversation scraping for memory',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: taskActionSchema({}),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<TaskResult<ConversationScraperTaskResult>> => {
-    const { taskClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
-
-    const { body } = params;
-
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: CONVERSATION_SCRAPER_TASK_TYPE,
-              taskId: SCRAPER_TASK_ID,
-              params: {},
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
-
-    return handleTaskAction<ConversationScraperTaskParams, ConversationScraperTaskResult>({
-      taskClient,
-      taskId: SCRAPER_TASK_ID,
-      ...actionParams,
-    });
-  },
-});
-
-const consolidateMemoryRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/memory/_consolidate',
-  options: {
-    access: 'internal',
-    summary: 'Trigger memory consolidation and cleanup',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: taskActionSchema({}),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<TaskResult<MemoryConsolidationTaskResult>> => {
-    const { taskClient, licensing, uiSettingsClient } = await getScopedClients({
+const createWorkflowTriggerRoute = (
+  endpoint: `POST ${string}`,
+  managedWorkflowId: string,
+  summary: string
+) =>
+  createServerRoute({
+    endpoint,
+    options: { access: 'internal', summary },
+    security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+    params: z.object({ body: z.object({}).passthrough().optional() }),
+    handler: async ({
       request,
-    });
+      server,
+      logger,
+      getScopedClients,
+    }): Promise<{ executionId: string }> => {
+      const { licensing, uiSettingsClient } = await getScopedClients({ request });
+      await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+
+      const wfMgmt = server.workflowsManagement;
+      if (!wfMgmt) {
+        throw serverUnavailable(
+          'Workflows management plugin is not available. Cannot trigger memory workflow.'
+        );
+      }
+
+      // Use the user's current space so the execution appears in the Workflows UI.
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      if (!workflow || !workflow.definition) {
+        throw notFound(
+          `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
+        );
+      }
+
+      const executionId = await wfMgmt.management.runWorkflow(
+        { ...workflow, definition: workflow.definition },
+        spaceId,
+        {},
+        request,
+        'sigevents-memory-ui'
+      );
+
+      logger.info(`Triggered managed workflow "${managedWorkflowId}", executionId=${executionId}`);
+      return { executionId };
+    },
+  });
+
+const scrapeConversationsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_scrape_conversations',
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  'Trigger conversation scraping for memory'
+);
+
+const consolidateMemoryRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_consolidate',
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  'Trigger memory consolidation'
+);
+
+const synthesizeMemoryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/_synthesize',
+  options: { access: 'internal', summary: 'Trigger memory synthesis from significant events' },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  params: z.object({ body: z.object({}).passthrough().optional() }),
+  handler: async ({
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ executionId: string }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
-    const { body } = params;
-
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: MEMORY_CONSOLIDATION_TASK_TYPE,
-              taskId: CONSOLIDATION_TASK_ID,
-              params: {},
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
-
-    return handleTaskAction<MemoryConsolidationTaskParams, MemoryConsolidationTaskResult>({
-      taskClient,
-      taskId: CONSOLIDATION_TASK_ID,
-      ...actionParams,
+    const executionId = await triggerMemorySynthesisWorkflow({
+      workflowsManagement: server.workflowsManagement,
+      spaces: server.spaces,
+      request,
+      logger,
+      triggeredBy: 'sigevents-memory-ui',
     });
-  },
-});
 
-// Schedules a singleton memory generation task (same fixed task ID as the
-// onboarding task uses). Concurrent calls replace rather than queue, which is
-// fine because memory generation is idempotent and best-effort.
-// TODO: Replace this endpoint with a managed workflow once memory generation
-// is migrated to the workflow engine.
-const generateMemoryRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/memory/_generate',
-  params: z.object({
-    path: z.object({ streamName: z.string() }),
-    body: z.object({
-      features: z.array(featureSchema).optional(),
-      queries: z.array(generatedSignificantEventQuerySchema).optional(),
-    }),
-  }),
-  options: {
-    access: 'internal',
-    summary: 'Generate memory from discovery indicators',
-    description:
-      'Schedules a background task to synthesize features and queries into memory pages.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ acknowledged: boolean; skipped?: boolean; reason?: string }> => {
-    const { uiSettingsClient, licensing, taskClient } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const memoryEnabled = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
-    if (!memoryEnabled) {
-      return {
-        acknowledged: false,
-        skipped: true,
-        reason: 'memory_disabled',
-      };
+    if (!executionId) {
+      throw serverUnavailable(
+        'Memory synthesis workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
+      );
     }
 
-    const { streamName } = params.path;
-    const { features: rawFeatures, queries: rawQueries } = params.body;
-
-    const features = rawFeatures?.filter((f) => f.stream_name === streamName);
-    const queries = rawQueries?.map((query) => ({ streamName, query }));
-
-    await taskClient.schedule<MemoryGenerationTaskParams>({
-      task: {
-        type: MEMORY_GENERATION_TASK_TYPE,
-        id: MEMORY_GENERATION_TASK_TYPE,
-        space: '*',
-      },
-      params: { features, queries },
-      request,
-    });
-
-    return { acknowledged: true };
+    return { executionId };
   },
 });
+
+const detectGapsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_detect_gaps',
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  'Trigger gap detection for memory'
+);
 
 export const internalMemoryRoutes = {
   ...createEntryRoute,
@@ -633,5 +560,6 @@ export const internalMemoryRoutes = {
   ...recentChangesRoute,
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
-  ...generateMemoryRoute,
+  ...synthesizeMemoryRoute,
+  ...detectGapsRoute,
 };

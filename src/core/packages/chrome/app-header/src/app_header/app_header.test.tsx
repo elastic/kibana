@@ -9,6 +9,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
+import '@emotion/jest';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
@@ -113,6 +114,14 @@ describe('AppHeaderView', () => {
     expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
   });
 
+  it('renders when the only content is a title appendix', () => {
+    renderAppHeader(
+      <AppHeaderView titleAppend={<div data-test-subj="titleAppend">Title append</div>} />
+    );
+
+    expect(screen.getByTestId('titleAppend')).toBeInTheDocument();
+  });
+
   it('renders legacy badge fallback content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getBadge$.mockReturnValue(
@@ -123,6 +132,26 @@ describe('AppHeaderView', () => {
 
     expect(screen.getByTestId('appHeader')).toBeInTheDocument();
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
+  });
+
+  it('renders an xs title for a single row and an s title when a second row is present', () => {
+    const { unmount: unmountSingle } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
+    unmountSingle();
+
+    const { unmount: unmountTabs } = renderAppHeader(
+      <AppHeaderView title="Dashboard" tabs={[{ id: 'overview', label: 'Overview' }]} />
+    );
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
+    unmountTabs();
+
+    renderAppHeader(
+      <AppHeaderView
+        title="Dashboard"
+        metadata={[{ type: 'text', label: 'Created by: analyst' }]}
+      />
+    );
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
   });
 
   it('renders tab badge and test subject metadata', () => {
@@ -170,5 +199,25 @@ describe('AppHeaderView', () => {
 
     expect(backClick).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
+  });
+
+  describe('borderless flag', () => {
+    it('renders a bottom border by default', () => {
+      renderAppHeader(<AppHeaderView title="Dashboard" />);
+
+      expect(screen.getByTestId('appHeader')).toHaveStyleRule(
+        'border-bottom',
+        expect.stringMatching(/solid/)
+      );
+    });
+
+    it('omits the bottom border when borderless is set', () => {
+      renderAppHeader(<AppHeaderView title="Dashboard" borderless />);
+
+      expect(screen.getByTestId('appHeader')).not.toHaveStyleRule(
+        'border-bottom',
+        expect.stringMatching(/solid/)
+      );
+    });
   });
 });
