@@ -44,11 +44,26 @@ const getSearchFilter = (request: OptionsListRequestBody) => {
   return { prefix: { [fieldName]: searchString } };
 };
 
+interface OptionsListBucket {
+  key: OptionsListSelection;
+  key_as_string?: string;
+  doc_count: number;
+}
+
 interface OptionsListAggregations {
   validation?: { buckets?: Record<string, { doc_count: number }> };
-  suggestions?: { buckets?: Array<{ key: OptionsListSelection; doc_count: number }> };
+  suggestions?: { buckets?: OptionsListBucket[] };
   totalCardinality?: { value?: number };
 }
+
+// Boolean term aggregations return numeric keys (0/1) alongside a "true"/"false"
+// `key_as_string`. The options list control stringifies the selected value before
+// building a phrase filter, so returning the numeric key would produce "0"/"1" —
+// which Elasticsearch rejects for boolean fields. Use `key_as_string` for boolean
+// fields so selections resolve to valid `true`/`false` values, mirroring the
+// behaviour of the shared controls suggestion query.
+const getSuggestionValue = (bucket: OptionsListBucket, fieldType?: string): OptionsListSelection =>
+  fieldType === 'boolean' && bucket.key_as_string !== undefined ? bucket.key_as_string : bucket.key;
 
 const getAggregations = (response: SearchResponse): OptionsListAggregations | undefined =>
   response.aggregations as unknown as OptionsListAggregations | undefined;
@@ -180,10 +195,11 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
 
           const aggregations = getAggregations(esResponse);
           const buckets = aggregations?.suggestions?.buckets ?? [];
+          const fieldType = optionsListRequest.fieldSpec?.type;
 
           const body: OptionsListSuccessResponse = {
             suggestions: buckets.map((bucket) => ({
-              value: bucket.key,
+              value: getSuggestionValue(bucket, fieldType),
               docCount: bucket.doc_count,
             })),
             totalCardinality: Number(aggregations?.totalCardinality?.value ?? 0),

@@ -394,6 +394,50 @@ describe('Internal Routes', () => {
     });
   });
 
+  it('should return key_as_string as the suggestion value for boolean fields', async () => {
+    mockSearch.mockResolvedValue({
+      aggregations: {
+        suggestions: {
+          buckets: [
+            { key: 1, key_as_string: 'true', doc_count: 3 },
+            { key: 0, key_as_string: 'false', doc_count: 7 },
+          ],
+        },
+        totalCardinality: { value: 2 },
+      },
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'isTestRun',
+        fieldSpec: { name: 'isTestRun', type: 'boolean' },
+        filters: [],
+        selectedOptions: [],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        suggestions: [
+          { value: 'true', docCount: 3 },
+          { value: 'false', docCount: 7 },
+        ],
+        totalCardinality: 2,
+        invalidSelections: [],
+      },
+    });
+  });
+
   it('should skip validation aggregation when selected options are empty', async () => {
     mockSearch.mockResolvedValue({
       aggregations: {

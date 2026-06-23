@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
 import { FilterGroupLoading } from '@kbn/alerts-ui-shared/src/alert_filter_controls/loading';
@@ -48,7 +47,6 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
   }) => {
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
-    const location = useLocation();
     const [isDataViewReady, setIsDataViewReady] = useState(false);
 
     const scopedDataViews = useMemo(
@@ -100,14 +98,14 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
 
     if (!isDataViewReady) {
       return (
-        <div data-test-subj="workflowExecutionsFilters" key={location.search}>
+        <div data-test-subj="workflowExecutionsFilters">
           <FilterGroupLoading />
         </div>
       );
     }
 
     return (
-      <div data-test-subj="workflowExecutionsFilters" key={location.search}>
+      <div data-test-subj="workflowExecutionsFilters">
         <FilterGroup
           controlsUrlState={controlsUrlState}
           dataViewId={WORKFLOW_EXECUTIONS_DATA_VIEW_ID}
