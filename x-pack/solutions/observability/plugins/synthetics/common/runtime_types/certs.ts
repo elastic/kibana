@@ -26,11 +26,6 @@ export const GetCertsParamsType = t.partial({
   tags: t.array(t.string),
   issuers: t.array(t.string),
   includeBrowserCerts: t.boolean,
-  // Cluster aliases to scope the cert query to one or more remote (CCS)
-  // clusters. Honoured by the certificates routes only when CCS is enabled —
-  // it adds an `_index: "<alias>:*"` filter on remote pings, while local pings
-  // remain visible regardless. An empty/absent value means "all configured
-  // clusters" (local + every remote alias the route wrapper expanded into).
   remoteNames: t.array(t.string),
 });
 
@@ -42,8 +37,6 @@ export const CertMonitorType = t.partial({
   configId: t.string,
   url: t.string,
   type: t.string,
-  // Set when the monitor's ping was read from a remote (CCS) cluster, so the
-  // UI can badge it and link out to the originating Kibana when known.
   remote: remoteMonitorInfoSchema,
 });
 
@@ -75,10 +68,6 @@ export const CertType = t.intersection([
     labels: t.record(t.string, t.string),
     tags: t.array(t.string),
     monitorTags: t.array(t.string),
-    // Set when the cert's representative ping (the collapse representative)
-    // came from a remote (CCS) cluster. The per-monitor `remote` field on
-    // entries in `monitors` is what's used to drive deep links — this one is
-    // a hint for row-level affordances.
     remote: remoteMonitorInfoSchema,
   }),
 ]);
