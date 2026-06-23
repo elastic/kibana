@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SetupDependencies, StartDependencies, DatasetsPluginStart } from './types';
+import type { SetupDependencies, StartDependencies, FederatedDataPluginStart } from './types';
 
 const PLUGIN_NAME = i18n.translate('dataFederation.pluginName', {
   defaultMessage: 'ES|QL Data Federation',
@@ -21,12 +21,22 @@ const LIST_BREADCRUMB = [
   },
 ];
 
-export class DatasetsPlugin
-  implements Plugin<void, DatasetsPluginStart, SetupDependencies, StartDependencies>
+export class FederatedDataPlugin
+  implements Plugin<void, FederatedDataPluginStart, SetupDependencies, StartDependencies>
 {
+  private readonly enableFederatedIdentityAuth: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    const { enableFederatedIdentityAuth } = initializerContext.config.get<{
+      enableFederatedIdentityAuth: boolean;
+    }>();
+    this.enableFederatedIdentityAuth = enableFederatedIdentityAuth;
+  }
+
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
+    const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     management.sections.section.data.registerApp({
-      id: 'data_federation',
+      id: 'federated_data',
       title: PLUGIN_NAME,
       order: 2,
       async mount(params: ManagementAppMountParams) {
@@ -41,6 +51,7 @@ export class DatasetsPlugin
 
         const unmountAppCallback = mountManagementSection(coreStart, params, {
           cloud: pluginsStart.cloud,
+          enableFederatedIdentityAuth,
         });
         return () => {
           docTitle.reset();
@@ -50,7 +61,7 @@ export class DatasetsPlugin
     });
   }
 
-  public start(): DatasetsPluginStart {
+  public start(): FederatedDataPluginStart {
     return {};
   }
 }

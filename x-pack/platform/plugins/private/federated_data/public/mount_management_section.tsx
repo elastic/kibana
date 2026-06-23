@@ -10,23 +10,30 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 
 import { Main } from './main';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
-  { element }: ManagementAppMountParams,
-  { cloud }: { cloud?: CloudStart }
+  { element, history }: ManagementAppMountParams,
+  {
+    cloud,
+    enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = true,
+  }: { cloud?: CloudStart; enableFederatedIdentityAuth?: boolean }
 ) => {
-  const enableFederatedIdentityAuth = true; // Boolean(cloud?.isCloudEnabled);
+  const enableFederatedIdentityAuth =
+    Boolean(cloud?.isCloudEnabled) && enableFederatedIdentityAuthConfig;
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <Main
-        httpClient={coreStart.http}
-        toasts={coreStart.notifications.toasts}
-        enableFederatedIdentityAuth={enableFederatedIdentityAuth}
-      />
+      <Router history={history}>
+        <Main
+          httpClient={coreStart.http}
+          toasts={coreStart.notifications.toasts}
+          enableFederatedIdentityAuth={enableFederatedIdentityAuth}
+        />
+      </Router>
     ),
     element
   );

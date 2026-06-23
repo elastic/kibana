@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { DatasetsPlugin } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { FederatedDataPlugin } from './plugin';
 
-export type { DatasetsPluginStart } from './types';
+export type { FederatedDataPluginStart } from './types';
 
-export function plugin() {
-  return new DatasetsPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new FederatedDataPlugin(initializerContext);
 }

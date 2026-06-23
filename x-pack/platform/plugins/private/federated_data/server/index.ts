@@ -6,9 +6,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+export { config } from './config';
 export { DataSourcesClient } from './data_sources_client';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { DatasetsServerPlugin } = await import('./plugin');
-  return new DatasetsServerPlugin(initializerContext);
+  const { FederatedDataServerPlugin } = await import('./plugin');
+  return new FederatedDataServerPlugin(initializerContext);
 }

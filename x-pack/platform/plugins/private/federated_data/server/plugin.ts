@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerDataSetsRoutes } from './routes/register_routes';
 
-export class DatasetsServerPlugin implements Plugin<void, void> {
+export class FederatedDataServerPlugin implements Plugin<void, void> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup({ http }: CoreSetup) {
