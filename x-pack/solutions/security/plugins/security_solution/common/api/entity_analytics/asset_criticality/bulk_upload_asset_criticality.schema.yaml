@@ -12,7 +12,7 @@ paths:
       operationId: BulkUpsertAssetCriticalityRecords
       summary: Bulk upsert asset criticality records
       description: |
-        **DEPRECATED.**
+        **DEPRECATED.** Use the Entity Store APIs to bulk set asset criticality.
 
         Bulk upsert up to 1000 asset criticality records.
 
@@ -100,7 +100,7 @@ components:
         - successful
         - failed
         - total
-    
+
     AssetCriticalityLevelsForBulkUpload:
       type: string
       description: The criticality level of the asset for bulk upload. The value `unassigned` is used to indicate that the criticality level is not assigned and is only used for bulk upload.

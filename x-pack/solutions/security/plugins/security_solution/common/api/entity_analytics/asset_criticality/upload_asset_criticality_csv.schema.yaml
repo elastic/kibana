@@ -78,7 +78,8 @@ paths:
       deprecated: true
       operationId: UploadAssetCriticalityRecords
       summary: Uploads a CSV file containing asset criticality data
-      description: '**DEPRECATED.**'
+      description: |
+        **DEPRECATED.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
       requestBody:
         content:
           multipart/form-data:

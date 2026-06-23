@@ -11,7 +11,10 @@ paths:
       deprecated: true
       operationId: DeleteAssetCriticalityRecord
       summary: Delete an asset criticality record
-      description: '**DEPRECATED.** Delete the asset criticality record for a specific entity.'
+      description: |
+        **DEPRECATED.** Use the Entity Store APIs to unset asset criticality for a specific entity.
+
+        Delete the asset criticality record for a specific entity.
       parameters:
         - name: id_value
           in: query
