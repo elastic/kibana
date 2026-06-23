@@ -17,19 +17,24 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/private/federated_data
 dependsOn:
+  - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/management-plugin'
   - '@kbn/i18n'
+  - '@kbn/core-http-browser'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
   - group-platform
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
-    - .storybook/**/*
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
