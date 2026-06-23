@@ -9,7 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { RuleMigrationsDataClient } from '../../../data/rule_migrations_data_client';
 import { getQradarRulesMigrationTools } from './qradar';
-import { getIntegrationSearchTool } from './integrations_search';
 import { getProductDocumentationSearchTool } from './product_documentation';
 
 interface RulesMigrationToolDependencies {
@@ -27,7 +26,6 @@ export const getRulesMigrationTools = (
   return {
     ...getQradarRulesMigrationTools(migrationId, rulesClient),
     ...getProductDocumentationSearchTool({ request, connectorId, llmTasks }),
-    ...getIntegrationSearchTool({ rulesClient }),
   };
 };
 

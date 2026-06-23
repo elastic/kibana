@@ -5,132 +5,83 @@
  * 2.0.
  */
 
-import { BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { RuleMigrationsRetriever } from '../../../../../retrievers';
-import type { ModelWithTools } from '../../../../types';
 import type { RuleMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
 import {
   cleanMarkdown,
   generateAssistantComment,
 } from '../../../../../../../common/task/util/comments';
-import { RETRIEVE_INTEGRATION_PROMPT } from './prompts';
-import type { RetrieveIntegrationsState } from './state';
+import type { GraphNode } from '../../types';
+import { MATCH_INTEGRATION_PROMPT } from './prompts';
+import type { MigrateRuleGraphParams } from '../../../../types';
 
 interface GetRetrieveIntegrationsNodeParams {
-  model: ModelWithTools;
+  model: MigrateRuleGraphParams['model'];
   telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
-interface IntegrationSearchPayload {
-  source: 'integrationSearch';
-  query: string;
-  count: number;
-  results: Array<{ id?: string; title: string; description: string }>;
-  hasUsefulResults: boolean;
+interface GetMatchedIntegrationResponse {
+  id: string;
+  summary: string;
 }
-
-interface IntegrationMatchResponse {
-  semantic_query?: string;
-  id?: string;
-  match?: string;
-  summary?: string;
-}
-
-const NO_MATCH_SUMMARY = '## Integration Matching Summary\nNo related integration found.';
-
-const jsonParser = new JsonOutputParser<IntegrationMatchResponse>();
 
 export const getRetrieveIntegrationsNode = ({
   model,
-  telemetryClient,
   ruleMigrationsRetriever,
-}: GetRetrieveIntegrationsNodeParams) => {
-  return async (state: RetrieveIntegrationsState): Promise<Partial<RetrieveIntegrationsState>> => {
-    const prompt = await RETRIEVE_INTEGRATION_PROMPT.formatMessages({
-      title: state.title,
-      description: state.description,
-      inlineQuery: state.inline_query,
-      nlQuery: state.nl_query,
-    });
-
-    const response = await model.invoke([...prompt, ...state.messages]);
-
-    const hasToolCall =
-      response &&
-      typeof response === 'object' &&
-      'tool_calls' in response &&
-      response?.tool_calls &&
-      response?.tool_calls?.length > 0;
-
-    if (hasToolCall) {
-      return { messages: [response] };
+  telemetryClient,
+}: GetRetrieveIntegrationsNodeParams): GraphNode => {
+  return async (state) => {
+    const query = state.semantic_query;
+    const integrations = await ruleMigrationsRetriever.integrations.search(query);
+    if (integrations.length === 0) {
+      telemetryClient.reportIntegrationsMatch({
+        preFilterIntegrations: [],
+      });
+      const comment = '## Integration Matching Summary\n\nNo related integration found.';
+      return {
+        comments: [generateAssistantComment(comment)],
+      };
     }
 
-    const responseText = typeof response === 'string' ? response : response.text;
-    let parsedResponse: IntegrationMatchResponse | undefined;
-    try {
-      parsedResponse = await jsonParser.parse(responseText);
-    } catch {
-      // LLM did not return valid JSON; fall back to tool payload data
-    }
-    const latestIntegrationPayload = getLatestIntegrationSearchPayload(state.messages);
-    const semanticQuery =
-      parsedResponse?.semantic_query?.trim() ||
-      state.semantic_query ||
-      latestIntegrationPayload?.query ||
-      '';
-    const matchedIntegrationId = (parsedResponse?.id || parsedResponse?.match || '').trim();
-    const summary = parsedResponse?.summary?.trim() || NO_MATCH_SUMMARY;
+    const outputParser = new JsonOutputParser();
+    const mostRelevantIntegration = MATCH_INTEGRATION_PROMPT.pipe(model).pipe(outputParser);
 
-    const fullIntegrationResults = semanticQuery
-      ? await ruleMigrationsRetriever.integrations.search(semanticQuery)
-      : [];
+    const integrationsInfo = integrations.map((integration) => ({
+      id: integration.id,
+      title: integration.title,
+      description: integration.description,
+    }));
+    const ruleToMatch = {
+      title: state.original_rule.title,
+      description: `${state.original_rule.description} ${
+        state.nl_query ? `\n Additional context: ${state.nl_query}` : ''
+      }`,
+    };
 
-    let matchedIntegration = matchedIntegrationId
-      ? fullIntegrationResults.find((integration) => integration.id === matchedIntegrationId)
+    /*
+     * Takes the most relevant integration from the array of integration(s) returned by the semantic query, returns either the most relevant or none.
+     */
+    const integrationsJson = JSON.stringify(integrationsInfo, null, 2);
+    const response = (await mostRelevantIntegration.invoke({
+      integrations: integrationsJson,
+      rule: JSON.stringify(ruleToMatch, null, 2),
+    })) as GetMatchedIntegrationResponse;
+    const comments = response.summary
+      ? [generateAssistantComment(cleanMarkdown(response.summary))]
       : undefined;
 
-    if (matchedIntegrationId && !matchedIntegration) {
-      const fallbackResults = await ruleMigrationsRetriever.integrations.search(
-        matchedIntegrationId
-      );
-      matchedIntegration = fallbackResults.find(
-        (integration) => integration.id === matchedIntegrationId
-      );
-    }
-
-    telemetryClient.reportIntegrationsMatch({
-      preFilterIntegrations: fullIntegrationResults,
-      ...(matchedIntegration ? { postFilterIntegration: matchedIntegration } : {}),
-    });
-
-    return {
-      ...(matchedIntegration ? { integration: matchedIntegration } : {}),
-      comments: [generateAssistantComment(cleanMarkdown(summary))],
-      semantic_query: semanticQuery,
-      ...(BaseMessage.isInstance(response) ? { messages: [response] } : {}),
-    };
-  };
-};
-
-const getLatestIntegrationSearchPayload = (
-  messages: BaseMessage[]
-): IntegrationSearchPayload | undefined => {
-  return [...messages]
-    .reverse()
-    .filter((msg): msg is ToolMessage => ToolMessage.isInstance(msg))
-    .map((msg) => {
-      try {
-        const parsed = JSON.parse(typeof msg.content === 'string' ? msg.content : '');
-        if (parsed.source === 'integrationSearch') {
-          return parsed as IntegrationSearchPayload;
-        }
-      } catch {
-        // ignore
+    if (response.id) {
+      const matchedIntegration = integrations.find((r) => r.id === response.id);
+      telemetryClient.reportIntegrationsMatch({
+        preFilterIntegrations: integrations,
+        postFilterIntegration: matchedIntegration,
+      });
+      if (matchedIntegration) {
+        return { integration: matchedIntegration, comments };
       }
-      return undefined;
-    })
-    .find((payload): payload is IntegrationSearchPayload => Boolean(payload));
+    }
+    return { comments };
+  };
 };

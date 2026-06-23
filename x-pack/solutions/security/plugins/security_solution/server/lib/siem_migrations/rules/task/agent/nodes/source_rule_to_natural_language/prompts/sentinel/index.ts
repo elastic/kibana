@@ -6,6 +6,9 @@
  */
 
 export const SENTINEL_VENDOR_INSTRUCTIONS = `
+### Terminologies:
+
+- KQL: Kusto Query Language, the query language used in Microsoft Sentinel for searching and analyzing log data.
 
 ### Microsoft Sentinel KQL-Specific Instructions
 
@@ -22,7 +25,7 @@ Identify ALL KQL table names referenced in the query. Tables appear as:
 
 #### Watchlists and Lookups
 
-Microsoft Sentinel watchlists are reference lists used in KQL queries via the \`_GetWatchlist('WatchlistAlias')\` function. They serve the same purpose as QRadar reference sets — they provide lookup data for enrichment or filtering.
+Microsoft Sentinel watchlists are reference lists used in KQL queries via the \`_GetWatchlist('WatchlistAlias')\` function. They provide lookup data for enrichment or filtering.
 
 ##### How to identify Watchlist dependencies:
 
@@ -36,7 +39,7 @@ Microsoft Sentinel watchlists are reference lists used in KQL queries via the \`
 - Check the provided resources first — if a matching lookup exists, use its index name
 - Convert the watchlist alias to a lookup index name by:
   1. Taking the watchlist alias from \`_GetWatchlist('AliasName')\`
-  2. Matching it against the provided resources list
+  2. Matching it against the provided lookups in resources list. If watchlist name is "IPAllowlist" then the corresponding lookup index name will be of pattern "lookup_[a-z0-9_]-ip_allow_list*".
   3. Using the resource's content field as the lookup index name
 - If no matching resource is found, use the watchlist alias itself as the lookup name and mark it as [UNRESOLVED_WATCHLIST]
 
@@ -46,10 +49,11 @@ Microsoft Sentinel watchlists are reference lists used in KQL queries via the \`
 - Include watchlist lookups in the **Lookups** section using the standard syntax:
   \`LOOKUP JOIN to check if value of field \`<source_field>\` [exists / does NOT exist] in the lookup field \`value\` of lookup index "<lookup_index_name>".\`
 - In the **Flattened Detection Logic**, describe the watchlist check as a lookup condition, not as a vendor-specific watchlist call
+-
 
 #### Elastic Ecosystem Data Source Mapping
 
-The customer is migrating FROM Microsoft Sentinel TO the Elastic ecosystem. When the rule references security products that have direct Elastic equivalents, REPLACE them entirely with the Elastic equivalent in your output. Do NOT mention the original vendor name in the Data Sources section.
+The customer is migrating FROM Microsoft Sentinel TO the Elastic ecosystem. When    69 - "Data source: Microsoft Defender endpoint events"the rule references security products that have direct Elastic equivalents, REPLACE them entirely with the Elastic equivalent in your output. Do NOT mention the original vendor name in the Data Sources section.
 
 Replacements:
 - **SentinelOne** (tables like \`SentinelOne_CL\`, SentinelOne activity/threat/agent logs) -> Output as: **Elastic Defend endpoint telemetry** (process, file, network, threat detection, agent lifecycle)
@@ -68,6 +72,6 @@ Examples of INCORRECT output (do NOT do this):
 
 - No tool calls are needed — all information is in the KQL query itself
 - The Data Sources section must prominently list the identified data source names (use Elastic equivalents where applicable per the mapping above)
-- Focus on extracting vendor/product/Data Sources identification from table names, NOT from rule titles (titles can be misleading)
+- Focus on extracting *vendor/product/Data* Sources identification from table names, NOT from rule titles (titles can be misleading)
 - If the query uses \`table()\` with a variable, look at the \`let\` bindings to find the actual table names
 `;

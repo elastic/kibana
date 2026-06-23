@@ -31,7 +31,7 @@ export const getSourceRuleToNaturalLanguageNode = ({
       ['human', USER_MESSAGE],
     ]);
 
-    const formattedMessages = await prompt.formatMessages({
+    const formattedPrompt = await prompt.formatMessages({
       title: state.original_rule.title,
       description: state.original_rule.description,
       query,
@@ -52,12 +52,13 @@ export const getSourceRuleToNaturalLanguageNode = ({
       };
     }
 
-    const response = await model.invoke([...formattedMessages, ...currentMessages]);
+    const response = await model.invoke([...formattedPrompt, ...currentMessages]);
 
     const hasToolCall =
       'tool_calls' in response && response?.tool_calls && response?.tool_calls?.length > 0;
 
     if (hasToolCall) {
+      // we don't generate comments for tool calls but only the final response
       return { messages: [response], comments: [] };
     }
 

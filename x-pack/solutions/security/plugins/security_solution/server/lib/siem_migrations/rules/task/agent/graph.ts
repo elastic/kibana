@@ -39,7 +39,6 @@ export function getRuleMigrationAgent({
     ruleMigrationsRetriever,
     telemetryClient,
     logger,
-    tools,
   });
   const sourceRuleToNaturalLanguageNode = getSourceRuleToNaturalLanguageNode({
     model: model.bindTools(resolveDepsTools),

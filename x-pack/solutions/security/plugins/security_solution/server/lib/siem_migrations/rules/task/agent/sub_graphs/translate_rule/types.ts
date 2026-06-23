@@ -12,7 +12,6 @@ import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { migrateRuleConfigSchema } from '../../state';
 import type { MigrateRuleGraphParams } from '../../types';
-import type { RulesMigrationTools } from '../../tools';
 import type { translateRuleState } from './state';
 
 export type TranslateRuleState = typeof translateRuleState.State;
@@ -29,7 +28,6 @@ export interface TranslateRuleGraphParams {
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   telemetryClient: RuleMigrationTelemetryClient;
   logger: Logger;
-  tools: RulesMigrationTools;
 }
 
 export interface TranslateRuleValidationErrors {
