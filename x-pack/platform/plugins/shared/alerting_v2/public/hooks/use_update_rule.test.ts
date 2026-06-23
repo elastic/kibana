@@ -100,7 +100,8 @@ describe('useUpdateRule', () => {
       expect(enrichedError.stack).toBe('Error: Forbidden\n    at fetch');
       expect(options).toEqual({
         title: 'Edits not saved',
-        toastMessage: "Your role needs additional privileges to save rules. Contact your administrator for help.",
+        toastMessage:
+          'Your role needs additional privileges to save rules. Contact your administrator for help.',
       });
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });

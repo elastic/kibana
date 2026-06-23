@@ -127,7 +127,8 @@ describe('useCreateRule', () => {
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
         title: 'Rule not created',
-        toastMessage: "Your role needs additional privileges to save rules. Contact your administrator for help.",
+        toastMessage:
+          'Your role needs additional privileges to save rules. Contact your administrator for help.',
       });
     });
   });
