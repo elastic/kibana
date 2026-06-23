@@ -38,8 +38,13 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToCreateRequest(baseFormValues);
 
       expect(result).toEqual({
-        kind: 'alert',
-        metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1', 'tag2'] },
+        kind: 'signal',
+        metadata: {
+          name: 'Test Rule',
+          description: undefined,
+          owner: 'test-owner',
+          tags: ['tag1', 'tag2'],
+        },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
         query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
