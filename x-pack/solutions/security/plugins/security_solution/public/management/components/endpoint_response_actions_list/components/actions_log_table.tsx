@@ -57,6 +57,8 @@ interface ActionsLogTableProps {
     page: _page,
   }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => void;
   onShowActionDetails: (actionIds: string[]) => void;
+  /** Callback for when table actions may have changed the `items` and thus they should be refreshed */
+  onDataNeedsRefresh: () => void;
   queryParams: EndpointActionListRequestQuery;
   showHostNames: boolean;
   totalItemCount: number;
@@ -70,6 +72,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     isFlyout,
     loading,
     onChange,
+    onDataNeedsRefresh,
     onShowActionDetails,
     queryParams,
     showHostNames,
@@ -142,7 +145,8 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
 
     const onCloseCancelModalHandler = useCallback(() => {
       setActionToCancel(null);
-    }, []);
+      onDataNeedsRefresh();
+    }, [onDataNeedsRefresh]);
 
     // memoized callback for toggleDetails
     const onClickCallback = useCallback(

@@ -188,8 +188,9 @@ export const CancelActionModal = memo<CancelActionModalProps>(
       sendCancelRequest(cancelApiBody).then(() => {
         if (isMounted()) {
           toast.addSuccess(
-            i18n.translate('xpack.securitySolution.cancelActionModal.successSubmit', {
-              defaultMessage: 'Cancel action request sent',
+            i18n.translate('xpack.securitySolution.cancelActionModal.successSubmitToastMessage', {
+              defaultMessage:
+                'Cancel action request sent. (Note that depending on your table filters, this new action may not be visible)',
             })
           );
           onClose();
