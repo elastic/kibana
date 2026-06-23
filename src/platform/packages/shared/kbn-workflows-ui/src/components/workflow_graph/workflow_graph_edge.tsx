@@ -38,12 +38,13 @@ const TRUNK_LENGTH_TO_TARGET = 14;
 // targets at very different ranks.
 const TB_LABEL_Y_OFFSET = 30;
 
-// Switch single-bus routing: distance from the source handle to the shared
-// horizontal bus (TB) or vertical bus (LR). Labels are anchored at a further
-// fixed offset below/right of the bus so all case labels sit on an aligned
+// Fork single-bus routing: distance from the source handle to the shared
+// horizontal bus (TB) or vertical bus (LR). Used for all branching edges
+// (switch case/default, if-then, if-else). Labels are anchored at a further
+// fixed offset below/right of the bus so all branch labels sit on an aligned
 // row (TB) / column (LR) regardless of sibling node heights.
-const SWITCH_BUS_TRUNK = 20;
-const SWITCH_BUS_LABEL_OFFSET = 20;
+const FORK_BUS_TRUNK = 20;
+const FORK_BUS_LABEL_OFFSET = 20;
 
 const EPS = 0.5;
 
@@ -82,19 +83,19 @@ function enforceOrthogonal(
 }
 
 /**
- * Build the SVG path for a switch-edge single-bus routing. All case/default
- * edges of one switch share the same sourceX/sourceY, so their trunks and bus
- * line (busY or busX) are identical — they naturally overlay into one visible
- * trunk + one bus. Labels sit at a fixed offset below/right of the bus so all
- * case labels align on one row (TB) / one column (LR) regardless of sibling
- * node heights.
+ * Build the SVG path for a fork-edge single-bus routing. All branch edges of
+ * one fork node (switch case/default, if-then, if-else) share the same
+ * sourceX/sourceY, so their trunks and bus line (busY or busX) are identical —
+ * they naturally overlay into one visible trunk + one bus. Labels sit at a
+ * fixed offset below/right of the bus so all branch labels align on one row
+ * (TB) / one column (LR) regardless of how deep each branch target sits.
  *
  * TB shape: source → trunk down → bus horizontal → drop vertical → target.
  * LR shape: source → trunk right → bus vertical → drop horizontal → target.
  *
  * Exported for unit testing.
  */
-export function buildSwitchBusPath(
+export function buildForkBusPath(
   p: { sourceX: number; sourceY: number; targetX: number; targetY: number },
   isLR: boolean,
   trunk: number
@@ -111,7 +112,7 @@ export function buildSwitchBusPath(
       ],
       CORNER_RADIUS
     );
-    return { path, labelX: busX + SWITCH_BUS_LABEL_OFFSET, labelY: ty };
+    return { path, labelX: busX + FORK_BUS_LABEL_OFFSET, labelY: ty };
   } else {
     const busY = sy + trunk;
     const { path } = buildRoundedOrthogonalPath(
@@ -123,7 +124,7 @@ export function buildSwitchBusPath(
       ],
       CORNER_RADIUS
     );
-    return { path, labelX: tx, labelY: busY + SWITCH_BUS_LABEL_OFFSET };
+    return { path, labelX: tx, labelY: busY + FORK_BUS_LABEL_OFFSET };
   }
 }
 
@@ -218,22 +219,27 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   let labelX: number;
   let labelY: number;
 
-  // Single-bus routing for switch edges. All case/default edges of one switch
-  // share the same sourceX/sourceY, so their trunks and bus line overlap into
-  // one visible trunk + one continuous bus. Each edge then drops straight from
-  // the bus to its own target. Labels sit at a fixed offset below the bus (TB)
-  // / right of the bus (LR) so all case labels align on one row/column.
-  const isSwitchBus = edgeData?.branchType === 'switch';
+  // Single-bus routing for all fork (fan-out) edges: switch case/default,
+  // if-then, and if-else. All branch edges of one fork node share the same
+  // sourceX/sourceY, so their trunks and bus line overlap into one visible
+  // trunk + one continuous bus. Each edge then drops straight from the bus to
+  // its own target. Labels sit at a fixed offset below the bus (TB) / right of
+  // the bus (LR) so all branch labels align on one row/column regardless of
+  // how deep each branch target sits.
+  // Note: merge/fan-in edges (branch tails → next step) carry no branchType
+  // and stay on the smooth-step fallback — the bus requires a shared source.
+  const branchType = edgeData?.branchType;
+  const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
   const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
-  const busGap = isLR ? targetX - sourceX : targetY - sourceY;
-  const useBus = isSwitchBus && busGap > SWITCH_BUS_TRUNK;
+  const forkGap = isLR ? targetX - sourceX : targetY - sourceY;
+  const useFork = isForkEdge && forkGap > FORK_BUS_TRUNK;
 
-  if (useBus) {
+  if (useFork) {
     ({
       path: edgePath,
       labelX,
       labelY,
-    } = buildSwitchBusPath({ sourceX, sourceY, targetX, targetY }, isLR, SWITCH_BUS_TRUNK));
+    } = buildForkBusPath({ sourceX, sourceY, targetX, targetY }, isLR, FORK_BUS_TRUNK));
   } else if (dagrePoints && dagrePoints.length >= 2) {
     let middle = dagrePoints.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
 
