@@ -139,13 +139,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should show the custom message text area when the Notify User checkbox is checked', async () => {
-          expect(await testSubjects.isChecked(cardTestSubj.notifyUserCheckbox)).to.be(true);
+          expect(await testSubjects.isChecked(cardTestSubj.windowsNotifyUserCheckbox)).to.be(true);
           await testSubjects.existOrFail(cardTestSubj.notifyCustomMessage);
         });
 
         it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
-          await pageObjects.endpointPageUtils.clickOnEuiCheckbox(cardTestSubj.notifyUserCheckbox);
-          expect(await testSubjects.isChecked(cardTestSubj.notifyUserCheckbox)).to.be(false);
+          await pageObjects.endpointPageUtils.clickOnEuiCheckbox(cardTestSubj.windowsNotifyUserCheckbox);
+          expect(await testSubjects.isChecked(cardTestSubj.windowsNotifyUserCheckbox)).to.be(false);
           await testSubjects.missingOrFail(cardTestSubj.notifyCustomMessage);
         });
 

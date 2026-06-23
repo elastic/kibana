@@ -84,7 +84,6 @@ export const DeviceControlCard = React.memo<DeviceControlProps>(
   ({ policy, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isEnterprise = useLicense().isEnterprise();
-    const isEditMode = mode === 'edit';
 
     const deviceControlExists =
       policy.windows.device_control !== undefined && policy.mac.device_control !== undefined;

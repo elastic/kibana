@@ -154,14 +154,10 @@ describe('Endpoint Policy Settings Form', () => {
   });
 
   describe('when changing related settings', () => {
-    let clickOnRadio: (selector: string) => Promise<void>;
     let expectOnChangeToBeCalledWith: (updatedPolicy: PolicyConfig) => void;
 
     describe('related to antivirus registration', () => {
       beforeEach(() => {
-        clickOnRadio = (selector) =>
-          userEvent.click(renderResult.getByTestId(selector).querySelector('input')!);
-
         expectOnChangeToBeCalledWith = (updatedPolicy) =>
           expect(formProps.onChange).toBeCalledWith({
             isValid: true,

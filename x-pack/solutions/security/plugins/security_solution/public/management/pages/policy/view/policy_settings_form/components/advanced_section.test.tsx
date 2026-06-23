@@ -20,11 +20,6 @@ import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
 import { within } from '@testing-library/react';
 import { set } from '@kbn/safer-lodash-set';
 
-// Helpers for per-OS filter tests
-const linuxKeys = AdvancedPolicySchema.filter((e) => e.key.startsWith('linux.advanced.'));
-const macKeys = AdvancedPolicySchema.filter((e) => e.key.startsWith('mac.advanced.'));
-const windowsKeys = AdvancedPolicySchema.filter((e) => e.key.startsWith('windows.advanced.'));
-
 jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
 jest.mock('../../../../../../common/hooks/use_license');
 

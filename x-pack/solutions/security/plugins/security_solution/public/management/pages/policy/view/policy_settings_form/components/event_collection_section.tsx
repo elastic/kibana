@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
@@ -17,6 +16,7 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiSwitch,
+  EuiSwitchProps,
   useEuiTheme,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
@@ -100,7 +100,7 @@ export const EventCollectionSection = memo<EventCollectionSectionProps>(
 
     const savedLinuxTtyIoWhenSessionWasOnRef = useRef<boolean | undefined>(undefined);
 
-    const onSessionSwitchChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    const onSessionSwitchChange = useCallback<EuiSwitchProps['onChange']>(
       (ev) => {
         const updatedPolicy = cloneDeep(policy);
         if (!ev.target.checked) {
