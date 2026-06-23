@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  buildDataRetentionFromSerializedDlmPhases,
-  HOT_ONLY_INFINITE_DATA_RETENTION,
-} from './build_data_retention';
+import { HOT_ONLY_INFINITE_DATA_RETENTION } from '../../../../../../common/lib/data_stream_utils';
+import { buildDataRetentionFromSerializedDlmPhases } from './build_data_retention';
 
 describe('buildDataRetentionFromSerializedDlmPhases', () => {
   it('returns hot-only infinite retention when no optional phases are configured', () => {

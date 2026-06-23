@@ -84,14 +84,15 @@ export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): Dat
     return { enabled: false };
   }
 
-  const frozen = lifecycle.frozen_after
-    ? (() => {
-        const { size, unit } = splitSizeAndUnits(lifecycle.frozen_after as string);
-        return { frozen: { enabled: true, value: Number(size), unit } };
-      })()
-    : {};
+  const frozen =
+    typeof lifecycle.frozen_after === 'string'
+      ? (() => {
+          const { size, unit } = splitSizeAndUnits(lifecycle.frozen_after);
+          return { frozen: { enabled: true, value: Number(size), unit } };
+        })()
+      : {};
 
-  if (!lifecycle.data_retention) {
+  if (typeof lifecycle.data_retention !== 'string') {
     return {
       enabled: true,
       infiniteDataRetention: true,
@@ -99,7 +100,7 @@ export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): Dat
     };
   }
 
-  const { size, unit } = splitSizeAndUnits(lifecycle.data_retention as string);
+  const { size, unit } = splitSizeAndUnits(lifecycle.data_retention);
 
   return {
     enabled: true,

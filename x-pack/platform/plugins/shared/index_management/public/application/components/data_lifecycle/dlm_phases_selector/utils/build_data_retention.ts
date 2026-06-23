@@ -12,8 +12,6 @@ import {
 } from '../../../../../../common/lib/data_stream_utils';
 import type { SerializedDlmPhases } from '../types';
 
-export { HOT_ONLY_INFINITE_DATA_RETENTION };
-
 export const buildDataRetentionFromSerializedDlmPhases = (
   serialized: SerializedDlmPhases
 ): DataRetention => {

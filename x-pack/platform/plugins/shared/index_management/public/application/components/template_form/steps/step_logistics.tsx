@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { SUBSCRIPTION_FEATURES_URL } from '@kbn/data-lifecycle-phases';
 
 import { DlmPhasesSelector } from '../../data_lifecycle';
 import type { DlmPhasesSelectorProps, SerializedDlmPhases } from '../../data_lifecycle';
@@ -52,8 +53,6 @@ import {
 } from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
-const SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions/cloud';
-
 const buildDlmDefaultValue = (
   lifecycle?: DataRetention
 ): DlmPhasesSelectorProps['defaultValue'] => {
@@ -79,6 +78,84 @@ const buildDlmDefaultValue = (
     ...(frozenPhase ? { frozen: frozenPhase } : {}),
     ...(deletePhase ? { delete: deletePhase } : {}),
   };
+};
+
+interface DlmPhasesSelectorFieldProps {
+  defaultValue: DlmPhasesSelectorProps['defaultValue'];
+  onChange: DlmPhasesSelectorProps['onChange'];
+}
+
+const useDlmRepositoryUrls = () => {
+  const {
+    core: { getUrlForApp },
+  } = useAppContext();
+
+  return {
+    manageRepositoriesUrl: getUrlForApp('management', {
+      path: 'data/snapshot_restore/repositories',
+    }),
+    createDefaultRepositoryUrl: getUrlForApp('management', {
+      path: 'data/snapshot_restore/add_repository',
+    }),
+  };
+};
+
+const useDlmEnterpriseConfig = (): DlmPhasesSelectorProps['enterprise'] => {
+  const {
+    plugins: { cloud },
+    core: { application },
+  } = useAppContext();
+
+  return {
+    isCloudEnabled: Boolean(cloud?.isCloudEnabled),
+    canManageLicense: Boolean(application?.capabilities?.management?.stack?.license_management),
+    trialDaysLeft: cloud?.trialDaysLeft?.(),
+    subscriptionFeaturesUrl: SUBSCRIPTION_FEATURES_URL,
+  };
+};
+
+const StatefulDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelectorFieldProps) => {
+  const { isAtLeastEnterprise } = useLicense();
+  const { data: snapshotRepositories, resendRequest: refreshSnapshotRepositories } =
+    useLoadSnapshotRepositories();
+  const { manageRepositoriesUrl, createDefaultRepositoryUrl } = useDlmRepositoryUrls();
+  const enterprise = useDlmEnterpriseConfig();
+
+  return (
+    <DlmPhasesSelector
+      defaultValue={defaultValue}
+      serverless={false}
+      hasEnterpriseLicense={isAtLeastEnterprise()}
+      hasDefaultSnapshotRepository={Boolean(snapshotRepositories?.hasDefaultRepository)}
+      canCreateDefaultSnapshotRepository={Boolean(snapshotRepositories?.canCreateRepository)}
+      defaultSnapshotRepository={snapshotRepositories?.defaultRepository}
+      manageRepositoriesUrl={manageRepositoriesUrl}
+      createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+      onRefreshDefaultSnapshotRepository={refreshSnapshotRepositories}
+      enterprise={enterprise}
+      onChange={onChange}
+    />
+  );
+};
+
+const ServerlessDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelectorFieldProps) => {
+  const { isAtLeastEnterprise } = useLicense();
+  const { manageRepositoriesUrl, createDefaultRepositoryUrl } = useDlmRepositoryUrls();
+  const enterprise = useDlmEnterpriseConfig();
+
+  return (
+    <DlmPhasesSelector
+      defaultValue={defaultValue}
+      serverless
+      hasEnterpriseLicense={isAtLeastEnterprise()}
+      hasDefaultSnapshotRepository={false}
+      canCreateDefaultSnapshotRepository={false}
+      manageRepositoriesUrl={manageRepositoriesUrl}
+      createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+      enterprise={enterprise}
+      onChange={onChange}
+    />
+  );
 };
 
 // Create or Form components with partial props that are common to all instances
@@ -321,22 +398,8 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
 
     const {
-      plugins: { cloud },
-      core: { application, getUrlForApp },
-      config: { isServerless },
+      config: { isServerless: isDlmPhasesSelectorServerless },
     } = useAppContext();
-    const { isAtLeastEnterprise } = useLicense();
-    const { data: snapshotRepositories, resendRequest: refreshSnapshotRepositories } =
-      useLoadSnapshotRepositories();
-
-    const isDlmPhasesSelectorServerless = isServerless;
-
-    const manageRepositoriesUrl = getUrlForApp('management', {
-      path: 'data/snapshot_restore/repositories',
-    });
-    const createDefaultRepositoryUrl = getUrlForApp('management', {
-      path: 'data/snapshot_restore/add_repository',
-    });
 
     const [lifecycle, setLifecycle] = useState<DataRetention | undefined>(defaultValue.lifecycle);
     const [isDlmValid, setIsDlmValid] = useState(true);
@@ -540,28 +603,17 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 'data-test-subj': 'dataLifecyclePhasesSelector',
               }}
             >
-              <DlmPhasesSelector
-                defaultValue={dlmDefaultValue}
-                serverless={isDlmPhasesSelectorServerless}
-                hasEnterpriseLicense={isAtLeastEnterprise()}
-                hasDefaultSnapshotRepository={Boolean(snapshotRepositories?.hasDefaultRepository)}
-                canCreateDefaultSnapshotRepository={Boolean(
-                  snapshotRepositories?.canCreateRepository
-                )}
-                defaultSnapshotRepository={snapshotRepositories?.defaultRepository}
-                manageRepositoriesUrl={manageRepositoriesUrl}
-                createDefaultRepositoryUrl={createDefaultRepositoryUrl}
-                onRefreshDefaultSnapshotRepository={refreshSnapshotRepositories}
-                enterprise={{
-                  isCloudEnabled: Boolean(cloud?.isCloudEnabled),
-                  canManageLicense: Boolean(
-                    application?.capabilities?.management?.stack?.license_management
-                  ),
-                  trialDaysLeft: cloud?.trialDaysLeft?.(),
-                  subscriptionFeaturesUrl: SUBSCRIPTION_FEATURES_URL,
-                }}
-                onChange={handleDlmChange}
-              />
+              {isDlmPhasesSelectorServerless ? (
+                <ServerlessDlmPhasesSelector
+                  defaultValue={dlmDefaultValue}
+                  onChange={handleDlmChange}
+                />
+              ) : (
+                <StatefulDlmPhasesSelector
+                  defaultValue={dlmDefaultValue}
+                  onChange={handleDlmChange}
+                />
+              )}
             </FormRow>
           )}
 

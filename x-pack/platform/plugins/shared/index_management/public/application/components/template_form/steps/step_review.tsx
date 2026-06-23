@@ -125,7 +125,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     const serializedLifecycle = isLegacy
       ? undefined
       : resolveLifecycleForSummary(indexTemplate?.lifecycle, {
-          hasDataStream: hasDatastream ?? Boolean(template!.dataStream),
+          hasDataStream: hasDatastream ?? Boolean(template?.dataStream),
         });
 
     const numIndexPatterns = indexPatterns!.length;

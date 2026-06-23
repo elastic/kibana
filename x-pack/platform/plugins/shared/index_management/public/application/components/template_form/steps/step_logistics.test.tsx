@@ -11,9 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { StepLogistics } from './step_logistics';
 
+let mockIsServerless = false;
+
 jest.mock('../../../app_context', () => ({
   useAppContext: () => ({
-    config: { isServerless: false },
+    config: { isServerless: mockIsServerless },
     plugins: { cloud: undefined },
     core: {
       application: { capabilities: { management: { stack: { license_management: true } } } },
@@ -26,15 +28,17 @@ jest.mock('../../../../hooks/use_license', () => ({
   useLicense: () => ({ isAtLeastEnterprise: () => true }),
 }));
 
+const mockUseLoadSnapshotRepositories = jest.fn(() => ({
+  data: {
+    hasDefaultRepository: true,
+    defaultRepository: 'found-snapshots',
+    canCreateRepository: true,
+  },
+  resendRequest: jest.fn(),
+}));
+
 jest.mock('../../../services/api', () => ({
-  useLoadSnapshotRepositories: () => ({
-    data: {
-      hasDefaultRepository: true,
-      defaultRepository: 'found-snapshots',
-      canCreateRepository: true,
-    },
-    resendRequest: jest.fn(),
-  }),
+  useLoadSnapshotRepositories: () => mockUseLoadSnapshotRepositories(),
 }));
 
 describe('StepLogistics', () => {
@@ -49,6 +53,11 @@ describe('StepLogistics', () => {
     dataStream: {},
     lifecycle: { enabled: false, value: 1, unit: 'd' },
   };
+
+  beforeEach(() => {
+    mockIsServerless = false;
+    mockUseLoadSnapshotRepositories.mockClear();
+  });
 
   describe('WHEN editing an existing template', () => {
     it('SHOULD disable the name field', async () => {
@@ -112,5 +121,49 @@ describe('StepLogistics', () => {
 
     const lastCall = onChange.mock.calls.at(-1)?.[0];
     expect(await lastCall.validate()).toBe(false);
+  });
+
+  describe('WHEN running on Stateful', () => {
+    it('SHOULD render the Hot and Frozen phases and load snapshot repositories', async () => {
+      render(
+        <I18nProvider>
+          <StepLogistics defaultValue={baseDefaultValue} onChange={jest.fn()} isLegacy={false} />
+        </I18nProvider>
+      );
+
+      expect(await screen.findByTestId('dlmPhasesSelectorHotPhaseCard')).toBeInTheDocument();
+      expect(screen.getByTestId('dlmPhasesSelectorFrozenPhaseCard')).toBeInTheDocument();
+      expect(screen.getByTestId('dlmPhasesSelectorDeletePhaseCard')).toBeInTheDocument();
+      expect(mockUseLoadSnapshotRepositories).toHaveBeenCalled();
+    });
+  });
+
+  describe('WHEN running on Serverless', () => {
+    beforeEach(() => {
+      mockIsServerless = true;
+    });
+
+    it('SHOULD only render the Delete phase', async () => {
+      render(
+        <I18nProvider>
+          <StepLogistics defaultValue={baseDefaultValue} onChange={jest.fn()} isLegacy={false} />
+        </I18nProvider>
+      );
+
+      expect(await screen.findByTestId('dlmPhasesSelectorDeletePhaseCard')).toBeInTheDocument();
+      expect(screen.queryByTestId('dlmPhasesSelectorHotPhaseCard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dlmPhasesSelectorFrozenPhaseCard')).not.toBeInTheDocument();
+    });
+
+    it('SHOULD NOT load snapshot repositories', async () => {
+      render(
+        <I18nProvider>
+          <StepLogistics defaultValue={baseDefaultValue} onChange={jest.fn()} isLegacy={false} />
+        </I18nProvider>
+      );
+
+      await screen.findByTestId('dlmPhasesSelectorDeletePhaseCard');
+      expect(mockUseLoadSnapshotRepositories).not.toHaveBeenCalled();
+    });
   });
 });
