@@ -10,18 +10,18 @@ responses:
             value:
               id: "email_exact_match"
               enabled: true
-  404:
-    description: "Resolution rule not found."
+  400:
+    description: "Invalid request."
     content:
       application/json:
         examples:
-          ruleNotFoundExample:
+          unknownRuleExample:
             summary: "Unknown resolution rule"
-            description: "The requested rule identifier is not defined."
+            description: "The path parameter is not one of the defined resolution rule ids."
             value:
-              statusCode: 404
-              error: "Not Found"
-              message: "Resolution rule 'nonexistent_rule' is not defined"
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request params.id]: Invalid enum value, received 'nonexistent_rule'"
   403:
     description: "Insufficient license."
     content:

@@ -16,6 +16,7 @@ import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../../constants';
 import { registerResolutionRulesList } from './list';
 import { registerResolutionRulesEnable } from './enable';
 import { registerResolutionRulesDisable } from './disable';
+import { ruleParamsSchema } from './params';
 
 interface CapturedRoute {
   routeConfig: { path: string; security?: { authz?: unknown } };
@@ -157,27 +158,6 @@ describe('resolution rules routes', () => {
       expect(res.ok).toHaveBeenCalledWith({ body: { id: 'email_exact_match', enabled: true } });
     });
 
-    it('returns 404 for an unknown rule id without touching the SO', async () => {
-      const { router, calls } = createFakeRouter();
-      registerResolutionRulesEnable(router);
-
-      const overridesClient = { setEnabled: jest.fn() };
-      const res = httpServerMock.createResponseFactory();
-      // The real response factory returns a truthy IKibanaResponse, which is how
-      // the handler short-circuits on an unknown rule; the mock must mirror that.
-      res.notFound.mockReturnValue({ status: 404 } as never);
-      await calls.put[0].handler!(
-        createCtx(overridesClient),
-        createReq({ id: 'nonexistent_rule' }, 'put'),
-        res
-      );
-
-      expect(overridesClient.setEnabled).not.toHaveBeenCalled();
-      expect(res.notFound).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining('is not defined') },
-      });
-    });
-
     it('is gated to enterprise license (403 below enterprise, SO untouched)', async () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesEnable(router);
@@ -226,27 +206,6 @@ describe('resolution rules routes', () => {
       expect(res.ok).toHaveBeenCalledWith({ body: { id: 'email_exact_match', enabled: false } });
     });
 
-    it('returns 404 for an unknown rule id without touching the SO', async () => {
-      const { router, calls } = createFakeRouter();
-      registerResolutionRulesDisable(router);
-
-      const overridesClient = { setEnabled: jest.fn() };
-      const res = httpServerMock.createResponseFactory();
-      // The real response factory returns a truthy IKibanaResponse, which is how
-      // the handler short-circuits on an unknown rule; the mock must mirror that.
-      res.notFound.mockReturnValue({ status: 404 } as never);
-      await calls.put[0].handler!(
-        createCtx(overridesClient),
-        createReq({ id: 'nonexistent_rule' }, 'put'),
-        res
-      );
-
-      expect(overridesClient.setEnabled).not.toHaveBeenCalled();
-      expect(res.notFound).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining('is not defined') },
-      });
-    });
-
     it('is gated to enterprise license (403 below enterprise, SO untouched)', async () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesDisable(router);
@@ -263,6 +222,16 @@ describe('resolution rules routes', () => {
       expect(res.forbidden).toHaveBeenCalled();
       expect(overridesClient.setEnabled).not.toHaveBeenCalled();
       expect(res.ok).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('rule id params validation (enable/disable)', () => {
+    it('accepts a defined rule id', () => {
+      expect(ruleParamsSchema.safeParse({ id: 'email_exact_match' }).success).toBe(true);
+    });
+
+    it('rejects an unknown rule id (request fails validation -> 400)', () => {
+      expect(ruleParamsSchema.safeParse({ id: 'nonexistent_rule' }).success).toBe(false);
     });
   });
 });

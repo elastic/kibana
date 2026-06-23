@@ -7,18 +7,13 @@
 
 import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../../constants';
 import type { EntityStorePluginRouter } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
-import { rejectUnknownRuleId } from './reject_unknown_rule_id';
-
-const paramsSchema = z.object({
-  id: z.string().max(256).describe('The resolution rule identifier.'),
-});
+import { ruleParamsSchema } from './params';
 
 export function registerResolutionRulesEnable(router: EntityStorePluginRouter) {
   router.versioned
@@ -45,7 +40,7 @@ export function registerResolutionRulesEnable(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(paramsSchema),
+            params: buildRouteValidationWithZod(ruleParamsSchema),
           },
         },
         options: {
@@ -57,11 +52,6 @@ export function registerResolutionRulesEnable(router: EntityStorePluginRouter) {
         async (ctx, req, res): Promise<IKibanaResponse> => {
           const { resolutionRuleOverridesClient } = await ctx.entityStore;
           const { id } = req.params;
-
-          const unknownRule = rejectUnknownRuleId(id, res);
-          if (unknownRule) {
-            return unknownRule;
-          }
 
           await resolutionRuleOverridesClient.setEnabled(id, true);
 
