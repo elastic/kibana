@@ -46,13 +46,13 @@ export function registerResolutionRulesList(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { resolutionRuleOverridesClient } = await ctx.entityStore;
+          const { resolutionRulesClient } = await ctx.entityStore;
 
-          const overrides = await resolutionRuleOverridesClient.find();
+          const disabledRuleIds = await resolutionRulesClient.getDisabledRuleIds();
           const rules = RESOLUTION_RULE_CONFIGS.map((rule) => ({
             id: rule.id,
             description: rule.description,
-            enabled: overrides?.overrides[rule.id]?.enabled !== false,
+            enabled: !disabledRuleIds.includes(rule.id),
             // Built-in rules are defined in code, so always managed. The field exists to
             // distinguish them from customer-authored rules (managed: false) in future.
             managed: true,

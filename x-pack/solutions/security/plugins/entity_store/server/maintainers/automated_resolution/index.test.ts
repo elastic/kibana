@@ -10,8 +10,8 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type { EntityStoreCoreSetup } from '../../types';
-import { EntityStoreResolutionRuleOverridesTypeName } from '../../domain/saved_objects';
-import type { ResolutionRuleOverrides } from '../../domain/saved_objects';
+import { EntityStoreResolutionDisabledRulesTypeName } from '../../domain/saved_objects';
+import type { ResolutionDisabledRules } from '../../domain/saved_objects';
 import type { EntityMaintainerTaskMethodContext } from '../../tasks/entity_maintainers/types';
 import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
 import { createAutomatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
@@ -40,16 +40,16 @@ const collectEmailsResponse = (maxTimestamp: string) => ({
 // the watermark still advances (no failed buckets).
 const noMatchGroupsResponse = { aggregations: { email_groups: { buckets: [] } } };
 
-const overridesFindResponse = (
-  overrides?: ResolutionRuleOverrides['overrides']
-): SavedObjectsFindResponse<ResolutionRuleOverrides> => {
-  if (overrides === undefined) {
+const disabledRulesFindResponse = (
+  disabledRuleIds?: string[]
+): SavedObjectsFindResponse<ResolutionDisabledRules> => {
+  if (disabledRuleIds === undefined) {
     return {
       total: 0,
       saved_objects: [],
       page: 1,
       per_page: 1,
-    } as SavedObjectsFindResponse<ResolutionRuleOverrides>;
+    } as SavedObjectsFindResponse<ResolutionDisabledRules>;
   }
   return {
     total: 1,
@@ -57,19 +57,19 @@ const overridesFindResponse = (
     per_page: 1,
     saved_objects: [
       {
-        id: `${EntityStoreResolutionRuleOverridesTypeName}-${NAMESPACE}`,
-        type: EntityStoreResolutionRuleOverridesTypeName,
+        id: `${EntityStoreResolutionDisabledRulesTypeName}-${NAMESPACE}`,
+        type: EntityStoreResolutionDisabledRulesTypeName,
         references: [],
-        attributes: { overrides },
+        attributes: { disabledRuleIds },
         score: 0,
       },
     ],
-  } as unknown as SavedObjectsFindResponse<ResolutionRuleOverrides>;
+  } as unknown as SavedObjectsFindResponse<ResolutionDisabledRules>;
 };
 
-const setup = (overrides?: ResolutionRuleOverrides['overrides']) => {
+const setup = (disabledRuleIds?: string[]) => {
   const soClient = savedObjectsClientMock.create();
-  soClient.find.mockResolvedValue(overridesFindResponse(overrides));
+  soClient.find.mockResolvedValue(disabledRulesFindResponse(disabledRuleIds));
 
   const core = {
     getStartServices: jest
@@ -150,12 +150,12 @@ describe('createAutomatedResolutionMaintainerConfig', () => {
     expect(Object.hasOwn(result, 'lastProcessedTimestamp')).toBe(false);
   });
 
-  it('treats all rules as enabled when the override SO does not exist', async () => {
+  it('treats all rules as enabled when the disabled-rules SO does not exist', async () => {
     const { core, esClient, soClient } = setup();
 
     const result = await runConfig(core, esClient, { lastProcessedTimestamp: null, lastRun: null });
 
-    // The override SO was consulted but, being absent, the email rule still ran.
+    // The disabled-rules SO was consulted but, being absent, the email rule still ran.
     expect(soClient.find).toHaveBeenCalledTimes(1);
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(result.rules[EMAIL_RULE].lastRun).toEqual({
@@ -184,9 +184,9 @@ describe('createAutomatedResolutionMaintainerConfig', () => {
     });
   });
 
-  it('treats the email rule as enabled when the SO has only an unrelated override', async () => {
-    // SO present with an unrelated rule disabled; the email rule has no entry and must run.
-    const { core, esClient } = setup({ some_other_rule: { enabled: false } });
+  it('treats the email rule as enabled when only an unrelated rule is disabled', async () => {
+    // SO present with an unrelated rule disabled; the email rule is not in the list and must run.
+    const { core, esClient } = setup(['some_other_rule']);
 
     const result = await runConfig(core, esClient, { lastProcessedTimestamp: null, lastRun: null });
 
@@ -197,8 +197,8 @@ describe('createAutomatedResolutionMaintainerConfig', () => {
     });
   });
 
-  it('skips the email rule when its override is disabled, without advancing its watermark', async () => {
-    const { core, esClient } = setup({ [EMAIL_RULE]: { enabled: false } });
+  it('skips the email rule when it is in the disabled list, without advancing its watermark', async () => {
+    const { core, esClient } = setup([EMAIL_RULE]);
 
     const result = await runConfig(core, esClient, {
       lastProcessedTimestamp: '2026-01-01T00:00:00Z',

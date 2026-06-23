@@ -18,7 +18,7 @@ import { FeatureFlags } from './infra/feature_flags';
 import {
   EngineDescriptorClient,
   EntityStoreGlobalStateClient,
-  ResolutionRuleOverridesClient,
+  ResolutionRulesClient,
 } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remote';
@@ -136,11 +136,7 @@ export async function createRequestHandlerContext({
       namespace,
     }),
     remoteLogsExtractionClient,
-    resolutionRuleOverridesClient: new ResolutionRuleOverridesClient(
-      core.savedObjects.client,
-      namespace,
-      logger
-    ),
+    resolutionRulesClient: new ResolutionRulesClient(core.savedObjects.client, namespace, logger),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
     historySnapshotClient,

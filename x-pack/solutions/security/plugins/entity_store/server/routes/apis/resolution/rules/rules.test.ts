@@ -40,14 +40,11 @@ const createFakeRouter = () => {
   return { router: router as unknown as EntityStorePluginRouter, calls };
 };
 
-const createCtx = (
-  overridesClient: unknown,
-  { enterprise = true }: { enterprise?: boolean } = {}
-) => ({
+const createCtx = (rulesClient: unknown, { enterprise = true }: { enterprise?: boolean } = {}) => ({
   entityStore: Promise.resolve({
     logger: loggingSystemMock.createLogger(),
     featureFlags: { isEntityStoreV2Enabled: jest.fn().mockResolvedValue(true) },
-    resolutionRuleOverridesClient: overridesClient,
+    resolutionRulesClient: rulesClient,
     namespace: 'default',
   }),
   licensing: Promise.resolve({
@@ -71,15 +68,15 @@ describe('resolution rules routes', () => {
       expect(calls.get[0].routeConfig.security?.authz).toEqual(RESOLUTION_ENTITY_STORE_PERMISSIONS);
     });
 
-    it('returns the rule config array with managed: true and override-aware enabled', async () => {
+    it('returns the rule config array with managed: true and disabled-aware enabled', async () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesList(router);
 
-      const overridesClient = {
-        find: jest.fn().mockResolvedValue({ overrides: { email_exact_match: { enabled: false } } }),
+      const rulesClient = {
+        getDisabledRuleIds: jest.fn().mockResolvedValue(['email_exact_match']),
       };
       const res = httpServerMock.createResponseFactory();
-      await calls.get[0].handler!(createCtx(overridesClient), createReq(), res);
+      await calls.get[0].handler!(createCtx(rulesClient), createReq(), res);
 
       expect(res.ok).toHaveBeenCalledWith({
         body: {
@@ -95,13 +92,13 @@ describe('resolution rules routes', () => {
       });
     });
 
-    it('defaults enabled to true when no override exists', async () => {
+    it('defaults enabled to true when no disabled-rules SO exists', async () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesList(router);
 
-      const overridesClient = { find: jest.fn().mockResolvedValue(undefined) };
+      const rulesClient = { getDisabledRuleIds: jest.fn().mockResolvedValue([]) };
       const res = httpServerMock.createResponseFactory();
-      await calls.get[0].handler!(createCtx(overridesClient), createReq(), res);
+      await calls.get[0].handler!(createCtx(rulesClient), createReq(), res);
 
       expect(res.ok).toHaveBeenCalledWith({
         body: {
@@ -116,19 +113,15 @@ describe('resolution rules routes', () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesList(router);
 
-      const overridesClient = { find: jest.fn() };
+      const rulesClient = { getDisabledRuleIds: jest.fn() };
       const res = httpServerMock.createResponseFactory();
       // The real response factory returns a truthy IKibanaResponse, which is how
       // wrapMiddlewares short-circuits; the mock must mirror that.
       res.forbidden.mockReturnValue({ status: 403 } as never);
-      await calls.get[0].handler!(
-        createCtx(overridesClient, { enterprise: false }),
-        createReq(),
-        res
-      );
+      await calls.get[0].handler!(createCtx(rulesClient, { enterprise: false }), createReq(), res);
 
       expect(res.forbidden).toHaveBeenCalled();
-      expect(overridesClient.find).not.toHaveBeenCalled();
+      expect(rulesClient.getDisabledRuleIds).not.toHaveBeenCalled();
       expect(res.ok).not.toHaveBeenCalled();
     });
   });
@@ -146,15 +139,15 @@ describe('resolution rules routes', () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesEnable(router);
 
-      const overridesClient = { setEnabled: jest.fn().mockResolvedValue({ overrides: {} }) };
+      const rulesClient = { enable: jest.fn().mockResolvedValue({ disabledRuleIds: [] }) };
       const res = httpServerMock.createResponseFactory();
       await calls.put[0].handler!(
-        createCtx(overridesClient),
+        createCtx(rulesClient),
         createReq({ id: 'email_exact_match' }, 'put'),
         res
       );
 
-      expect(overridesClient.setEnabled).toHaveBeenCalledWith('email_exact_match', true);
+      expect(rulesClient.enable).toHaveBeenCalledWith('email_exact_match');
       expect(res.ok).toHaveBeenCalledWith({ body: { id: 'email_exact_match', enabled: true } });
     });
 
@@ -162,17 +155,17 @@ describe('resolution rules routes', () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesEnable(router);
 
-      const overridesClient = { setEnabled: jest.fn() };
+      const rulesClient = { enable: jest.fn() };
       const res = httpServerMock.createResponseFactory();
       res.forbidden.mockReturnValue({ status: 403 } as never);
       await calls.put[0].handler!(
-        createCtx(overridesClient, { enterprise: false }),
+        createCtx(rulesClient, { enterprise: false }),
         createReq({ id: 'email_exact_match' }, 'put'),
         res
       );
 
       expect(res.forbidden).toHaveBeenCalled();
-      expect(overridesClient.setEnabled).not.toHaveBeenCalled();
+      expect(rulesClient.enable).not.toHaveBeenCalled();
       expect(res.ok).not.toHaveBeenCalled();
     });
   });
@@ -190,19 +183,17 @@ describe('resolution rules routes', () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesDisable(router);
 
-      const overridesClient = {
-        setEnabled: jest
-          .fn()
-          .mockResolvedValue({ overrides: { email_exact_match: { enabled: false } } }),
+      const rulesClient = {
+        disable: jest.fn().mockResolvedValue({ disabledRuleIds: ['email_exact_match'] }),
       };
       const res = httpServerMock.createResponseFactory();
       await calls.put[0].handler!(
-        createCtx(overridesClient),
+        createCtx(rulesClient),
         createReq({ id: 'email_exact_match' }, 'put'),
         res
       );
 
-      expect(overridesClient.setEnabled).toHaveBeenCalledWith('email_exact_match', false);
+      expect(rulesClient.disable).toHaveBeenCalledWith('email_exact_match');
       expect(res.ok).toHaveBeenCalledWith({ body: { id: 'email_exact_match', enabled: false } });
     });
 
@@ -210,17 +201,17 @@ describe('resolution rules routes', () => {
       const { router, calls } = createFakeRouter();
       registerResolutionRulesDisable(router);
 
-      const overridesClient = { setEnabled: jest.fn() };
+      const rulesClient = { disable: jest.fn() };
       const res = httpServerMock.createResponseFactory();
       res.forbidden.mockReturnValue({ status: 403 } as never);
       await calls.put[0].handler!(
-        createCtx(overridesClient, { enterprise: false }),
+        createCtx(rulesClient, { enterprise: false }),
         createReq({ id: 'email_exact_match' }, 'put'),
         res
       );
 
       expect(res.forbidden).toHaveBeenCalled();
-      expect(overridesClient.setEnabled).not.toHaveBeenCalled();
+      expect(rulesClient.disable).not.toHaveBeenCalled();
       expect(res.ok).not.toHaveBeenCalled();
     });
   });

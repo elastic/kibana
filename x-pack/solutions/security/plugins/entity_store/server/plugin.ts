@@ -24,7 +24,7 @@ import {
   EntityStoreGlobalStateType,
   LegacyCcsLogExtractionStateType,
   RemoteLogExtractionStateType,
-  EntityStoreResolutionRuleOverridesType,
+  EntityStoreResolutionDisabledRulesType,
 } from './domain/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
@@ -85,7 +85,7 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EntityStoreGlobalStateType);
     core.savedObjects.registerType(RemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
-    core.savedObjects.registerType(EntityStoreResolutionRuleOverridesType);
+    core.savedObjects.registerType(EntityStoreResolutionDisabledRulesType);
 
     registerEntityMaintainerTask({
       taskManager: plugins.taskManager,

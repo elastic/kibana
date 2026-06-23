@@ -50,10 +50,10 @@ export function registerResolutionRulesEnable(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { resolutionRuleOverridesClient } = await ctx.entityStore;
+          const { resolutionRulesClient } = await ctx.entityStore;
           const { id } = req.params;
 
-          await resolutionRuleOverridesClient.setEnabled(id, true);
+          await resolutionRulesClient.enable(id);
 
           return res.ok({ body: { id, enabled: true } });
         },

@@ -9,7 +9,7 @@ import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/con
 import type { RegisterEntityMaintainerConfig } from '../../tasks/entity_maintainers/types';
 import type { EntityStoreCoreSetup } from '../../types';
 import { ResolutionClient } from '../../domain/resolution';
-import { ResolutionRuleOverridesClient } from '../../domain/saved_objects';
+import { ResolutionRulesClient } from '../../domain/saved_objects';
 import type { AutomatedResolutionState, PerRuleState } from './types';
 import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from './rule_config';
@@ -39,14 +39,14 @@ export const createAutomatedResolutionMaintainerConfig = (
 
     const [coreStart] = await core.getStartServices();
     const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
-    const overridesClient = new ResolutionRuleOverridesClient(soClient, namespace, logger);
-    const overrides = await overridesClient.find();
+    const resolutionRulesClient = new ResolutionRulesClient(soClient, namespace, logger);
+    const disabledRuleIds = await resolutionRulesClient.getDisabledRuleIds();
 
     const resolutionClient = new ResolutionClient({ logger, esClient, namespace });
     const rules: Record<string, PerRuleState> = { ...state.rules };
 
     for (const ruleConfig of RESOLUTION_RULE_CONFIGS) {
-      if (overrides?.overrides[ruleConfig.id]?.enabled === false) {
+      if (disabledRuleIds.includes(ruleConfig.id)) {
         logger.debug(`Resolution rule '${ruleConfig.id}' is disabled; skipping this cycle`);
         continue;
       }

@@ -9,37 +9,34 @@ import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-serve
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-export const EntityStoreResolutionRuleOverridesTypeName = 'entity-store-resolution-rule-overrides';
+export const EntityStoreResolutionDisabledRulesTypeName = 'entity-store-resolution-disabled-rules';
 
 // No fields are mapped/indexed because nothing queries this SO by its contents:
 // we always fetch the single per-namespace document by its deterministic id and
-// read the whole `overrides` map. With `dynamic: false` the map is still stored in
-// `_source` and returned on read — it just isn't indexed for search/filtering.
-export const EntityStoreResolutionRuleOverridesTypeMappings: SavedObjectsType['mappings'] = {
+// read the whole `disabledRuleIds` list. With `dynamic: false` the list is still
+// stored in `_source` and returned on read — it just isn't indexed for search.
+export const EntityStoreResolutionDisabledRulesTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {},
 };
 
-const overridesSchemaV1 = schema.object({
-  overrides: schema.recordOf(
-    schema.string({ maxLength: 256 }),
-    schema.object({ enabled: schema.boolean() })
-  ),
+const disabledRulesSchemaV1 = schema.object({
+  disabledRuleIds: schema.arrayOf(schema.string({ maxLength: 256 })),
 });
 
 const version1: SavedObjectsFullModelVersion = {
   changes: [],
   schemas: {
-    create: overridesSchemaV1,
-    forwardCompatibility: overridesSchemaV1.extends({}, { unknowns: 'ignore' }),
+    create: disabledRulesSchemaV1,
+    forwardCompatibility: disabledRulesSchemaV1.extends({}, { unknowns: 'ignore' }),
   },
 };
 
-export const EntityStoreResolutionRuleOverridesType: SavedObjectsType = {
-  name: EntityStoreResolutionRuleOverridesTypeName,
+export const EntityStoreResolutionDisabledRulesType: SavedObjectsType = {
+  name: EntityStoreResolutionDisabledRulesTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  mappings: EntityStoreResolutionRuleOverridesTypeMappings,
+  mappings: EntityStoreResolutionDisabledRulesTypeMappings,
   modelVersions: { 1: version1 },
   hiddenFromHttpApis: true,
 };
