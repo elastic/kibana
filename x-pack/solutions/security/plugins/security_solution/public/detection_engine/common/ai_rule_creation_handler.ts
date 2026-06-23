@@ -239,7 +239,9 @@ export const createAiRuleCreationHandler = ({
     for (const att of activeAttachments) {
       if (att.id !== exceptId && att.type === SecurityAgentBuilderAttachments.rule) {
         agentBuilder
-          .updateAttachment(convId, att.id, { data: { text: '{}', ruleId: null } })
+          .updateAttachment(convId, att.id, {
+            data: { text: '{}', ruleId: null, attachmentLabel: '' },
+          })
           .catch(() => {});
         agentBuilder.addAttachment({
           id: att.id,
