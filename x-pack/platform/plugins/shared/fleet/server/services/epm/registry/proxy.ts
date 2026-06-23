@@ -17,7 +17,7 @@ export interface RegistryProxySettings {
   proxyRejectUnauthorizedCertificates?: boolean;
 }
 
-type ProxyAgent = HttpsProxyAgent | HttpProxyAgent;
+type ProxyAgent = HttpsProxyAgent<string> | HttpProxyAgent<string>;
 type GetProxyAgentParams = RegistryProxySettings & { targetUrl: string };
 
 export function getRegistryProxyUrl(): string | undefined {
@@ -35,18 +35,16 @@ export function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
   return agent;
 }
 
-export function getProxyAgentOptions(options: GetProxyAgentParams): HttpsProxyAgentOptions {
+export function getProxyAgentOptions(options: GetProxyAgentParams): HttpsProxyAgentOptions<string> {
   const endpointParsed = new URL(options.targetUrl);
   const proxyParsed = new URL(options.proxyUrl);
-  const authValue = proxyParsed.username
-    ? `${proxyParsed.username}:${proxyParsed.password}`
-    : undefined;
 
   return {
     host: proxyParsed.hostname,
     port: Number(proxyParsed.port),
     protocol: proxyParsed.protocol,
-    auth: authValue,
+    ...(proxyParsed.username &&
+      proxyParsed.password && { username: proxyParsed.username, password: proxyParsed.password }),
     // The headers to send
     headers: options.proxyHeaders || {
       // the proxied URL's host is put in the header instead of the server's actual host

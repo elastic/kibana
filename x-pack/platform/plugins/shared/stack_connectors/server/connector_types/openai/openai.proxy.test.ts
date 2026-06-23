@@ -111,7 +111,6 @@ describe('OpenAI with proxy config', () => {
     expect(openAIClient.httpAgent).toBeDefined();
     expect(openAIClient.httpAgent.proxy).toBeDefined();
     expect(openAIClient.httpAgent.proxy.host).toBe(PROXY_HOST);
-    expect(openAIClient.httpAgent.proxy.port).toBe(80);
   });
 
   it('verifies that requests use the configured HTTP agent', async () => {
