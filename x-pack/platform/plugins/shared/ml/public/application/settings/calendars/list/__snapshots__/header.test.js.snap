@@ -24,37 +24,6 @@ exports[`CalendarListsHeader renders header 1`] = `
         </div>
       </div>
     </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
-      >
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <button
-            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
-            data-test-subj="mlCalendarListRefreshButton"
-            type="button"
-          >
-            <span
-              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-            >
-              <span
-                color="inherit"
-                data-euiicon-type="refresh"
-              />
-              <span
-                class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
-              >
-                Refresh
-              </span>
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
