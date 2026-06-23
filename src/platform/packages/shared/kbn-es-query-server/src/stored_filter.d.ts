@@ -1,4 +1,4 @@
-import type { FilterStateStore } from '@kbn/es-query-constants';
+import { FilterStateStore } from '@kbn/es-query-constants';
 export declare const filterStateStoreSchema: import("@kbn/config-schema").Type<FilterStateStore>;
 export declare const storedFilterMetaSchema: import("@kbn/config-schema").ObjectType<{
     alias: import("@kbn/config-schema").Type<string | null | undefined>;

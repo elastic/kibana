@@ -1,5 +1,5 @@
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
-import type { FULL_TEXT_SEARCH_FUNCTIONS } from '../../definitions/constants';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../definitions/constants';
 import type { ICommandCallbacks } from '../types';
 import { type ICommandContext, type ISuggestionItem } from '../types';
 export declare const FUNCTIONS_TO_IGNORE: {

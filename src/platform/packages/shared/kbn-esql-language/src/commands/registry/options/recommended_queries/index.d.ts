@@ -1,6 +1,6 @@
 import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
-import type { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
+import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 export interface EditorExtensions {
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];

@@ -1,6 +1,6 @@
 import { type CustomValidator, type Schema } from 'joi';
-import type { SchemaTypeError } from '../errors';
-import type { Reference } from '../references';
+import { SchemaTypeError } from '../errors';
+import { Reference } from '../references';
 /**
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.

@@ -2,7 +2,7 @@ import { type PromQLAstExpression } from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { PromQLFunctionParamType, SupportedDataType } from '../types';
 import type { ESQLColumnData } from '../../registry/types';
-import type { UnmappedFieldsStrategy } from '../../registry/types';
+import { UnmappedFieldsStrategy } from '../../registry/types';
 /**
  * Determines the type of the expression
  * @param root The root AST node of the expression

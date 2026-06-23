@@ -1,7 +1,7 @@
 import { type ESQLControlVariable } from '@kbn/esql-types';
 import type { ISuggestionItem } from '../../registry/types';
 import type { FunctionParameterType, SupportedDataType } from '../types';
-import type { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 export declare const TIME_SYSTEM_PARAMS: string[];
 export interface BuildConstantsOptions {
     advanceCursorAndOpenSuggestions?: boolean;

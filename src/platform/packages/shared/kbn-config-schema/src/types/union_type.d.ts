@@ -1,4 +1,4 @@
-import type { SchemaTypesError } from '../errors';
+import { SchemaTypesError } from '../errors';
 import type { ExtendsDeepOptions } from './type';
 import { Type, type TypeOptions } from './type';
 export type UnionTypeOptions<T> = TypeOptions<T>;

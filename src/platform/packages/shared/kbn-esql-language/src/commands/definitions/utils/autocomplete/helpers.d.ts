@@ -1,7 +1,7 @@
 import type { ESQLControlVariable, InferenceEndpointAutocompleteItem, ControlTriggerSource } from '@kbn/esql-types';
-import type { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ICommandCallbacks, ICommandContext, ISuggestionItem } from '../../../registry/types';
-import type { Location } from '../../../registry/types';
+import { Location } from '../../../registry/types';
 import type { SupportedDataType } from '../../types';
 import type { FunctionDefinitionTypes } from '../../types';
 export declare const shouldBeQuotedText: (text: string, { dashSupported }?: {

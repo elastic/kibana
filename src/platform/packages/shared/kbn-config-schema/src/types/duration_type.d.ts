@@ -1,5 +1,5 @@
 import type { Duration } from '../duration';
-import type { SchemaTypeError } from '../errors';
+import { SchemaTypeError } from '../errors';
 import type { Reference } from '../references';
 import { Type } from './type';
 export type DurationValueType = Duration | string | number;

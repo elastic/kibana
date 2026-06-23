@@ -1,3 +1,3 @@
-import type { CommandRegistry } from './registry';
+import { CommandRegistry } from './registry';
 declare const esqlCommandRegistry: CommandRegistry;
 export { esqlCommandRegistry };

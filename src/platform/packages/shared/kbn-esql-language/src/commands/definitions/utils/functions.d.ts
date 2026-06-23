@@ -1,6 +1,6 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
-import type { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { type FunctionDefinition, type FunctionFilterPredicates, type FunctionParameterType, type InlineCastingType } from '../types';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
