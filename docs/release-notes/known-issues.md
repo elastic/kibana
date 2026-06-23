@@ -14,7 +14,7 @@ Applies to: {{stack}} 9.4.0-9.4.2
 
 **Details**
 
-Clusters with a large number of active rules (for example, thousands of rules) and multiple {{kib}} nodes might experience {{kib}} process crashes after upgrading to 9.4.0-9.4.2. Affected deployments exhibit high memory usage that causes the OS to terminate {{kib}} processes.
+Deployments with a large number of active rules (for example, thousands of rules) and multiple {{kib}} nodes might experience {{kib}} process crashes after upgrading to 9.4.0-9.4.2. Affected deployments exhibit high memory usage that causes the OS to terminate {{kib}} processes.
 
 **Workaround**
 
