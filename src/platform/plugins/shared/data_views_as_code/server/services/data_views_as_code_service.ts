@@ -59,10 +59,15 @@ export class DataViewsAsCodeService {
     const dataViewSpec = toStoredDataView({ id, ...spec });
 
     if (await this.exists(id)) {
+      // First create a new data view instance from the spec and update it.
       const dataViewInstance = await this.dataViewsService.createFromSpecLazy(dataViewSpec);
-
       await this.dataViewsService.updateSavedObject(dataViewInstance);
-      return { action: 'updated', body: await this.mapDataView(dataViewInstance) };
+
+      return {
+        action: 'updated',
+        // After that, it needs to be refetched, otherwise it won't get the meta fields correctly.
+        body: await this.mapDataView(await this.dataViewsService.getDataViewLazy(id)),
+      };
     }
 
     const createdDataView = await this.dataViewsService.createAndSaveDataViewLazy(dataViewSpec);

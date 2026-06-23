@@ -50,6 +50,20 @@ export const registerPutDataViewAsCodeRoute = (
           response: {
             200: {
               body: () => asCodeResponseSchema,
+              description: 'updated',
+            },
+            201: {
+              body: () => asCodeResponseSchema,
+              description: 'created',
+            },
+            400: {
+              description: 'invalid request',
+            },
+            403: {
+              description: 'forbidden',
+            },
+            409: {
+              description: 'conflict',
             },
           },
         },
