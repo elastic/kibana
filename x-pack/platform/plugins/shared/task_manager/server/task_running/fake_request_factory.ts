@@ -64,6 +64,5 @@ export const buildChildRequestEnricher = ({
   enrichFakeRequest?: FakeRequestEnricher;
 }): ((request: KibanaRequest) => void) | undefined => {
   if ((!userProfileId && !userName) || !enrichFakeRequest) return undefined;
-  return (request) =>
-    enrichFakeRequest(request, { profileId: userProfileId, username: userName });
+  return (request) => enrichFakeRequest(request, { profileId: userProfileId, username: userName });
 };

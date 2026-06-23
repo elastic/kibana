@@ -156,9 +156,9 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const realRequest = httpServerMock.createKibanaRequest();
 
-      expect(() => enrichRequestWithUserProfile(realRequest, { profileId: 'u_profile_123' })).toThrow(
-        /must only be called on a fake request/
-      );
+      expect(() =>
+        enrichRequestWithUserProfile(realRequest, { profileId: 'u_profile_123' })
+      ).toThrow(/must only be called on a fake request/);
 
       expect(getOverride(realRequest)).toBeUndefined();
       expect(logger.warn).not.toHaveBeenCalled();
