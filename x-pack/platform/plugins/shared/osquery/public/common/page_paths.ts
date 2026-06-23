@@ -17,7 +17,8 @@ export type StaticPage =
   | 'packs'
   | 'pack_add'
   | 'saved_queries'
-  | 'saved_query_new';
+  | 'saved_query_new'
+  | 'files';
 
 export type DynamicPage =
   | 'live_query_details'
@@ -51,6 +52,7 @@ export const PAGE_ROUTING_PATHS = {
   saved_queries: '/saved_queries',
   saved_query_new: '/saved_queries/new',
   saved_query_edit: '/saved_queries/:savedQueryId',
+  files: '/files',
 };
 
 export const pagePathGetters: {
@@ -76,4 +78,5 @@ export const pagePathGetters: {
   pack_add: () => '/packs/add',
   pack_details: ({ packId }) => `/packs/${packId}`,
   pack_edit: ({ packId }) => `/packs/${packId}/edit`,
+  files: () => '/files',
 };

@@ -24,6 +24,8 @@ export const API_PATHS = {
   FLEET_EPM_PACKAGES: 'api/fleet/epm/packages',
   FLEET_AGENT_POLICIES: 'api/fleet/agent_policies',
   FLEET_PACKAGE_POLICIES: 'api/fleet/package_policies',
+  OSQUERY_FILE_SYSTEM_LIST: 'internal/osquery/file_system/list',
+  OSQUERY_FILE_SYSTEM_ROOTS: 'internal/osquery/file_system/roots',
 } as const;
 
 const uniqueId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
