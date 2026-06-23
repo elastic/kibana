@@ -231,9 +231,8 @@ export const Navigation = ({
       />
     ) : null;
 
-  // When the secondary panel is collapsed it is unmounted, so the header button is not
-  // available. Keep a footer affordance in that state so users can expand it again.
-  const footerCollapseButton = isCollapsedProp ? renderCollapseButton() : null;
+  const shouldOpenPopoverWhenCollapsed = (itemId: string) =>
+    isCollapsedProp && itemId === openerNode?.id;
 
   return (
     <div
@@ -267,6 +266,7 @@ export const Navigation = ({
                     footer={createPanelFooter(item.panelFooterActions, onItemClick)}
                     hasContent={getHasSubmenu(item)}
                     isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
+                    openWhenCollapsed={shouldOpenPopoverWhenCollapsed(item.id)}
                     isAnyPopoverLocked={isAnyPopoverLocked}
                     label={item.label}
                     trigger={
@@ -474,7 +474,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels} collapseButton={footerCollapseButton}>
+        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
@@ -488,6 +488,7 @@ export const Navigation = ({
                     footer={createPanelFooter(item.panelFooterActions, onItemClick)}
                     hasContent={getHasSubmenu(item)}
                     isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
+                    openWhenCollapsed={shouldOpenPopoverWhenCollapsed(item.id)}
                     isAnyPopoverLocked={isAnyPopoverLocked}
                     label={item.label}
                     persistent={false}

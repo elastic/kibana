@@ -55,6 +55,11 @@ export interface PopoverProps {
   hasContent: boolean;
   isSidePanelOpen: boolean;
   isAnyPopoverLocked?: boolean;
+  /**
+   * When true, keeps the popover open so collapsed secondary navigation remains
+   * reachable via the popover header (e.g. expand button) instead of the footer.
+   */
+  openWhenCollapsed?: boolean;
   setIsLocked?: (isLocked: boolean) => void;
   label: string;
   persistent?: boolean;
@@ -84,6 +89,7 @@ export const Popover = ({
   hasContent,
   isSidePanelOpen,
   isAnyPopoverLocked = false,
+  openWhenCollapsed = false,
   setIsLocked = () => {},
   label,
   persistent = false,
@@ -110,6 +116,17 @@ export const Popover = ({
       setIsLocked(isOpenedByClick && isOpen);
     }
   }, [persistent, isOpenedByClick, isOpen, setIsLocked]);
+
+  useEffect(() => {
+    if (openWhenCollapsed && hasContent && !isSidePanelOpen) {
+      setIsOpen(true);
+      return;
+    }
+
+    if (!openWhenCollapsed && !isOpenedByClick) {
+      setIsOpen(false);
+    }
+  }, [openWhenCollapsed, hasContent, isSidePanelOpen, isOpenedByClick]);
 
   const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
 
@@ -150,10 +167,14 @@ export const Popover = ({
   ]);
 
   const handleMouseLeave = useCallback(() => {
+    if (openWhenCollapsed) {
+      return;
+    }
+
     if (!persistent || !isOpenedByClick) {
       setHoverTimeout(handleClose, POPOVER_HOVER_DELAY);
     }
-  }, [persistent, isOpenedByClick, setHoverTimeout, handleClose]);
+  }, [openWhenCollapsed, persistent, isOpenedByClick, setHoverTimeout, handleClose]);
 
   const scrollStyles = useScroll(true);
 
@@ -219,11 +240,15 @@ export const Popover = ({
           triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused)
         );
 
+      if (openWhenCollapsed) {
+        return;
+      }
+
       if (isStayingInComponent === false) {
         handleClose();
       }
     },
-    [clearHoverTimeout, handleClose]
+    [clearHoverTimeout, handleClose, openWhenCollapsed]
   );
 
   // Clean up on unmount
