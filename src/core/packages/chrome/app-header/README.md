@@ -77,6 +77,32 @@ button is present.
   and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
   single value applies to both the sides and the top because the section's padding is symmetric.)
 
+## Testing
+
+`AppHeader` reads chrome from context, so rendering it in a test without a `ChromeServiceProvider`
+throws `"useChromeService must be used within a ChromeServiceProvider"`. Consumers don't have to always wire
+that provider up by hand, but it is possible to mock the package instead:
+
+```ts
+jest.mock('@kbn/app-header', () => require('@kbn/app-header/mocks').mockAppHeaderModule());
+```
+
+`mockAppHeaderModule()` swaps `AppHeader`/`AppHeaderView` for variants that render the **real**
+components wrapped in a mock chrome provider, so the genuine DOM and test subjects are produced. Every
+other export (types, registration helpers) is preserved.
+
+Assert against `APP_HEADER_TEST_SUBJECTS` for the header's structural subjects so component and test
+stay in lockstep (tab/badge/menu subjects are caller-provided and not included):
+
+```ts
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/mocks';
+
+expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My app');
+```
+
+`MockAppHeader`/`MockAppHeaderView` are also exported directly for tests that render the header
+without mocking the module.
+
 ## Chrome Next flag and runtime checks
 
 Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to
