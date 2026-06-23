@@ -127,7 +127,13 @@ export class UnifiedTabs {
    * content-loading waiter after this if needed.
    */
   async selectTab(index: number) {
-    const tab = await this.getTab(index);
+    const tabs = await this.getTabs().all();
+
+    if (index < 0 || index >= tabs.length) {
+      throw new Error(`Tab index ${index} is out of bounds (found ${tabs.length} tabs)`);
+    }
+
+    const tab = tabs[index];
     await tab.click();
     await expect(tab).toHaveAttribute('aria-selected', 'true');
   }
