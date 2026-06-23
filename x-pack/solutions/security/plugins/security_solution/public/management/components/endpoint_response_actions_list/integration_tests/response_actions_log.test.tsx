@@ -221,6 +221,8 @@ describe('Response actions history', () => {
         <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
       ));
 
+    mockedContext.setExperimentalFlag({ responseActionsEndpointCancel: true });
+
     useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
       data: await getActionListMock({ actionCount: 13 }),
@@ -2004,6 +2006,140 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+    });
+  });
+
+  describe('Row actions', () => {
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    });
+
+    it('should not render a cancel button for completed actions', async () => {
+      // Default mock has isCompleted: true for all actions
+      render();
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
+
+    it('should render a cancel button for pending actions', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeTruthy();
+    });
+
+    it('should render a disabled cancel button when the action command is not cancelable for the agent type', async () => {
+      // `isolate` is not cancelable for the default `endpoint` agent type
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['isolate'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeDisabled();
+    });
+
+    it('should render a disabled cancel button when user lacks the required permission to cancel the command', async () => {
+      // `get-file` requires `canWriteFileOperations` to cancel
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteFileOperations: false,
+        }),
+      });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeDisabled();
+    });
+
+    it('should render an enabled cancel button for a pending cancelable action when user has required permissions', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).not.toBeDisabled();
+    });
+
+    it('should show cancel action modal when cancel button is clicked', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      await user.click(renderResult.getByTestId('responseActionRowActions'));
+      expect(renderResult.getByRole('dialog')).toBeTruthy();
+    });
+
+    it('should dismiss cancel action modal when it is closed', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      await user.click(renderResult.getByTestId('responseActionRowActions'));
+      expect(renderResult.getByRole('dialog')).toBeTruthy();
+      await user.click(renderResult.getByLabelText('Closes this modal window'));
+      await waitFor(() => {
+        expect(renderResult.queryByRole('dialog')).toBeNull();
+      });
+    });
+
+    it('should disable all row cancel buttons when a cancel action modal is open', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 2,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const cancelButtons = renderResult.getAllByTestId('responseActionRowActions');
+      expect(cancelButtons).toHaveLength(2);
+      expect(cancelButtons[0]).not.toBeDisabled();
+      expect(cancelButtons[1]).not.toBeDisabled();
+
+      await user.click(cancelButtons[0]);
+
+      await waitFor(() => {
+        const updatedButtons = renderResult.getAllByTestId('responseActionRowActions');
+        expect(updatedButtons[0]).toBeDisabled();
+        expect(updatedButtons[1]).toBeDisabled();
+      });
     });
   });
 });

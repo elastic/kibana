@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ActionCreatedBy } from './action_created_by';
 import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -77,6 +78,9 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const authz = useUserPrivileges().endpointPrivileges;
+    const isEndpointCancelActionEnabled = useIsExperimentalFeatureEnabled(
+      'responseActionsEndpointCancel'
+    );
 
     const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
     const [actionToCancel, setActionToCancel] = useState<ActionDetails | null>(null);
@@ -201,7 +205,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     );
 
     const columns = useMemo(() => {
-      const columnDef: EuiBasicTableColumn<ActionDetails>[] = [
+      let columnDef: EuiBasicTableColumn<ActionDetails>[] = [
         {
           field: '',
           align: CENTER_ALIGNMENT as HorizontalAlignment,
@@ -387,11 +391,24 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       // filter out the `hosts` column
       // if showHostNames is FALSE
       if (!showHostNames) {
-        return columnDef.filter((column) => 'field' in column && column.field !== 'hosts');
+        columnDef = columnDef.filter((column) => 'field' in column && column.field !== 'hosts');
+      }
+
+      // Remove actions if cancel feature flag is disabled
+      if (!isEndpointCancelActionEnabled) {
+        columnDef = columnDef.filter((column) => !('actions' in column));
       }
 
       return columnDef;
-    }, [actionToCancel, authz, expandedRowMap, getTestId, onClickCallback, showHostNames]);
+    }, [
+      actionToCancel,
+      authz,
+      expandedRowMap,
+      getTestId,
+      isEndpointCancelActionEnabled,
+      onClickCallback,
+      showHostNames,
+    ]);
 
     return (
       <>
@@ -416,7 +433,11 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         />
 
         {actionToCancel && (
-          <CancelActionModal action={actionToCancel} onClose={onCloseCancelModalHandler} />
+          <CancelActionModal
+            action={actionToCancel}
+            onClose={onCloseCancelModalHandler}
+            data-test-subj={getTestId('cancelActionModal')}
+          />
         )}
       </>
     );
