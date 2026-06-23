@@ -145,7 +145,8 @@
     "@kbn/management-settings-ids",
     "@kbn/onechat-plugin",
     "@kbn/observability-agent-builder-plugin",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
+    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }
