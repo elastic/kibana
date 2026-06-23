@@ -9,6 +9,7 @@
 
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
+import type { ExecutionError } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
   hasExternalApprovalChannels,
@@ -79,6 +80,7 @@ describe('WaitForApprovalStepImpl', () => {
     mockStepExecutionRuntime = {
       tryEnterWaitUntil: jest.fn().mockReturnValue(true),
       finishStep: jest.fn(),
+      failStep: jest.fn(),
       setInput: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
@@ -101,6 +103,7 @@ describe('WaitForApprovalStepImpl', () => {
 
     workflowLogger = {
       logDebug: jest.fn(),
+      logWarn: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
     connectorExecutor = { execute: jest.fn() } as unknown as ConnectorExecutor;
@@ -197,6 +200,66 @@ describe('WaitForApprovalStepImpl', () => {
       response: { approved: false },
       respondedBy: 'api_key:api-key-id',
     });
+  });
+
+  it('fails with TimeoutError and invalidates the external resume API key when approval wait expires', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2025-06-01T12:01:00.000Z'));
+      node.configuration = {
+        ...node.configuration,
+        timeout: '30s',
+      } as WaitForApprovalStep;
+
+      const invalidateAsInternalUser = jest.fn().mockResolvedValue(undefined);
+      dependencies = {
+        spaceId: 'default',
+        coreStart: {
+          security: {
+            authc: {
+              apiKeys: { invalidateAsInternalUser },
+            },
+          },
+        },
+      } as unknown as ContextDependencies;
+
+      mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        startedAt: '2025-06-01T12:00:00.000Z',
+        input: { externalResumeApiKeyId: 'api-key-id' },
+      };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: {},
+      } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
+
+      underTest = new WaitForApprovalStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger,
+        connectorExecutor,
+        dependencies
+      );
+
+      await underTest.run();
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toSerializableObject: expect.any(Function),
+        })
+      );
+      const timeoutError = (mockStepExecutionRuntime.failStep as jest.Mock).mock
+        .calls[0][0] as ExecutionError;
+      expect(timeoutError.toSerializableObject()).toEqual({
+        type: 'TimeoutError',
+        message: 'Approval wait exceeded the configured timeout of 30s.',
+      });
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('uses workflow execution spaceId when dependencies.spaceId is missing', async () => {

@@ -14,13 +14,14 @@ import {
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
-import { createExternalResumeApiKey } from '@kbn/workflows/server';
+import { createExternalResumeApiKey, ExecutionError } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
   hasExternalApprovalChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 import type { ConnectorExecutor } from '../../connector_executor';
+import { parseDuration } from '../../utils';
 import { getKibanaUrl } from '../../utils/get_kibana_url';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
@@ -60,7 +61,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' resuming with approval input`, {
       event: { action: 'hitl:resuming' },
     });
-    this.resume();
+    await this.resume();
   }
 
   private async enterWait(): Promise<void> {
@@ -178,19 +179,69 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     });
   }
 
-  private resume(): void {
+  private async resume(): Promise<void> {
+    const execution = this.workflowRuntime.getWorkflowExecution();
+    const resumeInput = execution.context?.resumeInput as Record<string, unknown> | undefined;
+
+    if (resumeInput == null && this.hasApprovalWaitExpired()) {
+      await this.invalidateExternalResumeApiKeyIfPresent();
+      const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+      this.stepExecutionRuntime.failStep(
+        new ExecutionError({
+          type: 'TimeoutError',
+          message: `Approval wait exceeded the configured timeout of ${timeout}.`,
+        })
+      );
+      return;
+    }
+
     resumeHitlWaitStep({
       stepExecutionRuntime: this.stepExecutionRuntime,
       workflowRuntime: this.workflowRuntime,
       workflowLogger: this.workflowLogger,
       stepId: this.node.stepId,
-      transformResumeInput: (resumeInput, respondedBy) => {
-        const approved = resumeInput?.approved;
+      transformResumeInput: (input, respondedBy) => {
+        const approved = input?.approved;
         return {
           response: { approved: approved === true },
           respondedBy,
         };
       },
     });
+  }
+
+  private hasApprovalWaitExpired(): boolean {
+    const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
+    if (!startedAt) {
+      return false;
+    }
+
+    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+    const deadlineMs = new Date(startedAt).getTime() + parseDuration(timeout);
+    return Date.now() >= deadlineMs;
+  }
+
+  private async invalidateExternalResumeApiKeyIfPresent(): Promise<void> {
+    const input = this.stepExecutionRuntime.stepExecution?.input;
+    if (input == null || typeof input !== 'object' || !('externalResumeApiKeyId' in input)) {
+      return;
+    }
+
+    const apiKeyId = (input as { externalResumeApiKeyId?: unknown }).externalResumeApiKeyId;
+    if (typeof apiKeyId !== 'string' || apiKeyId.length === 0) {
+      return;
+    }
+
+    try {
+      await this.dependencies.coreStart.security.authc.apiKeys.invalidateAsInternalUser({
+        ids: [apiKeyId],
+      });
+    } catch (error) {
+      this.workflowLogger.logWarn(
+        `Failed to invalidate external resume API key (${apiKeyId}): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 }

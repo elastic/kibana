@@ -179,8 +179,8 @@ function visitTypedAbstractStep(
     return visitLoopContinueStep(currentStep as LoopContinueStep, context);
   }
 
-  // HITL wait steps use `timeout` as the approval/input wait duration, not as a
-  // step-level execution timeout zone. Handle them before the generic timeout branch.
+  // HITL wait steps are not wrapped in enter-timeout-zone nodes. waitForApproval
+  // schedules its approval deadline via handleExecutionDelay; waitForInput has no step timeout.
   const hitlWaitGraph = tryVisitHitlWaitStep(currentStep, context);
   if (hitlWaitGraph) {
     return hitlWaitGraph;
