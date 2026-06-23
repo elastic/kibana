@@ -23,11 +23,6 @@ export {
 export type { ProviderPermissions } from './aws_provider_permissions';
 export { AWS_SERVICE_PROVIDER_PERMISSIONS } from './aws_provider_permissions';
 
-export type { AwsServiceLookupEntry } from './aws_service_lookup';
-export { AWS_SERVICE_LOOKUP, KNOWN_AWS_SERVICE_IDS } from './aws_service_lookup';
-
-export type { ServiceManifestLookup, MappedProviderPermissions } from './map_provider_permissions';
-export { mapProviderPermissions } from './map_provider_permissions';
 
 export type { GetIamPermissionsResponse } from './iam_permissions_api';
 export { IAM_PERMISSIONS_API_PATH } from './iam_permissions_api';
