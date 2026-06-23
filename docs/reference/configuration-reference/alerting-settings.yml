@@ -1225,7 +1225,7 @@ groups:
         datatype: int
         default: 2800
         applies_to:
-          stack: ga 9.4.3
+          stack: ga 9.4.3!
           ech: ga
           self: ga
 
