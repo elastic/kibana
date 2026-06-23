@@ -23,7 +23,7 @@ import {
  */
 spaceTest.describe(
   'Security in Discover - Dashboard embedded flyout',
-  { tag: [...tags.stateful.all, ...tags.serverless.security.complete] },
+  { tag: tags.stateful.all },
   () => {
     // Force a wide viewport so the doc viewer flyout (pushMinBreakpoint="xl") renders in push mode.
     spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });

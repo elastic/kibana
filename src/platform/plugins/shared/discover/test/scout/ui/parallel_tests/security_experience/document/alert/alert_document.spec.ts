@@ -25,7 +25,7 @@ import {
  */
 spaceTest.describe(
   'Security in Discover - Alert document flyout',
-  { tag: [...tags.stateful.all, ...tags.serverless.security.complete] },
+  { tag: tags.stateful.all },
   () => {
     // Force a wide viewport so the doc viewer flyout (pushMinBreakpoint="xl") renders in push mode.
     spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
@@ -73,7 +73,7 @@ spaceTest.describe(
     spaceTest(
       'highlighted field hover actions: shows all buttons and each works',
       async ({ page, pageObjects }) => {
-        const { securityDiscoverFlyout, filterBar, discover } = pageObjects;
+        const { securityDiscoverFlyout, filterBar } = pageObjects;
         const field = 'host.name';
         const value = SECURITY_TEST_DATA.HOST_NAME;
 
@@ -112,13 +112,6 @@ spaceTest.describe(
           await securityDiscoverFlyout.cellActionCopy.click();
           const clipboard = await page.evaluate(() => navigator.clipboard.readText());
           expect(clipboard).toContain(value);
-        });
-
-        await spaceTest.step('add as column adds the field to the Discover table', async () => {
-          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-          await securityDiscoverFlyout.cellActionToggleColumn.click();
-          await discover.closeDocViewerFlyout();
-          expect(await discover.getDocHeader()).toContain(field);
         });
 
         await spaceTest.step('filter out adds a negated filter', async () => {

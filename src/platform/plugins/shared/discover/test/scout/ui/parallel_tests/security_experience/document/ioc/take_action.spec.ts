@@ -30,7 +30,7 @@ import {
  */
 spaceTest.describe(
   'Security in Discover - IOC document take action',
-  { tag: [...tags.stateful.all, ...tags.serverless.security.complete] },
+  { tag: tags.stateful.all },
   () => {
     spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
 

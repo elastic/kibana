@@ -131,7 +131,6 @@ export const TAKE_ACTION_TEST_SUBJECTS = {
   ADD_NOTE: 'add-note-action',
   INVESTIGATE_IN_TIMELINE: 'investigate-in-timeline-action-item',
   // Sub-panels / modals opened from the document menu
-  CLOSING_REASON_PANEL: 'alert-closing-reason-selectable',
   ALERT_TAGS_PANEL: 'alert-tags-selectable-menu',
   ALERT_ASSIGNEES_PANEL: 'alert-assignees-selectable-menu',
   ALL_CASES_MODAL: 'all-cases-modal',

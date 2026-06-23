@@ -70,8 +70,6 @@ export class SecurityDiscoverFlyout {
   public readonly takeActionMenu: Locator;
   /** Take action footer button (IOC flyout — separate menu). */
   public readonly iocTakeActionButton: Locator;
-  /** "Closing reason" sub-panel opened from the status action. */
-  public readonly closingReasonPanel: Locator;
   /** Alert tags selection sub-panel. */
   public readonly alertTagsPanel: Locator;
   /** Alert assignees selection sub-panel. */
@@ -130,7 +128,6 @@ export class SecurityDiscoverFlyout {
     this.takeActionButton = page.testSubj.locator(TS.TAKE_ACTION_BUTTON);
     this.takeActionMenu = page.testSubj.locator(TA.MENU);
     this.iocTakeActionButton = page.testSubj.locator(TA.IOC_BUTTON);
-    this.closingReasonPanel = page.testSubj.locator(TA.CLOSING_REASON_PANEL);
     this.alertTagsPanel = page.testSubj.locator(TA.ALERT_TAGS_PANEL);
     this.alertAssigneesPanel = page.testSubj.locator(TA.ALERT_ASSIGNEES_PANEL);
     this.allCasesModal = page.testSubj.locator(TA.ALL_CASES_MODAL);
