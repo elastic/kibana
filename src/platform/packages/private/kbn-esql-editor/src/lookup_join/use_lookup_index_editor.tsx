@@ -56,8 +56,15 @@ async function isCurrentAppSupported(
 export function getMonacoCommandString(
   indexName: string,
   isExistingIndex: boolean,
-  indexPrivileges: LookupIndexPrivileges
+  indexPrivileges: LookupIndexPrivileges,
+  isClosedIndex?: boolean
 ): string | undefined {
+  if (isClosedIndex) {
+    return i18n.translate('esqlEditor.lookupIndex.closed', {
+      defaultMessage: '⚠ Index is closed — reopen it before using it in a lookup join.',
+    });
+  }
+
   const { canEditIndex, canReadIndex, canCreateIndex } = indexPrivileges;
 
   let actionLabel = '';
@@ -165,6 +172,7 @@ export const useLookupIndexCommand = (
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
   const lookupIndexEditBadgeClassName = 'lookupIndexEditBadge';
+  const lookupIndexClosedBadgeClassName = 'lookupIndexClosedBadge';
   const lookupIndexBadgeStyle = css`
     .${lookupIndexBaseBadgeClassName} {
       white-space: nowrap;
@@ -177,6 +185,11 @@ export const useLookupIndexCommand = (
 
     .${lookupIndexEditBadgeClassName} {
       border-bottom: ${euiTheme.border.width.thick} dotted ${euiTheme.colors.textParagraph};
+    }
+
+    .${lookupIndexClosedBadgeClassName} {
+      border-bottom: ${euiTheme.border.width.thick} dotted ${euiTheme.colors.warning};
+      color: ${euiTheme.colors.warning};
     }
   `;
 
@@ -193,17 +206,29 @@ export const useLookupIndexCommand = (
     for (let i = 0; i < lookupIndices.length; i++) {
       const lookupIndex = lookupIndices[i];
 
-      const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
+      const existingIndex = existingIndices.indices.find((index) => index.name === lookupIndex);
+      const isExistingIndex = !!existingIndex;
+      const isClosedIndex = existingIndex?.status === 'closed';
       const matches =
         editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 
       const commandString = getMonacoCommandString(
         lookupIndex,
         isExistingIndex,
-        permissions[lookupIndex]
+        permissions[lookupIndex],
+        isClosedIndex
       );
 
       if (!commandString) continue;
+
+      let badgeClassName: string;
+      if (isClosedIndex) {
+        badgeClassName = lookupIndexClosedBadgeClassName;
+      } else if (isExistingIndex) {
+        badgeClassName = lookupIndexEditBadgeClassName;
+      } else {
+        badgeClassName = lookupIndexAddBadgeClassName;
+      }
 
       matches.forEach((match) => {
         newDecorations.push({
@@ -216,10 +241,7 @@ export const useLookupIndexCommand = (
               isTrusted: true,
             },
 
-            inlineClassName:
-              lookupIndexBaseBadgeClassName +
-              ' ' +
-              (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+            inlineClassName: lookupIndexBaseBadgeClassName + ' ' + badgeClassName,
           },
         });
       });
