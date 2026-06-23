@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { getCustomQueryRuleParams } from '../../../../objects/rule';
+import { getEsqlRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';
+import { selectEsqlRuleType } from '../../../../tasks/create_new_rule';
 import { createAzureConnector } from '../../../../tasks/api_calls/connectors';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
@@ -38,6 +39,8 @@ describe(
 
     it('should show the "Add to chat" button on the rule creation page', () => {
       visit(CREATE_RULE_URL);
+      // "Add to chat" is enabled only for ES|QL rules, so switch the form to the ES|QL rule type.
+      selectEsqlRuleType();
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
@@ -46,11 +49,11 @@ describe(
     });
 
     it('should show the "Add to chat" button on the rule details page', () => {
-      createRule(
-        getCustomQueryRuleParams({ rule_id: 'test-rule', name: 'Test Rule', enabled: false })
-      ).then((response) => {
-        visitRuleDetailsPage(response.body.id);
-      });
+      createRule(getEsqlRule({ rule_id: 'test-rule', name: 'Test Rule', enabled: false })).then(
+        (response) => {
+          visitRuleDetailsPage(response.body.id);
+        }
+      );
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
@@ -59,11 +62,11 @@ describe(
     });
 
     it('should show the "Add to chat" button on the rule editing page', () => {
-      createRule(
-        getCustomQueryRuleParams({ rule_id: 'test-rule', name: 'Test Rule', enabled: false })
-      ).then((response) => {
-        visitRuleEditPage(response.body.id);
-      });
+      createRule(getEsqlRule({ rule_id: 'test-rule', name: 'Test Rule', enabled: false })).then(
+        (response) => {
+          visitRuleEditPage(response.body.id);
+        }
+      );
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();

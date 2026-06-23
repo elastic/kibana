@@ -30,6 +30,7 @@ const mockUseAgentBuilderAttachment = jest.fn();
 const mockFormatRule = jest.fn();
 const mockNewAgentBuilderAttachment = jest.fn();
 const mockActivateFormSync = jest.fn();
+const mockReleaseBind = jest.fn();
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
@@ -51,6 +52,7 @@ const mockKibanaServices = () => ({
   services: {
     aiRuleCreation: {
       activateFormSync: mockActivateFormSync,
+      releaseBind: mockReleaseBind,
     },
     agentBuilder: undefined,
   },
@@ -120,7 +122,6 @@ describe('AddRuleAttachmentToChatButton', () => {
       attachmentData: {
         text: JSON.stringify({ name: 'Formatted Rule' }),
         attachmentLabel: 'Formatted Rule',
-        intent: 'create',
       },
       attachmentDescription: 'Formatted Rule',
     });
