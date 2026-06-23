@@ -25,6 +25,7 @@ import type { AiRuleCreationService } from '../../../detection_engine/common/ai_
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
 import { ScheduleDisplay } from './schedule_display';
+import { ThreatEuiFlexGroup } from '../../../detection_engine/rule_creation_ui/components/description_step/threat_description';
 import {
   parseRuleFromAttachment,
   getRuleTypeLabel,
@@ -222,6 +223,19 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           </SectionHeading>
           <EuiSpacer size="xs" />
           <TagsBadgeList tags={rule.tags} />
+        </>
+      )}
+
+      {rule.threat && rule.threat.length > 0 && (
+        <>
+          <EuiSpacer size="xs" />
+          <SectionHeading>
+            {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.mitreHeading', {
+              defaultMessage: 'MITRE ATT&CK',
+            })}
+          </SectionHeading>
+          <EuiSpacer size="xs" />
+          <ThreatEuiFlexGroup threat={rule.threat} />
         </>
       )}
 
