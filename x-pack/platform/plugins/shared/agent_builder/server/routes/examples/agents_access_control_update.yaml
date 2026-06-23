@@ -2,8 +2,8 @@ requestBody:
   content:
     application/json:
       examples:
-        updateAgentAclRequestExample:
-          description: "Example request granting two users access to the agent — Alice as Editor (can update the agent and its ACL), Bob as User (can run the agent)."
+        updateAgentAccessControlRequestExample:
+          description: "Example request granting two users access to the agent — Alice as Editor (can update the agent and its access control), Bob as User (can run the agent)."
           value:
             entries:
               - type: user
@@ -12,8 +12,8 @@ requestBody:
               - type: user
                 name: bob
                 role: user
-        clearAgentAclRequestExample:
-          description: "Submit an empty entries list to remove all ACL grants. Access then falls back to the agent's visibility setting."
+        clearAgentAccessControlRequestExample:
+          description: "Submit an empty entries list to remove all custom grants. Access then falls back to the agent's access-control mode."
           value:
             entries: []
 responses:
@@ -22,9 +22,10 @@ responses:
     content:
       application/json:
         examples:
-          updateAgentAclResponseExample:
-            description: "Example response returning the persisted ACL after the update."
+          updateAgentAccessControlResponseExample:
+            description: "Example response returning the persisted access control after the update."
             value:
+              access_mode: private
               entries:
                 - type: user
                   name: alice
@@ -33,12 +34,12 @@ responses:
                   name: bob
                   role: user
   400:
-    description: "Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have an ACL)."
+    description: "Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have custom access control)."
     content:
       application/json:
         examples:
-          aclOnDefaultAgentResponseExample:
-            description: "The built-in Elastic default agent (`elastic-ai-agent`) cannot have a custom ACL — its access is governed by the platform, not per-agent grants."
+          accessControlOnDefaultAgentResponseExample:
+            description: "The built-in Elastic default agent (`elastic-ai-agent`) cannot have custom access control — its access is governed by the platform, not per-agent grants."
             value:
               statusCode: 400
               error: "Bad Request"
@@ -67,7 +68,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+        -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true" \
         -H "Content-Type: application/json" \
@@ -79,7 +80,7 @@ x-codeSamples:
         }'
   - lang: Console
     source: |
-      PUT kbn://api/agent_builder/agents/{id}/acl
+      PUT kbn://api/agent_builder/agents/{id}/access_control
       {
         "entries": [
           { "type": "user", "name": "alice", "role": "editor" },

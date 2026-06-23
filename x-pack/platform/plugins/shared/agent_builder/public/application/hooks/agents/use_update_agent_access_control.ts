@@ -6,26 +6,31 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { AgentAclUpdateRequest } from '../../../../common/agents';
+import type { AgentAccessControlUpdateRequest } from '../../../../common/agents';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 import { mutationKeys } from '../../mutation_keys';
 
-interface UseUpdateAgentAclOptions {
+interface UseUpdateAgentAccessControlOptions {
   agentId: string;
   onSuccess?: () => void;
   onError?: (err: Error) => void;
 }
 
-export const useUpdateAgentAcl = ({ agentId, onSuccess, onError }: UseUpdateAgentAclOptions) => {
+export const useUpdateAgentAccessControl = ({
+  agentId,
+  onSuccess,
+  onError,
+}: UseUpdateAgentAccessControlOptions) => {
   const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: mutationKeys.updateAgentAcl(agentId),
-    mutationFn: (update: AgentAclUpdateRequest) => agentService.updateAcl(agentId, update),
+    mutationKey: mutationKeys.updateAgentAccessControl(agentId),
+    mutationFn: (update: AgentAccessControlUpdateRequest) =>
+      agentService.updateAccessControl(agentId, update),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.acl(agentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.accessControl(agentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
       onSuccess?.();
