@@ -165,11 +165,18 @@ describe('registerSearchRoute', () => {
   it('returns 503 when authorization enumeration is incomplete (fail closed)', async () => {
     mockSmlService.search.mockRejectedValue(
       new SmlAuthzEnumerationIncompleteError(
-        "_terms_enum on 'permissions...' returned complete=false"
+        'Could not complete permission authorization for this search; please retry.'
       )
     );
     const response = await callHandler({ query: 'test' });
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 503,
+        body: {
+          message: 'Could not complete permission authorization for this search; please retry.',
+        },
+      })
+    );
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('SML search authorization unavailable')
     );
@@ -177,9 +184,19 @@ describe('registerSearchRoute', () => {
 
   it('returns 503 when the corpus is too large to enumerate (fail closed)', async () => {
     mockSmlService.search.mockRejectedValue(
-      new SmlCorpusTooLargeError('Distinct values exceed enumeration ceiling')
+      new SmlCorpusTooLargeError(
+        'Too many distinct permission values to authorize this search; the limit is 100000.'
+      )
     );
     const response = await callHandler({ query: 'test' });
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 503,
+        body: {
+          message:
+            'Too many distinct permission values to authorize this search; the limit is 100000.',
+        },
+      })
+    );
   });
 });
