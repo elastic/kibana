@@ -66,21 +66,18 @@ export function getCurrentTraceParent(apm: typeof agent): string | undefined {
   return typeof traceparent === 'string' && traceparent ? traceparent : undefined;
 }
 
-export interface WithTraceParentOptions {
-  /**
-   * APM transaction name for the short-lived schedule wrapper transaction.
-   * Defaults to {@link DEFAULT_TRACE_PARENT_TRANSACTION_NAME}.
-   */
-  transactionName?: string;
-}
-
 export async function withTraceParent<T>(
   apm: typeof agent,
   traceParent: string | undefined,
   run: () => Promise<T>,
-  options?: WithTraceParentOptions
+  options?: { transactionName?: string }
 ): Promise<T> {
   if (!traceParent) {
+    return run();
+  }
+
+  const currentTraceParent = getCurrentTraceParent(apm);
+  if (currentTraceParent === traceParent) {
     return run();
   }
 

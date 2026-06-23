@@ -11,14 +11,7 @@ jest.mock('../workflow_context_manager/apm_internal', () => {
   const actual = jest.requireActual('../workflow_context_manager/apm_internal');
   return {
     ...actual,
-    withTraceParent: jest.fn(
-      (
-        _apm: unknown,
-        _traceParent: string | undefined,
-        run: () => Promise<unknown>,
-        _options?: { transactionName?: string }
-      ) => run()
-    ),
+    withTraceParent: jest.fn((_apm, _traceParent, run: () => Promise<unknown>) => run()),
   };
 });
 
