@@ -20,7 +20,7 @@ import {
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { parseDurationToMs } from '@kbn/alerting-v2-schemas';
+import { parseDurationToMs, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -125,9 +125,9 @@ export const AlertTimelineSection: React.FC = () => {
           from: new Date(gteMs).toISOString(),
           to: new Date(lteMs).toISOString(),
         },
-        ruleEsql: rule.evaluation.query.base,
+        ruleEsql: getRootEsqlQuery(rule.query),
       }),
-    [share, application.capabilities, uiSettings, gteMs, lteMs, rule.evaluation.query.base]
+    [share, application.capabilities, uiSettings, gteMs, lteMs, rule.query]
   );
 
   const viewAllHref = useMemo(

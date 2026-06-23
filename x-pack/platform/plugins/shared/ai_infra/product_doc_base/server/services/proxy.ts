@@ -27,10 +27,10 @@ type GetProxyAgentParams = ArtifactRepositoryProxySettings & { targetUrl: string
 
 function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
   const isHttps = options.targetUrl.startsWith('https:');
-  const agentOptions = isHttps ? getProxyAgentOptions(options) : options.proxyUrl;
+  const agentOptions = getProxyAgentOptions(options)
   const agent: ProxyAgent = isHttps
-    ? new HttpsProxyAgent(agentOptions)
-    : new HttpProxyAgent(agentOptions);
+    ? new HttpsProxyAgent(options.proxyUrl, agentOptions)
+    : new HttpProxyAgent(options.proxyUrl, agentOptions);
 
   return agent;
 }
