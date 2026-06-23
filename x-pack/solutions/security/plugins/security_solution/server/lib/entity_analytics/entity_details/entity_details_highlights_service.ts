@@ -75,7 +75,6 @@ interface EntityDetailsHighlightsServiceFactoryOptions {
 }
 
 interface GetDataFnOpts {
-  request: KibanaRequest;
   entityType: string;
   entityIdentifier: string;
   anomalyFromDate: number;
@@ -182,7 +181,6 @@ export const entityDetailsHighlightsServiceFactory = ({
   };
 
   const getAnomaliesData = async (
-    request: KibanaRequest,
     criteriaFields: CriteriaField[],
     fromDate: number,
     toDate: number,
@@ -399,7 +397,6 @@ export const entityDetailsHighlightsServiceFactory = ({
   };
 
   const getV1Data = async ({
-    request,
     entityType,
     entityIdentifier,
     anomalyFromDate,
@@ -415,7 +412,6 @@ export const entityDetailsHighlightsServiceFactory = ({
     );
 
     const anomaliesAnonymized: Record<string, string[]>[] = await getAnomaliesData(
-      request,
       [{ fieldName: entityField, fieldValue: entityIdentifier }],
       anomalyFromDate,
       anomalyToDate

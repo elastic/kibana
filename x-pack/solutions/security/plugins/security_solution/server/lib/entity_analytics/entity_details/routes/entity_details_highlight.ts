@@ -99,7 +99,6 @@ export const entityDetailsHighlightsRoute = ({
               });
 
             const getDataOpts = {
-              request,
               entityType,
               entityIdentifier,
               anomalyFromDate: fromDate,
