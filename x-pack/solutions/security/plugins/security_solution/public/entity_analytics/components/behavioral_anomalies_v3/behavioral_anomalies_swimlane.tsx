@@ -57,8 +57,9 @@ interface BucketInterval {
 
 /**
  * Picks an x-axis bucket size that gives a readable column count across the
- * selected range — hourly for short ranges, daily for a couple of months,
- * and weekly for anything longer (e.g. the default "Last 1 year").
+ * selected range — hourly for short ranges, daily for the default 30-day
+ * window / a couple of months, and weekly for anything longer (e.g. when
+ * the user picks "Last 1 year" from the quick-select dropdown).
  */
 const deriveBucketInterval = (timeRangeMs: { from: number; to: number }): BucketInterval => {
   const spanMs = Math.max(0, timeRangeMs.to - timeRangeMs.from);

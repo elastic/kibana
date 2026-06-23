@@ -124,6 +124,16 @@ export const ANOMALIES_TABLE_V3_DESCRIPTION_HEADING = i18n.translate(
   { defaultMessage: 'Explainer' }
 );
 
+export const ANOMALIES_TABLE_V3_COUNT_HEADING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3.table.countOfSourceEventsHeading',
+  { defaultMessage: 'Count of source events' }
+);
+
+export const ANOMALIES_TABLE_V3_KEY_FIELDS_HEADING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3.table.keyFieldsHeading',
+  { defaultMessage: 'Key fields' }
+);
+
 export const ANOMALIES_TABLE_V3_SCORE_COLUMN = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3.table.scoreColumn',
   { defaultMessage: 'Anomaly score' }

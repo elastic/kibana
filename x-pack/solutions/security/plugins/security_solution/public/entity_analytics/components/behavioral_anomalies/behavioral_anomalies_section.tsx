@@ -27,10 +27,12 @@ import { BehavioralAnomaliesOverviewV3 } from './behavioral_anomalies_overview_v
 import {
   BEHAVIORAL_ANOMALIES_SECTION_TITLE,
   BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME,
+  BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TIMEFRAME,
 } from './translations';
 import {
   BEHAVIORAL_ANOMALIES_SECTION_TEST_ID,
   BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TIMEFRAME_TEST_ID,
   BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID,
 } from './test_ids';
 
@@ -96,24 +98,38 @@ export const BehavioralAnomaliesSection: React.FC<BehavioralAnomaliesSectionProp
     [entityId, isPreviewMode, openDetailsPanel]
   );
 
-  // Right-side timeframe badge on the section title, shown when v.2 or v.3
-  // is selected (both visualize a year-at-a-glance window). Matches the
-  // "Updated {time}" pattern used by the Risk score and Observed attributes
-  // sections (same xs font size, subdued styling). When v.2/v.3 are dropped,
-  // either remove the corresponding `version === ...` clause or render the
-  // span unconditionally — see file-level cleanup notes.
-  const extraAction =
-    version === 'v2' || version === 'v3' ? (
-      <span
-        data-test-subj={BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID}
-        css={css`
-          font-size: ${xsFontSize};
-          color: ${euiTheme.colors.textSubdued};
-        `}
-      >
-        {BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME}
-      </span>
-    ) : undefined;
+  // Right-side timeframe badge on the section title — shown when v.2 or v.3
+  // is selected. Each prototype owns its own label (v.2 = "Last 1 year",
+  // v.3 = "Last 30 days", matching its left-tab date-picker default) and its
+  // own test id, so the two prototypes stay independently deletable per the
+  // file-level cleanup notes. Matches the "Updated {time}" pattern used by
+  // the Risk score / Observed attributes sections (xs font size, subdued).
+  const timeframeBadgeProps = (() => {
+    if (version === 'v2') {
+      return {
+        testSubj: BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID,
+        label: BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME,
+      };
+    }
+    if (version === 'v3') {
+      return {
+        testSubj: BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TIMEFRAME_TEST_ID,
+        label: BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TIMEFRAME,
+      };
+    }
+    return undefined;
+  })();
+  const extraAction = timeframeBadgeProps ? (
+    <span
+      data-test-subj={timeframeBadgeProps.testSubj}
+      css={css`
+        font-size: ${xsFontSize};
+        color: ${euiTheme.colors.textSubdued};
+      `}
+    >
+      {timeframeBadgeProps.label}
+    </span>
+  ) : undefined;
 
   return (
     <>

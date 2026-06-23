@@ -67,6 +67,14 @@ export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_EXPANDER_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3TableRowExpander` as const;
 export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_DESCRIPTION_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3TableRowDescription` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_EXPLAINER_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TableRowExplainer` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_EXPLAINER_SPIKE_BADGE_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TableRowExplainerSpikeBadge` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_COUNT_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TableRowCountOfSourceEvents` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_KEY_FIELDS_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TableRowKeyFields` as const;
 export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTIONS_BUTTON_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3TableRowActionsButton` as const;
 export const BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_ACTIONS_MENU_TEST_ID =

@@ -25,8 +25,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   EuiBadge,
   EuiBadgeGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiToolTip,
@@ -77,25 +75,22 @@ export const TacticBadgesCellV3: React.FC<TacticBadgesCellV3Props> = ({ tactics 
   const firstTactic = tactics[0];
 
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      responsive={false}
-      alignItems="center"
-      css={css`
-        flex-wrap: nowrap;
-        min-width: 0;
-      `}
-    >
-      {/* First-badge cell shrinks with the column so long tactic names
-          collapse to an ellipsis instead of pushing the +N badge out of view.
-          The badge itself is `max-width: 100%` so the inner span can clip.
-          The +N badge cell stays `grow={false}` and is not truncated. */}
-      <EuiFlexItem
-        grow={1}
-        css={css`
-          min-width: 0;
-        `}
-      >
+    // Plain flex wrapper (not `EuiFlexGroup`) so the first badge cell can
+    // be configured as `flex: 0 1 auto` — i.e. it doesn't grow past its
+    // content width but still shrinks (and truncates) when the column is
+    // narrower than the combined natural badge widths. `EuiFlexGroup` /
+    // `EuiFlexItem grow={1}` would force the cell to expand to fill the
+    // column, pushing the +N badge to the right and leaving a variable
+    // gap between the two badges. `EuiFlexItem grow={false}` would zero
+    // both grow AND shrink, breaking the truncation. The plain `gap` is
+    // an absolute 4 px so the inter-badge distance never drifts with
+    // column width.
+    <div css={tacticCellCss}>
+      {/* First-badge slot — `min-width: 0` lets the badge shrink below
+          its natural width so `text-overflow: ellipsis` can kick in
+          when the column is too narrow. The badge itself caps at
+          `max-width: 100%` so the inner text actually clips. */}
+      <div css={firstBadgeSlotCss}>
         <EuiToolTip
           content={firstTactic}
           anchorProps={{
@@ -109,25 +104,14 @@ export const TacticBadgesCellV3: React.FC<TacticBadgesCellV3Props> = ({ tactics 
           <EuiBadge
             color="hollow"
             data-test-subj={BEHAVIORAL_ANOMALIES_V3_TABLE_TACTIC_BADGE_TEST_ID}
-            css={css`
-              max-width: 100%;
-              & .euiBadge__content,
-              & .euiBadge__text {
-                min-width: 0;
-                max-width: 100%;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                display: block;
-              }
-            `}
+            css={badgeTruncationCss}
           >
             {firstTactic}
           </EuiBadge>
         </EuiToolTip>
-      </EuiFlexItem>
+      </div>
       {overflowCount > 0 && (
-        <EuiFlexItem grow={false}>
+        <div css={overflowBadgeSlotCss}>
           <EuiPopover
             isOpen={isOpen}
             closePopover={close}
@@ -181,8 +165,42 @@ export const TacticBadgesCellV3: React.FC<TacticBadgesCellV3Props> = ({ tactics 
               </EuiBadgeGroup>
             </div>
           </EuiPopover>
-        </EuiFlexItem>
+        </div>
       )}
-    </EuiFlexGroup>
+    </div>
   );
 };
+
+// 4 px is an absolute gap, not the EUI `xs` token, because the v.3 design
+// explicitly calls for a fixed inter-badge distance that doesn't track the
+// theme spacing scale.
+const tacticCellCss = css`
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+`;
+
+const firstBadgeSlotCss = css`
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+`;
+
+const overflowBadgeSlotCss = css`
+  flex: 0 0 auto;
+`;
+
+const badgeTruncationCss = css`
+  max-width: 100%;
+  & .euiBadge__content,
+  & .euiBadge__text {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
+`;

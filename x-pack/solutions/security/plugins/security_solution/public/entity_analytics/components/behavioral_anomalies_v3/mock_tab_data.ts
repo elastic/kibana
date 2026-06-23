@@ -20,7 +20,7 @@ import type {
 const HOUR_MS = 60 * 60 * 1000;
 
 /** Default left-tab time range — drives the EuiSuperDatePicker initial value. */
-export const DEFAULT_TIMELINE_RANGE_V3 = { from: 'now-1y', to: 'now' } as const;
+export const DEFAULT_TIMELINE_RANGE_V3 = { from: 'now-30d', to: 'now' } as const;
 
 /**
  * Returns the ML severity-bucket threshold (one of `ML_ANOMALY_THRESHOLD.*`)
@@ -184,8 +184,19 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 32.4,
     detectorIndex: 0,
     entities: { 'user.name': 'john.doe' },
-    description:
-      'Detects rare values for destination.geo.country_name — the user signed in from a country never seen for this account in the last 30 days. First sign-in from Italy in the last 90 days; 2 prior new-country sign-ins (Spain, Germany) in the last 30 days.',
+    // No spike chip — this is a categorical first-time-seen value rather
+    // than a numeric multiplier.
+    explainer: [
+      {
+        text: 'Detects rare values for destination.geo.country_name — the user signed in from a country never seen for this account in the last 30 days. First sign-in from Italy in the last 90 days; 2 prior new-country sign-ins (Spain, Germany) in the last 30 days.',
+      },
+    ],
+    countOfSourceEvents: 1,
+    keyFields: [
+      'user.name=john.doe',
+      'destination.geo.country_name=Italy',
+      'source.ip=185.30.32.11',
+    ],
     eventIds: ['evt-rare-country-1'],
   },
   {
@@ -199,8 +210,19 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 92,
     detectorIndex: 0,
     entities: { 'user.name': 'john.doe' },
-    description:
-      'Detects unusual spikes in failed authentication events — 42× the typical hourly rate for this user. 4th failed-auth spike for this account in the last 14 days; previous spikes peaked at 12–18×.',
+    // Mirrors the screenshot from the design spec — two spike chips,
+    // "42×" then "12×-18×".
+    explainer: [
+      { text: 'Detects unusual spikes in failed authentication events — ' },
+      { spike: '42x' },
+      {
+        text: ' the typical hourly rate for this user. 4th failed-auth spike for this account in the last 14 days; previous spikes peaked at ',
+      },
+      { spike: '12x-18x' },
+      { text: '.' },
+    ],
+    countOfSourceEvents: 456,
+    keyFields: ['user.id=xxx', 'host.id=xxx', 'source.ip=xxx'],
     eventIds: ['evt-auth-spike-1', 'evt-auth-spike-2', 'evt-auth-spike-3'],
   },
   {
@@ -213,8 +235,14 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 18.7,
     detectorIndex: 0,
     entities: { 'user.name': 'john.doe' },
-    description:
-      "Detects login activity outside the user's typical 09:00–18:00 working hours. First off-hours sign-in for this account in the last 30 days.",
+    // Time-of-day rarity — no numeric multiplier to chip.
+    explainer: [
+      {
+        text: "Detects login activity outside the user's typical 09:00–18:00 working hours. First off-hours sign-in for this account in the last 30 days.",
+      },
+    ],
+    countOfSourceEvents: 1,
+    keyFields: ['user.name=john.doe', 'host.name=server-01', 'source.ip=10.0.0.12'],
     eventIds: ['evt-login-hour-1'],
   },
   {
@@ -227,8 +255,13 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 78.5,
     detectorIndex: 0,
     entities: { 'host.name': 'server-01' },
-    description:
-      'Detects rarely-used binaries executing on the host — certutil.exe deviates from the baseline parent/child relationship. First execution of certutil.exe on this host in the last 60 days; 2 other rare-binary anomalies on this host in the last 30 days.',
+    explainer: [
+      {
+        text: 'Detects rarely-used binaries executing on the host — certutil.exe deviates from the baseline parent/child relationship. First execution of certutil.exe on this host in the last 60 days; 2 other rare-binary anomalies on this host in the last 30 days.',
+      },
+    ],
+    countOfSourceEvents: 1,
+    keyFields: ['host.name=server-01', 'process.name=certutil.exe', 'user.name=SYSTEM'],
     eventIds: ['evt-process-1', 'evt-process-2'],
   },
   {
@@ -242,8 +275,19 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 71.2,
     detectorIndex: 0,
     entities: { 'source.ip': '10.0.0.12' },
-    description:
-      'Detects a sharp increase in distinct source IPs targeting the entity — 3.9× the typical hourly distinct-IP count. 3rd surge above 30 unique IPs in the last 14 days for this destination.',
+    explainer: [
+      { text: 'Detects a sharp increase in distinct source IPs targeting the entity — ' },
+      { spike: '3.9x' },
+      {
+        text: ' the typical hourly distinct-IP count. 3rd surge above 30 unique IPs in the last 14 days for this destination.',
+      },
+    ],
+    countOfSourceEvents: 1247,
+    keyFields: [
+      'destination.ip=10.0.0.12',
+      'destination.port=443',
+      'event.action=network_flow',
+    ],
     eventIds: ['evt-ip-count-1', 'evt-ip-count-2'],
   },
   {
@@ -257,8 +301,19 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 88.1,
     detectorIndex: 0,
     entities: { 'host.name': 'server-01' },
-    description:
-      'Detects unusually large outbound transfer volume — 7.4× the typical hourly egress for the host. First transfer above 500 MB/hour for this host in the last 30 days.',
+    explainer: [
+      { text: 'Detects unusually large outbound transfer volume — ' },
+      { spike: '7.4x' },
+      {
+        text: ' the typical hourly egress for the host. First transfer above 500 MB/hour for this host in the last 30 days.',
+      },
+    ],
+    countOfSourceEvents: 832,
+    keyFields: [
+      'host.name=server-01',
+      'destination.ip=203.0.113.42',
+      'network.bytes=890MB',
+    ],
     eventIds: ['evt-exfil-1', 'evt-exfil-2', 'evt-exfil-3'],
   },
   {
@@ -272,8 +327,19 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 1.4,
     detectorIndex: 0,
     entities: { 'host.name': 'server-01' },
-    description:
-      'Detects an unusually broad set of internal hosts reached from the entity — 4.5× the typical fan-out. 2nd fan-out above 5 hosts for this entity in the last 30 days; 4 of the 9 hosts are new contacts.',
+    explainer: [
+      { text: 'Detects an unusually broad set of internal hosts reached from the entity — ' },
+      { spike: '4.5x' },
+      {
+        text: ' the typical fan-out. 2nd fan-out above 5 hosts for this entity in the last 30 days; 4 of the 9 hosts are new contacts.',
+      },
+    ],
+    countOfSourceEvents: 234,
+    keyFields: [
+      'host.name=server-01',
+      'user.name=svc-deploy',
+      'destination.bytes=12.4MB',
+    ],
     eventIds: ['evt-lateral-1', 'evt-lateral-2'],
   },
   {
@@ -287,8 +353,19 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 76.4,
     detectorIndex: 0,
     entities: { 'destination.ip': '192.168.1.44' },
-    description:
-      'Detects DNS query patterns consistent with tunneling — sustained 7× query-rate spike to a single destination. First sustained tunneling-pattern spike to 192.168.1.44 in the last 30 days.',
+    explainer: [
+      { text: 'Detects DNS query patterns consistent with tunneling — sustained ' },
+      { spike: '7x' },
+      {
+        text: ' query-rate spike to a single destination. First sustained tunneling-pattern spike to 192.168.1.44 in the last 30 days.',
+      },
+    ],
+    countOfSourceEvents: 4210,
+    keyFields: [
+      'destination.ip=192.168.1.44',
+      'dns.question.name=*.suspicious.com',
+      'source.ip=10.0.0.12',
+    ],
     eventIds: ['evt-dns-1'],
   },
 ];
@@ -315,7 +392,9 @@ const buildTableRows = (): BehavioralAnomalyV3TableRow[] => {
     anomalyScore: template.anomalyScore,
     detectorIndex: template.detectorIndex,
     entities: template.entities,
-    description: template.description,
+    explainer: template.explainer,
+    countOfSourceEvents: template.countOfSourceEvents,
+    keyFields: template.keyFields,
     mitreTactics: tacticsForJob(template.jobId),
     underlyingEvents: buildUnderlyingEvents(template.eventIds, `v3-${index}`),
   }));
@@ -343,7 +422,11 @@ const buildTableRows = (): BehavioralAnomalyV3TableRow[] => {
       anomalyScore: Math.max(5, template.anomalyScore - (counter % 7) * 3),
       detectorIndex: template.detectorIndex,
       entities: template.entities,
-      description: template.description,
+      // Padded rows inherit the template's explainer / key-fields content so
+      // the expanded-row design stays meaningful as the user pages back.
+      explainer: template.explainer,
+      countOfSourceEvents: template.countOfSourceEvents,
+      keyFields: template.keyFields,
       mitreTactics: tacticsForJob(template.jobId),
       underlyingEvents: buildUnderlyingEvents(template.eventIds, `v3-${counter}`),
     });

@@ -60,7 +60,7 @@ const TIME_RANGE_PRESETS_V3: TimeRangeBoundsOption[] = [
   { start: 'now-1y', end: 'now', label: 'Last 1 year' },
 ];
 
-const DEFAULT_PICKER_VALUE_V3 = 'last 1 year';
+const DEFAULT_PICKER_VALUE_V3 = 'last 30 days';
 const DEFAULT_SETTINGS_V3: DateRangePickerSettings = {
   roundRelativeTime: true,
   timePrecision: 's',
@@ -68,7 +68,7 @@ const DEFAULT_SETTINGS_V3: DateRangePickerSettings = {
 
 export const BehavioralAnomaliesV3Tab: React.FC = () => {
   // The new Kibana date range picker is *controlled* via a single text value
-  // (e.g. "last 1 year" or "now-7d to now"). We additionally keep the
+  // (e.g. "last 30 days" or "now-7d to now"). We additionally keep the
   // resolved `start`/`end` date-math strings around so the swim lane and the
   // Anomalies table can derive absolute millisecond bounds from them.
   const [pickerValue, setPickerValue] = useState<string>(DEFAULT_PICKER_VALUE_V3);

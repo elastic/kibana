@@ -17,7 +17,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,7 +34,6 @@ import {
   ANOMALIES_TABLE_V3_ANOMALY_COLUMN,
   ANOMALIES_TABLE_V3_BASELINE_COLUMN,
   ANOMALIES_TABLE_V3_COLLAPSE_ROW_ARIA,
-  ANOMALIES_TABLE_V3_DESCRIPTION_HEADING,
   ANOMALIES_TABLE_V3_EXPAND_ROW_ARIA,
   ANOMALIES_TABLE_V3_JOB_COLUMN,
   ANOMALIES_TABLE_V3_SCORE_COLUMN,
@@ -46,36 +44,22 @@ import {
 } from '../translations';
 import {
   BEHAVIORAL_ANOMALIES_V3_TABLE_ACCORDION_TEST_ID,
-  BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_DESCRIPTION_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_EXPANDER_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TABLE_SCORE_HEADER_TOOLTIP_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TABLE_SECTION_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TABLE_TEST_ID,
 } from '../test_ids';
+import { AnomalyExpandedRowV3 } from './anomaly_expanded_row';
 import { AnomalyJobNameCellV3 } from './anomaly_job_name_cell';
 import { AnomalyScoreBadgeV3 } from './anomaly_score_badge';
 import { AnomalyRowActionsMenuV3 } from './anomaly_row_actions_menu';
 import { TacticBadgesCellV3 } from './tactic_badges_cell';
-
-// Applied to the EuiToolTip anchor (via `anchorProps`) for cells whose content
-// can overflow the column. Putting the truncation rules on the element that
-// directly contains the text is what lets `text-overflow: ellipsis` actually
-// render the three dots — when the rules sit on an outer wrapper whose only
-// child is an `inline-block` atomic box (EuiToolTip's default anchor), the
-// browser clips but does not draw the ellipsis. `min-width: 0` is required so
-// the anchor can shrink below its intrinsic content width inside the cell's
-// flex container.
-const truncatedAnchorCss = css`
-  display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
+import { TruncatedTextCellV3 } from './truncated_text_cell';
 
 /*
+ * Cell-level truncation + overflow-only tooltip is now delegated to
+ * `TruncatedTextCellV3` — see that file for the measurement logic.
+ *
  * `EuiInMemoryTable` (via `EuiBasicTable`'s internal `PaginationBar`) hard-
  * codes an `EuiSpacer size="m"` (16 px) between the last row of the table
  * and the page navigation controls. There is no prop to tune it, so we
@@ -205,34 +189,23 @@ export const AnomaliesTableSectionV3: React.FC<AnomaliesTableSectionV3Props> = (
         field: 'timestamp',
         sortable: true,
         render: (timestamp: number) => (
-          <EuiToolTip
-            content={<PreferenceFormattedDate value={new Date(timestamp)} />}
-            anchorProps={{ css: truncatedAnchorCss }}
+          <TruncatedTextCellV3
+            tooltipContent={<PreferenceFormattedDate value={new Date(timestamp)} />}
           >
-            <EuiText size="xs" component="span">
-              <PreferenceFormattedDate value={new Date(timestamp)} />
-            </EuiText>
-          </EuiToolTip>
+            <PreferenceFormattedDate value={new Date(timestamp)} />
+          </TruncatedTextCellV3>
         ),
       },
       {
         name: ANOMALIES_TABLE_V3_BASELINE_COLUMN,
         render: (item: BehavioralAnomalyV3TableRow) => (
-          <EuiToolTip content={item.baseline} anchorProps={{ css: truncatedAnchorCss }}>
-            <EuiText size="xs" component="span">
-              {item.baseline}
-            </EuiText>
-          </EuiToolTip>
+          <TruncatedTextCellV3 tooltipContent={item.baseline}>{item.baseline}</TruncatedTextCellV3>
         ),
       },
       {
         name: ANOMALIES_TABLE_V3_ANOMALY_COLUMN,
         render: (item: BehavioralAnomalyV3TableRow) => (
-          <EuiToolTip content={item.anomaly} anchorProps={{ css: truncatedAnchorCss }}>
-            <EuiText size="xs" component="span">
-              {item.anomaly}
-            </EuiText>
-          </EuiToolTip>
+          <TruncatedTextCellV3 tooltipContent={item.anomaly}>{item.anomaly}</TruncatedTextCellV3>
         ),
       },
       {
@@ -274,23 +247,15 @@ export const AnomaliesTableSectionV3: React.FC<AnomaliesTableSectionV3Props> = (
   );
 
   // EuiInMemoryTable accepts an `itemIdToExpandedRowMap` mapping the row id
-  // to the node rendered as its expanded panel. Description block is kept
-  // compact (heading + paragraph) to match the design.
+  // to the node rendered as its expanded panel. The structured layout
+  // (Explainer + Count of source events + Event type + Events time range +
+  // Key fields) lives in `AnomalyExpandedRowV3` so it can be reused / tested
+  // independently of the table wiring.
   const itemIdToExpandedRowMap = useMemo(() => {
     const map: Record<string, React.ReactNode> = {};
     for (const row of filteredRows) {
       if (!expandedRowIds.has(row.id)) continue;
-      map[row.id] = (
-        <div
-          data-test-subj={`${BEHAVIORAL_ANOMALIES_V3_TABLE_ROW_DESCRIPTION_TEST_ID}-${row.id}`}
-        >
-          <EuiText size="xs">
-            <strong>{ANOMALIES_TABLE_V3_DESCRIPTION_HEADING}</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs">{row.description}</EuiText>
-        </div>
-      );
+      map[row.id] = <AnomalyExpandedRowV3 row={row} />;
     }
     return map;
   }, [expandedRowIds, filteredRows]);

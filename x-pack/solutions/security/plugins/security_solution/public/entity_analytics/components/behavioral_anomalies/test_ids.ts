@@ -16,6 +16,10 @@ export const BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID =
 // v.2 overview is selected. Remove with the v.2 overview.
 export const BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2OverviewTimeframe` as const;
+// Prototype-only "Last 30 days" badge rendered on the section title when the
+// v.3 overview is selected. Remove with the v.3 overview.
+export const BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TIMEFRAME_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3OverviewTimeframe` as const;
 export const BEHAVIORAL_ANOMALIES_OVERVIEW_TEST_ID = `${PREFIX}BehavioralAnomaliesOverview` as const;
 export const BEHAVIORAL_ANOMALIES_COUNT_TEST_ID = `${PREFIX}BehavioralAnomaliesCount` as const;
 export const BEHAVIORAL_ANOMALIES_HEATMAP_TEST_ID = `${PREFIX}BehavioralAnomaliesHeatmap` as const;
@@ -34,6 +38,10 @@ export const BEHAVIORAL_ANOMALIES_V3_TACTICS_COUNT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3TacticsCount` as const;
 export const BEHAVIORAL_ANOMALIES_V3_TACTICS_CHAIN_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3TacticsChain` as const;
+export const BEHAVIORAL_ANOMALIES_V3_RECENT_HEADING_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3RecentHeading` as const;
+export const BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3RecentTable` as const;
 export const BEHAVIORAL_ANOMALIES_TAB_CONTENT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesTabContent` as const;
 export const BEHAVIORAL_ANOMALIES_TIMELINE_SECTION_TEST_ID =

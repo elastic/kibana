@@ -22,6 +22,18 @@ export const BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME = i18n.translate(
   { defaultMessage: 'Last 1 year' }
 );
 
+/**
+ * Prototype "v.3" timeframe indicator rendered as `extraAction` on the
+ * Behavioral anomalies section title when the v.3 overview is selected.
+ * v.3 narrows the default window from a year to 30 days — matching the
+ * v.3 left-tab date picker default. Cleanup: remove together with the v.3
+ * selector / overview.
+ */
+export const BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TIMEFRAME = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.timeframeLabel',
+  { defaultMessage: 'Last 30 days' }
+);
+
 export const BEHAVIORAL_ANOMALIES_ALL_LINK_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomalies.allAnomaliesLink',
   { defaultMessage: 'All anomalies' }
@@ -56,6 +68,16 @@ export const BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_LABEL = i18n.translate(
 export const BEHAVIORAL_ANOMALIES_V3_TACTICS_COUNT_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.tacticsCountLabel',
   { defaultMessage: 'Tactics' }
+);
+
+/**
+ * Prototype "v.3" — sub-heading rendered above the 3-row "Recent anomalies"
+ * table in the right-panel overview. Cleanup: remove with
+ * `behavioral_anomalies_overview_v3.tsx`.
+ */
+export const BEHAVIORAL_ANOMALIES_V3_RECENT_HEADING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.recentAnomaliesHeading',
+  { defaultMessage: 'Recent anomalies' }
 );
 
 export const BEHAVIORAL_ANOMALIES_TAB_LABEL = i18n.translate(

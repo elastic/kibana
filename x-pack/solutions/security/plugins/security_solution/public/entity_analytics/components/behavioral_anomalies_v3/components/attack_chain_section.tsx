@@ -16,7 +16,7 @@
 import React from 'react';
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MitreAttackChain } from '../../behavioral_anomalies/mitre/components/mitre_attack_chain';
+import { MitreAttackChainV3 } from '../../behavioral_anomalies/mitre/components/mitre_attack_chain_v3';
 import { ATTACK_CHAIN_V3_TITLE } from '../translations';
 import {
   BEHAVIORAL_ANOMALIES_V3_ATTACK_CHAIN_ACCORDION_TEST_ID,
@@ -68,7 +68,7 @@ export const AttackChainSectionV3: React.FC<AttackChainSectionV3Props> = ({
             padding: 16px 24px;
           `}
         >
-          <MitreAttackChain
+          <MitreAttackChainV3
             triggeredTactics={triggeredTactics}
             showLabels
             selectedTactic={selectedTactic}
