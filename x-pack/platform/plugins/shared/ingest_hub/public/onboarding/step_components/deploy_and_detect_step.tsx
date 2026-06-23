@@ -7,19 +7,29 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import type { ServiceChipState } from '../onboarding_flow_context';
+
+const CHIP_COLORS: Record<ServiceChipState, string> = {
+  instantiating: 'default',
+  detecting: 'primary',
+  receiving: 'success',
+  error: 'danger',
+  timeout: 'warning',
+};
 
 interface DeployAndDetectStepProps {
   onContinue: () => void;
@@ -28,14 +38,10 @@ interface DeployAndDetectStepProps {
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
   const { deployStep, retryDeploy } = useOnboardingFlow();
-  const { isDeploying, serviceStatuses, failedPackages } = deployStep;
+  const { isDeploying, serviceStatuses, failedPackages, deployErrors } = deployStep;
 
   const hasStarted = Object.keys(serviceStatuses).length > 0;
   const allSucceeded = hasStarted && !isDeploying && failedPackages.length === 0;
-
-  const succeededServiceIds = Object.entries(serviceStatuses)
-    .filter(([, state]) => state !== 'error')
-    .map(([id]) => id);
 
   return (
     <div data-test-subj="onboardingStep-deploy-and-detect">
@@ -73,30 +79,27 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
         </EuiFlexGroup>
       )}
 
-      {!isDeploying && hasStarted && (
+      {hasStarted && (
         <>
-          {succeededServiceIds.map((serviceId) => (
-            <EuiFlexGroup key={serviceId} alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
+          {isDeploying && <EuiSpacer size="m" />}
+          <EuiFlexGroup wrap gutterSize="s" data-test-subj="deployAndDetectStep-serviceChips">
+            {Object.entries(serviceStatuses).map(([serviceId, state]) => (
+              <EuiFlexItem grow={false} key={serviceId}>
+                <EuiBadge color={CHIP_COLORS[state]}>
+                  {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
+                </EuiBadge>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{serviceId}</strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ))}
+            ))}
+          </EuiFlexGroup>
 
-          {failedPackages.length > 0 && (
+          {!isDeploying && failedPackages.length > 0 && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
                 title={
                   <FormattedMessage
                     id="xpack.ingestHub.deployAndDetectStep.errorCallout.title"
-                    defaultMessage="Deployment failed for {count, plural, one {# package} other {# packages}}"
-                    values={{ count: failedPackages.length }}
+                    defaultMessage="Deployment failed"
                   />
                 }
                 color="danger"
@@ -106,7 +109,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
               >
                 {failedPackages.map((pkg) => (
                   <EuiText key={pkg} size="s">
-                    <strong>{pkg}</strong>
+                    {deployErrors[pkg] ?? pkg}
                   </EuiText>
                 ))}
                 <EuiSpacer size="s" />
@@ -118,7 +121,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                 >
                   <FormattedMessage
                     id="xpack.ingestHub.deployAndDetectStep.retryButton"
-                    defaultMessage="Retry failed"
+                    defaultMessage="Retry failed services"
                   />
                 </EuiButton>
               </EuiCallOut>

@@ -72,10 +72,6 @@ export function buildStreamVars(
     result[regionField] = globalRegion;
   }
 
-  if ((service.requiredConfig ?? []).includes('regions') && !result.regions && globalRegion) {
-    result.regions = globalRegion;
-  }
-
   return result;
 }
 
@@ -88,11 +84,12 @@ export function buildPackageInputs(
 
   for (const service of services) {
     const serviceVars: ServiceVars = storedServiceVars[service.id] ?? { trigger: null, vars: {} };
-    const inputType = serviceVars.trigger ?? service.inputs?.[0] ?? '';
+    const defaultInput = service.inputs?.includes('aws-s3') ? 'aws-s3' : service.inputs?.[0] ?? '';
+    const inputType = serviceVars.trigger ?? defaultInput;
     if (!inputType) continue;
 
     const inputKey = service.policyTemplate ? `${service.policyTemplate}-${inputType}` : inputType;
-    const streamKey = `${service.packageName}.${service.id}`;
+    const streamKey = `${service.packageName}.${service.dataStream ?? service.id}`;
     const streamVars = buildStreamVars(service, serviceVars, globalRegion);
 
     if (!inputs[inputKey]) {
@@ -107,13 +104,14 @@ export function buildPackageInputs(
 
 function buildPackageVars(
   globalRegion: string,
-  staticKeys: ConnectStepState['staticKeys']
+  staticKeys: ConnectStepState['staticKeys'],
+  pkgVarNames: Set<string>
 ): Record<string, string> | undefined {
   const vars: Record<string, string> = {};
-  if (globalRegion) vars.default_region = globalRegion;
+  if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
   if (staticKeys?.access_key_id && staticKeys?.secret_access_key) {
-    vars.access_key_id = staticKeys.access_key_id;
-    vars.secret_access_key = staticKeys.secret_access_key;
+    if (pkgVarNames.has('access_key_id')) vars.access_key_id = staticKeys.access_key_id;
+    if (pkgVarNames.has('secret_access_key')) vars.secret_access_key = staticKeys.secret_access_key;
   }
   return Object.keys(vars).length > 0 ? vars : undefined;
 }
@@ -138,17 +136,41 @@ async function deployPackage(
   }
 ): Promise<PackageDeployOutcome> {
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
-  const pkgVersion = pkgInfoResponse.data?.item?.version;
+  const pkgInfo = pkgInfoResponse.data?.item;
+  const pkgVersion = pkgInfo?.version;
   if (!pkgVersion) {
     throw new Error(`Package ${packageName} is not installed`);
   }
 
   const { connectorId, staticKeys } = connectStep;
   const inputs = buildPackageInputs(services, storedServiceVars, globalRegion);
-  const vars = buildPackageVars(globalRegion, staticKeys);
 
+  // Explicitly disable all package inputs not in our selection.
+  // Fleet merges our partial inputs with package manifest defaults (including defaultEnabled: true
+  // inputs like aws-s3), causing "not allowed for agentless" errors for inputs we never wanted.
+  const pkgTemplates: Array<{ name?: string; type?: string; inputs?: Array<{ type: string }> }> =
+    (pkgInfo as any).policy_templates ?? [];
+  for (const template of pkgTemplates) {
+    const templateInputs = template.inputs ?? (template.type ? [{ type: template.type }] : []);
+    for (const input of templateInputs) {
+      const key = template.name ? `${template.name}-${input.type}` : input.type;
+      if (!inputs[key]) {
+        inputs[key] = { enabled: false, streams: {} };
+      }
+    }
+  }
+
+  const pkgVarNames = new Set<string>(
+    ((pkgInfo as any).vars ?? []).map((v: any) => v.name as string)
+  );
+  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
+
+  const serviceIdsPart = services
+    .map((s) => s.id)
+    .join('_')
+    .slice(0, 100);
   const response = await sendCreateAgentlessPolicy({
-    name: `aws-onboarding-${packageName}`,
+    name: `${serviceIdsPart}-${Date.now()}`,
     namespace,
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
@@ -159,12 +181,25 @@ async function deployPackage(
   return { policyId: (response as any)?.data?.item?.policy_ids?.[0] };
 }
 
+function extractErrorMessage(reason: unknown): string {
+  if (reason instanceof Error) return reason.message;
+  if (reason !== null && typeof reason === 'object' && 'message' in reason) {
+    return String((reason as { message: unknown }).message);
+  }
+  return String(reason);
+}
+
 export function collectDeployResults(
   results: PromiseSettledResult<PackageDeployOutcome>[],
   targets: string[]
-): { policyIdsByPackage: Record<string, string>; failedPackages: string[] } {
+): {
+  policyIdsByPackage: Record<string, string>;
+  failedPackages: string[];
+  errorsByPackage: Record<string, string>;
+} {
   const policyIdsByPackage: Record<string, string> = {};
   const failedPackages: string[] = [];
+  const errorsByPackage: Record<string, string> = {};
 
   for (let i = 0; i < targets.length; i++) {
     const pkg = targets[i];
@@ -173,22 +208,24 @@ export function collectDeployResults(
       if (result.value.policyId) policyIdsByPackage[pkg] = result.value.policyId;
     } else {
       failedPackages.push(pkg);
+      errorsByPackage[pkg] = extractErrorMessage(result.reason);
     }
   }
 
-  return { policyIdsByPackage, failedPackages };
+  return { policyIdsByPackage, failedPackages, errorsByPackage };
 }
 
 export function buildServiceStatuses(
   targets: string[],
   failedPackages: string[],
-  servicesByPackage: Map<string, AwsServiceMatrixEntry[]>
+  servicesByPackage: Map<string, AwsServiceMatrixEntry[]>,
+  succeededState: ServiceChipState = 'instantiating'
 ): Record<string, ServiceChipState> {
   const statuses: Record<string, ServiceChipState> = {};
   const failedSet = new Set(failedPackages);
 
   for (const pkg of targets) {
-    const chipState: ServiceChipState = failedSet.has(pkg) ? 'error' : 'instantiating';
+    const chipState: ServiceChipState = failedSet.has(pkg) ? 'error' : succeededState;
     for (const service of servicesByPackage.get(pkg) ?? []) {
       statuses[service.id] = chipState;
     }
@@ -198,7 +235,7 @@ export function buildServiceStatuses(
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
-  const { servicesStep, connectStep, updateDeployStep, registerDeployHandler } =
+  const { servicesStep, connectStep, deployStep, updateDeployStep, registerDeployHandler } =
     useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
@@ -232,21 +269,58 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     return map;
   }, [agentlessServices]);
 
+  const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
+    () =>
+      selectedServiceIds
+        .map((id) => AWS_SERVICES_MAP.get(id))
+        .filter(
+          (s): s is AwsServiceMatrixEntry =>
+            s !== undefined &&
+            !s.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)
+        ),
+    [selectedServiceIds]
+  );
+
   const handleDeploy = useCallback(
     async (packageNames?: string[]) => {
-      const targets = packageNames ?? [...servicesByPackage.keys()];
       const isInitialDeploy = packageNames === undefined;
 
-      if (targets.length === 0) {
-        onContinue();
-        return;
-      }
-
-      setIsDeploying(true);
-      updateDeployStep({ isDeploying: true });
-
+      let targets: string[];
       if (isInitialDeploy) {
+        // Only deploy packages that have at least one service not yet tracked in serviceStatuses.
+        // This handles: back-navigation during deploy (skip), and adding new services (deploy them).
+        targets = [...servicesByPackage.keys()].filter((pkg) =>
+          (servicesByPackage.get(pkg) ?? []).some((s) => !(s.id in deployStep.serviceStatuses))
+        );
+
+        // Non-agentless services (e.g. cloud_forwarder) are shown as gray chips but never deployed.
+        const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
+        for (const service of nonAgentlessServices) {
+          if (!(service.id in deployStep.serviceStatuses)) {
+            newNonAgentlessStatuses[service.id] = 'instantiating';
+          }
+        }
+
+        if (targets.length === 0 && Object.keys(newNonAgentlessStatuses).length === 0) {
+          onContinue();
+          return;
+        }
+
+        // Set target services to 'instantiating' before navigating so that a back-navigation
+        // mid-deploy sees them in serviceStatuses and won't resubmit.
+        const initialStatuses = buildServiceStatuses(targets, [], servicesByPackage);
+        if (targets.length > 0) setIsDeploying(true);
+        updateDeployStep({
+          isDeploying: targets.length > 0,
+          serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
+        });
         onContinue();
+
+        if (targets.length === 0) return;
+      } else {
+        targets = packageNames;
+        setIsDeploying(true);
+        updateDeployStep({ isDeploying: true });
       }
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
@@ -263,11 +337,17 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         )
       );
 
-      const { policyIdsByPackage, failedPackages: newFailed } = collectDeployResults(
-        results,
-        targets
+      const {
+        policyIdsByPackage,
+        failedPackages: newFailed,
+        errorsByPackage,
+      } = collectDeployResults(results, targets);
+      const newServiceStatuses = buildServiceStatuses(
+        targets,
+        newFailed,
+        servicesByPackage,
+        'receiving'
       );
-      const newServiceStatuses = buildServiceStatuses(targets, newFailed, servicesByPackage);
 
       setIsDeploying(false);
       setFailedPackages(newFailed);
@@ -276,9 +356,20 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         serviceStatuses: newServiceStatuses,
         policyIdsByPackage,
         failedPackages: newFailed,
+        deployErrors: errorsByPackage,
       });
     },
-    [servicesByPackage, serviceSettings, connectStep, namespace, onContinue, updateDeployStep]
+
+    [
+      servicesByPackage,
+      nonAgentlessServices,
+      serviceSettings,
+      connectStep,
+      namespace,
+      onContinue,
+      updateDeployStep,
+      deployStep.serviceStatuses,
+    ]
   );
 
   useEffect(() => {

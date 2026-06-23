@@ -23,6 +23,7 @@ export interface DeployStepState {
   serviceStatuses: Record<string, ServiceChipState>;
   policyIdsByPackage: Record<string, string>;
   failedPackages: string[];
+  deployErrors: Record<string, string>;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
@@ -108,6 +109,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     serviceStatuses: {},
     policyIdsByPackage: {},
     failedPackages: [],
+    deployErrors: {},
   });
 
   const deployHandlerRef = useRef<((packageNames?: string[]) => void) | null>(null);
@@ -118,6 +120,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       ...update,
       serviceStatuses: { ...prev.serviceStatuses, ...update.serviceStatuses },
       policyIdsByPackage: { ...prev.policyIdsByPackage, ...update.policyIdsByPackage },
+      deployErrors: { ...prev.deployErrors, ...update.deployErrors },
     }));
   }, []);
 

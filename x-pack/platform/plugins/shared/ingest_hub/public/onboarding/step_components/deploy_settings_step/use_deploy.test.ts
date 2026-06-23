@@ -120,22 +120,6 @@ describe('buildStreamVars', () => {
     );
     expect(vars.region).toBe('eu-west-1');
   });
-
-  it('falls back to globalRegion for the "regions" list field', () => {
-    const service = makeService({ inputs: ['aws/metrics'], requiredConfig: ['regions'] });
-    const vars = buildStreamVars(service, { trigger: null, vars: {} }, 'ap-southeast-1');
-    expect(vars.regions).toBe('ap-southeast-1');
-  });
-
-  it('does not override existing regions var with globalRegion', () => {
-    const service = makeService({ inputs: ['aws/metrics'], requiredConfig: ['regions'] });
-    const vars = buildStreamVars(
-      service,
-      { trigger: null, vars: { regions: 'eu-central-1' } },
-      'us-east-1'
-    );
-    expect(vars.regions).toBe('eu-central-1');
-  });
 });
 
 // ─── buildPackageInputs ──────────────────────────────────────────────────────
@@ -207,6 +191,17 @@ describe('buildPackageInputs', () => {
     expect(inputs['ec2-aws-cloudwatch']).toBeDefined();
   });
 
+  it('defaults to aws-s3 when service has multiple inputs and no trigger is set', () => {
+    const service = makeService({
+      id: 'cloudtrail',
+      policyTemplate: 'cloudtrail',
+      inputs: ['aws-s3', 'aws-cloudwatch'],
+    });
+    const inputs = buildPackageInputs([service], {}, '');
+    expect(inputs['cloudtrail-aws-s3']).toBeDefined();
+    expect(inputs['cloudtrail-aws-cloudwatch']).toBeUndefined();
+  });
+
   it('skips services with no resolvable input type', () => {
     const service = makeService({ id: 'no_input', inputs: [] });
     const inputs = buildPackageInputs([service], { no_input: { trigger: null, vars: {} } }, '');
@@ -219,23 +214,38 @@ describe('buildPackageInputs', () => {
 describe('collectDeployResults', () => {
   it('extracts policyId from fulfilled result', () => {
     const results = [{ status: 'fulfilled' as const, value: { policyId: 'policy-abc' } }];
-    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, ['aws']);
+    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
+      'aws',
+    ]);
     expect(policyIdsByPackage.aws).toBe('policy-abc');
     expect(failedPackages).toHaveLength(0);
+    expect(errorsByPackage).not.toHaveProperty('aws');
   });
 
   it('omits policyId when response does not include one', () => {
     const results = [{ status: 'fulfilled' as const, value: {} }];
-    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, ['aws']);
+    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
+      'aws',
+    ]);
     expect(policyIdsByPackage).not.toHaveProperty('aws');
     expect(failedPackages).toHaveLength(0);
+    expect(errorsByPackage).not.toHaveProperty('aws');
   });
 
-  it('adds package to failedPackages on rejection', () => {
+  it('adds package to failedPackages on rejection and captures error message', () => {
     const results = [{ status: 'rejected' as const, reason: new Error('Network failure') }];
-    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, ['aws']);
+    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
+      'aws',
+    ]);
     expect(failedPackages).toContain('aws');
     expect(policyIdsByPackage).not.toHaveProperty('aws');
+    expect(errorsByPackage.aws).toBe('Network failure');
+  });
+
+  it('captures error message from plain object rejection', () => {
+    const results = [{ status: 'rejected' as const, reason: { message: 'Server error' } }];
+    const { errorsByPackage } = collectDeployResults(results, ['aws']);
+    expect(errorsByPackage.aws).toBe('Server error');
   });
 
   it('handles mixed fulfilled and rejected results', () => {
@@ -243,25 +253,33 @@ describe('collectDeployResults', () => {
       { status: 'fulfilled' as const, value: { policyId: 'p1' } },
       { status: 'rejected' as const, reason: new Error('fail') },
     ];
-    const { policyIdsByPackage, failedPackages } = collectDeployResults(results, [
+    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
       'pkg-a',
       'pkg-b',
     ]);
     expect(policyIdsByPackage['pkg-a']).toBe('p1');
     expect(failedPackages).toContain('pkg-b');
+    expect(errorsByPackage['pkg-b']).toBe('fail');
+    expect(errorsByPackage).not.toHaveProperty('pkg-a');
   });
 });
 
 // ─── buildServiceStatuses ────────────────────────────────────────────────────
 
 describe('buildServiceStatuses', () => {
-  it('sets succeeded package services to "instantiating"', () => {
+  it('sets succeeded package services to "instantiating" by default', () => {
     const servicesByPackage = new Map([
       ['aws', [makeService({ id: 'ec2_metrics' }), makeService({ id: 's3_logs' })]],
     ]);
     const statuses = buildServiceStatuses(['aws'], [], servicesByPackage);
     expect(statuses.ec2_metrics).toBe('instantiating');
     expect(statuses.s3_logs).toBe('instantiating');
+  });
+
+  it('sets succeeded package services to the provided succeededState', () => {
+    const servicesByPackage = new Map([['aws', [makeService({ id: 'ec2_metrics' })]]]);
+    const statuses = buildServiceStatuses(['aws'], [], servicesByPackage, 'receiving');
+    expect(statuses.ec2_metrics).toBe('receiving');
   });
 
   it('sets failed package services to "error"', () => {
@@ -301,12 +319,14 @@ function setupMocks({
   staticKeys = undefined as { access_key_id: string; secret_access_key: string } | undefined,
   globalRegion = 'us-east-1',
   pkgVersion = '2.0.0',
+  deployStep = {} as Record<string, unknown>,
 }: {
   selectedServiceIds?: string[];
   connectorId?: string;
   staticKeys?: { access_key_id: string; secret_access_key: string };
   globalRegion?: string;
   pkgVersion?: string;
+  deployStep?: Record<string, unknown>;
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
@@ -316,6 +336,7 @@ function setupMocks({
       serviceStatuses: {},
       policyIdsByPackage: {},
       failedPackages: [],
+      ...deployStep,
     },
     updateDeployStep: jest.fn(),
     registerDeployHandler: jest.fn(),
@@ -325,7 +346,16 @@ function setupMocks({
   mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {} }, jest.fn()]);
 
   mockSendGetPackageInfoByKey.mockResolvedValue({
-    data: { item: { version: pkgVersion } },
+    data: {
+      item: {
+        version: pkgVersion,
+        vars: [
+          { name: 'default_region' },
+          { name: 'access_key_id' },
+          { name: 'secret_access_key' },
+        ],
+      },
+    },
   });
 
   mockSendCreateAgentlessPolicy.mockResolvedValue({ data: {} });
@@ -464,5 +494,76 @@ describe('useDeploy', () => {
     });
 
     expect(result.current.failedPackages).toContain('aws');
+  });
+
+  it('navigates without resubmitting when all selected services are already deployed', async () => {
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      deployStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+    });
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useDeploy({ onContinue }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
+  it('navigates without resubmitting when deploy is in progress for all selected services', async () => {
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      deployStep: { isDeploying: true, serviceStatuses: { ec2_metrics: 'instantiating' } },
+    });
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useDeploy({ onContinue }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
+  it('deploys newly selected services even when some are already deployed', async () => {
+    // ec2_metrics already deployed; lambda is a new selection in the same package
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics', 'lambda'],
+      deployStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+    });
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useDeploy({ onContinue }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes non-agentless services as gray instantiating chips without deploying them', async () => {
+    // ec2_metrics is agentless; ec2_logs is cloud_forwarder (per updated service matrix)
+    setupMocks({ selectedServiceIds: ['ec2_metrics', 'ec2_logs'] });
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useDeploy({ onContinue }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    const updateDeployStep = mockUseOnboardingFlow.mock.results[0].value
+      .updateDeployStep as jest.Mock;
+    const initialUpdate = updateDeployStep.mock.calls[0][0];
+
+    // Both services appear in the initial status update
+    expect(initialUpdate.serviceStatuses.ec2_metrics).toBe('instantiating');
+    expect(initialUpdate.serviceStatuses.ec2_logs).toBe('instantiating');
+    // Agentless API only called once (for the aws package containing ec2_metrics)
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
+    expect(onContinue).toHaveBeenCalledTimes(1);
   });
 });
