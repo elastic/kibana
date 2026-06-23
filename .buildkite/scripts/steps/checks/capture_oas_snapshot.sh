@@ -24,6 +24,7 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/dashboards \
   --include-path /api/visualizations \
   --include-path /api/links \
+  --include-path /api/tags \
   --include-path /api/security/entity_store"
 
 run_check() {
