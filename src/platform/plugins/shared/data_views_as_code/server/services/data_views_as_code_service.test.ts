@@ -278,23 +278,28 @@ describe('DataViewsAsCodeService', () => {
       const { service, mockDataViewsService } = createService();
 
       const existingDataView = createMockDataViewLazy({ id, spec: storedSpec });
-      const updatedDataView = createMockDataViewLazy({
+      const updatableDataView = createMockDataViewLazy({ id, spec: storedSpec });
+      const refetchedDataView = createMockDataViewLazy({
         id,
         managed: true,
         version: '2',
         namespaces: ['default', 'space-1'],
         spec: storedSpec,
       });
-      mockDataViewsService.getDataViewLazy.mockResolvedValue(existingDataView);
-      mockDataViewsService.createFromSpecLazy = jest.fn().mockResolvedValue(updatedDataView);
+      mockDataViewsService.getDataViewLazy
+        .mockResolvedValueOnce(existingDataView)
+        .mockResolvedValueOnce(refetchedDataView);
+      mockDataViewsService.createFromSpecLazy = jest.fn().mockResolvedValue(updatableDataView);
       mockDataViewsService.updateSavedObject.mockResolvedValue(undefined);
 
       const result = await service.upsert(id, inputSpecWithoutId);
 
-      expect(mockDataViewsService.getDataViewLazy).toHaveBeenCalledWith(id);
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenCalledTimes(2);
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenNthCalledWith(1, id);
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenNthCalledWith(2, id);
       expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
       expect(mockDataViewsService.createFromSpecLazy).toHaveBeenCalledWith(storedSpec);
-      expect(mockDataViewsService.updateSavedObject).toHaveBeenCalledWith(updatedDataView);
+      expect(mockDataViewsService.updateSavedObject).toHaveBeenCalledWith(updatableDataView);
       expect(result).toEqual({
         action: 'updated',
         body: {
