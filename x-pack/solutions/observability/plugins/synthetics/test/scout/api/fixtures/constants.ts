@@ -15,15 +15,49 @@
 export const SYNTHETICS_API_URLS = {
   SYNTHETICS_ENABLEMENT: '/internal/synthetics/service/enablement',
   SYNTHETICS_MONITORS: '/api/synthetics/monitors',
+  CERTS: '/internal/synthetics/certs',
+  CERTS_FACETS: '/internal/synthetics/certs/facets',
+  GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{monitorId}',
+  TEST_NOW_MONITOR: '/api/synthetics/monitor/test',
   FILTERS: '/internal/synthetics/monitor/filters',
   SUGGESTIONS: '/internal/synthetics/suggestions',
   PRIVATE_LOCATIONS: '/api/synthetics/private_locations',
-  DYNAMIC_SETTINGS: '/internal/synthetics/settings',
+  PRIVATE_LOCATIONS_MONITORS: '/internal/synthetics/private_locations/monitors',
+  SERVICE_LOCATIONS: '/internal/uptime/service/locations',
+  DYNAMIC_SETTINGS: '/api/synthetics/settings',
+  PARAMS: '/api/synthetics/params',
+  PRIVATE_LOCATIONS_CLEANUP: '/internal/synthetics/private_locations/_cleanup',
+  SYNC_GLOBAL_PARAMS: '/internal/synthetics/sync_global_params',
+  ENABLE_DEFAULT_ALERTING: '/internal/synthetics/enable_default_alerting',
+  SYNTHETICS_MONITOR_INSPECT: '/internal/synthetics/service/monitor/inspect',
+  SYNTHETICS_MONITOR_RESET: '/internal/synthetics/monitors/{monitorId}/_reset',
+  SYNTHETICS_MONITORS_BULK_RESET: '/internal/synthetics/monitors/_bulk_reset',
+  SYNTHETICS_MONITORS_BULK_UPDATE: '/api/synthetics/monitors/_bulk_update',
+  SYNTHETICS_MONITORS_PROJECT: '/api/synthetics/project/{projectName}/monitors',
   SYNTHETICS_MONITORS_PROJECT_UPDATE: '/api/synthetics/project/{projectName}/monitors/_bulk_update',
+  SYNTHETICS_MONITORS_PROJECT_DELETE: '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 } as const;
 
 export const PUBLIC_API_VERSION = '2023-10-31';
 export const INTERNAL_API_VERSION = '1';
+
+/**
+ * Synthetics monitor saved-object types created by the create/edit specs.
+ * Cleaned in `beforeAll`/`afterAll` so the worker-shared Fleet package and
+ * private location survive across specs (matching the FTR suite's design).
+ */
+export const SYNTHETICS_MONITOR_SO_TYPES = ['synthetics-monitor', 'synthetics-monitor-multi-space'];
+
+/**
+ * Elastic-managed "local" public location available in the test environment.
+ * Mirrors `LOCAL_PUBLIC_LOCATION` from the FTR `apis/synthetics/helpers/location.ts`.
+ */
+export const LOCAL_PUBLIC_LOCATION = {
+  geo: { lat: 0, lon: 0 },
+  id: 'dev',
+  label: 'Dev Service',
+  isServiceManaged: true,
+} as const;
 
 /** Default headers for Synthetics *public* API requests (versioned). */
 export const PUBLIC_API_HEADERS = {

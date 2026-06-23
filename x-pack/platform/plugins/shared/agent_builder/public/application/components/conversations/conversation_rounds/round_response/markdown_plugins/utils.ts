@@ -23,12 +23,13 @@ export const createTagParser = <T extends Record<string, string | undefined>>(co
     value: string,
     extractAttr: (value: string, attr: string) => string | undefined
   ) => T;
-  assignAttributes: (node: MutableNode, attributes: T) => void;
   createNode: (attributes: T, position: MutableNode['position']) => MutableNode;
 }) => {
   return () => {
     const extractAttribute = (value: string, attr: string) => {
-      const regex = new RegExp(`${attr}="([^"]*)"`, 'i');
+      // (?:^|\s) prevents a short attr name like "id" from matching inside a
+      // longer attribute name (e.g. "field-id") that ends with the same string.
+      const regex = new RegExp(`(?:^|\\s)${attr}="([^"]*)"`, 'i');
       return value.match(regex)?.[1];
     };
 
@@ -43,43 +44,53 @@ export const createTagParser = <T extends Record<string, string | undefined>>(co
         }
 
         if (child.type !== 'html' && child.type !== 'text') {
-          continue; // terminate iteration if not html/text node
+          continue; // only html/text nodes can contain the raw tag markup
         }
 
         const rawValue = child.value;
         if (!rawValue) {
-          continue; // terminate iteration if no value attribute
+          continue; // nothing to scan
         }
 
-        const trimmedValue = rawValue.trim();
-        if (!trimmedValue.toLowerCase().startsWith(`<${config.tagName}`)) {
-          continue; // terminate iteration if not starting with tag
-        }
-
-        const matches = Array.from(trimmedValue.matchAll(tagRegex));
+        // Match tags wherever they appear in the node, not just at the start.
+        // remark cannot tokenize tag names containing underscores into their own
+        // html nodes, so the tag is frequently embedded inside a text node along
+        // with surrounding prose (e.g. "Rule:\n<render_attachment .../>").
+        const matches = Array.from(rawValue.matchAll(tagRegex));
         if (matches.length === 0) {
-          continue; // terminate iteration if no matches found
-        }
-
-        const parsedAttributes = matches.map((match) =>
-          config.getAttributes(match[0], extractAttribute)
-        );
-        const leftoverContent = trimmedValue.replace(tagRegex, '').trim();
-
-        config.assignAttributes(child, parsedAttributes[0]);
-
-        if (parsedAttributes.length === 1 || leftoverContent.length > 0) {
           continue;
         }
 
-        const additionalNodes = parsedAttributes
-          .slice(1)
-          .map((attributes) => config.createNode(attributes, child.position));
+        // Rebuild the node as a sequence of [leading text, tag, text, tag, ...]
+        // preserving any prose around the tag(s).
+        const replacementNodes: Node[] = [];
+        let cursorIndex = 0;
+
+        const pushTextSegment = (text: string) => {
+          // Drop whitespace-only gaps (e.g. newlines between stacked tags) so we
+          // don't introduce empty paragraphs between rendered attachments.
+          if (text.trim().length === 0) {
+            return;
+          }
+          replacementNodes.push({
+            type: 'text',
+            value: text,
+            position: child.position,
+          } as MutableNode);
+        };
+
+        for (const match of matches) {
+          const matchIndex = match.index ?? 0;
+          pushTextSegment(rawValue.slice(cursorIndex, matchIndex));
+          const attributes = config.getAttributes(match[0], extractAttribute);
+          replacementNodes.push(config.createNode(attributes, child.position));
+          cursorIndex = matchIndex + match[0].length;
+        }
+        pushTextSegment(rawValue.slice(cursorIndex));
 
         const siblings = parent.children as Node[];
-        siblings.splice(index + 1, 0, ...additionalNodes);
-        index += additionalNodes.length;
-        continue;
+        siblings.splice(index, 1, ...replacementNodes);
+        index += replacementNodes.length - 1;
       }
     };
 

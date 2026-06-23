@@ -1448,12 +1448,34 @@ const earliestDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'The search field',
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'exponential_histogram',
     },
     {
       params: [
@@ -1553,6 +1575,17 @@ const earliestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'tdigest',
     },
     {
       params: [
@@ -1949,6 +1982,74 @@ const firstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'The search field',
@@ -2012,6 +2113,74 @@ const firstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
     },
     {
       params: [
@@ -2624,6 +2793,74 @@ const firstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
     },
     {
       params: [
@@ -4941,7 +5178,10 @@ const sampleDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  examples: ['FROM employees\n| STATS sample = SAMPLE(gender, 5)'],
+  examples: [
+    'FROM sample_data\n| STATS sample_messages = SAMPLE(message, 3)',
+    'FROM sample_data\n| STATS sample_messages = SAMPLE(message, 2) BY client_ip\n| SORT client_ip',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -4952,6 +5192,7 @@ const sparklineDefinition: FunctionDefinition = {
     defaultMessage:
       'The values representing the y-axis values of a sparkline graph for a given aggregation over a period of time.',
   }),
+  tsdbCompatible: false,
   preview: true,
   alias: undefined,
   signatures: [

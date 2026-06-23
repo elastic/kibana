@@ -72,9 +72,44 @@ describe('registerUpsertRoute', () => {
     });
     expect(response.ok).toHaveBeenCalledWith({
       body: {
-        item: sampleDocument,
+        item: expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin }),
         created: true,
       },
+    });
+  });
+
+  it('forwards permissions to sml.upsertDocument when provided', async () => {
+    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
+    const bodyWithPermissions = {
+      ...validBody,
+      permissions: {
+        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        elasticsearch: {
+          indices: [{ name: 'logs-app-*' }, { name: 'metrics-prod' }],
+        },
+      },
+    };
+    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithPermissions });
+    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
+      id: 'chunk-1',
+      spaceId: 'test-space',
+      document: bodyWithPermissions,
+      esClient: expect.any(Object),
+    });
+  });
+
+  it('forwards tags to sml.upsertDocument when provided', async () => {
+    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
+    const bodyWithTags = {
+      ...validBody,
+      tags: ['otel', 'claude-code'],
+    };
+    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithTags });
+    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
+      id: 'chunk-1',
+      spaceId: 'test-space',
+      document: expect.objectContaining({ tags: ['otel', 'claude-code'] }),
+      esClient: expect.any(Object),
     });
   });
 
@@ -83,7 +118,9 @@ describe('registerUpsertRoute', () => {
     const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     expect(body.created).toBe(false);
-    expect(body.item).toEqual(sampleDocument);
+    expect(body.item).toEqual(
+      expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })
+    );
   });
 
   it('returns 404 when the document exists in another space', async () => {

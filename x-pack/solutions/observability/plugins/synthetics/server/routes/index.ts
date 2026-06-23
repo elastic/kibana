@@ -29,6 +29,7 @@ import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
 import type { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
+import { getSyntheticsCertsFacetsRoute } from './certs/get_certificates_facets';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
@@ -110,6 +111,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
   getSyntheticsCertsRoute,
+  getSyntheticsCertsFacetsRoute,
   getSyntheticsSuggestionsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,

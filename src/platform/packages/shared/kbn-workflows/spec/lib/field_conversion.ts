@@ -10,6 +10,10 @@
 import type { JSONSchema7 } from 'json-schema';
 import type { Document } from 'yaml';
 import { parseDocument } from 'yaml';
+import {
+  builtinWorkflowInputDefinitions,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+} from '../builtin_workflow_input_definitions';
 import type { WorkflowOutput, WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
@@ -22,6 +26,12 @@ import {
 export type NormalizableFieldSchema =
   | JsonModelSchemaType
   | Array<LegacyWorkflowInput | WorkflowOutput>;
+
+export type RenderInputValue = (value: unknown) => unknown;
+
+function renderValue(value: unknown, renderInputValue?: RenderInputValue): unknown {
+  return renderInputValue ? renderInputValue(value) : value;
+}
 
 /**
  * Converts a legacy workflow field definition to a JSON Schema property
@@ -209,14 +219,15 @@ export function extractNormalizedInputsFromYaml(
 function applyDefaultToObjectProperty(
   prop: JSONSchema7,
   currentValue: unknown,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): unknown {
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
-      return prop.default;
+      return renderValue(prop.default, renderInputValue);
     }
     if (prop.type === 'object' && prop.properties) {
-      return applyDefaultFromSchema(prop, undefined, inputsSchema);
+      return applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
     }
     return undefined;
   }
@@ -227,10 +238,10 @@ function applyDefaultToObjectProperty(
     typeof currentValue === 'object' &&
     !Array.isArray(currentValue)
   ) {
-    return applyDefaultFromSchema(prop, currentValue, inputsSchema);
+    return applyDefaultFromSchema(prop, currentValue, inputsSchema, renderInputValue);
   }
 
-  return currentValue;
+  return renderValue(currentValue, renderInputValue);
 }
 
 /**
@@ -242,13 +253,19 @@ function applyDefaultToObjectProperty(
 function applyDefaultsToObjectProperties(
   schema: JSONSchema7,
   value: Record<string, unknown>,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { ...value };
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
     const currentValue = result[key];
-    const defaultValue = applyDefaultToObjectProperty(prop, currentValue, inputsSchema);
+    const defaultValue = applyDefaultToObjectProperty(
+      prop,
+      currentValue,
+      inputsSchema,
+      renderInputValue
+    );
     if (defaultValue !== undefined) {
       result[key] = defaultValue;
     }
@@ -297,7 +314,8 @@ export function hasDefaultsRecursive(
 
 function createObjectWithDefaults(
   schema: JSONSchema7,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> | undefined {
   const result: Record<string, unknown> = {};
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
@@ -308,7 +326,7 @@ function createObjectWithDefaults(
     // 1. It's required, OR
     // 2. It has defaults (direct or nested)
     if (isRequired || hasDefaultsRecursive(prop, inputsSchema)) {
-      const defaultValue = applyDefaultFromSchema(prop, undefined, inputsSchema);
+      const defaultValue = applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
       if (defaultValue !== undefined) {
         result[key] = defaultValue;
       }
@@ -318,8 +336,11 @@ function createObjectWithDefaults(
 }
 
 /**
- * Resolves a $ref reference within the inputs schema context
- * @param ref - The $ref string (e.g., "#/definitions/UserSchema")
+ * Resolves a $ref reference within the inputs schema context, or from
+ * {@link builtinWorkflowInputDefinitions} when the ref uses
+ * {@link KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}.
+ *
+ * @param ref - The $ref string (e.g., "#/definitions/UserSchema" or "#/kibana/definitions/MyType")
  * @param inputsSchema - The full inputs schema containing definitions
  * @returns The resolved schema, or null if not found
  */
@@ -330,6 +351,15 @@ export function resolveRef(
   if (!ref.startsWith('#/')) {
     // External references not supported yet
     return null;
+  }
+
+  if (ref.startsWith(KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX)) {
+    const id = ref.slice(KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX.length);
+    if (!id || id.includes('/')) {
+      return null;
+    }
+    const builtin = builtinWorkflowInputDefinitions[id];
+    return (builtin ?? null) as JSONSchema7 | null;
   }
 
   const path = ref.slice(2).split('/'); // Remove '#/' and split
@@ -357,14 +387,15 @@ export function resolveRef(
 function applyDefaultFromSchema(
   schema: JSONSchema7,
   value: unknown,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): unknown {
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
     if (resolvedSchema) {
       // Use resolved schema for applying defaults
-      return applyDefaultFromSchema(resolvedSchema, value, inputsSchema);
+      return applyDefaultFromSchema(resolvedSchema, value, inputsSchema, renderInputValue);
     }
   }
   // If value is already provided, use it (unless it's undefined/null for objects)
@@ -379,20 +410,21 @@ function applyDefaultFromSchema(
       return applyDefaultsToObjectProperties(
         schema,
         value as Record<string, unknown>,
-        inputsSchema
+        inputsSchema,
+        renderInputValue
       );
     }
-    return value;
+    return renderValue(value, renderInputValue);
   }
 
   // If value is not provided, use default if available
   if (schema.default !== undefined) {
-    return schema.default;
+    return renderValue(schema.default, renderInputValue);
   }
 
   // For objects, create object with defaults for required properties or properties with defaults
   if (schema.type === 'object' && schema.properties) {
-    const objectWithDefaults = createObjectWithDefaults(schema, inputsSchema);
+    const objectWithDefaults = createObjectWithDefaults(schema, inputsSchema, renderInputValue);
     // If we created an object with defaults, return it; otherwise return undefined
     // This ensures nested objects with defaults are created even if not required
     return objectWithDefaults;
@@ -414,7 +446,8 @@ function applyDefaultFromSchema(
  */
 export function applyInputDefaults(
   inputs: Record<string, unknown> | undefined,
-  inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> | undefined {
   if (!inputsSchema?.properties) {
     return inputs;
@@ -429,28 +462,25 @@ export function applyInputDefaults(
 
     // Apply defaults if value is missing or undefined
     if (currentValue === undefined) {
-      const defaultValue = applyDefaultFromSchema(jsonSchema, undefined, inputsSchema);
+      const defaultValue = applyDefaultFromSchema(
+        jsonSchema,
+        undefined,
+        inputsSchema,
+        renderInputValue
+      );
       if (defaultValue !== undefined) {
         result[propertyName] = defaultValue;
         hasAnyDefaults = true;
       }
-    } else if (
-      jsonSchema.type === 'object' &&
-      jsonSchema.properties &&
-      typeof currentValue === 'object' &&
-      !Array.isArray(currentValue)
-    ) {
-      // Recursively apply defaults to nested objects
-      const updatedValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
-      if (updatedValue !== undefined) {
+    } else {
+      const updatedValue = applyDefaultFromSchema(
+        jsonSchema,
+        currentValue,
+        inputsSchema,
+        renderInputValue
+      );
+      if (updatedValue !== undefined && !Object.is(updatedValue, currentValue)) {
         result[propertyName] = updatedValue;
-        hasAnyDefaults = true;
-      }
-    } else if (jsonSchema.$ref) {
-      // Handle $ref: resolve and apply defaults
-      const defaultValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
-      if (defaultValue !== undefined) {
-        result[propertyName] = defaultValue;
         hasAnyDefaults = true;
       }
     }

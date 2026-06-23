@@ -161,12 +161,35 @@ The primary action is intentionally callback-based through `onPrimaryAction` bec
 - Cloud + no subscription management permission: no primary action
 - Cloud + subscription management permission: `startTrial` (default) or `upgrade` when `trialStatus` is `expired`
 
-The “Review subscription features” link defaults to:
+The “Review subscription features” link is controlled by the required `subscriptionFeaturesUrl` prop. Consumers must provide it explicitly (for example, `https://www.elastic.co/subscriptions/cloud` for Cloud or `https://www.elastic.co/subscriptions` for self-managed).
 
-- Cloud: `https://www.elastic.co/subscriptions/cloud`
-- Self-managed: `https://www.elastic.co/subscriptions`
+### `FrozenEnterpriseRequiredCallout`
 
-Consumers can override this via `subscriptionFeaturesUrl`.
+A warning callout shown when the current subscription tier does not support the frozen phase. The optional `onUpgradeEnterprise` callback renders an "Upgrade to enterprise" action; when omitted, the callout is informational only.
+
+```typescript
+import { FrozenEnterpriseRequiredCallout } from '@kbn/data-lifecycle-phases';
+
+<FrozenEnterpriseRequiredCallout
+  onUpgradeEnterprise={openUpgradeFlow}
+  calloutTestSubj="frozenEnterpriseRequiredCallout"
+  upgradeButtonTestSubj="frozenEnterpriseUpgradeButton"
+/>
+```
+
+### `FrozenDefaultRepositoryRequiredCallout`
+
+A warning callout shown when the previously assigned default searchable snapshot repository is no longer available. Renders an `EuiSplitButton` whose primary action creates a default repository (`onCreateDefaultRepository`) and whose secondary action refreshes the panel (`onRefresh`, with `isRefreshing` for the loading state). When neither callback is provided, the callout is informational only.
+
+```typescript
+import { FrozenDefaultRepositoryRequiredCallout } from '@kbn/data-lifecycle-phases';
+
+<FrozenDefaultRepositoryRequiredCallout
+  onCreateDefaultRepository={openCreateRepositoryFlow}
+  onRefresh={refetchRepositories}
+  isRefreshing={isLoading}
+/>
+```
 
 ## Development
 

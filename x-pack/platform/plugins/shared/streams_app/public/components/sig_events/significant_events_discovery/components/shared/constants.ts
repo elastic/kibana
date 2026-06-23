@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Detection, Discovery, Verdict } from '@kbn/streams-schema';
+import type { Detection, Discovery, SigEventStatus } from '@kbn/streams-schema';
 
 export const DETECTION_KIND_COLORS: Record<Detection['kind'], string> = {
   detection: 'warning',
@@ -14,12 +14,14 @@ export const DETECTION_KIND_COLORS: Record<Detection['kind'], string> = {
 };
 
 export const DISCOVERY_KIND_COLORS: Record<Discovery['kind'], string> = {
-  finding: 'warning',
+  discovery: 'warning',
   clearance: 'success',
+  handled: 'primary',
 };
 
-export const VERDICT_COLORS: Record<Verdict['verdict'], string> = {
-  promoted: 'warning',
-  demoted: 'success',
-  acknowledged: 'primary',
+export const SIG_EVENT_STATUS_COLORS: Record<SigEventStatus, string> = {
+  promoted: 'danger',
+  acknowledged: 'warning',
+  resolved: 'success',
+  demoted: 'default',
 };

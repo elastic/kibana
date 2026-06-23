@@ -155,11 +155,11 @@ export type PackagePolicyValidationResults = {
 } & PackagePolicyConfigValidationResults;
 
 const validateCondition = (
-  expr: string | undefined,
+  expr: string | null | undefined,
   conditionValidator: ValidatePackagePolicyDeps['conditionValidator']
 ): Errors => {
   if (!conditionValidator) return null;
-  const errors = conditionValidator(expr);
+  const errors = conditionValidator(expr ?? undefined);
   if (!errors.length) return null;
   return errors.map(({ line, column, message }) =>
     i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
@@ -291,7 +291,7 @@ const isVarRequiredByVarGroup = (
 };
 
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
 
 /*
  * Returns validation information for a given package policy and package info

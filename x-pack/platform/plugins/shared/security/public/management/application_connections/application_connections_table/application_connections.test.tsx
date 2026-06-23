@@ -72,8 +72,8 @@ describe('ApplicationConnections', () => {
 
     const { findByText, findByTestId, getByTestId, getByPlaceholderText } = renderPage(coreStart);
 
-    expect(await findByText(/No MCP clients \(OAuth\)/)).toBeInTheDocument();
-    expect(await findByText(/Get started with MCP clients/)).toBeInTheDocument();
+    expect(await findByText(/No application connections/)).toBeInTheDocument();
+    expect(await findByText(/Get started by creating MCP clients/)).toBeInTheDocument();
     const addButton = await findByTestId('applicationConnectionsEmptyPromptAddButton');
     expect(addButton).toBeInTheDocument();
     expect(addButton).toHaveAttribute(
@@ -111,7 +111,7 @@ describe('ApplicationConnections', () => {
 
     const { findByText, queryByText, queryByTestId } = renderPage(coreStart);
 
-    expect(await findByText(/No MCP clients \(OAuth\)/)).toBeInTheDocument();
+    expect(await findByText(/No application connections/)).toBeInTheDocument();
     expect(queryByText('Unused MCP app')).not.toBeInTheDocument();
     expect(
       queryByTestId('applicationConnectionsListRow-client-without-conn')
@@ -589,9 +589,43 @@ describe('ApplicationConnections', () => {
 
     const input = await findByTestId('inlineEditConnectionNameInput-conn-1');
     fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.click(getByTestId('inlineEditConnectionNameSave-conn-1'));
 
-    const saveButton = getByTestId('inlineEditConnectionNameSave-conn-1');
-    expect(saveButton).toBeDisabled();
+    expect(await findByText(/Connection name cannot be empty/)).toBeInTheDocument();
+    expect(coreStart.http.patch).not.toHaveBeenCalled();
+  });
+
+  it('blocks the inline rename when the name exceeds the max length', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'client-a',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('expandRow-client-a'));
+    await findByText('Laptop session');
+
+    const inlineEdit = getByTestId('inlineEditConnectionName-conn-1');
+    fireEvent.click(within(inlineEdit).getByTestId('euiInlineReadModeButton'));
+
+    const input = await findByTestId('inlineEditConnectionNameInput-conn-1');
+    fireEvent.change(input, { target: { value: 'a'.repeat(129) } });
+    fireEvent.click(getByTestId('inlineEditConnectionNameSave-conn-1'));
+
+    expect(await findByText(/Connection name must be 128 characters or fewer/)).toBeInTheDocument();
     expect(coreStart.http.patch).not.toHaveBeenCalled();
   });
 

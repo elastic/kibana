@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ReportingCore } from '../../..';
 import { Report } from '../../../lib/store';
 import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';
