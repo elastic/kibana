@@ -18,6 +18,7 @@ import { getExceptionListSchemaMock } from '../../../common/schemas/response/exc
 import {
   EXPORT_SIZE_LIMIT,
   ExportSizeLimitError,
+  LIST_IDS_BATCH_SIZE,
   exportExceptionListsAndItems,
 } from './export_exception_lists_and_items';
 import { findExceptionListsItemsPointInTimeFinder } from './find_exception_lists_items_point_in_time_finder';
@@ -309,6 +310,60 @@ describe('export_exception_lists_and_items', () => {
             exported_exception_list_item_count: EXPORT_SIZE_LIMIT - 1,
           })
         );
+      });
+    });
+
+    describe('list ID batching', () => {
+      it('splits items queries into batches of LIST_IDS_BATCH_SIZE', async () => {
+        const listCount = LIST_IDS_BATCH_SIZE * 2 + 1;
+        const lists = Array.from({ length: listCount }, () => getExceptionListSchemaMock());
+        mockListsFinder(lists);
+
+        const expectedBatchCount = Math.ceil(listCount / LIST_IDS_BATCH_SIZE);
+        for (let i = 0; i < expectedBatchCount; i++) {
+          mockItemsFinder([]);
+        }
+
+        await exportExceptionListsAndItems(baseOptions);
+
+        expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledTimes(expectedBatchCount);
+      });
+
+      it('passes at most LIST_IDS_BATCH_SIZE list IDs per items query', async () => {
+        const listCount = LIST_IDS_BATCH_SIZE + 1;
+        const lists = Array.from({ length: listCount }, () => getExceptionListSchemaMock());
+        mockListsFinder(lists);
+
+        mockItemsFinder([]);
+        mockItemsFinder([]);
+
+        await exportExceptionListsAndItems(baseOptions);
+
+        const calls = (findExceptionListsItemsPointInTimeFinder as jest.Mock).mock.calls;
+        for (const [callArgs] of calls) {
+          expect(callArgs.listIds.length).toBeLessThanOrEqual(LIST_IDS_BATCH_SIZE);
+        }
+      });
+
+      it('stops querying further batches once the item budget is exhausted', async () => {
+        // Two lists, each in its own batch. The first batch saturates the budget.
+        const lists = Array.from({ length: LIST_IDS_BATCH_SIZE + 1 }, () =>
+          getExceptionListSchemaMock()
+        );
+        mockListsFinder(lists);
+
+        // First batch returns enough items to saturate the budget (+1 sentinel).
+        const itemsBudget = EXPORT_SIZE_LIMIT - lists.length;
+        mockItemsFinder(
+          Array.from({ length: itemsBudget + 1 }, () => getExceptionListItemSchemaMock())
+        );
+
+        await expect(exportExceptionListsAndItems(baseOptions)).rejects.toBeInstanceOf(
+          ExportSizeLimitError
+        );
+
+        // Second batch should never be queried because the budget was already hit.
+        expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledTimes(1);
       });
     });
   });

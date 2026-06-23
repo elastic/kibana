@@ -44,6 +44,14 @@ export interface ExportExceptionListsAndItemsReturn {
 export const EXPORT_SIZE_LIMIT = 10_000;
 
 /**
+ * Maximum number of list IDs passed to a single items PIT query. ES translates
+ * each list ID into one `should` clause, so keeping this below the cluster's
+ * `indices.query.bool.max_clause_count` (default 1 024) prevents query
+ * rejection when a single export covers many lists.
+ */
+export const LIST_IDS_BATCH_SIZE = 100;
+
+/**
  * Thrown when a bulk export request would return more saved objects than
  * {@link EXPORT_SIZE_LIMIT}. Carries a `statusCode` of 422 so the route layer
  * surfaces it as Unprocessable Entity via `transformError`.
@@ -133,18 +141,27 @@ export const exportExceptionListsAndItems = async ({
   }
 
   // Cap items at the remaining budget, again with +1 so we can detect overflow.
+  // Items are fetched in batches of LIST_IDS_BATCH_SIZE to keep the generated
+  // KQL filter within ES's `indices.query.bool.max_clause_count` limit.
   const itemsBudget = EXPORT_SIZE_LIMIT - exceptionLists.length;
-  await findExceptionListsItemsPointInTimeFinder({
-    executeFunctionOnStream: appendExceptionItem,
-    filter,
-    listIds,
-    maxSize: itemsBudget + 1,
-    namespaceTypes,
-    perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
-    savedObjectsClient,
-    sortField: `${savedObjectPrefix}.created_at`,
-    sortOrder: 'desc',
-  });
+  for (let i = 0; i < listIds.length; i += LIST_IDS_BATCH_SIZE) {
+    const remaining = itemsBudget + 1 - exceptionItems.length;
+    if (remaining <= 0) break;
+
+    await findExceptionListsItemsPointInTimeFinder({
+      executeFunctionOnStream: appendExceptionItem,
+      filter,
+      listIds: listIds.slice(i, i + LIST_IDS_BATCH_SIZE),
+      maxSize: remaining,
+      namespaceTypes: namespaceTypes.slice(i, i + LIST_IDS_BATCH_SIZE),
+      perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+      savedObjectsClient,
+      sortField: `${savedObjectPrefix}.created_at`,
+      sortOrder: 'desc',
+    });
+
+    if (exceptionItems.length >= itemsBudget + 1) break;
+  }
 
   if (exceptionLists.length + exceptionItems.length > EXPORT_SIZE_LIMIT) {
     throw new ExportSizeLimitError(
