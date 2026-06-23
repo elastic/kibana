@@ -405,7 +405,7 @@ const getVisualizationTypeId = (
  * Resolves the subtype-aware visualization type id a layer was saved with, or
  * `undefined` when the visualization was never saved.
  */
-const getPersistedLayerVisualizationTypeId = (
+export const getPersistedLayerVisualizationTypeId = (
   persistedDoc: LensDocument | undefined,
   visualizationMap: VisualizationMap,
   layerId: string
