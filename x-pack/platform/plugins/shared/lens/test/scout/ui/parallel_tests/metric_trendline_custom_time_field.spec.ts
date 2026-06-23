@@ -7,42 +7,12 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { KbnClient } from '@kbn/scout';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-
-const DASHBOARD_API_PATH = '/api/dashboards';
-const DASHBOARD_API_VERSION = '2023-10-31';
+import { createDashboard } from '../fixtures';
 
 const ECOMMERCE_DATA_VIEW_INDEX = 'kibana_sample_data_ecommerce';
 const ECOMMERCE_TIME_FIELD = 'order_date';
 const ECOMMERCE_TIME_RANGE = { from: 'now-7d', to: 'now' } as const;
-
-function withSpace(path: string, spaceId: string): string {
-  return `/s/${spaceId}${path}`;
-}
-
-async function createDashboard(client: KbnClient, body: unknown, spaceId: string): Promise<string> {
-  const response = await client.request<unknown>({
-    method: 'POST',
-    path: withSpace(DASHBOARD_API_PATH, spaceId),
-    body,
-    headers: { 'elastic-api-version': DASHBOARD_API_VERSION },
-  });
-
-  if (response.status !== 201) {
-    throw new Error(
-      `Expected dashboard create status 201, got ${response.status}: ${JSON.stringify(
-        response.data
-      )}`
-    );
-  }
-
-  const { id } = response.data as Record<string, unknown>;
-  if (typeof id !== 'string' || id.length === 0) {
-    throw new Error('Dashboard create response: expected a non-empty string id');
-  }
-  return id;
-}
 
 spaceTest.describe(
   'Lens metric trendline with custom time field',

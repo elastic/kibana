@@ -6,4 +6,5 @@
  */
 
 export * as testData from './constants';
+export * from './dashboard_api';
 export * from './helpers';

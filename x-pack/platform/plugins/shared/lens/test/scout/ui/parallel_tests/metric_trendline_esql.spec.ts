@@ -7,43 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { KbnClient } from '@kbn/scout';
-import { testData } from '../fixtures';
-
-const DASHBOARD_API_PATH = '/api/dashboards';
-const DASHBOARD_API_VERSION = '2023-10-31';
-
-const LOGSTASH_TIME_RANGE = {
-  from: '2015-09-19T06:31:44.000Z',
-  to: '2015-09-23T18:31:44.000Z',
-};
-
-function withSpace(path: string, spaceId: string): string {
-  return `/s/${spaceId}${path}`;
-}
-
-async function createDashboard(client: KbnClient, body: unknown, spaceId: string): Promise<string> {
-  const response = await client.request<unknown>({
-    method: 'POST',
-    path: withSpace(DASHBOARD_API_PATH, spaceId),
-    body,
-    headers: { 'elastic-api-version': DASHBOARD_API_VERSION },
-  });
-
-  if (response.status !== 201) {
-    throw new Error(
-      `Expected dashboard create status 201, got ${response.status}: ${JSON.stringify(
-        response.data
-      )}`
-    );
-  }
-
-  const { id } = response.data as Record<string, unknown>;
-  if (typeof id !== 'string' || id.length === 0) {
-    throw new Error('Dashboard create response: expected a non-empty string id');
-  }
-  return id;
-}
+import { createDashboard, LOGSTASH_TIME_RANGE, testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline on dashboard (ES|QL)',
