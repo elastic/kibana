@@ -76,6 +76,7 @@ export const toNavigationItems = (
 
   let deepestActiveItemId: string | undefined;
   let currentActiveItemIdLevel = -1;
+  const urlActiveSecondaryByPanel = new Map<string, string[]>();
 
   const isActive = (navNode: ChromeProjectNavigationNode) =>
     isActiveFromUrl(navNode.path, activeNodes, false);
@@ -85,14 +86,42 @@ export const toNavigationItems = (
     level: number,
     parentNode?: ChromeProjectNavigationNode
   ) => {
-    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
-      if (isActive(navNode)) {
-        deepestActiveItemId = navNode.id;
-        currentActiveItemIdLevel = level;
+    if (!isActive(navNode)) {
+      return;
+    }
 
-        if (parentNode?.id) {
-          panelStateManager.setPanelLastActive(parentNode.id, navNode.id);
-        }
+    if (level === 2 && parentNode?.id) {
+      const candidates = urlActiveSecondaryByPanel.get(parentNode.id) ?? [];
+      candidates.push(navNode.id);
+      urlActiveSecondaryByPanel.set(parentNode.id, candidates);
+      return;
+    }
+
+    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
+      deepestActiveItemId = navNode.id;
+      currentActiveItemIdLevel = level;
+
+      if (parentNode?.id) {
+        panelStateManager.setPanelLastActive(parentNode.id, navNode.id);
+      }
+    }
+  };
+
+  const resolveSecondaryActiveItems = () => {
+    for (const [panelId, candidateIds] of urlActiveSecondaryByPanel) {
+      if (candidateIds.length === 0) {
+        continue;
+      }
+
+      const lastActiveItemId = panelStateManager.getPanelLastActive(panelId);
+      const activeItemId =
+        lastActiveItemId && candidateIds.includes(lastActiveItemId)
+          ? lastActiveItemId
+          : candidateIds[0];
+
+      if (deepestActiveItemId == null || currentActiveItemIdLevel <= 2) {
+        deepestActiveItemId = activeItemId;
+        currentActiveItemIdLevel = 2;
       }
     }
   };
@@ -177,6 +206,18 @@ export const toNavigationItems = (
     // Helper function to convert a node to a secondary menu item
     const createSecondaryMenuItem = (child: ChromeProjectNavigationNode): SecondaryMenuItem => {
       maybeMarkActive(child, 2, navNode);
+      const itemActions = child.itemActions?.map((action) => ({
+        id: action.id,
+        iconType: action.iconType,
+        'aria-label': action.ariaLabel,
+        'data-test-subj': getTestSubj(child, [`item-action-${action.id}`]),
+        ...(action.opensNestedPanel ? { opensNestedPanel: action.opensNestedPanel } : {}),
+        ...(action.opensItemActionMenu ? { opensItemActionMenu: action.opensItemActionMenu } : {}),
+        ...(action.itemActionMenuContext
+          ? { itemActionMenuContext: action.itemActionMenuContext }
+          : {}),
+      }));
+
       return {
         id: child.id,
         label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
@@ -184,6 +225,7 @@ export const toNavigationItems = (
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
         badgeType: child.badgeType,
+        ...(itemActions?.length ? { itemActions } : {}),
       };
     };
 
@@ -217,9 +259,9 @@ export const toNavigationItems = (
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
             if (child.sideNavStatus === 'hidden') return null;
-            if (!child.children?.length) return null;
+            if (!child.children?.length && !child.emptyState) return null;
 
-            const validChildren = filterValidSecondaryChildren(child.children);
+            const validChildren = filterValidSecondaryChildren(child.children ?? []);
             const secondaryItems = validChildren.map(createSecondaryMenuItem);
 
             if (child.href) {
@@ -232,9 +274,13 @@ export const toNavigationItems = (
               id: child.id,
               label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
+              ...(child.animateItemReorder ? { animateItemReorder: true } : {}),
+              ...(child.emptyState && secondaryItems.length === 0
+                ? { emptyState: child.emptyState }
+                : {}),
             };
           })
-        ).filter((section) => section.items.length > 0); // Filter out empty sections;
+        ).filter((section) => section.items.length > 0 || section.emptyState);
       }
 
       // If after all filtering there are no sections, we skip this menu item
@@ -252,12 +298,36 @@ export const toNavigationItems = (
 
     maybeMarkActive(navNode, 1);
 
+    const panelHeaderActions = navNode.panelHeaderActions?.map((action) => ({
+      id: action.id,
+      iconType: action.iconType,
+      'aria-label': action.ariaLabel,
+      'data-test-subj': getTestSubj(navNode, [`panel-header-action-${action.id}`]),
+      ...(action.opensNestedPanel ? { opensNestedPanel: action.opensNestedPanel } : {}),
+    }));
+
+    const panelNestedPanels = navNode.panelNestedPanels?.map((panel) => ({
+      id: panel.id,
+      title: panel.title,
+    }));
+
+    const panelFooterActions = navNode.panelFooterActions?.map((action) => ({
+      id: action.id,
+      label: action.label,
+      href: action.href,
+      iconType: action.iconType,
+      'data-test-subj': getTestSubj(navNode, [`panel-footer-action-${action.id}`]),
+    }));
+
     return {
       id: navNode.id,
       label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
       iconType: getNavigationNodeIcon(navNode),
       href: itemHref,
       sections: secondarySections,
+      ...(panelHeaderActions ? { panelHeaderActions } : {}),
+      ...(panelNestedPanels ? { panelNestedPanels } : {}),
+      ...(panelFooterActions ? { panelFooterActions } : {}),
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
     } as MenuItem;
@@ -268,6 +338,8 @@ export const toNavigationItems = (
   const primaryItems = allPrimaryItems.filter((item) => !overflowIdSet.has(item.id));
   const overflowItems = allPrimaryItems.filter((item) => overflowIdSet.has(item.id));
   const footerItems = filterEmpty(footerNodes.flatMap(toMenuItem));
+
+  resolveSecondaryActiveItems();
 
   if (footerItems.length > 5) {
     warnOnce(
@@ -541,23 +613,16 @@ const getPanelOpenerHref = (
   secondarySections: SecondaryMenuSection[],
   panelStateManager: PanelStateManager
 ): string => {
+  if (navNode.href) {
+    return navNode.href;
+  }
+
   // Try to use last active item first
   const lastActiveHref = findItemByLastActive(navNode.id, secondarySections, panelStateManager);
   if (lastActiveHref) return lastActiveHref;
 
   // Fall back to first available href
   const firstAvailableHref = findFirstAvailableHref(secondarySections);
-
-  // Warn if panel opener has its own href (which it shouldn't)
-  if (navNode.href) {
-    warnOnce(
-      `Panel opener node "${navNode.id}" has a href "${
-        navNode.href
-      }", but it should not. We're using it as a panel opener that contains sections with links and we use the first link inside the section as the href ${
-        firstAvailableHref ?? 'missing-href-😭'
-      }.`
-    );
-  }
 
   return firstAvailableHref ?? 'missing-href-😭';
 };

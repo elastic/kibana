@@ -170,7 +170,7 @@ export const SidePanel = ({
 
     const timeoutId = window.setTimeout(
       completeAnimation,
-      getAnimationDurationMs(animationDuration)
+      getAnimationDurationMs(animationDuration ?? '250ms')
     );
 
     return () => window.clearTimeout(timeoutId);

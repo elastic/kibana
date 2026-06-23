@@ -23,6 +23,7 @@ import {
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import type { DashboardRedirect } from '../types';
 import { findService } from '../../dashboard_client';
+import { useCollapseSideNav } from '../hooks/use_collapse_side_nav';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { LANDING_PAGE_PATH } from '../../../common/page_bundle_constants';
 
@@ -42,6 +43,9 @@ export const DashboardListingPage = ({
   const { getListingTabs } = useDashboardMountContext();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
+
+  useCollapseSideNav();
+
   useEffect(() => {
     let isMounted = true;
     (async () => {

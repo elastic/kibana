@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Utility function for getting focusable elements.
- *
- * @param container - the container element to search within.
- * @returns an array of focusable elements.
- */
-export const getFocusableElements = (container: HTMLElement) => {
-  return Array.from(container.querySelectorAll('button, a')).filter(
-    (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
-  ) as HTMLElement[];
-};
+export const toAbsoluteNavHref = (relativeUrl: string): string =>
+  new URL(relativeUrl, window.location.href).href;

@@ -11,6 +11,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { createDashboardsNavigationNode } from '@kbn/dashboard-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 
@@ -81,13 +82,11 @@ export function createNavigationTree({
         link: 'discover',
         icon: 'productDiscover',
       },
-      {
-        link: 'dashboards',
-        icon: 'productDashboard',
+      createDashboardsNavigationNode({
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
-      },
+      }),
       {
         link: 'workflows',
       },

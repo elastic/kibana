@@ -13,7 +13,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
-import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
+import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem, PanelFooterAction } from '../../types';
+import type { SidePanelNestedPanelRenderProps } from '@kbn/core-chrome-browser';
 import {
   MAIN_PANEL_ID,
   MAX_FOOTER_ITEMS,
@@ -32,10 +33,38 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
+import { SecondaryMenuPanelFooter } from './secondary_menu/panel_footer';
+import { PanelMenuContent } from './panel_menu_content';
+import { NestedPanelContent } from './nested_panel_content';
 
 const navigationWrapperStyles = css`
   display: flex;
 `;
+
+const createPanelFooter =
+  (
+    panelFooterActions: PanelFooterAction[] | undefined,
+    onItemClick?: NavigationProps['onItemClick']
+  ) =>
+  (closePopover: () => void): ReactNode | undefined => {
+    if (!panelFooterActions?.length) {
+      return undefined;
+    }
+
+    return (
+      <SecondaryMenuPanelFooter
+        actions={panelFooterActions}
+        onActionClick={(action: PanelFooterAction) => {
+          onItemClick?.({
+            id: action.id,
+            label: action.label,
+            href: action.href,
+          });
+          closePopover();
+        }}
+      />
+    );
+  };
 
 export interface NavigationProps {
   /**
@@ -81,6 +110,13 @@ export interface NavigationProps {
    */
   sidePanelFooter?: ReactNode;
   /**
+   * (optional) Renders content for nested side panels opened from panel header actions.
+   */
+  renderSidePanelNestedPanel?: (
+    panelId: string,
+    options?: Pick<SidePanelNestedPanelRenderProps, 'onGoBack'>
+  ) => ReactNode;
+  /**
    * When true, renders a centered horizontal separator at the top of the side nav,
    * between the global header and the logo/primary menu.
    */
@@ -105,6 +141,7 @@ export const Navigation = ({
   onCustomizeNavigation,
   onItemClick,
   onToggleCollapsed,
+  renderSidePanelNestedPanel,
   setWidth,
   showTopSeparator = false,
   sidePanelFooter,
@@ -159,7 +196,7 @@ export const Navigation = ({
     isSidePanelShown,
     renderedOpenerNode,
     onSidePanelAnimationEnd,
-  } = useSidePanelVisibility(isSidePanelOpen, openerNode);
+  } = useSidePanelVisibility(isSidePanelOpen, openerNode ?? undefined);
 
   const handleSidePanelCollapse = useCallback(() => {
     onToggleCollapsed?.(true);
@@ -216,13 +253,14 @@ export const Navigation = ({
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
-                const { sections, ...itemProps } = item;
+                const { sections: _sections, ...itemProps } = item;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? mainNavigationInstructionsId : undefined;
 
                 return (
                   <SideNav.Popover
                     key={item.id}
+                    footer={createPanelFooter(item.panelFooterActions, onItemClick)}
                     hasContent={getHasSubmenu(item)}
                     isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
                     isAnyPopoverLocked={isAnyPopoverLocked}
@@ -245,49 +283,23 @@ export const Navigation = ({
                     }
                   >
                     {(closePopover, ids) => (
-                      <SideNav.SecondaryMenu
-                        title={item.label}
-                        badgeType={item.badgeType}
-                        isNew={getIsNewSecondary(item.id)}
+                      <PanelMenuContent
+                        actualActiveItemId={actualActiveItemId}
                         collapseButton={renderCollapseButton(true)}
-                      >
-                        {sections?.map((section, sectionIndex) => {
-                          const firstNonEmptySectionIndex = item.sections?.findIndex(
-                            (s) => s.items.length > 0
-                          );
-
-                          return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
-                              {section.items.map((subItem, subItemIndex) => {
-                                const isFirstSubItem =
-                                  sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
-                                const subItemAriaDescribedBy = isFirstSubItem
-                                  ? ids?.popoverNavigationInstructionsId
-                                  : undefined;
-                                return (
-                                  <SideNav.SecondaryMenu.Item
-                                    aria-describedby={subItemAriaDescribedBy}
-                                    key={subItem.id}
-                                    isHighlighted={subItem.id === visuallyActiveSubpageId}
-                                    isCurrent={actualActiveItemId === subItem.id}
-                                    isNew={getIsNewSecondary(subItem.id)}
-                                    onClick={() => {
-                                      onItemClick?.(subItem);
-                                      if (subItem.href) {
-                                        closePopover();
-                                      }
-                                    }}
-                                    testSubjPrefix={popoverItemPrefix}
-                                    {...subItem}
-                                  >
-                                    {subItem.label}
-                                  </SideNav.SecondaryMenu.Item>
-                                );
-                              })}
-                            </SideNav.SecondaryMenu.Section>
-                          );
-                        })}
-                      </SideNav.SecondaryMenu>
+                        getIsNewSecondary={getIsNewSecondary}
+                        item={item}
+                        navigationInstructionsId={ids?.popoverNavigationInstructionsId}
+                        onItemClick={onItemClick}
+                        onSubItemClick={(subItem) => {
+                          onItemClick?.(subItem);
+                          if (subItem.href) {
+                            closePopover();
+                          }
+                        }}
+                        renderNestedPanel={renderSidePanelNestedPanel}
+                        testSubjPrefix={popoverItemPrefix}
+                        visuallyActiveSubpageId={visuallyActiveSubpageId}
+                      />
                     )}
                   </SideNav.Popover>
                 );
@@ -340,7 +352,7 @@ export const Navigation = ({
                             <SideNav.NestedSecondaryMenu.Section>
                               {allOverflowItems.map((item, index) => {
                                 const hasSubmenu = getHasSubmenu(item);
-                                const { sections, ...itemProps } = item;
+                                const { sections: _sections, ...itemProps } = item;
                                 const isFirstItem = index === 0;
                                 const ariaDescribedBy =
                                   [
@@ -393,18 +405,20 @@ export const Navigation = ({
                           </>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
-                      {allOverflowItems.filter(getHasSubmenu).map((item) => (
+                      {allOverflowItems.filter(getHasSubmenu).flatMap((item) => [
                         <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
                           {({ panelNavigationInstructionsId }) => (
                             <>
                               <SideNav.NestedSecondaryMenu.Header
                                 title={item.label}
-                                aria-describedby={panelNavigationInstructionsId}
+                                panelHeaderActions={item.panelHeaderActions}
                                 collapseButton={renderCollapseButton(true)}
+                                aria-describedby={panelNavigationInstructionsId}
                               />
                               {item.sections?.map((section) => (
                                 <SideNav.NestedSecondaryMenu.Section
                                   key={section.id}
+                                  animateItemReorder={section.animateItemReorder}
                                   label={section.label}
                                 >
                                   {section.items.map((subItem) => (
@@ -425,10 +439,29 @@ export const Navigation = ({
                                   ))}
                                 </SideNav.NestedSecondaryMenu.Section>
                               ))}
+                              {createPanelFooter(item.panelFooterActions, onItemClick)?.(
+                                closePopover
+                              )}
                             </>
                           )}
-                        </SideNav.NestedSecondaryMenu.Panel>
-                      ))}
+                        </SideNav.NestedSecondaryMenu.Panel>,
+                        ...(item.panelNestedPanels?.map((panel) => (
+                          <SideNav.NestedSecondaryMenu.Panel key={`submenu-${panel.id}`} id={panel.id}>
+                            {({ panelNavigationInstructionsId }) => (
+                              <>
+                                <SideNav.NestedSecondaryMenu.Header
+                                  title={panel.title}
+                                  aria-describedby={panelNavigationInstructionsId}
+                                />
+                                <NestedPanelContent
+                                  panelId={panel.id}
+                                  renderNestedPanel={renderSidePanelNestedPanel}
+                                />
+                              </>
+                            )}
+                          </SideNav.NestedSecondaryMenu.Panel>
+                        )) ?? []),
+                      ])}
                     </SideNav.NestedSecondaryMenu>
                   )}
                 </SideNav.Popover>
@@ -441,13 +474,14 @@ export const Navigation = ({
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
-                const { sections, ...itemProps } = item;
+                const { sections: _sections, ...itemProps } = item;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? footerNavigationInstructionsId : undefined;
 
                 return (
                   <SideNav.Popover
                     key={item.id}
+                    footer={createPanelFooter(item.panelFooterActions, onItemClick)}
                     hasContent={getHasSubmenu(item)}
                     isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
                     isAnyPopoverLocked={isAnyPopoverLocked}
@@ -466,49 +500,23 @@ export const Navigation = ({
                     }
                   >
                     {(closePopover, ids) => (
-                      <SideNav.SecondaryMenu
-                        title={item.label}
-                        badgeType={item.badgeType}
-                        isNew={getIsNewSecondary(item.id)}
+                      <PanelMenuContent
+                        actualActiveItemId={actualActiveItemId}
                         collapseButton={renderCollapseButton(true)}
-                      >
-                        {sections?.map((section, sectionIndex) => {
-                          const firstNonEmptySectionIndex = item.sections?.findIndex(
-                            (s) => s.items.length > 0
-                          );
-                          return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
-                              {section.items.map((subItem, subItemIndex) => {
-                                const isFirstSubItem =
-                                  sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
-                                const subItemAriaDescribedBy = isFirstSubItem
-                                  ? ids?.popoverNavigationInstructionsId
-                                  : undefined;
-
-                                return (
-                                  <SideNav.SecondaryMenu.Item
-                                    aria-describedby={subItemAriaDescribedBy}
-                                    key={subItem.id}
-                                    isHighlighted={subItem.id === visuallyActiveSubpageId}
-                                    isCurrent={actualActiveItemId === subItem.id}
-                                    isNew={getIsNewSecondary(subItem.id)}
-                                    onClick={() => {
-                                      onItemClick?.(subItem);
-                                      if (subItem.href) {
-                                        closePopover();
-                                      }
-                                    }}
-                                    {...subItem}
-                                    testSubjPrefix={popoverFooterItemPrefix}
-                                  >
-                                    {subItem.label}
-                                  </SideNav.SecondaryMenu.Item>
-                                );
-                              })}
-                            </SideNav.SecondaryMenu.Section>
-                          );
-                        })}
-                      </SideNav.SecondaryMenu>
+                        getIsNewSecondary={getIsNewSecondary}
+                        item={item}
+                        navigationInstructionsId={ids?.popoverNavigationInstructionsId}
+                        onItemClick={onItemClick}
+                        onSubItemClick={(subItem) => {
+                          onItemClick?.(subItem);
+                          if (subItem.href) {
+                            closePopover();
+                          }
+                        }}
+                        renderNestedPanel={renderSidePanelNestedPanel}
+                        testSubjPrefix={popoverFooterItemPrefix}
+                        visuallyActiveSubpageId={visuallyActiveSubpageId}
+                      />
                     )}
                   </SideNav.Popover>
                 );
@@ -520,7 +528,22 @@ export const Navigation = ({
 
       {isSidePanelRendered && renderedOpenerNode && (
         <SideNav.SidePanel
-          footer={sidePanelFooter}
+          footer={
+            renderedOpenerNode.panelFooterActions?.length ? (
+              <SecondaryMenuPanelFooter
+                actions={renderedOpenerNode.panelFooterActions}
+                onActionClick={(action: PanelFooterAction) =>
+                  onItemClick?.({
+                    id: action.id,
+                    label: action.label,
+                    href: action.href,
+                  })
+                }
+              />
+            ) : (
+              sidePanelFooter
+            )
+          }
           isAnimating={isSidePanelAnimating}
           isPanelShown={isSidePanelShown}
           onAnimationEnd={onSidePanelAnimationEnd}
@@ -531,48 +554,19 @@ export const Navigation = ({
           onSidePanelCollapse={handleSidePanelCollapse}
           onSidePanelWidthChange={setSidePanelWidth}
         >
-          {({ secondaryNavigationInstructionsId }) => {
-            const firstNonEmptySectionIndex = renderedOpenerNode.sections?.findIndex(
-              (s) => s.items.length > 0
-            );
-
-            return (
-              <SideNav.SecondaryMenu
-                badgeType={renderedOpenerNode.badgeType}
-                isPanel
-                title={renderedOpenerNode.label}
-                isNew={getIsNewSecondary(renderedOpenerNode.id)}
-                collapseButton={renderCollapseButton()}
-              >
-                {renderedOpenerNode.sections?.map((section, sectionIndex) => (
-                  <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
-                    {section.items.map((subItem, subItemIndex) => {
-                      const isFirstItem =
-                        sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
-                      const ariaDescribedBy = isFirstItem
-                        ? secondaryNavigationInstructionsId
-                        : undefined;
-
-                      return (
-                        <SideNav.SecondaryMenu.Item
-                          aria-describedby={ariaDescribedBy}
-                          key={subItem.id}
-                          isCurrent={actualActiveItemId === subItem.id}
-                          isHighlighted={subItem.id === visuallyActiveSubpageId}
-                          isNew={getIsNewSecondary(subItem.id)}
-                          onClick={() => onItemClick?.(subItem)}
-                          testSubjPrefix={sidePanelItemPrefix}
-                          {...subItem}
-                        >
-                          {subItem.label}
-                        </SideNav.SecondaryMenu.Item>
-                      );
-                    })}
-                  </SideNav.SecondaryMenu.Section>
-                ))}
-              </SideNav.SecondaryMenu>
-            );
-          }}
+          {({ secondaryNavigationInstructionsId }) => (
+            <PanelMenuContent
+              actualActiveItemId={actualActiveItemId}
+              collapseButton={renderCollapseButton()}
+              getIsNewSecondary={getIsNewSecondary}
+              item={renderedOpenerNode}
+              navigationInstructionsId={secondaryNavigationInstructionsId}
+              onItemClick={onItemClick}
+              renderNestedPanel={renderSidePanelNestedPanel}
+              testSubjPrefix={sidePanelItemPrefix}
+              visuallyActiveSubpageId={visuallyActiveSubpageId}
+            />
+          )}
         </SideNav.SidePanel>
       )}
     </div>
