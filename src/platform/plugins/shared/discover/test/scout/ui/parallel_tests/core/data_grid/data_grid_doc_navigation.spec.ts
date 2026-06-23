@@ -40,10 +40,6 @@ const clickFieldActionInDocViewer = async (
   }).toPass({ timeout: 15_000 });
 };
 
-const openSingleDocumentFromDocViewer = async (page: ScoutPage) => {
-  await page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
-};
-
 spaceTest.describe(
   'Discover data grid - document navigation',
   { tag: '@local-stateful-classic' },
@@ -73,9 +69,9 @@ spaceTest.describe(
       'opens the single-document view from the selected row',
       async ({ page, pageObjects }) => {
         await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-        await openSingleDocumentFromDocViewer(page);
+        await page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
 
-        await expect(page.testSubj.locator('doc-hit')).toBeVisible();
+        await page.testSubj.locator('doc-hit').waitFor();
       }
     );
 
@@ -86,17 +82,15 @@ spaceTest.describe(
         await clickFieldActionInDocViewer(page, '@timestamp', 'addExistsFilterButton');
         await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
-        await expect
-          .poll(() =>
-            pageObjects.filterBar.hasFilter({
-              field: '@timestamp',
-              value: 'exists',
-              enabled: true,
-              pinned: false,
-              negated: false,
-            })
-          )
-          .toBe(true);
+        expect(
+          await pageObjects.filterBar.hasFilter({
+            field: '@timestamp',
+            value: 'exists',
+            enabled: true,
+            pinned: false,
+            negated: false,
+          })
+        ).toBe(true);
       }
     );
   }

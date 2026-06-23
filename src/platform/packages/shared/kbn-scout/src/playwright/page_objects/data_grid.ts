@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  BUTTON_NEXT_TEST_SUBJ,
+  BUTTON_TEST_SUBJ,
+  COUNTER_TEST_SUBJ,
+  HIGHLIGHT_CLASS_NAME,
+  INPUT_TEST_SUBJ,
+} from '@kbn/data-grid-in-table-search';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
@@ -23,27 +31,6 @@ export class DataGrid {
     );
   }
 
-  async openColumnMenuByField(field: string) {
-    await expect(async () => {
-      await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
-      await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
-      await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
-        state: 'visible',
-      });
-    }).toPass();
-  }
-
-  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
-    const expandButton = this.page.locator(
-      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
-    );
-
-    await expect(expandButton).toBeVisible();
-    await expandButton.scrollIntoViewIfNeeded();
-    await expandButton.hover();
-    await expandButton.click({ delay: 50 });
-  }
-
   private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
     return scope
       .locator('.kbnFieldIcon svg')
@@ -51,6 +38,30 @@ export class DataGrid {
         (icons, max) => icons.slice(0, max).map((icon) => icon.getAttribute('aria-label') ?? ''),
         limit
       );
+  }
+
+  private async resizeColumn(
+    field: string,
+    delta: number
+  ): Promise<{ originalWidth: number; newWidth: number }> {
+    const originalWidth = await this.getColumnWidth(field);
+    const header = this.getColumnHeader(field);
+    const headerBox = await header.boundingBox();
+    if (!headerBox) {
+      throw new Error(`Unable to find column header for field ${field}`);
+    }
+
+    const startX = headerBox.x + headerBox.width - 1;
+    const startY = headerBox.y + headerBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + delta, startY, { steps: 5 });
+    await this.page.mouse.up();
+
+    await expect.poll(() => this.getColumnWidth(field)).not.toBe(originalWidth);
+
+    return { originalWidth, newWidth: await this.getColumnWidth(field) };
   }
 
   private async waitUntilFieldListHasCountOfFields() {
@@ -74,6 +85,43 @@ export class DataGrid {
     await this.page.testSubj.waitForSelector(`tablePagination-${rowsPerPage}-rows`, {
       state: 'hidden',
     });
+  }
+
+  async closeDocViewerFlyout() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
+  }
+
+  async closeInTableSearch() {
+    const input = this.getInTableSearchInput();
+
+    if (!(await input.isVisible())) return;
+
+    await input.press('Escape');
+
+    await expect(input).toBeHidden();
+    await expect(this.page.testSubj.locator(BUTTON_TEST_SUBJ)).toBeVisible();
+  }
+
+  async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
+    const cell = this.getCell(rowIndex, columnId);
+    await cell.hover();
+    await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+    await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+  }
+
+  async expandMetaFieldsSection() {
+    const metaFieldsSection = this.page.testSubj.locator('fieldListGroupedMetaFields');
+    const metaFieldsButton = metaFieldsSection.getByRole('button', { name: /Meta fields/ });
+
+    await metaFieldsButton.click();
+    await expect(metaFieldsButton).toHaveAttribute('aria-expanded', 'true');
+  }
+
+  getCell(rowIndex: number, columnId: string): Locator {
+    return this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="${columnId}"]`
+    );
   }
 
   getColumnHeader(name: string): Locator {
@@ -100,6 +148,10 @@ export class DataGrid {
     await expect(selectedButton).toBeVisible();
 
     return (await selectedButton.innerText()).trim() as DataGridDensity;
+  }
+
+  getCurrentPageButton(): Locator {
+    return this.page.locator('.euiPaginationButton[aria-current="page"]');
   }
 
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
@@ -155,10 +207,35 @@ export class DataGrid {
     return table.locator('.euiDataGridRowCell--firstColumn').count();
   }
 
+  getDocumentColumnFieldValue(rowIndex: number, fieldName: string): Locator {
+    return this.getCell(rowIndex, '_source').locator(
+      `.unifiedDataTable__descriptionListTitle:has-text("${fieldName}") + .unifiedDataTable__descriptionListDescription`
+    );
+  }
+
   async getDocViewerFieldTokens(limit = 10): Promise<string[]> {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     await flyout.waitFor({ state: 'visible' });
     return this.readFieldTokenLabels(flyout, limit);
+  }
+
+  async getDocViewerRowActionCount(): Promise<number> {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    return flyout.locator('[data-test-subj*="docTableRowAction"]').count();
+  }
+
+  getInTableSearchCellMatches(rowIndex: number, columnId: string): Locator {
+    return this.getCell(rowIndex, columnId).locator(`.${HIGHLIGHT_CLASS_NAME}`);
+  }
+
+  getInTableSearchInput(): Locator {
+    return this.page.testSubj.locator(INPUT_TEST_SUBJ);
+  }
+
+  getInTableSearchMatchesCounter(): Locator {
+    return this.page.testSubj.locator(COUNTER_TEST_SUBJ);
   }
 
   async getNumberOfSelectedRows(): Promise<number> {
@@ -188,6 +265,15 @@ export class DataGrid {
     await this.waitUntilSearchingHasFinished();
   }
 
+  async goToNextInTableSearchMatch() {
+    const counter = this.getInTableSearchMatchesCounter();
+    const previousCounter = (await counter.textContent()) ?? '';
+
+    await this.page.testSubj.locator(BUTTON_NEXT_TEST_SUBJ).click();
+
+    await expect(counter).not.toHaveText(previousCounter);
+  }
+
   async isSelectedRowsMenuVisible(): Promise<boolean> {
     return this.page.testSubj.locator('unifiedDataTableSelectionBtn').isVisible();
   }
@@ -197,16 +283,42 @@ export class DataGrid {
     await this.waitForDocViewerFlyoutOpen();
   }
 
+  async openColumnMenuByField(field: string) {
+    await expect(async () => {
+      await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
+      await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
+      await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
+        state: 'visible',
+      });
+    }).toPass();
+  }
+
+  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
+    const expandButton = this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
+    );
+
+    await expect(expandButton).toBeVisible();
+    await expandButton.scrollIntoViewIfNeeded();
+    await expandButton.hover();
+    await expandButton.click({ delay: 50 });
+  }
+
+  async openDocViewerTab(tabId: string) {
+    await this.page.testSubj.click(`docViewerTab-${tabId}`);
+  }
+
   async openGridDisplaySettings() {
     await this.page.testSubj.click('dataGridDisplaySelectorButton');
   }
 
-  async expandMetaFieldsSection() {
-    const metaFieldsSection = this.page.testSubj.locator('fieldListGroupedMetaFields');
-    const metaFieldsButton = metaFieldsSection.getByRole('button', { name: /Meta fields/ });
+  async openInTableSearch() {
+    const input = this.getInTableSearchInput();
 
-    await metaFieldsButton.click();
-    await expect(metaFieldsButton).toHaveAttribute('aria-expanded', 'true');
+    if (await input.isVisible()) return;
+
+    await this.page.testSubj.locator(BUTTON_TEST_SUBJ).click();
+    await expect(input).toBeVisible();
   }
 
   async openSelectedRowsMenu() {
@@ -220,6 +332,27 @@ export class DataGrid {
       .locator('docViewerFlyout')
       .getByLabel('View surrounding documents')
       .click();
+  }
+
+  async readJsonFromCodeEditor<T extends Record<string, unknown>>(): Promise<T> {
+    const codeEditor = new KibanaCodeEditorWrapper(this.page);
+    let parsed: T | undefined;
+
+    await expect(async () => {
+      const raw = await codeEditor.getCodeEditorValue();
+
+      if (!raw) {
+        throw new Error('Monaco editor has not rendered a value yet');
+      }
+
+      parsed = JSON.parse(raw) as T;
+    }).toPass({ timeout: 15_000 });
+
+    if (!parsed) {
+      throw new Error('Unable to read JSON from Monaco editor');
+    }
+
+    return parsed;
   }
 
   async resetColumnWidth(field: string) {
@@ -239,6 +372,16 @@ export class DataGrid {
     delta: number
   ): Promise<{ originalWidth: number; newWidth: number }> {
     return this.resizeColumn(field, delta);
+  }
+
+  async runInTableSearch(searchTerm: string) {
+    await this.openInTableSearch();
+
+    const counter = this.getInTableSearchMatchesCounter();
+    const previousCounter = (await counter.textContent()) ?? '';
+
+    await this.getInTableSearchInput().fill(searchTerm);
+    await expect(counter).not.toHaveText(previousCounter);
   }
 
   async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
@@ -271,6 +414,23 @@ export class DataGrid {
     await input.press('Enter');
     await this.waitUntilSearchingHasFinished();
     await this.page.keyboard.press('Escape');
+  }
+
+  async toggleColumnInDocViewer(fieldName: string) {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+
+    await expect(async () => {
+      const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+      await nameElement.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await nameElement.hover();
+
+      const toggle = flyout.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]`);
+      await toggle.waitFor({ state: 'visible' });
+      await toggle.scrollIntoViewIfNeeded();
+      await toggle.click();
+    }).toPass({ timeout: 15_000 });
   }
 
   async waitForDocTableRendered() {
@@ -326,29 +486,5 @@ export class DataGrid {
       state: 'hidden',
       timeout: 30_000,
     });
-  }
-
-  private async resizeColumn(
-    field: string,
-    delta: number
-  ): Promise<{ originalWidth: number; newWidth: number }> {
-    const originalWidth = await this.getColumnWidth(field);
-    const header = this.getColumnHeader(field);
-    const headerBox = await header.boundingBox();
-    if (!headerBox) {
-      throw new Error(`Unable to find column header for field ${field}`);
-    }
-
-    const startX = headerBox.x + headerBox.width - 1;
-    const startY = headerBox.y + headerBox.height / 2;
-
-    await this.page.mouse.move(startX, startY);
-    await this.page.mouse.down();
-    await this.page.mouse.move(startX + delta, startY, { steps: 5 });
-    await this.page.mouse.up();
-
-    await expect.poll(() => this.getColumnWidth(field)).not.toBe(originalWidth);
-
-    return { originalWidth, newWidth: await this.getColumnWidth(field) };
   }
 }

@@ -67,15 +67,7 @@ spaceTest.describe(
 
         await expect(page).toHaveURL(/#\/context/);
         await pageObjects.dataGrid.waitForDocTableRendered();
-        await expect
-          .poll(() =>
-            page
-              .locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]')
-              .evaluateAll(
-                (rows) => new Set(rows.map((row) => row.getAttribute('data-grid-row-index'))).size
-              )
-          )
-          .toBe(6);
+        await expect.poll(() => pageObjects.dataGrid.getDocTableRowCount()).toBe(6);
       }
     );
   }

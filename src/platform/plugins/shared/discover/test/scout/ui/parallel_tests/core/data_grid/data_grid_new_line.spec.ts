@@ -11,7 +11,7 @@
  * Newline rendering in data-grid cells across document and explicit columns.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { Locator } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
 import { testData } from '../../../fixtures/common';
@@ -19,18 +19,6 @@ import { testData } from '../../../fixtures/common';
 const NEWLINE_INDEX = 'newline';
 const VALUE_WITH_NEW_LINES = "Newline!\nHere's a newline.\nHere's a newline again.";
 const VALUE_WITHOUT_NEW_LINES = VALUE_WITH_NEW_LINES.replaceAll('\n', ' ');
-
-const getGridCell = (page: ScoutPage, rowIndex: number, columnName: string) =>
-  page.locator(
-    `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"]`
-  );
-
-const setCustomRowHeight = async (page: ScoutPage, newValue: number) => {
-  const input = page.testSubj.locator('unifiedDataTableRowHeightSettings_lineCountNumber');
-
-  await expect(input).toBeVisible();
-  await input.fill(newValue.toString());
-};
 
 const whiteSpaceOf = (locator: Locator) =>
   locator.evaluate((el) => window.getComputedStyle(el).whiteSpace);
@@ -80,14 +68,10 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('does not show new lines for the Document column', async ({ page }) => {
-      const cell = getGridCell(page, 0, '_source');
-      await expect(cell).toBeVisible();
+    spaceTest('does not show new lines for the Document column', async ({ pageObjects }) => {
+      const description = pageObjects.dataGrid.getDocumentColumnFieldValue(0, 'message');
 
-      const description = cell.locator(
-        '.unifiedDataTable__descriptionListTitle:has-text("message") + .unifiedDataTable__descriptionListDescription'
-      );
-
+      await expect(description).toBeVisible();
       await expect(description).toHaveText(VALUE_WITHOUT_NEW_LINES);
       expect(await whiteSpaceOf(description)).toBe('normal');
     });
@@ -99,7 +83,7 @@ spaceTest.describe(
         await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
         const messageValue = () =>
-          getGridCell(page, 0, 'message').locator('.unifiedDataTable__cellValue');
+          pageObjects.dataGrid.getCell(0, 'message').locator('.unifiedDataTable__cellValue');
 
         // Default (Custom) row height preserves newlines.
         await expect(messageValue()).toBeVisible();
@@ -119,7 +103,13 @@ spaceTest.describe(
         await pageObjects.dataGrid.openGridDisplaySettings();
         expect(await pageObjects.dataGrid.getCurrentRowHeight()).toBe('Auto');
         await pageObjects.dataGrid.setRowHeight('Custom');
-        await setCustomRowHeight(page, 1);
+
+        await spaceTest.step('set custom row height to one line', async () => {
+          const input = page.testSubj.locator('unifiedDataTableRowHeightSettings_lineCountNumber');
+          await expect(input).toBeVisible();
+          await input.fill('1');
+        });
+
         await pageObjects.dataGrid.openGridDisplaySettings();
 
         await expect.poll(async () => messageValue().innerText()).toBe(VALUE_WITHOUT_NEW_LINES);

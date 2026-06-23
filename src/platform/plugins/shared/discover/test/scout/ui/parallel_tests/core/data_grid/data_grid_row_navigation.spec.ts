@@ -11,7 +11,7 @@
  * Doc-viewer navigation between rows that share an ID across different indices.
  */
 
-import type { KibanaRole, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
 
@@ -31,19 +31,6 @@ const getIndexNames = (spaceId: string) => ({
   dataViewTitle: `similar_index*_${spaceId}`,
   firstIndex: `similar_index_${spaceId}`,
   secondIndex: `similar_index_two_${spaceId}`,
-});
-
-const getRowNavigationViewerRole = (indexPattern: string): KibanaRole => ({
-  elasticsearch: {
-    cluster: [],
-    indices: [
-      {
-        names: [indexPattern],
-        privileges: ['read', 'view_index_metadata'],
-      },
-    ],
-  },
-  kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
 });
 
 const goToNextDocViewerDocument = async (page: ScoutPage) => {
@@ -96,11 +83,8 @@ spaceTest.describe('Discover data grid row navigation', { tag: '@local-stateful-
     await scoutSpace.uiSettings.setDefaultTime(TIME_RANGE);
   });
 
-  spaceTest.beforeEach(async ({ page, browserAuth, pageObjects, scoutSpace }) => {
-    const { dataViewTitle } = getIndexNames(scoutSpace.id);
-
-    await page.setViewportSize({ width: 1600, height: 1200 });
-    await browserAuth.loginWithCustomRole(getRowNavigationViewerRole(dataViewTitle));
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
     await pageObjects.dataGrid.waitUntilSearchingHasFinished();

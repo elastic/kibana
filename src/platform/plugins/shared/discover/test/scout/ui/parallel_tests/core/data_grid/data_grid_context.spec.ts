@@ -90,7 +90,7 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
   });
 
   spaceTest(
-    'opens the context view with the selected document as anchor',
+    'opens the context view with Discover columns, disabled filters, toolbar, and anchor document',
     async ({ page, pageObjects }) => {
       await pageObjects.dataGrid.addFieldFromSidebar(CONTEXT_COLUMN);
 
@@ -111,6 +111,8 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
       await expect(page).toHaveURL(/#\/context/);
       await pageObjects.dataGrid.waitForDocTableRendered();
 
+      // Covers the original FTR assertions for same columns, disabled filters, toolbar,
+      // and selected document as anchor in one independent context-navigation flow.
       await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', CONTEXT_COLUMN]);
       await expect(page.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
 
