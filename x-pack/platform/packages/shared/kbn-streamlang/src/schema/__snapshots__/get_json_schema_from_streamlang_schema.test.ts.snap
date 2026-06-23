@@ -2213,6 +2213,7 @@ Object {
                     },
                     "internal_networks": Object {
                       "items": Object {
+                        "maxLength": 100,
                         "type": "string",
                       },
                       "type": "array",
@@ -3892,6 +3893,7 @@ Object {
                       },
                       "internal_networks": Object {
                         "items": Object {
+                          "maxLength": 100,
                           "type": "string",
                         },
                         "type": "array",

@@ -754,7 +754,7 @@ export type NetworkDirectionProcessor = NetworkDirectionCommonFields &
 
 export const networkDirectionProcessorSchema = z.union([
   networkDirectionCommonFieldsSchema.extend({
-    internal_networks: z.array(z.string()),
+    internal_networks: z.array(z.string().max(100)),
   }),
   networkDirectionCommonFieldsSchema.extend({
     internal_networks_field: StreamlangSourceField,

@@ -6,6 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '../../helpers/stream_name_validation';
+
+const MAX_REFRESH_INTERVAL_LENGTH = 50;
 
 export interface IngestStreamSettings {
   'index.number_of_replicas'?: { value: number };
@@ -21,15 +24,22 @@ export const ingestStreamSettingsSchema: z.Schema<IngestStreamSettings> = z.stri
   'index.number_of_replicas': z.optional(z.strictObject({ value: z.number() })),
   'index.number_of_shards': z.optional(z.strictObject({ value: z.number() })),
   'index.refresh_interval': z.optional(
-    z.strictObject({ value: z.union([z.string(), z.literal(-1)]) })
+    z.strictObject({ value: z.union([z.string().max(MAX_REFRESH_INTERVAL_LENGTH), z.literal(-1)]) })
   ),
 });
 
 export const wiredIngestStreamEffectiveSettingsSchema: z.Schema<WiredIngestStreamEffectiveSettings> =
   z.strictObject({
-    'index.number_of_replicas': z.optional(z.strictObject({ value: z.number(), from: z.string() })),
-    'index.number_of_shards': z.optional(z.strictObject({ value: z.number(), from: z.string() })),
+    'index.number_of_replicas': z.optional(
+      z.strictObject({ value: z.number(), from: z.string().max(MAX_STREAM_NAME_LENGTH) })
+    ),
+    'index.number_of_shards': z.optional(
+      z.strictObject({ value: z.number(), from: z.string().max(MAX_STREAM_NAME_LENGTH) })
+    ),
     'index.refresh_interval': z.optional(
-      z.strictObject({ value: z.union([z.string(), z.literal(-1)]), from: z.string() })
+      z.strictObject({
+        value: z.union([z.string().max(MAX_REFRESH_INTERVAL_LENGTH), z.literal(-1)]),
+        from: z.string().max(MAX_STREAM_NAME_LENGTH),
+      })
     ),
   });

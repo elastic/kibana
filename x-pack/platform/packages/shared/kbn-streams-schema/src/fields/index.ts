@@ -31,6 +31,8 @@ import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { recursiveRecord } from '../shared/record_types';
 
+const MAX_FIELD_DESCRIPTION_LENGTH = 1000;
+
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
   'match_only_text',
@@ -91,13 +93,13 @@ const mappingFieldSchema = z.intersection(
   z.object({
     type: z.enum(FIELD_DEFINITION_TYPES),
     format: z.optional(NonEmptyString),
-    description: z.optional(z.string()),
+    description: z.optional(z.string().max(MAX_FIELD_DESCRIPTION_LENGTH)),
   })
 );
 
 // Documentation-only override: require description and forbid type entirely
 const descriptionOnlyFieldSchema = z.strictObject({
-  description: z.string(),
+  description: z.string().max(MAX_FIELD_DESCRIPTION_LENGTH),
   type: z.never().optional(),
   format: z.never().optional(),
 });
@@ -105,7 +107,7 @@ const descriptionOnlyFieldSchema = z.strictObject({
 // System field type: only allow description override
 const systemFieldSchema = z.strictObject({
   type: z.literal('system'),
-  description: z.optional(z.string()),
+  description: z.optional(z.string().max(MAX_FIELD_DESCRIPTION_LENGTH)),
 });
 
 export const fieldDefinitionConfigSchema = z
