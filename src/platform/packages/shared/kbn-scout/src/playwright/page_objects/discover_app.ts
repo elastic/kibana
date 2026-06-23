@@ -21,7 +21,7 @@ const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
-  queryMode?: DiscoverQueryMode;
+  queryMode: DiscoverQueryMode;
 }
 
 export interface DataViewOptions {
@@ -40,7 +40,7 @@ export class DiscoverApp {
     this.dataGrid = new DataGrid(page);
   }
 
-  async goto(options: DiscoverGotoOptions = {}) {
+  async goto(options: DiscoverGotoOptions) {
     if (options.queryMode) await this.setQueryMode(options.queryMode);
 
     await this.page.gotoApp('discover');

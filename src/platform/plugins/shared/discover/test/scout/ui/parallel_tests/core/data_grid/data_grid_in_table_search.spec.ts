@@ -27,8 +27,7 @@ spaceTest.describe('Discover data grid in-table search', { tag: '@local-stateful
     // exact pagination transitions the assertions below rely on.
     await page.setViewportSize({ width: 1200, height: 2000 });
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.setQueryMode('classic');
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     await pageObjects.dataGrid.waitForDocTableRendered();
   });
