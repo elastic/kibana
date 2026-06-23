@@ -215,7 +215,7 @@ describe('registerIamPermissionsRoute', () => {
         );
       }
       // awsfargate package returns no permissions
-      return Promise.resolve(makePackageInfo({ name: pkgName }));
+      return Promise.resolve(makePackageInfo());
     });
 
     const request = httpServerMock.createKibanaRequest({
