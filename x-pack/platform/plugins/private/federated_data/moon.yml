@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-http-browser'
   - '@kbn/cloud-plugin'
+  - '@kbn/shared-ux-router'
 tags:
   - plugin
   - prod
