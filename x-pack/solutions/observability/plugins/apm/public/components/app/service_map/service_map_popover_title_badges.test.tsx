@@ -31,7 +31,10 @@ jest.mock('./use_service_map_alerts_tab_href', () => ({
 
 jest.mock('../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
-    link: (path: string) => `/app/apm${path}`,
+    link: (path: string, { query }: { query?: Record<string, string> } = {}) => {
+      const search = new URLSearchParams(query).toString();
+      return search ? `/app/apm${path}?${search}` : `/app/apm${path}`;
+    },
   }),
 }));
 
@@ -41,7 +44,7 @@ jest.mock('../../../hooks/use_apm_params', () => ({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       environment: 'ENVIRONMENT_ALL',
-      kuery: '',
+      kuery: 'service.name : "test-service"',
       comparisonEnabled: false,
       serviceGroup: '',
     },
@@ -90,6 +93,25 @@ describe('ServiceMapPopoverTitleBadges', () => {
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
       expect.stringContaining('/app/apm/services/{serviceName}/overview')
     );
+  });
+
+  it('strips the map kuery filter from the anomalies redirect URL', () => {
+    render(
+      <ServiceMapPopoverTitleBadges
+        nodeData={serviceNodeData({
+          serviceAnomalyStats: {
+            anomalyScore: 90,
+            detectorType: AnomalyDetectorType.txFailureRate,
+          },
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('apmAnomaliesBadge'));
+
+    const navigatedUrl = mockNavigateToUrl.mock.calls[0][0] as string;
+    const kuery = new URLSearchParams(navigatedUrl.split('?')[1]).get('kuery');
+    expect(kuery).toBe('');
   });
 
   it('renders the anomalies badge alongside the alerts badge in the same row', () => {
