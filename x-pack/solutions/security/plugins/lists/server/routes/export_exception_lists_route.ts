@@ -54,15 +54,6 @@ export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
             namespaceType,
           });
 
-          if (exportContent == null) {
-            return siemResponse.error({
-              body: filter
-                ? `No exception lists found for filter: "${filter}"`
-                : 'No exception lists found',
-              statusCode: 404,
-            });
-          }
-
           const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
           return response.ok({
             body: `${exportContent.exportData}${JSON.stringify(exportContent.exportDetails)}\n`,

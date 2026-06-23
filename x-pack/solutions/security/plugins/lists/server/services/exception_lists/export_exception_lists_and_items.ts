@@ -62,7 +62,7 @@ export const exportExceptionListsAndItems = async ({
   includeExpiredExceptions,
   savedObjectsClient,
   filter: dataFilter,
-}: ExportExceptionListsAndItemsOptions): Promise<ExportExceptionListsAndItemsReturn | null> => {
+}: ExportExceptionListsAndItemsOptions): Promise<ExportExceptionListsAndItemsReturn> => {
   const exceptionLists: ExceptionListSchema[] = [];
   const listIds: string[] = [];
   const namespaceTypes: NamespaceType[] = [];
@@ -92,12 +92,21 @@ export const exportExceptionListsAndItems = async ({
     namespaceType: [namespaceType],
     perPage: 1_000,
     savedObjectsClient,
-    sortField: 'exception-list.created_at',
+    sortField: `${savedObjectPrefix}.created_at`,
     sortOrder: 'desc',
   });
 
   if (exceptionLists.length === 0) {
-    return null;
+    // Bulk export is a "give me everything matching" operation, so an empty
+    // result set is a valid 200 response (mirroring the rules export) rather
+    // than a 404. The summary footer reports zero counts.
+    return {
+      exportData: '',
+      exportDetails: {
+        exported_exception_list_count: 0,
+        exported_exception_list_item_count: 0,
+      },
+    };
   }
 
   if (exceptionLists.length > EXPORT_SIZE_LIMIT) {
@@ -133,7 +142,7 @@ export const exportExceptionListsAndItems = async ({
     namespaceTypes,
     perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     savedObjectsClient,
-    sortField: 'exception-list.created_at',
+    sortField: `${savedObjectPrefix}.created_at`,
     sortOrder: 'desc',
   });
 

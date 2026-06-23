@@ -53,10 +53,22 @@ beforeEach(() => {
 
 describe('export_exception_lists_and_items', () => {
   describe('exportExceptionListsAndItems', () => {
-    it('returns null when no exception lists are found', async () => {
+    it('returns an empty export with zero counts when no exception lists are found', async () => {
       const result = await exportExceptionListsAndItems(baseOptions);
 
-      expect(result).toEqual(null);
+      expect(result).toEqual({
+        exportData: '',
+        exportDetails: {
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+        },
+      });
+    });
+
+    it('does not query for items when no exception lists are found', async () => {
+      await exportExceptionListsAndItems(baseOptions);
+
+      expect(findExceptionListsItemsPointInTimeFinder).not.toHaveBeenCalled();
     });
 
     it('returns multiple exception lists and items when found', async () => {
@@ -203,6 +215,38 @@ describe('export_exception_lists_and_items', () => {
             /^\(exception-list\.attributes\.expire_time > "[^"]+" OR NOT exception-list\.attributes\.expire_time: \*\)$/
           ),
         })
+      );
+    });
+
+    it('sorts by the single-namespace saved object type when namespaceType is single', async () => {
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems({ ...baseOptions, namespaceType: 'single' });
+
+      expect(findExceptionListPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'exception-list.created_at' })
+      );
+      expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'exception-list.created_at' })
+      );
+    });
+
+    it('sorts by the agnostic saved object type when namespaceType is agnostic', async () => {
+      // For agnostic exceptions the documents live under the
+      // `exception-list-agnostic` saved object type, so the sort field must be
+      // scoped to that type. Sorting by `exception-list.created_at` would leave
+      // agnostic docs effectively unsorted (the field is unmapped for them).
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems({ ...baseOptions, namespaceType: 'agnostic' });
+
+      expect(findExceptionListPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'exception-list-agnostic.created_at' })
+      );
+      expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'exception-list-agnostic.created_at' })
       );
     });
 

@@ -64,21 +64,20 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('returns a 404 response if filter does not match any items', async () => {
+    it('returns a 200 with an empty summary if the filter matches no lists', async () => {
       const { body } = await supertest
         .post(
           `${EXCEPTION_LIST_URL}/_bulk_export?filter=exception-list.attributes.list_id:non-existent-list-id`
         )
         .set('kbn-xsrf', 'true')
-        .expect(404);
+        .expect(200)
+        .parse(binaryToString);
 
-      expect(body).toEqual(
-        expect.objectContaining({
-          message:
-            'No exception lists found for filter: "exception-list.attributes.list_id:non-existent-list-id"',
-          status_code: 404,
-        })
-      );
+      const exportedRows = parseRows(body);
+
+      expect(exportedRows).toEqual([
+        { exported_exception_list_count: 0, exported_exception_list_item_count: 0 },
+      ]);
     });
 
     it('returns a partial response if the filter matches some items', async () => {

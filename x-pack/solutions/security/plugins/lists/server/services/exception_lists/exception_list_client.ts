@@ -1181,11 +1181,12 @@ export class ExceptionListClient {
    * Export multiple exception lists and their items
    * @param options
    * @param options.namespaceType saved object namespace (single | agnostic)
-   * @returns the ndjson of the list and items to export or null if none exists
+   * @returns the ndjson of the lists and items to export; an empty export with
+   * zero counts when nothing matches
    */
   public exportExceptionListsAndItems = async (
     options: ExportExceptionListsAndItemsOptions
-  ): Promise<ExportExceptionListsAndItemsReturn | null> => {
+  ): Promise<ExportExceptionListsAndItemsReturn> => {
     const { savedObjectsClient } = this;
 
     return exportExceptionListsAndItems({
