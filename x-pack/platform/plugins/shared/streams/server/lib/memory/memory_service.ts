@@ -7,7 +7,10 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer, RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  RetrieverContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
 import { DataStreamClient } from '@kbn/data-streams';
 import type { IDataStreamClient } from '@kbn/data-streams';
@@ -16,6 +19,7 @@ import { memoriesDataStream, type memoriesMappings, type StoredMemoryPage } from
 import { MEMORIES_DATA_STREAM } from '../../../common/constants';
 import { resolveSearchMode, type SearchMode } from '../../../common/queries';
 import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../common/sig_events_tuning_config';
+import { bulkCreateWithInferenceFallback } from '../streams/ki/knowledge_indicator_client/bulk_with_inference_fallback';
 import type {
   MemoryEntry,
   MemoryVersionRecord,
@@ -81,37 +85,32 @@ export class MemoryServiceImpl implements MemoryService {
    * entry, defaulting to `false` for live writes.
    */
   private async _indexPage(entry: MemoryEntry): Promise<void> {
-    const document: StoredMemoryPage = {
-      '@timestamp': entry.updated_at,
-      id: entry.id,
-      name: entry.name,
-      title: entry.title,
-      content: entry.content,
-      // Populate search_embedding for live pages so semantic/hybrid search can rank them.
-      // Tombstones omit it — there is no value in embedding a soft-delete marker.
-      ...(!entry.is_deleted && { search_embedding: `${entry.title}\n\n${entry.content}` }),
-      categories: entry.categories,
-      tags: entry.tags,
-      references: entry.references,
-      version: entry.version,
-      created_at: entry.created_at,
-      updated_at: entry.updated_at,
-      created_by: entry.created_by,
-      updated_by: entry.updated_by,
-      is_deleted: entry.is_deleted ?? false,
-    };
-
-    const response = await this.dataStreamClient.create({
-      documents: [document],
-      refresh: 'wait_for',
+    await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) => {
+      const document: StoredMemoryPage = {
+        '@timestamp': entry.updated_at,
+        id: entry.id,
+        name: entry.name,
+        title: entry.title,
+        content: entry.content,
+        // Populate search_embedding for live pages so semantic/hybrid search can rank them.
+        // Omit it on tombstones (no value in embedding a soft-delete marker) and on the
+        // final fallback attempt when the inference endpoint is unavailable.
+        ...(includeEmbedding &&
+          !entry.is_deleted && {
+            search_embedding: `${entry.title}\n\n${entry.content}`,
+          }),
+        categories: entry.categories,
+        tags: entry.tags,
+        references: entry.references,
+        version: entry.version,
+        created_at: entry.created_at,
+        updated_at: entry.updated_at,
+        created_by: entry.created_by,
+        updated_by: entry.updated_by,
+        is_deleted: entry.is_deleted ?? false,
+      };
+      return this.dataStreamClient.create({ documents: [document], refresh: 'wait_for' });
     });
-
-    if (response.errors) {
-      const failure = response.items.find((item) => item.create?.error)?.create?.error;
-      throw new Error(
-        `Failed to index memory page '${entry.id}': ${failure?.reason ?? 'unknown bulk error'}`
-      );
-    }
   }
 
   // ── Reads: field collapse to resolve latest version ──
@@ -510,7 +509,11 @@ export class MemoryServiceImpl implements MemoryService {
     const phase1Query: QueryDslQueryContainer =
       mode === 'keyword'
         ? { bool: { filter: structuredFilters, must: [fuzzyMatch] } }
-        : { bool: structuredFilters.length ? { filter: structuredFilters } : { must: [{ match_all: {} }] } };
+        : {
+            bool: structuredFilters.length
+              ? { filter: structuredFilters }
+              : { must: [{ match_all: {} }] },
+          };
 
     let candidateIds: string[];
     try {
@@ -541,7 +544,15 @@ export class MemoryServiceImpl implements MemoryService {
     // a page whose current version satisfies both the structural filters and the text query.
     // Semantic and hybrid modes use a retriever instead of a plain query so ES can apply
     // vector scoring; keyword mode keeps the original bool query path.
-    const response = await this._executePhase3(mode, params.mode, query, latestLiveIds, structuredFilters, fuzzyMatch, size);
+    const response = await this._executePhase3(
+      mode,
+      params.mode,
+      query,
+      latestLiveIds,
+      structuredFilters,
+      fuzzyMatch,
+      size
+    );
     if (!response) return [];
 
     return response.hits.hits.flatMap((hit) => {
@@ -660,9 +671,7 @@ export class MemoryServiceImpl implements MemoryService {
       if (mode !== 'keyword' && !requestedMode) {
         // Auto-resolved mode failed (inference endpoint unavailable) — fall back to keyword.
         this.logger.warn(
-          `Memory search mode "${mode}" failed, falling back to keyword: ${
-            (err as Error).message
-          }`
+          `Memory search mode "${mode}" failed, falling back to keyword: ${(err as Error).message}`
         );
         return this.esClient.search<MemoryEntry>({
           index: MEMORIES_DATA_STREAM,

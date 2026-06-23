@@ -463,6 +463,68 @@ describe('MemoryServiceImpl', () => {
     await expect(service.listByCategory({ category: 'services' })).resolves.toEqual([]);
   });
 
+  describe('search mode behaviour', () => {
+    it('mode: keyword does not widen Phase 1 to match-all — no retriever is issued', async () => {
+      mockedUuidV4.mockReturnValueOnce('k-entry').mockReturnValueOnce('k-hist');
+      const { service, esClient } = createService();
+
+      await service.create({ name: 'page', title: 'Page', content: 'content', user });
+
+      // Override: throw if a retriever-based request is ever issued
+      const base = esClient.search.getMockImplementation()!;
+      esClient.search.mockImplementation(async (params) => {
+        if ((params as { retriever?: unknown }).retriever) {
+          throw new Error('retriever must not be used in keyword mode');
+        }
+        return base(params as never);
+      });
+
+      await expect(service.search({ query: 'page', mode: 'keyword' })).resolves.toHaveLength(1);
+    });
+
+    it('auto-resolved hybrid falls back to keyword and warns when retriever search throws', async () => {
+      mockedUuidV4.mockReturnValueOnce('fb-entry').mockReturnValueOnce('fb-hist');
+      const { service, esClient } = createService();
+
+      await service.create({ name: 'fallback-page', title: 'Fallback', content: 'content', user });
+
+      const base = esClient.search.getMockImplementation()!;
+      esClient.search.mockImplementation(async (params) => {
+        if ((params as { retriever?: unknown }).retriever) {
+          throw new Error('inference_service_not_found: model still loading');
+        }
+        return base(params as never);
+      });
+
+      // No explicit mode → auto-resolves to hybrid → falls back to keyword on error
+      const results = await service.search({ query: 'fallback-page' });
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({ name: 'fallback-page' });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
+    });
+
+    it('explicit hybrid mode propagates retriever errors without fallback', async () => {
+      mockedUuidV4.mockReturnValueOnce('ex-entry').mockReturnValueOnce('ex-hist');
+      const { service, esClient } = createService();
+
+      await service.create({ name: 'explicit-page', title: 'Explicit', content: 'content', user });
+
+      const base = esClient.search.getMockImplementation()!;
+      esClient.search.mockImplementation(async (params) => {
+        if ((params as { retriever?: unknown }).retriever) {
+          throw new Error('inference endpoint unavailable');
+        }
+        return base(params as never);
+      });
+
+      // Explicit mode → no fallback → error propagates
+      await expect(service.search({ query: 'explicit-page', mode: 'hybrid' })).rejects.toThrow(
+        'inference endpoint unavailable'
+      );
+    });
+  });
+
   it('getBacklinks does not return a page whose latest version dropped the reference', async () => {
     mockedUuidV4
       .mockReturnValueOnce('target-uuid')
