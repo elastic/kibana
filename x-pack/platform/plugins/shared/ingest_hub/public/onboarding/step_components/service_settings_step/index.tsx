@@ -27,11 +27,11 @@ import { CollectionSettingsFlyout } from './collection_settings_flyout';
 import type { TransportType } from './field_config';
 
 interface ServiceSettingsStepProps {
-  onNext: () => void;
+  onContinue: () => void;
   onBack?: () => void;
 }
 
-export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps) {
+export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepProps) {
   const {
     globalRegion,
     setGlobalRegion,
@@ -42,7 +42,7 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
     setServiceFields,
     isReady,
     handleNext,
-  } = useServiceSettings({ onNext });
+  } = useServiceSettings({ onContinue });
 
   const [activeFlyoutServiceId, setActiveFlyoutServiceId] = useState<string | null>(null);
 

@@ -26,7 +26,7 @@ interface PersistedState {
 
 const SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
-export function useServiceSettings({ onNext }: { onNext: () => void }) {
+export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
@@ -126,8 +126,8 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
   }, [globalRegion, selectedServices, getServiceVars]);
 
   const handleNext = useCallback(() => {
-    if (isReady) onNext();
-  }, [isReady, onNext]);
+    if (isReady) onContinue();
+  }, [isReady, onContinue]);
 
   return {
     globalRegion,

@@ -17,16 +17,19 @@ import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { getSelectedServicePermissions } from '../service_permissions';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { AwsPermissionsViewer } from './aws_permissions_viewer';
+import { useDeploy } from './deploy_settings_step/use_deploy';
 
 interface DeploySettingsStepProps {
-  onNext: () => void;
+  onContinue: () => void;
   onBack?: () => void;
 }
 
-export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) {
+export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { connectStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
+
+  const { handleDeploy } = useDeploy({ onContinue });
 
   const showIdentityFederation = useMemo(() => {
     if (selectedServiceIds.length === 0) return true;
@@ -67,7 +70,14 @@ export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) 
           initialStaticKeys={connectStep.staticKeys}
           showIdentityFederation={showIdentityFederation}
           staticKeysContent={staticKeysContent}
-          onNext={onNext}
+          onContinue={() => handleDeploy()}
+          continueButtonLabel={
+            <FormattedMessage
+              id="xpack.ingestHub.deploySettingsStep.nextButton"
+              defaultMessage="Deploy"
+            />
+          }
+          continueButtonIconType="playFilled"
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}
         />

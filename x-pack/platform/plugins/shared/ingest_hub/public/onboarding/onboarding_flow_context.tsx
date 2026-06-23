@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useCallback, useState } from 'react';
+import React, { createContext, useContext, useCallback, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
@@ -14,6 +14,16 @@ import { AWS_SERVICES_MAP } from './aws_service_matrix';
 export interface ConnectStepState {
   connectorId?: string;
   staticKeys?: AwsStaticKeyCredentials;
+}
+
+export interface DeployPackageResult {
+  status: 'idle' | 'success' | 'error';
+  errorMessage?: string;
+}
+
+export interface DeployStepState {
+  isDeploying: boolean;
+  packageStatuses: Record<string, DeployPackageResult>;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
@@ -39,6 +49,10 @@ interface OnboardingFlowState {
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
+  deployStep: DeployStepState;
+  updateDeployStep: (update: Partial<DeployStepState>) => void;
+  registerDeployHandler: (fn: (packageNames?: string[]) => void) => void;
+  retryDeploy: (packageNames?: string[]) => void;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -90,6 +104,25 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [persistedServices, setPersistedServices]
   );
 
+  const [deployStep, setDeployStep] = useState<DeployStepState>({
+    isDeploying: false,
+    packageStatuses: {},
+  });
+
+  const deployHandlerRef = useRef<((packageNames?: string[]) => void) | null>(null);
+
+  const updateDeployStep = useCallback((update: Partial<DeployStepState>) => {
+    setDeployStep((prev) => ({ ...prev, ...update }));
+  }, []);
+
+  const registerDeployHandler = useCallback((fn: (packageNames?: string[]) => void) => {
+    deployHandlerRef.current = fn;
+  }, []);
+
+  const retryDeploy = useCallback((packageNames?: string[]) => {
+    deployHandlerRef.current?.(packageNames);
+  }, []);
+
   const connectStep: ConnectStepState = {
     connectorId: persistedConnectStep?.connectorId,
     staticKeys,
@@ -109,6 +142,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setStaticKeys,
         servicesStep,
         setSelectedServiceIds,
+        deployStep,
+        updateDeployStep,
+        registerDeployHandler,
+        retryDeploy,
       }}
     >
       {children}

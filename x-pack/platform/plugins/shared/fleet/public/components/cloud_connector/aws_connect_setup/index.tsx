@@ -32,7 +32,10 @@ export interface AwsConnectSetupProps {
   initialTemporaryKeys?: Partial<AwsTemporaryKeyCredentials>;
   showIdentityFederation?: boolean;
   staticKeysContent?: React.ReactNode;
-  onNext?: () => void;
+  onContinue?: () => void;
+  isContinueButtonLoading?: boolean;
+  continueButtonLabel?: React.ReactNode;
+  continueButtonIconType?: string;
   onConnectorIdChange?: (connectorId: string | undefined) => void;
   onStaticKeysChange?: (keys: AwsStaticKeyCredentials | undefined) => void;
   onTemporaryKeysChange?: (keys: AwsTemporaryKeyCredentials | undefined) => void;
@@ -48,7 +51,10 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   initialTemporaryKeys,
   showIdentityFederation = true,
   staticKeysContent,
-  onNext,
+  onContinue,
+  isContinueButtonLoading = false,
+  continueButtonLabel,
+  continueButtonIconType,
   onConnectorIdChange,
   onStaticKeysChange,
   onTemporaryKeysChange,
@@ -124,21 +130,25 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
           onFieldsChange={onTemporaryKeysChange}
         />
       )}
-      {onNext && (
+      {onContinue && (
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isDisabled={!isFormReady}
-                onClick={onNext}
-                data-test-subj="awsConnectSetup-nextButton"
+                isDisabled={!isFormReady || isContinueButtonLoading}
+                isLoading={isContinueButtonLoading}
+                onClick={onContinue}
+                iconType={continueButtonIconType}
+                data-test-subj="awsConnectSetup-continueButton"
               >
-                <FormattedMessage
-                  id="xpack.fleet.awsConnectSetup.nextButton"
-                  defaultMessage="Next"
-                />
+                {continueButtonLabel ?? (
+                  <FormattedMessage
+                    id="xpack.fleet.awsConnectSetup.continueButton"
+                    defaultMessage="Continue"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

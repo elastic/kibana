@@ -53,14 +53,14 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('awsAuthTypeSelector').selectOption('static_keys');
 
     await expect(page.testSubj.locator('awsStaticKeysForm')).toBeVisible();
-    await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
+    await expect(page.testSubj.locator('awsConnectSetup-continueButton')).toBeDisabled();
 
     await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
     await page.testSubj
       .locator('awsStaticKeysForm-secretAccessKey')
       .fill('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
 
-    await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeEnabled();
+    await expect(page.testSubj.locator('awsConnectSetup-continueButton')).toBeEnabled();
   });
 
   test('identity federation create — New Identity tab active when no connectors exist', async ({
@@ -139,15 +139,13 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
       await expect(page.testSubj.locator('aws-cloud-connector-super-select')).toBeVisible();
 
       // Next button stays disabled until a connector is chosen from the selector
-      await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
+      await expect(page.testSubj.locator('awsConnectSetup-continueButton')).toBeDisabled();
     } finally {
-      if (connectorId) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `/api/fleet/cloud_connectors/${connectorId}`,
-          ignoreErrors: [404],
-        });
-      }
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/api/fleet/cloud_connectors/${connectorId ?? 'none'}`,
+        ignoreErrors: [404],
+      });
     }
   });
 });
