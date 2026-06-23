@@ -73,7 +73,7 @@ describe('parseTemplateYaml', () => {
     expect(result.raw).toBe(VALID_TEMPLATE);
   });
 
-  it('should preserve unknown metadata fields for forward compatibility', () => {
+  it('should reject unknown fields in the template-metadata block (strict mode)', () => {
     const raw = `
 template-metadata:
   slug: future-template
@@ -84,9 +84,13 @@ template-metadata:
   categories: [utility]
   someFutureField: hello
 `;
-
-    const result = parseTemplateYaml(raw);
-    expect((result.metadata as unknown as Record<string, unknown>).someFutureField).toBe('hello');
+    expect.assertions(2);
+    try {
+      parseTemplateYaml(raw);
+    } catch (err) {
+      expect(err).toBeInstanceOf(TemplateParseError);
+      expect((err as TemplateParseError).reason).toBe('invalid-metadata');
+    }
   });
 
   it('should throw `invalid-yaml` when the YAML is malformed', () => {

@@ -11,7 +11,7 @@ export {
   InstallFormFieldOptionSchema,
   InstallFormFieldSchema,
   InstallFormFieldTypeSchema,
-  InstallFormSchemaSchema,
+  InstallFormSchema,
 } from './install_form';
 
 export { TemplateMetadataSchema } from './template';

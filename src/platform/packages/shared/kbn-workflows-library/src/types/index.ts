@@ -11,7 +11,7 @@ export type {
   InstallFormField,
   InstallFormFieldOption,
   InstallFormFieldType,
-  InstallFormSchema,
+  InstallForm as InstallFormSchema,
 } from './install_form';
 
 export type {

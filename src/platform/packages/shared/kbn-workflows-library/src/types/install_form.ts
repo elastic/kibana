@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod/v4';
+import type {
+  InstallFormFieldOptionSchema,
+  InstallFormFieldSchema,
+  InstallFormFieldTypeSchema,
+  InstallFormSchema,
+} from '../schemas/install_form';
+
 /**
  * The set of input widgets a template's install form can render. Each field's
  * `inputType` selects which renderer the install UI uses and which type-specific
  * properties on `InstallFormField` apply.
  */
-export type InstallFormFieldType =
-  | 'text'
-  | 'textarea'
-  | 'connector'
-  | 'select'
-  | 'boolean'
-  | 'number';
+export type InstallFormFieldType = z.infer<typeof InstallFormFieldTypeSchema>;
 
-export interface InstallFormFieldOption {
-  value: string;
-  label: string;
-}
+export type InstallFormFieldOption = z.infer<typeof InstallFormFieldOptionSchema>;
 
 /**
  * A single install-time input declared by a template's `install.form` block.
@@ -33,19 +32,14 @@ export interface InstallFormFieldOption {
  * submitted form values when persisting the workflow. Names are kebab-case by
  * convention (e.g. `abuseipdb-connector`); they never surface to end users.
  */
-export interface InstallFormField {
-  name: string;
-  label?: string;
-  description?: string;
-  inputType: InstallFormFieldType;
-  required?: boolean;
-  /** Only meaningful when `inputType === 'connector'`. */
-  connectorType?: string;
-  /** Only meaningful when `inputType === 'select'`. */
-  options?: InstallFormFieldOption[];
-  default?: unknown;
-}
+export type InstallFormField = z.infer<typeof InstallFormFieldSchema>;
 
-export interface InstallFormSchema {
-  form: InstallFormField[];
-}
+/**
+ * The inferred type for the `template-metadata.install` block. Declared
+ * alongside the schema (rather than in `../types/install_form.ts`) so the
+ * type-namespace `InstallFormSchema` and the value-namespace
+ * `InstallFormSchema` (the Zod schema) co-exist in a single module — TS
+ * merges them naturally at this scope but a cross-file `export *`
+ * collision would error.
+ */
+export type InstallForm = z.infer<typeof InstallFormSchema>;

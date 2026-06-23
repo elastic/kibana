@@ -9,9 +9,7 @@
 
 import semver from 'semver';
 import { z } from '@kbn/zod/v4';
-import { InstallFormSchemaSchema } from './install_form';
-
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
+import { InstallFormSchema } from './install_form';
 
 const semverString = z.string().refine((value) => semver.valid(value) !== null, {
   message: 'Must be a valid semver string (e.g. 1.0.0).',
@@ -26,14 +24,20 @@ const semverRangeString = z.string().refine((value) => semver.validRange(value) 
  */
 export const TemplateMetadataSchema = z
   .object({
-    slug: z.string().regex(SLUG_REGEX, 'Slug must be lowercase, alphanumeric, and dash-separated.'),
+    slug: z
+      .string()
+      .regex(
+        /^[a-z0-9][a-z0-9-]*[a-z0-9]$/,
+        'Slug must be lowercase, alphanumeric, and dash-separated.'
+      ),
     version: semverString,
     availability: semverRangeString,
-    name: z.string().min(1),
-    description: z.string().min(1),
-    solutions: z.array(z.string()).optional(),
-    categories: z.array(z.string()).nonempty('At least one category is required.'), // close-vocabulary is guaranteed by the catalog generator in the source repo
-    icon: z.string().optional(),
-    install: InstallFormSchemaSchema.optional(),
+    name: z.string().min(1).max(120),
+    description: z.string().min(1).max(500),
+    solutions: z.array(z.string().min(1)).optional(),
+    // Closed vocabulary is enforced by the catalog generator in the source repo.
+    categories: z.array(z.string().min(1)).min(1, 'At least one category is required.'),
+    icon: z.string().min(1).optional(),
+    install: InstallFormSchema.optional(),
   })
-  .loose();
+  .strict();
