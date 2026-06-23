@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 
 interface UseStreamsIngestionRatesProps {
@@ -22,6 +22,13 @@ interface UseStreamsIngestionRatesProps {
 interface UseStreamsIngestionRatesResult {
   ingestionByStream: Record<string, number>;
   ingestionLoaded: boolean;
+  ingestionError: boolean;
+}
+
+interface IngestionRatesState {
+  byStream: Record<string, number>;
+  loaded: boolean;
+  error: boolean;
 }
 
 /**
@@ -33,36 +40,40 @@ export const useStreamsIngestionRates = ({
   timeStart,
   timeEnd,
 }: UseStreamsIngestionRatesProps): UseStreamsIngestionRatesResult => {
-  const [ingestionByStream, setIngestionByStream] = useState<Record<string, number>>({});
-  const [ingestionLoaded, setIngestionLoaded] = useState(false);
-  const cancelledRef = useRef(false);
+  const [state, setState] = useState<IngestionRatesState>({
+    byStream: {},
+    loaded: false,
+    error: false,
+  });
 
   useEffect(() => {
-    cancelledRef.current = false;
-    setIngestionLoaded(false);
+    let cancelled = false;
+    setState((prev) => ({ ...prev, loaded: false, error: false }));
 
     const timeRangeSec = (timeEnd - timeStart) / 1000;
 
     ingestionDocCount
       .then((counts) => {
-        if (cancelledRef.current) return;
-        const map: Record<string, number> = {};
+        if (cancelled) return;
+        const byStream: Record<string, number> = {};
         for (const { stream, count } of counts) {
-          map[stream] = timeRangeSec > 0 ? count / timeRangeSec : 0;
+          byStream[stream] = timeRangeSec > 0 ? count / timeRangeSec : 0;
         }
-        setIngestionByStream(map);
-        setIngestionLoaded(true);
+        setState({ byStream, loaded: true, error: false });
       })
       .catch(() => {
-        if (cancelledRef.current) return;
-        setIngestionByStream({});
-        setIngestionLoaded(true);
+        if (cancelled) return;
+        setState({ byStream: {}, loaded: true, error: true });
       });
 
     return () => {
-      cancelledRef.current = true;
+      cancelled = true;
     };
   }, [ingestionDocCount, timeStart, timeEnd]);
 
-  return { ingestionByStream, ingestionLoaded };
+  return {
+    ingestionByStream: state.byStream,
+    ingestionLoaded: state.loaded,
+    ingestionError: state.error,
+  };
 };

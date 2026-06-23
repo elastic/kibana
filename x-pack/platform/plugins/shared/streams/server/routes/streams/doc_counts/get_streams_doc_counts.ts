@@ -14,6 +14,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
+import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamsMeteringStats,
   getLastBackingIndexByStream,
@@ -227,11 +228,12 @@ export async function getDegradedDocCountsForStreams(options: {
 
 export async function getIngestionDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
+  streamsClient: StreamsClient;
   start: number;
   end: number;
   streamName?: string;
 }): Promise<StreamDocsStat[]> {
-  const { esClient, start, end, streamName } = options;
+  const { esClient, streamsClient, start, end, streamName } = options;
 
   const { data_streams: streams } = streamName
     ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
@@ -246,10 +248,30 @@ export async function getIngestionDocCountsForStreams(options: {
     return [];
   }
 
+  const streamNames = streams.map((stream) => stream.name);
+  const privilegeChunks = await processAsyncInChunks<
+    string,
+    Record<string, { read_failure_store: boolean }>
+  >({
+    items: streamNames,
+    processChunk: (chunk) => streamsClient.getPrivilegesPerStream(chunk),
+  });
+  const readFailureStoreByStream = new Map<string, boolean>();
+  for (const chunk of privilegeChunks) {
+    for (const [name, privileges] of Object.entries(chunk)) {
+      readFailureStoreByStream.set(name, privileges.read_failure_store);
+    }
+  }
+
   const indexToStream = new Map<string, string>();
   for (const stream of streams) {
     for (const index of stream.indices ?? []) {
       indexToStream.set(index.index_name, stream.name);
+    }
+    if (readFailureStoreByStream.get(stream.name)) {
+      for (const index of stream.failure_store?.indices ?? []) {
+        indexToStream.set(index.index_name, stream.name);
+      }
     }
   }
 
@@ -280,6 +302,7 @@ export async function getIngestionDocCountsForStreams(options: {
 
       const response = await esClient.search<unknown, PerIndexAggs>({
         index: indicesInChunk,
+        ignore_unavailable: true,
         size: 0,
         track_total_hits: false,
         query: {

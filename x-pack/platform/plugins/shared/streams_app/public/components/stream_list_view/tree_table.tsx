@@ -211,7 +211,7 @@ export function StreamsTreeTable({
   const qualityLoaded =
     !!totalDocsResult.value && !!degradedDocsResult.value && !!failedDocsResult.value;
 
-  const { ingestionByStream, ingestionLoaded } = useStreamsIngestionRates({
+  const { ingestionByStream, ingestionLoaded, ingestionError } = useStreamsIngestionRates({
     ingestionDocCount: docCountsFetch.ingestionDocCount,
     timeStart: timeState.start,
     timeEnd: timeState.end,
@@ -643,9 +643,10 @@ export function StreamsTreeTable({
               field: 'ingestionRate',
               name: INGESTION_COLUMN_HEADER,
               width: '112px',
-              sortable: ingestionLoaded
-                ? (row: TableRow) => ingestionByStream[row.stream.name] ?? 0
-                : false,
+              sortable:
+                ingestionLoaded && !ingestionError
+                  ? (row: TableRow) => ingestionByStream[row.stream.name] ?? 0
+                  : false,
               align: 'right',
               dataType: 'number',
               render: (_: unknown, item: TableRow) =>
@@ -653,6 +654,7 @@ export function StreamsTreeTable({
                   <IngestionColumn
                     rate={ingestionByStream[item.stream.name] ?? 0}
                     isLoading={!ingestionLoaded}
+                    hasError={ingestionError}
                   />
                 ) : (
                   '-'

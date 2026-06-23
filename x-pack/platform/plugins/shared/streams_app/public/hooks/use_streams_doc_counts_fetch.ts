@@ -175,6 +175,11 @@ export function useStreamDocCountsFetch({
         }
       );
 
+      // Stream-detail consumers read only some of these promises (not ingestion). Attach a no-op
+      // rejection handler so an abort on unmount does not surface as an unhandled promise rejection.
+      // The listing still attaches its own handlers to the same promise.
+      void ingestionCountPromise.catch(() => {});
+
       const docCountsFetch: StreamDocCountsFetch = {
         docCount: countPromise,
         failedDocCount: failedCountPromise,

@@ -126,12 +126,13 @@ const ingestionDocCountsRoute = createServerRoute({
     }),
   }),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
     const { start, end, stream } = params.query;
 
     return await getIngestionDocCountsForStreams({
       esClient,
+      streamsClient,
       start,
       end,
       streamName: stream,
