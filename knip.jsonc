@@ -43,7 +43,10 @@
     "nyc",
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
-    "oxlint"
+    "oxlint",
+    // @typescript/native-preview is invoked via its bin path (tsgo.js) in
+    // kbn-ts-type-check-cli; knip can't trace dynamic binary invocations.
+    "@typescript/native-preview"
   ],
   "workspaces": {
     ".": {
