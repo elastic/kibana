@@ -80,7 +80,11 @@ apiTest.describe(
       journeyId: string
     ): Promise<string | undefined> => {
       const filter = `${syntheticsMonitorSavedObjectType}.attributes.journey_id: "${journeyId}"`;
-      const res = await listMonitors(apiClient, editorHeaders, `filter=${encodeURIComponent(filter)}`);
+      const res = await listMonitors(
+        apiClient,
+        editorHeaders,
+        `filter=${encodeURIComponent(filter)}`
+      );
       const monitors = (res.body as { monitors: Array<{ config_id: string }> }).monitors;
       return monitors[0]?.config_id;
     };
@@ -194,9 +198,14 @@ apiTest.describe(
             attributes: { enabled: false },
           });
 
-          const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id, {
-            internal: true,
-          });
+          const { body: refreshed } = await getMonitor(
+            apiClient,
+            editorHeaders,
+            monitor.config_id,
+            {
+              internal: true,
+            }
+          );
 
           const decrypted = refreshed as {
             enabled: boolean;
@@ -218,30 +227,31 @@ apiTest.describe(
 
     // --- per-id error reporting ----------------------------------------------
 
-    apiTest('returns mixed updated/error entries when some ids do not exist', async ({
-      apiClient,
-    }) => {
-      const monitor = await createUiMonitor(apiClient);
-      const missingId = uuidv4();
-      try {
-        const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
-          ids: [monitor.config_id, missingId],
-          attributes: { enabled: false },
-        });
+    apiTest(
+      'returns mixed updated/error entries when some ids do not exist',
+      async ({ apiClient }) => {
+        const monitor = await createUiMonitor(apiClient);
+        const missingId = uuidv4();
+        try {
+          const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
+            ids: [monitor.config_id, missingId],
+            attributes: { enabled: false },
+          });
 
-        const results = res.body.result as BulkUpdateResult[];
-        expect(results).toHaveLength(2);
+          const results = res.body.result as BulkUpdateResult[];
+          expect(results).toHaveLength(2);
 
-        const updatedEntry = resultFor(results, monitor.config_id);
-        const missingEntry = resultFor(results, missingId);
+          const updatedEntry = resultFor(results, monitor.config_id);
+          const missingEntry = resultFor(results, missingId);
 
-        expect(updatedEntry).toStrictEqual({ id: monitor.config_id, updated: true });
-        expect(missingEntry!.updated).toBe(false);
-        expect(missingEntry!.error).toMatch(/not found/i);
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
+          expect(updatedEntry).toStrictEqual({ id: monitor.config_id, updated: true });
+          expect(missingEntry!.updated).toBe(false);
+          expect(missingEntry!.error).toMatch(/not found/i);
+        } finally {
+          await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
+        }
       }
-    });
+    );
 
     apiTest('rejects project-origin monitors with an origin error', async ({ apiClient }) => {
       const projectName = `bulk-patch-project-${uuidv4()}`;
@@ -280,30 +290,31 @@ apiTest.describe(
       }
     });
 
-    apiTest('rejects schedules outside the allowed set with a validation error', async ({
-      apiClient,
-    }) => {
-      const monitor = await createUiMonitor(apiClient);
-      try {
-        const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
-          ids: [monitor.config_id],
-          attributes: { schedule: { number: '7', unit: 'm' } },
-        });
+    apiTest(
+      'rejects schedules outside the allowed set with a validation error',
+      async ({ apiClient }) => {
+        const monitor = await createUiMonitor(apiClient);
+        try {
+          const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
+            ids: [monitor.config_id],
+            attributes: { schedule: { number: '7', unit: 'm' } },
+          });
 
-        const results = res.body.result as BulkUpdateResult[];
-        expect(results).toHaveLength(1);
-        expect(results[0].updated).toBe(false);
-        expect(results[0].error).toMatch(/schedule/i);
+          const results = res.body.result as BulkUpdateResult[];
+          expect(results).toHaveLength(1);
+          expect(results[0].updated).toBe(false);
+          expect(results[0].error).toMatch(/schedule/i);
 
-        const refreshed = await getMonitor(apiClient, editorHeaders, monitor.config_id);
-        expect((refreshed.body as { schedule: unknown }).schedule).toStrictEqual({
-          number: '5',
-          unit: 'm',
-        });
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
+          const refreshed = await getMonitor(apiClient, editorHeaders, monitor.config_id);
+          expect((refreshed.body as { schedule: unknown }).schedule).toStrictEqual({
+            number: '5',
+            unit: 'm',
+          });
+        } finally {
+          await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
+        }
       }
-    });
+    );
 
     // --- input validation ----------------------------------------------------
 
