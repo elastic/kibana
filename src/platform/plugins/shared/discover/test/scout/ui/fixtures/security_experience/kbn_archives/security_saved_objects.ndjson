@@ -75,3 +75,49 @@
     "typeMigrationVersion": "10.5.0",
     "updated_at": "2025-01-01T00:00:00.000Z"
 }
+
+{
+    "attributes": {
+        "name": "security-discover-alerts-rendered",
+        "timeFieldName": "@timestamp",
+        "title": "security-discover-alerts*,.alerts-security.alerts-discover*"
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2025-01-01T00:00:00.000Z",
+    "id": "security-discover-alerts-rendered-data-view",
+    "managed": false,
+    "references": [],
+    "type": "index-pattern",
+    "typeMigrationVersion": "8.0.0",
+    "updated_at": "2025-01-01T00:00:00.000Z"
+}
+
+{
+    "attributes": {
+        "columns": ["kibana.alert.rule.name", "source.ip", "kibana.alert.workflow_status"],
+        "description": "",
+        "grid": {},
+        "hideChart": false,
+        "isTextBasedQuery": false,
+        "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [["@timestamp", "desc"]],
+        "timeRestore": false,
+        "title": "Security Discover cell renderers"
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2025-01-01T00:00:00.000Z",
+    "id": "security-discover-cell-renderers-saved-search",
+    "managed": false,
+    "references": [
+        {
+            "id": "security-discover-alerts-rendered-data-view",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+            "type": "index-pattern"
+        }
+    ],
+    "type": "search",
+    "typeMigrationVersion": "10.5.0",
+    "updated_at": "2025-01-01T00:00:00.000Z"
+}

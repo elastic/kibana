@@ -10,10 +10,12 @@
 import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
+  SECURITY_CELL_RENDERER_SAVED_SEARCH,
   SECURITY_DATA_VIEWS,
   SECURITY_FLYOUT_TEST_SUBJECTS as TS,
   SECURITY_SAVED_SEARCH_TITLE,
   TAKE_ACTION_TEST_SUBJECTS as TA,
+  CELL_RENDERER_TEST_SUBJECTS as CR,
 } from '../constants';
 
 // Raised from the default: opening the flyout depends on Discover's first load + security profile
@@ -96,6 +98,16 @@ export class SecurityDiscoverFlyout {
   public readonly iocOverviewTitle: Locator;
   /** IOC overview high-level blocks. */
   public readonly iocOverviewHighLevelBlocks: Locator;
+  /** Grid cell link rendered by the rule-name cell renderer. */
+  public readonly ruleNameCellLink: Locator;
+  /** Error prompt shown in the rule flyout opened from the rule-name link (synthetic rule). */
+  public readonly ruleFlyoutError: Locator;
+  /** Grid cell link rendered by the IP cell renderer. */
+  public readonly ipCellLink: Locator;
+  /** Grid cell rendered by the Timeline DefaultCellRenderer for workflow status. */
+  public readonly statusCell: Locator;
+  /** Network details flyout title (opened from the IP cell renderer link). */
+  public readonly networkFlyoutTitle: Locator;
 
   private readonly page: ScoutPage;
   private readonly discover: PageObjects['discover'];
@@ -145,6 +157,11 @@ export class SecurityDiscoverFlyout {
     this.tableTabContent = page.testSubj.locator(TS.TABLE_TAB_CONTENT);
     this.iocOverviewTitle = page.testSubj.locator(TS.IOC_OVERVIEW_TITLE);
     this.iocOverviewHighLevelBlocks = page.testSubj.locator(TS.IOC_OVERVIEW_HIGH_LEVEL_BLOCKS);
+    this.ruleNameCellLink = page.testSubj.locator(CR.RULE_NAME_LINK);
+    this.ruleFlyoutError = page.testSubj.locator(CR.RULE_FLYOUT_ERROR);
+    this.ipCellLink = page.testSubj.locator(CR.IP_LINK);
+    this.statusCell = page.testSubj.locator(CR.STATUS_CELL);
+    this.networkFlyoutTitle = page.testSubj.locator(CR.NETWORK_FLYOUT_TITLE);
   }
 
   /** Navigate to Discover, select the data view, and expand a row to open the doc viewer flyout. */
@@ -169,6 +186,18 @@ export class SecurityDiscoverFlyout {
   /** Open the IOC flyout from a Discover row. */
   async openIocFlyoutFromDiscover(rowIndex = 0) {
     await this.openFlyoutFromDiscover(SECURITY_DATA_VIEWS.IOCS, rowIndex);
+  }
+
+  /**
+   * Open the cell-renderers saved search and wait for its grid to render. The saved search points at
+   * an alerts-pattern data view (so the security profile registers its custom cell renderers) and
+   * pins the rule-name / source-IP / workflow-status columns, so each custom renderer has exactly
+   * one cell in the grid.
+   */
+  async openCellRenderersSavedSearch() {
+    await this.discover.goto();
+    await this.discover.loadSavedSearch(SECURITY_CELL_RENDERER_SAVED_SEARCH);
+    await this.discover.waitForDocTableRendered();
   }
 
   /**

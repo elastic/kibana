@@ -37,6 +37,16 @@ export const SECURITY_DATA_VIEWS = {
 /** Saved search (Discover session) used by the dashboard-embedded test. */
 export const SECURITY_SAVED_SEARCH_TITLE = 'Security Discover alerts saved search';
 
+/**
+ * Saved search used by the cell-renderer tests. The Security profile only registers its custom
+ * cell renderers (and default columns) when the data view's index pattern includes
+ * `.alerts-security.alerts-` (see `security_root_profile/profile.tsx`). Our synthetic alerts index
+ * doesn't match that, so this saved search points at a data view whose title appends a (non-matching)
+ * `.alerts-security.alerts-*` pattern to satisfy the gate while still resolving the synthetic index.
+ * Its explicit `columns` (rule name, source IP, workflow status) keep the rendered grid deterministic.
+ */
+export const SECURITY_CELL_RENDERER_SAVED_SEARCH = 'Security Discover cell renderers';
+
 /** Wide window covering the fixed synthetic document timestamps. */
 export const SECURITY_TIME_RANGE = {
   from: '2025-01-01T00:00:00.000Z',
@@ -51,9 +61,16 @@ export const SECURITY_TIME_RANGE = {
  */
 export const PUSH_FLYOUT_VIEWPORT = { width: 1920, height: 1080 } as const;
 
-/** Path to the saved-objects (data views + saved search) archive, relative to the repo root. */
+/**
+ * Path to the saved-objects (data views + saved searches) archive, relative to the repo root.
+ *
+ * The Scout loader (`scoutSpace.savedObjects.load` → `parseArchive`) splits this file on BLANK LINES
+ * and `JSON.parse`s each chunk, so the objects must stay separated by blank lines (not the strict
+ * one-object-per-line `.ndjson` form). The `.ndjson` extension is used so editors don't try to
+ * validate the multi-object file as a single JSON document.
+ */
 export const SECURITY_KBN_ARCHIVE =
-  'src/platform/plugins/shared/discover/test/scout/ui/fixtures/security_experience/kbn_archives/security_saved_objects.json';
+  'src/platform/plugins/shared/discover/test/scout/ui/fixtures/security_experience/kbn_archives/security_saved_objects.ndjson';
 
 /**
  * Synthetic-document field values referenced by the specs. Values used only when generating the
@@ -108,6 +125,32 @@ export const SECURITY_FLYOUT_TEST_SUBJECTS = {
   // IOC overview tab content (threat-intelligence overview reused in Discover)
   IOC_OVERVIEW_TITLE: 'tiFlyoutOverviewTitle',
   IOC_OVERVIEW_HIGH_LEVEL_BLOCKS: 'tiFlyoutOverviewHighLevelBlocks',
+} as const;
+
+/**
+ * Custom Discover data-grid cell renderers the Security profile registers
+ * (see one_discover/cell_renderers/cell_renderers.tsx). The grid columns themselves are pinned by the
+ * cell-renderers saved search (see SECURITY_CELL_RENDERER_SAVED_SEARCH); these are the elements the
+ * renderers produce in each cell.
+ */
+export const CELL_RENDERER_TEST_SUBJECTS = {
+  /** Link produced by RuleNameCellRenderer for `kibana.alert.rule.name` (opens the rule flyout). */
+  RULE_NAME_LINK: 'one-discover-rule-name-link',
+  /**
+   * Error prompt rendered inside the rule flyout when the rule can't be loaded. The synthetic alert's
+   * `kibana.alert.rule.uuid` is not a real detection rule, so clicking the rule-name link opens the
+   * rule flyout but its `RuleDetails` falls back to this error (full rule rendering is covered by the
+   * security_solution flyout_v2 suite). Asserting it confirms the click opened the system flyout.
+   */
+  RULE_FLYOUT_ERROR: 'securitySolutionFlyoutError',
+  /** Link produced by IpCellRenderer for `source.ip` (opens the network flyout). */
+  IP_LINK: 'one-discover-ip-link',
+  NETWORK_FLYOUT_TITLE: 'network-details-flyout-headerText',
+  /**
+   * `kibana.alert.workflow_status` is rendered by the Timeline DefaultCellRenderer → `RuleStatus`, an
+   * EuiBadge with the same `rule-status-badge` test subject used by the flyout header status badge.
+   */
+  STATUS_CELL: 'rule-status-badge',
 } as const;
 
 /**

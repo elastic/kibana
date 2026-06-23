@@ -93,10 +93,18 @@ const createIndexWithDocuments = async (
   documents: Array<Record<string, unknown>>
 ) => {
   // `event.*`, `kibana.alert.*` etc. arrive as dotted keys; dynamic mapping expands them into the
-  // nested objects the profile's field accessors (`getFieldValue`) read.
+  // nested objects the profile's field accessors (`getFieldValue`) read. The IP fields are mapped
+  // explicitly because the security profile's IP cell renderer only registers for fields the data
+  // view reports as `ip`-typed — dynamic mapping would infer `text`/`keyword` from the string value.
   await esClient.indices.create({
     index,
-    mappings: { dynamic: true },
+    mappings: {
+      dynamic: true,
+      properties: {
+        source: { properties: { ip: { type: 'ip' } } },
+        destination: { properties: { ip: { type: 'ip' } } },
+      },
+    },
   });
 
   const operations = documents.flatMap((doc) => [{ index: { _index: index } }, doc]);
@@ -105,20 +113,18 @@ const createIndexWithDocuments = async (
 
 /**
  * Create the synthetic security indices (alerts, events, IOCs) used by the Security-in-Discover
- * tests, skipping any that already exist. Returns true if at least one index was created.
+ * tests. Any pre-existing index is dropped and recreated so mapping changes (e.g. the explicit `ip`
+ * mapping the IP cell renderer depends on) always take effect, even on a persistent local ES that
+ * still holds an index from an earlier run.
  */
-export async function createSecurityTestIndicesIfNeeded(esClient: EsClient): Promise<boolean> {
-  let createdAny = false;
-
+export async function createSecurityTestIndices(esClient: EsClient): Promise<void> {
   for (const { index, documents } of INDICES) {
-    const exists = await esClient.indices.exists({ index });
-    if (exists) {
-      continue;
+    if (await esClient.indices.exists({ index })) {
+      await esClient.indices.delete({ index });
     }
 
     try {
       await createIndexWithDocuments(esClient, index, documents);
-      createdAny = true;
     } catch (error) {
       if (
         error instanceof errors.ResponseError &&
@@ -129,6 +135,4 @@ export async function createSecurityTestIndicesIfNeeded(esClient: EsClient): Pro
       throw error;
     }
   }
-
-  return createdAny;
 }
