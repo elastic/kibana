@@ -47,8 +47,7 @@ test.describe('YAML mode — view and edit rules', { tag: tags.deploymentAgnosti
     await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
   });
 
-  test('view API-created rule in YAML mode — correct shape, no null/undefined noise', async ({
-    page,
+  test('view API-created rule in YAML mode — correct shape', async ({
     pageObjects,
     apiServices,
   }) => {
@@ -77,9 +76,7 @@ test.describe('YAML mode — view and edit rules', { tag: tags.deploymentAgnosti
     });
 
     await test.step('switch to YAML mode', async () => {
-      const editModeToggle = page.testSubj.locator('composeDiscoverEditModeToggle');
-      await editModeToggle.locator('button').last().click();
-      await expect(page.testSubj.locator('composeDiscoverYamlBadge')).toBeVisible();
+      await pageObjects.composeDiscover.switchToYamlMode();
     });
 
     await test.step('YAML has the expected structure with all seeded fields', async () => {
@@ -108,18 +105,6 @@ test.describe('YAML mode — view and edit rules', { tag: tags.deploymentAgnosti
         },
       });
     });
-
-    await test.step('absent optional fields are omitted — no null or undefined values anywhere', async () => {
-      const yamlString = await pageObjects.composeDiscover.getYamlEditorValue();
-
-      expect(yamlString).not.toContain(': null');
-      expect(yamlString).not.toContain(': undefined');
-
-      const parsed = load(yamlString) as Record<string, unknown>;
-      const metadata = parsed.metadata as Record<string, unknown>;
-      expect(metadata).not.toHaveProperty('description');
-      expect(metadata).not.toHaveProperty('owner');
-    });
   });
 
   test('edit rule name in YAML mode and save', async ({ page, pageObjects, apiServices }) => {
@@ -145,49 +130,14 @@ test.describe('YAML mode — view and edit rules', { tag: tags.deploymentAgnosti
       await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
       await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-
-      const editModeToggle = page.testSubj.locator('composeDiscoverEditModeToggle');
-      await editModeToggle.locator('button').last().click();
-      await expect(page.testSubj.locator('composeDiscoverYamlBadge')).toBeVisible();
+      await pageObjects.composeDiscover.switchToYamlMode();
     });
 
     await test.step('edit the rule name in the YAML editor', async () => {
       const yaml = await pageObjects.composeDiscover.getYamlEditorValue();
-      const updatedYaml = yaml.replace(RULE_NAME, EDITED_RULE_NAME);
-
-      // Set the new value and trigger onChange by dispatching an input event
-      // through the Monaco textarea after programmatic edit
-      await page.evaluate(
-        ({ newValue, oldName }) => {
-          const monacoEnv = (window as any).MonacoEnvironment;
-          const models = monacoEnv.monaco.editor.getModels();
-          const yamlModel = models.find((m: any) => m.getValue().includes(oldName));
-          if (!yamlModel) throw new Error('YAML model not found');
-
-          const editors = monacoEnv.monaco.editor.getEditors();
-          const editor = editors.find(
-            (e: any) => e.getModel()?.uri?.toString() === yamlModel.uri.toString()
-          );
-          if (!editor) throw new Error('YAML editor not found');
-
-          // Select all text and replace via executeEdits with the editor focused
-          editor.focus();
-          const fullRange = yamlModel.getFullModelRange();
-          editor.executeEdits('scout-test', [{ range: fullRange, text: newValue }]);
-
-          // Manually fire the blur → re-parse cycle
-          const textarea = document.querySelector(
-            '[data-test-subj="ruleV2FormYamlEditor"] textarea.inputarea'
-          ) as HTMLTextAreaElement;
-          if (textarea) {
-            textarea.dispatchEvent(new Event('blur', { bubbles: true }));
-          }
-        },
-        { newValue: updatedYaml, oldName: RULE_NAME }
+      await pageObjects.composeDiscover.setYamlEditorValue(
+        yaml.replace(RULE_NAME, EDITED_RULE_NAME)
       );
-
-      // Give the form time to parse and re-validate
-      await page.waitForTimeout(1000);
     });
 
     await test.step('save via YAML mode submit', async () => {

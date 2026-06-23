@@ -173,8 +173,19 @@ export class ComposeDiscoverPage {
   }
 
   /**
+   * Switches the edit-mode toggle from Form view to YAML view and waits for
+   * the YAML badge to appear.
+   */
+  async switchToYamlMode(): Promise<void> {
+    const editModeToggle = this.page.testSubj.locator('composeDiscoverEditModeToggle');
+    await editModeToggle.getByRole('button', { name: 'YAML view' }).click();
+    await expect(this.page.testSubj.locator('composeDiscoverYamlBadge')).toBeVisible();
+  }
+
+  /**
    * Replaces the full content of the YAML-mode Monaco editor via executeEdits,
-   * which fires all change listeners (including React's onChange prop).
+   * focuses the editor beforehand and fires blur afterward so the form
+   * re-parses the new YAML content through its `onBlurSync` handler.
    */
   async setYamlEditorValue(value: string): Promise<void> {
     const yamlEditor = this.page.testSubj.locator('ruleV2FormYamlEditor');
@@ -208,8 +219,13 @@ export class ComposeDiscoverPage {
         throw new Error('YAML editor instance not found');
       }
 
+      editor.focus();
       const fullRange = yamlModel.getFullModelRange();
       editor.executeEdits('scout-test', [{ range: fullRange, text: newValue }]);
+
+      document
+        .querySelector('[data-test-subj="ruleV2FormYamlEditor"] textarea.inputarea')
+        ?.dispatchEvent(new Event('blur', { bubbles: true }));
     }, value);
   }
 }
