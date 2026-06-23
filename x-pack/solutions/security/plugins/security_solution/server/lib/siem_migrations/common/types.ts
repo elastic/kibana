@@ -13,7 +13,6 @@ import type {
 } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
@@ -33,7 +32,6 @@ export interface SiemMigrationsClientDependencies {
   packageService?: PackageService;
   telemetry: AnalyticsServiceSetup;
   experimentalFeatures: ExperimentalFeatures;
-  llmTasks?: LlmTasksPluginStart;
 }
 
 export interface SiemMigrationsCreateClientParams {

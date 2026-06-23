@@ -70,9 +70,6 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
     const toolMap = getRulesMigrationTools(this.migrationId, {
       rulesClient: this.data,
-      request: this.request,
-      connectorId,
-      llmTasks: this.dependencies.llmTasks,
     });
 
     const modelName = this.actionsClientChat.getModelName(model);
