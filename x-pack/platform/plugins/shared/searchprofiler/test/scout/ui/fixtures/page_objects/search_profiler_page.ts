@@ -57,11 +57,6 @@ export class SearchProfilerPage {
     await this.indexInput.fill(index);
   }
 
-  async getIndex(): Promise<string> {
-    await this.waitForEditorToLoad();
-    return await this.indexInput.inputValue();
-  }
-
   async setQuery(query: string) {
     await this.waitForEditorToLoad();
     await this.page.evaluate((value) => {

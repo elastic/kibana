@@ -54,13 +54,13 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
     await pageObjects.searchProfiler.setIndex(PERSISTED_INDEX_NAME);
     await pageObjects.searchProfiler.setQuery(PERSISTED_QUERY);
 
-    await expect.poll(() => pageObjects.searchProfiler.getIndex()).toBe(PERSISTED_INDEX_NAME);
+    await expect(pageObjects.searchProfiler.indexInput).toHaveValue(PERSISTED_INDEX_NAME);
     await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PERSISTED_QUERY);
 
     await pageObjects.searchProfiler.gotoConsole();
     await pageObjects.searchProfiler.goto();
 
-    await expect.poll(() => pageObjects.searchProfiler.getIndex()).toBe(PERSISTED_INDEX_NAME);
+    await expect(pageObjects.searchProfiler.indexInput).toHaveValue(PERSISTED_INDEX_NAME);
     await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PERSISTED_QUERY);
   });
 });
