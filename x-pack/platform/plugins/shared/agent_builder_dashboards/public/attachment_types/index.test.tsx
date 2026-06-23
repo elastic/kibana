@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import type { ChromeStart } from '@kbn/core/public';
+import type { ChromeStart, FeatureFlagsStart } from '@kbn/core/public';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -228,9 +228,14 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       ui: { SearchBar: jest.fn() },
     } as unknown as UnifiedSearchPublicPluginStart;
 
+    const featureFlags = {
+      getBooleanValue: jest.fn().mockReturnValue(false),
+    } as unknown as FeatureFlagsStart;
+
     return {
       agentBuilder,
       chrome,
+      featureFlags,
       addAttachment: mockAddAttachment,
       canWriteDashboards: true,
       data,
@@ -334,6 +339,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
           getCurrentAppId$: () => new BehaviorSubject<string | null>('agentBuilder').asObservable(),
         },
       } as unknown as ChromeStart,
+      featureFlags: {
+        getBooleanValue: jest.fn().mockReturnValue(false),
+      } as unknown as FeatureFlagsStart,
       canWriteDashboards: true,
       dashboardLocator: undefined,
       dashboardPlugin: {

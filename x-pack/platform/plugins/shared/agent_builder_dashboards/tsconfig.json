@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-chrome-feature-flags",
     "@kbn/i18n",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
