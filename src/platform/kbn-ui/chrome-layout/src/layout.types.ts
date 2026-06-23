@@ -20,6 +20,7 @@ export interface LayoutDimensions {
   footerHeight: number;
   headerHeight: number;
   navigationWidth: number;
+  agentWidth: number;
   sidebarWidth: number;
   applicationTopBarHeight: number;
   applicationBottomBarHeight: number;
@@ -37,6 +38,7 @@ export interface LayoutState extends LayoutDimensions {
   hasSidebar: boolean;
   hasHeader: boolean;
   hasNavigation: boolean;
+  hasAgent: boolean;
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
 }
@@ -57,6 +59,7 @@ export type Slot = React.ReactNode | ((props: SlotProps) => React.ReactNode);
 export interface ChromeLayoutSlots {
   header?: Slot | null;
   navigation?: Slot | null;
+  agent?: Slot | null;
   banner?: Slot | null;
   footer?: Slot | null;
   sidebar?: Slot | null;

@@ -12,6 +12,8 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 export const NEXT_CHROME_FEATURE_FLAG_KEY = 'core.chrome.next';
 export const NEXT_CHROME_SESSION_STORAGE_KEY = 'dev.core.chrome.next';
 
+export const AGENT_FIRST_FEATURE_FLAG_KEY = 'core.chrome.agentFirst';
+
 type FeatureFlagsBooleanReader = Pick<FeatureFlagsStart, 'getBooleanValue'>;
 
 const isNextChromeFeatureFlagEnabled = (featureFlags: FeatureFlagsBooleanReader): boolean =>
@@ -39,3 +41,11 @@ export const toggleNextChrome = (featureFlags: FeatureFlagsBooleanReader): void 
   sessionStorage.setItem(NEXT_CHROME_SESSION_STORAGE_KEY, String(next));
   window.location.reload();
 };
+
+/**
+ * POC: agent-first chrome layout with a dedicated agent workspace column.
+ * Enable via `feature_flags.overrides.core.chrome.agentFirst: true` in kibana.dev.yml.
+ * Only shown when Chrome Next is enabled (see grid layout gating).
+ */
+export const isAgentFirst = (featureFlags: FeatureFlagsBooleanReader): boolean =>
+  featureFlags.getBooleanValue(AGENT_FIRST_FEATURE_FLAG_KEY, false);
