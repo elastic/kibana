@@ -22,7 +22,12 @@ import {
   buildNewTermsAgg,
   buildDocFetchAgg,
 } from './build_new_terms_aggregation';
-import { parseDateString, validateHistoryWindowStart, transformBucketsToValues } from './utils';
+import {
+  ALERT_CHUNK_MULTIPLIER,
+  parseDateString,
+  validateHistoryWindowStart,
+  transformBucketsToValues,
+} from './utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -206,7 +211,7 @@ export const executeNewTermsAggregationApproach = async (execOptions: NewTermsEx
       // wrap and create alerts by chunks
       // large number of matches, processed in possibly 10,000 size of events and terms
       // can significantly affect Kibana performance
-      const eventAndTermsChunks = chunk(eventsAndTerms, 5 * params.maxSignals);
+      const eventAndTermsChunks = chunk(eventsAndTerms, ALERT_CHUNK_MULTIPLIER * params.maxSignals);
 
       for (let i = 0; i < eventAndTermsChunks.length; i++) {
         const eventAndTermsChunk = eventAndTermsChunks[i];

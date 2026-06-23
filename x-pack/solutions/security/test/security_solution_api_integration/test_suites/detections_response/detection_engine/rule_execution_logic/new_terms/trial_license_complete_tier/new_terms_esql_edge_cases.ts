@@ -304,10 +304,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['host-new']);
       });
 
-      it('misses new flattened subfield value - labels.env "development" is new but ES|QL produces 0 alerts', async () => {
+      it('detects new flattened subfield value via aggregation fallback - labels.env "development"', async () => {
         // labels is mapped as flattened. labels.env subfield is aggregatable as keyword
         // in the aggregation approach (terms agg resolves it). ES|QL can't resolve
-        // flattened subfield columns — they're treated as unsupported/unknown.
+        // flattened subfield columns, so the executor falls back to aggregation.
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           index: [FLATTENED_INDEX],
@@ -323,9 +323,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['development']);
       });
 
-      it('misses new combination when one field is flattened - host.name+labels.env combo is new but ES|QL produces 0 alerts', async () => {
+      it('detects new combination via aggregation fallback when one field is flattened - host.name+labels.env', async () => {
         // (host-new, development) is a new combination. But labels.env can't be resolved
-        // as an ES|QL column, so the WHERE null filter or STATS BY produces nothing.
+        // as an ES|QL column, so the executor falls back to the aggregation approach.
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           index: [FLATTENED_INDEX],
@@ -344,8 +344,8 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      it('misses new flattened subfield value - labels.team "attackers" is new but ES|QL produces 0 alerts', async () => {
-        // Second flattened subfield to confirm the issue isn't specific to one subfield name.
+      it('detects new flattened subfield value via aggregation fallback - labels.team "attackers"', async () => {
+        // Second flattened subfield to confirm the fallback works for any subfield name.
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           index: [FLATTENED_INDEX],

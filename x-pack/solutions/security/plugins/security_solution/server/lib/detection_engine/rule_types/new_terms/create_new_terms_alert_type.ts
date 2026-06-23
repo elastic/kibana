@@ -78,24 +78,46 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       const { licensing, inputIndex, experimentalFeatures } = execOptions.sharedParams;
       const { newTermsFields } = execOptions.params;
 
-      if (experimentalFeatures.newTermsEsqlApproachEnabled) {
-        const license = await firstValueFrom(licensing.license$);
-        const hasEnterpriseLicense = license.hasAtLeast('enterprise');
+      const { ruleExecutionLogger } = execOptions.sharedParams;
 
-        if (hasEnterpriseLicense || !hasCrossClusterIndices(inputIndex)) {
-          const hasUnsupportedFields = await hasFieldsWithUnsupportedEsqlTypes({
-            esClient: execOptions.services.scopedClusterClient.asCurrentUser,
-            index: inputIndex,
-            fields: newTermsFields,
-          });
-
-          if (!hasUnsupportedFields) {
-            return executeNewTermsEsqlApproach(execOptions);
-          }
-        }
+      if (!experimentalFeatures.newTermsEsqlApproachEnabled) {
+        ruleExecutionLogger.debug('New Terms: using aggregation approach (feature flag disabled)');
+        return executeNewTermsAggregationApproach(execOptions);
       }
 
-      return executeNewTermsAggregationApproach(execOptions);
+      const license = await firstValueFrom(licensing.license$);
+      const hasEnterpriseLicense = license.hasAtLeast('enterprise');
+
+      if (!hasEnterpriseLicense && hasCrossClusterIndices(inputIndex)) {
+        ruleExecutionLogger.debug(
+          'New Terms: using aggregation approach (cross-cluster indices without enterprise license)'
+        );
+        return executeNewTermsAggregationApproach(execOptions);
+      }
+
+      let hasUnsupportedFields = false;
+      try {
+        hasUnsupportedFields = await hasFieldsWithUnsupportedEsqlTypes({
+          esClient: execOptions.services.scopedClusterClient.asCurrentUser,
+          index: inputIndex,
+          fields: newTermsFields,
+        });
+      } catch (_error) {
+        ruleExecutionLogger.debug(
+          'New Terms: using aggregation approach (field_caps check failed)'
+        );
+        return executeNewTermsAggregationApproach(execOptions);
+      }
+
+      if (hasUnsupportedFields) {
+        ruleExecutionLogger.debug(
+          'New Terms: using aggregation approach (unsupported field types: nested or flattened)'
+        );
+        return executeNewTermsAggregationApproach(execOptions);
+      }
+
+      ruleExecutionLogger.debug('New Terms: using ES|QL approach');
+      return executeNewTermsEsqlApproach(execOptions);
     },
   };
 };

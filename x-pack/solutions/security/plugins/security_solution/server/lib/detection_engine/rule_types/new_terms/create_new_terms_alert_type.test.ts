@@ -39,17 +39,23 @@ const createExecOptions = ({
   experimentalFeatures,
   licensing,
   newTermsFields = ['user.name'],
+  fieldCapsResponse = { fields: {} },
 }: {
   inputIndex: string[];
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
   newTermsFields?: string[];
+  fieldCapsResponse?: Record<string, unknown>;
 }) =>
   ({
     sharedParams: {
       inputIndex,
       experimentalFeatures,
       licensing,
+      ruleExecutionLogger: {
+        debug: jest.fn(),
+        warn: jest.fn(),
+      },
     },
     params: {
       newTermsFields,
@@ -57,7 +63,7 @@ const createExecOptions = ({
     services: {
       scopedClusterClient: {
         asCurrentUser: {
-          fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+          fieldCaps: jest.fn().mockResolvedValue(fieldCapsResponse),
         },
       },
     },
@@ -112,6 +118,60 @@ describe('createNewTermsAlertType executor approach selection', () => {
         experimentalFeatures: features,
         licensing,
       });
+
+      await ruleType.executor(execOptions);
+
+      expect(aggregationMock).toHaveBeenCalledWith(execOptions);
+      expect(esqlMock).not.toHaveBeenCalled();
+    });
+
+    it('falls back to aggregation when field_caps returns a flattened type', async () => {
+      const licensing = createLicensingMock(() => false);
+      const execOptions = createExecOptions({
+        inputIndex: ['logs-*'],
+        experimentalFeatures: features,
+        licensing,
+        newTermsFields: ['labels.env'],
+        fieldCapsResponse: {
+          fields: { labels: { flattened: { type: 'flattened', searchable: true } } },
+        },
+      });
+
+      await ruleType.executor(execOptions);
+
+      expect(aggregationMock).toHaveBeenCalledWith(execOptions);
+      expect(esqlMock).not.toHaveBeenCalled();
+    });
+
+    it('falls back to aggregation when field_caps returns a nested type', async () => {
+      const licensing = createLicensingMock(() => false);
+      const execOptions = createExecOptions({
+        inputIndex: ['logs-*'],
+        experimentalFeatures: features,
+        licensing,
+        newTermsFields: ['nested_field'],
+        fieldCapsResponse: {
+          fields: { nested_field: { nested: { type: 'nested' } } },
+        },
+      });
+
+      await ruleType.executor(execOptions);
+
+      expect(aggregationMock).toHaveBeenCalledWith(execOptions);
+      expect(esqlMock).not.toHaveBeenCalled();
+    });
+
+    it('falls back to aggregation when field_caps throws', async () => {
+      const licensing = createLicensingMock(() => false);
+      const execOptions = createExecOptions({
+        inputIndex: ['logs-*'],
+        experimentalFeatures: features,
+        licensing,
+      });
+
+      const fieldCapsMock = execOptions.services.scopedClusterClient.asCurrentUser
+        .fieldCaps as jest.Mock;
+      fieldCapsMock.mockRejectedValueOnce(new Error('index_not_found'));
 
       await ruleType.executor(execOptions);
 

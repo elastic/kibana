@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityExecutorOptions, SignalSource } from '../types';
-import { parseDateString, validateHistoryWindowStart } from './utils';
+import { ALERT_CHUNK_MULTIPLIER, parseDateString, validateHistoryWindowStart } from './utils';
 import {
   createSearchAfterReturnType,
   getUnprocessedExceptionsWarnings,
@@ -22,6 +22,7 @@ import {
 import { getFilter } from '../utils/get_filter';
 import { buildEsqlSearchRequest } from '../esql/build_esql_search_request';
 import { performEsqlRequest } from '../esql/esql_request';
+import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
@@ -40,11 +41,14 @@ type NewTermsExecutorOptions = SecurityExecutorOptions<
   { isLoggedRequestsEnabled?: boolean }
 >;
 
-// Process buckets in batches to avoid issuing too many concurrent searches in a single _msearch
+// Process new term combinations in batches to avoid issuing too many concurrent searches in a single _msearch
 const BATCH_SIZE = 500;
 
 /**
- * New (ES|QL + _msearch based) New Terms implementation, available to platinum tier only.
+ * New (ES|QL + _msearch based) New Terms implementation. Available on all license tiers for
+ * local indices; cross-cluster search requires an Enterprise license (enforced by Elasticsearch).
+ * Falls back to the aggregation approach when cross-cluster indices are detected without an
+ * Enterprise license.
  *
  * It collapses the first two phases of the aggregation approach into a single ES|QL aggregation that
  * computes the `first_seen` timestamp per terms combination over the history window, and keeps only the
@@ -89,7 +93,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
     name: 'historyWindowStart',
   });
 
-  const filterArgs = {
+  const esFilter = await getFilter({
     filters: params.filters,
     index: inputIndex,
     language: params.language,
@@ -99,8 +103,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
     query: params.query,
     exceptionFilter,
     loadFields: true,
-  };
-  const esFilter = await getFilter(filterArgs);
+  });
 
   const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -138,7 +141,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
     `| WHERE ${nullFilters}`,
     mvExpandCommands,
     `| STATS first_seen = MIN(\`${timestampField}\`) BY ${byFields}`,
-    `| WHERE first_seen >= "${tuple.from.toISOString()}"`,
+    `| WHERE first_seen > "${tuple.from.toISOString()}"`,
   ]
     .filter(Boolean)
     .join(' ');
@@ -188,26 +191,32 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
     return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
   }
 
-  // Parse ES|QL results to extract bucket keys
-  // ES|QL returns columns and values array
+  logClusterShardFailuresEsql({ response: esqlResponse, result });
+
   const columnNames = esqlResponse.columns.map((col) => col.name);
   const newTermsFieldIndices = newTermsFields.map((field) => columnNames.indexOf(field));
-  const buckets: Array<Record<string, string | number>> = [];
+  const newTermsCombinations: Array<Record<string, string | number>> = [];
 
   for (const row of esqlResponse.values) {
-    const bucket: Record<string, string | number> = {};
+    const combination: Record<string, string | number> = {};
     for (let i = 0; i < newTermsFields.length; i++) {
       const fieldIndex = newTermsFieldIndices[i];
       if (fieldIndex >= 0 && row[fieldIndex] != null) {
-        bucket[newTermsFields[i]] = row[fieldIndex] as string | number;
+        combination[newTermsFields[i]] = row[fieldIndex] as string | number;
       }
     }
-    if (Object.keys(bucket).length === newTermsFields.length) {
-      buckets.push(bucket);
+    if (Object.keys(combination).length === newTermsFields.length) {
+      newTermsCombinations.push(combination);
     }
   }
 
-  if (buckets.length === 0) {
+  if (newTermsCombinations.length >= 10000) {
+    result.warningMessages.push(
+      'ES|QL new terms query returned the maximum 10,000 term combinations. Additional new terms may exist but were not evaluated in this execution.'
+    );
+  }
+
+  if (newTermsCombinations.length === 0) {
     scheduleNotificationResponseActionsService({
       signals: result.createdSignals,
       signalsCount: result.createdSignalsCount,
@@ -219,43 +228,38 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
   // ============================================
   // STEP 2: FETCH SOURCE DOCUMENTS (Phase 2) - Use msearch
   // ============================================
-  // For each bucket, create a search query to find the first document in the rule execution interval
-  // that contains that combination. Use msearch to execute all queries in parallel.
-  let bucketIndex = 0;
+  // For each combination, create a search query to find the first document in the rule execution
+  // interval that contains it. Use msearch to execute all queries in parallel.
+  let combinationIndex = 0;
   let alertsCandidateCount: number | undefined;
 
-  while (bucketIndex < buckets.length && result.createdSignalsCount < params.maxSignals) {
-    const batch = buckets.slice(bucketIndex, bucketIndex + BATCH_SIZE);
-    bucketIndex += BATCH_SIZE;
+  while (
+    combinationIndex < newTermsCombinations.length &&
+    result.createdSignalsCount < params.maxSignals
+  ) {
+    const batch = newTermsCombinations.slice(combinationIndex, combinationIndex + BATCH_SIZE);
+    combinationIndex += BATCH_SIZE;
 
-    // Build msearch requests: for each bucket, create a search query
     const searches: estypes.MsearchRequestItem[] = [];
-    for (const bucket of batch) {
-      // Build filter for this specific bucket combination
-      const bucketFilter = {
+    for (const combination of batch) {
+      const combinationFilter: estypes.QueryDslQueryContainer = {
         bool: {
           must: newTermsFields.map((field) => ({
-            term: { [field]: bucket[field] },
+            term: { [field]: combination[field] },
           })),
         },
       };
 
-      const esFilterForBucket = await getFilter({
-        ...filterArgs,
-        filters: [...(Array.isArray(filterArgs.filters) ? filterArgs.filters : []), bucketFilter],
-      });
-
-      // Body for this search - find first document sorted by timestamp
       const searchQuery = buildEventsSearchQuery({
         aggregations: undefined,
         runtimeMappings,
         searchAfterSortIds: undefined,
         index: inputIndex,
-        // Search only in the rule execution interval
         from: tuple.from.toISOString(),
         to: tuple.to.toISOString(),
-        filter: esFilterForBucket,
-        size: 1, // Get only the first document
+        filter: esFilter,
+        additionalFilters: [combinationFilter],
+        size: 1,
         primaryTimestamp,
         secondaryTimestamp,
       });
@@ -299,9 +303,17 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
       });
     }
 
-    const msearchResponse = await services.scopedClusterClient.asCurrentUser.msearch<SignalSource>({
-      searches,
-    });
+    let msearchResponse;
+    try {
+      msearchResponse = await services.scopedClusterClient.asCurrentUser.msearch<SignalSource>({
+        searches,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      result.errors.push(`_msearch request to fetch new terms documents failed: ${message}`);
+      result.success = false;
+      break;
+    }
 
     const searchDuration = `${(Date.now() - startTime) / 1000}s`;
     result.searchAfterTimes.push(searchDuration);
@@ -322,19 +334,17 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
         const hits = response.hits;
         if (hits?.hits?.length > 0) {
           const hit = hits.hits[0] as estypes.SearchHit<SignalSource>;
-          const bucket = batch[i];
-          const newTerms = newTermsFields.map((field) => bucket[field]);
+          const combination = batch[i];
+          const newTerms = newTermsFields.map((field) => combination[field]);
           eventsAndTerms.push({
             event: hit,
             newTerms,
           });
         }
       } else if ('status' in response && response.status !== 200) {
-        result.errors.push(
-          `Error fetching document for bucket: ${JSON.stringify(batch[i])}, status: ${
-            response.status
-          }`
-        );
+        const errorMsg = `Failed to fetch document for new term combination ${JSON.stringify(batch[i])}: status ${response.status}`;
+        result.errors.push(errorMsg);
+        ruleExecutionLogger.warn(errorMsg);
       }
     }
 
@@ -344,7 +354,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
 
     // Create alerts from eventsAndTerms
     if (eventsAndTerms.length > 0) {
-      const eventAndTermsChunks = chunk(eventsAndTerms, 5 * params.maxSignals);
+      const eventAndTermsChunks = chunk(eventsAndTerms, ALERT_CHUNK_MULTIPLIER * params.maxSignals);
       let bulkCreateResult: Omit<
         GenericBulkCreateResponse<NewTermsAlertLatest>,
         'suppressedItemsCount'

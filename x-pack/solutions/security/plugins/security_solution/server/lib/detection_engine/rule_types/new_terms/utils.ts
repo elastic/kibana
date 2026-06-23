@@ -58,6 +58,10 @@ export const validateHistoryWindowStart = ({
   }
 };
 
+// Alerts are processed in chunks of ALERT_CHUNK_MULTIPLIER * maxSignals to balance
+// memory pressure against bulk create efficiency.
+export const ALERT_CHUNK_MULTIPLIER = 5;
+
 const ESQL_UNSUPPORTED_FIELD_TYPES = new Set(['flattened', 'nested']);
 
 /**
