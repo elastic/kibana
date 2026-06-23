@@ -11,7 +11,7 @@ mapped_pages:
 
 # {{xsoar}} connector and action [xsoar-action-type]
 
-The {{xsoar}} connector uses the [{{xsoar}} REST API](https://cortex-panw.stoplight.io/docs/cortex-xsoar-8/m0qlgh9inh4vk-create-or-update-an-incident) to create Cortex {{xsoar}} incidents from Elastic rules, cases, and workflows. Use the `xsoar.run` workflow step when a workflow needs to open an incident in {{xsoar}} and optionally associate it with an {{xsoar}} playbook.
+The {{xsoar}} connector uses the [{{xsoar}} REST API](https://cortex-panw.stoplight.io/docs/cortex-xsoar-8/m0qlgh9inh4vk-create-or-update-an-incident) to create Cortex {{xsoar}} incidents from Elastic rules, cases, and Workflows. Use the `xsoar.run` workflow step when a workflow needs to open an incident in {{xsoar}} and optionally associate it with an {{xsoar}} playbook.
 
 ## Prepare {{xsoar}} [xsoar-prepare]
 
