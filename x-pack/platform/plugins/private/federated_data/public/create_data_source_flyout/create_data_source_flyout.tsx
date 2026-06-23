@@ -57,7 +57,10 @@ export interface CreateDataSourceFlyoutProps {
   initialDataSource?: DataSource;
   /** Existing names to prevent duplicates (create mode only). */
   existingDataSourceNames?: readonly string[];
-  enableFederatedIdentityAuth?: boolean;
+  featureFlags?: {
+    enableFederatedIdentityAuth?: boolean;
+    enableGoogleCloudStorageDataSourceType?: boolean;
+  };
   dataSourcesClient: DataSourcesClient;
   toasts: ToastsStart;
   onClose: () => void;
@@ -70,12 +73,15 @@ export interface CreateDataSourceFlyoutProps {
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
   initialDataSource,
   existingDataSourceNames = [],
-  enableFederatedIdentityAuth,
+  featureFlags,
   dataSourcesClient,
   toasts,
   onClose,
   onSave,
 }) => {
+  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
+  const enableGoogleCloudStorageDataSourceType =
+    featureFlags?.enableGoogleCloudStorageDataSourceType;
   const isEditMode = initialDataSource !== undefined;
 
   const formDefaultValues = useMemo(
@@ -131,31 +137,36 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     control,
   });
 
-  const dataSourceTypeOptions = useMemo(
-    () =>
-      ALL_DATA_SOURCE_TYPES.map((value) => ({ value, label: getDataSourceTypeVerbose(value) }))
-        .sort((a, b) => a.label.localeCompare(b.label))
-        .map(({ value, label }) => {
-          const iconType = DATA_SOURCE_TYPES_TO_ICONS[value];
-          const display = iconType ? (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={iconType} size="m" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            label
-          );
+  const enabledDataSourceTypes = useMemo<readonly DataSourceType[]>(() => {
+    const typesToExclude = !enableGoogleCloudStorageDataSourceType ? ['gcs'] : [];
 
-          return {
-            value,
-            inputDisplay: display,
-            dropdownDisplay: display,
-          };
-        }),
-    []
-  );
+    return ALL_DATA_SOURCE_TYPES.filter((t) => !typesToExclude.includes(t));
+  }, [enableGoogleCloudStorageDataSourceType]);
+
+  const dataSourceTypeOptions = useMemo(() => {
+    return enabledDataSourceTypes
+      .map((value) => ({ value, label: getDataSourceTypeVerbose(value) }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+      .map(({ value, label }) => {
+        const iconType = DATA_SOURCE_TYPES_TO_ICONS[value];
+        const display = iconType ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={iconType} size="m" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          label
+        );
+
+        return {
+          value,
+          inputDisplay: display,
+          dropdownDisplay: display,
+        };
+      });
+  }, [enabledDataSourceTypes]);
 
   // todo - is this needed for initial release?
   const [authenticationMode, setAuthenticationMode] = useState<CreateDataSourceAuthenticationMode>(

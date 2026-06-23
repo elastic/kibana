@@ -14,13 +14,24 @@ import { Router } from '@kbn/shared-ux-router';
 
 import { Main } from './main';
 
+export interface FederatedDataFeatureFlags {
+  enableFederatedIdentityAuth?: boolean;
+  enableGoogleCloudStorageDataSourceType?: boolean;
+}
+
 export const mountManagementSection = (
   coreStart: CoreStart,
   { element, history }: ManagementAppMountParams,
   {
     cloud,
-    enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = true,
-  }: { cloud?: CloudStart; enableFederatedIdentityAuth?: boolean }
+    featureFlags: {
+      enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = true,
+      enableGoogleCloudStorageDataSourceType = false,
+    } = {},
+  }: {
+    cloud?: CloudStart;
+    featureFlags?: FederatedDataFeatureFlags;
+  }
 ) => {
   const enableFederatedIdentityAuth =
     Boolean(cloud?.isCloudEnabled) && enableFederatedIdentityAuthConfig;
@@ -31,7 +42,10 @@ export const mountManagementSection = (
         <Main
           httpClient={coreStart.http}
           toasts={coreStart.notifications.toasts}
-          enableFederatedIdentityAuth={enableFederatedIdentityAuth}
+          featureFlags={{
+            enableFederatedIdentityAuth,
+            enableGoogleCloudStorageDataSourceType,
+          }}
         />
       </Router>
     ),

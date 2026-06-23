@@ -25,16 +25,21 @@ export class FederatedDataPlugin
   implements Plugin<void, FederatedDataPluginStart, SetupDependencies, StartDependencies>
 {
   private readonly enableFederatedIdentityAuth: boolean;
+  private readonly enableGoogleCloudStorageDataSourceType: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const { enableFederatedIdentityAuth } = initializerContext.config.get<{
-      enableFederatedIdentityAuth: boolean;
-    }>();
+    const { enableFederatedIdentityAuth, enableGoogleCloudStorageDataSourceType } =
+      initializerContext.config.get<{
+        enableFederatedIdentityAuth: boolean;
+        enableGoogleCloudStorageDataSourceType: boolean;
+      }>();
     this.enableFederatedIdentityAuth = enableFederatedIdentityAuth;
+    this.enableGoogleCloudStorageDataSourceType = enableGoogleCloudStorageDataSourceType;
   }
 
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
+    const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     management.sections.section.data.registerApp({
       id: 'federated_data',
       title: PLUGIN_NAME,
@@ -51,7 +56,7 @@ export class FederatedDataPlugin
 
         const unmountAppCallback = mountManagementSection(coreStart, params, {
           cloud: pluginsStart.cloud,
-          enableFederatedIdentityAuth,
+          featureFlags: { enableFederatedIdentityAuth, enableGoogleCloudStorageDataSourceType },
         });
         return () => {
           docTitle.reset();

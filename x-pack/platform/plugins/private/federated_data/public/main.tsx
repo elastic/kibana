@@ -50,14 +50,16 @@ type DataSetFlyoutState =
 export interface MainProps {
   httpClient: HttpSetup;
   toasts: ToastsStart;
-  enableFederatedIdentityAuth?: boolean;
+  featureFlags?: {
+    enableFederatedIdentityAuth?: boolean;
+    enableGoogleCloudStorageDataSourceType?: boolean;
+  };
 }
 
-export const Main: FunctionComponent<MainProps> = ({
-  httpClient,
-  toasts,
-  enableFederatedIdentityAuth,
-}) => {
+export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, featureFlags }) => {
+  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
+  const enableGoogleCloudStorageDataSourceType =
+    featureFlags?.enableGoogleCloudStorageDataSourceType ?? false;
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
@@ -677,7 +679,10 @@ export const Main: FunctionComponent<MainProps> = ({
           dataSourcesClient={dataClient}
           toasts={toasts}
           existingDataSourceNames={items.map((ds) => ds.name)}
-          enableFederatedIdentityAuth={enableFederatedIdentityAuth}
+          featureFlags={{
+            enableFederatedIdentityAuth,
+            enableGoogleCloudStorageDataSourceType,
+          }}
           onClose={() => setDataSourceFlyout({ kind: 'closed' })}
           onSave={handleDataSourceSave}
         />

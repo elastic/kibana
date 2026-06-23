@@ -11,6 +11,10 @@
     "id": "federatedData",
     "browser": true,
     "server": true,
+    "configPath": [
+      "xpack",
+      "federatedData"
+    ],
     "requiredPlugins": [
       "management"
     ],

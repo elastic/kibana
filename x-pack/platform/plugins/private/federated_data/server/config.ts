@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 
 const configSchema = schema.object({
   enableFederatedIdentityAuth: schema.boolean({ defaultValue: false }),
+  enableGoogleCloudStorageDataSourceType: schema.boolean({ defaultValue: false }),
 });
 
 export type FederatedDataConfigType = TypeOf<typeof configSchema>;
@@ -18,6 +19,7 @@ export type FederatedDataConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<FederatedDataConfigType> = {
   exposeToBrowser: {
     enableFederatedIdentityAuth: true,
+    enableGoogleCloudStorageDataSourceType: true,
   },
   schema: configSchema,
 };

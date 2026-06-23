@@ -7,12 +7,17 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerDataSetsRoutes } from './routes/register_routes';
+import type { FederatedDataConfigType } from './config';
 
 export class FederatedDataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly config: FederatedDataConfigType;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<FederatedDataConfigType>();
+  }
 
   public setup({ http }: CoreSetup) {
-    registerDataSetsRoutes(http.createRouter());
+    registerDataSetsRoutes(http.createRouter(), this.config);
   }
 
   public start(_core: CoreStart) {}
