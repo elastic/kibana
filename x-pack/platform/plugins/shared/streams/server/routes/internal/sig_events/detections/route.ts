@@ -55,7 +55,7 @@ const detectionsHistoryRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Get detection history',
-    description: 'Get all historical versions of a detection entity.',
+    description: 'Get all state transition documents for a detection episode, sorted ascending.',
   },
   security: {
     authz: {
@@ -64,7 +64,7 @@ const detectionsHistoryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      id: z.string().max(255),
     }),
   }),
   handler: async ({

@@ -163,7 +163,7 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           # Extended tier: includes smaller/cheaper models for cost-performance evaluation.
           # Keep in sync with `weeklyEisModelGroups` for significant-events in evals.suites.json.
-          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-oss-120b'
+          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.7-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-flash-lite,eis/google-gemini-3.5-flash,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -293,11 +293,11 @@ steps:
         env:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'entity-analytics'
+          EVAL_SUITE_ID: 'entity-analytics-v2'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
-          EVAL_SERVER_CONFIG_SET: 'evals_entity_analytics'
+          EVAL_SERVER_CONFIG_SET: 'evals_entity_analytics_v2'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -384,6 +384,28 @@ steps:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'security-alerts-rag-regression'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Security Alert Triage'
+        key: kbn-evals-weekly-security-alert-triage
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-alert-triage'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models

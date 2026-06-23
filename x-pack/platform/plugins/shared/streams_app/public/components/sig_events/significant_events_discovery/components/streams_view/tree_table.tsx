@@ -22,8 +22,12 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Streams, TaskStatus } from '@kbn/streams-schema';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
+import {
+  Streams,
+  SigEventsWorkflowStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type SigEventsWorkflowStatusResult,
+} from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
@@ -63,9 +67,9 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
+  streamOnboardingResultMap: Record<string, SigEventsWorkflowStatusResult>;
   loading?: boolean;
-  searchQuery?: Query;
+  searchQuery: Query;
   selection: EuiTableSelectionType<TableRow>;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
@@ -87,7 +91,7 @@ export function StreamsTreeTable({
   const filteredStreams = React.useMemo(() => {
     return filterStreamsByQuery(
       streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
-      searchQuery?.text ?? ''
+      searchQuery.text
     );
   }, [streams, searchQuery]);
 
@@ -103,10 +107,9 @@ export function StreamsTreeTable({
 
   const allRows = React.useMemo(() => {
     const rows = buildStreamRows(enrichedStreams, sortField, sortDirection, {});
-    const qualityFiters =
-      searchQuery?.ast?.clauses.filter(
-        (clause) => clause.type === 'field' && clause.field === 'dataQuality'
-      ) ?? [];
+    const qualityFiters = searchQuery.ast.clauses.filter(
+      (clause) => clause.type === 'field' && clause.field === 'dataQuality'
+    );
     return qualityFiters.length > 0
       ? rows.filter((row) =>
           qualityFiters.some(
@@ -117,7 +120,7 @@ export function StreamsTreeTable({
           )
         )
       : rows;
-  }, [enrichedStreams, sortField, sortDirection, searchQuery?.ast?.clauses]);
+  }, [enrichedStreams, sortField, sortDirection, searchQuery.ast.clauses]);
 
   // Only pass filtered rows if tree mode is active
   const items = React.useMemo(
@@ -194,16 +197,8 @@ export function StreamsTreeTable({
 
   // Expand/Collapse all button for the name column header
   const expandCollapseAllButton = (
-    <EuiButtonIcon
-      size="xs"
-      iconType={allExpanded ? 'fold' : 'unfold'}
-      color="text"
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        handleExpandCollapseAll();
-      }}
-      data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
-      aria-label={
+    <EuiToolTip
+      content={
         allExpanded
           ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
               defaultMessage: 'Collapse all',
@@ -212,7 +207,28 @@ export function StreamsTreeTable({
               defaultMessage: 'Expand all',
             })
       }
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="xs"
+        iconType={allExpanded ? 'fold' : 'unfold'}
+        color="text"
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          handleExpandCollapseAll();
+        }}
+        data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
+        aria-label={
+          allExpanded
+            ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+                defaultMessage: 'Collapse all',
+              })
+            : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+                defaultMessage: 'Expand all',
+              })
+        }
+      />
+    </EuiToolTip>
   );
 
   const streamsListStepProps = getStepPropsByStepId('streams_list');
@@ -321,9 +337,7 @@ export function StreamsTreeTable({
                           path: { key: item.stream.name, tab: 'significantEvents' },
                         })}
                       >
-                        <EuiHighlight search={searchQuery?.text ?? ''}>
-                          {item.stream.name}
-                        </EuiHighlight>
+                        <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
                       </EuiLink>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -342,22 +356,17 @@ export function StreamsTreeTable({
                 }
 
                 switch (onboardingResult.status) {
-                  case TaskStatus.InProgress:
-                  case TaskStatus.BeingCanceled:
+                  case SigEventsWorkflowStatus.InProgress:
+                  case SigEventsWorkflowStatus.BeingCanceled:
                     return <EuiLoadingSpinner size="m" />;
-                  case TaskStatus.NotStarted:
-                  case TaskStatus.Canceled:
+                  case SigEventsWorkflowStatus.NotStarted:
+                  case SigEventsWorkflowStatus.Canceled:
                     return '-';
-                  case TaskStatus.Completed:
-                  case TaskStatus.Acknowledged:
+                  case SigEventsWorkflowStatus.Completed:
                     return (
                       <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
                     );
-                  case TaskStatus.Stale:
-                    return (
-                      <EuiIcon type="checkCircleFill" color="subdued" size="m" aria-hidden={true} />
-                    );
-                  case TaskStatus.Failed:
+                  case SigEventsWorkflowStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
@@ -419,11 +428,7 @@ export function StreamsTreeTable({
               render: (_: unknown, item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                if (
-                  [TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(
-                    onboardingResult?.status
-                  )
-                ) {
+                if (STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
                   return (
                     <EuiToolTip
                       position="top"
@@ -434,7 +439,7 @@ export function StreamsTreeTable({
                       <EuiButtonIcon
                         iconType="stop"
                         aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                        disabled={onboardingResult.status === TaskStatus.BeingCanceled}
+                        disabled={onboardingResult.status === SigEventsWorkflowStatus.BeingCanceled}
                         onClick={() => onStopOnboardingActionClick(item.stream.name)}
                       />
                     </EuiToolTip>

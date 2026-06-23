@@ -15,6 +15,7 @@ import {
   type PaginatedResponse,
   type PaginatedSearchOptions,
 } from './query_utils';
+import { runEsqlQuery } from './run_esql_query';
 
 export const isIndexNotFoundError = (error: unknown): boolean => {
   if (error instanceof Error) {
@@ -40,6 +41,19 @@ export const queryEsql = async ({
   query: ComposerQuery;
 }): Promise<ESQLSearchResponse> =>
   (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
+
+// Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
+export const esqlToObjects = <T extends Record<string, unknown>>(
+  response: ESQLSearchResponse
+): T[] =>
+  response.values.map(
+    (row) =>
+      row.reduce<Record<string, unknown>>((acc, value, i) => {
+        const col = response.columns[i];
+        if (col) acc[col.name] = value;
+        return acc;
+      }, {}) as T
+  );
 
 const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
   const sourceIdx = getSourceColumnIndex(response);
@@ -322,4 +336,151 @@ export const runFindByIdsEsqlQuery = async <T>({
 
   const hits = await executeEsqlQuery<T>({ esClient, query });
   return { hits };
+};
+
+export type LatestSourceGroupBy = string | [string, string] | [string, string, string];
+
+export type LatestSourceWhereCondition = ESQLAstExpression;
+
+interface RunGetProcessedIdsArgs {
+  esClient: ElasticsearchClient;
+  space: string;
+  index: string;
+  idField: string;
+  idValues: string[];
+  stateKinds: string[];
+  handledKind: string;
+  chunkSize?: number;
+}
+
+/**
+ * Returns the set of IDs where a handled stamp (kind == handledKind) is at least
+ * as recent as the latest state doc (kind in stateKinds). Used by both DetectionClient
+ * and DiscoveryClient to determine which episodes are fully processed.
+ */
+export const runGetProcessedIds = async ({
+  esClient,
+  space,
+  index,
+  idField,
+  idValues,
+  stateKinds,
+  handledKind,
+  chunkSize = 250,
+}: RunGetProcessedIdsArgs): Promise<Set<string>> => {
+  if (!idValues.length) return new Set();
+
+  const processed = new Set<string>();
+  const idCol = esql.col(idField);
+  const kindCol = esql.col('kind');
+  const allKinds = [...stateKinds, handledKind].map((k) => esql.str(k));
+  const kindStateLiterals = stateKinds.map((k) => esql.str(k));
+
+  for (let i = 0; i < idValues.length; i += chunkSize) {
+    const batch = idValues.slice(i, i + chunkSize);
+    const idLiterals = batch.map((id) => esql.str(id));
+
+    const query = esql`FROM ${index}
+      | WHERE kibana.space_ids == ${esql.str(space)} OR kibana.space_ids IS NULL
+      | WHERE ${kindCol} IN (${allKinds})
+      | WHERE ${idCol} IN (${idLiterals})
+      | STATS max_state_ts = MAX(CASE(${kindCol} IN (${kindStateLiterals}), @timestamp, null)),
+              max_handled_ts = MAX(CASE(${kindCol} == ${esql.str(handledKind)}, @timestamp, null))
+        BY ${idCol}
+      | WHERE max_handled_ts >= max_state_ts OR max_state_ts IS NULL
+      | KEEP ${idCol}`;
+
+    const response = await queryEsql({ esClient, query });
+    const rows = esqlToObjects<Record<string, string>>(response);
+    for (const row of rows) {
+      const id = row[idField];
+      if (id) processed.add(id);
+    }
+  }
+  return processed;
+};
+
+/**
+ * Start an ES|QL query from a data stream, filtered to the given space.
+ */
+export const latestSourceFrom = (index: string, space: string): ComposerQuery =>
+  esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
+
+export const withTimeRange = (
+  query: ComposerQuery,
+  options: CommonSearchOptions
+): ComposerQuery => {
+  let next = query;
+  if (options.from !== undefined) {
+    next = next.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
+  }
+  if (options.to !== undefined) {
+    next = next.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
+  }
+  return next;
+};
+
+export const withWhere = (
+  query: ComposerQuery,
+  condition?: LatestSourceWhereCondition
+): ComposerQuery => {
+  if (!condition) {
+    return query;
+  }
+  return query.where`${condition}`;
+};
+
+const buildGroupByCols = (groupBy: LatestSourceGroupBy) => {
+  if (typeof groupBy === 'string') {
+    return [esql.col(groupBy)];
+  }
+  return groupBy.map((field) => esql.col(field));
+};
+
+/**
+ * Two-stage `INLINE STATS` reduction: keeps the latest revision per group by
+ * `MAX(@timestamp)`, breaking ties with `MAX(_id)`.
+ */
+export const pickLatestPerGroup = (
+  query: ComposerQuery,
+  groupBy: LatestSourceGroupBy
+): ComposerQuery => {
+  const groupByCols = buildGroupByCols(groupBy);
+  return query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${groupByCols}`
+    .where`@timestamp == latest_ts`.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${groupByCols}`
+    .where`_id == tiebreaker_id`;
+};
+
+export const withSort = (query: ComposerQuery, sort?: ComposerSortShorthand[]): ComposerQuery => {
+  if (!sort?.length) {
+    return query;
+  }
+  return query.sort(sort[0], ...sort.slice(1));
+};
+
+/**
+ * Run the composed query, locate `_source`, and strip the `kibana` envelope
+ * that `IDataStreamClient` adds on write.
+ */
+export const executeAndDecodeSource = async <T>(
+  esClient: ElasticsearchClient,
+  query: ComposerQuery
+): Promise<{ hits: T[] }> => {
+  const response = await runEsqlQuery(esClient, query.print('basic'));
+  if (!response) {
+    return { hits: [] };
+  }
+
+  const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+  if (sourceIdx === -1) {
+    return { hits: [] };
+  }
+
+  return {
+    hits: response.values.map((row) => {
+      const source = (row[sourceIdx] ?? {}) as Record<string, unknown>;
+      const { kibana: _kibana, ...rest } = source;
+      return rest as T;
+    }),
+  };
 };

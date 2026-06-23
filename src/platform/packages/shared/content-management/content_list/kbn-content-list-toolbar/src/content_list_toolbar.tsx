@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { EuiSearchBar } from '@elastic/eui';
+import { EuiSearchBar, EuiText } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import {
   useContentListConfig,
@@ -38,6 +38,11 @@ const defaultPlaceholder = i18n.translate(
   { defaultMessage: 'Search…' }
 );
 
+const parseErrorPrefix = i18n.translate(
+  'contentManagement.contentList.toolbar.searchParseErrorPrefix',
+  { defaultMessage: 'Invalid search:' }
+);
+
 /**
  * `ContentListToolbar` component.
  *
@@ -61,25 +66,37 @@ const ContentListToolbarComponent = ({
   const { selectedCount } = useContentListSelection();
   const filters = useFilters(children);
 
+  // Surface `EuiSearchBar` parse errors below the input — the built-in
+  // invalid-icon + browser `title` tooltip is easy to miss
+  // ({@link https://github.com/elastic/kibana/issues/271705}).
+  const [parseError, setParseError] = useState<string | null>(null);
+
   const handleSearchChange = useCallback(
     ({ query, error }: EuiSearchBarOnChangeArgs) => {
       if (error || !query) {
-        // Return without updating state when EuiSearchBar reports a parse error.
-        //
-        // EuiSearchBar maintains its own internal `queryText` during error states,
-        // so the input continues to show what the user typed. Passing the raw
-        // error text to the controlled `query` prop is unsafe: EuiSearchBar's
-        // `getDerivedStateFromProps` calls `parseQuery` on any new prop value and
-        // would throw if the text is unparseable, crashing the component.
-        //
-        // Known limitation: if an external query change (e.g. a filter-toggle
-        // avatar click) fires while the user has an in-progress parse error, the
-        // input will snap to the new external query value.
+        // Capture the parse message for the hint popover but do not echo the
+        // raw text back through the controlled `query` prop —
+        // `EuiSearchBar.getDerivedStateFromProps` re-parses every new value
+        // and would throw on unparseable text.
+        setParseError(error ? error.message : null);
         return;
       }
+      setParseError(null);
       setQueryFromEuiQuery(query);
     },
     [setQueryFromEuiQuery]
+  );
+
+  const searchHint = useMemo(
+    () => ({
+      content: (
+        <EuiText color="danger" size="s" data-test-subj={`${dataTestSubj}-searchParseError`}>
+          {parseErrorPrefix} {parseError}
+        </EuiText>
+      ),
+      popoverProps: { isOpen: Boolean(parseError) },
+    }),
+    [parseError, dataTestSubj]
   );
 
   // Build an EuiSearchBar schema so it recognizes registered fields (e.g., `tag`,
@@ -130,6 +147,7 @@ const ContentListToolbarComponent = ({
       onChange={handleSearchChange}
       toolsLeft={toolsLeft}
       filters={filters}
+      hint={searchHint}
       data-test-subj={dataTestSubj}
     />
   );

@@ -31,22 +31,30 @@ export interface InitialStateConfig {
   initialKind?: RuleKind;
   initialRecoveryType?: RecoveryType;
   isBuilderMode?: boolean;
+  /** When true, the query is already populated (e.g. from Discover) and the sandbox gate is skipped. */
+  isQueryPrePopulated?: boolean;
 }
 
 export const createInitialState = ({
   mode,
-  initialKind = 'signal',
+  initialKind = 'alert',
   initialRecoveryType = 'default',
   isBuilderMode = false,
-}: InitialStateConfig): ComposeDiscoverState => ({
-  mode,
-  step: 0,
-  recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
-  activeTab: 'alert',
-  childOpen: mode === 'create' && !isBuilderMode,
-  queryCommitted: mode === 'edit',
-  yamlMode: false,
-});
+  isQueryPrePopulated = false,
+}: InitialStateConfig): ComposeDiscoverState => {
+  const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
+  return {
+    mode,
+    step: 0,
+    recoveryType,
+    activeTab: defaultTabForTabs(
+      getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType })
+    ),
+    childOpen: mode === 'create' && !isBuilderMode,
+    queryCommitted: mode === 'edit' || isQueryPrePopulated,
+    yamlMode: false,
+  };
+};
 
 /**
  * Returns the tabs to show in the Sandbox for the current step.
@@ -70,6 +78,9 @@ export function getSandboxTabs(
 
 function defaultTabForTabs(tabs: QueryTab[] | undefined): QueryTab {
   if (tabs?.includes('recovery')) return 'recovery';
+  // When the split editor is open (base + alert), start on the base query —
+  // users build the base query first, then layer the alert condition on top.
+  if (tabs?.includes('base')) return 'base';
   return 'alert';
 }
 
@@ -82,13 +93,13 @@ export function reducer(
       return {
         ...state,
         recoveryType: action.recoveryType,
-        ...(action.recoveryType === 'custom'
+        ...(action.recoveryType === 'custom' && !action.isBuilderMode
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
     case 'KIND_CHANGE':
       return action.kind === 'alert'
-        ? { ...state, step: 0, childOpen: true, activeTab: 'alert' }
+        ? { ...state, step: 0, childOpen: true, activeTab: 'base' }
         : { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };

@@ -12,8 +12,12 @@ import {
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
   ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
+import {
+  AnomalyChartsAttachmentPayloadSchema,
+  AnomalySwimLaneAttachmentPayloadSchema,
+  SingleMetricViewerAttachmentPayloadSchema,
+} from '../../common/util/cases_utils';
 import type { MlFeatures } from '../../common/constants/app';
-import { casesSchemaValidator } from '../../common/util/cases_utils';
 
 export function registerCasesPersistableState(
   cases: CasesServerSetup,
@@ -24,7 +28,7 @@ export function registerCasesPersistableState(
     try {
       cases.attachmentFramework.registerUnified({
         id: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
-        schemaValidator: casesSchemaValidator,
+        schema: AnomalySwimLaneAttachmentPayloadSchema,
       });
     } catch (error) {
       logger.warn(
@@ -34,7 +38,7 @@ export function registerCasesPersistableState(
     try {
       cases.attachmentFramework.registerUnified({
         id: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
-        schemaValidator: casesSchemaValidator,
+        schema: AnomalyChartsAttachmentPayloadSchema,
       });
     } catch (error) {
       logger.warn(
@@ -45,7 +49,7 @@ export function registerCasesPersistableState(
     try {
       cases.attachmentFramework.registerUnified({
         id: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
-        schemaValidator: casesSchemaValidator,
+        schema: SingleMetricViewerAttachmentPayloadSchema,
       });
     } catch (error) {
       logger.warn(

@@ -58,6 +58,35 @@ import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { Case } from './apis/bulk_get_cases';
 import type { ItemsSelectionState } from './components/tags/items/types';
 
+/**
+ * A single conversation attachment or a group of attachments. Defined structurally
+ * here to avoid a compile-time dependency on agent-builder packages. The payload is
+ * passed through to openChat without inspection, so a broad structural type is enough.
+ */
+export interface ConversationAttachmentInput {
+  type: string;
+}
+
+/**
+ * Minimal structural interface for the chat service required by the alerts table.
+ * Using a local structural type avoids a compile-time dependency on agent-builder packages
+ * from this shared platform package.
+ */
+export interface OpenChatService {
+  openChat(options?: {
+    attachments?: ConversationAttachmentInput[];
+    newConversation?: boolean;
+    initialMessage?: string;
+    autoSendInitialMessage?: boolean;
+  }): void;
+}
+
+export interface BulkAddToChatConfig {
+  convertAlertToAttachment: (alerts: TimelineItem[]) => ConversationAttachmentInput[];
+  initialMessage?: string;
+  onAddedToChat?: (itemCount: number) => void;
+}
+
 export interface Consumer {
   id: AlertConsumers;
   name: string;
@@ -411,6 +440,14 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * @default new LocalStorageWrapper(window.localStorage)
    */
   configurationStorage?: IStorageWrapper | null;
+
+  /**
+   * Configuration for the bulk "Add to chat" action. When provided, a bulk
+   * action will appear in the table allowing users to add selected alerts to
+   * the Agent Builder chat.
+   */
+  bulkAddToChatConfig?: BulkAddToChatConfig;
+
   /**
    * Show a CSV export button in the toolbar. The button exports all alerts matching
    * the current filters using the reporting CSV endpoint.
@@ -418,6 +455,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * @default false
    */
   showCsvExportButton?: boolean;
+  /**
+   * The current Kibana version (e.g. '9.5.0'). Used when generating CSV reports
+   * so the correct version is recorded in the report metadata.
+   */
+  kibanaVersion?: string;
   /**
    * Dependencies
    */
@@ -438,6 +480,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
      * The cases service is optional: cases features will be disabled if not provided
      */
     cases?: CasesService;
+    agentBuilder?: OpenChatService;
   };
 }
 
@@ -523,6 +566,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'onExpandedAlertIndexChange'
     | 'renderExpandedAlertView'
     | 'services'
+    | 'kibanaVersion'
     | 'casesConfiguration'
     | 'openLinksInNewTab'
     | 'isMutedAlertsEnabled'
@@ -613,6 +657,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   extends PublicAlertsDataGridProps,
     Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];
   leadingControlColumns?: EuiDataGridControlColumn[];

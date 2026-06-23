@@ -110,20 +110,16 @@ export function createSearchKnowledgeIndicatorsTool({
       const { request } = context;
 
       try {
-        const { streamsClient, getFeatureClient, getQueryClient, licensing, uiSettingsClient } =
+        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
           await getScopedClients({ request });
 
         await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-        const [featureClient, queryClient] = await Promise.all([
-          getFeatureClient(),
-          getQueryClient(),
-        ]);
+        const kiClient = await getKnowledgeIndicatorClient();
 
         const output = await searchKnowledgeIndicatorsToolHandler({
           streamsClient,
-          featureClient,
-          queryClient,
+          kiClient,
           logger,
           params: toolParams,
         });

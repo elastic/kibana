@@ -1,5 +1,5 @@
 {
-  "sha1": "44ec6301399958b77de8327aa10ffc91016d6da5",
+  "sha1": "dc96f680abbb685e6d1c4e51fda21b58e6281a93",
   "tests": [
     {
       "id": "f4c048e25988cb5-605d7a7bf19c60f",
@@ -133,7 +133,6 @@
       "id": "429b26b1a93be7d-b4cd1ee38b3f8ad",
       "title": "Hosts Page - Empty State should show onboarding page when no data is present",
       "expectedStatus": "skipped",
-      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -142,7 +141,6 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_empty_state.spec.ts",
-        "line": 23,
         "line": 23,
         "column": 9
       }
@@ -230,7 +228,7 @@
     {
       "id": "a01812d3d8d03d1-6edec65fe06717b",
       "title": "Infrastructure Inventory - Onboarding Renders no data page and redirects to onboarding page when no data is present",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -239,7 +237,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
-        "line": 23,
+        "line": 45,
         "column": 9
       }
     }
