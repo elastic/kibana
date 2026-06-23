@@ -15,6 +15,7 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
   code: ESQLMessage['code'];
   data?: ESQLMessage['data'];
   location?: ESQLMessage['location'];
+  // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: ESQLMessage['underlinedWarning'];
 };
 

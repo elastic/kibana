@@ -10,7 +10,8 @@
 import { BasicPrettyPrinter, EsqlQuery, mutate, synth } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { i18n } from '@kbn/i18n';
-import { inlineCastsMapping } from '../../commands/definitions/generated/inline_casts_mapping';
+import type { InlineCastingType } from '../../commands/definitions/types';
+import { getFunctionForInlineCast } from '../../commands/definitions/utils/functions';
 import type { QuickFix, QuickFixMessage } from './types';
 
 interface TypeConversion {
@@ -81,9 +82,9 @@ const getTypeConversions = (types: string[]): TypeConversion[] => {
 
 /** Resolve the conversion function from the generated inline cast mapping. */
 const getConversionFunctionNameForType = (type: string): string | undefined => {
-  const normalizedType = type.toLowerCase() as keyof typeof inlineCastsMapping;
+  const normalizedType = type.toLowerCase() as InlineCastingType;
 
-  return inlineCastsMapping[normalizedType];
+  return getFunctionForInlineCast(normalizedType);
 };
 
 const getCommandIndexContainingMessage = (

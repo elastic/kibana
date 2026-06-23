@@ -507,7 +507,7 @@ export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export type ESQLDiagnosticData = ColumnTypeConflictDiagnosticData;
-export interface ColumnTypeConflictDiagnosticData {
+interface ColumnTypeConflictDiagnosticData {
   columnName: string;
   types: string[];
 }
