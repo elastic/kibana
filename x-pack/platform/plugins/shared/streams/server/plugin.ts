@@ -252,10 +252,6 @@ export class StreamsPlugin
             rulesClientOptions
           );
           return knowledgeIndicatorService.getClient({
-            // KI data (significant-event queries and their backing alerting rules) lives in
-            // internal indices reachable only through authz-gated streams routes, so the KI
-            // client always runs as the internal user. Stream CRUD no longer reads or writes
-            // KI, so editor-level stream operations no longer require KI index privileges.
             esClient: scopedClusterClient.asInternalUser,
             soClient,
             alertingRulesClient: rulesClient,
