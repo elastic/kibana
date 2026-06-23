@@ -23,27 +23,118 @@ export interface RuleSpec {
   enabled: boolean;
 }
 
-const ES_QUERY_PARAMS = {
-  index: ['.kibana-event-log-*'],
-  timeField: '@timestamp',
-  esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
-  size: 100,
-  timeWindowSize: 5,
-  timeWindowUnit: 'm',
-  thresholdComparator: '>',
-  threshold: [0],
-  searchType: 'esQuery',
-  excludeHitsFromPreviousRun: true,
-  aggType: 'count',
-  groupBy: 'all',
-};
-
 export const ES_QUERY_CONSUMER = 'logs';
 
-export const RULE_SPECS: RuleSpec[] = OBS_ALERTING_FEATURES.map(({ ruleTypeId, consumers }) => ({
+/**
+ * Minimal valid params for each obs rule type that can be created without
+ * external resources (SLOs, ML jobs, uptime monitors).  Rule types that
+ * require those resources are omitted — the privilege boundary is identical
+ * regardless of rule type, so covering the self-contained ones is sufficient.
+ */
+const OBS_RULE_TEST_PARAMS: Record<string, Record<string, unknown>> = {
+  '.es-query': {
+    index: ['.kibana-event-log-*'],
+    timeField: '@timestamp',
+    esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
+    size: 100,
+    timeWindowSize: 5,
+    timeWindowUnit: 'm',
+    thresholdComparator: '>',
+    threshold: [0],
+    searchType: 'esQuery',
+    excludeHitsFromPreviousRun: true,
+    aggType: 'count',
+    groupBy: 'all',
+  },
+  'apm.error_rate': {
+    environment: 'production',
+    threshold: 0,
+    windowSize: 1,
+    windowUnit: 'm',
+  },
+  'apm.transaction_error_rate': {
+    environment: 'production',
+    threshold: 30,
+    windowSize: 5,
+    windowUnit: 'm',
+  },
+  'apm.transaction_duration': {
+    environment: 'production',
+    threshold: 1500,
+    windowSize: 5,
+    windowUnit: 'm',
+    aggregationType: 'avg',
+  },
+  'apm.anomaly': {
+    windowSize: 5,
+    windowUnit: 'm',
+    environment: 'ENVIRONMENT_ALL',
+    anomalySeverityType: 'minor',
+  },
+  'metrics.alert.threshold': {
+    sourceId: 'default',
+    criteria: [
+      { aggType: 'count', comparator: '>', threshold: [0], timeSize: 1, timeUnit: 'm' },
+    ],
+  },
+  'metrics.alert.inventory.threshold': {
+    sourceId: 'default',
+    nodeType: 'host',
+    criteria: [
+      { metric: 'cpu', comparator: '>', threshold: [40], timeSize: 1, timeUnit: 'm' },
+    ],
+  },
+  'logs.alert.document.count': {
+    logView: { logViewId: 'Default', type: 'log-view-reference' },
+    count: { comparator: 'more than or equals', value: 1 },
+    timeUnit: 'm',
+    timeSize: 5,
+    criteria: [{ field: 'env', comparator: 'does not equal', value: 'dev' }],
+  },
+  'observability.rules.custom_threshold': {
+    criteria: [
+      {
+        comparator: '>',
+        threshold: [100],
+        timeSize: 1,
+        timeUnit: 'm',
+        metrics: [{ name: 'A', aggType: 'count' }],
+      },
+    ],
+    searchConfiguration: {
+      query: { query: '', language: 'kuery' },
+      index: '.kibana-event-log-*',
+    },
+  },
+  'xpack.synthetics.alerts.monitorStatus': {},
+  'xpack.synthetics.alerts.tls': {},
+  'xpack.uptime.alerts.tls': {},
+  'xpack.uptime.alerts.tlsCertificate': {},
+  'xpack.uptime.alerts.monitorStatus': {
+    numTimes: 1,
+    shouldCheckStatus: true,
+    shouldCheckAvailability: false,
+  },
+};
+
+/**
+ * Rule types that need external resources we don't provision in this fixture:
+ * - slo.rules.burnRate — requires an existing SLO
+ * - xpack.ml.anomaly_detection_alert — requires an existing ML job
+ * - xpack.uptime.alerts.durationAnomaly — requires an existing monitor
+ */
+const SKIPPED_RULE_TYPES = new Set([
+  'slo.rules.burnRate',
+  'xpack.ml.anomaly_detection_alert',
+  'xpack.uptime.alerts.durationAnomaly',
+]);
+
+export const RULE_SPECS: RuleSpec[] = OBS_ALERTING_FEATURES.filter(
+  ({ ruleTypeId }) => !SKIPPED_RULE_TYPES.has(ruleTypeId)
+).map(({ ruleTypeId, consumers }) => ({
   ruleTypeId,
   consumer: ruleTypeId === '.es-query' ? ES_QUERY_CONSUMER : consumers[0],
-  params: ruleTypeId === '.es-query' ? ES_QUERY_PARAMS : {},
+  params: OBS_RULE_TEST_PARAMS[ruleTypeId] ?? {},
   enabled: ruleTypeId === '.es-query',
 }));
 
