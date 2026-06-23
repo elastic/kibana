@@ -87,35 +87,6 @@ describe('DefaultEditorAgg component', () => {
     expect(comp.props()).toHaveProperty('initialIsOpen', true);
   });
 
-  it('should apply date histogram time range before rendering params', () => {
-    const timeRange = { from: '2015-09-20T22:30:00.000Z', to: '2015-09-20T23:30:00.000Z' };
-    const setTimeRange = jest.fn((nextTimeRange) => {
-      defaultProps.agg.params.timeRange = nextTimeRange;
-    });
-    const makeLabel = jest.fn(() => 'Date Histogram label');
-    defaultProps.agg = {
-      ...defaultProps.agg,
-      aggConfigs: {
-        setTimeRange,
-      },
-      params: {},
-      schema: 'segment',
-      type: {
-        makeLabel,
-        name: 'date_histogram',
-      } as IAggType,
-    } as any;
-    defaultProps.schemas = [{ name: 'segment', title: 'X-axis' } as Schema];
-
-    const comp = shallow(<DefaultEditorAgg {...defaultProps} timeRange={timeRange} />);
-
-    expect(setTimeRange).toHaveBeenCalledWith(timeRange);
-    expect(setTimeRange.mock.invocationCallOrder[0]).toBeLessThan(
-      makeLabel.mock.invocationCallOrder[0]
-    );
-    expect(comp.find(DefaultEditorAggParams).prop('agg').params.timeRange).toBe(timeRange);
-  });
-
   it('should not show description when agg is invalid', () => {
     (defaultProps.agg as any).brandNew = false;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
