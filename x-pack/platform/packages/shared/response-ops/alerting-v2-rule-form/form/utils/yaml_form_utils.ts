@@ -8,12 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/alerting-v2-schemas';
 import { dump, load } from 'js-yaml';
-import type { FormValues, StateTransition, RuleQuery } from '../types';
+import type {
+  FormValues,
+  StateTransition,
+  RuleQuery,
+  RecoveryStrategy,
+  NoDataStrategy,
+} from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from './state_transition_helpers';
 import { ruleQueryToApiQuery } from './query_mappers';
+import { resolveRecoveryStrategy } from './rule_request_mappers';
 import { mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
 
 export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
@@ -51,6 +58,7 @@ interface YamlRuleObject {
   schedule: { every: string; lookback: string };
   query: Query;
   recovery_strategy?: string;
+  no_data_strategy?: string;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
   artifacts?: Array<{ id: string; type: string; value: string }>;
@@ -76,8 +84,8 @@ const serializeStateTransition = (st?: StateTransition): YamlStateTransition | u
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition);
-  const hasRecovery = values.query.recovery != null;
   const allArtifacts = mergeArtifactsByType(values);
+  const recoveryStrategy = resolveRecoveryStrategy(values);
 
   return {
     kind: values.kind,
@@ -92,8 +100,9 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       every: values.schedule.every,
       lookback: values.schedule.lookback,
     },
-    query: ruleQueryToApiQuery(values.query, { includeNoData: true }),
-    ...(hasRecovery ? { recovery_strategy: 'query' } : {}),
+    query: ruleQueryToApiQuery(values.query),
+    ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
+    ...(values.noDataStrategy ? { no_data_strategy: values.noDataStrategy } : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
     ...(allArtifacts?.length && { artifacts: allArtifacts }),
@@ -214,6 +223,23 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
   const name = metadata?.name;
 
+  const rawRecoveryStrategy = obj.recovery_strategy;
+  const recoveryStrategy =
+    rawRecoveryStrategy === 'no_breach' ||
+    rawRecoveryStrategy === 'query' ||
+    rawRecoveryStrategy === 'none'
+      ? (rawRecoveryStrategy as RecoveryStrategy)
+      : undefined;
+
+  const rawNoDataStrategy = obj.no_data_strategy;
+  const noDataStrategy =
+    rawNoDataStrategy === 'last_known_status' ||
+    rawNoDataStrategy === 'emit' ||
+    rawNoDataStrategy === 'recover' ||
+    rawNoDataStrategy === 'none'
+      ? (rawNoDataStrategy as NoDataStrategy)
+      : undefined;
+
   return {
     values: {
       kind: (kind as 'alert' | 'signal') ?? 'alert',
@@ -230,6 +256,8 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
       query: parseQuery(queryObj),
+      recoveryStrategy,
+      noDataStrategy,
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,

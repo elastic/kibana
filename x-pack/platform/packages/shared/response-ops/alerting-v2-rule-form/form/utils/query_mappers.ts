@@ -9,14 +9,9 @@ import type { RuleResponse, Query } from '@kbn/alerting-v2-schemas';
 import type { RuleQuery } from '../types';
 
 /**
- * Maps form `RuleQuery` to the API `Query` shape. By default `no_data` is
- * omitted (the GUI forms don't surface it). Pass `{ includeNoData: true }`
- * when serializing to YAML, which round-trips standalone `no_data` blocks.
+ * Maps form `RuleQuery` to the API `Query` shape.
  */
-export const ruleQueryToApiQuery = (
-  query: RuleQuery,
-  options?: { includeNoData?: boolean }
-): Query => {
+export const ruleQueryToApiQuery = (query: RuleQuery): Query => {
   if (query.format === 'composed') {
     return {
       format: 'composed',
@@ -29,7 +24,7 @@ export const ruleQueryToApiQuery = (
     format: 'standalone',
     breach: { query: query.breach.query },
     ...(query.recovery ? { recovery: { query: query.recovery.query } } : {}),
-    ...(options?.includeNoData && query.no_data ? { no_data: { query: query.no_data.query } } : {}),
+    ...(query.no_data ? { no_data: { query: query.no_data.query } } : {}),
   };
 };
 
@@ -57,5 +52,6 @@ export const apiQueryToFormQuery = (
     ...(recoveryStrategy === 'query' && q.recovery
       ? { recovery: { query: q.recovery.query } }
       : {}),
+    ...(q.no_data ? { no_data: { query: q.no_data.query } } : {}),
   };
 };
