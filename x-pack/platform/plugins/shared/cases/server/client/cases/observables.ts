@@ -68,7 +68,7 @@ export const applyObservablesToCase = async (
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
   prefetchedCase?: CaseSavedObjectTransformed
-): Promise<void> => {
+) => {
   const {
     services: { caseService, userActionService },
     user,
@@ -102,7 +102,7 @@ export const applyObservablesToCase = async (
     return;
   }
 
-  await caseService.patchCase({
+  const patchedCase = await caseService.patchCase({
     caseId: retrievedCase.id,
     originalCase: retrievedCase,
     updatedAttributes: {
@@ -122,6 +122,13 @@ export const applyObservablesToCase = async (
       },
     },
   });
+
+  return {
+    ...retrievedCase,
+    ...patchedCase,
+    attributes: { ...retrievedCase.attributes, ...patchedCase?.attributes },
+    references: retrievedCase.references,
+  };
 };
 
 export const addObservable = async (
@@ -397,21 +404,18 @@ export const bulkAddObservables = async (
       )
     );
 
-    // Pass the already-fetched SO so applyObservablesToCase does not issue
-    // another getCase round-trip. We still re-fetch after the patch to get the
-    // fully updated SO for the response.
-    await applyObservablesToCase(
+    const theCase = await applyObservablesToCase(
       paramArgs.caseId,
       paramArgs.observables,
       clientArgs,
       retrievedCase
     );
-
-    const freshCase = await caseService.getCase({ id: paramArgs.caseId });
-
-    const res = flattenCaseSavedObject({ savedObject: freshCase });
-
-    return decodeOrThrow(CaseRt)(res);
+    if (theCase) {
+      const res = flattenCaseSavedObject({ savedObject: theCase });
+      return decodeOrThrow(CaseRt)(res);
+    } else {
+      throw Boom.badRequest(`Failed to add observable`);
+    }
   } catch (error) {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   }

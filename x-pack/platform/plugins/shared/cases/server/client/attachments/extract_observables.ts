@@ -116,15 +116,14 @@ export const extractAndAddObservables = async (
 
     licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
-    // Collect AlertInfo for all alert and event attachments
-    const alertInfos = attachments.flatMap(getAlertInfoFromAttachment);
+    const documentInfo = attachments.flatMap(getAlertInfoFromAttachment);
 
-    if (alertInfos.length === 0) {
+    if (documentInfo.length === 0) {
       return;
     }
 
     // Fetch the ECS source documents
-    const mgetResponse = await alertsService.getAlerts(alertInfos);
+    const mgetResponse = await alertsService.getAlerts(documentInfo);
 
     if (!mgetResponse || mgetResponse.docs.length === 0) {
       return;
