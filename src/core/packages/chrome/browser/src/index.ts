@@ -58,7 +58,6 @@ export type {
   PanelOpenerChildDefinition,
   StandardNodeDefinition,
   RootNodeDefinition,
-  ExtensionPointRenderAs,
   AppDeepLinkId,
   AppId,
   SolutionId,

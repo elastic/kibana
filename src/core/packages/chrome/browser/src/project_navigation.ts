@@ -111,9 +111,7 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type RenderAs = 'home' | 'panelOpener';
-
-export type ExtensionPointRenderAs = 'extension';
+export type RenderAs = 'home' | 'panelOpener' | 'extension';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -170,13 +168,11 @@ interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> 
  * in the slot data-source map at registration.
  */
 export interface ExtensionPointNodeDefinition<Id extends string = string>
-  extends Omit<NodeDefinitionCommon<AppDeepLinkId, Id>, 'cloudLink'> {
-  renderAs: ExtensionPointRenderAs;
+  extends Omit<NodeDefinitionCommon<AppDeepLinkId, Id>, 'cloudLink' | 'link' | 'href'> {
+  renderAs: Extract<RenderAs, 'extension'>;
   slotId: string;
   extensionId: NavExtensionId;
   popoverOnly?: boolean;
-  link?: never;
-  cloudLink?: never;
   children?: never;
 }
 
@@ -186,29 +182,21 @@ export type StandardNodeDefinition<
   Id extends string = string,
   ChildrenId extends string = Id
 > = NodeDefinitionCommon<LinkId, Id> & {
-  renderAs?: RenderAs;
-  slotId?: never;
-  extensionId?: never;
-  popoverOnly?: never;
-  children?: Array<StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>>;
+  renderAs?: never;
+  children?: Array<
+    | StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>
+    | (NodeDefinitionCommon<LinkId, Id> & {
+        renderAs: 'panelOpener';
+        children?: Array<StandardNodeDefinition<LinkId, ChildrenId>>;
+      })
+  >;
 };
 
 /** Allowed only under `panelOpener.children`. */
 export type PanelOpenerChildDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string
-> =
-  | ExtensionPointNodeDefinition<Id>
-  | StandardNodeDefinition<LinkId, Id, Id>
-  | (NodeDefinitionCommon<LinkId, Id> & {
-      renderAs?: never;
-      slotId?: never;
-      extensionId?: never;
-      popoverOnly?: never;
-      link?: LinkId;
-      href?: string;
-      children?: never;
-    });
+> = ExtensionPointNodeDefinition<Id> | StandardNodeDefinition<LinkId, Id, Id>;
 
 /** Root-level node: body/footer items. */
 export type RootNodeDefinition<
@@ -216,6 +204,7 @@ export type RootNodeDefinition<
   Id extends string = string,
   ChildrenId extends string = Id
 > =
+  | StandardNodeDefinition<LinkId, Id, ChildrenId>
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs: 'home';
       children?: never;
@@ -223,10 +212,6 @@ export type RootNodeDefinition<
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs: 'panelOpener';
       children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
-    })
-  | (NodeDefinitionCommon<LinkId, Id> & {
-      renderAs?: never;
-      children?: Array<StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>>;
     });
 
 interface ChromeNavigationNodeCommon {
@@ -245,7 +230,7 @@ interface ChromeNavigationNodeCommon {
 
 /** @public */
 export interface ChromeExtensionPointNavigationNode extends ChromeNavigationNodeCommon {
-  renderAs: ExtensionPointRenderAs;
+  renderAs: Extract<RenderAs, 'extension'>;
   slotId: string;
   extensionId: string;
   popoverOnly?: boolean;

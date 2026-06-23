@@ -21,15 +21,19 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/ui-side-navigation'
   - '@kbn/core-chrome-browser'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-common
   - package
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

@@ -9,12 +9,14 @@
 
 import type {
   AppDeepLinkId,
+  ChromeExtensionPointNavigationNode,
   ChromeNavLink,
   ChromeProjectNavigationNode,
   ChromeRootNavigationNode,
   ChromeStandardNavigationNode,
   CloudLinkId,
   CloudLinks,
+  ExtensionPointNodeDefinition,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   PanelOpenerChildDefinition,
@@ -36,6 +38,12 @@ type ParseableNodeDefinition<
   | RootNodeDefinition<LinkId, Id, ChildrenId>
   | PanelOpenerChildDefinition<LinkId, ChildrenId>
   | StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>;
+
+function isExtensionPointNodeDefinition(
+  node: ParseableNodeDefinition
+): node is ExtensionPointNodeDefinition {
+  return node.renderAs === 'extension';
+}
 
 /**
  * Flatten the navigation tree into a record of path => node
@@ -230,7 +238,13 @@ function validateNodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
->({ id, link, href, cloudLink }: ParseableNodeDefinition<LinkId, Id, ChildrenId>) {
+>(node: ParseableNodeDefinition<LinkId, Id, ChildrenId>) {
+  if (isExtensionPointNodeDefinition(node)) {
+    return;
+  }
+
+  const { id, link, href, cloudLink } = node;
+
   if (link && cloudLink) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. Only one of "link" or "cloudLink" can be provided.`
@@ -261,6 +275,27 @@ const initNavNode = <
     index?: number;
   }
 ): ChromeProjectNavigationNode | null => {
+  if (isExtensionPointNodeDefinition(node)) {
+    const { children, ...navNodeFromProps } = node;
+    const id = getNavigationNodeId(node, () => `node-${index}`) as Id;
+    const title = getTitleForNode(node, { cloudLinks });
+    const path = parentNodePath ? `${parentNodePath}.${id}` : id;
+    const sideNavStatus = node.sideNavStatus ?? 'visible';
+
+    const navNode: ChromeExtensionPointNavigationNode = {
+      ...navNodeFromProps,
+      id,
+      path,
+      title,
+      renderAs: 'extension',
+      slotId: node.slotId,
+      extensionId: node.extensionId,
+      sideNavStatus,
+    };
+
+    return navNode;
+  }
+
   validateNodeProps(node);
 
   const { cloudLink, link, children, ...navNodeFromProps } = node;

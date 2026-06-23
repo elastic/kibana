@@ -22,5 +22,6 @@
     "@kbn/utility-types",
     "@kbn/ui-side-navigation",
     "@kbn/core-chrome-browser",
+    "@kbn/test-jest-helpers",
   ]
 }
