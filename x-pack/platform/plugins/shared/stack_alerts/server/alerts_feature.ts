@@ -33,7 +33,7 @@ export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         alert: { all: alertingFeatures },
-        rule: { mute_alerts: alertingFeatures },
+        rule: { read: alertingFeatures, mute_alerts: alertingFeatures },
       },
       savedObject: { all: [], read: [] },
       api: ['rac'],
