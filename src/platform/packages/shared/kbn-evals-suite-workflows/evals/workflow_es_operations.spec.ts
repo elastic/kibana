@@ -18,9 +18,10 @@
  *    - Delete or index with ID in body instead of URL path (no-op)
  *
  * 2. Invented step type names:
- *    - elasticsearch.bulk / elasticsearch.bulkInsert (not real — use elasticsearch.request)
- *    - elasticsearch.delete / elasticsearch.deleteDocument (not real — use elasticsearch.request)
- *    - elasticsearch.index / elasticsearch.put / elasticsearch.upsert (not real — use elasticsearch.request)
+ *    - elasticsearch.bulk IS a real typed step (generated schema) — accept it alongside elasticsearch.request
+ *    - elasticsearch.index IS a real typed step (generated schema, path params: index + id) — accept it alongside elasticsearch.request
+ *    - elasticsearch.delete / elasticsearch.deleteDocument are NOT real — document deletion uses elasticsearch.request (DELETE) or elasticsearch.bulk
+ *    - elasticsearch.put / elasticsearch.upsert are NOT real
  *
  * These failures are hard to catch without targeted evals because:
  *    - The YAML is syntactically valid and schema validation passes
@@ -332,10 +333,10 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'There is a step that writes a document to the my-records index.',
-                    'The document ID (inputs.record_id) appears in the request path — for example /my-records/_doc/{{ inputs.record_id }} — NOT solely as a field inside the request body.',
+                    'The document ID (inputs.record_id) is provided as the id path parameter (for elasticsearch.index) or in the URL path like /my-records/_doc/{{ inputs.record_id }} (for elasticsearch.request) — NOT solely as a field inside the request body.',
                     'The body or document contains inputs.record_data.',
                     'The step uses an appropriate method: PUT for a specific ID or POST for auto-generated ID.',
-                    'The step type is elasticsearch.request — NOT a fictional type like elasticsearch.index, elasticsearch.put, or elasticsearch.upsert.',
+                    'The step type is elasticsearch.index or elasticsearch.request — NOT a fictional type like elasticsearch.put or elasticsearch.upsert.',
                   ],
                   expectedStepCount: { min: 1, max: 2 },
                   expectedMaxToolCalls: 6,
@@ -355,10 +356,10 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'There is a step that writes to the app-configs index.',
-                    'The document ID (inputs.config_key) appears in the request path — NOT solely in the body.',
+                    'The document ID (inputs.config_key) is provided as the id path parameter (for elasticsearch.index) or in the URL path (for elasticsearch.request) — NOT solely in the body.',
                     'The body contains inputs.config_value.',
                     'The HTTP method is PUT or POST.',
-                    'The step type is elasticsearch.request — NOT a fictional type like elasticsearch.index, elasticsearch.put, or elasticsearch.upsert.',
+                    'The step type is elasticsearch.index or elasticsearch.request — NOT a fictional type like elasticsearch.put or elasticsearch.upsert.',
                   ],
                   expectedStepCount: { min: 1, max: 2 },
                   expectedMaxToolCalls: 6,
@@ -378,10 +379,10 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'There is a step that writes a document to the catalog index.',
-                    'The document ID (inputs.product_sku) appears in the request path — NOT solely in the body.',
+                    'The document ID (inputs.product_sku) is provided as the id path parameter (for elasticsearch.index) or in the URL path (for elasticsearch.request) — NOT solely in the body.',
                     'The body contains inputs.product_info.',
                     'The HTTP method is PUT or POST.',
-                    'The step type is elasticsearch.request — NOT a fictional type like elasticsearch.index, elasticsearch.put, or elasticsearch.upsert.',
+                    'The step type is elasticsearch.index or elasticsearch.request — NOT a fictional type like elasticsearch.put or elasticsearch.upsert.',
                   ],
                   expectedStepCount: { min: 1, max: 2 },
                   expectedMaxToolCalls: 6,
@@ -521,10 +522,10 @@ evaluate.describe(
                   criteria: [
                     'There is an HTTP step that fetches records from https://api.example.com/records.',
                     'There is a bulk indexing step that sends multiple documents to the my-records index.',
-                    'The bulk step uses the Elasticsearch Bulk API format: each document is preceded by an action descriptor (e.g. {"index": {"_index": "my-records"}}), not sent as a plain flat array.',
-                    'The bulk request uses the _bulk endpoint or equivalent.',
+                    'If using elasticsearch.bulk, the documents are provided as a flat array under the operations field (the step handles NDJSON serialization automatically). If using elasticsearch.request, the body uses NDJSON action+document pairs — NOT a flat array of documents.',
+                    'The bulk step uses the elasticsearch.bulk step type, or targets the _bulk endpoint with elasticsearch.request.',
                     'The documents come from the HTTP step output.',
-                    'The step type is elasticsearch.request — NOT a fictional type like elasticsearch.bulk, elasticsearch.bulkInsert, or elasticsearch.bulkIndex.',
+                    'The step type is elasticsearch.bulk or elasticsearch.request — NOT a fictional type like elasticsearch.bulkInsert or elasticsearch.bulkIndex.',
                   ],
                   expectedStepTypes: ['http'],
                   expectedStepCount: { min: 2, max: 4 },
@@ -546,9 +547,9 @@ evaluate.describe(
                   criteria: [
                     'There is an HTTP step fetching from https://api.example.com/products.',
                     'There is a bulk indexing step targeting the products index.',
-                    'The bulk body uses action+document pairs — NOT a flat array of documents.',
-                    'The step uses the _bulk endpoint.',
-                    'The step type is elasticsearch.request — NOT a fictional type like elasticsearch.bulk, elasticsearch.bulkInsert, or elasticsearch.bulkIndex.',
+                    'If using elasticsearch.bulk, the documents are provided as a flat array under the operations field (the step handles NDJSON serialization automatically). If using elasticsearch.request, the bulk body uses NDJSON action+document pairs — NOT a flat array of documents.',
+                    'The bulk step uses the elasticsearch.bulk step type, or targets the _bulk endpoint with elasticsearch.request.',
+                    'The step type is elasticsearch.bulk or elasticsearch.request — NOT a fictional type like elasticsearch.bulkInsert or elasticsearch.bulkIndex.',
                   ],
                   expectedStepTypes: ['http'],
                   expectedStepCount: { min: 2, max: 4 },
@@ -570,9 +571,9 @@ evaluate.describe(
                   criteria: [
                     'There is an HTTP step fetching from https://api.example.com/transactions.',
                     'There is a bulk indexing step targeting the transactions index.',
-                    'The bulk body uses action+document pairs — each document is preceded by an action descriptor.',
-                    'The step uses the _bulk endpoint.',
-                    'The step type is elasticsearch.request — NOT a fictional type like elasticsearch.bulk, elasticsearch.bulkInsert, or elasticsearch.bulkIndex.',
+                    'If using elasticsearch.bulk, the documents are provided as a flat array under the operations field (the step handles NDJSON serialization automatically). If using elasticsearch.request, the bulk body uses NDJSON action+document pairs — NOT a flat array of documents.',
+                    'The bulk step uses the elasticsearch.bulk step type, or targets the _bulk endpoint with elasticsearch.request.',
+                    'The step type is elasticsearch.bulk or elasticsearch.request — NOT a fictional type like elasticsearch.bulkInsert or elasticsearch.bulkIndex.',
                   ],
                   expectedStepTypes: ['http'],
                   expectedStepCount: { min: 2, max: 4 },
