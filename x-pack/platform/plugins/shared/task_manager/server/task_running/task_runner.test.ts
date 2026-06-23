@@ -1196,7 +1196,7 @@ describe('TaskManagerRunner', () => {
       expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
       expect(enrichFakeRequest).toHaveBeenCalledWith(
         expect.objectContaining({ headers: expect.any(Object) }),
-        'u_profile_123'
+        { profileId: 'u_profile_123', username: undefined }
       );
     });
 
@@ -1289,7 +1289,10 @@ describe('TaskManagerRunner', () => {
       createTaskRunnerParams.enrichRequest(childRequest);
 
       expect(enrichFakeRequest).toHaveBeenCalledTimes(2);
-      expect(enrichFakeRequest).toHaveBeenLastCalledWith(childRequest, 'u_profile_123');
+      expect(enrichFakeRequest).toHaveBeenLastCalledWith(childRequest, {
+        profileId: 'u_profile_123',
+        username: undefined,
+      });
     });
 
     test('runs without error and passes undefined enrichRequest when no enrichFakeRequest hook is provided', async () => {
@@ -1349,7 +1352,7 @@ describe('TaskManagerRunner', () => {
       expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
       expect(enrichFakeRequest).toHaveBeenCalledWith(
         expect.objectContaining({ headers: expect.any(Object) }),
-        'u_profile_123'
+        { profileId: 'u_profile_123', username: undefined }
       );
       const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
       expect(createTaskRunnerParams.enrichRequest).toBeDefined();

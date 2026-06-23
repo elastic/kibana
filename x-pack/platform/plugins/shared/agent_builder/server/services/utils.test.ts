@@ -63,9 +63,25 @@ describe('getUserFromRequest', () => {
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 
-  it('skips getCurrentUser and falls back to ES authenticate API for fake requests', async () => {
+  it('returns the enriched identity for a fake request without calling ES authenticate', async () => {
     const request = httpServerMock.createFakeKibanaRequest({});
 
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'originating-user',
+      profile_uid: 'profile-123',
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({ id: 'profile-123', username: 'originating-user' });
+    expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+    expect(esClient.security.authenticate).not.toHaveBeenCalled();
+  });
+
+  it('falls back to ES authenticate API for un-enriched fake requests', async () => {
+    const request = httpServerMock.createFakeKibanaRequest({});
+
+    security.authc.getCurrentUser.mockReturnValue(null);
     esClient.security.authenticate.mockResolvedValue({
       username: 'task-manager-user',
     } as any);
@@ -73,7 +89,7 @@ describe('getUserFromRequest', () => {
     const result = await getUserFromRequest({ request, security, esClient });
 
     expect(result).toEqual({ username: 'task-manager-user' });
-    expect(security.authc.getCurrentUser).not.toHaveBeenCalled();
+    expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 
