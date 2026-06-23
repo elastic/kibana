@@ -32,7 +32,7 @@ export const CreateAgentlessPolicyRequestSchema = {
         schema.string({
           meta: {
             description:
-              'The policy template to use for the agentless package policy. If not provided, the default policy template will be used.',
+              'The policy template to use for the agentless package policy. If not provided, the default policy template is used.',
           },
         })
       ),
@@ -42,10 +42,10 @@ export const CreateAgentlessPolicyRequestSchema = {
         schema.arrayOf(
           schema.object({
             name: schema.string({
-              meta: { description: 'The name of the custom field. Cannot contain spaces.' },
+              meta: { description: 'Name of the custom field. The name cannot contain spaces.' },
             }),
             value: schema.oneOf([schema.string(), schema.number()], {
-              meta: { description: 'The value of the custom field.' },
+              meta: { description: 'Value of the custom field.' },
             }),
           }),
           {
@@ -58,13 +58,13 @@ export const CreateAgentlessPolicyRequestSchema = {
         schema.object({
           enabled: schema.boolean({
             defaultValue: false,
-            meta: { description: 'Whether cloud connectors are enabled for this policy.' },
+            meta: { description: 'Set to `true` to enable cloud connectors for this policy.' },
           }),
           cloud_connector_id: schema.maybe(
             schema.string({
               meta: {
                 description:
-                  'ID of an existing cloud connector to reuse. If not provided, a new connector will be created.',
+                  'ID of an existing cloud connector to reuse. If not provided, a new connector is created.',
               },
             })
           ),
@@ -74,7 +74,7 @@ export const CreateAgentlessPolicyRequestSchema = {
               maxLength: 255,
               meta: {
                 description:
-                  'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.',
+                  'Name for the cloud connector. If not provided, a name is generated automatically from the credentials.',
               },
             })
           ),
@@ -82,7 +82,7 @@ export const CreateAgentlessPolicyRequestSchema = {
             schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')], {
               meta: {
                 description:
-                  'Target cloud service provider. If not provided, will be auto-detected from inputs.',
+                  'Target cloud service provider. If not provided, the provider is detected automatically from the inputs.',
               },
             })
           ),
