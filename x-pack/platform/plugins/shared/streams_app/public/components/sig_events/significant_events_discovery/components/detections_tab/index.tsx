@@ -6,20 +6,19 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiBasicTable,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
+import useInterval from 'react-use/lib/useInterval';
+import { EuiBasicTable, EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchDetections } from '../../../../../hooks/sig_events/use_fetch_detections';
-import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { DetectionFlyout } from './detection_flyout';
+import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
+import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DETECTION_KIND_LABELS } from '../shared/translations';
 import { DETECTION_KIND_COLORS } from '../shared/constants';
@@ -41,11 +40,11 @@ const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'd
 
 // Unhandled detections older than this window are outside the discovery lookback
 // and won't be picked up automatically by the discovery pipeline.
-const DISCOVERY_LOOKBACK_MS = 2 * 60 * 60 * 1000;
+const DISCOVERY_LOOKBACK_MS = 4 * 60 * 60 * 1000;
 
 const columns: Array<EuiBasicTableColumn<Detection>> = [
   {
-    field: 'detected_at',
+    field: '@timestamp',
     name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
@@ -87,15 +86,14 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
   },
   {
     name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
-      defaultMessage: 'Discovery',
+      defaultMessage: 'Status',
     }),
     width: '110px',
     render: (detection: Detection) => {
       if (detection.processed) {
         return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
       }
-      const docAgeMs =
-        Date.now() - new Date(detection.detected_at ?? detection['@timestamp']).getTime();
+      const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
       if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
         return <EuiBadge color="warning">{DISCOVERY_STATUS_LABELS.missed}</EuiBadge>;
       }
@@ -104,16 +102,18 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
   },
 ];
 
-const DEFAULT_DETECTIONS_RANGE = { from: 'now-24h', to: 'now' };
-
 export const DetectionsTab = () => {
-  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
-    useTabTimeRange(DEFAULT_DETECTIONS_RANGE);
+  const { timeState } = useTimefilter();
 
-  const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
-    from: absoluteRange.from,
-    to: absoluteRange.to,
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
+
+  const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchDetections({
+    from: timeState.start,
+    to: timeState.end,
   });
+  useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
+
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -132,23 +132,34 @@ export const DetectionsTab = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={pickerRange.from}
-              end={pickerRange.to}
-              onTimeChange={handleTimeChange}
-              onRefresh={() => {
-                refreshAbsoluteRange();
-                refetch();
-              }}
-              compressed
-              showUpdateButton="iconOnly"
-              updateButtonProps={{ size: 's', fill: false }}
+            <StreamsAppSearchBar showDatePicker enableDateRangePicker />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isError && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.detectionsTab.fetchError', {
+              defaultMessage: 'Failed to load detections',
+            })}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
