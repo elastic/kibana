@@ -17,7 +17,6 @@ import {
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
 import type {
   InternalResumeWorkflowExecution,
@@ -155,15 +154,6 @@ export async function runWorkflow({
     throw error;
   } finally {
     loopSpan?.end();
-
-    // await emitWorkflowExecutionFailedEventIfFailed({
-    //   workflowRuntime,
-    //   workflowExecutionState,
-    //   emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
-    //   request: fakeRequest,
-    //   logger,
-    //   workflowRunId,
-    // });
   }
 
   await handlePostExecutionLoop({

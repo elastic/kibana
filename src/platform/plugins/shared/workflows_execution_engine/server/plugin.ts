@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { omit } from 'lodash';
 import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
@@ -19,7 +18,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { domainEventBus } from '@kbn/domain-events';
-import { WORKFLOW_TERMINATED_EVENT_TYPE } from '@kbn/domain-events/events/workflows';
 import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
@@ -31,7 +29,6 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/common';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {

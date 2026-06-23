@@ -12,7 +12,6 @@ import { isTerminalStatus } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
 import type {
   InternalResumeWorkflowExecution,
@@ -75,32 +74,21 @@ export async function resumeWorkflow({
 
   await workflowRuntime.resume();
 
-  try {
-    await workflowExecutionLoop({
-      workflowRuntime,
-      stepExecutionRuntimeFactory,
-      workflowExecutionState,
-      stepIoService,
-      workflowExecutionRepository,
-      workflowLogger,
-      nodesFactory,
-      workflowExecutionGraph,
-      esClient,
-      fakeRequest,
-      coreStart: dependencies.coreStart,
-      taskAbortController,
-      workflowTaskManager,
-    });
-  } finally {
-    // await emitWorkflowExecutionFailedEventIfFailed({
-    //   workflowRuntime,
-    //   workflowExecutionState,
-    //   emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
-    //   request: fakeRequest,
-    //   logger,
-    //   workflowRunId,
-    // });
-  }
+  await workflowExecutionLoop({
+    workflowRuntime,
+    stepExecutionRuntimeFactory,
+    workflowExecutionState,
+    stepIoService,
+    workflowExecutionRepository,
+    workflowLogger,
+    nodesFactory,
+    workflowExecutionGraph,
+    esClient,
+    fakeRequest,
+    coreStart: dependencies.coreStart,
+    taskAbortController,
+    workflowTaskManager,
+  });
 
   await handlePostExecutionLoop({
     workflowRunId,

@@ -279,21 +279,14 @@ export class TriggerEventHandler {
       );
       return;
     }
-    const { type: eventType, payload: domainEventPayload, request } = event;
-    const trigger = this.getTriggerForDomainEvent(event);
-    if (!trigger) {
+    const { type: eventType, request } = event;
+    const triggers = this.getTriggersForDomainEvent(event);
+    if (!triggers.length) {
       this.logger.debug(`No trigger found for event type ${eventType}; skipping.`);
       return;
     }
 
-    const payload = (trigger.mapEvent?.(event) ?? domainEventPayload) as Record<string, unknown>;
-
-    const triggerId = trigger.id;
-
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-    const timestamp = new Date().toISOString();
-    const eventId = generateUuid();
 
     let eventChainContext = getEventChainContext(request);
     if (eventChainContext === undefined) {
@@ -303,6 +296,29 @@ export class TriggerEventHandler {
         this.config.maxChainDepth
       );
     }
+
+    // A single domain event can fan out to multiple triggers (e.g. cases.attachmentsAdded
+    // drives both the attachments and comments triggers). Dispatch each independently.
+    for (const trigger of triggers) {
+      await this.dispatchDomainEventToTrigger({ event, trigger, spaceId, eventChainContext });
+    }
+  }
+
+  private async dispatchDomainEventToTrigger(params: {
+    event: DomainEvent;
+    trigger: ServerTriggerDefinition;
+    spaceId: string;
+    eventChainContext: EventChainContext | undefined;
+  }): Promise<void> {
+    const { event, trigger, spaceId, eventChainContext } = params;
+    const { payload: domainEventPayload, request } = event;
+
+    const payload = (trigger.mapEvent?.(event) ?? domainEventPayload) as Record<string, unknown>;
+
+    const triggerId = trigger.id;
+
+    const timestamp = new Date().toISOString();
+    const eventId = generateUuid();
 
     const eventContextForResolution = {
       ...payload,
@@ -371,7 +387,7 @@ export class TriggerEventHandler {
     });
   }
 
-  private getTriggerForDomainEvent(event: DomainEvent): ServerTriggerDefinition | undefined {
+  private getTriggersForDomainEvent(event: DomainEvent): ServerTriggerDefinition[] {
     if (!this.eventTypeToTriggerIdMap.size) {
       this.workflowsExtensions.getAllTriggerDefinitions().forEach((current) => {
         if (current.domainEventType) {
@@ -385,15 +401,18 @@ export class TriggerEventHandler {
     const triggerIds = this.eventTypeToTriggerIdMap.get(event.type);
 
     if (!triggerIds?.length) {
-      return undefined;
+      return [];
     }
 
+    const triggers: ServerTriggerDefinition[] = [];
     for (const triggerId of triggerIds) {
       const trigger = this.workflowsExtensions.getTriggerDefinition(triggerId);
-      if (trigger?.matchesDomainEvent?.(event)) {
-        return trigger;
+      // A trigger without `matchesDomainEvent` matches every event of its `domainEventType`.
+      if (trigger && (!trigger.matchesDomainEvent || trigger.matchesDomainEvent(event))) {
+        triggers.push(trigger);
       }
     }
+    return triggers;
   }
 
   /**

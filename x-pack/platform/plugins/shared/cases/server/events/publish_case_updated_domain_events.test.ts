@@ -11,7 +11,6 @@ import {
   CASE_UPDATED_EVENT_TYPE,
   CASE_STATUS_CHANGED_EVENT_TYPE,
 } from '@kbn/domain-events/events/cases';
-import { CasesEventBus } from './event_bus';
 import {
   getCaseStatusChangedPayloadIfApplicable,
   publishCaseUpdatedDomainEvents,
@@ -25,12 +24,10 @@ jest.mock('@kbn/domain-events', () => ({
 
 describe('publishCaseUpdatedDomainEvents', () => {
   const request = httpServerMock.createKibanaRequest();
-  const casesEventBus = new CasesEventBus();
   const publishMock = domainEventBus.publish as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(casesEventBus, 'emitCaseUpdated');
   });
 
   it('publishes caseUpdated only when updated fields do not include a status change', () => {
@@ -41,7 +38,6 @@ describe('publishCaseUpdatedDomainEvents', () => {
         owner: 'securitySolution',
         updatedFields: ['title'],
       },
-      casesEventBus,
     });
 
     expect(publishMock).toHaveBeenCalledTimes(1);
@@ -54,15 +50,6 @@ describe('publishCaseUpdatedDomainEvents', () => {
       },
       request,
     });
-    expect(casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
-      request,
-      {
-        caseId: 'case-1',
-        owner: 'securitySolution',
-        updatedFields: ['title'],
-      },
-      { previousCase: undefined, updatedCase: undefined }
-    );
   });
 
   it('publishes caseUpdated and caseStatusChanged when status actually changed', () => {
@@ -81,7 +68,6 @@ describe('publishCaseUpdatedDomainEvents', () => {
         // @ts-expect-error - test only needs status on updated case
         status: 'closed',
       },
-      casesEventBus,
     });
 
     expect(publishMock).toHaveBeenCalledTimes(2);
@@ -104,18 +90,6 @@ describe('publishCaseUpdatedDomainEvents', () => {
       },
       request,
     });
-    expect(casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
-      request,
-      {
-        caseId: 'case-1',
-        owner: 'securitySolution',
-        updatedFields: ['status'],
-      },
-      expect.objectContaining({
-        previousCase: expect.objectContaining({ attributes: { status: 'in-progress' } }),
-        updatedCase: expect.objectContaining({ status: 'closed' }),
-      })
-    );
   });
 
   it('does not publish caseStatusChanged when status field is unchanged', () => {
@@ -134,7 +108,6 @@ describe('publishCaseUpdatedDomainEvents', () => {
         // @ts-expect-error - test only needs status on updated case
         status: 'closed',
       },
-      casesEventBus,
     });
 
     expect(publishMock).toHaveBeenCalledTimes(1);

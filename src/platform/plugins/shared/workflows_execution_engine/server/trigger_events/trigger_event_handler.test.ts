@@ -487,4 +487,124 @@ describe('TriggerEventHandler', () => {
     );
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
   });
+
+  describe('handleDomainEvent', () => {
+    const okEventSchema = { safeParse: () => ({ success: true }) };
+
+    const attachmentsAddedTrigger = {
+      id: 'cases.attachmentsAdded',
+      domainEventType: 'cases.attachmentsAdded',
+      eventSchema: okEventSchema,
+      // No matchesDomainEvent: should match every cases.attachmentsAdded event.
+      mapEvent: (event: any) => event.payload,
+    };
+
+    const commentsAddedTrigger = {
+      id: 'cases.commentsAdded',
+      domainEventType: 'cases.attachmentsAdded',
+      eventSchema: okEventSchema,
+      matchesDomainEvent: (event: any) => event.payload.attachmentType === 'comment',
+      mapEvent: (event: any) => ({
+        caseId: event.payload.caseId,
+        owner: event.payload.owner,
+        commentIds: event.payload.attachmentIds,
+      }),
+    };
+
+    const createDomainDeps = (triggers: any[], overrides: Partial<TriggerEventHandlerDeps> = {}) => {
+      const byId = new Map(triggers.map((t) => [t.id, t]));
+      return createDeps({
+        workflowRepository: createWorkflowRepositoryMock([createMockWorkflow({ id: 'wf-1' })]),
+        workflowsExtensions: {
+          getAllTriggerDefinitions: jest.fn().mockReturnValue(triggers),
+          getTriggerDefinition: jest.fn((id: string) => byId.get(id)),
+        } as any,
+        ...overrides,
+      });
+    };
+
+    it('fans out one domain event to every matching trigger (comment matches both)', async () => {
+      const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+      const deps = createDomainDeps([attachmentsAddedTrigger, commentsAddedTrigger], {
+        scheduleWorkflow,
+      });
+      const handler = new TriggerEventHandler(deps);
+
+      await handler.handleDomainEvent({
+        type: 'cases.attachmentsAdded',
+        payload: {
+          caseId: 'case-1',
+          owner: 'securitySolution',
+          attachmentIds: ['a-1'],
+          attachmentType: 'comment',
+        },
+        request: mockRequest,
+      } as any);
+
+      expect(scheduleWorkflow).toHaveBeenCalledTimes(2);
+      const scheduledTriggerIds = scheduleWorkflow.mock.calls.map((call) => call[1].triggeredBy);
+      expect(scheduledTriggerIds).toEqual(
+        expect.arrayContaining(['cases.attachmentsAdded', 'cases.commentsAdded'])
+      );
+    });
+
+    it('skips a trigger whose matchesDomainEvent returns false (non-comment attachment)', async () => {
+      const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+      const deps = createDomainDeps([attachmentsAddedTrigger, commentsAddedTrigger], {
+        scheduleWorkflow,
+      });
+      const handler = new TriggerEventHandler(deps);
+
+      await handler.handleDomainEvent({
+        type: 'cases.attachmentsAdded',
+        payload: {
+          caseId: 'case-1',
+          owner: 'securitySolution',
+          attachmentIds: ['a-1'],
+          attachmentType: 'alert',
+        },
+        request: mockRequest,
+      } as any);
+
+      expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+      expect(scheduleWorkflow.mock.calls[0][1].triggeredBy).toBe('cases.attachmentsAdded');
+    });
+
+    it('matches a trigger without matchesDomainEvent (omitted filter = match-all)', async () => {
+      const caseCreatedTrigger = {
+        id: 'cases.caseCreated',
+        domainEventType: 'cases.caseCreated',
+        eventSchema: okEventSchema,
+      };
+      const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+      const deps = createDomainDeps([caseCreatedTrigger], { scheduleWorkflow });
+      const handler = new TriggerEventHandler(deps);
+
+      await handler.handleDomainEvent({
+        type: 'cases.caseCreated',
+        payload: { caseId: 'case-1', owner: 'securitySolution' },
+        request: mockRequest,
+      } as any);
+
+      expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+      expect(scheduleWorkflow.mock.calls[0][1].triggeredBy).toBe('cases.caseCreated');
+    });
+
+    it('skips when no trigger is registered for the event type', async () => {
+      const scheduleWorkflow = jest.fn();
+      const deps = createDomainDeps([attachmentsAddedTrigger], { scheduleWorkflow });
+      const handler = new TriggerEventHandler(deps);
+
+      await handler.handleDomainEvent({
+        type: 'workflows.terminated',
+        payload: { status: 'completed' },
+        request: mockRequest,
+      } as any);
+
+      expect(scheduleWorkflow).not.toHaveBeenCalled();
+      expect(deps.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('No trigger found for event type workflows.terminated')
+      );
+    });
+  });
 });

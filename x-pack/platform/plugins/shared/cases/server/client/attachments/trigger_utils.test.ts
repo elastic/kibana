@@ -5,12 +5,24 @@
  * 2.0.
  */
 
+jest.mock('@kbn/domain-events', () => ({
+  domainEventBus: {
+    publish: jest.fn(),
+  },
+}));
+
+import { domainEventBus } from '@kbn/domain-events';
+import { ATTACHMENTS_ADDED_EVENT_TYPE } from '@kbn/domain-events/events/cases';
 import type { Case } from '../../../common/types/domain';
 import { createCasesClientMockArgs } from '../mocks';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
 
 describe('emitAttachmentsAddedEvent', () => {
-  it('emits attachmentsAdded with the attachment ids and type', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('publishes cases.attachmentsAdded with the attachment ids and type', () => {
     const clientArgs = createCasesClientMockArgs();
     emitAttachmentsAddedEvent(
       clientArgs,
@@ -19,11 +31,15 @@ describe('emitAttachmentsAddedEvent', () => {
       'comment'
     );
 
-    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(clientArgs.request, {
-      caseId: 'case-1',
-      attachmentIds: ['attachment-1', 'attachment-2'],
-      attachmentType: 'comment',
-      owner: 'securitySolution',
+    expect(domainEventBus.publish).toHaveBeenCalledWith({
+      type: ATTACHMENTS_ADDED_EVENT_TYPE,
+      payload: {
+        caseId: 'case-1',
+        attachmentIds: ['attachment-1', 'attachment-2'],
+        attachmentType: 'comment',
+        owner: 'securitySolution',
+      },
+      request: clientArgs.request,
     });
   });
 });

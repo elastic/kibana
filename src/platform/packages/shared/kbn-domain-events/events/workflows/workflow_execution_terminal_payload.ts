@@ -35,7 +35,7 @@ const workflowExecutionTerminalErrorSchema = z
   })
   .strict();
 
-/** Matches the payload built by `buildWorkflowExecutionFailedPayload` in workflows_execution_engine. */
+/** Matches the `workflows.terminated` payload published by the workflows execution engine runtime manager. */
 export const workflowExecutionTerminalPayloadSchema = z
   .object({
     status: z.enum(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']),

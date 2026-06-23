@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+jest.mock('@kbn/domain-events', () => ({
+  domainEventBus: {
+    publish: jest.fn(),
+  },
+}));
+
+import { domainEventBus } from '@kbn/domain-events';
+import { ATTACHMENTS_ADDED_EVENT_TYPE } from '@kbn/domain-events/events/cases';
 import { comment, actionComment, mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import {
@@ -200,15 +208,16 @@ describe('bulkCreate', () => {
 
     await bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs);
 
-    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledTimes(1);
-    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
-      clientArgs.request,
-      expect.objectContaining({
+    expect(domainEventBus.publish).toHaveBeenCalledTimes(1);
+    expect(domainEventBus.publish).toHaveBeenCalledWith({
+      type: ATTACHMENTS_ADDED_EVENT_TYPE,
+      payload: expect.objectContaining({
         caseId,
         attachmentIds: expect.arrayContaining([expect.any(String), expect.any(String)]),
         attachmentType: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
-      })
-    );
+      }),
+      request: clientArgs.request,
+    });
   });
 });
