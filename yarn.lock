@@ -6497,6 +6497,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-visualizer-server-schemas@link:x-pack/platform/packages/shared/ml/data-visualizer-server-schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dataset-quality-plugin@link:x-pack/platform/plugins/shared/dataset_quality":
   version "0.0.0"
   uid ""
@@ -18745,10 +18749,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@149.0.0:
-  version "149.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-149.0.0.tgz#4eaa557c0acbbb001543f6b117e7518d53379284"
-  integrity sha512-kFZI2Tft4p6QXGhtbjohRHad2uGhwcH95YH2CLVhOjQM676+QnJPl00OgcB1o3tTobmW8BezufMYTKYFjmTvtg==
+chromedriver@149.0.2:
+  version "149.0.2"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-149.0.2.tgz#e5d716e4af7ceda3f9987d07779e5eb061ff04a7"
+  integrity sha512-/ArEVtowNDQWy0KTKYD+1E3h1HeZoosU6X3PAvUFcJQr5wMGfG7h+L3CdiDF2BvOL2M9sAtozqw+pbzrD2MmzA==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     adm-zip "^0.5.17"
@@ -36992,10 +36996,10 @@ webpack-dev-middleware@^7.4.2:
     range-parser "^1.2.1"
     schema-utils "^4.0.0"
 
-webpack-dev-server@5.2.4:
-  version "5.2.4"
-  resolved "https://registry.yarnpkg.com/webpack-dev-server/-/webpack-dev-server-5.2.4.tgz#6e6306ce59848ed322c235e48b326632b1eed6d6"
-  integrity sha512-GqDPGZN9bRqKBTkp4aWkobDDHMsrXKoGSdOH56smIri8qR0JG8gfL8/v/f/OZR3/OKXjG8uwJbFVhKm/FNU/UA==
+webpack-dev-server@5.2.5:
+  version "5.2.5"
+  resolved "https://registry.yarnpkg.com/webpack-dev-server/-/webpack-dev-server-5.2.5.tgz#648fceaac6a5736b0935e5c1e55d6aa1d0626119"
+  integrity sha512-4wZtCquSuv9CKX8oybo+mqxtxZqWz47uM1Ch94lxowBztOhWCbhqvRbfC/mODOwxgV2brY+JGZpHq58/SuVFYg==
   dependencies:
     "@types/bonjour" "^3.5.13"
     "@types/connect-history-api-fallback" "^1.5.4"
