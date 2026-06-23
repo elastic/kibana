@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -26,7 +27,7 @@ import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isTriggerType } from '@kbn/workflows';
-import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
@@ -115,6 +116,7 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
+import { WORKFLOW_MONACO_LAYOUT_OPTIONS } from '../lib/workflow_monaco_layout_options';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import {
@@ -123,29 +125,7 @@ import {
 } from '../styles/use_workflow_editor_styles';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
-  minimap: { enabled: false },
-  automaticLayout: true,
-  lineNumbers: 'on',
-  glyphMargin: true,
-  scrollBeyondLastLine: false,
-  folding: true,
-  showFoldingControls: 'mouseover',
-  tabSize: 2,
-  lineNumbersMinChars: 2,
-  insertSpaces: true,
-  fontSize: 14,
-  lineHeight: 23, // default ~21px + 2px
-  renderWhitespace: 'none',
-  roundedSelection: false,
-  guides: { indentation: true },
-  wordWrap: 'on',
-  wordWrapColumn: 80,
-  wrappingIndent: 'indent',
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
-  padding: {
-    top: 24,
-    bottom: 16,
-  },
+  ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
   quickSuggestions: {
     other: true,
     comments: false,
@@ -218,7 +198,8 @@ export const WorkflowYAMLEditor = ({
   const originalValue = workflow?.yaml ?? '';
 
   // Refs
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  // EuiFlexGroup forwards this ref to its outer div for ActionsMenuPopover anchoring.
+  const containerRef = useRef<React.ElementRef<typeof EuiFlexGroup>>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const stepExecutions = useSelector(selectStepExecutions);
@@ -818,13 +799,19 @@ export const WorkflowYAMLEditor = ({
   );
 
   return (
-    <div css={editorWrapperCss} ref={containerRef}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      css={editorWrapperCss}
+      ref={containerRef}
+    >
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
         button={actionsMenuPanelProps.Button}
-        container={containerRef.current ?? undefined}
+        container={containerRef.current instanceof HTMLElement ? containerRef.current : undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
@@ -836,15 +823,16 @@ export const WorkflowYAMLEditor = ({
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
-      <div
+      <EuiText
+        component="div"
         css={styles.stepActionsContainer}
-        style={positionStyles ?? {}}
+        style={positionStyles ?? undefined}
         data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
       >
         <StepActions onStepRun={onStepRun} />
-      </div>
+      </EuiText>
       {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
-        <div css={styles.agentBuilderSectionCss}>
+        <EuiText component="div" css={styles.agentBuilderSectionCss}>
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}
             isDevelopment={isDevelopment}
@@ -854,9 +842,10 @@ export const WorkflowYAMLEditor = ({
             onOpenAgentChat={openAgentChat}
             onDownloadSchema={downloadSchema}
           />
-        </div>
+        </EuiText>
       ) : null}
-      <div
+      <EuiText
+        component="div"
         css={styles.editorContainer}
         className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
       >
@@ -871,8 +860,8 @@ export const WorkflowYAMLEditor = ({
           enableFindAction={true}
           dataTestSubj="workflowYamlEditor"
         />
-      </div>
-      <div css={styles.validationErrorsContainer}>
+      </EuiText>
+      <EuiText component="div" css={styles.validationErrorsContainer}>
         <WorkflowYamlValidationAccordion
           isMounted={isEditorMounted}
           isLoading={isLoadingValidation}
@@ -881,8 +870,8 @@ export const WorkflowYAMLEditor = ({
           onErrorClick={handleErrorClick}
           extraAction={extraActionElement}
         />
-      </div>
-    </div>
+      </EuiText>
+    </EuiFlexGroup>
   );
 };
 

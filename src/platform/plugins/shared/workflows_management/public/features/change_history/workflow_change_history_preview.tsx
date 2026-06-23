@@ -7,41 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCodeBlock, EuiFlexGroup } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
-import type { ChangeHistoryDetail, ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
+import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
+import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
+import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
 
-const getWorkflowYamlFromSnapshot = (snapshot: unknown): string => {
-  if (!snapshot || typeof snapshot !== 'object') {
-    return '';
-  }
-
-  const workflow = (snapshot as { workflow?: { yaml?: unknown } }).workflow;
-
-  return typeof workflow?.yaml === 'string' ? workflow.yaml : '';
-};
-
-const WorkflowChangeHistoryPreviewContent = ({
+export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({
   change,
-}: {
-  change: ChangeHistoryDetail;
-}): JSX.Element => {
-  return (
-    <EuiFlexGroup
-      direction="column"
-      css={css`
-        height: 100%;
-        box-sizing: border-box;
-      `}
-    >
-      <EuiCodeBlock language="yaml" isCopyable paddingSize="none">
-        {getWorkflowYamlFromSnapshot(change.snapshot)}
-      </EuiCodeBlock>
-    </EuiFlexGroup>
-  );
-};
-
-export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({ change }) => (
-  <WorkflowChangeHistoryPreviewContent change={change} />
+  compareChange,
+}) => (
+  <WorkflowChangeHistoryMonacoPreview
+    yaml={getWorkflowYamlFromSnapshot(change.snapshot)}
+    compareYaml={compareChange ? getWorkflowYamlFromSnapshot(compareChange.snapshot) : undefined}
+  />
 );
