@@ -26,6 +26,11 @@ const TEST_PROFILE_STATE_DEF: ProfileStateDefinition<TestProfileState> = {
     urlValue: { type: ProfileStateType.Url },
     persistentValue: { type: ProfileStateType.Persistent },
   },
+  defaultState: {
+    uiValue: 'defaultUi',
+    urlValue: 'defaultUrl',
+    persistentValue: 'defaultPersistent',
+  },
 };
 
 describe('ProfileStateRegistry', () => {
@@ -41,6 +46,22 @@ describe('ProfileStateRegistry', () => {
         descriptor: {
           ...TEST_PROFILE_STATE_DEF.descriptor,
           uiValue: { type: ProfileStateType.Url },
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('does not match definitions with different defaults', () => {
+    const registry = new ProfileStateRegistry();
+
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.hasDefinition({
+        ...TEST_PROFILE_STATE_DEF,
+        defaultState: {
+          ...TEST_PROFILE_STATE_DEF.defaultState,
+          uiValue: 'differentDefaultUi',
         },
       })
     ).toBe(false);

@@ -38,7 +38,7 @@ export const createInMemoryContextAwarenessToolkit = ({
         return existingAdapter as unknown as ProfileStateAdapter<TState>;
       }
 
-      const stateSubject = new BehaviorSubject<TState>({} as TState);
+      const stateSubject = new BehaviorSubject<TState>(definition.defaultState);
       const state$ = stateSubject.pipe(distinctUntilChanged(isEqual));
       const getState = () => stateSubject.getValue();
 

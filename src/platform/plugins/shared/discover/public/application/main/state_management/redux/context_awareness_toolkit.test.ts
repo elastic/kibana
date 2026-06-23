@@ -28,6 +28,10 @@ const TEST_PROFILE_STATE_DEF: ProfileStateDefinition<TestProfileState> = {
     color: { type: ProfileStateType.Ui },
     rowsPerPage: { type: ProfileStateType.Ui },
   },
+  defaultState: {
+    color: 'default',
+    rowsPerPage: 25,
+  },
 };
 
 describe('createContextAwarenessToolkit', () => {
@@ -171,7 +175,7 @@ describe('createContextAwarenessToolkit', () => {
       tabId,
     }).getStateAdapter(TEST_PROFILE_STATE_DEF);
 
-    expect(stateAdapter.getState()).toEqual({});
+    expect(stateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
 
     stateAdapter.setState({ color: 'primary', rowsPerPage: 50 });
     expect(stateAdapter.getState()).toEqual({ color: 'primary', rowsPerPage: 50 });
@@ -199,7 +203,7 @@ describe('createContextAwarenessToolkit', () => {
     subscription.unsubscribe();
 
     expect(emittedValues).toEqual([
-      {},
+      TEST_PROFILE_STATE_DEF.defaultState,
       { color: 'primary', rowsPerPage: 50 },
       { color: 'primary', rowsPerPage: 100 },
     ]);

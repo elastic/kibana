@@ -53,6 +53,9 @@ const TEST_PROFILE_STATE_DEF: ProfileStateDefinition<TestProfileState> = {
   descriptor: {
     color: { type: ProfileStateType.Ui },
   },
+  defaultState: {
+    color: 'default',
+  },
 };
 
 describe('saved search embeddable', () => {
@@ -646,6 +649,8 @@ describe('saved search embeddable', () => {
       }
 
       const stateAdapter = capturedToolkit.getStateAdapter(TEST_PROFILE_STATE_DEF);
+      expect(stateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
+
       stateAdapter.setState({ color: 'primary' });
       stateAdapter.updateState({ color: 'success' });
 

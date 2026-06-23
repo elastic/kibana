@@ -23,6 +23,7 @@ export const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileSta
   descriptor: {
     timestampColor: { type: ProfileStateType.Ui },
   },
+  defaultState: EXAMPLE_PROFILE_STATE_DEFAULTS,
 };
 
 export const registerExampleProfileStateDefinitions = (registry: ProfileStateRegistry) => {

@@ -71,7 +71,7 @@ export const createContextAwarenessToolkit = ({
       const getState = () => {
         const tabState = selectTab(internalState.getState(), tabId);
 
-        return (tabState?.profileState[definition.key] ?? {}) as TState;
+        return (tabState.profileState[definition.key] ?? definition.defaultState) as TState;
       };
 
       const state$ = from(internalState).pipe(map(getState), distinctUntilChanged(isEqual));

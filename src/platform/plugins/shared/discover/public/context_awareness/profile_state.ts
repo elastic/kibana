@@ -32,6 +32,7 @@ export type ProfileStateDescriptor<TState extends object> = {
 export interface ProfileStateDefinition<TState extends object> {
   key: string;
   descriptor: ProfileStateDescriptor<TState>;
+  defaultState: TState;
 }
 
 export class ProfileStateRegistry {
@@ -47,7 +48,7 @@ export class ProfileStateRegistry {
 
     this.stateDefinitions.set(
       definition.key,
-      definition as unknown as ProfileStateDefinition<Record<string, unknown>>
+      definition as ProfileStateDefinition<Record<string, unknown>>
     );
   }
 
@@ -58,7 +59,10 @@ export class ProfileStateRegistry {
       return false;
     }
 
-    return isEqual(registeredDefinition.descriptor, definition.descriptor);
+    return (
+      isEqual(registeredDefinition.descriptor, definition.descriptor) &&
+      isEqual(registeredDefinition.defaultState, definition.defaultState)
+    );
   }
 
   public pickStateByType({

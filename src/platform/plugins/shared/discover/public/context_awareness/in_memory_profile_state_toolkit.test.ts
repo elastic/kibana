@@ -31,6 +31,12 @@ const TEST_PROFILE_STATE_DEF: ProfileStateDefinition<TestProfileState> = {
     persistentValue: { type: ProfileStateType.Persistent },
     nestedValue: { type: ProfileStateType.Ui },
   },
+  defaultState: {
+    uiValue: 'defaultUi',
+    urlValue: 'defaultUrl',
+    persistentValue: 'defaultPersistent',
+    nestedValue: { count: 0 },
+  },
 };
 
 const createRegisteredRegistry = () => {
@@ -55,7 +61,7 @@ describe('createInMemoryContextAwarenessToolkit', () => {
       profileStateRegistry: createRegisteredRegistry(),
     }).getStateAdapter(TEST_PROFILE_STATE_DEF);
 
-    expect(stateAdapter.getState()).toEqual({});
+    expect(stateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
 
     stateAdapter.setState({
       uiValue: 'ui',
@@ -104,7 +110,7 @@ describe('createInMemoryContextAwarenessToolkit', () => {
     subscription.unsubscribe();
 
     expect(emittedValues).toEqual([
-      {},
+      TEST_PROFILE_STATE_DEF.defaultState,
       {
         uiValue: 'ui',
         urlValue: 'url',
@@ -142,7 +148,9 @@ describe('createInMemoryContextAwarenessToolkit', () => {
       nestedValue: { count: 1 },
     });
 
-    expect(secondToolkit.getStateAdapter(TEST_PROFILE_STATE_DEF).getState()).toEqual({});
+    expect(secondToolkit.getStateAdapter(TEST_PROFILE_STATE_DEF).getState()).toEqual(
+      TEST_PROFILE_STATE_DEF.defaultState
+    );
   });
 
   it('throws when the profile state definition is not registered', () => {
