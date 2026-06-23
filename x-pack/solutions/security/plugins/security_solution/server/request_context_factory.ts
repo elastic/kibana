@@ -282,6 +282,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           packageService: startPlugins.fleet?.packageService,
           telemetry: core.analytics,
           experimentalFeatures: options.config.experimentalFeatures,
+          llmTasks: startPlugins.llmTasks,
         },
       }),
 

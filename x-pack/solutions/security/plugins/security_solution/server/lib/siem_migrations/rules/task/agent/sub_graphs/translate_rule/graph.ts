@@ -11,7 +11,7 @@ import type { OriginalRule } from '../../../../../../../../common/siem_migration
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
-import { getRetrieveIntegrationsNode } from './nodes/retrieve_integrations';
+import { getRetrieveIntegrationsGraph } from './nodes/retrieve_integrations/graph';
 import { getTranslateRuleNode } from './nodes/translate_rule';
 import { getTranslationResultNode } from './nodes/translation_result';
 import { getValidationNode } from './nodes/validation';
@@ -25,6 +25,7 @@ export function getTranslateRuleGraph({
   ruleMigrationsRetriever,
   logger,
   telemetryClient,
+  tools,
 }: TranslateRuleGraphParams) {
   const translateRuleNode = getTranslateRuleNode({
     esqlKnowledgeBase,
@@ -34,12 +35,30 @@ export function getTranslateRuleGraph({
   const inlineQueryNode = getInlineQueryNode({ model, logger, telemetryClient });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
-  const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
-    model,
-    ruleMigrationsRetriever,
-    telemetryClient,
-  });
   const ecsMappingNode = getEcsMappingNode({ esqlKnowledgeBase, logger });
+
+  const retrieveIntegrationsSubgraph = getRetrieveIntegrationsGraph({
+    model,
+    telemetryClient,
+    ruleMigrationsRetriever,
+    tools,
+  });
+
+  const retrieveIntegrationsNode = async (state: TranslateRuleState) => {
+    const result = await retrieveIntegrationsSubgraph.invoke({
+      title: state.original_rule.title,
+      description: state.original_rule.description,
+      inline_query: state.inline_query,
+      nl_query: state.nl_query,
+      semantic_query: state.semantic_query,
+    });
+
+    return {
+      ...(result.integration ? { integration: result.integration } : {}),
+      ...(result.semantic_query ? { semantic_query: result.semantic_query } : {}),
+      ...(result.comments?.length ? { comments: result.comments } : {}),
+    };
+  };
 
   const translateRuleGraph = new StateGraph(translateRuleState, migrateRuleConfigSchema)
     // Nodes

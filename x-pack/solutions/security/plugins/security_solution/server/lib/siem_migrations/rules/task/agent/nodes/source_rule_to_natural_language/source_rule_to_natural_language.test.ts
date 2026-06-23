@@ -100,15 +100,15 @@ describe('getSourceRuleToNaturalLanguageNode', () => {
       expect(result.nl_query).toContain('Data Sources');
       expect(result.nl_query).toContain('Azure');
       expect(result.comments).toHaveLength(1);
-      expect(result.messages).toBeUndefined();
+      expect(result.messages).toHaveLength(1);
     });
 
-    it('should not check for unsupported functions', async () => {
+    it('should check for unsupported functions same as other vendors', async () => {
       mockInvoke.mockResolvedValue({ text: 'NL description' });
 
       await node(mockSentinelState, mockConfig);
 
-      expect(hasUnsupportedFunctions).not.toHaveBeenCalled();
+      expect(hasUnsupportedFunctions).toHaveBeenCalled();
     });
   });
 });

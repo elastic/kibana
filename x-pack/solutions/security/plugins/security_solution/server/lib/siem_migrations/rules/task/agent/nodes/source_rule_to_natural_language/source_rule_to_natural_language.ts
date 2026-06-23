@@ -38,14 +38,7 @@ export const getSourceRuleToNaturalLanguageNode = ({
       resources: JSON.stringify(state.resources?.lookup ?? []),
     });
 
-    if (vendor === 'microsoft-sentinel') {
-      const response = await model.invoke(formattedMessages);
-      const comments = [generateAssistantComment(cleanMarkdown(response.text))];
-      return { nl_query: response.text, comments };
-    }
-
-    // QRadar path
-    const currentMessages = state.messages;
+    const currentMessages = state.messages ?? [];
     const isUnsupported = hasUnsupportedFunctions([query, ...currentMessages].join('\n'));
 
     if (isUnsupported) {
@@ -59,7 +52,7 @@ export const getSourceRuleToNaturalLanguageNode = ({
       };
     }
 
-    const response = await model.invoke([...formattedMessages, ...(state.messages ?? [])]);
+    const response = await model.invoke([...formattedMessages, ...currentMessages]);
 
     const hasToolCall =
       'tool_calls' in response && response?.tool_calls && response?.tool_calls?.length > 0;
@@ -67,8 +60,8 @@ export const getSourceRuleToNaturalLanguageNode = ({
     if (hasToolCall) {
       return { messages: [response], comments: [] };
     }
-    const comments = [generateAssistantComment(cleanMarkdown(response.text))];
 
+    const comments = [generateAssistantComment(cleanMarkdown(response.text))];
     return { messages: [response], nl_query: response.text, comments };
   };
 };

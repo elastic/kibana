@@ -30,7 +30,8 @@ export function getRuleMigrationAgent({
     telemetryClient,
   });
 
-  const resolveDepsToolNode = new ToolNode([tools.getRulesByName, tools.getResourceByType]);
+  const resolveDepsTools = [tools.getRulesByName, tools.getResourceByType];
+  const resolveDepsToolNode = new ToolNode(resolveDepsTools);
 
   const translationSubGraph = getTranslateRuleGraph({
     model,
@@ -38,9 +39,10 @@ export function getRuleMigrationAgent({
     ruleMigrationsRetriever,
     telemetryClient,
     logger,
+    tools,
   });
   const sourceRuleToNaturalLanguageNode = getSourceRuleToNaturalLanguageNode({
-    model: model.bindTools(Object.values(tools)),
+    model: model.bindTools(resolveDepsTools),
   });
   const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
 

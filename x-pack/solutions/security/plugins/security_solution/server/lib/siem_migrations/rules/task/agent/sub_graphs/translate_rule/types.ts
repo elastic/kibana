@@ -10,15 +10,17 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
-import type { translateRuleState } from './state';
 import type { migrateRuleConfigSchema } from '../../state';
 import type { MigrateRuleGraphParams } from '../../types';
+import type { RulesMigrationTools } from '../../tools';
+import type { translateRuleState } from './state';
 
 export type TranslateRuleState = typeof translateRuleState.State;
-export type TranslateRuleGraphConfig = RunnableConfig<(typeof migrateRuleConfigSchema)['State']>;
+export type TranslateRuleConfigSchema = (typeof migrateRuleConfigSchema)['State'];
+export type TranslateRuleConfig = RunnableConfig<TranslateRuleConfigSchema>;
 export type GraphNode = (
   state: TranslateRuleState,
-  config: TranslateRuleGraphConfig
+  config: TranslateRuleConfig
 ) => Promise<Partial<TranslateRuleState>>;
 
 export interface TranslateRuleGraphParams {
@@ -27,6 +29,7 @@ export interface TranslateRuleGraphParams {
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   telemetryClient: RuleMigrationTelemetryClient;
   logger: Logger;
+  tools: RulesMigrationTools;
 }
 
 export interface TranslateRuleValidationErrors {

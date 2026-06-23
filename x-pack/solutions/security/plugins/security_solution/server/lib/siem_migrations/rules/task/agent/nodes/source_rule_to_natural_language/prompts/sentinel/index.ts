@@ -47,10 +47,27 @@ Microsoft Sentinel watchlists are reference lists used in KQL queries via the \`
   \`LOOKUP JOIN to check if value of field \`<source_field>\` [exists / does NOT exist] in the lookup field \`value\` of lookup index "<lookup_index_name>".\`
 - In the **Flattened Detection Logic**, describe the watchlist check as a lookup condition, not as a vendor-specific watchlist call
 
+#### Elastic Ecosystem Data Source Mapping
+
+The customer is migrating FROM Microsoft Sentinel TO the Elastic ecosystem. When the rule references security products that have direct Elastic equivalents, REPLACE them entirely with the Elastic equivalent in your output. Do NOT mention the original vendor name in the Data Sources section.
+
+Replacements:
+- **SentinelOne** (tables like \`SentinelOne_CL\`, SentinelOne activity/threat/agent logs) -> Output as: **Elastic Defend endpoint telemetry** (process, file, network, threat detection, agent lifecycle)
+- **Microsoft Defender** (tables like \`DeviceEvents\`, \`DeviceProcessEvents\`, \`AlertEvidence\`) -> Output as: **Elastic Defend endpoint telemetry**
+- **Microsoft Sentinel alerts** (tables like \`SecurityAlert\`, \`SecurityIncident\`) -> Output as: **Elastic Security detection alerts**
+
+Examples of correct output:
+- "Data source: Elastic Defend endpoint telemetry"
+- "Data source: Elastic Security detection alerts"
+
+Examples of INCORRECT output (do NOT do this):
+- "Data source: SentinelOne agent activity (Elastic equivalent: Elastic Defend)"
+- "Data source: Microsoft Defender endpoint events"
+
 #### Important Notes for Sentinel Rules
 
 - No tool calls are needed — all information is in the KQL query itself
-- The Data Sources section must prominently list the identified vendor/product names
+- The Data Sources section must prominently list the identified data source names (use Elastic equivalents where applicable per the mapping above)
 - Focus on extracting vendor/product/Data Sources identification from table names, NOT from rule titles (titles can be misleading)
 - If the query uses \`table()\` with a variable, look at the \`let\` bindings to find the actual table names
 `;
