@@ -6,8 +6,8 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import {
-  createQuantitativeCorrectnessEvaluators,
   createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
   getStringMeta,
@@ -19,46 +19,43 @@ import {
   type Example,
   type ExperimentTask,
   type TaskOutput,
-  withEvaluatorSpan,
 } from '@kbn/evals';
-import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { SecuritySkillsExample } from './dataset';
-import type { SecuritySkillsAgentBuilderChatClient } from './chat_client';
+import type { RuleRoutingExample } from '../datasets/routing_examples';
+import type { SecurityRuleGenerationClient } from './chat_client';
 
-export interface SecuritySkillsDatasetInput extends Record<string, unknown> {
+export interface RuleRoutingDatasetInput extends Record<string, unknown> {
   question: string;
 }
 
-export interface SecuritySkillsDatasetExpected {
+export interface RuleRoutingDatasetExpected {
   reference: string;
-  expected: string;
   expectedSkill?: string;
   shouldNotActivateSkill?: string;
   tool_sequence?: string[];
 }
 
-export interface SecuritySkillsDatasetMetadata extends Record<string, unknown> {
+export interface RuleRoutingDatasetMetadata extends Record<string, unknown> {
   category: string;
-  query_intent: string;
+  routing_intent: string;
   dataset_split: string[];
   is_distractor?: boolean;
   expectedToolId?: string;
   expectedOnlyToolId?: string;
+  forbiddenToolId?: string;
   tool_sequence?: string[];
 }
 
-export type SecuritySkillsDatasetExample = Example<
-  SecuritySkillsDatasetInput,
-  SecuritySkillsDatasetExpected,
-  SecuritySkillsDatasetMetadata
+export type RuleRoutingDatasetExample = Example<
+  RuleRoutingDatasetInput,
+  RuleRoutingDatasetExpected,
+  RuleRoutingDatasetMetadata
 >;
 
-export const toDatasetExample = (ex: SecuritySkillsExample): SecuritySkillsDatasetExample => ({
+export const toRoutingDatasetExample = (ex: RuleRoutingExample): RuleRoutingDatasetExample => ({
   input: { question: ex.input.question },
   output: {
     reference: ex.expected.reference,
-    expected: ex.expected.reference,
     ...(ex.expected.expectedSkill ? { expectedSkill: ex.expected.expectedSkill } : {}),
     ...(ex.expected.shouldNotActivateSkill
       ? { shouldNotActivateSkill: ex.expected.shouldNotActivateSkill }
@@ -67,22 +64,23 @@ export const toDatasetExample = (ex: SecuritySkillsExample): SecuritySkillsDatas
   },
   metadata: {
     category: ex.metadata.category,
-    query_intent: ex.metadata.query_intent,
+    routing_intent: ex.metadata.routing_intent,
     dataset_split: ex.metadata.dataset_split,
     ...(ex.metadata.is_distractor ? { is_distractor: true } : {}),
     ...(ex.metadata.expectedToolId ? { expectedToolId: ex.metadata.expectedToolId } : {}),
     ...(ex.metadata.expectedOnlyToolId
       ? { expectedOnlyToolId: ex.metadata.expectedOnlyToolId }
       : {}),
+    ...(ex.metadata.forbiddenToolId ? { forbiddenToolId: ex.metadata.forbiddenToolId } : {}),
     ...(ex.metadata.tool_sequence ? { tool_sequence: ex.metadata.tool_sequence } : {}),
   },
 });
 
 const FILESTORE_READ_TOOL_ID = 'filestore.read';
+const FIND_SECURITY_RULES_SKILL = 'find-security-rules';
 
-function collectUniqueExpectedSkills(examples: SecuritySkillsDatasetExample[]): string[] {
+function collectUniqueExpectedSkills(examples: RuleRoutingDatasetExample[]): string[] {
   const names = new Set<string>();
-
   for (const example of examples) {
     const expectedSkill =
       example.output?.expectedSkill ?? getStringMeta(example.metadata, 'expectedSkill');
@@ -90,11 +88,10 @@ function collectUniqueExpectedSkills(examples: SecuritySkillsDatasetExample[]): 
       names.add(expectedSkill);
     }
   }
-
   return [...names];
 }
 
-function hasShouldNotActivateExamples(examples: SecuritySkillsDatasetExample[]): boolean {
+function hasShouldNotActivateExamples(examples: RuleRoutingDatasetExample[]): boolean {
   return examples.some(
     (example) =>
       Boolean(example.output?.shouldNotActivateSkill) ||
@@ -102,9 +99,13 @@ function hasShouldNotActivateExamples(examples: SecuritySkillsDatasetExample[]):
   );
 }
 
+function hasForbiddenToolExamples(examples: RuleRoutingDatasetExample[]): boolean {
+  return examples.some((example) => Boolean(getStringMeta(example.metadata, 'forbiddenToolId')));
+}
+
 function resolveTrajectoryGolden(
-  expected?: SecuritySkillsDatasetExpected,
-  metadata?: SecuritySkillsDatasetMetadata
+  expected?: RuleRoutingDatasetExpected,
+  metadata?: RuleRoutingDatasetMetadata
 ): string[] {
   const toolSequence = expected?.tool_sequence ?? metadata?.tool_sequence;
   if (Array.isArray(toolSequence)) {
@@ -118,8 +119,8 @@ function resolveTrajectoryGolden(
   return expectedToolId ? [expectedToolId] : [];
 }
 
-const createSecuritySkillsTrajectoryEvaluator = (): Evaluator<
-  SecuritySkillsDatasetExample,
+const createRuleRoutingTrajectoryEvaluator = (): Evaluator<
+  RuleRoutingDatasetExample,
   TaskOutput
 > => {
   const inner = createTrajectoryEvaluator({
@@ -128,7 +129,7 @@ const createSecuritySkillsTrajectoryEvaluator = (): Evaluator<
         .map((step) => step.tool_id)
         .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
     goldenPathExtractor: (goldenExpected) => {
-      const exp = goldenExpected as SecuritySkillsDatasetExpected | undefined;
+      const exp = goldenExpected as RuleRoutingDatasetExpected | undefined;
       return exp?.tool_sequence ?? [];
     },
     orderWeight: 0.6,
@@ -140,8 +141,8 @@ const createSecuritySkillsTrajectoryEvaluator = (): Evaluator<
     name: 'Trajectory',
     evaluate: async (args) => {
       const golden = resolveTrajectoryGolden(
-        args.expected as SecuritySkillsDatasetExpected | undefined,
-        args.metadata as SecuritySkillsDatasetMetadata | undefined
+        args.expected as RuleRoutingDatasetExpected | undefined,
+        args.metadata as RuleRoutingDatasetMetadata | undefined
       );
       if (golden.length === 0) {
         return {
@@ -155,13 +156,10 @@ const createSecuritySkillsTrajectoryEvaluator = (): Evaluator<
         expected: { ...(args.expected as object), tool_sequence: golden },
       });
     },
-  } as Evaluator<SecuritySkillsDatasetExample, TaskOutput>;
+  } as Evaluator<RuleRoutingDatasetExample, TaskOutput>;
 };
 
-const createExpectedToolCalledEvaluator = (): Evaluator<
-  SecuritySkillsDatasetExample,
-  TaskOutput
-> => ({
+const createExpectedToolCalledEvaluator = (): Evaluator<RuleRoutingDatasetExample, TaskOutput> => ({
   name: 'ExpectedToolCalled',
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
@@ -183,7 +181,7 @@ const createExpectedToolCalledEvaluator = (): Evaluator<
   },
 });
 
-const createToolUsageOnlyEvaluator = (): Evaluator<SecuritySkillsDatasetExample, TaskOutput> => ({
+const createToolUsageOnlyEvaluator = (): Evaluator<RuleRoutingDatasetExample, TaskOutput> => ({
   name: 'ToolUsageOnly',
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
@@ -211,15 +209,26 @@ const createToolUsageOnlyEvaluator = (): Evaluator<SecuritySkillsDatasetExample,
   },
 });
 
-export type EvaluateSecuritySkillsDataset = (options: {
-  dataset: {
-    name: string;
-    description: string;
-    examples: SecuritySkillsExample[];
-  };
-}) => Promise<void>;
+const createForbiddenToolEvaluator = (): Evaluator<RuleRoutingDatasetExample, TaskOutput> => ({
+  name: 'ForbiddenToolNotCalled',
+  kind: 'CODE',
+  evaluate: async ({ output, metadata }) => {
+    const forbiddenToolId = getStringMeta(metadata, 'forbiddenToolId');
+    if (!forbiddenToolId) return { score: 1 };
 
-export const buildSecuritySkillsEvaluators = ({
+    const usedToolIds = getToolCallSteps(output as TaskOutput)
+      .map((t) => t.tool_id)
+      .filter(Boolean);
+    const invoked = usedToolIds.includes(forbiddenToolId);
+
+    return {
+      score: invoked ? 0 : 1,
+      metadata: { forbiddenToolId, usedToolIds, invoked },
+    };
+  },
+});
+
+export const buildRuleRoutingEvaluators = ({
   evaluators,
   traceEsClient,
   log,
@@ -228,24 +237,27 @@ export const buildSecuritySkillsEvaluators = ({
   evaluators: DefaultEvaluators;
   traceEsClient: EsClient;
   log: ToolingLog;
-  examples?: SecuritySkillsDatasetExample[];
-}): Array<Evaluator<SecuritySkillsDatasetExample, TaskOutput>> => {
+  examples?: RuleRoutingDatasetExample[];
+}): Array<Evaluator<RuleRoutingDatasetExample, TaskOutput>> => {
   const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
 
+  const skillNames = collectUniqueExpectedSkills(examples);
+  if (!skillNames.includes(FIND_SECURITY_RULES_SKILL)) {
+    skillNames.push(FIND_SECURITY_RULES_SKILL);
+  }
+
   return [
-    ...(createQuantitativeCorrectnessEvaluators() as Array<
-      Evaluator<SecuritySkillsDatasetExample, TaskOutput>
-    >),
     createExpectedToolCalledEvaluator(),
     createToolUsageOnlyEvaluator(),
-    createSecuritySkillsTrajectoryEvaluator(),
-    toolCalls as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
-    latency as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
-    inputTokens as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
-    outputTokens as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
-    cachedTokens as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
-    ...collectUniqueExpectedSkills(examples).map((skillName) =>
+    ...(hasForbiddenToolExamples(examples) ? [createForbiddenToolEvaluator()] : []),
+    createRuleRoutingTrajectoryEvaluator(),
+    toolCalls as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
+    latency as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
+    inputTokens as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
+    outputTokens as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
+    cachedTokens as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
+    ...skillNames.map((skillName) =>
       createSkillInvocationEvaluator({
         traceEsClient,
         log,
@@ -259,7 +271,7 @@ export const buildSecuritySkillsEvaluators = ({
             kind: 'CODE' as const,
             evaluate: async ({ output, expected, metadata }) => {
               const shouldNotActivate =
-                (expected as SecuritySkillsDatasetExpected | undefined)?.shouldNotActivateSkill ??
+                (expected as RuleRoutingDatasetExpected | undefined)?.shouldNotActivateSkill ??
                 getStringMeta(metadata, 'shouldNotActivateSkill');
               if (!shouldNotActivate) {
                 return { score: 1 };
@@ -317,81 +329,63 @@ export const buildSecuritySkillsEvaluators = ({
                 return { score: null, label: 'error' };
               }
             },
-          } as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
+          } as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
         ]
       : []),
   ];
 };
 
-const buildTask = ({
-  chatClient,
-  evaluators,
-  log,
-}: {
-  chatClient: SecuritySkillsAgentBuilderChatClient;
-  evaluators: DefaultEvaluators;
-  log: ToolingLog;
-}): ExperimentTask<SecuritySkillsDatasetExample, TaskOutput> => {
-  return async (example) => {
-    const { input, output: expected, metadata } = example;
-    const question = input?.question ?? '';
-    const questionPreview = `${question.slice(0, 120)}${question.length > 120 ? '...' : ''}`;
-    log.info(`[security-skills] task request: question="${questionPreview}"`);
-
-    const response = await chatClient.converse({ message: question });
-
-    const taskOutput = {
-      messages: response.messages,
-      steps: response.steps,
-      errors: response.errors,
-      traceId: response.traceId,
-    };
-
-    const correctnessResult = await withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-      evaluators.correctnessAnalysis().evaluate({
-        input,
-        expected,
-        output: taskOutput,
-        metadata,
-      })
-    );
-
-    return {
-      ...taskOutput,
-      correctnessAnalysis: correctnessResult?.metadata,
-    };
+export type EvaluateRuleRoutingDataset = (options: {
+  dataset: {
+    name: string;
+    description: string;
+    examples: RuleRoutingExample[];
   };
-};
+}) => Promise<void>;
 
-export const createEvaluateSecuritySkillsDataset = ({
+export const createEvaluateRuleRoutingDataset = ({
   chatClient,
   evaluators,
   executorClient,
   traceEsClient,
   log,
 }: {
-  chatClient: SecuritySkillsAgentBuilderChatClient;
+  chatClient: SecurityRuleGenerationClient;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   traceEsClient: EsClient;
   log: ToolingLog;
-}): EvaluateSecuritySkillsDataset => {
+}): EvaluateRuleRoutingDataset => {
   return async ({ dataset: { name, description, examples } }) => {
-    const wrappedExamples = examples.map(toDatasetExample);
+    const wrappedExamples = examples.map(toRoutingDatasetExample);
 
     const dataset = {
       name,
       description,
       examples: wrappedExamples,
-    } satisfies EvaluationDataset<SecuritySkillsDatasetExample>;
+    } satisfies EvaluationDataset<RuleRoutingDatasetExample>;
 
-    const evalStack = buildSecuritySkillsEvaluators({
+    const evalStack = buildRuleRoutingEvaluators({
       evaluators,
       traceEsClient,
       log,
       examples: wrappedExamples,
     });
-    const task = buildTask({ chatClient, evaluators, log });
+
+    const task: ExperimentTask<RuleRoutingDatasetExample, TaskOutput> = async (example) => {
+      const question = example.input?.question ?? '';
+      const preview = `${question.slice(0, 120)}${question.length > 120 ? '...' : ''}`;
+      log.info(`[security-ai-rules routing] question="${preview}"`);
+
+      const response = await chatClient.converseNaturalLanguage(question);
+
+      return {
+        messages: response.messages,
+        steps: response.steps,
+        errors: response.errors,
+        traceId: response.traceId,
+      };
+    };
 
     await executorClient.runExperiment({ datasets: [dataset], task }, evalStack);
   };

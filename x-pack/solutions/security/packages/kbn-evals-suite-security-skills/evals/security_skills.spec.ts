@@ -12,7 +12,7 @@ import { seedFindRulesFixtures } from '../src/fixtures/find_rules_fixtures';
 
 const DATASET_NAME = 'security: security-skills';
 const DATASET_DESCRIPTION =
-  'Agent Builder security skill routing: find-security-rules inventory queries and general security skills (alert-analysis, threat-hunting). Includes distractor examples.';
+  'Agent Builder find-security-rules routing (inventory queries) and distractors. Alert-analysis and threat-hunting routing are covered by dedicated E2E suites; C2 rule-creation collisions are on security-ai-rules Track B.';
 
 evaluate.describe('Security Skills', { tag: tags.stateful.classic }, () => {
   let teardown: (() => Promise<void>) | undefined;
@@ -29,7 +29,7 @@ evaluate.describe('Security Skills', { tag: tags.stateful.classic }, () => {
     if (teardown) await teardown();
   });
 
-  evaluate('find-rules and security skill routing', async ({ evaluateDataset }) => {
+  evaluate('find-rules skill routing', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
         name: DATASET_NAME,

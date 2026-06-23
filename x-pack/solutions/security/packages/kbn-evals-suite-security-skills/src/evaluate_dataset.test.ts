@@ -44,20 +44,29 @@ const buildBuildArgs = () => ({
 });
 
 describe('buildSecuritySkillsEvaluators', () => {
+  const wrappedExamples = securitySkillsExamples.map(toDatasetExample);
+
   const expectedNames = [
     'Factuality',
     'Relevance',
     'Sequence Accuracy',
+    'ExpectedToolCalled',
+    'ToolUsageOnly',
+    'Trajectory',
     'Tool Calls',
     'Latency',
     'Input Tokens',
     'Output Tokens',
     'Cached Tokens',
-    'Skill Invoked',
+    'Skill Invoked (find-security-rules)',
+    'ExpectedSkillInvocation',
   ];
 
   it('pins the baseline L1–L5 evaluator stack', () => {
-    const stack = buildSecuritySkillsEvaluators(buildBuildArgs());
+    const stack = buildSecuritySkillsEvaluators({
+      ...buildBuildArgs(),
+      examples: wrappedExamples,
+    });
     expect(stack.map((e) => e.name)).toEqual(expectedNames);
   });
 });
@@ -69,24 +78,33 @@ describe('toDatasetExample', () => {
       expected: {
         reference: 'Uses find_rules',
         expectedSkill: 'find-security-rules',
+        tool_sequence: ['security.find_rules'],
       },
       metadata: {
         category: 'find-rules',
         query_intent: 'Rule Discovery',
         dataset_split: ['base'],
+        expectedOnlyToolId: 'security.find_rules',
       },
     };
     const wrapped = toDatasetExample(ex);
     expect(wrapped.input?.question).toBe('List MITRE rules');
     expect(wrapped.output?.expectedSkill).toBe('find-security-rules');
+    expect(wrapped.output?.tool_sequence).toEqual(['security.find_rules']);
+    expect(wrapped.metadata?.expectedOnlyToolId).toBe('security.find_rules');
   });
 });
 
 describe('securitySkillsExamples', () => {
-  it('includes happy-path and distractor splits', () => {
+  it('includes find-rules happy-path and distractor splits only', () => {
     const distractors = securitySkillsExamples.filter((ex) => ex.metadata.is_distractor);
-    const happy = securitySkillsExamples.filter((ex) => !ex.metadata.is_distractor);
-    expect(happy.length).toBeGreaterThanOrEqual(3);
-    expect(distractors.length).toBeGreaterThanOrEqual(1);
+    const findRules = securitySkillsExamples.filter((ex) => ex.metadata.category === 'find-rules');
+    expect(findRules.length).toBe(4);
+    expect(distractors.length).toBe(2);
+    expect(
+      securitySkillsExamples.every(
+        (ex) => ex.metadata.category === 'find-rules' || ex.metadata.category === 'distractor'
+      )
+    ).toBe(true);
   });
 });

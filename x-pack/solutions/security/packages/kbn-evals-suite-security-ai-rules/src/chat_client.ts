@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import pRetry from 'p-retry';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
-// These string literals mirror the constants defined in security_solution/common/constants.
-// They are inlined here to avoid a package→plugin import boundary violation.
-const THREAT_HUNTING_AGENT_ID = 'elastic-ai-agent';
+// Mirrors security_solution/common/constants — inlined to avoid package→plugin import.
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
@@ -31,6 +31,14 @@ interface RuleToolStep {
 interface ConverseResponse {
   steps?: RuleToolStep[];
   trace_id?: string;
+  response?: { message: string };
+}
+
+export interface NaturalLanguageConverseResponse {
+  messages: Array<{ message: string }>;
+  steps: RuleToolStep[];
+  errors: Array<{ error: { message: string; stack?: string }; type: 'error' }>;
+  traceId?: string;
 }
 
 interface SecurityRuleGenerationLog {
@@ -44,6 +52,50 @@ export class SecurityRuleGenerationClient {
     private readonly connectorId: string
   ) {}
 
+  /**
+   * Track B — default-agent natural-language converse with no forced tool prompt
+   * and no security.rule attachment. Used for routing / collision evaluators.
+   */
+  public async converseNaturalLanguage(
+    message: string,
+    agentId: string = agentBuilderDefaultAgentId
+  ): Promise<NaturalLanguageConverseResponse> {
+    const call = async (): Promise<NaturalLanguageConverseResponse> => {
+      const syncResponse = (await this.fetch(AGENT_BUILDER_CONVERSE_API_PATH, {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          agent_id: agentId,
+          connector_id: this.connectorId,
+          input: message,
+        }),
+      })) as ConverseResponse;
+
+      return {
+        messages: [{ message: syncResponse.response?.message ?? '' }],
+        steps: syncResponse.steps ?? [],
+        traceId: syncResponse.trace_id,
+        errors: [],
+      };
+    };
+
+    try {
+      return await pRetry(call, {
+        retries: 2,
+        minTimeout: 2_000,
+        onFailedAttempt: (error) => {
+          this.log.warning(
+            `agent_builder/converse (routing) failed on attempt ${error.attemptNumber}; retrying...`
+          );
+        },
+      });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.log.error(`agent_builder/converse (routing) failed after retries: ${msg}`);
+      throw error instanceof Error ? error : new Error(msg);
+    }
+  }
+
   public async generateRule(prompt: string): Promise<{
     generatedRule?: Partial<ReferenceRule>;
     error?: string;
@@ -51,7 +103,7 @@ export class SecurityRuleGenerationClient {
     steps?: RuleToolStep[];
   }> {
     const payload = {
-      agent_id: THREAT_HUNTING_AGENT_ID,
+      agent_id: agentBuilderDefaultAgentId,
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
       capabilities: { visualizations: true },

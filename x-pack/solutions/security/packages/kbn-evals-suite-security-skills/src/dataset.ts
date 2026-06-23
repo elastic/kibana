@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type SecuritySkillsCategory = 'find-rules' | 'security-skills' | 'distractor';
+export type SecuritySkillsCategory = 'find-rules' | 'distractor';
 
 export interface SecuritySkillsExample {
   input: {
@@ -15,11 +15,15 @@ export interface SecuritySkillsExample {
     reference: string;
     expectedSkill?: string;
     shouldNotActivateSkill?: string;
+    tool_sequence?: string[];
   };
   metadata: {
     category: SecuritySkillsCategory;
     query_intent: string;
     dataset_split: string[];
     is_distractor?: boolean;
+    expectedToolId?: string;
+    expectedOnlyToolId?: string;
+    tool_sequence?: string[];
   };
 }

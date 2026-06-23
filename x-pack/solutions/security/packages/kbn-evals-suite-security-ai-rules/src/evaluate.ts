@@ -17,6 +17,8 @@ import {
   clearDatasetSkipSummaries,
   type DatasetSkipSummary,
 } from './evaluate_dataset';
+import type { EvaluateRuleRoutingDataset } from './evaluate_routing_dataset';
+import { createEvaluateRuleRoutingDataset } from './evaluate_routing_dataset';
 
 function formatEvalSummary(summaries: DatasetSkipSummary[]): string {
   if (summaries.length === 0) {
@@ -108,6 +110,7 @@ export const evaluate = base.extend<
   {
     chatClient: SecurityRuleGenerationClient;
     evaluationInferenceClient: BoundInferenceClient;
+    evaluateRoutingDataset: EvaluateRuleRoutingDataset;
   }
 >({
   chatClient: [
@@ -125,6 +128,20 @@ export const evaluate = base.extend<
     {
       scope: 'worker',
     },
+  ],
+  evaluateRoutingDataset: [
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+      use(
+        createEvaluateRuleRoutingDataset({
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        })
+      );
+    },
+    { scope: 'worker' },
   ],
   reportDisplayOptions: [
     async ({ evaluators }, use) => {
