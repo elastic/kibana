@@ -66,11 +66,17 @@ describe('<AttackFlyoutWrapper />', () => {
   it('passes a wrapped onAttackUpdated handler to AttackFlyout that calls refetch then the callback', async () => {
     const onAttackUpdated = jest.fn();
     const refetch = jest.fn().mockResolvedValue(undefined);
-    (useAttackDetails as jest.Mock).mockReturnValue({ loading: false, searchHit: mockSearchHit, refetch });
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: false,
+      searchHit: mockSearchHit,
+      refetch,
+    });
 
     renderWrapper({ onAttackUpdated });
 
-    const [receivedProps] = mockAttackFlyout.mock.calls[0] as [{ onAttackUpdated: () => Promise<void> }];
+    const [receivedProps] = mockAttackFlyout.mock.calls[0] as [
+      { onAttackUpdated: () => Promise<void> }
+    ];
     expect(typeof receivedProps.onAttackUpdated).toBe('function');
 
     await receivedProps.onAttackUpdated();
