@@ -52,9 +52,12 @@ export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
     return null;
   }
 
+  // Strip `kuery` so the map's service-name filter isn't carried into the
+  // service overview (same treatment as the alerts redirection — see
+  // `useAlertsTabHrefBuilder` — to avoid undesired side effects on the destination).
   const anomaliesOverviewHref = apmRouter.link('/services/{serviceName}/overview', {
     path: { serviceName },
-    query: { ...query },
+    query: { ...query, kuery: '' },
   });
   const navigateToAnomaliesOverview: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
