@@ -94,7 +94,7 @@ export const createLinksOASOperationObject = {
         '  -H "Authorization: ApiKey ${API_KEY}" \\\n' +
         '  -H "kbn-xsrf: true" \\\n' +
         '  -H "Content-Type: application/json" \\\n' +
-        `  -d '${JSON.stringify(linksCreateRequestExamples.createLinks, null, 2)}'`,
+        `  -d '${JSON.stringify(linksCreateRequestExamples.createLinks.value, null, 2)}'`,
     },
     {
       lang: 'Create a links library item - Console',

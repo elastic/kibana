@@ -45,6 +45,9 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
           204: {
             description: 'deleted',
           },
+          400: {
+            description: 'invalid request',
+          },
           403: {
             description: 'forbidden',
           },

@@ -74,17 +74,17 @@ export const updateBasicSoAttributes = async (
   });
 
   let { references } = extractedReferences;
-
+  console.log({ item: so.item, references });
   const attributes = {
     ...extractedReferences.attributes,
     title: newAttributes.title,
     description: newAttributes.description,
   };
 
-  if (dependencies.savedObjectsTagging) {
+  if (dependencies.savedObjectsTagging && newAttributes.tags.length) {
     references = dependencies.savedObjectsTagging.ui.updateTagsReferences(
       references,
-      newAttributes.tags || []
+      newAttributes.tags
     );
   }
 
@@ -94,7 +94,7 @@ export const updateBasicSoAttributes = async (
       ...attributes,
     },
     options: {
-      references: [...so.item.references, ...references],
+      references,
       ...getAdditionalOptionsForUpdate(type, dependencies.typesService, 'update'),
     },
   });

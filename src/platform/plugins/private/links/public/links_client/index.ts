@@ -94,15 +94,12 @@ export function getLinksClient<
     },
     update: async ({ id, data, options }) => {
       const transformedData = transformOut(data, options?.references ?? []);
-      let tags: string[] = [];
-      if (savedObjectsTaggingService) {
-        tags =
-          savedObjectsTaggingService
-            .getTaggingApi()
-            ?.ui.getTagIdsFromReferences(options?.references ?? []) ?? [];
-      }
-
       const original = await linksClient.get(id); // get the original library item so we can perform a full update
+      const tags = savedObjectsTaggingService
+        ? savedObjectsTaggingService
+            .getTaggingApi()
+            ?.ui.getTagIdsFromReferences(options?.references ?? []) ?? []
+        : original.data.tags ?? [];
       const result = await linksClient.update(id, { ...original.data, ...transformedData, tags });
       const { state: attributes, references } = transformIn(result.data);
 
