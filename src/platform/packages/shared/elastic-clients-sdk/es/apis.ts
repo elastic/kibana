@@ -66,8 +66,15 @@ export async function loadEsApisInFile(namespaceFile: string): Promise<EsApiDefi
   return cached;
 }
 
-/** Locates a single `EsApiDefinition` by its manifest entry. */
-export async function loadEsApi(meta: EsApiMeta): Promise<EsApiDefinition> {
+/**
+ * Locates a single `EsApiDefinition` by its manifest entry.
+ *
+ * Only the lookup keys are needed, so any structurally-compatible meta works
+ * (e.g. the unified `ApiRegistryMeta`); a full `EsApiMeta` is not required.
+ */
+export async function loadEsApi(
+  meta: Pick<EsApiMeta, 'name' | 'namespace' | 'namespaceFile'>
+): Promise<EsApiDefinition> {
   const defs = await loadEsApisInFile(meta.namespaceFile);
   const found = defs.find((d) => d.name === meta.name && (d.namespace ?? null) === meta.namespace);
   if (found == null) {

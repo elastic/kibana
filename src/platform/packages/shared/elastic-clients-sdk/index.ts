@@ -23,7 +23,7 @@ export function resolveInput(
 export { extractSchemaArgs } from './lib/schema-args';
 export type { SchemaArgDefinition, FoundIn } from './lib/schema-args';
 
-export { esApiRegistry, kbApiRegistry } from './api/registry';
+export { esApiRegistry, kbApiRegistry } from './registry';
 export type {
   ApiRegistry,
   ApiRegistryMeta,
@@ -31,4 +31,4 @@ export type {
   ApiRequest,
   LoadedApi,
   ApiHttpMethod,
-} from './api/registry';
+} from './registry';

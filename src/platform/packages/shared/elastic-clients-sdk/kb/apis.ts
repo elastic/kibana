@@ -58,8 +58,16 @@ export async function loadKbApisInFile(namespaceFile: string): Promise<KbApiDefi
   return cached;
 }
 
-/** Locates a single `KbApiDefinition` by its manifest entry. */
-export async function loadKbApi(meta: KbApiMeta): Promise<KbApiDefinition> {
+/**
+ * Locates a single `KbApiDefinition` by its manifest entry.
+ *
+ * Only the lookup keys are needed, so any structurally-compatible meta works
+ * (e.g. the unified `ApiRegistryMeta`, whose `namespace` may be `null`); a full
+ * `KbApiMeta` is not required.
+ */
+export async function loadKbApi(
+  meta: Pick<KbApiMeta, 'name' | 'namespaceFile'> & { readonly namespace: string | null }
+): Promise<KbApiDefinition> {
   const defs = await loadKbApisInFile(meta.namespaceFile);
   const found = defs.find((d) => d.name === meta.name && d.namespace === meta.namespace);
   if (found == null) {

@@ -13,15 +13,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { apiManifest, loadEsApi } from '../es/apis';
-import type { EsApiMeta } from '../es/apis';
-import { kbApiManifest, loadKbApi } from '../kb/apis';
-import type { KbApiMeta } from '../kb/apis';
-import type { KbApiDefinition } from '../kb/types';
-import type { FoundIn } from '../lib/schema-args';
-import { extractSchemaArgs } from '../lib/schema-args';
-import { buildRequestParams as buildEsRequestParams } from '../es/request-builder';
-import { buildKibanaRequestParams } from '../kb/request-builder';
+import { apiManifest, loadEsApi } from './es/apis';
+import { kbApiManifest, loadKbApi } from './kb/apis';
+import type { KbApiDefinition } from './kb/types';
+import type { FoundIn } from './lib/schema-args';
+import { extractSchemaArgs } from './lib/schema-args';
+import { buildRequestParams as buildEsRequestParams } from './es/request-builder';
+import { buildKibanaRequestParams } from './kb/request-builder';
 
 const resolveInput = (
   input: z.ZodObject<z.ZodRawShape> | (() => z.ZodObject<z.ZodRawShape>)
@@ -129,11 +127,11 @@ export interface ApiRegistry {
 export const esApiRegistry: ApiRegistry = {
   manifest: apiManifest,
   loadApi: async (meta) => {
-    const def = await loadEsApi(meta as EsApiMeta);
-    const schemaArgs = def.input != null ? extractSchemaArgs(resolveInput(def.input)) : [];
+    const def = await loadEsApi(meta);
     return {
       definition: def,
       buildRequest: (input): ApiRequest => {
+        const schemaArgs = def.input != null ? extractSchemaArgs(resolveInput(def.input)) : [];
         const p = buildEsRequestParams(def, input, schemaArgs);
         const req: {
           method: string;
@@ -155,7 +153,7 @@ export const esApiRegistry: ApiRegistry = {
 export const kbApiRegistry: ApiRegistry = {
   manifest: kbApiManifest,
   loadApi: async (meta) => {
-    const rawDef = await loadKbApi(meta as KbApiMeta);
+    const rawDef = await loadKbApi(meta);
     return {
       definition: toRegistryDefinition(rawDef),
       buildRequest: (input): ApiRequest => {
@@ -203,9 +201,7 @@ function annotate(
 }
 
 /**
- * Builds the unified `input` schema for a Kibana API definition.
- * Keys are `cliFlag ?? name` (the display representation). Wire names are preserved
- * in the raw `KbApiDefinition` captured by {@link kbApiRegistry.loadApi}.
+ * Temporarily build a simple zod schema, until the full kibana schemas are available
  */
 function buildKbRegistryInput(def: KbApiDefinition): z.ZodObject<z.ZodRawShape> {
   const shape: Record<string, z.ZodType> = {};

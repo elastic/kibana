@@ -21,9 +21,6 @@ export interface SchemaArgDefinition {
   /** Original key name as defined in the Zod schema (e.g., `num_shards`, `refreshInterval`) */
   schemaKey: string;
 
-  /** Kebab-case flag name derived from `schemaKey` (e.g., `num-shards`, `refresh-interval`) */
-  cliFlag: string;
-
   /** Declared type from schema introspection */
   type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'enum';
 
@@ -130,11 +127,11 @@ function unwrapField(field: z.ZodType): {
   return { typeName: def.type, isOptional: false };
 }
 
-const CLI_TYPES = new Set(['string', 'number', 'boolean', 'object', 'array', 'enum']);
+const PARAMS_TYPES = new Set(['string', 'number', 'boolean', 'object', 'array', 'enum']);
 
 /**
- * Extracts CLI argument definitions from a Zod object schema.
- * Each top-level key becomes a `SchemaArgDefinition` with its kebab-case flag name,
+ * Extracts input params from a Zod object schema.
+ * Each top-level key becomes a `SchemaArgDefinition` with its kebab-case name,
  * type, required status, default value, and description.
  *
  * Returns an empty array if `schema` is not a Zod object schema.
@@ -145,7 +142,7 @@ export function extractSchemaArgs(schema: unknown): SchemaArgDefinition[] {
 
   return Object.entries(shape).map(([key, fieldSchema]) => {
     const { typeName, isOptional, defaultValue } = unwrapField(fieldSchema as z.ZodType);
-    const type = (CLI_TYPES.has(typeName) ? typeName : 'string') as SchemaArgDefinition['type'];
+    const type = (PARAMS_TYPES.has(typeName) ? typeName : 'string') as SchemaArgDefinition['type'];
 
     // Read description from the Zod globalRegistry -- much faster than calling
     // .toJSONSchema() per field, which would force lazy-schema evaluation.
@@ -170,7 +167,6 @@ export function extractSchemaArgs(schema: unknown): SchemaArgDefinition[] {
     const acceptsArrayForm = type !== 'array' && schemaAcceptsArrayForm(fieldSchema as z.ZodType);
     return {
       schemaKey: key,
-      cliFlag: toKebabCase(key),
       type,
       required: !isOptional && defaultValue === undefined,
       defaultValue,
@@ -202,52 +198,6 @@ function schemaAcceptsArrayForm(field: z.ZodType): boolean {
     return def.options.some((o) => schemaAcceptsArrayForm(o));
   }
   return false;
-}
-
-/**
- * Builds a bidirectional mapping between CLI flag names and schema keys for a command.
- * Created once at registration time; immutable after creation.
- */
-export function buildFlagKeyMap(args: SchemaArgDefinition[]): FlagKeyMap {
-  const toSchemaKey = new Map<string, string>();
-  const toCliFlag = new Map<string, string>();
-  for (const arg of args) {
-    toSchemaKey.set(arg.cliFlag, arg.schemaKey);
-    toCliFlag.set(arg.schemaKey, arg.cliFlag);
-  }
-  return { toSchemaKey, toCliFlag };
-}
-
-/** Reserved CLI flag names that schema keys must not collide with. */
-const RESERVED_FLAGS = new Set([
-  'help',
-  'json',
-  'config-file',
-  'use-context',
-  'command-profile',
-  'input-file',
-]);
-
-/**
- * Validates schema arguments for naming conflicts.
- * Throws if any `cliFlag` collides with a reserved flag or duplicates another arg's flag.
- * Called at command registration time for fail-fast detection.
- */
-export function validateSchemaArgs(args: SchemaArgDefinition[]): void {
-  const seen = new Set<string>();
-  for (const arg of args) {
-    if (RESERVED_FLAGS.has(arg.cliFlag)) {
-      throw new Error(
-        `Schema key "${arg.schemaKey}" collides with reserved flag "--${arg.cliFlag}"`
-      );
-    }
-    if (seen.has(arg.cliFlag)) {
-      throw new Error(
-        `Duplicate CLI flag collision: multiple schema keys map to "--${arg.cliFlag}"`
-      );
-    }
-    seen.add(arg.cliFlag);
-  }
 }
 
 /**
