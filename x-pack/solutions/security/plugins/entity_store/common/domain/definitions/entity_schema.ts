@@ -23,10 +23,11 @@ const retentionOperationSchema = z.discriminatedUnion('operation', [
 
 const fieldSchema = z.object({
   allowAPIUpdate: z.optional(z.boolean()),
-  mapping: z.optional(mappingSchema),
-  source: z.string(),
   destination: z.string(),
+  mapping: z.optional(mappingSchema),
   retention: retentionOperationSchema,
+  skipExtraction: z.optional(z.boolean()).default(false),
+  source: z.string(),
 });
 
 const euidFieldSchema = z.object({
