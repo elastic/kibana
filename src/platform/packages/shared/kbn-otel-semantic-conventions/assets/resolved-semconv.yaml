@@ -8446,7 +8446,7 @@ groups:
           - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36
         requirement_level: recommended
         note: |
-          The user-agent value SHOULD be provided only from browsers that do not have a mechanism to retrieve brands and platform individually from the User-Agent Client Hints API. To retrieve the value, the legacy `navigator.userAgent` API can be used.
+          To retrieve the value, the legacy `navigator.userAgent` API can be used.
         stability: stable
     name: browser
     lineage:
@@ -8529,7 +8529,7 @@ groups:
     type: entity
     brief: |
       A pipeline is a series of automated steps that helps software teams deliver code.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.pipeline.name
         type: string
@@ -8540,8 +8540,9 @@ groups:
           - Lint
           - Deploy Go Project
           - deploy_to_environment
-        requirement_level: recommended
-        stability: development
+        requirement_level: required
+        stability: release_candidate
+        role: identifying
     name: cicd.pipeline
     lineage:
       provenance:
@@ -8554,13 +8555,15 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
   - id: entity.cicd.pipeline.run
     type: entity
     brief: |
       A pipeline run is a singular execution of a given pipeline's tasks.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.pipeline.run.id
         type: string
@@ -8568,8 +8571,9 @@ groups:
           The unique identifier of a pipeline run within a CI/CD system.
         examples:
           - "120912"
-        requirement_level: recommended
-        stability: development
+        requirement_level: required
+        stability: release_candidate
+        role: identifying
       - name: cicd.pipeline.run.url.full
         type: string
         brief: |
@@ -8577,7 +8581,8 @@ groups:
         examples:
           - https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763?pr=1075
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
+        role: descriptive
     name: cicd.pipeline.run
     lineage:
       provenance:
@@ -8590,8 +8595,10 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
         cicd.pipeline.run.url.full:
           source_group: registry.cicd.pipeline
           inherited_fields:
@@ -8600,13 +8607,15 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.cicd.worker
     type: entity
     brief: |
       A CI/CD worker is a component of the CI/CD system that performs work (eg. running pipeline tasks or performing sync).
       A single pipeline run may be distributed across multiple workers. Any OpenTelemetry signal associated with a worker should be associated to the worker that performed the corresponding work.
       For example, when a pipeline run involves several workers, its task run spans may reference the different `cicd.worker` resources corresponding to the workers that executed each task run. The pipeline run's parent span may instead reference the CI/CD controller as the `cicd.worker` resource.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.worker.id
         type: string
@@ -8616,7 +8625,8 @@ groups:
           - 10.0.1.2
           - controller
         requirement_level: required
-        stability: development
+        stability: release_candidate
+        role: identifying
       - name: cicd.worker.name
         type: string
         brief: The name of a worker within a CI/CD system.
@@ -8625,7 +8635,8 @@ groups:
           - controller
           - Ubuntu LTS
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
+        role: descriptive
       - name: cicd.worker.url.full
         type: string
         brief: The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.
@@ -8633,7 +8644,8 @@ groups:
           - https://cicd.example.org/worker/abc123
         requirement_level:
           recommended: If available
-        stability: development
+        stability: release_candidate
+        role: descriptive
     name: cicd.worker
     lineage:
       provenance:
@@ -8649,6 +8661,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         cicd.worker.name:
           source_group: registry.cicd.pipeline
           inherited_fields:
@@ -8657,6 +8670,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         cicd.worker.url.full:
           source_group: registry.cicd.pipeline
           inherited_fields:
@@ -8666,6 +8681,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
   - id: entity.cloud
     type: entity
     brief: |
@@ -8679,7 +8695,10 @@ groups:
         examples:
           - "111111111111"
           - opentelemetry
+          - 22222222-2222-2222-2222-222222222222
         requirement_level: recommended
+        note: |
+          For Azure, this is the subscription ID.
         stability: development
       - name: cloud.availability_zone
         type: string
@@ -11030,9 +11049,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `1` SHOULD be recorded
+          - An annotation `replicas` with value `1` SHOULD be recorded
             as the `k8s.daemonset.annotation.replicas` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.annotation.data` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -11050,7 +11069,7 @@ groups:
 
           - A label `app` with value `guestbook` SHOULD be recorded
             as the `k8s.daemonset.label.app` attribute with value `"guestbook"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.daemonset.label.injected` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -11136,9 +11155,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `1` SHOULD be recorded
+          - An annotation `replicas` with value `1` SHOULD be recorded
             as the `k8s.deployment.annotation.replicas` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.deployment.annotation.data` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -11154,7 +11173,7 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `0` SHOULD be recorded
+          - A label `app` with value `guestbook` SHOULD be recorded
             as the `k8s.deployment.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.deployment.label.injected` attribute with value `""`.
@@ -11358,9 +11377,9 @@ groups:
           
           Examples:
 
-          - A label `number` with value `1` SHOULD be recorded
+          - An annotation `number` with value `1` SHOULD be recorded
             as the `k8s.job.annotation.number` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.job.annotation.data` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -11378,7 +11397,7 @@ groups:
 
           - A label `jobtype` with value `ci` SHOULD be recorded
             as the `k8s.job.label.jobtype` attribute with value `"ci"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - A label `automated` with empty string value SHOULD be recorded as
             the `k8s.job.label.automated` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -11464,9 +11483,9 @@ groups:
           
           Examples:
 
-          - A label `ttl` with value `0` SHOULD be recorded
+          - An annotation `ttl` with value `0` SHOULD be recorded
             as the `k8s.namespace.annotation.ttl` attribute with value `"0"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.annotation.data` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -12156,9 +12175,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `0` SHOULD be recorded
+          - An annotation `replicas` with value `0` SHOULD be recorded
             as the `k8s.replicaset.annotation.replicas` attribute with value `"0"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.replicaset.annotation.data` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -12590,9 +12609,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `1` SHOULD be recorded
+          - An annotation `replicas` with value `1` SHOULD be recorded
             as the `k8s.statefulset.annotation.replicas` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.statefulset.annotation.data` attribute with value `""`.
         stability: stable
         role: descriptive
@@ -12608,7 +12627,7 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `0` SHOULD be recorded
+          - A label `app` with value `guestbook` SHOULD be recorded
             as the `k8s.statefulset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.statefulset.label.injected` attribute with value `""`.
@@ -13385,28 +13404,28 @@ groups:
                 Service is business-critical; downtime directly impacts revenue, user experience, or core functionality.
               note: |
                 Examples include payment processing, authentication, and primary user-facing APIs.
-              stability: development
+              stability: alpha
             - id: high
               value: high
               brief: |
                 Service is important but has degradation tolerance or fallback mechanisms.
               note: |
                 Examples include shopping cart, search, and recommendation engines.
-              stability: development
+              stability: alpha
             - id: medium
               value: medium
               brief: |
                 Service provides supplementary functionality; degradation has limited user impact.
               note: |
                 Examples include analytics, reporting, and non-essential integrations.
-              stability: development
+              stability: alpha
             - id: low
               value: low
               brief: |
                 Service is non-essential to core operations; used for background tasks or internal tools.
               note: |
                 Examples include batch processors, cleanup jobs, and internal dashboards.
-              stability: development
+              stability: alpha
         brief: |
           The operational criticality of the service.
         examples:
@@ -13417,7 +13436,7 @@ groups:
         requirement_level: recommended
         note: |
           Application developers are encouraged to set `service.criticality` to express the operational importance of their services. Telemetry consumers MAY use this attribute to optimize telemetry collection or improve user experience.
-        stability: development
+        stability: alpha
         role: descriptive
       - name: service.name
         type: string
@@ -13648,6 +13667,9 @@ groups:
               stability: stable
             - id: java
               value: java
+              stability: stable
+            - id: kotlin
+              value: kotlin
               stability: stable
             - id: nodejs
               value: nodejs
@@ -13991,6 +14013,200 @@ groups:
             - requirement_level
         zos.sysplex.name:
           source_group: registry.zos
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+  - id: event.app.crash
+    type: event
+    brief: |
+      This event represents a termination of a user-facing application due to
+      unrecoverable programming errors such as exceptions or signals that
+      indicate an error has happened at a lower level.
+    note: |
+      Crash events can be produced asynchronously by an OTel SDK instance that is
+      not running in the application instance in which the crash happened. For
+      example, the instrumentation may report crashes from previous app instances
+      based on information found in tombstones on disk.
+      If the reporter of the crash is not the crashing application instance itself,
+      relevant resource attributes that identify the application instance that
+      crashed MUST be provided as event attributes so that the corresponding
+      attributes from the reporter's resource aren't used instead.
+      How the instrumentation will determine whether an instance of a crash has
+      already been reported and how the necessary data will be retrieved is left up
+      to the instrumentation. Providing enough data to dedupe is NOT REQUIRED.
+    stability: development
+    attributes:
+      - name: app.build_id
+        type: string
+        brief: Unique identifier for a particular build or compilation of the application.
+        examples:
+          - 6cff0a7e-cefc-4668-96f5-1273d8b334d0
+          - 9f2b833506aa6973a92fde9733e6271f
+          - my-app-1.0.0-code-123
+        requirement_level:
+          conditionally_required: If reporter is not the crashing application instance itself and it's available.
+        stability: development
+      - name: app.crash.id
+        type: string
+        brief: |
+          A unique identifier representing an instance of an end-user facing app crash.
+        examples:
+          - 083d3d2d-9a0e-47f8-be3d-bc3c5538ba38
+        requirement_level: recommended
+        note: |
+          Its value MAY be meaningful and be used as a reference for telemetry and metadata recorded by
+          the same instrumentation (e.g. it is an ID generated by an external source that captured the crash).
+          It MAY come from a source external to the instrumentation such that it can be used to look up additional
+          data from other sources as well as facilitate deduplication.
+        stability: development
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level: recommended
+        note: If this contains obfuscated symbols, `app.build_id` SHOULD be provided so they can be deobfuscated.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        note: If this contains obfuscated symbols, `app.build_id` SHOULD be provided so they can be deobfuscated.
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level: recommended
+        note: If this contains obfuscated symbols, `app.build_id` SHOULD be provided so they can be deobfuscated.
+        stability: stable
+      - name: os.name
+        type: string
+        brief: Human readable operating system name.
+        examples:
+          - iOS
+          - Android
+          - Ubuntu
+        requirement_level:
+          conditionally_required: If reporter is not the crashing application instance itself and the OS name is available.
+        stability: development
+      - name: os.version
+        type: string
+        brief: |
+          The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).
+        examples:
+          - 14.2.1
+          - 18.04.1
+        requirement_level:
+          conditionally_required: If reporter is not the crashing application instance itself.
+        stability: development
+      - name: service.version
+        type: string
+        brief: |
+          The version string of the service component. The format is not defined by these conventions.
+        examples:
+          - 2.0.0
+          - a01dbef8a
+        requirement_level:
+          conditionally_required: If reporter is not the crashing application instance itself.
+        stability: stable
+      - name: session.id
+        type: string
+        brief: A unique id to identify a session.
+        examples: 00112233-4455-6677-8899-aabbccddeeff
+        requirement_level: recommended
+        stability: development
+    name: app.crash
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/app/events.yaml
+      attributes:
+        app.build_id:
+          source_group: registry.app
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        app.crash.id:
+          source_group: registry.app
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        os.name:
+          source_group: registry.os
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        os.version:
+          source_group: registry.os
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        service.version:
+          source_group: registry.service
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        session.id:
+          source_group: registry.session
           inherited_fields:
             - brief
             - examples
@@ -14665,7 +14881,7 @@ groups:
         requirement_level:
           conditionally_required: if and only if `os.name` is `android`
         note: |
-          The Android lifecycle states are defined in [Activity lifecycle callbacks](https://developer.android.com/guide/components/activities/activity-lifecycle#lc), and from which the `OS identifiers` are derived.
+          The Android lifecycle states are defined in [Activity lifecycle callbacks](https://developer.android.com/guide/components/activities/activity-lifecycle#lifecycle-callbacks), and from which the `OS identifiers` are derived.
         stability: development
       - name: ios.app.state
         type:
@@ -22649,7 +22865,7 @@ groups:
         stability: development
       - name: messaging.consumer.group.name
         type: string
-        brief: RocketMQ [consumer group name](https://rocketmq.apache.org/docs/domainModel/07consumergroup).
+        brief: RocketMQ [consumer group name](https://rocketmq.apache.org/docs/domainModel/08consumergroup/).
         examples:
           - my-group
           - indexer
@@ -29464,7 +29680,7 @@ groups:
   - id: metric.cicd.pipeline.run.active
     type: metric
     brief: The number of pipeline runs currently active in the system by state.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.pipeline.name
         type: string
@@ -29476,7 +29692,7 @@ groups:
           - Deploy Go Project
           - deploy_to_environment
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.run.state
         type:
           members:
@@ -29484,15 +29700,15 @@ groups:
               value: pending
               brief: |
                 The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).
-              stability: development
+              stability: release_candidate
             - id: executing
               value: executing
               brief: The executing state spans the execution of any run tasks (eg. build, test).
-              stability: development
+              stability: release_candidate
             - id: finalizing
               value: finalizing
               brief: The finalizing state spans from when the run has finished executing (eg. cleanup of run resources).
-              stability: development
+              stability: release_candidate
         brief: |
           The pipeline run goes through these states during its lifecycle.
         examples:
@@ -29500,7 +29716,7 @@ groups:
           - executing
           - finalizing
         requirement_level: required
-        stability: development
+        stability: release_candidate
     metric_name: cicd.pipeline.run.active
     instrument: updowncounter
     unit: "{run}"
@@ -29535,7 +29751,7 @@ groups:
   - id: metric.cicd.pipeline.run.duration
     type: metric
     brief: Duration of a pipeline run grouped by pipeline, state and result.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.pipeline.name
         type: string
@@ -29547,44 +29763,44 @@ groups:
           - Deploy Go Project
           - deploy_to_environment
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.result
         type:
           members:
             - id: success
               value: success
               brief: The pipeline run finished successfully.
-              stability: development
+              stability: release_candidate
             - id: failure
               value: failure
               brief: The pipeline run did not finish successfully, eg. due to a compile error or a failing test. Such failures are usually detected by non-zero exit codes of the tools executed in the pipeline run.
-              stability: development
+              stability: release_candidate
             - id: error
               value: error
               brief: The pipeline run failed due to an error in the CI/CD system, eg. due to the worker being killed.
-              stability: development
+              stability: release_candidate
             - id: timeout
               value: timeout
               brief: A timeout caused the pipeline run to be interrupted.
-              stability: development
+              stability: release_candidate
             - id: cancellation
               value: cancellation
               brief: The pipeline run was cancelled, eg. by a user manually cancelling the pipeline run.
-              stability: development
+              stability: release_candidate
             - id: skip
               value: skip
               brief: The pipeline run was skipped, eg. due to a precondition not being met.
-              stability: development
+              stability: release_candidate
         brief: |
           The result of a pipeline run.
         examples:
           - success
           - failure
           - timeout
-          - skipped
+          - skip
         requirement_level:
           conditionally_required: If and only if the pipeline run result has been set during that state.
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.run.state
         type:
           members:
@@ -29592,15 +29808,15 @@ groups:
               value: pending
               brief: |
                 The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).
-              stability: development
+              stability: release_candidate
             - id: executing
               value: executing
               brief: The executing state spans the execution of any run tasks (eg. build, test).
-              stability: development
+              stability: release_candidate
             - id: finalizing
               value: finalizing
               brief: The finalizing state spans from when the run has finished executing (eg. cleanup of run resources).
-              stability: development
+              stability: release_candidate
         brief: |
           The pipeline run goes through these states during its lifecycle.
         examples:
@@ -29608,7 +29824,7 @@ groups:
           - executing
           - finalizing
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: error.type
         type:
           members:
@@ -29708,7 +29924,7 @@ groups:
     note: |
       There might be errors in a pipeline run that are non fatal (eg. they are suppressed) or in a parallel stage multiple stages could have a fatal error.
       This means that this error count might not be the same as the count of metric `cicd.pipeline.run.duration` with run result `failure`.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.pipeline.name
         type: string
@@ -29720,7 +29936,7 @@ groups:
           - Deploy Go Project
           - deploy_to_environment
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: error.type
         type:
           members:
@@ -29799,7 +30015,7 @@ groups:
     type: metric
     brief: The number of errors in a component of the CI/CD system (eg. controller, scheduler, agent).
     note: Errors in pipeline run execution are explicitly excluded. Ie a test failure is not counted in this metric.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.system.component
         type: string
@@ -29809,7 +30025,7 @@ groups:
           - scheduler
           - agent
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: error.type
         type:
           members:
@@ -29885,7 +30101,7 @@ groups:
   - id: metric.cicd.worker.count
     type: metric
     brief: The number of workers on the CI/CD system by state.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.worker.state
         type:
@@ -29894,26 +30110,26 @@ groups:
               value: available
               brief: The worker is not performing work for the CI/CD system. It is available to the CI/CD system to perform work on (online / idle).
               note: Pipelines might have conditions on which workers they are able to run so not every worker might be available to every pipeline.
-              stability: development
+              stability: release_candidate
             - id: busy
               value: busy
               brief: The worker is performing work for the CI/CD system.
-              stability: development
+              stability: release_candidate
             - id: offline
               value: offline
               brief: The worker is not available to the CI/CD system (disconnected / down).
-              stability: development
+              stability: release_candidate
         brief: |
           The state of a CI/CD worker / agent.
         examples:
-          - idle
+          - available
           - busy
-          - down
+          - offline
         requirement_level: required
-        stability: development
+        stability: release_candidate
     metric_name: cicd.worker.count
     instrument: updowncounter
-    unit: "{count}"
+    unit: "{worker}"
     lineage:
       provenance:
         registry_id: main
@@ -36198,7 +36414,7 @@ groups:
         examples:
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: recommended
+        requirement_level: opt_in
         stability: stable
       - name: network.protocol.version
         type: string
@@ -36325,7 +36541,7 @@ groups:
         examples:
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: recommended
+        requirement_level: opt_in
         stability: stable
       - name: network.protocol.version
         type: string
@@ -56199,6 +56415,9 @@ groups:
       For successful exports, `error.type` MUST NOT be set. For failed exports, `error.type` MUST contain the failure cause.
       For exporters with partial success semantics (e.g. OTLP with `rejected_log_records`), rejected log records MUST count as failed and only non-rejected log records count as success.
       If no rejection reason is available, `rejected` SHOULD be used as value for `error.type`.
+      If the exporter retries failed export attempts, the export operation is considered finished only after the final attempt has concluded.
+      Each log record MUST be counted exactly once per export operation: intermediate failed attempts that are followed by a retry MUST NOT increment the counter,
+      and `error.type` reflects the cause of the final attempt.
     stability: development
     attributes:
       - name: error.type
@@ -56442,7 +56661,8 @@ groups:
     type: metric
     brief: The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).
     note: |
-      For successful exports, `error.type` MUST NOT be set. For failed exports, `error.type` MUST contain the failure cause.
+      Log records are counted as inflight from when they are passed to the exporter until the export operation has concluded.
+      If the exporter retries failed export attempts, log records remain inflight across all retry attempts and any backoff between them.
     stability: development
     attributes:
       - name: otel.component.name
@@ -56637,6 +56857,9 @@ groups:
       For successful exports, `error.type` MUST NOT be set. For failed exports, `error.type` MUST contain the failure cause.
       For exporters with partial success semantics (e.g. OTLP with `rejected_data_points`), rejected data points MUST count as failed and only non-rejected data points count as success.
       If no rejection reason is available, `rejected` SHOULD be used as value for `error.type`.
+      If the exporter retries failed export attempts, the export operation is considered finished only after the final attempt has concluded.
+      Each metric data point MUST be counted exactly once per export operation: intermediate failed attempts that are followed by a retry MUST NOT increment the counter,
+      and `error.type` reflects the cause of the final attempt.
     stability: development
     attributes:
       - name: error.type
@@ -56880,7 +57103,8 @@ groups:
     type: metric
     brief: The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).
     note: |
-      For successful exports, `error.type` MUST NOT be set. For failed exports, `error.type` MUST contain the failure cause.
+      Metric data points are counted as inflight from when they are passed to the exporter until the export operation has concluded.
+      If the exporter retries failed export attempts, metric data points remain inflight across all retry attempts and any backoff between them.
     stability: development
     attributes:
       - name: otel.component.name
@@ -57075,6 +57299,9 @@ groups:
       This metric defines successful operations using the full success definitions for [http](https://github.com/open-telemetry/opentelemetry-proto/blob/v1.5.0/docs/specification.md#full-success-1)
       and [grpc](https://github.com/open-telemetry/opentelemetry-proto/blob/v1.5.0/docs/specification.md#full-success). Anything else is defined as an unsuccessful operation. For successful
       operations, `error.type` MUST NOT be set. For unsuccessful export operations, `error.type` MUST contain a relevant failure cause.
+      If the exporter retries failed export attempts, exactly one observation MUST be recorded per export operation,
+      covering the wall-clock duration from the start of the first attempt through the conclusion of the final attempt (including any backoff between attempts).
+      `error.type` reflects the cause of the final attempt.
     stability: development
     attributes:
       - name: error.type
@@ -57362,6 +57589,9 @@ groups:
       For successful exports, `error.type` MUST NOT be set. For failed exports, `error.type` MUST contain the failure cause.
       For exporters with partial success semantics (e.g. OTLP with `rejected_spans`), rejected spans MUST count as failed and only non-rejected spans count as success.
       If no rejection reason is available, `rejected` SHOULD be used as value for `error.type`.
+      If the exporter retries failed export attempts, the export operation is considered finished only after the final attempt has concluded.
+      Each span MUST be counted exactly once per export operation: intermediate failed attempts that are followed by a retry MUST NOT increment the counter,
+      and `error.type` reflects the cause of the final attempt.
     stability: development
     attributes:
       - name: error.type
@@ -57623,7 +57853,8 @@ groups:
     type: metric
     brief: The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).
     note: |
-      For successful exports, `error.type` MUST NOT be set. For failed exports, `error.type` MUST contain the failure cause.
+      Spans are counted as inflight from when they are passed to the exporter until the export operation has concluded.
+      If the exporter retries failed export attempts, spans remain inflight across all retry attempts and any backoff between them.
     stability: development
     attributes:
       - name: otel.component.name
@@ -58050,6 +58281,8 @@ groups:
     brief: The number of log records for which the processing has finished, either successful or failed.
     note: |
       For successful processing, `error.type` MUST NOT be set. For failed processing, `error.type` MUST contain the failure cause.
+      SDK Batching Log Record Processors MUST use `queue_full` as the value of `error.type` for log records dropped due to a full queue.
+      SDK Log Record Processors MUST use `already_shutdown` as the value of `error.type` for log records dropped because the processor has already been shut down.
       For the SDK Simple and Batching Log Record Processor a log record is considered to be processed already when it has been submitted to the exporter,
       not when the corresponding export call has finished.
     stability: development
@@ -58062,10 +58295,10 @@ groups:
               brief: |
                 A fallback error value to be used when the instrumentation doesn't define a custom value.
               stability: stable
-        brief: |
-          A low-cardinality description of the failure reason. SDK Batching Log Record Processors MUST use `queue_full` for log records dropped due to a full queue.
+        brief: A low-cardinality description of the failure reason.
         examples:
           - queue_full
+          - already_shutdown
         requirement_level: recommended
         note: |
           The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
@@ -58551,6 +58784,8 @@ groups:
     brief: The number of spans for which the processing has finished, either successful or failed.
     note: |
       For successful processing, `error.type` MUST NOT be set. For failed processing, `error.type` MUST contain the failure cause.
+      SDK Batching Span Processors MUST use `queue_full` as the value of `error.type` for spans dropped due to a full queue.
+      SDK Span Processors MUST use `already_shutdown` as the value of `error.type` for spans dropped because the processor has already been shut down.
       For the SDK Simple and Batching Span Processor a span is considered to be processed already when it has been submitted to the exporter, not when the corresponding export call has finished.
     stability: development
     attributes:
@@ -58562,10 +58797,10 @@ groups:
               brief: |
                 A fallback error value to be used when the instrumentation doesn't define a custom value.
               stability: stable
-        brief: |
-          A low-cardinality description of the failure reason. SDK Batching Span Processors MUST use `queue_full` for spans dropped due to a full queue.
+        brief: A low-cardinality description of the failure reason.
         examples:
           - queue_full
+          - already_shutdown
         requirement_level: recommended
         note: |
           The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
@@ -59098,6 +59333,8 @@ groups:
   - id: metric.otel.sdk.span.live
     type: metric
     brief: The number of created spans with `recording=true` for which the end operation has not been called yet.
+    note: |
+      Non-recording spans are not counted, hence `otel.span.sampling_result` can only take values `RECORD_ONLY` and `RECORD_AND_SAMPLE`, not `DROP`.
     stability: development
     attributes:
       - name: otel.span.sampling_result
@@ -64720,17 +64957,19 @@ groups:
         metric_value_type: int
   - id: metric.v8js.memory.heap.limit
     type: metric
-    brief: Maximum heap size allowed by the V8 engine.
-    note: |
-      The value can be retrieved from value `heap_size_limit` of [`v8.getHeapStatistics()`](https://nodejs.org/api/v8.html#v8getheapstatistics). This represents the absolute ceiling the heap can grow to, controlled by `--max-old-space-size` or V8 defaults.
+    brief: Deprecated, use `v8js.memory.heap.space.size` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: v8js.memory.heap.space.size
+      note: Replaced by `v8js.memory.heap.space.size`.
     metric_name: v8js.memory.heap.limit
     instrument: updowncounter
     unit: By
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/v8js/metrics.yaml
+        path: /home/weaver/source/v8js/deprecated/metrics-deprecated.yaml
     annotations:
       code_generation:
         metric_value_type: int
@@ -67905,7 +68144,7 @@ groups:
           - created
         requirement_level: recommended
         note: |
-          The Android lifecycle states are defined in [Activity lifecycle callbacks](https://developer.android.com/guide/components/activities/activity-lifecycle#lc), and from which the `OS identifiers` are derived.
+          The Android lifecycle states are defined in [Activity lifecycle callbacks](https://developer.android.com/guide/components/activities/activity-lifecycle#lifecycle-callbacks), and from which the `OS identifiers` are derived.
         stability: development
       - name: android.os.api_level
         type: string
@@ -67970,6 +68209,19 @@ groups:
           - 9f2b833506aa6973a92fde9733e6271f
           - my-app-1.0.0-code-123
         requirement_level: recommended
+        stability: development
+      - name: app.crash.id
+        type: string
+        brief: |
+          A unique identifier representing an instance of an end-user facing app crash.
+        examples:
+          - 083d3d2d-9a0e-47f8-be3d-bc3c5538ba38
+        requirement_level: recommended
+        note: |
+          Its value MAY be meaningful and be used as a reference for telemetry and metadata recorded by
+          the same instrumentation (e.g. it is an ID generated by an external source that captured the crash).
+          It MAY come from a source external to the instrumentation such that it can be used to look up additional
+          data from other sources as well as facilitate deduplication.
         stability: development
       - name: app.installation.id
         type: string
@@ -69264,6 +69516,25 @@ groups:
         registry_id: main
         path: /home/weaver/source/aws/registry.yaml
     display_name: Amazon Step Functions Attributes
+  - id: registry.azure
+    type: attribute_group
+    brief: |
+      This section defines generic attributes for Azure services.
+    attributes:
+      - name: azure.resource_group.name
+        type: string
+        brief: |
+          The name of the Azure [resource group](https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal) the resource belongs to.
+        examples:
+          - my-resource-group
+          - rg-myapp-prod
+        requirement_level: recommended
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/azure/registry.yaml
+    display_name: General Azure Attributes
   - id: registry.azure.client.sdk
     type: attribute_group
     brief: |
@@ -69594,15 +69865,15 @@ groups:
             - id: build
               value: BUILD
               brief: The pipeline run is executing a build.
-              stability: development
+              stability: release_candidate
             - id: run
               value: RUN
               brief: The pipeline run is executing.
-              stability: development
+              stability: release_candidate
             - id: sync
               value: SYNC
               brief: The pipeline run is executing a sync.
-              stability: development
+              stability: release_candidate
         brief: |
           The kind of action a pipeline run is performing.
         examples:
@@ -69610,7 +69881,7 @@ groups:
           - RUN
           - SYNC
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.name
         type: string
         brief: |
@@ -69621,43 +69892,43 @@ groups:
           - Deploy Go Project
           - deploy_to_environment
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.result
         type:
           members:
             - id: success
               value: success
               brief: The pipeline run finished successfully.
-              stability: development
+              stability: release_candidate
             - id: failure
               value: failure
               brief: The pipeline run did not finish successfully, eg. due to a compile error or a failing test. Such failures are usually detected by non-zero exit codes of the tools executed in the pipeline run.
-              stability: development
+              stability: release_candidate
             - id: error
               value: error
               brief: The pipeline run failed due to an error in the CI/CD system, eg. due to the worker being killed.
-              stability: development
+              stability: release_candidate
             - id: timeout
               value: timeout
               brief: A timeout caused the pipeline run to be interrupted.
-              stability: development
+              stability: release_candidate
             - id: cancellation
               value: cancellation
               brief: The pipeline run was cancelled, eg. by a user manually cancelling the pipeline run.
-              stability: development
+              stability: release_candidate
             - id: skip
               value: skip
               brief: The pipeline run was skipped, eg. due to a precondition not being met.
-              stability: development
+              stability: release_candidate
         brief: |
           The result of a pipeline run.
         examples:
           - success
           - failure
           - timeout
-          - skipped
+          - skip
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.run.id
         type: string
         brief: |
@@ -69665,7 +69936,7 @@ groups:
         examples:
           - "120912"
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.run.state
         type:
           members:
@@ -69673,15 +69944,15 @@ groups:
               value: pending
               brief: |
                 The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).
-              stability: development
+              stability: release_candidate
             - id: executing
               value: executing
               brief: The executing state spans the execution of any run tasks (eg. build, test).
-              stability: development
+              stability: release_candidate
             - id: finalizing
               value: finalizing
               brief: The finalizing state spans from when the run has finished executing (eg. cleanup of run resources).
-              stability: development
+              stability: release_candidate
         brief: |
           The pipeline run goes through these states during its lifecycle.
         examples:
@@ -69689,7 +69960,7 @@ groups:
           - executing
           - finalizing
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.run.url.full
         type: string
         brief: |
@@ -69697,7 +69968,7 @@ groups:
         examples:
           - https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763?pr=1075
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.name
         type: string
         brief: |
@@ -69708,7 +69979,7 @@ groups:
           - go-test
           - deploy_binary
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.run.id
         type: string
         brief: |
@@ -69718,43 +69989,43 @@ groups:
         requirement_level: recommended
         note: |
           For a given pipeline run and task, the `cicd.pipeline.task.run.id` MUST be unique within that run. For the same task across different runs of the same pipeline, the `cicd.pipeline.task.run.id` MAY remain the same, enabling correlation of `cicd.pipeline.task.run.result` values across multiple pipeline runs.
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.run.result
         type:
           members:
             - id: success
               value: success
               brief: The task run finished successfully.
-              stability: development
+              stability: release_candidate
             - id: failure
               value: failure
               brief: The task run did not finish successfully, eg. due to a compile error or a failing test. Such failures are usually detected by non-zero exit codes of the tools executed in the task run.
-              stability: development
+              stability: release_candidate
             - id: error
               value: error
               brief: The task run failed due to an error in the CI/CD system, eg. due to the worker being killed.
-              stability: development
+              stability: release_candidate
             - id: timeout
               value: timeout
               brief: A timeout caused the task run to be interrupted.
-              stability: development
+              stability: release_candidate
             - id: cancellation
               value: cancellation
               brief: The task run was cancelled, eg. by a user manually cancelling the task run.
-              stability: development
+              stability: release_candidate
             - id: skip
               value: skip
               brief: The task run was skipped, eg. due to a precondition not being met.
-              stability: development
+              stability: release_candidate
         brief: |
           The result of a task run.
         examples:
           - success
           - failure
           - timeout
-          - skipped
+          - skip
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.run.url.full
         type: string
         brief: |
@@ -69762,22 +70033,22 @@ groups:
         examples:
           - https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763/job/26920038674?pr=1075
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.type
         type:
           members:
             - id: build
               value: build
               brief: build
-              stability: development
+              stability: release_candidate
             - id: test
               value: test
               brief: test
-              stability: development
+              stability: release_candidate
             - id: deploy
               value: deploy
               brief: deploy
-              stability: development
+              stability: release_candidate
         brief: |
           The type of the task within a pipeline.
         examples:
@@ -69785,7 +70056,7 @@ groups:
           - test
           - deploy
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.system.component
         type: string
         brief: The name of a component of the CI/CD system.
@@ -69794,7 +70065,7 @@ groups:
           - scheduler
           - agent
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.worker.id
         type: string
         brief: The unique identifier of a worker within a CI/CD system.
@@ -69803,7 +70074,7 @@ groups:
           - 10.0.1.2
           - controller
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.worker.name
         type: string
         brief: The name of a worker within a CI/CD system.
@@ -69812,7 +70083,7 @@ groups:
           - controller
           - Ubuntu LTS
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.worker.state
         type:
           members:
@@ -69820,30 +70091,30 @@ groups:
               value: available
               brief: The worker is not performing work for the CI/CD system. It is available to the CI/CD system to perform work on (online / idle).
               note: Pipelines might have conditions on which workers they are able to run so not every worker might be available to every pipeline.
-              stability: development
+              stability: release_candidate
             - id: busy
               value: busy
               brief: The worker is performing work for the CI/CD system.
-              stability: development
+              stability: release_candidate
             - id: offline
               value: offline
               brief: The worker is not available to the CI/CD system (disconnected / down).
-              stability: development
+              stability: release_candidate
         brief: |
           The state of a CI/CD worker / agent.
         examples:
-          - idle
+          - available
           - busy
-          - down
+          - offline
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: cicd.worker.url.full
         type: string
         brief: The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.
         examples:
           - https://cicd.example.org/worker/abc123
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
     lineage:
       provenance:
         registry_id: main
@@ -69891,7 +70162,10 @@ groups:
         examples:
           - "111111111111"
           - opentelemetry
+          - 22222222-2222-2222-2222-222222222222
         requirement_level: recommended
+        note: |
+          For Azure, this is the subscription ID.
         stability: development
       - name: cloud.availability_zone
         type: string
@@ -76538,9 +76812,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `1` SHOULD be recorded
+          - An annotation `replicas` with value `1` SHOULD be recorded
             as the `k8s.daemonset.annotation.replicas` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.annotation.data` attribute with value `""`.
         stability: stable
       - name: k8s.daemonset.label
@@ -76557,7 +76831,7 @@ groups:
 
           - A label `app` with value `guestbook` SHOULD be recorded
             as the `k8s.daemonset.label.app` attribute with value `"guestbook"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.daemonset.label.injected` attribute with value `""`.
         stability: stable
       - name: k8s.daemonset.name
@@ -76588,9 +76862,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `1` SHOULD be recorded
+          - An annotation `replicas` with value `1` SHOULD be recorded
             as the `k8s.deployment.annotation.replicas` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.deployment.annotation.data` attribute with value `""`.
         stability: stable
       - name: k8s.deployment.label
@@ -76605,7 +76879,7 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `0` SHOULD be recorded
+          - A label `app` with value `guestbook` SHOULD be recorded
             as the `k8s.deployment.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.deployment.label.injected` attribute with value `""`.
@@ -76706,9 +76980,9 @@ groups:
           
           Examples:
 
-          - A label `number` with value `1` SHOULD be recorded
+          - An annotation `number` with value `1` SHOULD be recorded
             as the `k8s.job.annotation.number` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.job.annotation.data` attribute with value `""`.
         stability: stable
       - name: k8s.job.label
@@ -76725,7 +76999,7 @@ groups:
 
           - A label `jobtype` with value `ci` SHOULD be recorded
             as the `k8s.job.label.jobtype` attribute with value `"ci"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - A label `automated` with empty string value SHOULD be recorded as
             the `k8s.job.label.automated` attribute with value `""`.
         stability: stable
       - name: k8s.job.name
@@ -76756,9 +77030,9 @@ groups:
           
           Examples:
 
-          - A label `ttl` with value `0` SHOULD be recorded
+          - An annotation `ttl` with value `0` SHOULD be recorded
             as the `k8s.namespace.annotation.ttl` attribute with value `"0"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.annotation.data` attribute with value `""`.
         stability: stable
       - name: k8s.namespace.label
@@ -77287,9 +77561,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `0` SHOULD be recorded
+          - An annotation `replicas` with value `0` SHOULD be recorded
             as the `k8s.replicaset.annotation.replicas` attribute with value `"0"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.replicaset.annotation.data` attribute with value `""`.
         stability: stable
       - name: k8s.replicaset.label
@@ -77582,9 +77856,9 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `1` SHOULD be recorded
+          - An annotation `replicas` with value `1` SHOULD be recorded
             as the `k8s.statefulset.annotation.replicas` attribute with value `"1"`.
-          - A label `data` with empty string value SHOULD be recorded as
+          - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.statefulset.annotation.data` attribute with value `""`.
         stability: stable
       - name: k8s.statefulset.label
@@ -77599,7 +77873,7 @@ groups:
           
           Examples:
 
-          - A label `replicas` with value `0` SHOULD be recorded
+          - A label `app` with value `guestbook` SHOULD be recorded
             as the `k8s.statefulset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.statefulset.label.injected` attribute with value `""`.
@@ -81091,28 +81365,28 @@ groups:
                 Service is business-critical; downtime directly impacts revenue, user experience, or core functionality.
               note: |
                 Examples include payment processing, authentication, and primary user-facing APIs.
-              stability: development
+              stability: alpha
             - id: high
               value: high
               brief: |
                 Service is important but has degradation tolerance or fallback mechanisms.
               note: |
                 Examples include shopping cart, search, and recommendation engines.
-              stability: development
+              stability: alpha
             - id: medium
               value: medium
               brief: |
                 Service provides supplementary functionality; degradation has limited user impact.
               note: |
                 Examples include analytics, reporting, and non-essential integrations.
-              stability: development
+              stability: alpha
             - id: low
               value: low
               brief: |
                 Service is non-essential to core operations; used for background tasks or internal tools.
               note: |
                 Examples include batch processors, cleanup jobs, and internal dashboards.
-              stability: development
+              stability: alpha
         brief: |
           The operational criticality of the service.
         examples:
@@ -81123,7 +81397,7 @@ groups:
         requirement_level: recommended
         note: |
           Application developers are encouraged to set `service.criticality` to express the operational importance of their services. Telemetry consumers MAY use this attribute to optimize telemetry collection or improve user experience.
-        stability: development
+        stability: alpha
       - name: service.instance.id
         type: string
         brief: |
@@ -81736,6 +82010,9 @@ groups:
             - id: java
               value: java
               stability: stable
+            - id: kotlin
+              value: kotlin
+              stability: stable
             - id: nodejs
               value: nodejs
               stability: stable
@@ -82228,8 +82505,9 @@ groups:
           Query string values for the following keys SHOULD be redacted by default and replaced by the
           value `REDACTED`:
 
-          * [`AWSAccessKeyId`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
-          * [`Signature`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+          * [`X-Amz-Signature`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Credential`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Security-Token`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
           * [`sig`](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#sas-token)
           * [`X-Goog-Signature`](https://cloud.google.com/storage/docs/access-control/signed-urls)
 
@@ -82291,8 +82569,9 @@ groups:
           ![Development](https://img.shields.io/badge/-development-blue)
           Query string values for the following keys SHOULD be redacted by default and replaced by the value `REDACTED`:
 
-          * [`AWSAccessKeyId`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
-          * [`Signature`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+          * [`X-Amz-Signature`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Credential`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Security-Token`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
           * [`sig`](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#sas-token)
           * [`X-Goog-Signature`](https://cloud.google.com/storage/docs/access-control/signed-urls)
 
@@ -87528,7 +87807,7 @@ groups:
       The `{action}` SHOULD be the [`cicd.pipeline.action.name`](/docs/registry/attributes/cicd.md#cicd-pipeline-action-name).
 
       The `{pipeline}` SHOULD be the [`cicd.pipeline.name`](/docs/registry/attributes/cicd.md#cicd-pipeline-name).
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.pipeline.action.name
         type:
@@ -87536,15 +87815,15 @@ groups:
             - id: build
               value: BUILD
               brief: The pipeline run is executing a build.
-              stability: development
+              stability: release_candidate
             - id: run
               value: RUN
               brief: The pipeline run is executing.
-              stability: development
+              stability: release_candidate
             - id: sync
               value: SYNC
               brief: The pipeline run is executing a sync.
-              stability: development
+              stability: release_candidate
         brief: |
           The kind of action a pipeline run is performing.
         examples:
@@ -87552,43 +87831,43 @@ groups:
           - RUN
           - SYNC
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.result
         type:
           members:
             - id: success
               value: success
               brief: The pipeline run finished successfully.
-              stability: development
+              stability: release_candidate
             - id: failure
               value: failure
               brief: The pipeline run did not finish successfully, eg. due to a compile error or a failing test. Such failures are usually detected by non-zero exit codes of the tools executed in the pipeline run.
-              stability: development
+              stability: release_candidate
             - id: error
               value: error
               brief: The pipeline run failed due to an error in the CI/CD system, eg. due to the worker being killed.
-              stability: development
+              stability: release_candidate
             - id: timeout
               value: timeout
               brief: A timeout caused the pipeline run to be interrupted.
-              stability: development
+              stability: release_candidate
             - id: cancellation
               value: cancellation
               brief: The pipeline run was cancelled, eg. by a user manually cancelling the pipeline run.
-              stability: development
+              stability: release_candidate
             - id: skip
               value: skip
               brief: The pipeline run was skipped, eg. due to a precondition not being met.
-              stability: development
+              stability: release_candidate
         brief: |
           The result of a pipeline run.
         examples:
           - success
           - failure
           - timeout
-          - skipped
+          - skip
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: error.type
         type:
           members:
@@ -87669,7 +87948,7 @@ groups:
   - id: span.cicd.pipeline.task.internal
     type: span
     brief: This span describes task execution in a pipeline run.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: cicd.pipeline.task.name
         type: string
@@ -87682,7 +87961,7 @@ groups:
           - deploy_binary
         requirement_level: required
         sampling_relevant: true
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.run.id
         type: string
         brief: |
@@ -87693,43 +87972,43 @@ groups:
         sampling_relevant: true
         note: |
           For a given pipeline run and task, the `cicd.pipeline.task.run.id` MUST be unique within that run. For the same task across different runs of the same pipeline, the `cicd.pipeline.task.run.id` MAY remain the same, enabling correlation of `cicd.pipeline.task.run.result` values across multiple pipeline runs.
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.run.result
         type:
           members:
             - id: success
               value: success
               brief: The task run finished successfully.
-              stability: development
+              stability: release_candidate
             - id: failure
               value: failure
               brief: The task run did not finish successfully, eg. due to a compile error or a failing test. Such failures are usually detected by non-zero exit codes of the tools executed in the task run.
-              stability: development
+              stability: release_candidate
             - id: error
               value: error
               brief: The task run failed due to an error in the CI/CD system, eg. due to the worker being killed.
-              stability: development
+              stability: release_candidate
             - id: timeout
               value: timeout
               brief: A timeout caused the task run to be interrupted.
-              stability: development
+              stability: release_candidate
             - id: cancellation
               value: cancellation
               brief: The task run was cancelled, eg. by a user manually cancelling the task run.
-              stability: development
+              stability: release_candidate
             - id: skip
               value: skip
               brief: The task run was skipped, eg. due to a precondition not being met.
-              stability: development
+              stability: release_candidate
         brief: |
           The result of a task run.
         examples:
           - success
           - failure
           - timeout
-          - skipped
+          - skip
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: cicd.pipeline.task.run.url.full
         type: string
         brief: |
@@ -87738,7 +88017,7 @@ groups:
           - https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763/job/26920038674?pr=1075
         requirement_level: required
         sampling_relevant: true
-        stability: development
+        stability: release_candidate
       - name: error.type
         type:
           members:
@@ -89710,8 +89989,9 @@ groups:
           Query string values for the following keys SHOULD be redacted by default and replaced by the
           value `REDACTED`:
 
-          * [`AWSAccessKeyId`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
-          * [`Signature`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+          * [`X-Amz-Signature`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Credential`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Security-Token`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
           * [`sig`](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#sas-token)
           * [`X-Goog-Signature`](https://cloud.google.com/storage/docs/access-control/signed-urls)
 
@@ -101794,8 +102074,9 @@ groups:
           Query string values for the following keys SHOULD be redacted by default and replaced by the
           value `REDACTED`:
 
-          * [`AWSAccessKeyId`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
-          * [`Signature`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+          * [`X-Amz-Signature`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Credential`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Security-Token`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
           * [`sig`](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#sas-token)
           * [`X-Goog-Signature`](https://cloud.google.com/storage/docs/access-control/signed-urls)
 
@@ -102480,8 +102761,9 @@ groups:
           ![Development](https://img.shields.io/badge/-development-blue)
           Query string values for the following keys SHOULD be redacted by default and replaced by the value `REDACTED`:
 
-          * [`AWSAccessKeyId`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
-          * [`Signature`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+          * [`X-Amz-Signature`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Credential`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Security-Token`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
           * [`sig`](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#sas-token)
           * [`X-Goog-Signature`](https://cloud.google.com/storage/docs/access-control/signed-urls)
 
@@ -106283,17 +106565,44 @@ groups:
         examples:
           - 192.168.1.100
           - api.example.com
+          - zookeeper://127.0.0.1:2181/com.example.HelloService:1.0.0:testGroup
         requirement_level:
           conditionally_required: If available.
         sampling_relevant: true
         note: |
-          Instrumentations SHOULD populate `server.address` (along with `server.port`)
+          Instrumentations SHOULD populate `server.address` (and `server.port`, when applicable)
           based on the configuration used when creating the Dubbo client and
           SHOULD NOT use actual network-level connection information for this purpose
           to ensure low cardinality.
 
-          The Dubbo registry address SHOULD NOT be used as `server.address`. Instead, use
-          the address of the actual server being called.
+          For direct connection, when the consumer is configured with an explicit
+          provider target URL, instrumentations SHOULD parse `server.address` and
+          `server.port` from that URL.
+
+          For service discovery through a registry, instrumentations SHOULD set
+          `server.address` to the service-discovery target and SHOULD NOT set
+          `server.port`. The service-discovery target is:
+
+          `{registry-protocol}://{registry-host}:{registry-port}/{logical-service-target}`
+
+          The `{registry-port}` component is part of the registry endpoint in
+          the service-discovery target and SHOULD NOT be recorded as
+          `server.port`, because it is not the network transport port used for
+          Dubbo RPC communication.
+
+          It is composed of two parts separated by the `/` between the registry endpoint and logical service target:
+
+          - Registry endpoint: `{registry-protocol}://{registry-host}:{registry-port}`
+          - Logical service target: `{interface}[:{version}][:{group}]`, derived from
+            the consumer URL, where:
+            - `{interface}` is the service interface name from the consumer URL.
+            - `{version}` is the `version` URL parameter, if set.
+            - `{group}` is the `group` URL parameter, if set.
+            - When only `{group}` is set, the format is `{interface}::{group}`.
+
+          Examples:
+
+          Direct connection:
 
           - Given the target URL `dubbo://192.168.1.100:20880/com.example.DemoService`, expected attributes:
             - `server.address`: `"192.168.1.100"`
@@ -106305,8 +106614,19 @@ groups:
             - `server.address`: `"api.example.com"`
             - `server.port`: not set
 
+          Service discovery (registry):
+
+          - Given a consumer that discovers providers via ZooKeeper for `com.example.HelloService` with `version=1.0.0` and `group=testGroup`, expected attributes:
+            - Service-discovery target: `"zookeeper://127.0.0.1:2181/com.example.HelloService:1.0.0:testGroup"`
+            - `server.address`: `"zookeeper://127.0.0.1:2181/com.example.HelloService:1.0.0:testGroup"`
+            - `server.port`: not set
+          - Given a consumer that discovers providers via Nacos for `com.example.HelloService` with `group=gray` (no version), expected attributes:
+            - Service-discovery target: `"nacos://127.0.0.1:8848/com.example.HelloService::gray"`
+            - `server.address`: `"nacos://127.0.0.1:8848/com.example.HelloService::gray"`
+            - `server.port`: not set
+
           When the address is an IP address, instrumentations SHOULD NOT do a
-          reverse proxy lookup to obtain a DNS name and SHOULD set `server.address`
+          reverse DNS lookup to obtain a DNS name and SHOULD set `server.address`
           to the IP address provided.
         stability: stable
       - name: server.port
@@ -109741,8 +110061,9 @@ groups:
           Query string values for the following keys SHOULD be redacted by default and replaced by the
           value `REDACTED`:
 
-          * [`AWSAccessKeyId`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
-          * [`Signature`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+          * [`X-Amz-Signature`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Credential`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Security-Token`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
           * [`sig`](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#sas-token)
           * [`X-Goog-Signature`](https://cloud.google.com/storage/docs/access-control/signed-urls)
 
@@ -109785,8 +110106,9 @@ groups:
           ![Development](https://img.shields.io/badge/-development-blue)
           Query string values for the following keys SHOULD be redacted by default and replaced by the value `REDACTED`:
 
-          * [`AWSAccessKeyId`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
-          * [`Signature`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+          * [`X-Amz-Signature`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Credential`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
+          * [`X-Amz-Security-Token`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-authentication-methods.html)
           * [`sig`](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#sas-token)
           * [`X-Goog-Signature`](https://cloud.google.com/storage/docs/access-control/signed-urls)
 

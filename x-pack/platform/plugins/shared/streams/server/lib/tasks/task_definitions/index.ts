@@ -11,15 +11,10 @@ import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
 import type { GetScopedClients } from '../../../routes/types';
 import type { StreamsServer } from '../../../types';
 import { createStreamsDescriptionGenerationTask } from './description_generation';
-import { createStreamsInsightsDiscoveryTask } from '../../sig_events/tasks/insights_discovery';
 import { createStreamsSignificantEventsQueriesGenerationTask } from '../../sig_events/tasks/significant_events_queries_generation';
 import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
 import { createStreamsOnboardingTask } from './onboarding';
-import { createStreamsMemoryGenerationTask } from './memory_generation';
-import { createStreamsMemoryUpdateTask } from './memory_update';
-import { createStreamsConversationScraperTask } from './conversation_scraper';
-import { createStreamsMemoryConsolidationTask } from './memory_consolidation';
 
 export interface TaskContext {
   logger: Logger;
@@ -37,12 +32,7 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsDescriptionGenerationTask(taskContext),
     ...createStreamsSignificantEventsQueriesGenerationTask(taskContext),
     ...createStreamsFeaturesIdentificationTask(taskContext),
-    ...createStreamsInsightsDiscoveryTask(taskContext),
     ...createStreamsOnboardingTask(taskContext),
-    ...createStreamsMemoryGenerationTask(taskContext),
-    ...createStreamsMemoryUpdateTask(taskContext),
-    ...createStreamsConversationScraperTask(taskContext),
-    ...createStreamsMemoryConsolidationTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 
