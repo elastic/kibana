@@ -97,9 +97,10 @@ export const registerUISettings = (
         defaultMessage:
           'Enables the in-product library of curated workflow templates. Templates are fetched from the Elastic-hosted catalog and rendered in the Workflows app. This is a technical preview; behavior and API surfaces may change.',
       }),
+      scope: 'global',
+      category: ['workflows'],
       schema: schema.boolean(),
       value: false,
-      scope: 'global',
       requiresPageReload: true,
       technicalPreview: true,
     },

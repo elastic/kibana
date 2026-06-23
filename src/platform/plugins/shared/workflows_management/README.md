@@ -322,12 +322,19 @@ The Library is a curated catalog the server fetches from the Elastic-hosted CDN.
 At tech-preview stage it is gated by a global Advanced Setting
 (`workflowsManagement:library:enabled`, default `false`).
 
-**Enable it in dev** by overriding the uiSetting in `kibana.dev.yml`:
+**Enable it in dev** by overriding the global uiSetting in `kibana.dev.yml`. The
+library toggle is registered with `scope: 'global'`, so the override key is
+`uiSettings.globalOverrides` — `uiSettings.overrides` only targets per-space
+settings and is silently ignored for global ones:
 
 ```yaml
-uiSettings.overrides:
+uiSettings.globalOverrides:
   "workflowsManagement:library:enabled": true
 ```
+
+The toggle also surfaces in the **Global Settings** page
+(`/app/management/kibana/globalSettings`), not the regular Advanced Settings
+page.
 
 **Point the server at a local catalog** when the production CDN is unavailable
 (e.g. while Phase 1 staging is still being provisioned). Run the Phase 1
