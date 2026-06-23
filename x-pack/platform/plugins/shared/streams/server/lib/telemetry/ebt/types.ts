@@ -31,6 +31,7 @@ interface StreamsDescriptionGeneratedProps {
 }
 interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
+  connector_id: string;
   input_tokens_used: number;
   output_tokens_used: number;
   cached_tokens_used: number;
@@ -50,6 +51,7 @@ interface StreamsProcessingPipelineSuggestedProps {
 
 interface StreamsFeaturesIdentifiedProps {
   run_id: string;
+  connector_id: string;
   iteration: number;
   docs_count: number;
   features_new: number;

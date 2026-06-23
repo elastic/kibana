@@ -19,3 +19,8 @@ export const STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG =
  */
 export const STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
   'streams.significantEventsSemanticCodeSearchGroundingEnabled';
+
+/**
+ * Enables the Streams root cause investigation workflow and agent.
+ */
+export const STREAMS_INVESTIGATION_ENABLED_FLAG = 'streams.investigationEnabled';

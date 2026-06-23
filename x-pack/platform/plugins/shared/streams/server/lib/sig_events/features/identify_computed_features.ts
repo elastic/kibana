@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { getStreamTypeFromDefinition, type Feature, type Streams } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, type FeatureUpsert, type Streams } from '@kbn/streams-schema';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import {
   generateAllComputedFeatures,
@@ -51,7 +51,7 @@ export async function identifyComputedFeatures({
   agentBuilderTools,
   request,
   telemetry,
-}: IdentifyComputedFeaturesOptions): Promise<Feature[]> {
+}: IdentifyComputedFeaturesOptions): Promise<FeatureUpsert[]> {
   const providers: Record<string, ComputedFeatureProvider> | undefined =
     agentBuilderTools && request
       ? {

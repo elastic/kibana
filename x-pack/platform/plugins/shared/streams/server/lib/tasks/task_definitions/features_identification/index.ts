@@ -15,7 +15,7 @@ import { isInferenceProviderError, type InferenceConnector } from '@kbn/inferenc
 import {
   type IdentifyFeaturesResult,
   type IterationResult,
-  type Feature,
+  type FeatureUpsert,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
@@ -84,22 +84,6 @@ async function runFeaturesIdentification(
   const taskDurationMs = () => Date.now() - new Date(_task.created_at).getTime();
 
   const runId = uuid();
-  const emptyTelemetryCtx = {
-    run_id: runId,
-    iteration: 0,
-    stream_name: streamName,
-    stream_type: 'unknown' as const,
-    docs_count: 0,
-    excluded_features_count: 0,
-    total_filters: 0,
-    filters_capped: false,
-    has_filtered_documents: false,
-  };
-  const trackEmptyTelemetry = (telemetryState: 'canceled' | 'failure') => {
-    taskContext.telemetry.trackFeaturesIdentified(
-      buildTelemetry(emptyTelemetryCtx, 0, { state: telemetryState })
-    );
-  };
 
   const {
     taskClient,
@@ -126,9 +110,27 @@ async function runFeaturesIdentification(
   ]);
   taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
+  const emptyTelemetryCtx = {
+    run_id: runId,
+    connector_id: connectorId,
+    iteration: 0,
+    stream_name: streamName,
+    stream_type: 'unknown' as const,
+    docs_count: 0,
+    excluded_features_count: 0,
+    total_filters: 0,
+    filters_capped: false,
+    has_filtered_documents: false,
+  };
+  const trackEmptyTelemetry = (telemetryState: 'canceled' | 'failure') => {
+    taskContext.telemetry.trackFeaturesIdentified(
+      buildTelemetry(emptyTelemetryCtx, 0, { state: telemetryState })
+    );
+  };
+
   let hasTrackedIteration = false;
   const iterationResults: IterationResult[] = [];
-  let discoveredFeatures: Feature[] = [];
+  let discoveredFeatures: FeatureUpsert[] = [];
 
   try {
     const stream = await streamsClient.getStream(streamName);
@@ -209,6 +211,7 @@ async function runFeaturesIdentification(
         kiClient,
         soClient,
         inferenceClient: boundInferenceClient,
+        connectorId,
         logger: taskLogger,
         signal: runContext.abortController.signal,
         streamName: stream.name,
