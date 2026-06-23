@@ -974,8 +974,12 @@ describe('Agent policy', () => {
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
           query: {
-            term: {
-              policy_id: 'mocked',
+            bool: {
+              should: [
+                { term: { policy_id: 'mocked' } },
+                { prefix: { policy_id: 'mocked#' } },
+              ],
+              minimum_should_match: 1,
             },
           },
         })
