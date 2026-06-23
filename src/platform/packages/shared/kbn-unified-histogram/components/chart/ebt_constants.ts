@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EbtClickAttrs } from './types';
-export * from './constants';
-export * from './helpers';
-export { useEcsFieldNames } from './hooks/use_ecs_field_names';
+export const EBT_BREAKDOWN_SELECTOR_ELEMENT = 'chartsToolbar';
