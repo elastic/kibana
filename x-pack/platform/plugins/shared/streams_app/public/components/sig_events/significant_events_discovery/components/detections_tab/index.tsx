@@ -171,11 +171,7 @@ export const DetectionsTab = () => {
           if (detection.processed) {
             return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
           }
-          return (
-            <EuiBadge color="hollow">
-                {DISCOVERY_STATUS_LABELS.pending}
-            </EuiBadge>
-          );
+          return <EuiBadge color="hollow">{DISCOVERY_STATUS_LABELS.pending}</EuiBadge>;
         },
       },
     ],
