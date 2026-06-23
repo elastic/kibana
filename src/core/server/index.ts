@@ -364,8 +364,11 @@ export type {
   SavedObjectsPointInTimeFinderClient,
   SavedObjectsBulkDeleteStatus,
 } from '@kbn/core-saved-objects-api-server';
+export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
+  SavedObjectErrorResult,
+  SavedObjectBulkResult,
   SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,

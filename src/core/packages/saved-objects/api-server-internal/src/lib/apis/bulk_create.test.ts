@@ -27,6 +27,7 @@ import {
   type SavedObjectsRawDoc,
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
+  isSavedObjectErrorResult,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
@@ -968,8 +969,12 @@ describe('#bulkCreate', () => {
         expect(result.saved_objects[1].id).toEqual(obj2.id);
 
         // Assert that managed is not changed
-        expect(result.saved_objects[0].managed).toBeFalsy();
-        expect(result.saved_objects[1].managed).toEqual(obj2.managed);
+        const [createdObj1, createdObj2] = result.saved_objects;
+        if (isSavedObjectErrorResult(createdObj1) || isSavedObjectErrorResult(createdObj2)) {
+          throw new Error('Expected successful bulkCreate results');
+        }
+        expect(createdObj1.managed).toBeFalsy();
+        expect(createdObj2.managed).toEqual(obj2.managed);
       });
 
       it(`sets managed=false if not already set`, async () => {
