@@ -65,7 +65,7 @@ export const buildRuleActionButtons = ({
   const buttons: ActionButton[] = [
     {
       label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.openInForm', {
-        defaultMessage: 'Open in form',
+        defaultMessage: 'Preview before saving',
       }),
       icon: 'pencil',
       type: ActionButtonType.SECONDARY,

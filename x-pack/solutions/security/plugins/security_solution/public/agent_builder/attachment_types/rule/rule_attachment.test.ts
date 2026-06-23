@@ -377,9 +377,9 @@ describe('buildRuleActionButtons', () => {
     );
   });
 
-  it('"Open in form" calls setAiCreatedRule with the rule and attachmentId', () => {
+  it('"Preview before saving" calls setAiCreatedRule with the rule and attachmentId', () => {
     const buttons = buildRuleActionButtons(baseProps);
-    buttons.find((b) => b.label === 'Open in form')!.handler();
+    buttons.find((b) => b.label === 'Preview before saving')!.handler();
     expect(aiRuleCreation.setAiCreatedRule).toHaveBeenCalledWith(baseProps.rule, 'air:testcard');
   });
 
@@ -405,7 +405,7 @@ describe('buildRuleActionButtons', () => {
       application,
       ruleId: 'rule-123',
     });
-    buttons.find((b) => b.label === 'Open in form')!.handler();
+    buttons.find((b) => b.label === 'Preview before saving')!.handler();
     expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: expect.stringContaining('/create'),
     });

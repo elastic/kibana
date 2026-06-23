@@ -78,7 +78,8 @@ export const createRuleAttachmentDefinition = ({
       ruleId,
       attachmentId: attachment.id,
       createCardVersion: attachment.version,
-      showViewRule: shouldShowViewRuleButton(ruleId, window.location.pathname),
+      showViewRule:
+        intent === 'update' && shouldShowViewRuleButton(ruleId, window.location.pathname),
     });
   },
 });
