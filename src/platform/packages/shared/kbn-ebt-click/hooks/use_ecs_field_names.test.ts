@@ -89,6 +89,62 @@ describe('useEcsFieldNames', () => {
     expect(result.current).toEqual(new Set());
   });
 
+  it('chunks large field lists into multiple requests and unions the results', async () => {
+    // More than the 100-per-request chunk size, to force multiple requests.
+    const fieldNames = Array.from({ length: 250 }, (_, i) => `field.${i}`);
+    // Mark even-indexed fields as ECS.
+    const ecsFields = Object.fromEntries(
+      fieldNames.map((name, i) => [name, i % 2 === 0 ? { short: `desc ${i}` } : undefined])
+    );
+
+    const find = jest.fn().mockImplementation(({ fieldNames: names }: { fieldNames: string[] }) =>
+      Promise.resolve({
+        fields: Object.fromEntries(names.map((name) => [name, ecsFields[name]])),
+      })
+    );
+    const fieldsMetadata = {
+      getClient: jest.fn().mockResolvedValue({ find }),
+    } as unknown as FieldsMetadataPublicStart;
+
+    const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));
+
+    await waitFor(() => expect(result.current).not.toBeNull());
+
+    // 250 fields => 100 + 100 + 50 => 3 requests, none exceeding the chunk size.
+    expect(find).toHaveBeenCalledTimes(3);
+    for (const call of find.mock.calls) {
+      expect(call[0].fieldNames.length).toBeLessThanOrEqual(100);
+    }
+
+    const expected = new Set(fieldNames.filter((_, i) => i % 2 === 0));
+    expect(result.current).toEqual(expected);
+  });
+
+  it('keeps results from successful chunks when one chunk fails', async () => {
+    const fieldNames = Array.from({ length: 150 }, (_, i) => `field.${i}`);
+
+    const find = jest.fn().mockImplementation(({ fieldNames: names }: { fieldNames: string[] }) => {
+      // Fail the second chunk only; the first chunk should still contribute.
+      if (names.includes('field.100')) {
+        return Promise.reject(new Error('chunk failed'));
+      }
+      return Promise.resolve({
+        fields: Object.fromEntries(names.map((name) => [name, { short: `desc ${name}` }])),
+      });
+    });
+    const fieldsMetadata = {
+      getClient: jest.fn().mockResolvedValue({ find }),
+    } as unknown as FieldsMetadataPublicStart;
+
+    const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));
+
+    await waitFor(() => expect(result.current).not.toBeNull());
+
+    // First 100 fields resolved; the failed chunk (100..149) contributes nothing.
+    expect(result.current).toEqual(new Set(fieldNames.slice(0, 100)));
+    expect(result.current?.has('field.100')).toBe(false);
+  });
+
   it('resets to null and re-resolves when fieldNames change', async () => {
     const fieldsMetadata = makeFieldsMetadata({
       [SERVICE_NAME]: { short: 'Name of the service' },
