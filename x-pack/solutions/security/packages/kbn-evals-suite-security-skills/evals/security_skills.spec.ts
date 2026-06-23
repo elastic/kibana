@@ -17,12 +17,15 @@ const DATASET_DESCRIPTION =
 evaluate.describe('Security Skills', { tag: tags.stateful.classic }, () => {
   let teardown: (() => Promise<void>) | undefined;
 
-  evaluate.beforeAll(async ({ kbnClient, esClient, log }) => {
+  evaluate.beforeAll(async ({ kbnClient, esClient, log, uiSettings }) => {
+    // Ensure Agent Builder experimental features are enabled
+    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
     const seeded = await seedFindRulesFixtures({ kbnClient, esClient, log });
     teardown = seeded.cleanup;
   });
 
-  evaluate.afterAll(async () => {
+  evaluate.afterAll(async ({ uiSettings }) => {
+    await uiSettings.unset('agentBuilder:experimentalFeatures');
     if (teardown) await teardown();
   });
 

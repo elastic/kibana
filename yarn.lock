@@ -6997,6 +6997,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-security-multi-step@link:x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-security-skills@link:x-pack/solutions/security/packages/kbn-evals-suite-security-skills":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-siem-readiness@link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness":
   version "0.0.0"
   uid ""

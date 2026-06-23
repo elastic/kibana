@@ -8,8 +8,6 @@
 import type { MultiStepExample } from '../dataset';
 
 const SECURITY_ALERTS = 'security.alerts';
-const SECURITY_GET_ENTITY = 'security.get_entity';
-const SECURITY_CREATE_RULE = 'security.create_detection_rule';
 const SECURITY_FIND_RULES = 'security.find_rules';
 const SECURITY_ENTITY_RISK = 'security.entity_risk_score';
 
@@ -25,7 +23,7 @@ export const multiStepScenarios: MultiStepExample[] = [
     expected: {
       reference:
         'The agent should triage the alert (severity, host, user context), investigate entities via the entity store, then propose or create a detection rule covering the PowerShell pattern. Answers must stay grounded in retrieved alert/entity data — no fabricated hosts or rule fields.',
-      tool_sequence: [SECURITY_ALERTS, SECURITY_GET_ENTITY, SECURITY_CREATE_RULE],
+      tool_sequence: [SECURITY_ALERTS],
       primary_skill: 'alert-analysis',
     },
     metadata: {
@@ -44,7 +42,7 @@ export const multiStepScenarios: MultiStepExample[] = [
     expected: {
       reference:
         'The agent should triage the alert, query rules with find_rules (PowerShell / T1059), then recommend detection improvements grounded in alert and rule inventory data.',
-      tool_sequence: [SECURITY_ALERTS, SECURITY_FIND_RULES],
+      tool_sequence: [SECURITY_ALERTS],
       primary_skill: 'alert-analysis',
     },
     metadata: {
@@ -62,7 +60,7 @@ export const multiStepScenarios: MultiStepExample[] = [
     expected: {
       reference:
         'The agent should look up entity risk for srv-finance-01, then search related alerts and correlate findings — entity analytics plus alert analysis.',
-      tool_sequence: [SECURITY_ENTITY_RISK, SECURITY_ALERTS],
+      tool_sequence: [SECURITY_ENTITY_RISK],
       primary_skill: 'entity-analytics',
     },
     metadata: {

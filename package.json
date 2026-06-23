@@ -1767,6 +1767,8 @@
     "@kbn/evals-suite-security-alert-triage": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage",
     "@kbn/evals-suite-security-automatic-migrations": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations",
     "@kbn/evals-suite-security-esql-generation-regression": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression",
+    "@kbn/evals-suite-security-multi-step": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step",
+    "@kbn/evals-suite-security-skills": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-skills",
     "@kbn/evals-suite-siem-readiness": "link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness",
     "@kbn/evals-suite-significant-events": "link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events",
     "@kbn/evals-suite-smoke-tests": "link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests",
@@ -2226,9 +2228,7 @@
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0",
     "yargs": "15.4.1",
-    "yarn-deduplicate": "6.0.2",
-    "@kbn/evals-suite-security-multi-step": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step",
-    "@kbn/evals-suite-security-skills": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-skills"
+    "yarn-deduplicate": "6.0.2"
   },
   "packageManager": "yarn@1.22.21"
 }

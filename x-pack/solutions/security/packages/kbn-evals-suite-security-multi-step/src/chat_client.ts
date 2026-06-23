@@ -91,25 +91,7 @@ export class MultiStepAgentBuilderChatClient {
           cause: error instanceof Error ? error : new Error(String(error)),
         })
       );
-      return {
-        conversationId,
-        messages: [
-          {
-            message:
-              'This question could not be answered as an internal error occurred. Please try again.',
-          },
-        ],
-        steps: [],
-        errors: [
-          {
-            error: {
-              message: error instanceof Error ? error.message : 'Unknown error',
-              stack: error instanceof Error ? error.stack : undefined,
-            },
-            type: 'error',
-          },
-        ],
-      };
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

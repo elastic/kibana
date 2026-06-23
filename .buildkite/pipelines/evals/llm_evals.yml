@@ -343,6 +343,7 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -388,6 +389,7 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -410,6 +412,7 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -432,7 +435,7 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
-          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
+          EVAL_SERVER_CONFIG_SET: 'evals_siem_readiness'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -524,6 +527,7 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

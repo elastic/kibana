@@ -16,12 +16,15 @@ import { multiStepScenarios } from '../src/datasets';
 
 const ALERTS_SNAPSHOT_ENV_PREFIX = 'MULTI_STEP_ALERTS_SNAPSHOT';
 
-const DATASET_NAME = 'Security Multi-step Execution';
+const DATASET_NAME = 'security: security-multi-step';
 const DATASET_DESCRIPTION =
   'Cross-category Agent Builder chain: alert triage → entity investigation → detection rule creation.';
 
 evaluate.describe('Security Multi-step Execution', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ esClient, log }) => {
+  evaluate.beforeAll(async ({ esClient, log, uiSettings }) => {
+    // Ensure Agent Builder experimental features are enabled
+    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+
     const snapshotConfig = resolveAlertsSnapshotConfig(ALERTS_SNAPSHOT_ENV_PREFIX);
     if (snapshotConfig) {
       log.info(
@@ -38,6 +41,10 @@ evaluate.describe('Security Multi-step Execution', { tag: tags.stateful.classic 
     }
 
     log.info(`[multi-step] dataset has ${multiStepScenarios.length} examples`);
+  });
+
+  evaluate.afterAll(async ({ uiSettings }) => {
+    await uiSettings.unset('agentBuilder:experimentalFeatures');
   });
 
   evaluate('multi-step scenarios', async ({ evaluateDataset }) => {

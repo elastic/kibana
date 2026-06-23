@@ -127,10 +127,9 @@ export const securitySkillsExamples: SecuritySkillsExample[] = [
       expectedSkill: 'alert-analysis',
     },
     metadata: {
-      category: 'distractor',
+      category: 'security-skills',
       query_intent: 'Alert Triage (not find-rules)',
-      dataset_split: ['distractor'],
-      is_distractor: true,
+      dataset_split: ['base'],
     },
   },
   {
