@@ -34,9 +34,7 @@ jest.mock('@kbn/cloud-security-posture', () => ({
   useMisconfigurationFindings: jest
     .fn()
     .mockReturnValue({ data: { rows: [finding] }, isLoading: false }),
-  useHasMisconfigurations: jest
-    .fn()
-    .mockReturnValue({ passedFindings: 1, failedFindings: 1 }),
+  useHasMisconfigurations: jest.fn().mockReturnValue({ passedFindings: 1, failedFindings: 1 }),
   useGetMisconfigurationStatusColor: jest
     .fn()
     .mockReturnValue({ getMisconfigurationStatusColor: jest.fn().mockReturnValue('#000') }),

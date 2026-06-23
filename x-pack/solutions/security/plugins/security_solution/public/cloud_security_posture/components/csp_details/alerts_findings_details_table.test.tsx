@@ -62,7 +62,9 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_query', ()
 }));
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
-  useSignalIndex: jest.fn().mockReturnValue({ loading: false, signalIndexName: '.alerts-security' }),
+  useSignalIndex: jest
+    .fn()
+    .mockReturnValue({ loading: false, signalIndexName: '.alerts-security' }),
 }));
 
 jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
