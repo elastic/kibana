@@ -95,6 +95,11 @@ export function useNavigateToUrl(): ApplicationStart['navigateToUrl'] {
   return useChromeComponentsDeps().application.navigateToUrl;
 }
 
+/** Returns `application.navigateToApp`. */
+export function useNavigateToApp(): ApplicationStart['navigateToApp'] {
+  return useChromeComponentsDeps().application.navigateToApp;
+}
+
 /** Returns the `docLinks` service. */
 export function useDocLinks(): DocLinksStart {
   return useChromeComponentsDeps().docLinks;
