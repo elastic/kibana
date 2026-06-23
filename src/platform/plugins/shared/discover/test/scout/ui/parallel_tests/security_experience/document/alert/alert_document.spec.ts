@@ -130,9 +130,10 @@ spaceTest.describe(
         const field = 'host.name';
 
         await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-        // The cell-actions popover (EuiPopover + per-button EuiToolTip) re-renders on open and can be
-        // reported "not stable"; the button is resolved, so force the click to fire its onClick.
-        await securityDiscoverFlyout.cellActionToggleColumn.click({ force: true });
+        // Wait for the popover button to settle (enabled) before clicking, so Playwright's
+        // actionability check has a stable target instead of bypassing it with `force`.
+        await expect(securityDiscoverFlyout.cellActionToggleColumn).toBeEnabled();
+        await securityDiscoverFlyout.cellActionToggleColumn.click();
 
         // The column is added to the grid behind the flyout; close it and assert the header.
         await discover.closeDocViewerFlyout();
@@ -152,12 +153,15 @@ spaceTest.describe(
         await expect(securityDiscoverFlyout.jsonTab).toBeVisible();
 
         await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.tableTab);
+        await expect(securityDiscoverFlyout.tableTab).toHaveAttribute('aria-selected', 'true');
         await expect(securityDiscoverFlyout.tableTabContent).toBeVisible();
         await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'false');
 
         await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.jsonTab);
+        await expect(securityDiscoverFlyout.jsonTab).toHaveAttribute('aria-selected', 'true');
 
         await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.overviewTab);
+        await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'true');
         await expect(securityDiscoverFlyout.aboutSection).toBeVisible();
       }
     );

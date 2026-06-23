@@ -56,9 +56,11 @@ spaceTest.describe('Security in Discover - IOC flyout', { tag: tags.stateful.all
 
       // Discover's default Table and JSON tabs are present alongside it and switch correctly.
       await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.tableTab);
+      await expect(securityDiscoverFlyout.tableTab).toHaveAttribute('aria-selected', 'true');
       await expect(securityDiscoverFlyout.tableTabContent).toBeVisible();
 
       await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.iocOverviewTab);
+      await expect(securityDiscoverFlyout.iocOverviewTab).toHaveAttribute('aria-selected', 'true');
       await expect(securityDiscoverFlyout.iocOverviewTitle).toBeVisible();
     }
   );

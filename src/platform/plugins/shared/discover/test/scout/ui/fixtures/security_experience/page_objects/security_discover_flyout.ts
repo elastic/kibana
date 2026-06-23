@@ -187,24 +187,23 @@ export class SecurityDiscoverFlyout {
 
   /** Wait for the doc viewer flyout to be visible and rendered. */
   async waitForFlyout() {
-    await expect(this.flyout).toBeVisible({ timeout: FLYOUT_TIMEOUT });
-    await expect(this.docViewer).toBeVisible({ timeout: FLYOUT_TIMEOUT });
+    await this.flyout.waitFor({ state: 'visible', timeout: FLYOUT_TIMEOUT });
+    await this.docViewer.waitFor({ state: 'visible', timeout: FLYOUT_TIMEOUT });
   }
 
   /** Wait for the alert / event header (confirms the security profile enhanced the flyout). */
   async waitForDocumentHeader() {
-    await expect(this.alertTitle).toBeVisible({ timeout: FLYOUT_TIMEOUT });
+    await this.alertTitle.waitFor({ state: 'visible', timeout: FLYOUT_TIMEOUT });
   }
 
   /** Wait for the IOC overview tab content. */
   async waitForIocOverview() {
-    await expect(this.iocOverviewTitle).toBeVisible({ timeout: FLYOUT_TIMEOUT });
+    await this.iocOverviewTitle.waitFor({ state: 'visible', timeout: FLYOUT_TIMEOUT });
   }
 
-  /** Click a doc viewer tab and wait for it to become the selected (active) tab. */
+  /** Click a doc viewer tab (assert the resulting active tab / content in the spec). */
   async selectTab(tab: Locator) {
     await tab.click();
-    await expect(tab).toHaveAttribute('aria-selected', 'true');
   }
 
   /**
@@ -213,7 +212,9 @@ export class SecurityDiscoverFlyout {
    * button is clicked, so re-call this before each action.
    */
   async hoverHighlightedFieldValue(field: string) {
-    await expect(this.highlightedFieldsTable).toBeVisible({ timeout: 30_000 });
+    // The flyout is already open (header awaited); the highlighted fields table is part of the
+    // overview content, so the default timeout is sufficient.
+    await this.highlightedFieldsTable.waitFor({ state: 'visible' });
     // Each highlighted-field row wraps its (single) value in the cell-actions popover anchor.
     const anchor = this.highlightedFieldsTable
       .locator('tr')
@@ -224,13 +225,13 @@ export class SecurityDiscoverFlyout {
     // Moving the cursor to the value crosses neighbouring cell-action values, briefly opening their
     // popovers too (they auto-close ~100ms after the cursor leaves). Wait for only the hovered
     // value's popover to remain so the action-button locators resolve to a single element.
-    await expect(this.cellActionFilterIn).toHaveCount(1, { timeout: 15_000 });
+    await expect(this.cellActionFilterIn).toHaveCount(1);
   }
 
   /** Open the alert/event take action footer menu and wait for the context menu. */
   async openTakeActionMenu() {
     await this.takeActionButton.click();
-    await expect(this.takeActionMenu).toBeVisible({ timeout: 15_000 });
+    await this.takeActionMenu.waitFor({ state: 'visible' });
   }
 
   /** Open the IOC take action footer menu. */

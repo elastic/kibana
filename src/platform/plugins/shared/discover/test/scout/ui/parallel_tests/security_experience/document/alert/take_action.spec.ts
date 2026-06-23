@@ -80,7 +80,7 @@ spaceTest.describe(
         const newTabPromise = page.context().waitForEvent('page');
         await securityDiscoverFlyout.clickTakeActionItem(TA.EXPLORE);
         const newTab = await newTabPromise;
-        await expect(newTab).toHaveURL(/app\/security\/alerts/, { timeout: 30_000 });
+        await expect(newTab).toHaveURL(/app\/security\/alerts/);
         await newTab.close();
       }
     );
