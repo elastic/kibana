@@ -133,7 +133,14 @@ describe('ComposeDiscoverFooter', () => {
     });
 
     it('calls onFinalSubmit when Submit is clicked', () => {
-      const { onFinalSubmit } = renderFooter({ propsOverrides: { isLastStep: true } });
+      const { onFinalSubmit } = renderFooter({
+        propsOverrides: { isLastStep: true },
+        stateOverrides: { queryCommitted: true },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+        },
+      });
       fireEvent.click(screen.getByTestId('composeDiscoverSubmit'));
       expect(onFinalSubmit).toHaveBeenCalledTimes(1);
     });
@@ -174,7 +181,13 @@ describe('ComposeDiscoverFooter', () => {
     });
 
     it('calls onYamlSave when YAML submit is clicked', () => {
-      const { onYamlSave } = renderFooter({ stateOverrides: { yamlMode: true } });
+      const { onYamlSave } = renderFooter({
+        stateOverrides: { yamlMode: true, queryCommitted: true },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+        },
+      });
       fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
       expect(onYamlSave).toHaveBeenCalledTimes(1);
     });
@@ -209,7 +222,7 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
-    it('enables Next for a base-only alert (no alert condition) persisted as standalone', () => {
+    it('disables Next for a base-only alert (no alert condition) persisted as standalone', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true },
         formValues: {
@@ -217,8 +230,41 @@ describe('ComposeDiscoverFooter', () => {
           query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         },
       });
-      // No alert condition resolves to a standalone breach query and is fully savable.
-      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+      // Per #621/#623 an alert needs a valid alert condition to advance; no_where blocks Next.
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('disables Next for an empty standalone alert in edit mode', () => {
+      renderFooter({
+        stateOverrides: { queryCommitted: true, mode: 'edit' },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'standalone', breach: { query: '' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('disables Next for a composed alert with base but no breach segment in edit mode', () => {
+      renderFooter({
+        stateOverrides: { queryCommitted: true, mode: 'edit' },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('disables Next for an alert whose split failed (base missing)', () => {
+      renderFooter({
+        stateOverrides: { queryCommitted: true },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'composed', base: '', breach: { segment: '| WHERE x > 1' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
     it('disables Next when both base and breach segments are empty', () => {
@@ -282,17 +328,28 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverSubmit')).toBeDisabled();
     });
 
-    it('enables Submit for a base-only alert (no alert condition) persisted as standalone', () => {
+    it('enables Submit on the last step when there are no validation errors', () => {
       renderFooter({
         propsOverrides: { isLastStep: true },
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
-      // alert + standalone is permitted by the rule schema, so base-only is savable.
       expect(screen.getByTestId('composeDiscoverSubmit')).not.toBeDisabled();
+    });
+
+    it('disables Submit for a composed alert with base but no breach segment in edit mode', () => {
+      renderFooter({
+        propsOverrides: { isLastStep: true, isCreate: false },
+        stateOverrides: { queryCommitted: true, mode: 'edit' },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverSubmit')).toBeDisabled();
     });
   });
 });

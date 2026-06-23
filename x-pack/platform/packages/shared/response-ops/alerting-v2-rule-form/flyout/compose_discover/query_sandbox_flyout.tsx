@@ -73,6 +73,12 @@ export interface QuerySandboxFlyoutProps {
   /** When provided an Apply button is shown. No-args: caller already holds current state. */
   onApply?: () => void;
   onClose: () => void;
+  /**
+   * Alert authoring in the single unified editor (no base/alert tabs). Drives the
+   * "we'll auto-identify base/alert on Apply" helper, which only surfaces in the
+   * create-mode unified editor (edit mode keeps the base/alert tabs).
+   */
+  isAlert?: boolean;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -94,6 +100,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onDateRangeChange,
   onApply,
   onClose,
+  isAlert = false,
   onAlertEditorMount,
   onRecoveryEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
@@ -209,7 +216,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           autoRun
-          showUnifiedAlertHelper={query.format === 'composed' && !tabs?.length}
+          showUnifiedAlertHelper={isAlert && !tabs?.length && !isReadOnly}
           tabProps={tabProps}
         />
       </EuiFlyoutBody>

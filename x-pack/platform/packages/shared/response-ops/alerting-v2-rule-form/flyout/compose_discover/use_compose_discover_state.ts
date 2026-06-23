@@ -59,10 +59,10 @@ export const createInitialState = ({
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * create + alertCondition      → undefined (single unified editor; split runs on Apply)
- * edit   + alertCondition      → ['base', 'alert']
+ * create + alertCondition               → undefined (single unified editor; split runs on Apply)
+ * edit   + alertCondition               → ['base', 'alert']
  * isAlert + recoveryCondition  + custom → ['recovery']
- * everything else              → undefined (single editor)
+ * everything else                       → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
@@ -73,12 +73,9 @@ export function getSandboxTabs(
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {
-    /*
-     * Create authors a single unified ES|QL query; the heuristic split into
-     * base/alert runs on Apply, not in the editor. Edit mode keeps the split
-     * tabs so its behavior is unchanged.
-     */
-    return state.mode === 'create' ? undefined : ['base', 'alert'];
+    // Create authors a single unified ES|QL query; the heuristic split runs on Apply.
+    if (state.mode === 'create') return undefined;
+    return ['base', 'alert'];
   }
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;

@@ -645,6 +645,12 @@ export function ComposeDiscoverFlyout({
   );
 
   const handleSandboxApply = useCallback(() => {
+    /*
+     * The heuristic split is a create-time authoring aid: on Apply we derive the
+     * base/alert parts from the single unified editor. In edit we never re-split —
+     * edit mode keeps the existing base/alert tab UI and respects the rule's
+     * persisted structure as-is.
+     */
     const isUnifiedAlertApply =
       uiState.mode === 'create' &&
       !uiState.yamlMode &&
@@ -655,14 +661,26 @@ export function ComposeDiscoverFlyout({
     if (isUnifiedAlertApply) {
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       /*
-       * The unified editor only edits base + alert, so carry over any recovery
-       * segment from the recovery step. Only valid when both sides are composed —
-       * a base-only (no_where) result is standalone and carries no segment recovery.
+       * Carry over any recovery block from the recovery step when the format is
+       * unchanged. A format change (e.g. adding an alert condition turns a
+       * standalone no_where query into a composed one) cannot carry recovery over.
        */
-      queryToCommit =
-        split.format === 'composed' && sandboxQuery.format === 'composed' && sandboxQuery.recovery
-          ? { ...split, recovery: sandboxQuery.recovery }
-          : split;
+      // two identical branches for composed and standalone queries
+      if (
+        split.format === 'composed' &&
+        sandboxQuery.format === 'composed' &&
+        sandboxQuery.recovery
+      ) {
+        queryToCommit = { ...split, recovery: sandboxQuery.recovery };
+      } else if (
+        split.format === 'standalone' &&
+        sandboxQuery.format === 'standalone' &&
+        sandboxQuery.recovery
+      ) {
+        queryToCommit = { ...split, recovery: sandboxQuery.recovery };
+      } else {
+        queryToCommit = split;
+      }
       setSandboxQuery(queryToCommit);
     }
 
@@ -693,10 +711,6 @@ export function ComposeDiscoverFlyout({
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (hasValidationErrors) {
-      return;
-    }
-    const query = values.query;
-    if (values.kind === 'alert' && query.format === 'composed' && !query.breach.segment.trim()) {
       return;
     }
     if (builderType) {
@@ -957,6 +971,7 @@ export function ComposeDiscoverFlyout({
                   syncSandbox();
                   dispatch({ type: 'CLOSE_CHILD' });
                 }}
+                isAlert={isAlert}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
               />
             )}

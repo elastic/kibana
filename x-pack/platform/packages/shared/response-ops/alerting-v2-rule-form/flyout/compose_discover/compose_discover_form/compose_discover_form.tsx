@@ -19,6 +19,7 @@ import type {
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { ComposeFormValues } from '../compose_form_types';
 import { getBreachQuery } from '../compose_form_types';
+import { getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { isActionValid } from '../../../actions_form';
@@ -59,12 +60,16 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       if (!s.queryCommitted) {
         return false;
       }
+      const query = methods.getValues('query');
       /*
-       * Any non-empty query can advance. A base-only query (no_where) resolves to a
-       * standalone breach query (every row is a breach) and is fully savable, so the
-       * only blocked case is an empty query.
+       * Alert rules require a valid alert condition to advance (#621/#623): the
+       * heuristic split must succeed (composed base + alert segment). no_where,
+       * split-failed and empty all block Next.
        */
-      return getBreachQuery(methods.getValues('query')).trim().length > 0;
+      if (methods.getValues('kind') === 'alert') {
+        return getEsqlSummaryState(s.queryCommitted, query) === 'success';
+      }
+      return getBreachQuery(query).trim().length > 0;
     },
   },
   builderCondition: {
