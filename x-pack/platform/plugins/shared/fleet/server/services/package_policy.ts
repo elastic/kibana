@@ -127,6 +127,7 @@ import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyPostUpdateCallback,
+  PutPackagePolicyUpdateCallback,
   AssetsMap,
 } from '../types';
 import type { ExternalCallback } from '..';
@@ -1557,9 +1558,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
+      const packagePolicyUpdateWithId = { ...packagePolicyUpdate, id };
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
-        packagePolicyUpdate,
+        packagePolicyUpdateWithId,
         soClient,
         esClient
       );
@@ -1617,7 +1619,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     // eslint-disable-next-line prefer-const
-    let { version, ...restOfPackagePolicy } = packagePolicy;
+    let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
     if (!packagePolicy.package?.name) {
       throw new FleetError(
@@ -2796,21 +2798,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   updatedNewData = PackagePolicySchema.validate(
                     omit(thisCallbackResponse, 'spaceIds')
                   );
-                } else {
-                  thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
-                    updatedNewData as NewPackagePolicy,
+                } else if (externalCallbackType === 'packagePolicyUpdate') {
+                  // Capture id before the callback so it can be re-injected after the
+                  // schema validation below strips it. This keeps id available to every
+                  // callback in the chain regardless of registration order.
+                  const packagePolicyId = (updatedNewData as UpdatePackagePolicy).id;
+                  thisCallbackResponse = await (callback as PutPackagePolicyUpdateCallback)(
+                    updatedNewData as UpdatePackagePolicy,
                     soClient,
                     esClient,
                     context,
                     request
                   );
-                }
-
-                if (externalCallbackType === 'packagePolicyCreate') {
-                  updatedNewData = NewPackagePolicySchema.validate(
-                    omit(thisCallbackResponse, 'spaceIds')
-                  );
-                } else if (externalCallbackType === 'packagePolicyUpdate') {
                   const omitted = {
                     ...omit(thisCallbackResponse, [
                       'id',
@@ -2827,8 +2826,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                       omit(input, ['compiled_input'])
                     ),
                   };
-
                   updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                  if (packagePolicyId !== undefined) {
+                    updatedNewData = { ...updatedNewData, id: packagePolicyId };
+                  }
+                } else {
+                  thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
+                    updatedNewData as NewPackagePolicy,
+                    soClient,
+                    esClient,
+                    context,
+                    request
+                  );
+                  updatedNewData = NewPackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 }
               } catch (callbackError) {
                 logger.debug(

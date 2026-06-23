@@ -220,8 +220,6 @@ export function onPackagePolicyUpdate({
       return decorated;
     }
 
-    // id is always present on the update path (persisted policy), but NewPackagePolicy
-    // types it as optional — guard so TypeScript can narrow below.
     if (!decorated.id) {
       return decorated;
     }
@@ -246,7 +244,6 @@ export function onPackagePolicyUpdate({
       : undefined;
 
     if (storedAgentConfigApiKey && storedSourceMapApiKey) {
-      // Carry the existing keys forward to avoid accumulating orphaned ES API keys.
       return getPackagePolicyWithApiKeys({
         packagePolicy: decorated,
         agentConfigApiKey: storedAgentConfigApiKey,
