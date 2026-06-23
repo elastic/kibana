@@ -9,9 +9,11 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiCode,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiText,
   useIsWithinBreakpoints,
@@ -29,6 +31,8 @@ import {
   Field,
   JsonEditorField,
   ToggleField,
+  useFormData,
+  useKibana,
 } from '../../../shared_imports';
 
 import type { OnUpdateHandler, OnDoneLoadJsonHandler } from '../pipeline_editor';
@@ -75,6 +79,10 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   isEditing,
 }) => {
   const styles = useStyles();
+  const { services } = useKibana();
+  const [{ field_access_pattern: isFlexibleFieldAccessPattern }] = useFormData<{
+    field_access_pattern?: boolean;
+  }>({ watch: 'field_access_pattern' });
 
   return (
     <>
@@ -134,6 +142,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             onFlyoutOpen={onEditorFlyoutOpen}
             onUpdate={onProcessorsUpdate}
             value={{ processors, onFailure }}
+            fieldAccessPattern={isFlexibleFieldAccessPattern ? 'flexible' : 'classic'}
           >
             <PipelineEditor onLoadJson={onLoadJson} />
           </ProcessorsEditorContextProvider>
@@ -270,7 +279,22 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.ingestPipelines.form.fieldAccessPatternDescription"
-                defaultMessage="Determines how all processors in this pipeline read and write ingest document fields. When disabled, the classic field access pattern is used."
+                defaultMessage="Lets processors access fields with dotted names (such as {dottedName}) without requiring nested objects in the source document. When disabled, the classic field access pattern is used. {learnMoreLink}"
+                values={{
+                  dottedName: <EuiCode>a.b.c</EuiCode>,
+                  learnMoreLink: (
+                    <EuiLink
+                      href={services.documentation.getFieldAccessPatternUrl()}
+                      target="_blank"
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestPipelines.form.fieldAccessPatternDocumentationLink"
+                        defaultMessage="Learn more."
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             </EuiText>
           </EuiPanel>
