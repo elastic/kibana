@@ -50,6 +50,18 @@ const booleanField = (name: string): FieldSpec => ({
   scripted: false,
 });
 
+const numberField = (name: string): FieldSpec => ({
+  name,
+  type: 'number',
+  esTypes: ['long'],
+  searchable: true,
+  aggregatable: true,
+  readFromDocValues: true,
+  scripted: false,
+});
+
+// Table column ids `workflow`, `tags`, and `triggers` are UI-only. Use workflowId,
+// triggeredBy, and EXECUTION_TABLE_SORT_FIELD_MAP for query/sort; tags are not indexed.
 export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   startedAt: dateField('startedAt'),
   createdAt: dateField('createdAt'),
@@ -61,7 +73,9 @@ export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   executedBy: keywordField('executedBy'),
   createdBy: keywordField('createdBy'),
   isTestRun: booleanField('isTestRun'),
+  managed: booleanField('managed'),
   spaceId: keywordField('spaceId'),
+  duration: numberField('duration'),
 };
 
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC: DataViewSpec = {

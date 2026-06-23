@@ -16,6 +16,11 @@ import type {
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
 import { buildWorkflowExecutionsSpaceFilter } from '../../lib/build_workflow_executions_search_query';
+import {
+  getElasticsearchErrorMessage,
+  isElasticsearchQueryError,
+  isIndexNotFoundError,
+} from '../../lib/es_error_helpers';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION, MAX_EXECUTION_FIELD_NAME_LENGTH } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -39,11 +44,26 @@ const getSearchFilter = (request: OptionsListRequestBody) => {
   return { prefix: { [fieldName]: searchString } };
 };
 
+interface OptionsListBucket {
+  key: OptionsListSelection;
+  key_as_string?: string;
+  doc_count: number;
+}
+
 interface OptionsListAggregations {
   validation?: { buckets?: Record<string, { doc_count: number }> };
-  suggestions?: { buckets?: Array<{ key: OptionsListSelection; doc_count: number }> };
+  suggestions?: { buckets?: OptionsListBucket[] };
   totalCardinality?: { value?: number };
 }
+
+// Boolean term aggregations return numeric keys (0/1) alongside a "true"/"false"
+// `key_as_string`. The options list control stringifies the selected value before
+// building a phrase filter, so returning the numeric key would produce "0"/"1" —
+// which Elasticsearch rejects for boolean fields. Use `key_as_string` for boolean
+// fields so selections resolve to valid `true`/`false` values, mirroring the
+// behaviour of the shared controls suggestion query.
+const getSuggestionValue = (bucket: OptionsListBucket, fieldType?: string): OptionsListSelection =>
+  fieldType === 'boolean' && bucket.key_as_string !== undefined ? bucket.key_as_string : bucket.key;
 
 const getAggregations = (response: SearchResponse): OptionsListAggregations | undefined =>
   response.aggregations as unknown as OptionsListAggregations | undefined;
@@ -60,6 +80,12 @@ const parseInvalidSelections = (
 
   return selectedOptions.filter((selection) => (buckets[String(selection)]?.doc_count ?? 0) === 0);
 };
+
+const emptyOptionsListResponse = (): OptionsListSuccessResponse => ({
+  suggestions: [],
+  totalCardinality: 0,
+  invalidSelections: [],
+});
 
 export function registerExecutionOptionsListRoute({ router, service, spaces }: RouteDependencies) {
   router.versioned
@@ -110,7 +136,9 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
 
           const searchFilter = getSearchFilter(optionsListRequest);
           const optionsListFilters = optionsListRequest.filters ?? [];
-          const selectedOptions = optionsListRequest.selectedOptions;
+          const selectedOptions = optionsListRequest.selectedOptions ?? [];
+          const shouldValidateSelections =
+            !optionsListRequest.ignoreValidations && selectedOptions.length > 0;
 
           const esResponse = await esClient.search({
             index: WORKFLOWS_EXECUTIONS_INDEX,
@@ -144,12 +172,11 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
                   field: optionsListRequest.fieldName,
                 },
               },
-              ...(optionsListRequest.ignoreValidations
-                ? {}
-                : {
+              ...(shouldValidateSelections
+                ? {
                     validation: {
                       filters: {
-                        filters: (selectedOptions ?? []).reduce<
+                        filters: selectedOptions.reduce<
                           Record<string, { match: Record<string, OptionsListSelection> }>
                         >((acc, option) => {
                           acc[String(option)] = {
@@ -161,16 +188,18 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
                         }, {}),
                       },
                     },
-                  }),
+                  }
+                : {}),
             },
           });
 
           const aggregations = getAggregations(esResponse);
           const buckets = aggregations?.suggestions?.buckets ?? [];
+          const fieldType = optionsListRequest.fieldSpec?.type;
 
           const body: OptionsListSuccessResponse = {
             suggestions: buckets.map((bucket) => ({
-              value: bucket.key,
+              value: getSuggestionValue(bucket, fieldType),
               docCount: bucket.doc_count,
             })),
             totalCardinality: Number(aggregations?.totalCardinality?.value ?? 0),
@@ -179,6 +208,15 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
 
           return response.ok({ body });
         } catch (error) {
+          if (isIndexNotFoundError(error)) {
+            return response.ok({ body: emptyOptionsListResponse() });
+          }
+
+          if (isElasticsearchQueryError(error)) {
+            const message = getElasticsearchErrorMessage(error) ?? 'Invalid search query';
+            return response.badRequest({ body: { message } });
+          }
+
           return handleRouteError(response, error);
         }
       })

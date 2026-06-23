@@ -61,26 +61,42 @@ export const WorkflowDetailTestModal = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isTestModalOpen) {
-      if (!canExecuteWorkflow) {
-        notifications.toasts.addWarning(
-          i18n.translate('workflows.detail.testModal.warningNoPermissions', {
-            defaultMessage: 'You do not have permission to run workflows.',
-          }),
-          { toastLifeTimeMs: 3000 }
-        );
-        closeModal();
-      } else if (!definition) {
-        notifications.toasts.addWarning(
-          i18n.translate('workflows.detail.testModal.warningInvalidDefinition', {
-            defaultMessage: 'Please fix the errors to run the workflow.',
-          }),
-          { toastLifeTimeMs: 3000 }
-        );
-        closeModal();
-      }
+    if (!isTestModalOpen) {
+      return;
     }
-  }, [closeModal, canExecuteWorkflow, isTestModalOpen, definition, notifications.toasts]);
+
+    if (!canExecuteWorkflow) {
+      notifications.toasts.addWarning(
+        i18n.translate('workflows.detail.testModal.warningNoPermissions', {
+          defaultMessage: 'You do not have permission to run workflows.',
+        }),
+        { toastLifeTimeMs: 3000 }
+      );
+      closeModal();
+      return;
+    }
+
+    if (!definition && !yamlString) {
+      return;
+    }
+
+    if (!definition) {
+      notifications.toasts.addWarning(
+        i18n.translate('workflows.detail.testModal.warningInvalidDefinition', {
+          defaultMessage: 'Please fix the errors to run the workflow.',
+        }),
+        { toastLifeTimeMs: 3000 }
+      );
+      closeModal();
+    }
+  }, [
+    closeModal,
+    canExecuteWorkflow,
+    definition,
+    isTestModalOpen,
+    notifications.toasts,
+    yamlString,
+  ]);
 
   if (!isTestModalOpen || !definition || !canExecuteWorkflow) {
     return null;

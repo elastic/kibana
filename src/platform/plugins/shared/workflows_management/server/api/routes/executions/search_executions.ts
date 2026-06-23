@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
-  INTERNAL_API_VERSION,
+  API_VERSION,
+  AVAILABILITY,
   MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
+  OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
@@ -59,16 +62,26 @@ const parseJsonParam = <T>(value: string | undefined, paramName: string): T | un
   }
 };
 
-export function registerInternalSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
-      path: '/internal/workflows/executions',
-      access: 'internal',
+      path: '/api/workflows/executions',
+      access: 'public',
       security: WORKFLOW_EXECUTION_READ_SECURITY,
+      summary: 'Search workflow executions',
+      description:
+        'Search workflow-level executions across all workflows in the current space with server-side space and step filters enforced.',
+      options: {
+        tags: [OAS_TAG],
+        availability: AVAILABILITY,
+      },
     })
     .addVersion(
       {
-        version: INTERNAL_API_VERSION,
+        version: API_VERSION,
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/search_executions.yaml'),
+        },
         validate: {
           request: {
             query: querySchema,
@@ -91,6 +104,9 @@ export function registerInternalSearchExecutionsRoute({ router, api, spaces }: R
           });
         } catch (error) {
           if (error instanceof Error && error.message.startsWith('Invalid JSON in')) {
+            return response.badRequest({ body: { message: error.message } });
+          }
+          if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {
             return response.badRequest({ body: { message: error.message } });
           }
           return handleRouteError(response, error);

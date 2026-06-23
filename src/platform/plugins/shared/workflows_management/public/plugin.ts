@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, Subject, type Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -21,7 +21,10 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
@@ -38,7 +41,6 @@ import type {
 import { getWorkflowsAppDeepLinks } from './workflows_app_deep_links';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
-import type { WorkflowsManagementConfig } from '../server/config';
 
 export class WorkflowsPlugin
   implements
@@ -57,14 +59,13 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
-  private readonly pluginConfig: WorkflowsManagementConfig;
+  private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
-    this.pluginConfig = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -94,7 +95,10 @@ export class WorkflowsPlugin
 
     this.setupAgentBuilderStart(core);
 
-    const initialExecutionsViewEnabled = this.pluginConfig.globalExecutionsView.enabled;
+    const initialExperimentalFeaturesEnabled = core.uiSettings.get<boolean>(
+      WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+      false
+    );
 
     core.application.register({
       id: PLUGIN_ID,
@@ -105,7 +109,7 @@ export class WorkflowsPlugin
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
-      deepLinks: getWorkflowsAppDeepLinks(initialExecutionsViewEnabled),
+      deepLinks: getWorkflowsAppDeepLinks(initialExperimentalFeaturesEnabled),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -127,6 +131,7 @@ export class WorkflowsPlugin
     triggerSchemas.initialize(plugins.workflowsExtensions);
 
     this.subscribeToWorkflowsSettingChange(core);
+    this.subscribeToExperimentalFeaturesDeepLinksChange(core);
 
     // Availability service: set license and subscribe to availability for app visibility changes
     this.availabilityService.setLicense$(plugins.licensing.license$);
@@ -154,6 +159,7 @@ export class WorkflowsPlugin
   public stop() {
     this.settingsSubscription?.unsubscribe();
     this.appVisibilitySubscription?.unsubscribe();
+    this.experimentalDeepLinksSubscription?.unsubscribe();
     this.availabilityService.stop();
   }
 
@@ -173,6 +179,17 @@ export class WorkflowsPlugin
         core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
           this.logger.error('Failed to disable all workflows on opt-out', { error: err });
         });
+      });
+  }
+
+  private subscribeToExperimentalFeaturesDeepLinksChange(core: CoreStart): void {
+    this.experimentalDeepLinksSubscription = core.uiSettings
+      .get$<boolean>(WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .pipe(distinctUntilChanged())
+      .subscribe((experimentalFeaturesEnabled) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: getWorkflowsAppDeepLinks(experimentalFeaturesEnabled),
+        }));
       });
   }
 
@@ -254,7 +271,6 @@ export class WorkflowsPlugin
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
-        globalExecutionsView: this.pluginConfig.globalExecutionsView,
       },
     };
 

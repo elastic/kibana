@@ -38,7 +38,6 @@ describe('WorkflowsPlugin', () => {
       enabled: true,
       logging: { console: false },
       available: true,
-      globalExecutionsView: { enabled: false },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);

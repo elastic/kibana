@@ -9,16 +9,17 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { useKibana } from '../hooks/use_kibana';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows/common/constants';
 import { WorkflowExecutionsPage } from '../pages/executions';
 
 export const WorkflowExecutionsRouteGate = React.memo(() => {
-  const {
-    workflowsManagement: { globalExecutionsView },
-  } = useKibana().services;
-  const isExecutionsViewEnabled = globalExecutionsView.enabled;
+  const isExperimentalFeaturesEnabled = useUiSetting<boolean>(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+    false
+  );
 
-  if (!isExecutionsViewEnabled) {
+  if (!isExperimentalFeaturesEnabled) {
     return <Redirect to="/" />;
   }
 

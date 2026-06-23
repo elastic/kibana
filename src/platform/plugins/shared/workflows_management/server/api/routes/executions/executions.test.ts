@@ -82,6 +82,7 @@ describe('Execution Routes', () => {
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
+      searchExecutionsView: jest.fn(),
       searchStepExecutions: jest.fn(),
       getWorkflowExecution: jest.fn(),
       getWorkflowExecutionLogs: jest.fn(),
@@ -309,6 +310,91 @@ describe('Execution Routes', () => {
         'default',
         request
       );
+    });
+  });
+
+  describe('GET /api/workflows/executions (search_executions)', () => {
+    const path = '/api/workflows/executions';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should call api.searchExecutionsView with parsed query params and space id', async () => {
+      mockApi.searchExecutionsView.mockResolvedValue({
+        results: [],
+        page: 1,
+        size: 25,
+        total: 0,
+      });
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          query: JSON.stringify({ term: { workflowId: 'wf-1' } }),
+          from: 25,
+          size: 25,
+          sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
+          trackTotalHits: true,
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+        {
+          query: { term: { workflowId: 'wf-1' } },
+          from: 25,
+          size: 25,
+          sort: [{ startedAt: { order: 'desc' } }],
+          trackTotalHits: true,
+        },
+        'default'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { results: [], page: 1, size: 25, total: 0 },
+      });
+    });
+
+    it('should return bad request for invalid JSON query params', async () => {
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          query: '{invalid-json',
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'Invalid JSON in query' },
+      });
+      expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
+    });
+
+    it('should return bad request when searchExecutionsView throws a query validation error', async () => {
+      mockApi.searchExecutionsView.mockRejectedValue(
+        Object.assign(new Error('failed to create query: For input string: "2s"'), {
+          statusCode: 400,
+        })
+      );
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          query: JSON.stringify({
+            range: {
+              duration: {
+                gte: '2s',
+              },
+            },
+          }),
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'failed to create query: For input string: "2s"' },
+      });
     });
   });
 

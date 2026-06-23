@@ -8,13 +8,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
 import { FilterGroupLoading } from '@kbn/alerts-ui-shared/src/alert_filter_controls/loading';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
-import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC,
   WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
@@ -22,49 +21,33 @@ import {
 import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTION_FILTERS_STORAGE_KEY,
-  EXECUTION_FILTERS_URL_PARAM_KEY,
 } from './workflow_executions_page_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
 
 export interface WorkflowExecutionsFiltersProps {
+  controlsUrlState?: FilterControlConfig[];
   filters: Filter[];
+  onFilterGroupInit?: (handler: FilterGroupHandler | undefined) => void;
   query?: Query;
+  setControlsUrlState: (controls: FilterControlConfig[]) => void;
   timeRange: TimeRange;
   onFiltersChange: (filters: Filter[]) => void;
 }
 
 export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersProps>(
-  ({ filters, query, timeRange, onFiltersChange }) => {
+  ({
+    controlsUrlState,
+    filters,
+    onFilterGroupInit,
+    onFiltersChange,
+    query,
+    setControlsUrlState,
+    timeRange,
+  }) => {
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
-    const history = useHistory();
-    const location = useLocation();
     const [isDataViewReady, setIsDataViewReady] = useState(false);
-
-    const urlStorage = useMemo(
-      () =>
-        createKbnUrlStateStorage({
-          history,
-          useHash: false,
-          useHashQuery: false,
-        }),
-      [history]
-    );
-
-    const persisted = urlStorage.get<FilterControlConfig[] | undefined>(
-      EXECUTION_FILTERS_URL_PARAM_KEY
-    );
-    const controlsUrlState = persisted
-      ? persisted.map(convertCamelCasedKeysToSnakeCase)
-      : undefined;
-
-    const setControlsUrlState = useCallback(
-      (next: FilterControlConfig[]) => {
-        urlStorage.set(EXECUTION_FILTERS_URL_PARAM_KEY, next);
-      },
-      [urlStorage]
-    );
 
     const scopedDataViews = useMemo(
       () => ({
@@ -115,14 +98,14 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
 
     if (!isDataViewReady) {
       return (
-        <div data-test-subj="workflowExecutionsFilters" key={location.search}>
+        <div data-test-subj="workflowExecutionsFilters">
           <FilterGroupLoading />
         </div>
       );
     }
 
     return (
-      <div data-test-subj="workflowExecutionsFilters" key={location.search}>
+      <div data-test-subj="workflowExecutionsFilters">
         <FilterGroup
           controlsUrlState={controlsUrlState}
           dataViewId={WORKFLOW_EXECUTIONS_DATA_VIEW_ID}
@@ -130,6 +113,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
           filters={filters}
           maxControls={4}
           onFiltersChange={handleFilterChanges}
+          onInit={onFilterGroupInit}
           query={query}
           ruleTypeIds={[]}
           setControlsUrlState={setControlsUrlState}

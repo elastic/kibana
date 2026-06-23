@@ -12,10 +12,13 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESSearchResponse } from '@kbn/es-types';
 import { useQuery } from '@kbn/react-query';
-import type { SortOrder } from '@kbn/unified-data-table';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
+import {
+  EXECUTION_TABLE_SORT_FIELD_MAP,
+  type ExecutionTableSortOrder,
+} from './workflow_executions_page_constants';
 import {
   buildWorkflowExecutionsSearchFilters,
   getWorkflowExecutionsFetchErrorMessage,
@@ -30,9 +33,15 @@ export interface UseWorkflowExecutionsSearchParams {
   spaceId: string;
   pageIndex: number;
   pageSize: number;
-  sort: SortOrder[];
+  sort: ExecutionTableSortOrder;
   enabled?: boolean;
 }
+
+const mapSortToEsSort = (sort: ExecutionTableSortOrder) =>
+  sort.map(([field, direction]) => {
+    const esField = EXECUTION_TABLE_SORT_FIELD_MAP[field] ?? field;
+    return { [esField]: { order: direction } };
+  });
 
 export const useWorkflowExecutionsSearch = ({
   dataView,
@@ -45,7 +54,8 @@ export const useWorkflowExecutionsSearch = ({
   sort,
   enabled = true,
 }: UseWorkflowExecutionsSearchParams) => {
-  const { http, uiSettings } = useKibana().services;
+  const { uiSettings } = useKibana().services;
+  const api = useWorkflowsApi();
   const timeField = dataView.timeFieldName ?? 'startedAt';
 
   const searchFilters = useMemo(
@@ -70,12 +80,9 @@ export const useWorkflowExecutionsSearch = ({
     [dataView, query, searchFilters, uiSettings]
   );
 
-  const sortParam = useMemo(
-    () => sort.map(([field, direction]) => ({ [field]: { order: direction } })),
-    [sort]
-  );
+  const sortParam = useMemo(() => mapSortToEsSort(sort), [sort]);
 
-  return useQuery<ESSearchResponse<EsWorkflowExecution>>({
+  return useQuery<WorkflowExecutionListDto>({
     networkMode: 'always',
     queryKey: [
       'workflows',
@@ -91,15 +98,12 @@ export const useWorkflowExecutionsSearch = ({
       esQuery,
     ],
     queryFn: () =>
-      http.get<ESSearchResponse<EsWorkflowExecution>>('/internal/workflows/executions', {
-        version: '1',
-        query: {
-          query: JSON.stringify(esQuery),
-          from: pageIndex * pageSize,
-          size: pageSize,
-          sort: JSON.stringify(sortParam),
-          trackTotalHits: true,
-        },
+      api.searchExecutions({
+        query: JSON.stringify(esQuery),
+        from: pageIndex * pageSize,
+        size: pageSize,
+        sort: JSON.stringify(sortParam),
+        trackTotalHits: true,
       }),
     enabled,
     retry: false,

@@ -9,7 +9,6 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
@@ -764,7 +763,7 @@ export class WorkflowsManagementApi {
   public async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<estypes.SearchResponse<unknown>> {
+  ): Promise<WorkflowExecutionListDto> {
     return this.workflowsService.searchExecutionsView(params, spaceId);
   }
 
