@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { generateDashboardTool } from './generate';
+export { kibanaRendering } from './kibana_rendering_guidance';
