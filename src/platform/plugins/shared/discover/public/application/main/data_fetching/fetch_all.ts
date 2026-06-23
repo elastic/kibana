@@ -87,6 +87,18 @@ export function fetchAll(
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
 
+    if (
+      isEsqlQuery &&
+      query &&
+      'esql' in query &&
+      (query as { esql: string }).esql
+        .split('\n')
+        .filter((l) => l.trim())
+        .every((l) => l.trim().startsWith('//'))
+    ) {
+      return Promise.resolve();
+    }
+
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }

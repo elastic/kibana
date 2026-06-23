@@ -51,7 +51,11 @@ import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
-import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+  SuggestionFooterOption,
+} from '@kbn/kql/public';
 import {
   DateRangePicker,
   type DateRangePickerSettings,
@@ -240,6 +244,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  kqlFooterOption?: SuggestionFooterOption;
   /**
    * Optional ES|QL prop - Enable data source browser in ESQL editor
    */
@@ -1159,6 +1164,7 @@ export const QueryBarTopRow = React.memo(
             appName={appName}
             submitOnBlur={props.submitOnBlur}
             bubbleSubmitEvent={props.bubbleSubmitEvent}
+            footerOption={props.kqlFooterOption}
             deps={{
               autocomplete: kql.autocomplete,
               data,

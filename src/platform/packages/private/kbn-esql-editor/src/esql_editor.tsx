@@ -560,6 +560,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const editorAiStyle = useEditorAiStyle();
 
+  const autoAcceptCommentCallbackRef = useRef<((query: string) => void) | undefined>(undefined);
+
   const {
     generateFromComment: onGenerateFromComment,
     isReviewActiveRef,
@@ -572,6 +574,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isEnabled: isNlToEsqlEnabled,
     clearGhostHintRef,
     telemetryService,
+    autoAcceptCallbackRef: autoAcceptCommentCallbackRef,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -803,6 +806,23 @@ const ESQLEditorInternal = function ESQLEditor({
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
+                    }
+
+                    if (isNlToEsqlEnabled) {
+                      const initialLines = model
+                        .getValue()
+                        .split('\n')
+                        .filter((l) => l.trim());
+                      const isAllComments =
+                        initialLines.length > 0 &&
+                        initialLines.every((l) => l.trim().startsWith('//'));
+                      if (isAllComments) {
+                        editor.setPosition({ lineNumber: 1, column: 1 });
+                        autoAcceptCommentCallbackRef.current = (generatedQuery) => {
+                          onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH);
+                        };
+                        onGenerateFromCommentRef.current();
+                      }
                     }
                   }
 
