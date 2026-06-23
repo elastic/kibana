@@ -15,6 +15,7 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
 import {
+  getAllBackingIndicesByStream,
   getDataStreamsMeteringStats,
   getLastBackingIndexByStream,
   processAsyncInChunks,
@@ -55,8 +56,10 @@ export async function getDocCountsForStreams(options: {
   if (!streams.length) {
     return [];
   }
-  const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
-  const allBackingIndices = Array.from(new Set(lastBackingIndexByStream.values()));
+  // Count across all backing indices, not just the write index, so docs that have rolled
+  // over into e.g. frozen backing indices are included in the stream total.
+  const backingIndicesByStream = getAllBackingIndicesByStream(streams);
+  const allBackingIndices = Array.from(new Set(Array.from(backingIndicesByStream.values()).flat()));
 
   if (!allBackingIndices.length) {
     return [];
@@ -105,8 +108,8 @@ export async function getDocCountsForStreams(options: {
 
   const results: StreamDocsStat[] = [];
 
-  for (const [stream, index] of lastBackingIndexByStream.entries()) {
-    const docsCount = docsByBackingIndex[index] ?? 0;
+  for (const [stream, indices] of backingIndicesByStream.entries()) {
+    const docsCount = indices.reduce((total, index) => total + (docsByBackingIndex[index] ?? 0), 0);
 
     if (docsCount > 0) {
       results.push({

@@ -178,6 +178,7 @@ export {
   type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
+  TIER_TO_PHASE,
   type IlmPolicy,
   type IlmPolicyWithUsage,
   type IlmPolicyUsage,

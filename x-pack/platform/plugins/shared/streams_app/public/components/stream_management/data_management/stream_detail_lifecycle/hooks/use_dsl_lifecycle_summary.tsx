@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import type { DataStreamStats } from './use_data_stream_stats';
 import { formatBytes } from '../helpers/format_bytes';
@@ -62,6 +63,11 @@ export const useDslLifecycleSummary = ({
   const {
     core: { notifications },
     isServerless,
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
 
   const { euiTheme } = useEuiTheme();
@@ -76,13 +82,42 @@ export const useDslLifecycleSummary = ({
   const isDsl = isDslLifecycle(effectiveLifecycle);
   const isDisabled = isDisabledLifecycle(effectiveLifecycle);
 
+  // Fetches each phase's storage size and doc count, split by the actual `_tier` allocation, so the
+  // timeline can show hot vs frozen separately. The frozen phase's existence comes from
+  // `frozen_after` on the effective lifecycle (below), not from this fetch.
+  const phaseStatsFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!isDsl && !isDisabled) {
+        return undefined;
+      }
+      return streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/lifecycle/_dsl_phase_stats',
+        {
+          params: { path: { name: definition.stream.name } },
+          signal,
+        }
+      );
+    },
+    [definition.stream.name, isDsl, isDisabled, streamsRepositoryClient],
+    { withRefresh: true }
+  );
+
   const getPhases = (): LifecyclePhase[] => {
     if (!isDsl && !isDisabled) {
       return [];
     }
 
     const retentionPeriod = isDsl ? effectiveLifecycle.dsl.data_retention : undefined;
-    const storageSize = stats?.sizeBytes ? formatBytes(stats.sizeBytes) : undefined;
+    const frozenAfter = isDsl ? effectiveLifecycle.dsl.frozen_after : undefined;
+    const phaseStats = phaseStatsFetch.value?.phases;
+
+    // Prefer per-phase stats (derived from `_tier`) so each phase reflects only the
+    // data actually allocated to it. Fall back to the whole-stream stats when per-phase data isn't
+    // available yet (e.g. while the request is in flight).
+    const hotSizeInBytes = phaseStats?.hot?.size_in_bytes ?? stats?.sizeBytes;
+    const hotDocsCount = phaseStats?.hot?.docs_count ?? stats?.totalDocs;
+    const frozenSizeInBytes = phaseStats?.frozen?.size_in_bytes;
+    const frozenDocsCount = phaseStats?.frozen?.docs_count;
 
     return buildLifecyclePhases({
       label: isServerless
@@ -93,11 +128,18 @@ export const useDslLifecycleSummary = ({
             defaultMessage: 'Hot',
           }),
       color: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
-      size: storageSize,
+      size: hotSizeInBytes !== undefined ? formatBytes(hotSizeInBytes) : undefined,
       retentionPeriod,
+      frozenAfter,
+      frozenLabel: 'frozen',
+      frozenColor: ilmPhases.frozen.color,
+      frozenDescription: ilmPhases.frozen.description,
+      frozenSize: frozenSizeInBytes !== undefined ? formatBytes(frozenSizeInBytes) : undefined,
+      frozenSizeInBytes,
+      frozenDocsCount,
       description: isServerless ? '' : ilmPhases.hot.description,
-      sizeInBytes: stats?.sizeBytes,
-      docsCount: stats?.totalDocs,
+      sizeInBytes: hotSizeInBytes,
+      docsCount: hotDocsCount,
       deletePhaseDescription: ilmPhases.delete.description,
       deletePhaseColor: ilmPhases.delete.color,
     });

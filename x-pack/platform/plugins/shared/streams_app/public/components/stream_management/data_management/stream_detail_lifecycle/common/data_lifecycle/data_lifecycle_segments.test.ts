@@ -69,6 +69,75 @@ describe('buildLifecyclePhases', () => {
     });
   });
 
+  it('should include frozen phase when frozenAfter is provided', () => {
+    const phases = buildLifecyclePhases({
+      label: 'Hot',
+      color: '#FF0000',
+      retentionPeriod: '90d',
+      frozenAfter: '30d',
+      frozenLabel: 'frozen',
+      frozenColor: '#00FFFF',
+      frozenDescription: 'Frozen description',
+      deletePhaseColor: '#000000',
+    });
+
+    expect(phases).toHaveLength(3);
+    expect(phases[0]).toMatchObject({ label: 'Hot', min_age: '0d' });
+    expect(phases[1]).toMatchObject({
+      label: 'frozen',
+      min_age: '30d',
+      description: 'Frozen description',
+    });
+    expect(phases[2]).toMatchObject({ isDelete: true, min_age: '90d' });
+  });
+
+  it('should include a frozen phase configured to freeze immediately (0d)', () => {
+    const phases = buildLifecyclePhases({
+      label: 'Hot',
+      color: '#FF0000',
+      retentionPeriod: '90d',
+      frozenAfter: '0d',
+      frozenLabel: 'frozen',
+      frozenColor: '#00FFFF',
+      frozenDescription: 'Frozen description',
+      deletePhaseColor: '#000000',
+    });
+
+    expect(phases).toHaveLength(3);
+    expect(phases[1]).toMatchObject({ label: 'frozen', min_age: '0d' });
+  });
+
+  it('should attach per-phase size and docs to hot and frozen phases', () => {
+    const phases = buildLifecyclePhases({
+      label: 'Hot',
+      color: '#FF0000',
+      retentionPeriod: '90d',
+      size: '1.0 GB',
+      sizeInBytes: 1_000_000_000,
+      docsCount: 1000,
+      frozenAfter: '30d',
+      frozenLabel: 'frozen',
+      frozenColor: '#00FFFF',
+      frozenSize: '5.0 GB',
+      frozenSizeInBytes: 5_000_000_000,
+      frozenDocsCount: 5000,
+      deletePhaseColor: '#000000',
+    });
+
+    expect(phases[0]).toMatchObject({
+      label: 'Hot',
+      size: '1.0 GB',
+      sizeInBytes: 1_000_000_000,
+      docsCount: 1000,
+    });
+    expect(phases[1]).toMatchObject({
+      label: 'frozen',
+      size: '5.0 GB',
+      sizeInBytes: 5_000_000_000,
+      docsCount: 5000,
+    });
+  });
+
   it('should build phases without size when size is not provided', () => {
     const phases = buildLifecyclePhases({
       label: 'Test phase',

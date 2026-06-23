@@ -10,7 +10,13 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
+import {
+  Streams,
+  isIlmLifecycle,
+  TIER_TO_PHASE,
+  type IlmPolicyWithUsage,
+  type PhaseName,
+} from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -27,6 +33,75 @@ import {
   assertPolicyNameIsValid,
 } from '../../../../lib/streams/lifecycle/ilm_policy_validation';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
+
+type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
+
+export interface DslPhaseStat {
+  size_in_bytes: number;
+  docs_count: number;
+}
+
+// Per-phase storage size and document count for a DSL stream, derived from the `_tier` allocation of each backing index joined with per-index stats.
+const getDslPhaseStats = async (
+  scopedClusterClient: IScopedClusterClient,
+  name: string,
+  dataStreamName: string
+): Promise<Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>>> => {
+  const [{ aggregations }, { indices: indicesStats = {} }] = await Promise.all([
+    scopedClusterClient.asCurrentUser.search({
+      index: name,
+      size: 0,
+      track_total_hits: false,
+      aggs: {
+        tiers: {
+          filters: {
+            filters: Object.fromEntries(
+              Object.keys(TIER_TO_PHASE).map((tier) => [tier, { term: { _tier: tier } }])
+            ),
+          },
+          aggs: {
+            indices: {
+              terms: { field: '_index', size: 1000 },
+            },
+          },
+        },
+      },
+    }),
+    scopedClusterClient.asCurrentUser.indices.stats({
+      index: dataStreamName,
+      metric: ['store', 'docs'],
+    }),
+  ]);
+
+  const tierBuckets =
+    (
+      aggregations?.tiers as
+        | { buckets: Record<string, { indices: { buckets: Array<{ key: string }> } }> }
+        | undefined
+    )?.buckets ?? {};
+
+  // Map each backing index (by actual `_index` value) to a phase derived from its `_tier`.
+  const indexToPhase: Record<string, PhaseNameWithoutDelete> = {};
+  for (const [tier, tierBucket] of Object.entries(tierBuckets)) {
+    const phase = TIER_TO_PHASE[tier];
+    if (!phase) {
+      continue;
+    }
+    for (const indexBucket of tierBucket.indices.buckets) {
+      indexToPhase[indexBucket.key] = phase;
+    }
+  }
+
+  const phaseStats: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> = {};
+  for (const [indexName, phase] of Object.entries(indexToPhase)) {
+    const stats = indicesStats[indexName];
+    const entry = (phaseStats[phase] ??= { size_in_bytes: 0, docs_count: 0 });
+    entry.size_in_bytes += stats?.primaries?.store?.total_data_set_size_in_bytes ?? 0;
+    entry.docs_count += stats?.primaries?.docs?.count ?? 0;
+  }
+
+  return phaseStats;
+};
 
 const getDataStreamByBackingIndices = async (
   scopedClusterClient: IScopedClusterClient,
@@ -115,6 +190,46 @@ const lifecycleStatsRoute = createServerRoute({
       phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }),
       policy_missing: false,
     };
+  },
+});
+
+const lifecycleDslPhaseStatsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_dsl_phase_stats',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<{ phases: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> }> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const name = params.path.name;
+
+    const definition = await streamsClient.getStream(name);
+    if (!Streams.ingest.all.Definition.is(definition)) {
+      throw new StatusError('Lifecycle phase stats are only available for ingest streams', 400);
+    }
+
+    const dataStream = await streamsClient.getDataStream(name);
+    const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
+    if (isIlmLifecycle(lifecycle)) {
+      throw new StatusError(
+        'DSL phase stats are only available for data stream lifecycle (DSL) streams',
+        400
+      );
+    }
+
+    const phases = await getDslPhaseStats(scopedClusterClient, name, dataStream.name);
+    return { phases };
   },
 });
 
@@ -270,6 +385,7 @@ const lifecycleSnapshotRepositoriesRoute = createServerRoute({
 
 export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
+  ...lifecycleDslPhaseStatsRoute,
   ...lifecycleIlmExplainRoute,
   ...lifecycleIlmPoliciesRoute,
   ...lifecycleIlmPoliciesUpdateRoute,
