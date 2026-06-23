@@ -54,11 +54,6 @@ const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
   { defaultMessage: 'Resolve ES|QL control placeholders before continuing' }
 );
 
-const BASE_ONLY_SAVE_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.baseOnlySaveTooltip',
-  { defaultMessage: 'Saving a rule without an alert condition is not supported yet' }
-);
-
 export interface ComposeDiscoverFooterProps {
   uiState: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
@@ -106,19 +101,6 @@ export const ComposeDiscoverFooter = ({
     !watchedQuery.base.trim() &&
     !watchedQuery.breach.segment.trim();
 
-  /*
-   * Base query with no alert condition (no_where). Step navigation is allowed,
-   * but saving a base-only alert is not supported yet (see
-   * https://github.com/elastic/rna-program/issues/622), so the final
-   * Create/Save action is disabled with an explanatory tooltip.
-   */
-  const baseOnlyComposed =
-    isAlert &&
-    uiState.queryCommitted &&
-    watchedQuery.format === 'composed' &&
-    !!watchedQuery.base.trim() &&
-    !watchedQuery.breach.segment.trim();
-
   const nextDisabled =
     uiState.childOpen ||
     hasValidationErrors ||
@@ -132,7 +114,7 @@ export const ComposeDiscoverFooter = ({
     return undefined;
   };
 
-  const submitDisabled = hasValidationErrors || baseOnlyComposed;
+  const submitDisabled = hasValidationErrors;
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {
@@ -140,17 +122,15 @@ export const ComposeDiscoverFooter = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={baseOnlyComposed ? BASE_ONLY_SAVE_TOOLTIP : undefined}>
-              <EuiButton
-                fill
-                onClick={onYamlSave}
-                isLoading={isSaving}
-                isDisabled={submitDisabled}
-                data-test-subj="composeDiscoverYamlSubmit"
-              >
-                {submitLabel}
-              </EuiButton>
-            </EuiToolTip>
+            <EuiButton
+              fill
+              onClick={onYamlSave}
+              isLoading={isSaving}
+              isDisabled={submitDisabled}
+              data-test-subj="composeDiscoverYamlSubmit"
+            >
+              {submitLabel}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
@@ -187,17 +167,15 @@ export const ComposeDiscoverFooter = ({
             )}
             <EuiFlexItem grow={false}>
               {isLastStep ? (
-                <EuiToolTip content={baseOnlyComposed ? BASE_ONLY_SAVE_TOOLTIP : undefined}>
-                  <EuiButton
-                    fill
-                    isLoading={isSaving}
-                    isDisabled={submitDisabled}
-                    onClick={onFinalSubmit}
-                    data-test-subj="composeDiscoverSubmit"
-                  >
-                    {submitLabel}
-                  </EuiButton>
-                </EuiToolTip>
+                <EuiButton
+                  fill
+                  isLoading={isSaving}
+                  isDisabled={submitDisabled}
+                  onClick={onFinalSubmit}
+                  data-test-subj="composeDiscoverSubmit"
+                >
+                  {submitLabel}
+                </EuiButton>
               ) : (
                 <EuiToolTip content={getNextTooltip()}>
                   <EuiButton

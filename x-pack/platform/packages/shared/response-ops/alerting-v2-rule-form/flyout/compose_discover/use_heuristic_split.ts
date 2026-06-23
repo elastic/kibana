@@ -6,7 +6,7 @@
  */
 
 import { Parser } from '@elastic/esql';
-import type { ComposedQuery } from './compose_form_types';
+import type { RuleQuery } from './compose_form_types';
 
 export type SplitConfidence = 'high' | 'low' | 'none';
 
@@ -151,28 +151,44 @@ export function discoverQueryToComposed(inlinedQuery: string): {
  */
 export type SplitOutcome = 'success' | 'no_alert_condition' | 'split_failed' | 'empty';
 
-export interface ComposedSplitResult {
-  query: ComposedQuery;
+export interface SplitRuleQueryResult {
+  query: RuleQuery;
   outcome: SplitOutcome;
 }
 
 /**
- * Maps a unified ES|QL query into the `composed` rule query shape used by alert
- * rules, alongside an outcome that drives the form summary copy/callouts. Alert
- * rules are always `composed` (the `alert ⇒ composed` invariant); a base-only
- * result is represented as a composed query with an empty `breach.segment`.
+ * Maps a unified ES|QL query into the rule query shape for an alert rule,
+ * alongside an outcome that drives the form summary copy/callouts.
+ *
+ * - `success` (base + alert condition) → `composed` (base + breach segment).
+ * - `no_alert_condition` (base only, no WHERE) → `standalone`: the whole query
+ *   is the breach query, so every returned row is a breach. The rule data schema
+ *   permits `alert + standalone` (only `signal` is forced to standalone), so this
+ *   is a first-class, savable rule rather than a blocked dead-end.
+ * - `split_failed` / `empty` → `composed` so the summary can flag the state; these
+ *   do not produce a savable base-only rule.
  */
-export function splitResultToComposed(fullQuery: string): ComposedSplitResult {
+export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult {
   const { base, alertBlock } = splitQuery(fullQuery);
-  const query: ComposedQuery = { format: 'composed', base, breach: { segment: alertBlock } };
 
   const hasBase = base.trim().length > 0;
   const hasAlert = alertBlock.trim().length > 0;
 
-  if (!hasBase && !hasAlert) return { query, outcome: 'empty' };
-  if (hasBase && hasAlert) return { query, outcome: 'success' };
-  if (hasBase) return { query, outcome: 'no_alert_condition' };
-  return { query, outcome: 'split_failed' };
+  if (hasBase && hasAlert) {
+    return {
+      query: { format: 'composed', base, breach: { segment: alertBlock } },
+      outcome: 'success',
+    };
+  }
+  if (hasBase) {
+    return {
+      query: { format: 'standalone', breach: { query: base } },
+      outcome: 'no_alert_condition',
+    };
+  }
+
+  const query: RuleQuery = { format: 'composed', base, breach: { segment: alertBlock } };
+  return { query, outcome: hasAlert ? 'split_failed' : 'empty' };
 }
 
 /**

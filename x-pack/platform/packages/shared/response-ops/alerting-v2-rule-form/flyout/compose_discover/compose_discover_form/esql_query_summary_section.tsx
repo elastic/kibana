@@ -25,8 +25,9 @@ import { QuerySummary } from '../query_summary';
 /**
  * Read-only summary of the applied ES|QL query on step 1. The heuristic split
  * is no longer shown in the editor (unified create flow) — it is surfaced here,
- * read-only, with copy + an edit CTA. Alert rules are always `composed`, so the
- * state is derived from the committed base/segment.
+ * read-only, with copy + an edit CTA. A successful split is a `composed` query
+ * (base + alert segment); a base-only query with no alert condition is persisted
+ * as `standalone` (the whole query is the breach query, so every row is a breach).
  */
 export type EsqlSummaryState =
   | 'before_apply'
@@ -44,7 +45,11 @@ export const getEsqlSummaryState = (
   query: RuleQuery
 ): EsqlSummaryState => {
   if (!queryCommitted) return 'before_apply';
-  if (query.format !== 'composed') return 'success';
+
+  // A standalone alert query has no separate alert condition — every row is a breach.
+  if (query.format === 'standalone') {
+    return query.breach.query.trim().length > 0 ? 'no_alert_condition' : 'empty';
+  }
 
   const hasBase = query.base.trim().length > 0;
   const hasSegment = query.breach.segment.trim().length > 0;
@@ -202,9 +207,10 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
   onOpenEditor,
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
-  const showBlocks =
-    state === 'success' || state === 'no_alert_condition' || state === 'split_failed';
-  const baseQuery = query.format === 'composed' ? query.base : '';
+  // Once a query is committed, the read-only Base query / Alert condition blocks are
+  // always shown (empty ones render "Not defined"); only the pre-Apply state hides them.
+  const showBlocks = state !== 'before_apply';
+  const baseQuery = query.format === 'composed' ? query.base : query.breach.query;
   const alertBlock = query.format === 'composed' ? query.breach.segment : '';
 
   const ctaLabel =

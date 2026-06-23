@@ -208,6 +208,23 @@ describe('AlertConditionStep', () => {
       ).toBeInTheDocument();
     });
 
+    it('shows the no-alert-condition state for an alert persisted as a standalone query', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS c = COUNT(*)' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryNoAlertConditionCallout')).toBeInTheDocument();
+      // The standalone breach query is surfaced as the base query block.
+      expect(screen.getByText(/FROM logs-\* \| STATS c = COUNT/)).toBeInTheDocument();
+    });
+
     it('shows the empty-query callout when both base and alert condition are empty', () => {
       renderStep(
         { queryCommitted: true },

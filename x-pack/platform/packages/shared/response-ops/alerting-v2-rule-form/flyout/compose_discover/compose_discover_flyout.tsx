@@ -48,8 +48,7 @@ import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
   discoverQueryToComposed,
-  splitQuery,
-  splitResultToComposed,
+  splitResultToRuleQuery,
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
@@ -466,14 +465,11 @@ export function ComposeDiscoverFlyout({
     (kind: 'signal' | 'alert') => {
       if (kind === 'alert') {
         const full = getBreachQuery(methods.getValues('query'));
-        const { base, alertBlock } = splitQuery(full);
-        const composed: RuleQuery = {
-          format: 'composed',
-          base,
-          breach: { segment: alertBlock },
-        };
-        setSandboxQuery(composed);
-        methods.setValue('query', composed, { shouldDirty: true });
+        // A query with no alert condition (no_where) maps to a standalone breach
+        // query (every row is a breach); a real split yields a composed query.
+        const alertQuery = splitResultToRuleQuery(full).query;
+        setSandboxQuery(alertQuery);
+        methods.setValue('query', alertQuery, { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
@@ -652,18 +648,19 @@ export function ComposeDiscoverFlyout({
     const isUnifiedAlertApply =
       uiState.mode === 'create' &&
       !uiState.yamlMode &&
-      sandboxQuery.format === 'composed' &&
+      isAlert &&
       currentStep?.id === 'alertCondition';
 
     let queryToCommit: RuleQuery = sandboxQuery;
     if (isUnifiedAlertApply) {
-      const split = splitResultToComposed(getBreachQuery(sandboxQuery)).query;
+      const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       /*
        * The unified editor only edits base + alert, so carry over any recovery
-       * segment that was set on the recovery step (splitResultToComposed omits it).
+       * segment from the recovery step. Only valid when both sides are composed —
+       * a base-only (no_where) result is standalone and carries no segment recovery.
        */
       queryToCommit =
-        sandboxQuery.format === 'composed' && sandboxQuery.recovery
+        split.format === 'composed' && sandboxQuery.format === 'composed' && sandboxQuery.recovery
           ? { ...split, recovery: sandboxQuery.recovery }
           : split;
       setSandboxQuery(queryToCommit);
@@ -688,6 +685,7 @@ export function ComposeDiscoverFlyout({
     uiState.yamlMode,
     uiState.mode,
     currentStep?.id,
+    isAlert,
     methods,
     dispatch,
     cancelYamlParse,

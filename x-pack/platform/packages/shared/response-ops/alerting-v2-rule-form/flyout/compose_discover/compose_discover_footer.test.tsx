@@ -209,19 +209,15 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
-    it('enables Next when base query is present but breach segment is empty (no alert condition)', () => {
+    it('enables Next for a base-only alert (no alert condition) persisted as standalone', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         },
       });
-      /*
-       * Base-only (no_where) is allowed to proceed; saving is gated on the
-       * final submit instead (base-only save deferred — see
-       * https://github.com/elastic/rna-program/issues/622).
-       */
+      // No alert condition resolves to a standalone breach query and is fully savable.
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
 
@@ -286,16 +282,17 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverSubmit')).toBeDisabled();
     });
 
-    it('disables Submit for a base-only alert (no alert condition, base-only save deferred per #622)', () => {
+    it('enables Submit for a base-only alert (no alert condition) persisted as standalone', () => {
       renderFooter({
         propsOverrides: { isLastStep: true },
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         },
       });
-      expect(screen.getByTestId('composeDiscoverSubmit')).toBeDisabled();
+      // alert + standalone is permitted by the rule schema, so base-only is savable.
+      expect(screen.getByTestId('composeDiscoverSubmit')).not.toBeDisabled();
     });
   });
 });

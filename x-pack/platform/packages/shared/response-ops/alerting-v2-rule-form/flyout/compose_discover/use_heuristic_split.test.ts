@@ -9,7 +9,7 @@ import {
   splitQuery,
   guessRecoveryBlock,
   discoverQueryToComposed,
-  splitResultToComposed,
+  splitResultToRuleQuery,
 } from './use_heuristic_split';
 
 // ── splitQuery ────────────────────────────────────────────────────────────────
@@ -268,55 +268,63 @@ describe('guessRecoveryBlock', () => {
   });
 });
 
-// ── splitResultToComposed ───────────────────────────────────────────────────
+// ── splitResultToRuleQuery ──────────────────────────────────────────────────
 
-describe('splitResultToComposed', () => {
+describe('splitResultToRuleQuery', () => {
   it('returns a composed query with outcome "success" when base and alert are found', () => {
-    const { query, outcome } = splitResultToComposed(
+    const { query, outcome } = splitResultToRuleQuery(
       'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
     );
 
     expect(outcome).toBe('success');
     expect(query.format).toBe('composed');
+    if (query.format !== 'composed') throw new Error('expected composed');
     expect(query.base).toContain('STATS');
     expect(query.breach.segment).toContain('WHERE count > 100');
   });
 
-  it('returns outcome "no_alert_condition" with the full pipeline as base when there is no WHERE', () => {
-    const { query, outcome } = splitResultToComposed(
-      'FROM logs-*\n| STATS count = COUNT(*) BY host.name'
-    );
+  it('returns a standalone query with outcome "no_alert_condition" when there is no WHERE', () => {
+    const fullQuery = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
+    const { query, outcome } = splitResultToRuleQuery(fullQuery);
 
     expect(outcome).toBe('no_alert_condition');
-    expect(query.format).toBe('composed');
-    expect(query.base).toContain('STATS');
-    expect(query.breach.segment).toBe('');
+    expect(query.format).toBe('standalone');
+    if (query.format !== 'standalone') throw new Error('expected standalone');
+    // The whole pipeline becomes the breach query — every returned row is a breach.
+    expect(query.breach.query).toBe(fullQuery);
   });
 
   it('returns outcome "empty" for an empty query', () => {
-    const { query, outcome } = splitResultToComposed('   ');
+    const { query, outcome } = splitResultToRuleQuery('   ');
 
     expect(outcome).toBe('empty');
+    expect(query.format).toBe('composed');
+    if (query.format !== 'composed') throw new Error('expected composed');
     expect(query.base).toBe('');
     expect(query.breach.segment).toBe('');
   });
 
   it('returns outcome "split_failed" when the heuristic cannot isolate a base', () => {
     // A leading-WHERE-only pipeline has no non-WHERE base command.
-    const { query, outcome } = splitResultToComposed('| WHERE count > 100');
+    const { query, outcome } = splitResultToRuleQuery('| WHERE count > 100');
 
     expect(outcome).toBe('split_failed');
+    expect(query.format).toBe('composed');
+    if (query.format !== 'composed') throw new Error('expected composed');
     expect(query.base).toBe('');
     expect(query.breach.segment).toContain('WHERE count > 100');
   });
 
   it('never produces a duplicated base when re-applied to its own joined output', () => {
-    const first = splitResultToComposed(
+    const first = splitResultToRuleQuery(
       'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
     );
+    if (first.query.format !== 'composed') throw new Error('expected composed');
     const joined = `${first.query.base}\n${first.query.breach.segment}`;
-    const second = splitResultToComposed(joined);
+    const second = splitResultToRuleQuery(joined);
 
+    expect(second.query.format).toBe('composed');
+    if (second.query.format !== 'composed') throw new Error('expected composed');
     expect(second.query.base).toBe(first.query.base);
     expect(second.query.breach.segment).toBe(first.query.breach.segment);
   });

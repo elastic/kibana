@@ -123,13 +123,13 @@ describe('step validation', () => {
       expect(await alertStep.validate!(methods, state)).toBe(true);
     });
 
-    it('returns true for a base-only query (no_where) so navigation is allowed', async () => {
+    it('returns true for a base-only alert persisted as a standalone query (no_where)', async () => {
       const state = createState({ queryCommitted: true });
       const methods = {
         getValues: (field?: keyof ComposeFormValues) => {
           if (field === 'kind') return 'alert';
           if (field === 'query') {
-            return { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } };
+            return { format: 'standalone', breach: { query: 'FROM logs-*' } };
           }
           return undefined;
         },
