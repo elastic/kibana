@@ -20,12 +20,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleResponse,
+  ThreatArray,
+} from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
 import { ScheduleDisplay } from './schedule_display';
-import { ThreatEuiFlexGroup } from '../../../detection_engine/rule_creation_ui/components/description_step/threat_description';
 import {
   parseRuleFromAttachment,
   getRuleTypeLabel,
@@ -48,6 +50,26 @@ const TagsBadgeList: React.FC<{ tags: string[] }> = ({ tags }) => (
     {tags.map((tag) => (
       <EuiFlexItem grow={false} key={tag}>
         <EuiBadge color="hollow">{tag}</EuiBadge>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+);
+
+const MitreMappings: React.FC<{ threat: ThreatArray }> = ({ threat }) => (
+  <EuiFlexGroup responsive={false} gutterSize="s" wrap>
+    {threat.map((entry) => (
+      <EuiFlexItem grow={false} key={entry.tactic.id}>
+        <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{entry.tactic.name}</EuiBadge>
+          </EuiFlexItem>
+          {entry.technique &&
+            entry.technique.map((technique) => (
+              <EuiFlexItem grow={false} key={technique.id}>
+                <EuiBadge color="hollow">{technique.name}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+        </EuiFlexGroup>
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>
@@ -235,7 +257,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
             })}
           </SectionHeading>
           <EuiSpacer size="xs" />
-          <ThreatEuiFlexGroup threat={rule.threat} />
+          <MitreMappings threat={rule.threat} />
         </>
       )}
 
