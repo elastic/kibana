@@ -12,6 +12,7 @@ import { test, makeEsQueryRule, defineIndexThresholdRule, THRESHOLD_TEST_INDEX }
 
 const TEST_RUN_ID = Date.now();
 const STATEFUL_ALERTS_INDEX = '.internal.alerts-stack.alerts-default-000001';
+const COMBO_BOX_OPTION_TIMEOUT_MS = 30_000;
 
 const INDEX_THRESHOLD_DEFAULT_MESSAGE = `Rule {{rule.name}} is active for group {{context.group}}:
 
@@ -111,8 +112,10 @@ const selectComboBoxOption = async (page: ScoutPage, testSubj: string, value: st
   // Clicking opens the dropdown and triggers the async field-options fetch.
   // The search input stays disabled until that fetch completes; wait for it.
   await expect(searchInput).toBeEnabled({ timeout: 30_000 });
-  await searchInput.fill(value);
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
+  await searchInput.pressSequentially(value, { delay: 50 });
+  const option = page.locator(`.euiComboBoxOption[title="${value}"]`);
+  await option.waitFor({ state: 'visible', timeout: COMBO_BOX_OPTION_TIMEOUT_MS });
+  await option.click();
 };
 
 const selectComboBoxOptionIn = async (
@@ -126,8 +129,10 @@ const selectComboBoxOptionIn = async (
   await combo.locator('[data-test-subj="comboBoxInput"]').click();
   const searchInput = combo.locator('[data-test-subj="comboBoxSearchInput"]');
   await expect(searchInput).toBeEnabled({ timeout: 30_000 });
-  await searchInput.fill(value);
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
+  await searchInput.pressSequentially(value, { delay: 50 });
+  const option = page.locator(`.euiComboBoxOption[title="${value}"]`);
+  await option.waitFor({ state: 'visible', timeout: COMBO_BOX_OPTION_TIMEOUT_MS });
+  await option.click();
 };
 
 const addStructuredFilterCondition = async (
