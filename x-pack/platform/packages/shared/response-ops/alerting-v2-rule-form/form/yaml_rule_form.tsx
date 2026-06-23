@@ -154,7 +154,7 @@ export const YamlRuleForm = ({
   );
 
   const isReadOnly = isDisabled || isSubmitting;
-  const editorContainerRef = useRef<HTMLDivElement>(null);
+  const editorContainerRef = useRef<HTMLElement | null>(null);
   const availableEditorHeight = useFlyoutBodyAvailableHeight(editorContainerRef, fullHeight);
   const editorHeight = fullHeight
     ? availableEditorHeight > 0
@@ -204,7 +204,11 @@ export const YamlRuleForm = ({
         }
       >
         <EuiFormRow label={yamlRuleFormLabelWithHelp} fullWidth>
-          <div ref={fullHeight ? editorContainerRef : undefined}>{editor}</div>
+          <div
+            ref={fullHeight ? (editorContainerRef as React.RefObject<HTMLDivElement>) : undefined}
+          >
+            {editor}
+          </div>
         </EuiFormRow>
       </EuiForm>
     </>
@@ -213,7 +217,7 @@ export const YamlRuleForm = ({
   if (fullHeight) {
     return (
       <div
-        className="yamlRuleFormFullHeight"
+        data-test-subj="yamlRuleFormFullHeight"
         style={{
           display: 'flex',
           flexDirection: 'column',

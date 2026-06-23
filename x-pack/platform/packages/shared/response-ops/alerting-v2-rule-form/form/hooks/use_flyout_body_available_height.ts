@@ -8,6 +8,11 @@
 import type { RefObject } from 'react';
 import { useLayoutEffect, useState } from 'react';
 
+/**
+ * EUI-internal class names — not part of the public API. Verified against
+ * `@elastic/eui` 116.2.0. An EUI upgrade may change these selectors; if
+ * measurement returns 0 the editor falls back to a CSS clamp height.
+ */
 const FLYOUT_BODY_OVERFLOW_SELECTOR = '.euiFlyoutBody__overflow';
 const FLYOUT_BODY_CONTENT_SELECTOR = '.euiFlyoutBody__overflowContent';
 const PANEL_SELECTOR = '.euiPanel';
@@ -70,7 +75,6 @@ export const useFlyoutBodyAvailableHeight = (
     measure();
 
     const observer = new ResizeObserver(measure);
-    observer.observe(document.body);
     observer.observe(flyoutOverflow);
     observer.observe(el);
     if (overflowContent) {

@@ -816,14 +816,11 @@ export function ComposeDiscoverFlyout({
                 style={{ marginTop: 8 }}
               >
                 {uiState.yamlMode ? (
-                  <>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
-                        {YAML_MODE_BADGE_LABEL}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow />
-                  </>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
+                      {YAML_MODE_BADGE_LABEL}
+                    </EuiBadge>
+                  </EuiFlexItem>
                 ) : (
                   <EuiFlexItem grow>
                     <HorizontalMinimalStepper
