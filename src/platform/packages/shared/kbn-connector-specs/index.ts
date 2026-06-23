@@ -50,5 +50,4 @@ export type {
   CredentialAccessor,
   ClientRegistry,
   ClientTypeId,
-  MysqlPool,
 } from './src/lib/clients';

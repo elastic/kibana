@@ -10,8 +10,6 @@
 import type { McpClient } from '@kbn/mcp-client';
 import type { ClientTypeSpec } from './client_type_spec';
 import { mcpClientType } from './mcp_client_type';
-import type { MysqlPool } from './mysql_client_type';
-import { mysqlClientType } from './mysql_client_type';
 
 /**
  * Maps each client-type id in the registry to the client instance its `build()`
@@ -25,7 +23,6 @@ import { mysqlClientType } from './mysql_client_type';
  */
 export interface ClientRegistry {
   mcp: McpClient;
-  mysql: MysqlPool;
 }
 
 /** The set of valid client-type ids, derived from {@link ClientRegistry}. */
@@ -33,7 +30,6 @@ export type ClientTypeId = keyof ClientRegistry;
 
 export const clientTypes: Readonly<Record<ClientTypeId, ClientTypeSpec<unknown>>> = {
   mcp: mcpClientType,
-  mysql: mysqlClientType,
 };
 
 export type {
@@ -42,4 +38,3 @@ export type {
   ConnectorNetwork,
   CredentialAccessor,
 } from './client_type_spec';
-export type { MysqlPool } from './mysql_client_type';

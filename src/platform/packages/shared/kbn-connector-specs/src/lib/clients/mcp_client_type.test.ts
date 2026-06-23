@@ -8,7 +8,6 @@
  */
 
 import { mcpClientType } from './mcp_client_type';
-import { mysqlClientType } from './mysql_client_type';
 import { clientTypes } from '.';
 import { McpClient, McpConnectionError } from '@kbn/mcp-client';
 import type { FetchLike } from '@kbn/mcp-client';
@@ -28,15 +27,13 @@ describe('clientTypes registry', () => {
     expect((clientTypes as Record<string, unknown>).register).toBeUndefined();
   });
 
-  it('contains exactly { mcp, mysql }', () => {
-    expect(Object.keys(clientTypes).sort()).toEqual(['mcp', 'mysql']);
+  it('contains exactly { mcp }', () => {
+    expect(Object.keys(clientTypes).sort()).toEqual(['mcp']);
     expect(clientTypes.mcp).toBe(mcpClientType);
-    expect(clientTypes.mysql).toBe(mysqlClientType);
   });
 
   it('each entry id matches its registry key', () => {
     expect(clientTypes.mcp.id).toBe('mcp');
-    expect(clientTypes.mysql.id).toBe('mysql');
   });
 });
 

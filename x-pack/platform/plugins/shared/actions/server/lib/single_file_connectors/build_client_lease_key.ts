@@ -9,7 +9,7 @@
  * Pool key = one shared client instance per (connector instance, client type).
  *
  * - connectorId: execOptions.actionId (two saved connectors must not share a session).
- * - clientTypeId: registry slot ('mcp', future 'mysql', ...).
+ * - clientTypeId: registry slot ('mcp').
  * - ':shared': one pool entry per connector+type (not per sub-action). Per-user OAuth pool
  *   key isolation via profileUid is the deferred next term.
  */
