@@ -1221,7 +1221,7 @@ groups:
 
       - setting: xpack.alerting.alertsService.totalFieldsLimit
         description: |
-          Controls the Elasticsearch `index.mapping.total_fields.limit` applied to `.alerts-*` indices, their index templates, and component templates. The previous hardcoded limit was `2500`. You can raise this value above the current alert mapping field count to avoid the framework's reset-then-increase recovery loop against Elasticsearch. This is useful for large clusters with many rule types or custom alert fields that would otherwise cause mapping-update failures. The value must be between `2500` and `5000`.
+          Controls the Elasticsearch `index.mapping.total_fields.limit` applied to `.alerts-*` indices, their index templates, and component templates. You can raise this value above the current alert mapping field count to avoid the framework's reset-then-increase recovery loop against Elasticsearch. This is useful for large clusters with many rule types or custom alert fields that would otherwise cause mapping-update failures. The value must be between `2500` and `5000`. In previous versions where this setting didn't exist, the limit was fixed to `2500`.
         datatype: int
         default: 2800
         applies_to:
