@@ -9,31 +9,31 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { Assignees } from './assignees';
-import { TestProviders } from '../../../common/mock';
-import { useAttackDetailsContext } from '../context';
-import { useHeaderData } from '../hooks/use_header_data';
-import { useAttackAssigneesContextMenuItems } from '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
-import { useInvalidateFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
-import { useAttacksPrivileges } from '../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges';
-import { useLicense } from '../../../common/hooks/use_license';
-import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
-import { HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID } from '../constants/test_ids';
-
+import { TestProviders } from '../../../../common/mock';
+import { useAttackAssigneesContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
+import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useAttacksPrivileges } from '../../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import {
+  HEADER_ASSIGNEES_TEST_ID,
+  HEADER_ASSIGNEES_EMPTY_TEST_ID,
+  HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID,
+} from '../constants/test_ids';
 import {
   USERS_AVATARS_PANEL_TEST_ID,
   USER_AVATAR_ITEM_TEST_ID,
-} from '../../../common/components/user_profiles/test_ids';
+} from '../../../../common/components/user_profiles/test_ids';
+import type { DataTableRecord } from '@kbn/discover-utils';
 
-jest.mock('../context');
-jest.mock('../hooks/use_header_data');
 jest.mock(
-  '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items'
+  '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items'
 );
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries');
-jest.mock('../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges');
-jest.mock('../../../common/hooks/use_license');
-jest.mock('../../../common/hooks/use_upselling');
-jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
+jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
+jest.mock('../../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges');
+jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/hooks/use_upselling');
+jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
   useBulkGetUserProfiles: ({ uids }: { uids: Set<string> }) => ({
     data:
       uids.size > 0
@@ -48,14 +48,10 @@ jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles',
         : undefined,
   }),
 }));
-jest.mock('../../../common/components/empty_value', () => ({
+jest.mock('../../../../common/components/empty_value', () => ({
   getEmptyTagValue: () => '—',
 }));
 
-const mockUseAttackDetailsContext = useAttackDetailsContext as jest.MockedFunction<
-  typeof useAttackDetailsContext
->;
-const mockUseHeaderData = useHeaderData as jest.MockedFunction<typeof useHeaderData>;
 const mockUseAttackAssigneesContextMenuItems =
   useAttackAssigneesContextMenuItems as jest.MockedFunction<
     typeof useAttackAssigneesContextMenuItems
@@ -72,54 +68,39 @@ const mockUseUpsellingMessage = useUpsellingMessage as jest.MockedFunction<
   typeof useUpsellingMessage
 >;
 
-const mockRefetch = jest.fn();
 const mockInvalidateFindAttackDiscoveries = jest.fn();
-
-const defaultContext = {
-  attack: {
-    id: 'attack-123',
-    alertIds: [],
-    connectorId: 'connector-1',
-    connectorName: 'Test Connector',
-    detailsMarkdown: 'Details',
-    generationUuid: 'gen-uuid-123',
-    summaryMarkdown: 'Summary',
-    timestamp: '2024-01-01T00:00:00Z',
-    title: 'Test Attack',
-  },
-  attackId: 'attack-123',
-  refetch: mockRefetch,
-  indexName: 'test-index',
-  searchHit: { _index: 'test-index' },
-  browserFields: {},
-  getFieldsData: jest.fn(),
-  dataFormattedForFieldBrowser: [],
-  scopeId: 'test-scope-id',
-  isPreviewMode: false,
-} as ReturnType<typeof useAttackDetailsContext>;
-
-const defaultHeaderData = {
-  alertIds: ['alert-1', 'alert-2'],
-  assignees: ['uid-1'],
-} as ReturnType<typeof useHeaderData>;
 
 const defaultMenuItems = {
   items: [{ name: 'Manage assignees', panel: 2, key: 'manage' }],
   panels: [{ id: 2, title: 'Assignees', content: <div data-test-subj="assignees-panel" /> }],
 };
 
-const renderAssignees = () =>
+const buildHit = (
+  overrides: Record<string, unknown> = {},
+  rawOverrides: Record<string, unknown> = {}
+): DataTableRecord =>
+  ({
+    id: 'attack-123',
+    raw: { _id: 'attack-123', _index: '.alerts-security.alerts-default', ...rawOverrides },
+    flattened: {
+      _id: 'attack-123',
+      _index: '.alerts-security.alerts-default',
+      'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
+      'kibana.alert.workflow_assignee_ids': ['uid-1'],
+      ...overrides,
+    },
+  } as unknown as DataTableRecord);
+
+const renderAssignees = (hit = buildHit(), onAttackUpdated = jest.fn()) =>
   render(
     <TestProviders>
-      <Assignees />
+      <Assignees hit={hit} onAttackUpdated={onAttackUpdated} />
     </TestProviders>
   );
 
-describe('Assignees', () => {
+describe('<Assignees /> (v2)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAttackDetailsContext.mockReturnValue(defaultContext);
-    mockUseHeaderData.mockReturnValue(defaultHeaderData);
     mockUseAttackAssigneesContextMenuItems.mockReturnValue(defaultMenuItems);
     mockUseInvalidateFindAttackDiscoveries.mockReturnValue(mockInvalidateFindAttackDiscoveries);
     mockUseAttacksPrivileges.mockReturnValue({
@@ -148,25 +129,23 @@ describe('Assignees', () => {
         telemetrySource: 'attacks_page_flyout_header',
       })
     );
-    const call = mockUseAttackAssigneesContextMenuItems.mock.calls[0][0];
-    expect(call.onSuccess).toBeDefined();
-    expect(typeof call.closePopover).toBe('function');
   });
 
-  it('onSuccess calls refetch and invalidateFindAttackDiscoveries', () => {
+  it('onSuccess calls onAttackUpdated and invalidateFindAttackDiscoveries', () => {
+    const onAttackUpdated = jest.fn();
     let capturedOnSuccess: (() => void) | undefined;
     mockUseAttackAssigneesContextMenuItems.mockImplementation((args) => {
       capturedOnSuccess = args.onSuccess;
       return defaultMenuItems;
     });
 
-    renderAssignees();
+    renderAssignees(buildHit(), onAttackUpdated);
     expect(capturedOnSuccess).toBeDefined();
 
     capturedOnSuccess!();
 
-    expect(mockRefetch).toHaveBeenCalled();
-    expect(mockInvalidateFindAttackDiscoveries).toHaveBeenCalled();
+    expect(onAttackUpdated).toHaveBeenCalledTimes(1);
+    expect(mockInvalidateFindAttackDiscoveries).toHaveBeenCalledTimes(1);
   });
 
   it('renders empty state when user has no permission', () => {
@@ -178,11 +157,9 @@ describe('Assignees', () => {
 
     renderAssignees();
 
-    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toBeInTheDocument();
-    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toHaveTextContent(
-      '—'
-    );
-    expect(screen.queryByTestId('attack-details-flyout-header-assignees')).not.toBeInTheDocument();
+    expect(screen.getByTestId(HEADER_ASSIGNEES_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(HEADER_ASSIGNEES_EMPTY_TEST_ID)).toHaveTextContent('—');
+    expect(screen.queryByTestId(HEADER_ASSIGNEES_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders empty state when not platinum plus', () => {
@@ -192,19 +169,17 @@ describe('Assignees', () => {
 
     renderAssignees();
 
-    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toBeInTheDocument();
-    expect(screen.queryByTestId('attack-details-flyout-header-assignees')).not.toBeInTheDocument();
+    expect(screen.getByTestId(HEADER_ASSIGNEES_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(HEADER_ASSIGNEES_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders assignees block with add button and popover when has permission', () => {
     renderAssignees();
 
-    expect(screen.getByTestId('attack-details-flyout-header-assignees')).toBeInTheDocument();
+    expect(screen.getByTestId(HEADER_ASSIGNEES_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();
-    expect(
-      screen.getByTestId('attack-details-flyout-header-assignees-popover')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('attack-flyout-v2-header-assignees-popover')).toBeInTheDocument();
   });
 
   it('renders avatars when assignees are provided and user profiles loaded', () => {
@@ -215,14 +190,9 @@ describe('Assignees', () => {
   });
 
   it('does not render avatars when assignees is empty', () => {
-    mockUseHeaderData.mockReturnValue({
-      ...defaultHeaderData,
-      assignees: [],
-    });
+    renderAssignees(buildHit({ 'kibana.alert.workflow_assignee_ids': [] }));
 
-    renderAssignees();
-
-    expect(screen.getByTestId('attack-details-flyout-header-assignees')).toBeInTheDocument();
+    expect(screen.getByTestId(HEADER_ASSIGNEES_TEST_ID)).toBeInTheDocument();
     expect(screen.queryByTestId(USERS_AVATARS_PANEL_TEST_ID)).not.toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
   });
@@ -236,17 +206,43 @@ describe('Assignees', () => {
 
     renderAssignees();
 
-    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toBeInTheDocument();
+    expect(screen.getByTestId(HEADER_ASSIGNEES_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
   it('disables the add button for a remote/CCS index', () => {
-    mockUseAttackDetailsContext.mockReturnValue({
-      ...defaultContext,
-      indexName: 'remote-cluster:.alerts-security.alerts-default',
-    });
-
-    renderAssignees();
+    renderAssignees(buildHit({}, { _index: 'remote-cluster:.alerts-security.alerts-default' }));
 
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
+  });
+
+  it('does not crash when flattened._index is missing (reads from raw._index)', () => {
+    const hit = {
+      id: 'attack-123',
+      raw: { _id: 'attack-123', _index: '.alerts-security.alerts-default' },
+      flattened: {
+        'kibana.alert.attack_discovery.alert_ids': ['alert-1'],
+        'kibana.alert.workflow_assignee_ids': ['uid-1'],
+      },
+    } as unknown as DataTableRecord;
+
+    renderAssignees(hit);
+
+    expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();
+  });
+
+  it('deduplicates alert ids from hit', () => {
+    renderAssignees(
+      buildHit({ 'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-1', 'alert-2'] })
+    );
+
+    expect(mockUseAttackAssigneesContextMenuItems).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attacksWithAssignees: [
+          expect.objectContaining({
+            relatedAlertIds: ['alert-1', 'alert-2'],
+          }),
+        ],
+      })
+    );
   });
 });
