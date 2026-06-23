@@ -474,53 +474,56 @@ export const AlertEpisodesListPage = () => {
               `}
             >
               <CellActionsProvider
-            getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
-          >
-            <EuiScreenReaderOnly>
-              <span id="alertingEpisodesTableAriaLabel">{i18n.EPISODES_LIST_TABLE_ARIA_LABEL}</span>
-            </EuiScreenReaderOnly>
-            {!dataView ? (
-              <EuiLoadingSpinner />
-            ) : (
-              <UnifiedDataTable
-                ariaLabelledBy="alertingEpisodesTableAriaLabel"
-                settings={ALERT_EPISODES_TABLE_SETTINGS}
-                css={getTableCss(euiTheme)}
-                gridStyleOverride={{
-                  stripes: false,
-                  cellPadding: 'l',
-                }}
-                dataView={dataView}
-                columns={columns}
-                onSetColumns={onSetColumns}
-                canDragAndDropColumns
-                showTimeCol={!!dataView.timeFieldName}
-                customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
-                externalCustomRenderers={externalCustomRenderers}
-                rows={rows}
-                totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
-                loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-                isPaginationEnabled
-                paginationMode="singlePage"
-                sampleSizeState={PAGE_SIZE}
-                isSortEnabled
-                sort={sort}
-                onSort={onSort}
-                rowHeightState={rowHeight}
-                onUpdateRowHeight={setRowHeight}
-                configRowHeight={rowHeight}
-                customBulkActions={customBulkActions}
-                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-                visibleRowLeadingControls={3}
-                enableComparisonMode={false}
-                services={services}
-                expandedDoc={expandedDoc}
-                setExpandedDoc={setExpandedDoc}
-                renderDocumentView={renderDocumentView}
-                renderCustomToolbar={renderCustomToolbar}
-              />
-            )}
-          </CellActionsProvider></EuiFlexItem>
+                getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+              >
+                <EuiScreenReaderOnly>
+                  <span id="alertingEpisodesTableAriaLabel">
+                    {i18n.EPISODES_LIST_TABLE_ARIA_LABEL}
+                  </span>
+                </EuiScreenReaderOnly>
+                {!dataView ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  <UnifiedDataTable
+                    ariaLabelledBy="alertingEpisodesTableAriaLabel"
+                    settings={ALERT_EPISODES_TABLE_SETTINGS}
+                    css={getTableCss(euiTheme)}
+                    gridStyleOverride={{
+                      stripes: false,
+                      cellPadding: 'l',
+                    }}
+                    dataView={dataView}
+                    columns={columns}
+                    onSetColumns={onSetColumns}
+                    canDragAndDropColumns
+                    showTimeCol={!!dataView.timeFieldName}
+                    customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
+                    externalCustomRenderers={externalCustomRenderers}
+                    rows={rows}
+                    totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
+                    loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+                    isPaginationEnabled
+                    paginationMode="singlePage"
+                    sampleSizeState={PAGE_SIZE}
+                    isSortEnabled
+                    sort={sort}
+                    onSort={onSort}
+                    rowHeightState={rowHeight}
+                    onUpdateRowHeight={setRowHeight}
+                    configRowHeight={rowHeight}
+                    customBulkActions={customBulkActions}
+                    rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                    visibleRowLeadingControls={3}
+                    enableComparisonMode={false}
+                    services={services}
+                    expandedDoc={expandedDoc}
+                    setExpandedDoc={setExpandedDoc}
+                    renderDocumentView={renderDocumentView}
+                    renderCustomToolbar={renderCustomToolbar}
+                  />
+                )}
+              </CellActionsProvider>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
