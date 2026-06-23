@@ -798,11 +798,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 260,
+            value: 300,
           },
           y: {
             unit: 'pixels',
-            value: 130,
+            value: 160,
           },
         },
       },
