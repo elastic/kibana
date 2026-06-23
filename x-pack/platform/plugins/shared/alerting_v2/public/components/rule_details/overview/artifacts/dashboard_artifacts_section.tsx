@@ -68,60 +68,38 @@ const DashboardRowActions = ({
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
     {href ? (
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
+        <EuiButtonIcon
+          iconType="external"
+          color="text"
+          href={href}
+          target="_blank"
+          aria-label={i18n.translate(
             'xpack.alertingV2.ruleDetails.artifacts.dashboards.openDashboardAriaLabel',
             {
               defaultMessage: 'Open dashboard {dashboardTitle}',
               values: { dashboardTitle },
             }
           )}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="popOut"
-            color="text"
-            href={href}
-            target="_blank"
-            aria-label={i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.dashboards.openDashboardAriaLabel',
-              {
-                defaultMessage: 'Open dashboard {dashboardTitle}',
-                values: { dashboardTitle },
-              }
-            )}
-            data-test-subj={`ruleDashboardArtifactOpenLink-${dashboardId}`}
-          />
-        </EuiToolTip>
+          data-test-subj={`ruleDashboardArtifactOpenLink-${dashboardId}`}
+        />
       </EuiFlexItem>
     ) : null}
     {artifactId ? (
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          aria-label={i18n.translate(
             'xpack.alertingV2.ruleDetails.artifacts.dashboards.deleteAriaLabel',
             {
               defaultMessage: 'Remove dashboard {dashboardTitle}',
               values: { dashboardTitle },
             }
           )}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.dashboards.deleteAriaLabel',
-              {
-                defaultMessage: 'Remove dashboard {dashboardTitle}',
-                values: { dashboardTitle },
-              }
-            )}
-            data-test-subj={`ruleDashboardArtifactDeleteButton-${dashboardId}`}
-            isDisabled={isDeleting}
-            onClick={() => onDelete(artifactId)}
-          />
-        </EuiToolTip>
+          data-test-subj={`ruleDashboardArtifactDeleteButton-${dashboardId}`}
+          isDisabled={isDeleting}
+          onClick={() => onDelete(artifactId)}
+        />
       </EuiFlexItem>
     ) : null}
   </EuiFlexGroup>
@@ -222,7 +200,7 @@ const DashboardsSubsectionHeader = ({ onAdd }: { onAdd: () => void }) => (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="dashboardApp" size="m" />
+          <EuiIcon type="dashboardApp" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -339,7 +317,7 @@ export const DashboardArtifactsSection: React.FC = () => {
         paddingSize="m"
         initialIsOpen
       >
-        <div data-test-subj="ruleDashboardArtifactsSection">
+        <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleDashboardArtifactsSection">
           <DashboardsSubsectionHeader onAdd={handleEdit} />
           <EuiSpacer size="m" />
 
@@ -429,7 +407,7 @@ export const DashboardArtifactsSection: React.FC = () => {
               ))}
             </>
           ) : null}
-        </div>
+        </EuiPanel>
       </EuiAccordion>
 
       {artifactIdPendingDelete ? (
