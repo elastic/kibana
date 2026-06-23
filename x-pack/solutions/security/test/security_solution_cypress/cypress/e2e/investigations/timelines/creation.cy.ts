@@ -19,7 +19,6 @@ import {
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
 } from '../../../screens/timeline';
-import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
@@ -102,10 +101,6 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     // Saved
     cy.get(TIMELINE_STATUS).should('not.exist');
 
-    // Wait for any background saves (e.g. saved search object) to settle
-    // before typing in the KQL bar to avoid interfering with in-flight requests.
-    cy.get(LOADING_INDICATOR).should('not.exist');
-
     executeTimelineKQL('agent.name : *');
 
     // Saved but has unsaved changes
@@ -122,9 +117,6 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
 
     openTimelineUsingToggle();
     addNameToTimelineAndSave('First');
-
-    // Wait for any background saves (e.g. saved search object) to settle.
-    cy.get(LOADING_INDICATOR).should('not.exist');
 
     addNameToTimelineAndSaveAsNew('Second');
     closeTimeline();
