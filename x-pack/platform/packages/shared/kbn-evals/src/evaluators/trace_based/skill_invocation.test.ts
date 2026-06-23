@@ -64,6 +64,32 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
+    expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
+    expect(calledQuery).toContain('"skill\\":\\"data-exploration\\"');
+  });
+
+  it('should build a query that detects load_skill invocations', async () => {
+    const evaluator = createSkillInvocationEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      skillName: 'alert-analysis',
+    });
+
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [
+        { name: 'total_spans', type: 'long' },
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[50, 2, 1]],
+    });
+
+    await evaluateWith(evaluator, VALID_TRACE_ID);
+
+    const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
+    expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
+    expect(calledQuery).toContain('"skill\\":\\"alert-analysis\\"');
+    expect(calledQuery).toContain('*/alert-analysis/SKILL.md*');
   });
 
   it('should return 1 when the skill was invoked', async () => {

@@ -64,6 +64,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
               {
@@ -77,6 +78,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -103,6 +105,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -116,6 +119,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Semantic Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
               {
@@ -129,6 +133,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -142,6 +147,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -155,6 +161,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -168,6 +175,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -181,6 +189,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -194,6 +203,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
               {
@@ -207,6 +217,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -220,6 +231,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -233,6 +245,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.discover_rule_tags'],
                 },
               },
               {

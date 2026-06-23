@@ -12,6 +12,20 @@ import { createTraceBasedEvaluator } from './factory';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
+function buildSkillInvokedCaseExpression(skillName: string): string {
+  return `(
+      attributes.gen_ai.tool.name == "filestore.read"
+        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
+    ) OR (
+      attributes.gen_ai.tool.name == "load_skill"
+        AND (
+          attributes.gen_ai.tool.call.arguments LIKE "*\\"skill\\":\\"${skillName}\\"*"
+          OR attributes.gen_ai.tool.call.arguments LIKE "*\\"skill\\": \\"${skillName}\\"*"
+          OR attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
+        )
+    )`;
+}
+
 export function createSkillInvocationEvaluator({
   traceEsClient,
   log,
@@ -45,8 +59,7 @@ export function createSkillInvocationEvaluator({
   ),
   skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
+      ${buildSkillInvokedCaseExpression(skillName)},
       1,
       NULL
     )
