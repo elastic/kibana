@@ -500,6 +500,54 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
+    it('should create an alert with is-one-of filter for conditional action', async () => {
+      const alertName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(alertName);
+
+      // filterKuery validation
+      await testSubjects.setValue('filterKuery', 'group:');
+      const filterKueryInput = await testSubjects.find('filterKuery');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(true);
+      await testSubjects.setValue('filterKuery', 'group: group-0');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(false);
+
+      await testSubjects.click('ruleActionsAddActionButton');
+      await testSubjects.existOrFail('ruleActionsConnectorsModal');
+      await find.clickByButtonText('Slack#xyztest');
+
+      await find.clickByButtonText('Settings');
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
+
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await filterBar.addFilter({
+        field: 'kibana.alert.action_group',
+        operation: 'is one of',
+        value: ['a', 'b', 'c'],
+      });
+      await testSubjects.setValue('queryInput', '_id: *');
+
+      await testSubjects.click('rulePageFooterSaveButton');
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+
+      await testSubjects.click('ruleActionsButton');
+      await testSubjects.click('openEditRuleFlyoutButton');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await find.clickByButtonText('Settings');
+      await testSubjects.scrollIntoView('globalQueryBar');
+
+      expect(await filterBar.getFiltersLabel()).to.contain('kibana.alert.action_group: a, b, c');
+
+      const alertsToDeleteAfterSave = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDeleteAfterSave.map((alertItem: { id: string }) => alertItem.id));
+    });
+
     it('should create an alert with actions in multiple groups', async () => {
       const alertName = generateUniqueKey();
       await defineAlwaysFiringAlert(alertName);
