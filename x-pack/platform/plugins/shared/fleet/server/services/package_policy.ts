@@ -2800,9 +2800,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     omit(thisCallbackResponse, 'spaceIds')
                   );
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
-                  // Capture id before the callback so it can be re-injected after the
-                  // schema validation below strips it. This keeps id available to every
-                  // callback in the chain regardless of registration order.
+                  // id is stripped by the schema validation below; re-inject it so every
+                  // callback in the chain receives it regardless of registration order.
                   const packagePolicyId = (updatedNewData as UpdatePackagePolicyWithId).id;
                   thisCallbackResponse = await (callback as PutPackagePolicyUpdateCallback)(
                     updatedNewData as UpdatePackagePolicyWithId,
@@ -2827,10 +2826,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                       omit(input, ['compiled_input'])
                     ),
                   };
-                  updatedNewData = UpdatePackagePolicySchema.validate(omitted);
-                  if (packagePolicyId !== undefined) {
-                    updatedNewData = { ...updatedNewData, id: packagePolicyId };
-                  }
+                  updatedNewData = {
+                    ...UpdatePackagePolicySchema.validate(omitted),
+                    id: packagePolicyId,
+                  };
                 } else {
                   thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                     updatedNewData as NewPackagePolicy,

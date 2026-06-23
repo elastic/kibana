@@ -6,6 +6,7 @@
  */
 
 import type { Logger, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type {
   FleetStartContract,
   PostPackagePolicyCreateCallback,
@@ -222,7 +223,7 @@ export function onPackagePolicyUpdate({
       return decorated;
     }
 
-    let storedPolicy;
+    let storedPolicy: PackagePolicy | null | undefined;
     try {
       storedPolicy = await fleetPluginStart.packagePolicyService.get(
         savedObjectsClient,
@@ -241,6 +242,9 @@ export function onPackagePolicyUpdate({
       ? get(storedPolicy, SOURCE_MAP_API_KEY_PATH)
       : undefined;
 
+    // Both keys must be present to reuse them. If only one exists (e.g. a partial
+    // write failure), treat it as missing and mint a fresh pair — this may orphan
+    // the surviving key but guarantees the policy always has a consistent key pair.
     if (storedAgentConfigApiKey && storedSourceMapApiKey) {
       return getPackagePolicyWithApiKeys({
         packagePolicy: decorated,

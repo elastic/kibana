@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { get } from 'lodash';
 import {
   onPackagePolicyCreate,
@@ -222,6 +221,57 @@ describe('onPackagePolicyUpdate', () => {
     expect(
       coreStart.elasticsearch.client.asInternalUser.security.createApiKey
     ).toHaveBeenCalledTimes(2);
+  });
+
+  it('creates new api keys when the stored policy lookup throws', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger } = buildMocks();
+    fleetPluginStart.packagePolicyService.get.mockRejectedValue(new Error('SO not found'));
+
+    const cb = onPackagePolicyUpdate({ fleetPluginStart, getApmIndices, coreStart, logger });
+    const result = await cb(apmPackagePolicy as any, soClient, esClient);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('falling back to creating new keys')
+    );
+    expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
+    expect(get(result, SOURCE_MAP_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
+    expect(
+      coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+    ).toHaveBeenCalledTimes(2);
+  });
+
+  it('creates new api keys when the stored policy has only one key (partial pair)', async () => {
+    const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger } = buildMocks();
+    const partialKeyPolicy = {
+      ...apmPackagePolicy,
+      inputs: [
+        {
+          ...apmPackagePolicy.inputs[0],
+          config: {
+            'apm-server': {
+              value: {
+                agent: {
+                  config: {
+                    elasticsearch: { api_key: 'partial-agent-key-id:partial-agent-key-secret' },
+                  },
+                },
+                // source map key intentionally absent
+              },
+            },
+          },
+        },
+      ],
+    };
+    fleetPluginStart.packagePolicyService.get.mockResolvedValue(partialKeyPolicy);
+
+    const cb = onPackagePolicyUpdate({ fleetPluginStart, getApmIndices, coreStart, logger });
+    const result = await cb(apmPackagePolicy as any, soClient, esClient);
+
+    expect(
+      coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+    ).toHaveBeenCalledTimes(2);
+    expect(get(result, AGENT_CONFIG_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
+    expect(get(result, SOURCE_MAP_API_KEY_PATH)).toBe('new-key-id:new-key-secret');
   });
 
   it('does not fetch the stored policy when the incoming policy already has api keys', async () => {
