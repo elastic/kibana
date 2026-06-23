@@ -339,7 +339,7 @@ describe('export_exception_lists_and_items', () => {
 
         await exportExceptionListsAndItems(baseOptions);
 
-        const calls = (findExceptionListsItemsPointInTimeFinder as jest.Mock).mock.calls;
+        const { calls } = (findExceptionListsItemsPointInTimeFinder as jest.Mock).mock;
         for (const [callArgs] of calls) {
           expect(callArgs.listIds.length).toBeLessThanOrEqual(LIST_IDS_BATCH_SIZE);
         }
