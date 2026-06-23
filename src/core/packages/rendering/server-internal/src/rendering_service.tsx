@@ -13,9 +13,11 @@ import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } f
 import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { IUiSettingsClient, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
@@ -74,7 +76,13 @@ export class RenderingService {
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
   private userStorageStart?: UserStorageServiceStart;
-  constructor(private readonly coreContext: CoreContext) {}
+  private savedObjectsStart?: SavedObjectsServiceStart;
+  private uiSettingsStart?: UiSettingsServiceStart;
+  private defaultSpaceUiSettingsClient?: IUiSettingsClient;
+  private readonly logger: Logger;
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('rendering');
+  }
 
   public async preboot({
     http,
@@ -90,6 +98,7 @@ export class RenderingService {
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
           themeName$: this.themeName$,
+          getDefaultSpaceDarkMode: () => this.getDefaultSpaceDarkMode(),
         }),
       });
     });
@@ -126,6 +135,7 @@ export class RenderingService {
         auth: http.auth,
         themeName$: this.themeName$,
         userSettingsService: userSettings,
+        getDefaultSpaceDarkMode: () => this.getDefaultSpaceDarkMode(),
       }),
     });
 
@@ -143,8 +153,10 @@ export class RenderingService {
     };
   }
 
-  public start({ featureFlags, userStorage }: RenderingStartDeps) {
+  public start({ featureFlags, userStorage, savedObjects, uiSettings }: RenderingStartDeps) {
     this.userStorageStart = userStorage;
+    this.savedObjectsStart = savedObjects;
+    this.uiSettingsStart = uiSettings;
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
@@ -258,7 +270,14 @@ export class RenderingService {
     const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
 
     let darkMode: DarkModeValue;
-    if (userSettingDarkMode !== undefined && !isThemeOverridden) {
+    if (isAnonymousPage) {
+      // Anonymous pages have no user or space context, so fall back to the default space's
+      // `theme:darkMode`, resolved via an internal (unscoped) client to avoid a 403.
+      // See https://github.com/elastic/kibana/issues/127700.
+      darkMode =
+        (await this.getDefaultSpaceDarkMode()) ??
+        getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
+    } else if (userSettingDarkMode !== undefined && !isThemeOverridden) {
       darkMode = userSettingDarkMode;
     } else {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
@@ -416,12 +435,44 @@ export class RenderingService {
 
   public async stop() {}
 
+  /**
+   * Resolves the default space `theme:darkMode` for anonymous pages using an internal, unscoped
+   * client (the per-request client would 403 for unauthenticated users). Returns `undefined` when
+   * the start deps are unavailable (e.g. preboot) or the read fails, so callers fall back to the
+   * registered default. Only the theme value is read; no user settings are exposed to the page.
+   */
+  private async getDefaultSpaceDarkMode(): Promise<DarkModeValue | undefined> {
+    const { savedObjectsStart, uiSettingsStart } = this;
+    if (!savedObjectsStart || !uiSettingsStart) {
+      return undefined;
+    }
+
+    try {
+      this.defaultSpaceUiSettingsClient ??= uiSettingsStart.asScopedToClient(
+        savedObjectsStart.getUnsafeInternalClient()
+      );
+      const rawValue = await this.defaultSpaceUiSettingsClient.get<unknown>('theme:darkMode');
+      return parseDarkModeValue(rawValue);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to resolve the default space "theme:darkMode" setting for an anonymous page: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+  }
+
   private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
     const userStorage = this.userStorageStart;
-    if (!userStorage) return {};
+    if (!userStorage) {
+      return {};
+    }
 
     const client = userStorage.asScoped(request);
-    if (!client) return {};
+    if (!client) {
+      return {};
+    }
 
     return client.getForInjection();
   }
