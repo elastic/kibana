@@ -67,6 +67,15 @@ jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state
   useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
 }));
 
+const mockOpenPreviewPanel = jest.fn();
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({ openPreviewPanel: mockOpenPreviewPanel }),
+  useExpandableFlyoutState: () => ({}),
+  useExpandableFlyoutHistory: () => [],
+  ExpandableFlyout: () => null,
+}));
+
 const riskScore = {
   '@timestamp': '2021-08-19T16:00:00.000Z',
   user: {
@@ -942,5 +951,60 @@ describe('RiskInputsTab', () => {
     );
 
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('High Risk Vendors');
+  });
+});
+
+describe('RiskInputsTab - alert preview navigation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseStableExpandableFlyoutState.mockReturnValue({});
+    mockUseGetWatchlists.mockReturnValue({ data: [] });
+    mockUseResolutionGroup.mockReturnValue({ data: undefined });
+    mockUseRiskScore.mockReturnValue({ loading: false, error: false, data: [riskScore] });
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [alertInputDataMock],
+    });
+  });
+
+  it('invokes the provided openAlertPreview callback and not the legacy preview panel', () => {
+    const openAlertPreview = jest.fn();
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          scopeId="scopeId"
+          openAlertPreview={openAlertPreview}
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId(EXPAND_ALERT_TEST_ID));
+
+    expect(openAlertPreview).toHaveBeenCalledWith('test-id', 'test-index');
+    expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
+  });
+
+  it('falls back to opening the legacy preview panel when no callback is provided', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId="scopeId" />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId(EXPAND_ALERT_TEST_ID));
+
+    expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          id: 'test-id',
+          indexName: 'test-index',
+          scopeId: 'scopeId',
+          isPreviewMode: true,
+        }),
+      })
+    );
   });
 });

@@ -65,6 +65,11 @@ export interface RiskInputsTabProps<T extends EntityType> {
   entityName: string;
   scopeId: string;
   entityId?: string;
+  /**
+   * Navigates to the alert preview for a risk-input row. When omitted, the tab falls
+   * back to opening the legacy expandable-flyout preview panel.
+   */
+  openAlertPreview?: (id: string, indexName: string) => void;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -109,6 +114,7 @@ export const RiskInputsTab = <T extends EntityType>({
   entityName,
   scopeId,
   entityId,
+  openAlertPreview,
 }: RiskInputsTabProps<T>) => {
   const panels = useStableExpandableFlyoutState();
   const subTab = isRiskScoreFlyoutPanelProps(panels.left)
@@ -240,6 +246,7 @@ export const RiskInputsTab = <T extends EntityType>({
       refetchResolutionRiskScore={refetchResolutionRiskScore}
       resolutionGroup={resolutionGroup}
       watchlistNamesById={watchlistNamesById}
+      openAlertPreview={openAlertPreview}
     />
   );
 };
@@ -262,6 +269,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   refetchResolutionRiskScore: RiskScoreState<EntityType>['refetch'];
   resolutionGroup: ReturnType<typeof useResolutionGroup>['data'];
   watchlistNamesById: Map<string, string>;
+  openAlertPreview?: (id: string, indexName: string) => void;
 }
 
 const RiskInputsTabContent = <T extends EntityType>({
@@ -280,6 +288,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   refetchResolutionRiskScore,
   resolutionGroup,
   watchlistNamesById,
+  openAlertPreview: openAlertPreviewProp,
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
@@ -296,7 +305,7 @@ const RiskInputsTabContent = <T extends EntityType>({
       : RiskScoreLeftPanelSubTab.ENTITY;
   const selectedView = userSelectedView ?? defaultView;
 
-  const openAlertPreview = useCallback(
+  const defaultOpenAlertPreview = useCallback(
     (id: string, indexName: string) =>
       openPreviewPanel({
         id: DocumentDetailsPreviewPanelKey,
@@ -310,6 +319,8 @@ const RiskInputsTabContent = <T extends EntityType>({
       }),
     [openPreviewPanel, scopeId]
   );
+
+  const openAlertPreview = openAlertPreviewProp ?? defaultOpenAlertPreview;
 
   const isResolutionView =
     selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
@@ -368,7 +379,7 @@ const RiskInputsTabContent = <T extends EntityType>({
       {
         render: (data: InputAlert) => (
           <EuiToolTip
-            content={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.ariaLabel', {
+            content={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.tooltip', {
               defaultMessage: 'Preview alert with id {id}',
               values: { id: data._id },
             })}

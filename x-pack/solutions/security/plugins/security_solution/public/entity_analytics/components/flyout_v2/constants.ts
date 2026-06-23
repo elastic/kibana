@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
+export { RISK_INPUTS_TAB_QUERY_ID } from '../entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
