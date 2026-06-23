@@ -406,7 +406,7 @@ src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 packages/kbn-dependency-usage @elastic/kibana-security
-x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
+x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engineering
 src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
@@ -612,7 +612,7 @@ x-pack/platform/plugins/shared/licensing @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-presentation
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
-x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
+x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
@@ -717,9 +717,9 @@ x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 src/platform/test/common/plugins/otel_metrics @elastic/obs-presentation-team
-src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
-src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
-src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-engineering
+src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-engineering
+src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-engineering
 src/platform/packages/shared/kbn-opentelemetry-attributes @elastic/kibana-core
 src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 packages/kbn-optimizer @elastic/kibana-operations
@@ -891,30 +891,30 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-rule-management
+x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-investigations
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
-x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
-src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-hook-utils @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
-src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
-src/platform/packages/shared/kbn-securitysolution-io-ts-utils @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-list-api @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
-src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
+x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engineering
+src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-hook-utils @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engineering
+src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engineering
+src/platform/packages/shared/kbn-securitysolution-io-ts-utils @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-list-api @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engineering
+src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
 src/platform/packages/shared/kbn-server-http-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
@@ -1122,7 +1122,7 @@ src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 packages/kbn-yarn-install-scripts @elastic/kibana-operations @elastic/kibana-security
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
-src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-engineering
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
@@ -1656,7 +1656,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
-/.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
+/.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-engineering
 /.buildkite/pipeline-utils/scout/ @elastic/appex-qa
 /.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
@@ -2075,7 +2075,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/fixtures/es_archives/cases/signals/default @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/alerts_legacy/ @elastic/response-ops
-/x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engineering
 
 # Enterprise Search
 # search
@@ -2207,11 +2207,11 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/fixtures/es_archives/cases/signals/duplicate_ids @elastic/kibana-cases
 
 # Security Solution OpenAPI bundles
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_detections_api_* @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_detections_api_* @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_detections_api_* @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_detections_api_* @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
@@ -2243,7 +2243,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/security_solution_cypress/cypress/objects @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/screens/common @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/support @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detections-response @elastic/security-threat-hunting
 
@@ -2441,93 +2441,93 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 
 
 ## Security Solution shared OAS schemas
-/x-pack/solutions/security/plugins/security_solution/common/api/model @elastic/security-detection-rule-management @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/common/api/model @elastic/security-detection-engineering
 
 ## Security Solution sub teams - Detection Rule Management
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/fleet_integrations @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/common/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/fleet_integrations @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/rule_schema @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/detection_engine/prebuilt_rules @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-engineering
 
-/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-rule-management @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
-/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-rule-management
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-engineering
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-engineering
 
-/x-pack/solutions/security/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/common/components/popover_items @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/fleet_integrations @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/common/components/popover_items @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/fleet_integrations @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/endpoint_exceptions @elastic/security-defend-workflows
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_details_ui @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_details_ui @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/rules @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions @elastic/security-detection-engineering
 
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/fleet_integrations @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/fleet_integrations @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_schema @elastic/security-detection-engineering
 
-/x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-engineering
 
 ## Security Solution sub teams - Detection Engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_tags @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/index_management @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/alerts @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_exceptions @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_preview @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/cti @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/common/field_maps @elastic/security-detection-engine
-/x-pack/solutions/security/test/fixtures/es_archives/entity/risks @elastic/security-detection-engine
-/x-pack/solutions/security/test/fixtures/es_archives/entity/host_risk @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/value_list @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_tags @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/index_management @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/alerts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_exceptions @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_preview @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/cti @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/field_maps @elastic/security-detection-engineering
+/x-pack/solutions/security/test/fixtures/es_archives/entity/risks @elastic/security-detection-engineering
+/x-pack/solutions/security/test/fixtures/es_archives/entity/host_risk @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/value_list @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_gaps @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/exceptions @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_gaps @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/exceptions @elastic/security-detection-engineering
 
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engineering
 
-/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engineering
 
-/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
-/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
-/x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
-/x-pack/solutions/security/test/fixtures/es_archives/asset_criticality @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/usage/exceptions @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/server/usage/value_lists @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engineering
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engineering
+/x-pack/solutions/security/test/fixtures/es_archives/asset_criticality @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/usage/exceptions @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/usage/value_lists @elastic/security-detection-engineering
 
-/x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_exceptions.gen.ts @elastic/security-detection-engine
-/x-pack/solutions/security/packages/test-api-clients/supertest/exceptions.gen.ts @elastic/security-detection-engine
-/x-pack/solutions/security/packages/test-api-clients/supertest/lists.gen.ts @elastic/security-detection-engine
+/x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_exceptions.gen.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/test-api-clients/supertest/exceptions.gen.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/test-api-clients/supertest/lists.gen.ts @elastic/security-detection-engineering
 
 ## Security Threat Intelligence - Under Security Platform
-/x-pack/solutions/security/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engineering
 
 ## Security Solution sub teams - security-defend-workflows
 /x-pack/solutions/security/test/defend_workflows_cypress @elastic/security-defend-workflows
