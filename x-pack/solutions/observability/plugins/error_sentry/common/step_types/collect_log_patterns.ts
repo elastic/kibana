@@ -65,9 +65,9 @@ export const PatternSchema = z.object({
       'Stable short fingerprint of the pattern, suitable as a dedup marker (e.g. a case tag).'
     ),
   docCount: z.number().describe('Number of documents matching this pattern in the window.'),
-  severity: z
+  occurrenceLevel: z
     .enum(['low', 'medium', 'high', 'critical'])
-    .describe('Severity derived from the occurrence count (maps to case severity).'),
+    .describe('Occurrence frequency tier derived from docCount (low/medium/high/critical thresholds).'),
   sampleMessage: z.string().optional().describe('One representative message for the pattern.'),
 });
 

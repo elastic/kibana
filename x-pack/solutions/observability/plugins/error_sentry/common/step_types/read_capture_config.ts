@@ -17,6 +17,9 @@ export const ReadCaptureConfigInputSchema = z.object({});
 export const ReadCaptureConfigOutputSchema = z.object({
   index: z.string().describe('Log index or pattern to use for capture.'),
   categoryField: z.string().describe('Text field to use for categorize_text.'),
+  logLevels: z
+    .array(z.string())
+    .describe('Log levels to filter on, e.g. ["ERROR","FATAL","WARN"].'),
   configured: z
     .boolean()
     .describe('True if a saved configuration was found; false if built-in defaults were used.'),

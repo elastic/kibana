@@ -7,15 +7,15 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { ERROR_SENTRY_CAPTURE_WORKFLOW_ID } from '../../common/constants';
+import { ERROR_SENTRY_INTROSPECT_WORKFLOW_ID } from '../../common/constants';
 
-export const registerRunCaptureRoute = (
+export const registerRunIntrospectRoute = (
   router: IRouter,
   getServices: () => { managedClient: PluginScopedManagedWorkflowsApi }
 ) => {
   router.post(
     {
-      path: '/internal/error_sentry/run_capture',
+      path: '/internal/error_sentry/run_introspect',
       validate: false,
       security: {
         authz: { enabled: false, reason: 'Access is controlled by Kibana feature privileges' },
@@ -23,9 +23,9 @@ export const registerRunCaptureRoute = (
     },
     async (_context, request, response) => {
       const { managedClient } = getServices();
-      const executionId = await managedClient.execute(request, ERROR_SENTRY_CAPTURE_WORKFLOW_ID, {
+      const executionId = await managedClient.execute(request, ERROR_SENTRY_INTROSPECT_WORKFLOW_ID, {
         spaceId: request.spaceId ?? 'default',
-        triggeredBy: 'error-sentry-overview',
+        triggeredBy: 'error-sentry-setup',
       });
       return response.ok({ body: { executionId } });
     }

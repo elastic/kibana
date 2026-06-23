@@ -12,7 +12,7 @@ import { collectLogPatternsCommonDefinition } from '../../common/step_types/coll
 
 const LOG_LEVEL_FIELDS = ['log.level.keyword', 'log.level'] as const;
 
-const severityForCount = (docCount: number): 'low' | 'medium' | 'high' | 'critical' => {
+const occurrenceLevelForCount = (docCount: number): 'low' | 'medium' | 'high' | 'critical' => {
   if (docCount >= 10000) return 'critical';
   if (docCount >= 1000) return 'high';
   if (docCount >= 100) return 'medium';
@@ -106,7 +106,7 @@ export const collectLogPatternsStepDefinition = createServerStepDefinition({
           key,
           hash: createHash('sha256').update(key).digest('hex').slice(0, 12),
           docCount: bucket.doc_count,
-          severity: severityForCount(bucket.doc_count),
+          occurrenceLevel: occurrenceLevelForCount(bucket.doc_count),
           sampleMessage: typeof sampleMessage === 'string' ? sampleMessage : undefined,
         };
       })

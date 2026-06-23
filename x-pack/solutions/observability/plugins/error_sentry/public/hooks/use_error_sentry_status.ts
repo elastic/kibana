@@ -51,6 +51,17 @@ export const useErrorSentryStatus = (http: HttpSetup, discover?: DiscoverStart) 
     () => http.post<{ executionId: string }>('/internal/error_sentry/run_capture')
   );
 
+  const { mutateAsync: runIntrospect, isLoading: isRunningIntrospect } = useMutation(
+    ['errorSentry', 'runIntrospect'],
+    () => http.post<{ executionId: string }>('/internal/error_sentry/run_introspect'),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: ['errorSentry', 'captureConfig'] });
+      },
+    }
+  );
+
   const discoverLogSourceUrl = buildDiscoverEsqlUrl(discover, CAPTURE_LOG_INDEX_DEFAULT);
 
   return {
@@ -76,6 +87,8 @@ export const useErrorSentryStatus = (http: HttpSetup, discover?: DiscoverStart) 
     repair,
     runCapture,
     isRunningCapture,
+    runIntrospect,
+    isRunningIntrospect,
     refetch,
   };
 };

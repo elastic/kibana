@@ -12,11 +12,13 @@ import {
   CAPTURE_CONFIG_INDEX,
   CAPTURE_LOG_CATEGORY_FIELD_DEFAULT,
   CAPTURE_LOG_INDEX_DEFAULT,
+  CAPTURE_LOG_LEVELS_DEFAULT,
 } from '../../common/constants';
 
 interface CaptureConfigDoc {
   index: string;
   categoryField: string;
+  logLevels?: string[];
 }
 
 export const readCaptureConfigStepDefinition = createServerStepDefinition({
@@ -34,6 +36,7 @@ export const readCaptureConfigStepDefinition = createServerStepDefinition({
           output: {
             index: resp._source.index,
             categoryField: resp._source.categoryField,
+            logLevels: resp._source.logLevels ?? [...CAPTURE_LOG_LEVELS_DEFAULT],
             configured: true,
           },
         };
@@ -46,6 +49,7 @@ export const readCaptureConfigStepDefinition = createServerStepDefinition({
       output: {
         index: CAPTURE_LOG_INDEX_DEFAULT,
         categoryField: CAPTURE_LOG_CATEGORY_FIELD_DEFAULT,
+        logLevels: [...CAPTURE_LOG_LEVELS_DEFAULT],
         configured: false,
       },
     };

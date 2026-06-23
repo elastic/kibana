@@ -48,6 +48,8 @@ export const Page = ({
     install,
     runCapture,
     isRunningCapture,
+    runIntrospect,
+    isRunningIntrospect,
     repair,
     refetch,
     repairingId,
@@ -57,19 +59,38 @@ export const Page = ({
 
   const casesEnabled = allInstalled(components);
 
-  const [activeTab, setActiveTab] = useState<'setup' | 'overview'>('overview');
+  const [activeTab, setActiveTabState] = useState<'setup' | 'overview'>(() => {
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    return tab === 'setup' ? 'setup' : 'overview';
+  });
+
+  const setActiveTab = (tab: 'setup' | 'overview') => {
+    setActiveTabState(tab);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', tab);
+    window.history.replaceState(null, '', url.toString());
+  };
 
   const [isPolling, setIsPolling] = useState(false);
+  const [isPollingIntrospect, setIsPollingIntrospect] = useState(false);
   const pollingTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  // Track whether we've seen at least one active execution so we don't stop
+  const introspectTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  // Track whether we've seen at least one active capture execution so we don't stop
   // polling immediately on the first fetch (before the workflow even starts).
   const seenActiveRef = useRef(false);
 
   const { stats } = useCasesStats(http, isPolling);
-  const hasActiveExecutions = useActiveExecutions(http, isPolling);
+  const { hasActiveExecutions, introspectJustCompleted } = useActiveExecutions(
+    http,
+    isPolling,
+    isPollingIntrospect
+  );
 
   useEffect(() => {
-    return () => clearTimeout(pollingTimerRef.current);
+    return () => {
+      clearTimeout(pollingTimerRef.current);
+      clearTimeout(introspectTimerRef.current);
+    };
   }, []);
 
   // Track once we've seen the capture workflow actually running.
@@ -94,6 +115,18 @@ export const Page = ({
       clearTimeout(pollingTimerRef.current);
     }
   }, [stats, isPolling]);
+
+  // When the introspect workflow has a completed execution after our start time, show a toast.
+  useEffect(() => {
+    if (!isPollingIntrospect || !introspectJustCompleted) return;
+    setIsPollingIntrospect(false);
+    clearTimeout(introspectTimerRef.current);
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.errorSentry.setup.introspectComplete', {
+        defaultMessage: 'Log source detection complete.',
+      })
+    );
+  }, [isPollingIntrospect, introspectJustCompleted, notifications.toasts]);
 
   const handleInstall = async () => {
     try {
@@ -129,6 +162,27 @@ export const Page = ({
       notifications.toasts.addDanger(
         i18n.translate('xpack.errorSentry.overview.runCaptureFailed', {
           defaultMessage: 'Failed searching for error patterns. Please try again.',
+        })
+      );
+    }
+  };
+
+  const handleRunIntrospect = async () => {
+    try {
+      await runIntrospect();
+      setIsPollingIntrospect(true);
+      clearTimeout(introspectTimerRef.current);
+      // 2-minute fallback — introspect is fast but give it time.
+      introspectTimerRef.current = setTimeout(() => setIsPollingIntrospect(false), 120_000);
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.errorSentry.setup.introspectStarted', {
+          defaultMessage: 'Log source detection started…',
+        })
+      );
+    } catch {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.errorSentry.setup.introspectFailed', {
+          defaultMessage: 'Log source detection failed. Please try again.',
         })
       );
     }
@@ -268,6 +322,8 @@ export const Page = ({
                 repair={repair}
                 refetch={refetch}
                 repairingId={repairingId}
+                runIntrospect={handleRunIntrospect}
+                isRunningIntrospect={isPollingIntrospect}
               />
             )}
           </>

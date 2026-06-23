@@ -7,11 +7,12 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
-import { CAPTURE_LOG_INDEX_DEFAULT } from '../../common/constants';
+import { CAPTURE_LOG_INDEX_DEFAULT, CAPTURE_LOG_LEVELS_DEFAULT } from '../../common/constants';
 
 interface CaptureConfig {
   index: string;
   categoryField: string;
+  logLevels: string[];
 }
 
 export const useCaptureConfig = (http: HttpSetup) => {
@@ -22,5 +23,6 @@ export const useCaptureConfig = (http: HttpSetup) => {
   return {
     index: data?.index ?? CAPTURE_LOG_INDEX_DEFAULT,
     categoryField: data?.categoryField,
+    logLevels: data?.logLevels ?? [...CAPTURE_LOG_LEVELS_DEFAULT],
   };
 };

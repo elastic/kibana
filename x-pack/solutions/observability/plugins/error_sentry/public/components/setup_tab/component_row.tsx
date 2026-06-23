@@ -23,9 +23,10 @@ interface ComponentRowProps {
   component: ComponentStatus;
   onRepair: (id: string) => void;
   repairingId: string | null;
+  actions?: React.ReactNode;
 }
 
-export const ComponentRow = ({ component, onRepair, repairingId }: ComponentRowProps) => {
+export const ComponentRow = ({ component, onRepair, repairingId, actions }: ComponentRowProps) => {
   const isRepairing = repairingId === component.id;
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -49,6 +50,7 @@ export const ComponentRow = ({ component, onRepair, repairingId }: ComponentRowP
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          {actions}
           {component.repairable && (
             <EuiFlexItem grow={false}>
               <EuiButton

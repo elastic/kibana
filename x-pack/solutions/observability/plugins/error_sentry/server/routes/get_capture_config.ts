@@ -11,11 +11,13 @@ import {
   CAPTURE_CONFIG_INDEX,
   CAPTURE_LOG_CATEGORY_FIELD_DEFAULT,
   CAPTURE_LOG_INDEX_DEFAULT,
+  CAPTURE_LOG_LEVELS_DEFAULT,
 } from '../../common/constants';
 
 interface CaptureConfigDoc {
   index: string;
   categoryField: string;
+  logLevels?: string[];
 }
 
 export const registerGetCaptureConfigRoute = (router: IRouter) => {
@@ -37,7 +39,11 @@ export const registerGetCaptureConfigRoute = (router: IRouter) => {
         });
         if (resp.found && resp._source) {
           return response.ok({
-            body: { index: resp._source.index, categoryField: resp._source.categoryField },
+            body: {
+              index: resp._source.index,
+              categoryField: resp._source.categoryField,
+              logLevels: resp._source.logLevels ?? [...CAPTURE_LOG_LEVELS_DEFAULT],
+            },
           });
         }
       } catch {
@@ -45,7 +51,11 @@ export const registerGetCaptureConfigRoute = (router: IRouter) => {
       }
 
       return response.ok({
-        body: { index: CAPTURE_LOG_INDEX_DEFAULT, categoryField: CAPTURE_LOG_CATEGORY_FIELD_DEFAULT },
+        body: {
+          index: CAPTURE_LOG_INDEX_DEFAULT,
+          categoryField: CAPTURE_LOG_CATEGORY_FIELD_DEFAULT,
+          logLevels: [...CAPTURE_LOG_LEVELS_DEFAULT],
+        },
       });
     }
   );

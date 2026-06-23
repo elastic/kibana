@@ -32,6 +32,7 @@ import { registerGetActiveExecutionsRoute } from './routes/get_active_executions
 import { registerGetCaptureConfigRoute } from './routes/get_capture_config';
 import { registerInstallRoutes } from './routes/install';
 import { registerRunCaptureRoute } from './routes/run_capture';
+import { registerRunIntrospectRoute } from './routes/run_introspect';
 
 export interface ErrorSentryServerPluginSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -92,6 +93,12 @@ export class ErrorSentryServerPlugin
       return { managedClient: this.managedClient, agentBuilder: this.agentBuilderStart };
     });
     registerRunCaptureRoute(router, () => {
+      if (!this.managedClient) {
+        throw new Error('ErrorSentry managed client not yet available');
+      }
+      return { managedClient: this.managedClient };
+    });
+    registerRunIntrospectRoute(router, () => {
       if (!this.managedClient) {
         throw new Error('ErrorSentry managed client not yet available');
       }

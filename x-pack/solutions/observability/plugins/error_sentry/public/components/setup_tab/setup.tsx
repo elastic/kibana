@@ -8,6 +8,7 @@
 import React from 'react';
 import type { UseMutateAsyncFunction } from '@kbn/react-query';
 import {
+  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,6 +31,8 @@ export function Setup({
   repair,
   refetch,
   repairingId,
+  runIntrospect,
+  isRunningIntrospect,
 }: {
   components: ComponentStatus[];
   needsInstall: boolean;
@@ -38,6 +41,8 @@ export function Setup({
   repair: UseMutateAsyncFunction<unknown, unknown, string, unknown>;
   refetch: any;
   repairingId: string | null;
+  runIntrospect: () => Promise<unknown>;
+  isRunningIntrospect: boolean;
 }) {
   const handleRepair = async (componentId: string) => {
     try {
@@ -130,6 +135,24 @@ export function Setup({
                     component={component}
                     onRepair={handleRepair}
                     repairingId={repairingId}
+                    actions={
+                      component.id === 'log_source' ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            iconType="refresh"
+                            onClick={runIntrospect}
+                            isLoading={isRunningIntrospect}
+                            data-test-subj="errorSentryRunIntrospect"
+                          >
+                            <FormattedMessage
+                              id="xpack.errorSentry.setup.introspectLabel"
+                              defaultMessage="Run Introspection"
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      ) : undefined
+                    }
                   />
                 </React.Fragment>
               ))}

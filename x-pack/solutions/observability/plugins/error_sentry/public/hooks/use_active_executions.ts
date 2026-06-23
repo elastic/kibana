@@ -9,10 +9,20 @@ import { useEffect, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 
-export const useActiveExecutions = (http: HttpSetup, isPolling: boolean) => {
-  // Capture the ISO timestamp at the moment polling starts so the server
-  // only checks for executions that began after Run Now was clicked.
+interface ActiveExecutionsResponse {
+  hasActiveExecutions: boolean;
+  hasActiveIntrospectExecutions: boolean;
+  introspectJustCompleted: boolean;
+}
+
+export const useActiveExecutions = (
+  http: HttpSetup,
+  isPolling: boolean,
+  isPollingIntrospect: boolean
+) => {
   const sinceRef = useRef<string | null>(null);
+  const introspectSinceRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (isPolling && sinceRef.current === null) {
       sinceRef.current = new Date().toISOString();
@@ -21,16 +31,36 @@ export const useActiveExecutions = (http: HttpSetup, isPolling: boolean) => {
     }
   }, [isPolling]);
 
+  useEffect(() => {
+    if (isPollingIntrospect && introspectSinceRef.current === null) {
+      introspectSinceRef.current = new Date().toISOString();
+    } else if (!isPollingIntrospect) {
+      introspectSinceRef.current = null;
+    }
+  }, [isPollingIntrospect]);
+
+  const enabled = isPolling || isPollingIntrospect;
+
   const { data } = useQuery(
     ['errorSentry', 'activeExecutions'],
     ({ signal }) =>
-      http.get<{ hasActiveExecutions: boolean }>('/internal/error_sentry/active_executions', {
-        query: { since: sinceRef.current ?? new Date().toISOString() },
+      http.get<ActiveExecutionsResponse>('/internal/error_sentry/active_executions', {
+        query: {
+          since: sinceRef.current ?? new Date().toISOString(),
+          ...(introspectSinceRef.current ? { introspectSince: introspectSinceRef.current } : {}),
+        },
         signal,
       }),
-    { enabled: isPolling, refetchInterval: isPolling ? 3000 : false }
+    { enabled, refetchInterval: enabled ? 3000 : false }
   );
 
-  // Return false when not polling so callers don't stay stuck on the last stale value.
-  return isPolling ? (data?.hasActiveExecutions ?? false) : false;
+  return {
+    hasActiveExecutions: isPolling ? (data?.hasActiveExecutions ?? false) : false,
+    hasActiveIntrospectExecutions: isPollingIntrospect
+      ? (data?.hasActiveIntrospectExecutions ?? false)
+      : false,
+    introspectJustCompleted: isPollingIntrospect
+      ? (data?.introspectJustCompleted ?? false)
+      : false,
+  };
 };

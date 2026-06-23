@@ -23,6 +23,7 @@ export const CASES_OWNER = 'observability' as const;
 
 export const CAPTURE_LOG_INDEX_DEFAULT = 'logs.otel' as const;
 export const CAPTURE_LOG_CATEGORY_FIELD_DEFAULT = 'body.text' as const;
+export const CAPTURE_LOG_LEVELS_DEFAULT = ['ERROR', 'FATAL', 'WARN'] as const;
 export const CAPTURE_CONFIG_INDEX = '.error-sentry-config' as const;
 export const CAPTURE_CONFIG_DOC_ID = 'capture-config' as const;
 

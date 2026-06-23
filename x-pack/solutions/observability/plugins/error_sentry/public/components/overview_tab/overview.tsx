@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import errorSentryLogo from './error_sentry.png';
 import { css } from '@emotion/react';
+import type { Criteria } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -33,6 +33,7 @@ import { useCasesStats } from '../../hooks/use_cases_stats';
 import type { CaseItem } from '../../hooks/use_cases_stats';
 import { useCaptureTiming } from '../../hooks/use_capture_timing';
 import { useCaptureConfig } from '../../hooks/use_capture_config';
+import errorSentryLogo from './error_sentry.png';
 
 export const Overview = ({
   http,
@@ -205,9 +206,17 @@ export const Overview = ({
           <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
             <EuiFlexItem css={{ textAlign: 'right' }}>
               <EuiTitle>
-                <h2>Nothing to show yet</h2>
+                <h2>
+                  {i18n.translate('xpack.errorSentry.overview.h2.nothingToShowYetLabel', {
+                    defaultMessage: 'Nothing to show yet',
+                  })}
+                </h2>
               </EuiTitle>
-              <EuiText>If issues are found, they will show up here.</EuiText>
+              <EuiText>
+                {i18n.translate('xpack.errorSentry.overview.ifIssuesAreFoundTextLabel', {
+                  defaultMessage: 'If issues are found, they will show up here.',
+                })}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <img
@@ -224,18 +233,18 @@ export const Overview = ({
       {stats.recentCases.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          <EuiInMemoryTable
+          <EuiInMemoryTable<CaseItem>
             tableCaption="list of cases"
             items={stats.recentCases}
             itemId="id"
             columns={columns}
             tableLayout="auto"
             sorting={{ sort }}
-            onChange={({ sort: newSort }) => {
-              if (newSort) {
+            onChange={(criteria: Criteria<CaseItem>) => {
+              if (criteria.sort) {
                 setSort({
-                  field: newSort.field as keyof CaseItem,
-                  direction: newSort.direction,
+                  field: criteria.sort.field as keyof CaseItem,
+                  direction: criteria.sort.direction,
                 });
               }
             }}
