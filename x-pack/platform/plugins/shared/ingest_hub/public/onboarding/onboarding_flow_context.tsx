@@ -11,14 +11,14 @@ import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
 
-export interface ConnectStepState {
+export interface DeploySettingsStepState {
   connectorId?: string;
   staticKeys?: AwsStaticKeyCredentials;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
 
-export interface DeployStepState {
+export interface DeployAndDetectStepState {
   isDeploying: boolean;
   serviceStatuses: Record<string, ServiceChipState>;
   policyIdsByPackage: Record<string, string>;
@@ -27,7 +27,7 @@ export interface DeployStepState {
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
-interface PersistedConnectStep {
+interface PersistedDeploySettingsStep {
   connectorId?: string;
   authType?: 'identity_federation' | 'static_keys';
   accessKeyId?: string;
@@ -41,16 +41,23 @@ interface PersistedServicesStep {
   selectedServiceIds: string[];
 }
 
+interface PersistedDeployAndDetectStep {
+  serviceStatuses: Record<string, ServiceChipState>;
+  policyIdsByPackage: Record<string, string>;
+  failedPackages: string[];
+  deployErrors: Record<string, string>;
+}
+
 const DEFAULT_SELECTED_IDS: string[] = [];
 
 interface OnboardingFlowState {
-  connectStep: ConnectStepState;
+  deploySettingsStep: DeploySettingsStepState;
   setConnectorId: (id: string | undefined) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
-  deployStep: DeployStepState;
-  updateDeployStep: (update: Partial<DeployStepState>) => void;
+  deployAndDetectStep: DeployAndDetectStepState;
+  updateDeployAndDetectStep: (update: Partial<DeployAndDetectStepState>) => void;
   registerDeployHandler: (fn: (packageNames?: string[]) => void) => void;
   retryDeploy: (packageNames?: string[]) => void;
 }
@@ -58,10 +65,8 @@ interface OnboardingFlowState {
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
 
 export function OnboardingFlowProvider({ children }: { children: React.ReactNode }) {
-  const [persistedConnectStep, setPersistedConnectStep] = useSessionStorage<PersistedConnectStep>(
-    'onboarding.aws.connectStep',
-    {}
-  );
+  const [persistedDeploySettingsStep, setPersistedDeploySettingsStep] =
+    useSessionStorage<PersistedDeploySettingsStep>('onboarding.aws.deploySettingsStep', {});
 
   const [persistedServices, setPersistedServices] = useSessionStorage<PersistedServicesStep>(
     'onboarding.aws.servicesStep',
@@ -70,31 +75,32 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   // secret_access_key lives in memory only; access_key_id is restored from session storage.
   const [staticKeys, setStaticKeysState] = useState<AwsStaticKeyCredentials | undefined>(() =>
-    persistedConnectStep?.authType === 'static_keys' && persistedConnectStep.accessKeyId
-      ? { access_key_id: persistedConnectStep.accessKeyId, secret_access_key: '' }
+    persistedDeploySettingsStep?.authType === 'static_keys' &&
+    persistedDeploySettingsStep.accessKeyId
+      ? { access_key_id: persistedDeploySettingsStep.accessKeyId, secret_access_key: '' }
       : undefined
   );
 
   const setConnectorId = useCallback(
     (id: string | undefined) => {
       setStaticKeysState(undefined);
-      setPersistedConnectStep({
+      setPersistedDeploySettingsStep({
         connectorId: id,
         authType: id ? 'identity_federation' : undefined,
       });
     },
-    [setPersistedConnectStep]
+    [setPersistedDeploySettingsStep]
   );
 
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
-      setPersistedConnectStep({
+      setPersistedDeploySettingsStep({
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
-    [setPersistedConnectStep]
+    [setPersistedDeploySettingsStep]
   );
 
   const setSelectedServiceIds = useCallback(
@@ -104,25 +110,42 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [persistedServices, setPersistedServices]
   );
 
-  const [deployStep, setDeployStep] = useState<DeployStepState>({
-    isDeploying: false,
-    serviceStatuses: {},
-    policyIdsByPackage: {},
-    failedPackages: [],
-    deployErrors: {},
-  });
+  const [persistedDeployAndDetectStep, setPersistedDeployAndDetectStep] =
+    useSessionStorage<PersistedDeployAndDetectStep>('onboarding.aws.deployAndDetectStep', {
+      serviceStatuses: {},
+      policyIdsByPackage: {},
+      failedPackages: [],
+      deployErrors: {},
+    });
+
+  // isDeploying is intentionally not persisted — it resets to false on page reload
+  const [isDeploying, setIsDeploying] = useState(false);
 
   const deployHandlerRef = useRef<((packageNames?: string[]) => void) | null>(null);
 
-  const updateDeployStep = useCallback((update: Partial<DeployStepState>) => {
-    setDeployStep((prev) => ({
-      ...prev,
-      ...update,
-      serviceStatuses: { ...prev.serviceStatuses, ...update.serviceStatuses },
-      policyIdsByPackage: { ...prev.policyIdsByPackage, ...update.policyIdsByPackage },
-      deployErrors: { ...prev.deployErrors, ...update.deployErrors },
-    }));
-  }, []);
+  const updateDeployAndDetectStep = useCallback(
+    (update: Partial<DeployAndDetectStepState>) => {
+      if (update.isDeploying !== undefined) {
+        setIsDeploying(update.isDeploying);
+      }
+      const { isDeploying: _, ...rest } = update;
+      if (Object.keys(rest).length > 0) {
+        setPersistedDeployAndDetectStep({
+          serviceStatuses: {
+            ...persistedDeployAndDetectStep.serviceStatuses,
+            ...rest.serviceStatuses,
+          },
+          policyIdsByPackage: {
+            ...persistedDeployAndDetectStep.policyIdsByPackage,
+            ...rest.policyIdsByPackage,
+          },
+          failedPackages: rest.failedPackages ?? persistedDeployAndDetectStep.failedPackages,
+          deployErrors: { ...persistedDeployAndDetectStep.deployErrors, ...rest.deployErrors },
+        });
+      }
+    },
+    [persistedDeployAndDetectStep, setPersistedDeployAndDetectStep]
+  );
 
   const registerDeployHandler = useCallback((fn: (packageNames?: string[]) => void) => {
     deployHandlerRef.current = fn;
@@ -132,27 +155,32 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     deployHandlerRef.current?.(packageNames);
   }, []);
 
-  const connectStep: ConnectStepState = {
-    connectorId: persistedConnectStep?.connectorId,
-    staticKeys,
-  };
-
   const servicesStep: ServicesStepState = {
     selectedServiceIds: (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
       (id) => AWS_SERVICES_MAP.get(id)?.showInUI === true
     ),
   };
 
+  const deploySettingsStep: DeploySettingsStepState = {
+    connectorId: persistedDeploySettingsStep?.connectorId,
+    staticKeys,
+  };
+
+  const deployAndDetectStep: DeployAndDetectStepState = {
+    isDeploying,
+    ...persistedDeployAndDetectStep,
+  };
+
   return (
     <OnboardingFlowContext.Provider
       value={{
-        connectStep,
+        deploySettingsStep,
         setConnectorId,
         setStaticKeys,
         servicesStep,
         setSelectedServiceIds,
-        deployStep,
-        updateDeployStep,
+        deployAndDetectStep,
+        updateDeployAndDetectStep,
         registerDeployHandler,
         retryDeploy,
       }}

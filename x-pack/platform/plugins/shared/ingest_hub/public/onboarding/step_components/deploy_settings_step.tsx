@@ -26,7 +26,7 @@ interface DeploySettingsStepProps {
 
 export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { connectStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
+  const { deploySettingsStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const { handleDeploy } = useDeploy({ onContinue });
@@ -66,14 +66,14 @@ export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepPro
       >
         <LazyAwsConnectSetup
           cloud={services.cloud as CloudSetupForCloudConnector | undefined}
-          initialConnectorId={connectStep.connectorId}
-          initialStaticKeys={connectStep.staticKeys}
+          initialConnectorId={deploySettingsStep.connectorId}
+          initialStaticKeys={deploySettingsStep.staticKeys}
           showIdentityFederation={showIdentityFederation}
           staticKeysContent={staticKeysContent}
           onContinue={() => handleDeploy()}
           continueButtonLabel={
             <FormattedMessage
-              id="xpack.ingestHub.deploySettingsStep.nextButton"
+              id="xpack.ingestHub.deploySettingsStep.continueButton"
               defaultMessage="Deploy"
             />
           }

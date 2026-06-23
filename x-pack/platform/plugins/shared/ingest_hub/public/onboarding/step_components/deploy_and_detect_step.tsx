@@ -37,8 +37,8 @@ interface DeployAndDetectStepProps {
 }
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
-  const { deployStep, retryDeploy } = useOnboardingFlow();
-  const { isDeploying, serviceStatuses, failedPackages, deployErrors } = deployStep;
+  const { deployAndDetectStep, retryDeploy } = useOnboardingFlow();
+  const { isDeploying, serviceStatuses, failedPackages, deployErrors } = deployAndDetectStep;
 
   const hasStarted = Object.keys(serviceStatuses).length > 0;
   const allSucceeded = hasStarted && !isDeploying && failedPackages.length === 0;
@@ -136,7 +136,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
           <EuiButton fill onClick={onContinue} data-test-subj="deployAndDetectStep-continueButton">
             <FormattedMessage
               id="xpack.ingestHub.deployAndDetectStep.continueButton"
-              defaultMessage="Continue"
+              defaultMessage="AWS Overview"
             />
           </EuiButton>
         </>

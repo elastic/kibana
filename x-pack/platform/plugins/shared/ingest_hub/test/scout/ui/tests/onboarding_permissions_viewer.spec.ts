@@ -33,7 +33,7 @@ const navigateWithPermissionBearingServices = async (page: ScoutPage) => {
 };
 
 test.describe(
-  'Onboarding connect step IAM permissions viewer',
+  'Onboarding deploy settings step IAM permissions viewer',
   { tag: tags.stateful.classic },
   () => {
     test.beforeAll(async ({ apiServices, config }) => {

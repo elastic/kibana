@@ -319,26 +319,26 @@ function setupMocks({
   staticKeys = undefined as { access_key_id: string; secret_access_key: string } | undefined,
   globalRegion = 'us-east-1',
   pkgVersion = '2.0.0',
-  deployStep = {} as Record<string, unknown>,
+  deployAndDetectStep = {} as Record<string, unknown>,
 }: {
   selectedServiceIds?: string[];
   connectorId?: string;
   staticKeys?: { access_key_id: string; secret_access_key: string };
   globalRegion?: string;
   pkgVersion?: string;
-  deployStep?: Record<string, unknown>;
+  deployAndDetectStep?: Record<string, unknown>;
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
-    connectStep: { connectorId, staticKeys },
-    deployStep: {
+    deploySettingsStep: { connectorId, staticKeys },
+    deployAndDetectStep: {
       isDeploying: false,
       serviceStatuses: {},
       policyIdsByPackage: {},
       failedPackages: [],
-      ...deployStep,
+      ...deployAndDetectStep,
     },
-    updateDeployStep: jest.fn(),
+    updateDeployAndDetectStep: jest.fn(),
     registerDeployHandler: jest.fn(),
     retryDeploy: jest.fn(),
   });
@@ -499,7 +499,7 @@ describe('useDeploy', () => {
   it('navigates without resubmitting when all selected services are already deployed', async () => {
     setupMocks({
       selectedServiceIds: ['ec2_metrics'],
-      deployStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+      deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -515,7 +515,7 @@ describe('useDeploy', () => {
   it('navigates without resubmitting when deploy is in progress for all selected services', async () => {
     setupMocks({
       selectedServiceIds: ['ec2_metrics'],
-      deployStep: { isDeploying: true, serviceStatuses: { ec2_metrics: 'instantiating' } },
+      deployAndDetectStep: { isDeploying: true, serviceStatuses: { ec2_metrics: 'instantiating' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -532,7 +532,7 @@ describe('useDeploy', () => {
     // ec2_metrics already deployed; lambda is a new selection in the same package
     setupMocks({
       selectedServiceIds: ['ec2_metrics', 'lambda'],
-      deployStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+      deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -555,9 +555,9 @@ describe('useDeploy', () => {
       await result.current.handleDeploy();
     });
 
-    const updateDeployStep = mockUseOnboardingFlow.mock.results[0].value
-      .updateDeployStep as jest.Mock;
-    const initialUpdate = updateDeployStep.mock.calls[0][0];
+    const updateDeployAndDetectStep = mockUseOnboardingFlow.mock.results[0].value
+      .updateDeployAndDetectStep as jest.Mock;
+    const initialUpdate = updateDeployAndDetectStep.mock.calls[0][0];
 
     // Both services appear in the initial status update
     expect(initialUpdate.serviceStatuses.ec2_metrics).toBe('instantiating');

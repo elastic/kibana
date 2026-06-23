@@ -58,7 +58,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       );
     });
     await page.reload();
-    await expect(page.testSubj.locator('serviceSettingsStep-nextButton')).toBeDisabled();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
   });
 
   test('Continue enables once global region is set and no inline fields are required', async ({
@@ -81,7 +81,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     });
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsStep-nextButton')).toBeEnabled();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
   test('Continue is disabled when an inline required field is empty', async ({
@@ -107,11 +107,11 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     });
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsStep-nextButton')).toBeDisabled();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
 
     // Filling the bucket_arn enables Continue
     await page.getByPlaceholder('arn:aws:s3:::my-bucket').fill('arn:aws:s3:::my-cloudtrail-bucket');
-    await expect(page.testSubj.locator('serviceSettingsStep-nextButton')).toBeEnabled();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
   test('transport toggle swaps the inline required field', async ({ browserAuth, page }) => {

@@ -13,7 +13,7 @@ import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-p
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { ConnectStepState, ServiceChipState } from '../../onboarding_flow_context';
+import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
@@ -104,7 +104,7 @@ export function buildPackageInputs(
 
 function buildPackageVars(
   globalRegion: string,
-  staticKeys: ConnectStepState['staticKeys'],
+  staticKeys: DeploySettingsStepState['staticKeys'],
   pkgVarNames: Set<string>
 ): Record<string, string> | undefined {
   const vars: Record<string, string> = {};
@@ -127,12 +127,12 @@ async function deployPackage(
     namespace,
     globalRegion,
     storedServiceVars,
-    connectStep,
+    deploySettingsStep,
   }: {
     namespace: string;
     globalRegion: string;
     storedServiceVars: Record<string, ServiceVars>;
-    connectStep: ConnectStepState;
+    deploySettingsStep: DeploySettingsStepState;
   }
 ): Promise<PackageDeployOutcome> {
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
@@ -142,7 +142,7 @@ async function deployPackage(
     throw new Error(`Package ${packageName} is not installed`);
   }
 
-  const { connectorId, staticKeys } = connectStep;
+  const { connectorId, staticKeys } = deploySettingsStep;
   const inputs = buildPackageInputs(services, storedServiceVars, globalRegion);
 
   // Explicitly disable all package inputs not in our selection.
@@ -235,8 +235,13 @@ export function buildServiceStatuses(
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
-  const { servicesStep, connectStep, deployStep, updateDeployStep, registerDeployHandler } =
-    useOnboardingFlow();
+  const {
+    servicesStep,
+    deploySettingsStep,
+    deployAndDetectStep,
+    updateDeployAndDetectStep,
+    registerDeployHandler,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -290,13 +295,15 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // Only deploy packages that have at least one service not yet tracked in serviceStatuses.
         // This handles: back-navigation during deploy (skip), and adding new services (deploy them).
         targets = [...servicesByPackage.keys()].filter((pkg) =>
-          (servicesByPackage.get(pkg) ?? []).some((s) => !(s.id in deployStep.serviceStatuses))
+          (servicesByPackage.get(pkg) ?? []).some(
+            (s) => !(s.id in deployAndDetectStep.serviceStatuses)
+          )
         );
 
         // Non-agentless services (e.g. cloud_forwarder) are shown as gray chips but never deployed.
         const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
         for (const service of nonAgentlessServices) {
-          if (!(service.id in deployStep.serviceStatuses)) {
+          if (!(service.id in deployAndDetectStep.serviceStatuses)) {
             newNonAgentlessStatuses[service.id] = 'instantiating';
           }
         }
@@ -310,7 +317,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // mid-deploy sees them in serviceStatuses and won't resubmit.
         const initialStatuses = buildServiceStatuses(targets, [], servicesByPackage);
         if (targets.length > 0) setIsDeploying(true);
-        updateDeployStep({
+        updateDeployAndDetectStep({
           isDeploying: targets.length > 0,
           serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
         });
@@ -320,7 +327,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       } else {
         targets = packageNames;
         setIsDeploying(true);
-        updateDeployStep({ isDeploying: true });
+        updateDeployAndDetectStep({ isDeploying: true });
       }
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
@@ -332,7 +339,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             namespace,
             globalRegion,
             storedServiceVars,
-            connectStep,
+            deploySettingsStep,
           })
         )
       );
@@ -351,7 +358,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
       setIsDeploying(false);
       setFailedPackages(newFailed);
-      updateDeployStep({
+      updateDeployAndDetectStep({
         isDeploying: false,
         serviceStatuses: newServiceStatuses,
         policyIdsByPackage,
@@ -364,11 +371,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       servicesByPackage,
       nonAgentlessServices,
       serviceSettings,
-      connectStep,
+      deploySettingsStep,
       namespace,
       onContinue,
-      updateDeployStep,
-      deployStep.serviceStatuses,
+      updateDeployAndDetectStep,
+      deployAndDetectStep.serviceStatuses,
     ]
   );
 

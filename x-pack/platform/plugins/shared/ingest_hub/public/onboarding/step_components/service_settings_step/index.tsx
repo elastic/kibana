@@ -152,10 +152,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             fill
             onClick={handleNext}
             isDisabled={!isReady}
-            data-test-subj="serviceSettingsStep-nextButton"
+            data-test-subj="serviceSettingsStep-continueButton"
           >
             <FormattedMessage
-              id="xpack.ingestHub.serviceSettingsStep.nextButton"
+              id="xpack.ingestHub.serviceSettingsStep.continueButton"
               defaultMessage="Continue"
             />
           </EuiButton>

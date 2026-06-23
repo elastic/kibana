@@ -247,7 +247,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
             fill
             onClick={handleNext}
             isDisabled={!isReady}
-            data-test-subj="servicesStep-continueButton"
+            data-test-subj="servicesStep-nextButton"
           >
             <FormattedMessage
               id="xpack.ingestHub.servicesStep.continueButton"

@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
+test.describe('Onboarding deploy settings step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, config }) => {
     // The /internal/core/_settings route is only registered when
     // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
