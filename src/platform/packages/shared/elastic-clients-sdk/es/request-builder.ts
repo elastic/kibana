@@ -6,10 +6,14 @@
 import type { TransportRequestParams } from '@elastic/transport'
 import type { EsApiDefinition } from './types'
 import type { SchemaArgDefinition } from '../lib/schema-args'
-import type { RawJsonValue, ParsedResult } from '../factory'
+
+/** Minimal shape of a raw JSON value passed through from the CLI. */
+interface RawJsonValue {
+  raw: string
+}
 
 /**
- * Builds a `TransportRequestParams` object from an API definition, parsed CLI input,
+ * Builds a `TransportRequestParams` object from an API definition, a flat input map,
  * and the schema arg definitions extracted from `def.input`.
  *
  * Each `SchemaArgDefinition` carries a `foundIn` field that determines routing:
@@ -17,22 +21,20 @@ import type { RawJsonValue, ParsedResult } from '../factory'
  * - `"query"` → value is added to the querystring (key = `schemaKey`, the snake_case ES name)
  * - `"body"` or `undefined` → value is collected into the request body object
  *
- * All user input arrives in `parsed.input` keyed by `schemaKey` (the snake_case schema
- * key), so no key translation is needed between CLI flags and destination param names.
+ * Input keys must match the schema keys (snake_case ES names); no key translation is done.
  *
  * @param def - the API definition describing the endpoint
- * @param parsed - the CLI-parsed result; all API params live in `parsed.input`
+ * @param input - flat map of parameter values keyed by schema key
  * @param schemaArgs - arg definitions extracted from `def.input` at registration time
+ * @param rawBody - optional map of pre-serialized JSON values (from CLI JSON parsing)
  * @returns `TransportRequestParams` ready to pass to `transport.request()`
  */
 export function buildRequestParams (
   def: EsApiDefinition,
-  parsed: ParsedResult,
-  schemaArgs: SchemaArgDefinition[]
+  input: Record<string, unknown>,
+  schemaArgs: SchemaArgDefinition[],
+  rawBody: Record<string, RawJsonValue> = {}
 ): TransportRequestParams {
-  const input = (parsed.input ?? {}) as Record<string, unknown>
-  const rawBody = parsed.rawBodyValues ?? {}
-
   const path = interpolatePath(def.path, schemaArgs, input)
   const querystring = buildQuerystring(schemaArgs, input)
   const body = collectBody(schemaArgs, input, rawBody, def.path, def.bodyFormat)

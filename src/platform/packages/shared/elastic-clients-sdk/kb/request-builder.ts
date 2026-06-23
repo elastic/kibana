@@ -4,26 +4,27 @@
  */
 
 import type { KbApiDefinition } from './types'
-import type { ParsedResult } from '../factory'
 import type { KibanaRequestParams } from '../lib/kibana-client'
 
 /**
- * Builds a `KibanaRequestParams` object from an API definition and parsed CLI input.
+ * Builds a `KibanaRequestParams` object from an API definition and a flat input map.
  *
  * Routing:
  * - `pathParams` → interpolated into the URL path template
- * - `queryParams` → sent as querystring params
- * - `bodyParams` → collected into the JSON request body
+ * - `queryParams` → sent as querystring params, keyed by wire `name` (not `cliFlag`)
+ * - `bodyParams` → collected into the JSON request body, keyed by wire `name`
+ *
+ * When a param has a `cliFlag` distinct from `name`, the input is looked up by
+ * `cliFlag` but written to the request using the wire `name`.
  *
  * @param def - the API definition describing the Kibana endpoint
- * @param parsed - the CLI-parsed result; all API params live in `parsed.input`
+ * @param input - flat map of parameter values keyed by `cliFlag ?? name`
  * @returns `KibanaRequestParams` ready to pass to `KibanaClient.request()`
  */
 export function buildKibanaRequestParams (
   def: KbApiDefinition,
-  parsed: ParsedResult
+  input: Record<string, unknown>
 ): KibanaRequestParams {
-  const input = (parsed.input ?? {}) as Record<string, unknown>
 
   const path = interpolatePath(def, input)
   const querystring = buildQuerystring(def, input)

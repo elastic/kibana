@@ -23,12 +23,12 @@ export function resolveInput (
 export { extractSchemaArgs } from './lib/schema-args';
 export type { SchemaArgDefinition, FoundIn } from './lib/schema-args';
 
-export { buildRequestParams } from './api/build-request-params';
-export type { ApiRequestParams } from './api/build-request-params';
 export { esApiRegistry, kbApiRegistry } from './api/registry';
 export type {
   ApiRegistry,
   ApiRegistryMeta,
   ApiRegistryDefinition,
+  ApiRequest,
+  LoadedApi,
   ApiHttpMethod,
 } from './api/registry';

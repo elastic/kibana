@@ -51,7 +51,7 @@ export function createEsHandler (
   deps: EsHandlerDeps = defaultDeps
 ): (parsed: ParsedResult) => Promise<JsonValue> {
   return async (parsed: ParsedResult): Promise<JsonValue> => {
-    const params = deps.buildRequestParams(def, parsed, schemaArgs)
+    const params = deps.buildRequestParams(def, (parsed.input ?? {}) as Record<string, unknown>, schemaArgs, parsed.rawBodyValues)
 
     let transport
     try {

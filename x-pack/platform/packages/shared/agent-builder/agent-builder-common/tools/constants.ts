@@ -36,6 +36,10 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  // HTTP API tools (discover / man / exec pattern) – target selectable via tool param
+  apiDiscover: platformCoreTool('discover'),
+  apiManual: platformCoreTool('manual'),
+  apiExecute: platformCoreTool('execute'),
 } as const;
 
 /**
@@ -105,6 +109,9 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.apiDiscover,
+  platformCoreTools.apiManual,
+  platformCoreTools.apiExecute,
 ];
 
 /**

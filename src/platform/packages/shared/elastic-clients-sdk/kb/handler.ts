@@ -41,7 +41,7 @@ export function createKbHandler (
       return missingConfigError(err)
     }
 
-    const params = deps.buildKibanaRequestParams(def, parsed)
+    const params = deps.buildKibanaRequestParams(def, (parsed.input ?? {}) as Record<string, unknown>)
 
     try {
       const body = await client.request(params)

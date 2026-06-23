@@ -6,19 +6,34 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { resolveInput, extractSchemaArgs, buildRequestParams } from '@kbn/elastic-clients-sdk';
-import { API_REGISTRIES, targetSchema } from './registries';
+import type { TransportRequestParams } from '@elastic/transport';
+import type { ApiRequest } from '@kbn/elastic-clients-sdk';
+import { API_REGISTRIES, findApi, targetSchema } from './registries';
+
+/**
+ * Issues a Kibana HTTP API call on behalf of the current user.
+ *
+ * TODO: wire up the actual invocation. The scoped `request` from the tool handler
+ * context is passed through so the future implementation can perform the call with
+ * the current user's credentials and space. Until then this stub throws so callers
+ * surface a clear "not implemented" error rather than silently succeeding.
+ */
+const invokeKibanaApi = async (_request: KibanaRequest, _params: ApiRequest): Promise<unknown> => {
+  throw new Error('api_execute: Kibana HTTP API invocation is not yet implemented');
+};
 
 const executeSchema = z.object({
   target: targetSchema,
   api: z
     .string()
     .describe(
-      'The API identifier returned by the api_discover tool (e.g. "indices_create", "bulk", "cluster_health").'
+      'The API identifier returned by the api_discover tool, formed from the namespace and name ' +
+        '(e.g. "indices.create", "bulk", "cluster.health").'
     ),
   params: z
     .record(z.string(), z.unknown())
@@ -43,9 +58,9 @@ export const apiExecuteTool = (): BuiltinToolDefinition<typeof executeSchema> =>
 
 The response is the raw API response body.`,
     schema: executeSchema,
-    handler: async ({ target, api, params = {} }, { esClient, logger }) => {
+    handler: async ({ target, api, params = {} }, { esClient, request, logger }) => {
       const registry = API_REGISTRIES[target];
-      const meta = registry.manifest.find((m) => m.namespaceFile === api);
+      const meta = findApi(registry, api);
       if (meta == null) {
         return {
           results: [
@@ -56,9 +71,9 @@ The response is the raw API response body.`,
         };
       }
 
-      let def;
+      let loaded;
       try {
-        def = await registry.loadApi(meta);
+        loaded = await registry.loadApi(meta);
       } catch (err) {
         logger.error(`api_execute: failed to load API "${api}" (target=${target}): ${err}`);
         return {
@@ -72,37 +87,34 @@ The response is the raw API response body.`,
         };
       }
 
-      const schemaArgs = def.input != null ? extractSchemaArgs(resolveInput(def.input)) : [];
-      const requestParams = buildRequestParams(def, params, schemaArgs);
+      const apiRequest = loaded.buildRequest(params);
 
       logger.debug(
-        `api_execute: ${requestParams.method} ${requestParams.path} (target=${target}, api=${api})`
+        `api_execute: ${apiRequest.method} ${apiRequest.path} (target=${target}, api=${api})`
       );
 
       try {
-        const transportParams: {
-          method: string;
-          path: string;
-          querystring?: Record<string, unknown>;
+        let response: unknown;
 
-          body?: any;
+        if (target === 'kibana') {
+          response = await invokeKibanaApi(request, apiRequest);
+        } else {
+          const transportParams: TransportRequestParams = {
+            method: apiRequest.method,
+            path: apiRequest.path,
+          };
 
-          bulkBody?: any;
-        } = {
-          method: requestParams.method,
-          path: requestParams.path,
-        };
+          if (apiRequest.querystring != null) {
+            transportParams.querystring = apiRequest.querystring;
+          }
+          if (apiRequest.bulkBody != null) {
+            transportParams.bulkBody = apiRequest.bulkBody;
+          } else if (apiRequest.body !== undefined) {
+            transportParams.body = apiRequest.body;
+          }
 
-        if (requestParams.querystring != null) {
-          transportParams.querystring = requestParams.querystring;
+          response = await esClient.asCurrentUser.transport.request(transportParams);
         }
-        if (requestParams.bulkBody != null) {
-          transportParams.bulkBody = requestParams.bulkBody;
-        } else if (requestParams.body != null) {
-          transportParams.body = requestParams.body;
-        }
-
-        const response = await esClient.asCurrentUser.transport.request(transportParams);
 
         return {
           results: [
@@ -111,8 +123,8 @@ The response is the raw API response body.`,
               data: {
                 target,
                 api,
-                method: requestParams.method,
-                path: requestParams.path,
+                method: apiRequest.method,
+                path: apiRequest.path,
                 response,
               },
             },
@@ -125,7 +137,7 @@ The response is the raw API response body.`,
           results: [
             createErrorResult({
               message: `API request failed: ${message}`,
-              metadata: { target, api, method: requestParams.method, path: requestParams.path },
+              metadata: { target, api, method: apiRequest.method, path: apiRequest.path },
             }),
           ],
         };

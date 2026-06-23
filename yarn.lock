@@ -6691,6 +6691,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/elastic-clients-sdk@link:src/platform/packages/shared/elastic-clients-sdk":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elastic-console-plugin@link:x-pack/platform/plugins/shared/elastic_console":
   version "0.0.0"
   uid ""

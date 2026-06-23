@@ -12,14 +12,15 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveInput } from '@kbn/elastic-clients-sdk';
-import { API_REGISTRIES, targetSchema } from './registries';
+import { API_REGISTRIES, findApi, targetSchema } from './registries';
 
 const manualSchema = z.object({
   target: targetSchema,
   api: z
     .string()
     .describe(
-      'The API identifier returned by the api_discover tool (e.g. "indices_create", "bulk", "cluster_health").'
+      'The API identifier returned by the api_discover tool, formed from the namespace and name ' +
+        '(e.g. "indices.create", "bulk", "cluster.health").'
     ),
 });
 
@@ -52,7 +53,7 @@ Then call \`${platformCoreTools.apiExecute}\` with the same \`target\`, \`api\`,
     schema: manualSchema,
     handler: async ({ target, api }, { logger }) => {
       const registry = API_REGISTRIES[target];
-      const meta = registry.manifest.find((m) => m.namespaceFile === api);
+      const meta = findApi(registry, api);
       if (meta == null) {
         return {
           results: [
@@ -63,9 +64,9 @@ Then call \`${platformCoreTools.apiExecute}\` with the same \`target\`, \`api\`,
         };
       }
 
-      let def;
+      let loaded;
       try {
-        def = await registry.loadApi(meta);
+        loaded = await registry.loadApi(meta);
       } catch (err) {
         logger.error(`api_manual: failed to load API "${api}" (target=${target}): ${err}`);
         return {
@@ -79,11 +80,13 @@ Then call \`${platformCoreTools.apiExecute}\` with the same \`target\`, \`api\`,
         };
       }
 
+      const { definition } = loaded;
+
       let paramsYaml: string;
-      if (def.input == null) {
+      if (definition.input == null) {
         paramsYaml = '# This API has no parameters\n';
       } else {
-        const schema = resolveInput(def.input);
+        const schema = resolveInput(definition.input);
         const jsonSchema = zodToJsonSchema(schema);
 
         if (jsonSchema.properties != null && typeof jsonSchema.properties === 'object') {
@@ -115,9 +118,9 @@ Then call \`${platformCoreTools.apiExecute}\` with the same \`target\`, \`api\`,
             data: {
               target,
               api,
-              method: def.method,
-              path: def.path,
-              description: def.description,
+              method: definition.method,
+              path: definition.path,
+              description: definition.description,
               params_schema_yaml: paramsYaml,
             },
           },
