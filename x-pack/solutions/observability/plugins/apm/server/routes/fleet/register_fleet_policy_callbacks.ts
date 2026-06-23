@@ -200,6 +200,8 @@ export function onPackagePolicyUpdate({
       return packagePolicy;
     }
 
+    const { id: packagePolicyId } = packagePolicy;
+
     const { asInternalUser } = coreStart.elasticsearch.client;
     const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
     const apmIndices = await getApmIndices(savedObjectsClient);
@@ -220,19 +222,15 @@ export function onPackagePolicyUpdate({
       return decorated;
     }
 
-    if (!decorated.id) {
-      return decorated;
-    }
-
     let storedPolicy;
     try {
       storedPolicy = await fleetPluginStart.packagePolicyService.get(
         savedObjectsClient,
-        decorated.id
+        packagePolicyId
       );
     } catch (err) {
       logger.warn(
-        `Failed to get package policy ${decorated.id}, falling back to creating new keys: ${err}`
+        `Failed to get package policy ${packagePolicyId}, falling back to creating new keys: ${err}`
       );
     }
 
@@ -253,7 +251,7 @@ export function onPackagePolicyUpdate({
 
     return createAndInjectApiKeys({
       policy: decorated,
-      packagePolicyId: decorated.id,
+      packagePolicyId,
       coreStart,
       logger,
     });

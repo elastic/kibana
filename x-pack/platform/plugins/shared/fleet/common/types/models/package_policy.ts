@@ -123,6 +123,10 @@ export interface UpdatePackagePolicy extends NewPackagePolicy {
   version?: string;
 }
 
+export interface UpdatePackagePolicyWithId extends UpdatePackagePolicy {
+  id: string;
+}
+
 // SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;

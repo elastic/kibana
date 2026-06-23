@@ -121,6 +121,7 @@ import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema 
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicySOAttributes,
   DryRunPackagePolicy,
@@ -1861,7 +1862,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
     options: PackagePolicyClientBulkUpdateOptions = {}
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -2802,9 +2803,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   // Capture id before the callback so it can be re-injected after the
                   // schema validation below strips it. This keeps id available to every
                   // callback in the chain regardless of registration order.
-                  const packagePolicyId = (updatedNewData as UpdatePackagePolicy).id;
+                  const packagePolicyId = (updatedNewData as UpdatePackagePolicyWithId).id;
                   thisCallbackResponse = await (callback as PutPackagePolicyUpdateCallback)(
-                    updatedNewData as UpdatePackagePolicy,
+                    updatedNewData as UpdatePackagePolicyWithId,
                     soClient,
                     esClient,
                     context,
