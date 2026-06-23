@@ -77,6 +77,51 @@ button is present.
   and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
   single value applies to both the sides and the top because the section's padding is symmetric.)
 
+## Testing
+
+`AppHeader` reads chrome from context, so rendering it without a `ChromeServiceProvider` throws
+`"useChromeService must be used within a ChromeServiceProvider"`. Satisfy it one of two ways:
+
+**Provide chrome in your harness** — best when a suite already has a shared render wrapper:
+
+```tsx
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core/public/mocks';
+
+<ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+  {/* ...rest of your harness... */}
+</ChromeServiceProvider>;
+```
+
+**Mock the package** — best for a one-off test that can't reach a shared harness:
+
+```ts
+jest.mock('@kbn/app-header', () => jest.requireActual('@kbn/app-header/mocks').mockAppHeaderModule());
+```
+
+`mockAppHeaderModule()` renders the **real** `AppHeader`/`AppHeaderView` wrapped in mock chrome, so the
+genuine DOM and test subjects are produced; every other export is preserved. (`MockAppHeader` /
+`MockAppHeaderView` are also exported directly.)
+
+Assert against `APP_HEADER_TEST_SUBJECTS` (from the package root) so component and test can't drift:
+
+```ts
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+
+expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My app');
+```
+
+Menu items — including the header's own documentation/feedback/integrations — collapse into the app
+menu overflow popover at narrow widths (the default in jsdom). Open it with the helper from
+`@kbn/app-header/test_helpers` before querying those items:
+
+```ts
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
+await openAppMenuOverflow();
+expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+```
+
 ## Chrome Next flag and runtime checks
 
 Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to
