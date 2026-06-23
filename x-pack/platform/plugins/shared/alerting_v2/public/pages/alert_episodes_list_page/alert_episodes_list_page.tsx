@@ -38,6 +38,7 @@ import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hook
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeStatusCell,
@@ -94,12 +95,14 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 
   & .euiDataGridRowCell__content {
     display: flex;
+  }
+
+  & .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--autoHeight) {
     block-size: 100%;
   }
 
   & .euiDataGridRowCell[data-gridcell-column-id='select'] .euiDataGridRowCell__content {
     justify-content: flex-start;
-    height: 100%;
   }
 
   &
@@ -213,7 +216,9 @@ export const AlertEpisodesListPage = () => {
             share: services.share,
             capabilities: services.application.capabilities,
             uiSettings: services.uiSettings,
-            ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
+            ruleEsql: rulesCache[ruleId]?.query
+              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+              : undefined,
             episodeIsoTimestamp,
           }),
       }),
