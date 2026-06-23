@@ -14,11 +14,11 @@ import {
   mapWorkflowHistoryItemToDetail,
   mapWorkflowHistoryItemToListItem,
 } from './map_workflow_history_item';
-import {
-  WORKFLOW_CHANGE_HISTORY_INTERNAL_API_VERSION,
-  WORKFLOW_CHANGE_HISTORY_LIST_PATH,
-} from '../../../common/lib/workflow_change_history/constants';
+import { INTERNAL_API_VERSION } from '../../../common/lib/api_constants';
+import { WORKFLOW_CHANGE_HISTORY_LIST_PATH } from '../../../common/lib/workflow_change_history/constants';
 import type { WorkflowChangesHistoryResponse } from '../../../common/lib/workflow_change_history/types';
+
+const toCacheKey = (objectId: string, changeId: string): string => `${objectId}:${changeId}`;
 
 export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHistoryAdapter => {
   const changeCache = new Map<string, ChangeHistoryDetail>();
@@ -36,7 +36,7 @@ export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHisto
             page: page.index + 1,
             per_page: page.size,
           },
-          version: WORKFLOW_CHANGE_HISTORY_INTERNAL_API_VERSION,
+          version: INTERNAL_API_VERSION,
           signal,
         }
       );
@@ -44,7 +44,10 @@ export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHisto
       const items = response.items.map((item, index) => {
         const isCurrent = page.index === 0 && index === 0;
         const listItem = mapWorkflowHistoryItemToListItem(item, { isCurrent });
-        changeCache.set(item.id, mapWorkflowHistoryItemToDetail(item, { isCurrent }));
+        changeCache.set(
+          toCacheKey(objectId, item.id),
+          mapWorkflowHistoryItemToDetail(item, { isCurrent })
+        );
         return listItem;
       });
 
@@ -54,8 +57,8 @@ export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHisto
       };
     },
 
-    getChange: async ({ changeId }) => {
-      const cached = changeCache.get(changeId);
+    getChange: async ({ objectId, changeId }) => {
+      const cached = changeCache.get(toCacheKey(objectId, changeId));
 
       if (!cached) {
         throw new Error(

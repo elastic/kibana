@@ -66,6 +66,13 @@ export const TRIGGER_LABEL = i18n.translate('xpack.changeHistoryUi.modal.trigger
   defaultMessage: 'Change history',
 });
 
+export const HISTORY_LIST_ITEM_LABEL = i18n.translate(
+  'xpack.changeHistoryUi.modal.historyListItemLabel',
+  {
+    defaultMessage: 'History',
+  }
+);
+
 export const TIMELINE_PANEL_TITLE = i18n.translate(
   'xpack.changeHistoryUi.modal.timelinePanelTitle',
   {

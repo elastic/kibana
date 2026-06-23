@@ -20,7 +20,7 @@ describe('createChangeHistoryHttpAdapter', () => {
     const mapListItem = jest.fn((dto: unknown) => dto as ChangeHistoryListItem);
 
     const adapter = createChangeHistoryHttpAdapter({
-      http: http as never,
+      http,
       listPath: '/api/example/{objectId}/history',
       mapListItem,
     });
@@ -40,7 +40,7 @@ describe('createChangeHistoryHttpAdapter', () => {
 
   it('getChange requires detailPath', async () => {
     const adapter = createChangeHistoryHttpAdapter({
-      http: { get: jest.fn() } as never,
+      http: { get: jest.fn() },
       listPath: '/api/history/{objectId}',
     });
 

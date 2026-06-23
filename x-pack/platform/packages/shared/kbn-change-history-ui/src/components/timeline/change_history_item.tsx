@@ -19,10 +19,7 @@ import type { ChangeHistoryBadgeRenderFn } from '../../types/change_history_badg
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { ChangeHistoryActionBadge } from './change_history_action_badge';
 import { ChangeHistoryItemComment } from './change_history_item_comment';
-import {
-  formatChangeHistoryListTimestamp,
-  formatChangeHistoryListTimestampWithSeconds,
-} from './format_change_history_list_timestamp';
+import { ChangeHistoryListTimestamp } from './change_history_list_timestamp';
 import * as i18n from './translations';
 
 export interface ChangeHistoryItemProps {
@@ -40,14 +37,6 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
 }: ChangeHistoryItemProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const timestamp = useMemo(() => new Date(item.timestamp), [item.timestamp]);
-  const formattedTimestamp = useMemo(
-    () => formatChangeHistoryListTimestamp(timestamp),
-    [timestamp]
-  );
-  const formattedTimestampWithSeconds = useMemo(
-    () => formatChangeHistoryListTimestampWithSeconds(timestamp),
-    [timestamp]
-  );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -99,7 +88,10 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                 overflow: hidden;
               `}
             >
-              <EuiToolTip position="top" content={formattedTimestampWithSeconds}>
+              <EuiToolTip
+                position="top"
+                content={<ChangeHistoryListTimestamp value={timestamp} withSeconds />}
+              >
                 <EuiText
                   size="xs"
                   css={css`
@@ -109,7 +101,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                     font-weight: var(--Font-weight-Semi-Bold, 600);
                   `}
                 >
-                  {formattedTimestamp}
+                  <ChangeHistoryListTimestamp value={timestamp} />
                 </EuiText>
               </EuiToolTip>
             </EuiFlexItem>

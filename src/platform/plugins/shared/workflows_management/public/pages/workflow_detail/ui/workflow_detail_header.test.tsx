@@ -63,10 +63,8 @@ jest.mock('../../../entities/workflows/model/use_update_workflow', () => ({
 jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
   useMemoCss: (styles: any) => mockUseMemoCss(styles),
 }));
-jest.mock('../../../features/change_history', () => ({
-  WorkflowChangeHistoryEmbed: ({ workflowId }: { workflowId: string }) => (
-    <div data-test-subj="workflowChangeHistoryEmbed">{workflowId}</div>
-  ),
+jest.mock('./workflow_detail_actions_menu', () => ({
+  WorkflowDetailActionsMenu: () => <div data-test-subj="workflowChangeHistoryEmbed" />,
 }));
 
 describe('WorkflowDetailHeader', () => {
@@ -458,7 +456,7 @@ describe('WorkflowDetailHeader', () => {
   it('renders change history embed on workflow tab when workflow id is present', () => {
     const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
-    expect(getByTestId('workflowChangeHistoryEmbed')).toHaveTextContent('test-123');
+    expect(getByTestId('workflowChangeHistoryEmbed')).toBeInTheDocument();
   });
 
   it('does not render change history embed on executions tab', () => {

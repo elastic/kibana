@@ -24,9 +24,13 @@ export type {
 export {
   ChangeHistoryModal,
   ChangeHistoryTrigger,
+  ChangeHistoryListGroupItem,
   ChangeHistoryPreviewPanel,
 } from './src/components/modal';
-export type { ChangeHistoryTriggerProps } from './src/components/modal';
+export type {
+  ChangeHistoryTriggerProps,
+  ChangeHistoryListGroupItemProps,
+} from './src/components/modal';
 export { ChangeHistoryProvider, useChangeHistoryConfig } from './src/provider';
 export type { ChangeHistoryProviderProps } from './src/provider';
 export { useChangeHistoryList, useChangeHistoryDetail } from './src/hooks';

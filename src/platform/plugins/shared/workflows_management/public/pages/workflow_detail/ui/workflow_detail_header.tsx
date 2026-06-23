@@ -39,6 +39,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { WorkflowDetailActionsMenu } from './workflow_detail_actions_menu';
 import { PLUGIN_ID } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -52,7 +53,6 @@ import {
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
-import { WorkflowChangeHistoryEmbed } from '../../../features/change_history';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useWorkflowUrlState,
@@ -392,15 +392,6 @@ export const WorkflowDetailHeader = React.memo(
                     })}
                   />
                 </EuiToolTip>
-                <EuiFlexItem grow={false} css={styles.separator} />
-                {workflowId && !isExecutionsTab ? (
-                  <EuiFlexItem grow={false}>
-                    <WorkflowChangeHistoryEmbed
-                      workflowId={workflowId}
-                      workflowName={workflow?.name}
-                    />
-                  </EuiFlexItem>
-                ) : null}
                 <EuiToolTip content={runWorkflowTooltipContent}>
                   <EuiButtonIcon
                     color="success"
@@ -436,6 +427,14 @@ export const WorkflowDetailHeader = React.memo(
                     />
                   </EuiButton>
                 </EuiToolTip>
+                {workflowId && !isExecutionsTab ? (
+                  <EuiFlexItem grow={false}>
+                    <WorkflowDetailActionsMenu
+                      workflowId={workflowId}
+                      workflowName={workflow?.name}
+                    />
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </EuiPageHeaderSection>
           </EuiPageTemplate.Header>
@@ -523,13 +522,6 @@ const componentStyles = {
     whiteSpace: 'nowrap',
     width: '100%',
   }),
-  separator: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '1px',
-      margin: '4px 0',
-      backgroundColor: euiTheme.colors.borderBasePlain,
-      alignSelf: 'stretch',
-    }),
   runConfirmationFooter: css({
     alignItems: 'center',
     justifyContent: 'space-between',

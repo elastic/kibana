@@ -44,7 +44,12 @@ export const useChangeHistoryDetail = ({
     abortControllerRef.current?.abort();
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
-    setIsLoading(true);
+
+    const showLoadingTimer = setTimeout(() => {
+      if (!abortController.signal.aborted) {
+        setIsLoading(true);
+      }
+    }, 0);
 
     adapter
       .getChange({ objectId, changeId, signal: abortController.signal })
@@ -65,12 +70,19 @@ export const useChangeHistoryDetail = ({
         setError(fetchError instanceof Error ? fetchError : new Error(String(fetchError)));
       })
       .finally(() => {
+        if (showLoadingTimer) {
+          clearTimeout(showLoadingTimer);
+        }
+
         if (!abortController.signal.aborted) {
           setIsLoading(false);
         }
       });
 
     return () => {
+      if (showLoadingTimer) {
+        clearTimeout(showLoadingTimer);
+      }
       abortController.abort();
     };
   }, [adapter, changeId, enabled, objectId]);

@@ -8,4 +8,6 @@
 export { ChangeHistoryModal } from './change_history_modal';
 export { ChangeHistoryTrigger } from './change_history_trigger';
 export type { ChangeHistoryTriggerProps } from './change_history_trigger';
+export { ChangeHistoryListGroupItem } from './change_history_list_group_item';
+export type { ChangeHistoryListGroupItemProps } from './change_history_list_group_item';
 export { ChangeHistoryPreviewPanel } from './change_history_preview_panel';

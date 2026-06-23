@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import type { ChangeHistoryDetail, ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
@@ -28,7 +28,8 @@ const WorkflowChangeHistoryPreviewContent = ({
   change: ChangeHistoryDetail;
 }): JSX.Element => {
   return (
-    <div
+    <EuiFlexGroup
+      direction="column"
       css={css`
         height: 100%;
         box-sizing: border-box;
@@ -37,11 +38,10 @@ const WorkflowChangeHistoryPreviewContent = ({
       <EuiCodeBlock language="yaml" isCopyable paddingSize="none">
         {getWorkflowYamlFromSnapshot(change.snapshot)}
       </EuiCodeBlock>
-    </div>
+    </EuiFlexGroup>
   );
 };
 
-/** Placeholder preview until Plan 3-3 wires read-only Monaco. */
 export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({ change }) => (
   <WorkflowChangeHistoryPreviewContent change={change} />
 );

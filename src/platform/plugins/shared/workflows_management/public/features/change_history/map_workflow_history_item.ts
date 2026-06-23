@@ -9,7 +9,6 @@
 
 import type { ChangeHistoryDetail, ChangeHistoryListItem } from '@kbn/change-history-ui';
 
-import { formatWorkflowChangeAction, SYSTEM_ACTOR_NAME } from './translations';
 import type { WorkflowHistoryItem } from '../../../common/lib/workflow_change_history/types';
 
 export interface MapWorkflowHistoryItemOptions {
@@ -22,13 +21,11 @@ export const mapWorkflowHistoryItemToListItem = (
 ): ChangeHistoryListItem => ({
   id: item.id,
   timestamp: item.timestamp,
-  actor: item.user
-    ? {
-        name: item.user.name,
-        ...(item.user.id ? { profileId: item.user.id } : {}),
-      }
-    : { name: SYSTEM_ACTOR_NAME },
-  action: formatWorkflowChangeAction(item.action),
+  actor: {
+    name: item.user.name,
+    ...(item.user.profileId ? { profileId: item.user.profileId } : {}),
+  },
+  action: item.action,
   ...(isCurrent ? { isCurrent: true } : {}),
   ...(item.version != null ? { metadata: { version: item.version } } : {}),
 });

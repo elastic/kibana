@@ -108,6 +108,10 @@ export const useChangeHistoryList = ({
       return;
     }
 
+    setItems([]);
+    setTotal(0);
+    setPageIndex(0);
+    setError(undefined);
     void fetchPage(0, false);
 
     return () => {

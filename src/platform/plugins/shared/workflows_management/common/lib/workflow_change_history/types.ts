@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Single workflow change-history entry. */
+import type { WorkflowChangeHistoryActionType } from './constants';
+
 export interface WorkflowHistoryItem {
   timestamp: string;
   id: string;
-  user: { id?: string; name: string } | null;
-  action: string;
+  user: { profileId?: string; name: string };
+  action: WorkflowChangeHistoryActionType;
   version?: number;
   workflow: {
     yaml: string;

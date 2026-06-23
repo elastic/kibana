@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-change-history-ui'],
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/platform/packages/shared/kbn-change-history-ui/jest.setup.js',
+  ],
 };

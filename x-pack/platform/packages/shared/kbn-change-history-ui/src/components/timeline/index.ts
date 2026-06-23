@@ -14,7 +14,5 @@ export type { ChangeHistoryFooterProps } from './change_history_footer';
 export { ChangeHistoryActionBadge } from './change_history_action_badge';
 export { ChangeHistoryEmptyPrompt } from './change_history_empty_prompt';
 export { ChangeHistoryItemComment } from './change_history_item_comment';
-export {
-  formatChangeHistoryListTimestamp,
-  formatChangeHistoryListTimestampWithSeconds,
-} from './format_change_history_list_timestamp';
+export { ChangeHistoryListTimestamp } from './change_history_list_timestamp';
+export type { ChangeHistoryListTimestampProps } from './change_history_list_timestamp';

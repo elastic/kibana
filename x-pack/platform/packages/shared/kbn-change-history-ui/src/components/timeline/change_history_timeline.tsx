@@ -29,7 +29,6 @@ export interface ChangeHistoryTimelineProps {
   historyStartedAt?: Date;
   isLoading?: boolean;
   onSelectItem?: (item: ChangeHistoryListItem) => void;
-  /** When provided, an intersection observer requests more pages (Plan 2 step 2-3). */
   onLoadMore?: () => void;
   /** Domain-specific badge content for each row. Falls back to action label when omitted. */
   renderBadge?: ChangeHistoryBadgeRenderFn;
@@ -45,26 +44,29 @@ export function ChangeHistoryTimeline({
   renderBadge,
 }: ChangeHistoryTimelineProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const onLoadMoreRef = useRef(onLoadMore);
+  onLoadMoreRef.current = onLoadMore;
 
   useEffect(() => {
-    if (!onLoadMore || !sentinelRef.current) {
+    if (!onLoadMore || isLoading || !scrollContainerRef.current || !sentinelRef.current) {
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          onLoadMore();
+          onLoadMoreRef.current?.();
         }
       },
-      { threshold: 0 }
+      { root: scrollContainerRef.current, threshold: 0 }
     );
 
     observer.observe(sentinelRef.current);
 
     return () => observer.disconnect();
-  }, [onLoadMore]);
+  }, [isLoading, items.length, onLoadMore]);
 
   const styles = useMemo(
     () => ({
@@ -97,6 +99,7 @@ export function ChangeHistoryTimeline({
   return (
     <div data-test-subj="changeHistoryTimeline" css={styles.changesTimelineWrapper}>
       <div
+        ref={scrollContainerRef}
         css={styles.changesTimeline}
         aria-label={i18n.TIMELINE_ARIA_LABEL}
         data-test-subj="changeHistoryTimelineList"

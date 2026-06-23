@@ -21,7 +21,4 @@ export const WorkflowChangeHistoryAction = {
 export type WorkflowChangeHistoryActionType =
   (typeof WorkflowChangeHistoryAction)[keyof typeof WorkflowChangeHistoryAction];
 
-/** Matches `INTERNAL_API_VERSION` on workflow internal routes. */
-export const WORKFLOW_CHANGE_HISTORY_INTERNAL_API_VERSION = '1';
-
 export const WORKFLOW_CHANGE_HISTORY_LIST_PATH = '/internal/workflows/workflow';

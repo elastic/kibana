@@ -40,19 +40,19 @@ export function ChangeHistoryModal(): JSX.Element | null {
     setSelectedChangeId,
   } = useChangeHistoryConfig();
 
-  const { items, isLoading, isLoadingMore, error, loadMore } = useChangeHistoryList({
+  const { items, total, isLoading, isLoadingMore, error, loadMore } = useChangeHistoryList({
     adapter,
     objectId,
     enabled: isModalOpen,
   });
 
   useEffect(() => {
-    if (!isModalOpen || selectedChangeId || items.length === 0) {
+    if (!isModalOpen || selectedChangeId || isLoading || items.length === 0) {
       return;
     }
 
     setSelectedChangeId(items[0]?.id);
-  }, [isModalOpen, items, selectedChangeId, setSelectedChangeId]);
+  }, [isModalOpen, isLoading, items, selectedChangeId, setSelectedChangeId]);
 
   const styles = useMemo(
     () => ({
@@ -112,7 +112,10 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const hasItems = items.length > 0;
   const showLoadingSidebar = isLoading && !hasItems && !error;
   const showListError = Boolean(error) && !hasItems && !isLoading;
-  const historyStartedAt = getHistoryStartedAt(items.map((item) => item.timestamp));
+  const allItemsLoaded = hasItems && items.length >= total;
+  const historyStartedAt = allItemsLoaded
+    ? getHistoryStartedAt(items.map((item) => item.timestamp))
+    : undefined;
 
   const previewFooter = renderPreviewFooter?.({
     objectId,

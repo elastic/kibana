@@ -9,33 +9,35 @@
 
 import React from 'react';
 import {
+  ChangeHistoryListGroupItem,
   ChangeHistoryModal,
   ChangeHistoryProvider,
-  ChangeHistoryTrigger,
 } from '@kbn/change-history-ui';
 
+import { BACK_TO_WORKFLOW } from './translations';
 import {
   useWorkflowChangeHistoryAdapter,
   useWorkflowChangeHistoryEnabled,
 } from './use_workflow_change_history';
-import { BACK_TO_WORKFLOW } from './translations';
 import { renderWorkflowChangeHistoryBadge } from './workflow_change_history_badge';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 
-export interface WorkflowChangeHistoryEmbedProps {
+export interface WorkflowChangeHistoryProviderProps {
   workflowId: string;
   workflowName?: string;
+  children: React.ReactNode;
 }
 
-export const WorkflowChangeHistoryEmbed = ({
+export const WorkflowChangeHistoryProvider = ({
   workflowId,
   workflowName,
-}: WorkflowChangeHistoryEmbedProps): JSX.Element | null => {
+  children,
+}: WorkflowChangeHistoryProviderProps): JSX.Element => {
   const isEnabled = useWorkflowChangeHistoryEnabled();
   const adapter = useWorkflowChangeHistoryAdapter();
 
   if (!isEnabled) {
-    return null;
+    return <>{children}</>;
   }
 
   return (
@@ -49,8 +51,24 @@ export const WorkflowChangeHistoryEmbed = ({
         previewTitle: workflowName,
       }}
     >
-      <ChangeHistoryTrigger buttonProps={{ size: 's' }} />
+      {children}
       <ChangeHistoryModal />
     </ChangeHistoryProvider>
   );
+};
+
+export interface WorkflowChangeHistoryListItemProps {
+  onClick?: () => void;
+}
+
+export const WorkflowChangeHistoryListItem = ({
+  onClick,
+}: WorkflowChangeHistoryListItemProps): JSX.Element | null => {
+  const isEnabled = useWorkflowChangeHistoryEnabled();
+
+  if (!isEnabled) {
+    return null;
+  }
+
+  return <ChangeHistoryListGroupItem onClick={onClick} />;
 };
