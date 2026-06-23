@@ -79,7 +79,11 @@ export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolea
         target={remoteEditUrl ? '_blank' : undefined}
         disabled={hasUndefinedRemoteKibanaUrl}
         toolTipContent={
-          hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : undefined
+          hasUndefinedRemoteKibanaUrl
+            ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL
+            : canEditSynthetics
+            ? undefined
+            : PERMISSIONS_ON_ORIGIN_CLUSTER
         }
       >
         {EDIT_MONITOR}
@@ -116,5 +120,12 @@ const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
   'xpack.synthetics.monitorDetails.actions.remoteKibanaUrlUndefined',
   {
     defaultMessage: 'This action is not available for remote monitors with undefined kibanaUrl',
+  }
+);
+
+const PERMISSIONS_ON_ORIGIN_CLUSTER = i18n.translate(
+  'xpack.synthetics.monitorDetails.actions.permissionsOnOriginCluster',
+  {
+    defaultMessage: 'Permissions are enforced on the origin cluster.',
   }
 );

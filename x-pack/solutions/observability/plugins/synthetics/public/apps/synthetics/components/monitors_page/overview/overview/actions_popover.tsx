@@ -371,8 +371,7 @@ export function ActionsPopover({
       disabled: isRemote ? !remoteEditUrl : !canEditSynthetics || !isServiceAllowed,
       href: isRemote ? remoteEditUrl : editUrl,
       target: isRemote ? '_blank' : undefined,
-      toolTipContent:
-        isRemote && !remoteEditUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : undefined,
+      toolTipContent: getRemoteActionTooltip(isRemote, remoteEditUrl, canEditSynthetics),
       'data-test-subj': 'editMonitorLink',
     },
     {
@@ -389,8 +388,7 @@ export function ActionsPopover({
         ? remoteCloneUrl
         : http?.basePath.prepend(`synthetics/add-monitor?cloneId=${monitor.configId}`),
       target: isRemote ? '_blank' : undefined,
-      toolTipContent:
-        isRemote && !remoteCloneUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : undefined,
+      toolTipContent: getRemoteActionTooltip(isRemote, remoteCloneUrl, canEditSynthetics),
       'data-test-subj': 'cloneMonitorLink',
     },
     {
@@ -681,3 +679,20 @@ const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
     defaultMessage: 'This action is not available for remote monitors with undefined kibanaUrl',
   }
 );
+
+const PERMISSIONS_ON_ORIGIN_CLUSTER = i18n.translate(
+  'xpack.synthetics.overview.actions.permissionsOnOriginCluster',
+  {
+    defaultMessage: 'Permissions are enforced on the origin cluster.',
+  }
+);
+
+const getRemoteActionTooltip = (
+  isRemote: boolean,
+  remoteUrl: string | undefined,
+  canEditSynthetics: boolean
+) => {
+  if (!isRemote) return undefined;
+  if (!remoteUrl) return NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL;
+  return canEditSynthetics ? undefined : PERMISSIONS_ON_ORIGIN_CLUSTER;
+};
