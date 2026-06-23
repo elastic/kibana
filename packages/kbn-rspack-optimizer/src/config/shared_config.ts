@@ -87,9 +87,12 @@ export function getSharedResolveFallback(): Record<string, false> {
  * This is faster than the webpack `swc-loader` because it's implemented
  * in Rust and integrated directly into RSPack.
  *
- * Uses @swc/plugin-emotion for CSS-in-JS. styled-components files
- * will still work at runtime - we just won't have build-time optimizations
- * like better debugging labels for styled-components.
+ * Emotion CSS-in-JS is handled in two parts: the `css` prop via Emotion's JSX
+ * runtime (`importSource: '@emotion/react'`), and styled-component labels +
+ * component-selector `target`s via the `@swc/plugin-emotion` WASM plugin
+ * (mirrors `@emotion/babel-plugin` on the webpack path). styled-components files
+ * still work at runtime without a build plugin - we just won't have build-time
+ * optimizations like better debugging labels for styled-components.
  *
  * This is acceptable because:
  * 1. Kibana is migrating from styled-components to Emotion
@@ -128,7 +131,35 @@ function getSwcOptions(dist: boolean, hmr: boolean = false) {
           importSource: '@emotion/react',
         },
       },
-      // No plugins needed - Emotion's JSX runtime handles css prop directly
+      // The JSX runtime above only handles the css prop. Emotion *component
+      // selectors* (interpolating a styled component as a CSS selector, e.g.
+      // `${NodeShapeContainer}:hover`) additionally require a build transform
+      // that injects a stable `target` into each styled component. The webpack
+      // optimizer gets this from `@emotion/babel-plugin` (via
+      // `@emotion/babel-preset-css-prop`); under SWC we run the equivalent
+      // `@swc/plugin-emotion` WASM plugin so component selectors don't throw at
+      // runtime. labelFormat is shared with the Babel path via
+      // `@kbn/transpiler-config` to keep generated class names consistent.
+      //
+      // NOTE: `@swc/plugin-emotion` is a WebAssembly plugin whose ABI is locked
+      // to the `swc_core` version that RSPack's bundled SWC was built against.
+      // RSPack 1.7.11 reports `swc_core` 59.0.1; `@swc/plugin-emotion@14.7.0` is
+      // built against `swc_core` 58.0.1 (the closest release at/below the host —
+      // there is no release targeting 59/60, it jumps to 61.0.1 in 14.8.0). The
+      // pinned version must be re-checked whenever `@rspack/core` is bumped, or
+      // the build will panic on a plugin ABI mismatch.
+      experimental: {
+        plugins: [
+          [
+            require.resolve('@swc/plugin-emotion'),
+            {
+              autoLabel: dist ? 'never' : 'dev-only',
+              labelFormat: sharedConfig.emotion.labelFormat,
+              sourceMap: !dist,
+            },
+          ],
+        ],
+      },
       // Target ES2020 for browser builds (matches Kibana's browserslist)
       target: 'es2020',
       // Keep class names for debugging and error messages

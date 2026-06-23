@@ -37,6 +37,10 @@ export interface SwcLoaderOptions {
         importSource?: string;
       };
     };
+    /** Experimental SWC features, including WebAssembly transform plugins. */
+    experimental?: {
+      plugins?: Array<[string, Record<string, unknown>]>;
+    };
     target: string;
     keepClassNames: boolean;
     externalHelpers: boolean;
@@ -59,7 +63,8 @@ export interface SwcLoaderOptions {
  * Key features:
  * - TypeScript with decorators (legacy mode)
  * - React automatic runtime with Emotion's JSX (importSource: '@emotion/react')
- * - Emotion CSS-in-JS support via the JSX runtime (no plugin needed)
+ * - Emotion css prop via the JSX runtime, plus styled-component labels and
+ *   component-selector `target`s via the @swc/plugin-emotion WASM plugin
  *
  * Note: styled-components files work without a build plugin - they just
  * won't have build-time optimizations. This is acceptable as Kibana is
@@ -91,7 +96,23 @@ export function getBrowserSwcConfig(options: BrowserSwcOptions = {}): SwcLoaderO
           importSource: '@emotion/react',
         },
       },
-      // No plugins needed - Emotion's JSX runtime handles css prop directly
+      // The JSX runtime only handles the css prop. Emotion component selectors
+      // (interpolating a styled component as a CSS selector) additionally need a
+      // build transform that injects a stable `target` into each styled
+      // component, so we run `@swc/plugin-emotion` (the SWC equivalent of
+      // `@emotion/babel-plugin` used on the webpack path).
+      experimental: {
+        plugins: [
+          [
+            require.resolve('@swc/plugin-emotion'),
+            {
+              autoLabel: production ? 'never' : 'dev-only',
+              labelFormat: sharedConfig.emotion.labelFormat,
+              sourceMap: !production,
+            },
+          ],
+        ],
+      },
       // Target ES2020 for browser builds (matches Kibana's browserslist)
       target: 'es2020',
       // Keep class names for debugging and error messages
