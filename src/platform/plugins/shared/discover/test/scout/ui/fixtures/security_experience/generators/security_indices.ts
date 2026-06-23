@@ -17,6 +17,14 @@ import { SECURITY_INDICES, SECURITY_TEST_DATA } from '../constants';
  */
 const DOC_TIMESTAMP = '2025-06-01T12:00:00.000Z';
 
+// Field values only used to build the synthetic documents. `HOST_NAME` is shared with the specs
+// (they hover/filter on it), so it lives in SECURITY_TEST_DATA.
+const { HOST_NAME } = SECURITY_TEST_DATA;
+const ALERT_RULE_NAME = 'Security Discover test rule';
+const USER_NAME = 'discover-test-user';
+const SOURCE_IP = '10.0.0.1';
+const IOC_NAME = 'malicious.example.com';
+
 /**
  * Minimal alert document: the Security profile treats `event.kind: 'signal'` as an alert and the
  * flyout header / overview tab read the `kibana.alert.*`, host, user and ip fields below.
@@ -27,7 +35,7 @@ const alertDocument = () => ({
   'event.category': ['network'],
   'event.type': ['connection'],
   'kibana.alert.uuid': 'security-discover-alert-1',
-  'kibana.alert.rule.name': SECURITY_TEST_DATA.ALERT_RULE_NAME,
+  'kibana.alert.rule.name': ALERT_RULE_NAME,
   'kibana.alert.rule.uuid': 'security-discover-rule-1',
   'kibana.alert.rule.rule_id': 'security-discover-rule-1',
   'kibana.alert.rule.description': 'Synthetic rule used by the Security-in-Discover Scout tests.',
@@ -35,11 +43,11 @@ const alertDocument = () => ({
   'kibana.alert.severity': 'high',
   'kibana.alert.risk_score': 73,
   'kibana.alert.workflow_status': 'open',
-  'kibana.alert.reason': `network event with source ${SECURITY_TEST_DATA.SOURCE_IP} created high alert ${SECURITY_TEST_DATA.ALERT_RULE_NAME}.`,
+  'kibana.alert.reason': `network event with source ${SOURCE_IP} created high alert ${ALERT_RULE_NAME}.`,
   'kibana.alert.original_time': DOC_TIMESTAMP,
-  'host.name': SECURITY_TEST_DATA.HOST_NAME,
-  'user.name': SECURITY_TEST_DATA.USER_NAME,
-  'source.ip': SECURITY_TEST_DATA.SOURCE_IP,
+  'host.name': HOST_NAME,
+  'user.name': USER_NAME,
+  'source.ip': SOURCE_IP,
   'destination.ip': '10.0.0.2',
   message: 'Synthetic security alert document for Discover flyout tests',
 });
@@ -51,9 +59,9 @@ const eventDocument = () => ({
   'event.category': ['process'],
   'event.type': ['start'],
   'event.action': 'process-started',
-  'host.name': SECURITY_TEST_DATA.HOST_NAME,
-  'user.name': SECURITY_TEST_DATA.USER_NAME,
-  'source.ip': SECURITY_TEST_DATA.SOURCE_IP,
+  'host.name': HOST_NAME,
+  'user.name': USER_NAME,
+  'source.ip': SOURCE_IP,
   'process.name': 'discover-test-process',
   message: 'Synthetic security event document for Discover flyout tests',
 });
@@ -67,8 +75,8 @@ const iocDocument = () => ({
   'event.dataset': 'ti_abusech.malware',
   'threat.feed.name': 'AbuseCH Malware',
   'threat.indicator.type': 'domain-name',
-  'threat.indicator.name': SECURITY_TEST_DATA.IOC_NAME,
-  'threat.indicator.url.domain': SECURITY_TEST_DATA.IOC_NAME,
+  'threat.indicator.name': IOC_NAME,
+  'threat.indicator.url.domain': IOC_NAME,
   'threat.indicator.marking.tlp': 'WHITE',
   message: 'Synthetic threat intelligence indicator document for Discover flyout tests',
 });

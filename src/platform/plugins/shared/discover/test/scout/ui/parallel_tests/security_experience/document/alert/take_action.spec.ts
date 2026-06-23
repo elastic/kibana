@@ -38,7 +38,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-      await pageObjects.securityDiscoverFlyout.waitForAlertHeader();
+      await pageObjects.securityDiscoverFlyout.waitForDocumentHeader();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

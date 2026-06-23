@@ -43,7 +43,7 @@ spaceTest.describe(
       const { securityDiscoverFlyout } = pageObjects;
       await securityDiscoverFlyout.openEventFlyoutFromDiscover();
 
-      await securityDiscoverFlyout.waitForAlertHeader();
+      await securityDiscoverFlyout.waitForDocumentHeader();
       // A title icon renders (EuiIcon does not expose the specific glyph as a stable DOM attribute,
       // so we assert presence rather than the exact `analyzeEvent` icon).
       await expect.soft(securityDiscoverFlyout.titleIcon).toBeVisible();

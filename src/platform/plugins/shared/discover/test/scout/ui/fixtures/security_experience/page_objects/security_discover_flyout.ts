@@ -16,6 +16,10 @@ import {
   TAKE_ACTION_TEST_SUBJECTS as TA,
 } from '../constants';
 
+// Raised from the default: opening the flyout depends on Discover's first load + security profile
+// resolution + the lazy-loaded security flyout content, which is slow in CI.
+const FLYOUT_TIMEOUT = 30_000;
+
 /**
  * Page object for the Security Solution flyout content rendered inside Discover's document viewer.
  *
@@ -183,18 +187,18 @@ export class SecurityDiscoverFlyout {
 
   /** Wait for the doc viewer flyout to be visible and rendered. */
   async waitForFlyout() {
-    await expect(this.flyout).toBeVisible({ timeout: 30_000 });
-    await expect(this.docViewer).toBeVisible({ timeout: 30_000 });
+    await expect(this.flyout).toBeVisible({ timeout: FLYOUT_TIMEOUT });
+    await expect(this.docViewer).toBeVisible({ timeout: FLYOUT_TIMEOUT });
   }
 
   /** Wait for the alert / event header (confirms the security profile enhanced the flyout). */
-  async waitForAlertHeader() {
-    await expect(this.alertTitle).toBeVisible({ timeout: 30_000 });
+  async waitForDocumentHeader() {
+    await expect(this.alertTitle).toBeVisible({ timeout: FLYOUT_TIMEOUT });
   }
 
   /** Wait for the IOC overview tab content. */
   async waitForIocOverview() {
-    await expect(this.iocOverviewTitle).toBeVisible({ timeout: 30_000 });
+    await expect(this.iocOverviewTitle).toBeVisible({ timeout: FLYOUT_TIMEOUT });
   }
 
   /** Click a doc viewer tab and wait for it to become the selected (active) tab. */

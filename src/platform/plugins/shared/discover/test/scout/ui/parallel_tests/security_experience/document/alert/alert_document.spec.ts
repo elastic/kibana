@@ -34,8 +34,10 @@ spaceTest.describe(
       await setupSecurityExperience(scoutSpace, config);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.securityDiscoverFlyout.openAlertFlyoutFromDiscover();
+      await pageObjects.securityDiscoverFlyout.waitForDocumentHeader();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -46,9 +48,6 @@ spaceTest.describe(
       'opens with security header, overview sections, and footer',
       async ({ pageObjects }) => {
         const { securityDiscoverFlyout } = pageObjects;
-        await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-
-        await securityDiscoverFlyout.waitForAlertHeader();
 
         // Header — a title icon renders (EuiIcon does not expose the specific glyph as a stable
         // DOM attribute, so we assert presence rather than the exact `warning` icon).
@@ -79,9 +78,6 @@ spaceTest.describe(
 
         // Needed so the copy-to-clipboard action can be verified via navigator.clipboard.
         await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-
-        await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-        await securityDiscoverFlyout.waitForAlertHeader();
 
         await spaceTest.step('hover reveals all relevant cell-action buttons', async () => {
           await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
@@ -116,7 +112,7 @@ spaceTest.describe(
 
         await spaceTest.step('filter out adds a negated filter', async () => {
           await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-          await securityDiscoverFlyout.waitForAlertHeader();
+          await securityDiscoverFlyout.waitForDocumentHeader();
           await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
           await securityDiscoverFlyout.cellActionFilterOut.click();
           expect(await filterBar.hasFilter({ field, value, negated: true })).toBe(true);
@@ -133,9 +129,6 @@ spaceTest.describe(
         const { securityDiscoverFlyout, discover } = pageObjects;
         const field = 'host.name';
 
-        await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-        await securityDiscoverFlyout.waitForAlertHeader();
-
         await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
         // The cell-actions popover (EuiPopover + per-button EuiToolTip) re-renders on open and can be
         // reported "not stable"; the button is resolved, so force the click to fire its onClick.
@@ -151,8 +144,6 @@ spaceTest.describe(
       'doc viewer tabs: security Overview is the default tab and Table / JSON tabs switch',
       async ({ pageObjects }) => {
         const { securityDiscoverFlyout } = pageObjects;
-        await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-        await securityDiscoverFlyout.waitForAlertHeader();
 
         await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'true');
         await expect(securityDiscoverFlyout.aboutSection).toBeVisible();

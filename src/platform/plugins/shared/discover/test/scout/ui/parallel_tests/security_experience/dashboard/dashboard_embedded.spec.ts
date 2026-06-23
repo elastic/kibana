@@ -46,7 +46,7 @@ spaceTest.describe(
         const { securityDiscoverFlyout } = pageObjects;
         await securityDiscoverFlyout.openAlertFlyoutFromDashboard();
 
-        await securityDiscoverFlyout.waitForAlertHeader();
+        await securityDiscoverFlyout.waitForDocumentHeader();
         await expect.soft(securityDiscoverFlyout.aboutSection).toBeVisible();
         await expect.soft(securityDiscoverFlyout.takeActionButton).toBeVisible();
       }

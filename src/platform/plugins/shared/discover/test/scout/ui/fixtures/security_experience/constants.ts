@@ -55,13 +55,12 @@ export const PUSH_FLYOUT_VIEWPORT = { width: 1920, height: 1080 } as const;
 export const SECURITY_KBN_ARCHIVE =
   'src/platform/plugins/shared/discover/test/scout/ui/fixtures/security_experience/kbn_archives/security_saved_objects.json';
 
-/** Representative field values asserted in the specs. */
+/**
+ * Synthetic-document field values referenced by the specs. Values used only when generating the
+ * documents live in ./generators/security_indices.ts.
+ */
 export const SECURITY_TEST_DATA = {
-  ALERT_RULE_NAME: 'Security Discover test rule',
   HOST_NAME: 'discover-test-host',
-  USER_NAME: 'discover-test-user',
-  SOURCE_IP: '10.0.0.1',
-  IOC_NAME: 'malicious.example.com',
 } as const;
 
 /**
