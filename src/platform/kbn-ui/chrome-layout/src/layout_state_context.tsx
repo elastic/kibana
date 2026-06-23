@@ -31,6 +31,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
   const slots = {
     Header: props.header || null,
     Navigation: props.navigation || null,
+    Agent: props.agent || null,
     Banner: props.banner || null,
     Footer: props.footer || null,
     Sidebar: props.sidebar || null,
@@ -43,6 +44,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
   const hasSidebar = !!slots.Sidebar;
   const hasHeader = !!slots.Header;
   const hasNavigation = !!slots.Navigation;
+  const hasAgent = !!slots.Agent;
   const hasApplicationTopBar = !!slots.ApplicationTopBar;
   const hasApplicationBottomBar = !!slots.ApplicationBottomBar;
 
@@ -55,6 +57,8 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     headerHeight: hasHeader ? layoutConfig.headerHeight ?? 0 : 0,
     hasNavigation,
     navigationWidth: hasNavigation ? layoutConfig.navigationWidth ?? 0 : 0,
+    hasAgent,
+    agentWidth: hasAgent ? layoutConfig.agentWidth ?? 0 : 0,
     hasSidebar,
     sidebarWidth: hasSidebar ? layoutConfig.sidebarWidth ?? 0 : 0,
     hasApplicationTopBar,

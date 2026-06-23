@@ -20,6 +20,9 @@ export { layoutLevels } from './src/levels';
 
 export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 
+/** Default width of the agent workspace column in agent-first chrome (POC). */
+export const DEFAULT_AGENT_WIDTH = 480;
+
 export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
 
 export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';

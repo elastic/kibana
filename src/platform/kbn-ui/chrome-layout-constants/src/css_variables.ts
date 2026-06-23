@@ -14,6 +14,7 @@ export type LayoutComponent =
   | 'header'
   | 'footer'
   | 'navigation'
+  | 'agent'
   | 'sidebar'
   | 'application';
 export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';

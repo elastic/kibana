@@ -22,6 +22,7 @@ import {
   ChromelessHeader,
   AppMenuBar,
   Sidebar,
+  AgentSlotPlaceholder,
   useHasAppMenu,
   useHasChromeAppHeaderContent,
   useHasInlineAppHeader,
@@ -30,12 +31,14 @@ import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
   useChromeStyle,
   useIsChromeVisible,
+  useIsNextChrome,
   useSidebarWidth,
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
+import { isAgentFirst } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from '@kbn/ui-chrome-layout';
+import { DEFAULT_AGENT_WIDTH } from '@kbn/ui-chrome-layout-constants';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
@@ -94,7 +97,7 @@ export class GridLayout implements LayoutService {
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
-    const nextChrome = isNextChrome(featureFlags);
+    const agentFirstEnabled = isAgentFirst(featureFlags);
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -107,6 +110,7 @@ export class GridLayout implements LayoutService {
       const chromeVisible = useIsChromeVisible();
       const hasHeaderBanner = useHasHeaderBanner();
       const chromeStyle = useChromeStyle();
+      const isNextChromeEnabled = useIsNextChrome();
       const hasAppMenu = useHasAppMenu();
       const hasInlineAppHeader = useHasInlineAppHeader();
       const hasChromeAppHeaderContent = useHasChromeAppHeaderContent();
@@ -114,18 +118,26 @@ export class GridLayout implements LayoutService {
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
 
+      const showAgentWorkspace =
+        agentFirstEnabled &&
+        isNextChromeEnabled &&
+        chromeVisible &&
+        chromeStyle === 'project';
+
       const layoutConfigKey =
-        chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
+        chromeStyle === 'classic' ? 'classic' : isNextChromeEnabled ? 'projectNext' : 'project';
 
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
         sidebarWidth,
         navigationWidth,
+        agentWidth: showAgentWorkspace ? DEFAULT_AGENT_WIDTH : 0,
       };
 
       // Assign main layout parts first
       let header: ReactNode;
       let navigation: ReactNode;
+      let agent: ReactNode;
       let banner: ReactNode;
       let applicationTopBar: ReactNode;
 
@@ -133,8 +145,8 @@ export class GridLayout implements LayoutService {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
         } else {
-          header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
-          if (nextChrome) {
+          header = isNextChromeEnabled ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
+          if (isNextChromeEnabled) {
             if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
               applicationTopBar = <ChromeAppHeaderRenderer />;
             }
@@ -150,6 +162,10 @@ export class GridLayout implements LayoutService {
         banner = <HeaderTopBanner position="static" />;
       }
 
+      if (showAgentWorkspace) {
+        agent = <AgentSlotPlaceholder />;
+      }
+
       return (
         <>
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
@@ -159,6 +175,7 @@ export class GridLayout implements LayoutService {
               sidebar={<Sidebar />}
               footer={footer}
               navigation={navigation}
+              agent={agent}
               banner={banner}
               applicationTopBar={applicationTopBar}
             >
