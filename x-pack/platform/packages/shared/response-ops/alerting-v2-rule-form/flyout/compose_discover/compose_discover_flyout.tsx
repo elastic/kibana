@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
@@ -70,6 +71,13 @@ const YAML_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMod
 const YAML_MODE_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
   defaultMessage: 'YAML MODE',
 });
+
+const QUERY_SANDBOX_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.yamlMode.querySandbox',
+  {
+    defaultMessage: 'Query sandbox',
+  }
+);
 
 const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
   defaultMessage: 'Edit mode selection',
@@ -808,11 +816,14 @@ export function ComposeDiscoverFlyout({
                 style={{ marginTop: 8 }}
               >
                 {uiState.yamlMode ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
-                      {YAML_MODE_BADGE_LABEL}
-                    </EuiBadge>
-                  </EuiFlexItem>
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
+                        {YAML_MODE_BADGE_LABEL}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow />
+                  </>
                 ) : (
                   <EuiFlexItem grow>
                     <HorizontalMinimalStepper
@@ -827,15 +838,33 @@ export function ComposeDiscoverFlyout({
                 )}
                 {!isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={EDIT_MODE_LEGEND}
-                      options={EDIT_MODE_OPTIONS}
-                      idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                      onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                      isIconOnly
-                      buttonSize="compressed"
-                      data-test-subj="composeDiscoverEditModeToggle"
-                    />
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      {uiState.yamlMode && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            color="text"
+                            iconType="chevronLimitLeft"
+                            isDisabled={uiState.childOpen}
+                            onClick={() => dispatch({ type: 'OPEN_CHILD', isAlert })}
+                            data-test-subj="composeDiscoverYamlQuerySandbox"
+                          >
+                            {QUERY_SANDBOX_LABEL}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      )}
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonGroup
+                          legend={EDIT_MODE_LEGEND}
+                          options={EDIT_MODE_OPTIONS}
+                          idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                          onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                          isIconOnly
+                          buttonSize="compressed"
+                          data-test-subj="composeDiscoverEditModeToggle"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
