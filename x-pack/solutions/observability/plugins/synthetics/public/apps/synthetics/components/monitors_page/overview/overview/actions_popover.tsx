@@ -540,6 +540,9 @@ export function ActionsPopover({
           closePopover={() => setIsPopoverOpen(false)}
           anchorPosition="rightUp"
           panelPaddingSize="none"
+          aria-label={i18n.translate('xpack.synthetics.actionsPopover.popoverAriaLabel', {
+            defaultMessage: 'Actions menu',
+          })}
         >
           <EuiContextMenu
             initialPanelId={0}
