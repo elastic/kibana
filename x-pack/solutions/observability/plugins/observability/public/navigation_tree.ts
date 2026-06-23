@@ -472,7 +472,6 @@ function createNavTree({
               description:
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
-            // renderAs: 'panelOpener',
             children: [
               {
                 link: 'integrations',
@@ -498,7 +497,6 @@ function createNavTree({
               description:
                 'Heading in a nav tree dedicated to UIs for leveraging various Elasticsearch features for data management',
             }),
-            // renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:index_management',
