@@ -230,6 +230,7 @@ export {
 
 export {
   type Feature,
+  type FeatureUpsert,
   type FeatureWithFilter,
   type BaseFeature,
   type IdentifiedFeature,
@@ -245,9 +246,12 @@ export {
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
+  computeFeatureUuid,
+  normalizeFeatureSlug,
   mergeFeature,
   toBaseFeature,
   featureSchema,
+  featureUpsertSchema,
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
@@ -317,6 +321,7 @@ export {
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   STREAMS_INFERENCE_PARENT_FEATURE_ID,
   STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID,
   STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
